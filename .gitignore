@@ -1,0 +1,8 @@
+*.env
+readme.md
+public/storage
+.idea/*
+.phpintel/*
+public/theme/legande/js/script.alt.js
+api.php
+vendor

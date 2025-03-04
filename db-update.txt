@@ -1,0 +1,3 @@
+ALTER TABLE `settings` ADD `disable_pickup_dates` TEXT NULL AFTER `minimum_order_pickup`, ADD `disable_delivery_dates` TEXT NULL AFTER `disable_pickup_dates`;
+
+ALTER TABLE `users` ADD `allowed_payments` TEXT NULL AFTER `is_subscribe`;

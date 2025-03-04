@@ -1,0 +1,29 @@
+[02-Sep-2020 09:11:46 Asia/Manila] PHP Fatal error:  Allowed memory size of 33554432 bytes exhausted (tried to allocate 20480 bytes) in /home/lydiaslech0n/lydias-lechon.com/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOStatement.php on line 158
+[02-Sep-2020 09:12:10 Asia/Manila] PHP Fatal error:  Allowed memory size of 33554432 bytes exhausted (tried to allocate 20480 bytes) in /home/lydiaslech0n/lydias-lechon.com/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOStatement.php on line 158
+[02-Sep-2020 09:12:17 Asia/Manila] PHP Fatal error:  Allowed memory size of 33554432 bytes exhausted (tried to allocate 20480 bytes) in /home/lydiaslech0n/lydias-lechon.com/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOStatement.php on line 158
+[02-Sep-2020 09:13:49 Asia/Manila] PHP Fatal error:  Allowed memory size of 33554432 bytes exhausted (tried to allocate 20480 bytes) in /home/lydiaslech0n/lydias-lechon.com/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOStatement.php on line 158
+[02-Sep-2020 09:21:57 Asia/Manila] PHP Fatal error:  Allowed memory size of 33554432 bytes exhausted (tried to allocate 20480 bytes) in /home/lydiaslech0n/lydias-lechon.com/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOStatement.php on line 158
+[02-Sep-2020 09:28:16 Asia/Manila] PHP Fatal error:  Allowed memory size of 33554432 bytes exhausted (tried to allocate 20480 bytes) in /home/lydiaslech0n/lydias-lechon.com/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOStatement.php on line 158
+[02-Sep-2020 09:28:25 Asia/Manila] PHP Fatal error:  Allowed memory size of 33554432 bytes exhausted (tried to allocate 20480 bytes) in /home/lydiaslech0n/lydias-lechon.com/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOStatement.php on line 158
+[02-Sep-2020 09:28:27 Asia/Manila] PHP Fatal error:  Allowed memory size of 33554432 bytes exhausted (tried to allocate 20480 bytes) in /home/lydiaslech0n/lydias-lechon.com/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOStatement.php on line 158
+[02-Sep-2020 09:29:01 Asia/Manila] PHP Fatal error:  Allowed memory size of 33554432 bytes exhausted (tried to allocate 20480 bytes) in /home/lydiaslech0n/lydias-lechon.com/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOStatement.php on line 158
+[02-Sep-2020 09:41:41 Asia/Manila] PHP Fatal error:  Allowed memory size of 33554432 bytes exhausted (tried to allocate 20480 bytes) in /home/lydiaslech0n/lydias-lechon.com/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOStatement.php on line 158
+[02-Sep-2020 09:41:45 Asia/Manila] PHP Fatal error:  Allowed memory size of 33554432 bytes exhausted (tried to allocate 20480 bytes) in /home/lydiaslech0n/lydias-lechon.com/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOStatement.php on line 158
+[02-Sep-2020 09:42:36 Asia/Manila] PHP Fatal error:  Allowed memory size of 33554432 bytes exhausted (tried to allocate 20480 bytes) in /home/lydiaslech0n/lydias-lechon.com/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOStatement.php on line 158
+[02-Sep-2020 09:42:38 Asia/Manila] PHP Fatal error:  Allowed memory size of 33554432 bytes exhausted (tried to allocate 20480 bytes) in /home/lydiaslech0n/lydias-lechon.com/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOStatement.php on line 158
+[02-Sep-2020 09:42:40 Asia/Manila] PHP Fatal error:  Allowed memory size of 33554432 bytes exhausted (tried to allocate 20480 bytes) in /home/lydiaslech0n/lydias-lechon.com/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOStatement.php on line 158
+[02-Sep-2020 09:42:41 Asia/Manila] PHP Fatal error:  Allowed memory size of 33554432 bytes exhausted (tried to allocate 20480 bytes) in /home/lydiaslech0n/lydias-lechon.com/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOStatement.php on line 158
+[02-Sep-2020 09:43:52 Asia/Manila] PHP Fatal error:  Allowed memory size of 33554432 bytes exhausted (tried to allocate 20480 bytes) in /home/lydiaslech0n/lydias-lechon.com/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOStatement.php on line 158
+[02-Sep-2020 09:46:38 Asia/Manila] PHP Fatal error:  Allowed memory size of 33554432 bytes exhausted (tried to allocate 20480 bytes) in /home/lydiaslech0n/lydias-lechon.com/vendor/doctrine/dbal/lib/Doctrine/DBAL/Driver/PDOStatement.php on line 158
+[19-Oct-2020 05:31:07 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function split() in /home/lydiaslech0n/public_html/d.php:19
+Stack trace:
+#0 /home/lydiaslech0n/public_html/d.php(2): Requery()
+#1 {main}
+  thrown in /home/lydiaslech0n/public_html/d.php on line 19
+[19-Oct-2020 05:32:26 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function split() in /home/lydiaslech0n/public_html/d.php:20
+Stack trace:
+#0 /home/lydiaslech0n/public_html/d.php(3): Requery()
+#1 {main}
+  thrown in /home/lydiaslech0n/public_html/d.php on line 20
+[22-Oct-2020 16:20:02 Asia/Manila] PHP Fatal error:  Cannot redeclare App\Http\Controllers\EcommerceControllers\PaymayaController::paymaya_url() in /home/lydiaslech0n/lydias-lechon.com/app/Http/Controllers/EcommerceControllers/PaymayaController.php on line 37
+[22-Oct-2020 16:20:31 Asia/Manila] PHP Fatal error:  Cannot redeclare App\Http\Controllers\EcommerceControllers\PaymayaController::paymaya_url() in /home/lydiaslech0n/lydias-lechon.com/app/Http/Controllers/EcommerceControllers/PaymayaController.php on line 37

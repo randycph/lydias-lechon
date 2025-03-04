@@ -1,0 +1,615 @@
+    /*
+    Flaticon icon font: Flaticon
+    Creation date: 26/09/2018 08:09
+    */
+
+    @font-face {
+  font-family: "Flaticon";
+  src: url("./Flaticon.eot");
+  src: url("./Flaticon.eot?#iefix") format("embedded-opentype"),
+       url("./Flaticon.woff") format("woff"),
+       url("./Flaticon.ttf") format("truetype"),
+       url("./Flaticon.svg#Flaticon") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+  @font-face {
+    font-family: "Flaticon";
+    src: url("./Flaticon.svg#Flaticon") format("svg");
+  }
+}
+
+    .fi:before{
+        display: inline-block;
+  font-family: "Flaticon";
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  line-height: 1;
+  text-decoration: inherit;
+  text-rendering: optimizeLegibility;
+  text-transform: none;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  font-smoothing: antialiased;
+    }
+
+    .flaticon-001-shopping-bag:before { content: "\f100"; }
+.flaticon-002-shopping-bag-1:before { content: "\f101"; }
+.flaticon-003-shopping-basket:before { content: "\f102"; }
+.flaticon-004-invoice:before { content: "\f103"; }
+.flaticon-005-shopping-cart:before { content: "\f104"; }
+.flaticon-006-shopping-cart-1:before { content: "\f105"; }
+.flaticon-007-shopping-cart-2:before { content: "\f106"; }
+.flaticon-008-package:before { content: "\f107"; }
+.flaticon-009-delivery-truck:before { content: "\f108"; }
+.flaticon-010-panel:before { content: "\f109"; }
+.flaticon-011-shopping-bag-2:before { content: "\f10a"; }
+.flaticon-012-shopping-bag-3:before { content: "\f10b"; }
+.flaticon-013-shopping-basket-1:before { content: "\f10c"; }
+.flaticon-014-invoice-1:before { content: "\f10d"; }
+.flaticon-015-shopping-cart-3:before { content: "\f10e"; }
+.flaticon-016-shopping-cart-4:before { content: "\f10f"; }
+.flaticon-017-shopping-cart-5:before { content: "\f110"; }
+.flaticon-018-credit-card:before { content: "\f111"; }
+.flaticon-019-shopping-bag-4:before { content: "\f112"; }
+.flaticon-020-shopping-bag-5:before { content: "\f113"; }
+.flaticon-021-barcode:before { content: "\f114"; }
+.flaticon-022-shopping-basket-2:before { content: "\f115"; }
+.flaticon-023-invoice-2:before { content: "\f116"; }
+.flaticon-024-sign:before { content: "\f117"; }
+.flaticon-025-calculator:before { content: "\f118"; }
+.flaticon-026-calculator-1:before { content: "\f119"; }
+.flaticon-027-headset:before { content: "\f11a"; }
+.flaticon-028-shopping-cart-6:before { content: "\f11b"; }
+.flaticon-029-shopping-cart-7:before { content: "\f11c"; }
+.flaticon-030-shopping-cart-8:before { content: "\f11d"; }
+.flaticon-031-shopping-cart-9:before { content: "\f11e"; }
+.flaticon-032-shopping-cart-10:before { content: "\f11f"; }
+.flaticon-033-shopping-cart-11:before { content: "\f120"; }
+.flaticon-034-shopping-cart-12:before { content: "\f121"; }
+.flaticon-035-shopping-cart-13:before { content: "\f122"; }
+.flaticon-036-money:before { content: "\f123"; }
+.flaticon-037-cash:before { content: "\f124"; }
+.flaticon-038-pound-sterling:before { content: "\f125"; }
+.flaticon-039-cash-register:before { content: "\f126"; }
+.flaticon-040-rupee:before { content: "\f127"; }
+.flaticon-041-yen:before { content: "\f128"; }
+.flaticon-042-package-1:before { content: "\f129"; }
+.flaticon-043-shopping-bag-6:before { content: "\f12a"; }
+.flaticon-044-shopping-bag-7:before { content: "\f12b"; }
+.flaticon-045-shopping-basket-3:before { content: "\f12c"; }
+.flaticon-046-shopping-cart-14:before { content: "\f12d"; }
+.flaticon-047-shopping-cart-15:before { content: "\f12e"; }
+.flaticon-048-shopping-cart-16:before { content: "\f12f"; }
+.flaticon-049-shipping-truck:before { content: "\f130"; }
+.flaticon-050-laptop:before { content: "\f131"; }
+.flaticon-051-online-shop:before { content: "\f132"; }
+.flaticon-052-online-shop-1:before { content: "\f133"; }
+.flaticon-053-online-shop-2:before { content: "\f134"; }
+.flaticon-054-online-shop-3:before { content: "\f135"; }
+.flaticon-055-online-shop-4:before { content: "\f136"; }
+.flaticon-056-credit-card-1:before { content: "\f137"; }
+.flaticon-057-coffee-cup:before { content: "\f138"; }
+.flaticon-058-customer:before { content: "\f139"; }
+.flaticon-059-chat:before { content: "\f13a"; }
+.flaticon-060-laptop-1:before { content: "\f13b"; }
+.flaticon-061-package-2:before { content: "\f13c"; }
+.flaticon-062-package-3:before { content: "\f13d"; }
+.flaticon-063-package-4:before { content: "\f13e"; }
+.flaticon-064-trolley:before { content: "\f13f"; }
+.flaticon-065-delivery-truck-1:before { content: "\f140"; }
+.flaticon-066-trolley-1:before { content: "\f141"; }
+.flaticon-067-discount:before { content: "\f142"; }
+.flaticon-068-shopping-bag-8:before { content: "\f143"; }
+.flaticon-069-shopping-bag-9:before { content: "\f144"; }
+.flaticon-070-shopping-basket-4:before { content: "\f145"; }
+.flaticon-071-invoice-3:before { content: "\f146"; }
+.flaticon-072-shopping-cart-17:before { content: "\f147"; }
+.flaticon-073-shopping-cart-18:before { content: "\f148"; }
+.flaticon-074-shopping-cart-19:before { content: "\f149"; }
+.flaticon-075-money-1:before { content: "\f14a"; }
+.flaticon-076-money-2:before { content: "\f14b"; }
+.flaticon-077-credit-card-2:before { content: "\f14c"; }
+.flaticon-078-discount-1:before { content: "\f14d"; }
+.flaticon-079-money-bag:before { content: "\f14e"; }
+.flaticon-080-shopping-bag-10:before { content: "\f14f"; }
+.flaticon-081-shopping-bag-11:before { content: "\f150"; }
+.flaticon-082-shopping-basket-5:before { content: "\f151"; }
+.flaticon-083-invoice-4:before { content: "\f152"; }
+.flaticon-084-shopping-cart-20:before { content: "\f153"; }
+.flaticon-085-money-3:before { content: "\f154"; }
+.flaticon-086-money-4:before { content: "\f155"; }
+.flaticon-087-credit-card-3:before { content: "\f156"; }
+.flaticon-088-discount-2:before { content: "\f157"; }
+.flaticon-089-money-bag-1:before { content: "\f158"; }
+.flaticon-090-shopping-bag-12:before { content: "\f159"; }
+.flaticon-091-shopping-bag-13:before { content: "\f15a"; }
+.flaticon-092-shopping-basket-6:before { content: "\f15b"; }
+.flaticon-093-invoice-5:before { content: "\f15c"; }
+.flaticon-094-shopping-cart-21:before { content: "\f15d"; }
+.flaticon-095-shopping-cart-22:before { content: "\f15e"; }
+.flaticon-096-shopping-cart-23:before { content: "\f15f"; }
+.flaticon-097-delivery-truck-2:before { content: "\f160"; }
+.flaticon-098-voucher:before { content: "\f161"; }
+.flaticon-099-gift:before { content: "\f162"; }
+.flaticon-100-gift-1:before { content: "\f163"; }
+.flaticon-101-shopping-bag-14:before { content: "\f164"; }
+.flaticon-102-shopping-bag-15:before { content: "\f165"; }
+.flaticon-103-shopping-basket-7:before { content: "\f166"; }
+.flaticon-104-invoice-6:before { content: "\f167"; }
+.flaticon-105-shopping-cart-24:before { content: "\f168"; }
+.flaticon-106-shopping-cart-25:before { content: "\f169"; }
+.flaticon-107-shopping-cart-26:before { content: "\f16a"; }
+.flaticon-108-credit-card-4:before { content: "\f16b"; }
+.flaticon-109-package-5:before { content: "\f16c"; }
+.flaticon-110-delivery-truck-3:before { content: "\f16d"; }
+.flaticon-111-online-shop-5:before { content: "\f16e"; }
+.flaticon-112-online-shop-6:before { content: "\f16f"; }
+.flaticon-113-online-shop-7:before { content: "\f170"; }
+.flaticon-114-online-shop-8:before { content: "\f171"; }
+.flaticon-115-online-shop-9:before { content: "\f172"; }
+.flaticon-116-online-shop-10:before { content: "\f173"; }
+.flaticon-117-online-shop-11:before { content: "\f174"; }
+.flaticon-118-shopping-bag-16:before { content: "\f175"; }
+.flaticon-119-shopping-bag-17:before { content: "\f176"; }
+.flaticon-120-shopping-basket-8:before { content: "\f177"; }
+.flaticon-121-invoice-7:before { content: "\f178"; }
+.flaticon-122-shopping-cart-27:before { content: "\f179"; }
+.flaticon-123-shopping-cart-28:before { content: "\f17a"; }
+.flaticon-124-shopping-cart-29:before { content: "\f17b"; }
+.flaticon-125-list:before { content: "\f17c"; }
+.flaticon-126-pin:before { content: "\f17d"; }
+.flaticon-127-pin-1:before { content: "\f17e"; }
+.flaticon-128-pin-2:before { content: "\f17f"; }
+.flaticon-129-pin-3:before { content: "\f180"; }
+.flaticon-130-pin-4:before { content: "\f181"; }
+.flaticon-131-pin-5:before { content: "\f182"; }
+.flaticon-132-credit-card-5:before { content: "\f183"; }
+.flaticon-133-microphone:before { content: "\f184"; }
+.flaticon-134-smartphone:before { content: "\f185"; }
+.flaticon-135-smartphone-1:before { content: "\f186"; }
+.flaticon-136-smartphone-2:before { content: "\f187"; }
+.flaticon-137-smartphone-3:before { content: "\f188"; }
+.flaticon-138-smartphone-4:before { content: "\f189"; }
+.flaticon-139-smartphone-5:before { content: "\f18a"; }
+.flaticon-140-smartphone-6:before { content: "\f18b"; }
+.flaticon-141-money-bag-2:before { content: "\f18c"; }
+.flaticon-142-online-shop-12:before { content: "\f18d"; }
+.flaticon-143-online-shop-13:before { content: "\f18e"; }
+.flaticon-144-online-shop-14:before { content: "\f18f"; }
+.flaticon-145-online-shop-15:before { content: "\f190"; }
+.flaticon-146-online-shop-16:before { content: "\f191"; }
+.flaticon-147-online-shop-17:before { content: "\f192"; }
+.flaticon-148-online-shop-18:before { content: "\f193"; }
+.flaticon-149-package-6:before { content: "\f194"; }
+.flaticon-150-online-shop-19:before { content: "\f195"; }
+.flaticon-151-online-shop-20:before { content: "\f196"; }
+.flaticon-152-online-shop-21:before { content: "\f197"; }
+.flaticon-153-online-shop-22:before { content: "\f198"; }
+.flaticon-154-online-shop-23:before { content: "\f199"; }
+.flaticon-155-online-shop-24:before { content: "\f19a"; }
+.flaticon-156-parking-ticket:before { content: "\f19b"; }
+.flaticon-157-parking-ticket-1:before { content: "\f19c"; }
+.flaticon-158-online-shop-25:before { content: "\f19d"; }
+.flaticon-159-online-shop-26:before { content: "\f19e"; }
+.flaticon-160-online-shop-27:before { content: "\f19f"; }
+.flaticon-161-online-shop-28:before { content: "\f1a0"; }
+.flaticon-162-online-shop-29:before { content: "\f1a1"; }
+.flaticon-163-online-shop-30:before { content: "\f1a2"; }
+.flaticon-164-online-shop-31:before { content: "\f1a3"; }
+.flaticon-165-delivery-truck-4:before { content: "\f1a4"; }
+.flaticon-166-shopping-bag-18:before { content: "\f1a5"; }
+.flaticon-167-shopping-bag-19:before { content: "\f1a6"; }
+.flaticon-168-shopping-basket-9:before { content: "\f1a7"; }
+.flaticon-169-invoice-8:before { content: "\f1a8"; }
+.flaticon-170-shopping-cart-30:before { content: "\f1a9"; }
+.flaticon-171-shopping-cart-31:before { content: "\f1aa"; }
+.flaticon-172-shopping-cart-32:before { content: "\f1ab"; }
+.flaticon-173-money-5:before { content: "\f1ac"; }
+.flaticon-174-money-6:before { content: "\f1ad"; }
+.flaticon-175-credit-card-6:before { content: "\f1ae"; }
+.flaticon-176-discount-3:before { content: "\f1af"; }
+.flaticon-177-money-bag-3:before { content: "\f1b0"; }
+.flaticon-178-invoice-9:before { content: "\f1b1"; }
+.flaticon-179-invoice-10:before { content: "\f1b2"; }
+.flaticon-180-invoice-11:before { content: "\f1b3"; }
+.flaticon-181-invoice-12:before { content: "\f1b4"; }
+.flaticon-182-invoice-13:before { content: "\f1b5"; }
+.flaticon-183-invoice-14:before { content: "\f1b6"; }
+.flaticon-184-invoice-15:before { content: "\f1b7"; }
+.flaticon-185-invoice-16:before { content: "\f1b8"; }
+.flaticon-186-invoice-17:before { content: "\f1b9"; }
+.flaticon-187-invoice-18:before { content: "\f1ba"; }
+.flaticon-188-invoice-19:before { content: "\f1bb"; }
+.flaticon-189-shopping-bag-20:before { content: "\f1bc"; }
+.flaticon-190-shopping-bag-21:before { content: "\f1bd"; }
+.flaticon-191-shopping-basket-10:before { content: "\f1be"; }
+.flaticon-192-shopping-cart-33:before { content: "\f1bf"; }
+.flaticon-193-shopping-cart-34:before { content: "\f1c0"; }
+.flaticon-194-shopping-cart-35:before { content: "\f1c1"; }
+.flaticon-195-shopping-bag-22:before { content: "\f1c2"; }
+.flaticon-196-shopping-bag-23:before { content: "\f1c3"; }
+.flaticon-197-shopping-basket-11:before { content: "\f1c4"; }
+.flaticon-198-shopping-cart-36:before { content: "\f1c5"; }
+.flaticon-199-shopping-cart-37:before { content: "\f1c6"; }
+.flaticon-200-shopping-cart-38:before { content: "\f1c7"; }
+.flaticon-201-package-7:before { content: "\f1c8"; }
+.flaticon-202-shopping-bag-24:before { content: "\f1c9"; }
+.flaticon-203-shopping-bag-25:before { content: "\f1ca"; }
+.flaticon-204-shopping-basket-12:before { content: "\f1cb"; }
+.flaticon-205-invoice-20:before { content: "\f1cc"; }
+.flaticon-206-shopping-cart-39:before { content: "\f1cd"; }
+.flaticon-207-shopping-cart-40:before { content: "\f1ce"; }
+.flaticon-208-shopping-cart-41:before { content: "\f1cf"; }
+.flaticon-209-rupee-1:before { content: "\f1d0"; }
+.flaticon-210-rupee-2:before { content: "\f1d1"; }
+.flaticon-211-credit-card-7:before { content: "\f1d2"; }
+.flaticon-212-discount-4:before { content: "\f1d3"; }
+.flaticon-213-money-bag-4:before { content: "\f1d4"; }
+.flaticon-214-search:before { content: "\f1d5"; }
+.flaticon-215-search-1:before { content: "\f1d6"; }
+.flaticon-216-search-2:before { content: "\f1d7"; }
+.flaticon-217-search-3:before { content: "\f1d8"; }
+.flaticon-218-search-4:before { content: "\f1d9"; }
+.flaticon-219-package-8:before { content: "\f1da"; }
+.flaticon-220-search-5:before { content: "\f1db"; }
+.flaticon-221-cctv:before { content: "\f1dc"; }
+.flaticon-222-package-9:before { content: "\f1dd"; }
+.flaticon-223-sign-1:before { content: "\f1de"; }
+.flaticon-224-sign-2:before { content: "\f1df"; }
+.flaticon-225-sign-3:before { content: "\f1e0"; }
+.flaticon-226-sign-4:before { content: "\f1e1"; }
+.flaticon-227-sign-5:before { content: "\f1e2"; }
+.flaticon-228-sign-6:before { content: "\f1e3"; }
+.flaticon-229-shop:before { content: "\f1e4"; }
+.flaticon-230-online-shop-32:before { content: "\f1e5"; }
+.flaticon-231-online-shop-33:before { content: "\f1e6"; }
+.flaticon-232-online-shop-34:before { content: "\f1e7"; }
+.flaticon-233-online-shop-35:before { content: "\f1e8"; }
+.flaticon-234-online-shop-36:before { content: "\f1e9"; }
+.flaticon-235-online-shop-37:before { content: "\f1ea"; }
+.flaticon-236-online-shop-38:before { content: "\f1eb"; }
+.flaticon-237-tag:before { content: "\f1ec"; }
+.flaticon-238-tag-1:before { content: "\f1ed"; }
+.flaticon-239-tag-2:before { content: "\f1ee"; }
+.flaticon-240-tag-3:before { content: "\f1ef"; }
+.flaticon-241-tag-4:before { content: "\f1f0"; }
+.flaticon-242-tag-5:before { content: "\f1f1"; }
+.flaticon-243-tag-6:before { content: "\f1f2"; }
+.flaticon-244-tag-7:before { content: "\f1f3"; }
+.flaticon-245-tag-8:before { content: "\f1f4"; }
+.flaticon-246-tag-9:before { content: "\f1f5"; }
+.flaticon-247-tag-10:before { content: "\f1f6"; }
+.flaticon-248-tag-11:before { content: "\f1f7"; }
+.flaticon-249-delivery-truck-5:before { content: "\f1f8"; }
+.flaticon-250-delivery-truck-6:before { content: "\f1f9"; }
+.flaticon-251-invoice-21:before { content: "\f1fa"; }
+.flaticon-252-invoice-22:before { content: "\f1fb"; }
+.flaticon-253-invoice-23:before { content: "\f1fc"; }
+.flaticon-254-invoice-24:before { content: "\f1fd"; }
+.flaticon-255-invoice-25:before { content: "\f1fe"; }
+.flaticon-256-invoice-26:before { content: "\f1ff"; }
+.flaticon-257-invoice-27:before { content: "\f200"; }
+.flaticon-258-invoice-28:before { content: "\f201"; }
+.flaticon-259-invoice-29:before { content: "\f202"; }
+.flaticon-260-invoice-30:before { content: "\f203"; }
+.flaticon-261-invoice-31:before { content: "\f204"; }
+.flaticon-262-wallet:before { content: "\f205"; }
+.flaticon-263-wallet-1:before { content: "\f206"; }
+.flaticon-264-wallet-2:before { content: "\f207"; }
+.flaticon-265-wallet-3:before { content: "\f208"; }
+.flaticon-266-wallet-4:before { content: "\f209"; }
+.flaticon-267-wallet-5:before { content: "\f20a"; }
+.flaticon-268-wallet-6:before { content: "\f20b"; }
+.flaticon-269-wallet-7:before { content: "\f20c"; }
+.flaticon-270-wallet-8:before { content: "\f20d"; }
+.flaticon-271-wallet-9:before { content: "\f20e"; }
+.flaticon-272-wallet-10:before { content: "\f20f"; }
+.flaticon-273-wallet-11:before { content: "\f210"; }
+.flaticon-274-wallet-12:before { content: "\f211"; }
+.flaticon-275-watch:before { content: "\f212"; }
+.flaticon-276-watch-1:before { content: "\f213"; }
+.flaticon-277-shopping-bags:before { content: "\f214"; }
+.flaticon-278-shopping-bags-1:before { content: "\f215"; }
+.flaticon-279-shopping-basket-13:before { content: "\f216"; }
+.flaticon-280-invoice-32:before { content: "\f217"; }
+.flaticon-281-shopping-cart-42:before { content: "\f218"; }
+.flaticon-282-shopping-cart-43:before { content: "\f219"; }
+.flaticon-283-shopping-cart-44:before { content: "\f21a"; }
+.flaticon-284-yen-1:before { content: "\f21b"; }
+.flaticon-285-yen-2:before { content: "\f21c"; }
+.flaticon-286-credit-card-8:before { content: "\f21d"; }
+.flaticon-287-discount-5:before { content: "\f21e"; }
+.flaticon-288-money-bag-5:before { content: "\f21f"; }
+    
+    $font-Flaticon-001-shopping-bag: "\f100";
+    $font-Flaticon-002-shopping-bag-1: "\f101";
+    $font-Flaticon-003-shopping-basket: "\f102";
+    $font-Flaticon-004-invoice: "\f103";
+    $font-Flaticon-005-shopping-cart: "\f104";
+    $font-Flaticon-006-shopping-cart-1: "\f105";
+    $font-Flaticon-007-shopping-cart-2: "\f106";
+    $font-Flaticon-008-package: "\f107";
+    $font-Flaticon-009-delivery-truck: "\f108";
+    $font-Flaticon-010-panel: "\f109";
+    $font-Flaticon-011-shopping-bag-2: "\f10a";
+    $font-Flaticon-012-shopping-bag-3: "\f10b";
+    $font-Flaticon-013-shopping-basket-1: "\f10c";
+    $font-Flaticon-014-invoice-1: "\f10d";
+    $font-Flaticon-015-shopping-cart-3: "\f10e";
+    $font-Flaticon-016-shopping-cart-4: "\f10f";
+    $font-Flaticon-017-shopping-cart-5: "\f110";
+    $font-Flaticon-018-credit-card: "\f111";
+    $font-Flaticon-019-shopping-bag-4: "\f112";
+    $font-Flaticon-020-shopping-bag-5: "\f113";
+    $font-Flaticon-021-barcode: "\f114";
+    $font-Flaticon-022-shopping-basket-2: "\f115";
+    $font-Flaticon-023-invoice-2: "\f116";
+    $font-Flaticon-024-sign: "\f117";
+    $font-Flaticon-025-calculator: "\f118";
+    $font-Flaticon-026-calculator-1: "\f119";
+    $font-Flaticon-027-headset: "\f11a";
+    $font-Flaticon-028-shopping-cart-6: "\f11b";
+    $font-Flaticon-029-shopping-cart-7: "\f11c";
+    $font-Flaticon-030-shopping-cart-8: "\f11d";
+    $font-Flaticon-031-shopping-cart-9: "\f11e";
+    $font-Flaticon-032-shopping-cart-10: "\f11f";
+    $font-Flaticon-033-shopping-cart-11: "\f120";
+    $font-Flaticon-034-shopping-cart-12: "\f121";
+    $font-Flaticon-035-shopping-cart-13: "\f122";
+    $font-Flaticon-036-money: "\f123";
+    $font-Flaticon-037-cash: "\f124";
+    $font-Flaticon-038-pound-sterling: "\f125";
+    $font-Flaticon-039-cash-register: "\f126";
+    $font-Flaticon-040-rupee: "\f127";
+    $font-Flaticon-041-yen: "\f128";
+    $font-Flaticon-042-package-1: "\f129";
+    $font-Flaticon-043-shopping-bag-6: "\f12a";
+    $font-Flaticon-044-shopping-bag-7: "\f12b";
+    $font-Flaticon-045-shopping-basket-3: "\f12c";
+    $font-Flaticon-046-shopping-cart-14: "\f12d";
+    $font-Flaticon-047-shopping-cart-15: "\f12e";
+    $font-Flaticon-048-shopping-cart-16: "\f12f";
+    $font-Flaticon-049-shipping-truck: "\f130";
+    $font-Flaticon-050-laptop: "\f131";
+    $font-Flaticon-051-online-shop: "\f132";
+    $font-Flaticon-052-online-shop-1: "\f133";
+    $font-Flaticon-053-online-shop-2: "\f134";
+    $font-Flaticon-054-online-shop-3: "\f135";
+    $font-Flaticon-055-online-shop-4: "\f136";
+    $font-Flaticon-056-credit-card-1: "\f137";
+    $font-Flaticon-057-coffee-cup: "\f138";
+    $font-Flaticon-058-customer: "\f139";
+    $font-Flaticon-059-chat: "\f13a";
+    $font-Flaticon-060-laptop-1: "\f13b";
+    $font-Flaticon-061-package-2: "\f13c";
+    $font-Flaticon-062-package-3: "\f13d";
+    $font-Flaticon-063-package-4: "\f13e";
+    $font-Flaticon-064-trolley: "\f13f";
+    $font-Flaticon-065-delivery-truck-1: "\f140";
+    $font-Flaticon-066-trolley-1: "\f141";
+    $font-Flaticon-067-discount: "\f142";
+    $font-Flaticon-068-shopping-bag-8: "\f143";
+    $font-Flaticon-069-shopping-bag-9: "\f144";
+    $font-Flaticon-070-shopping-basket-4: "\f145";
+    $font-Flaticon-071-invoice-3: "\f146";
+    $font-Flaticon-072-shopping-cart-17: "\f147";
+    $font-Flaticon-073-shopping-cart-18: "\f148";
+    $font-Flaticon-074-shopping-cart-19: "\f149";
+    $font-Flaticon-075-money-1: "\f14a";
+    $font-Flaticon-076-money-2: "\f14b";
+    $font-Flaticon-077-credit-card-2: "\f14c";
+    $font-Flaticon-078-discount-1: "\f14d";
+    $font-Flaticon-079-money-bag: "\f14e";
+    $font-Flaticon-080-shopping-bag-10: "\f14f";
+    $font-Flaticon-081-shopping-bag-11: "\f150";
+    $font-Flaticon-082-shopping-basket-5: "\f151";
+    $font-Flaticon-083-invoice-4: "\f152";
+    $font-Flaticon-084-shopping-cart-20: "\f153";
+    $font-Flaticon-085-money-3: "\f154";
+    $font-Flaticon-086-money-4: "\f155";
+    $font-Flaticon-087-credit-card-3: "\f156";
+    $font-Flaticon-088-discount-2: "\f157";
+    $font-Flaticon-089-money-bag-1: "\f158";
+    $font-Flaticon-090-shopping-bag-12: "\f159";
+    $font-Flaticon-091-shopping-bag-13: "\f15a";
+    $font-Flaticon-092-shopping-basket-6: "\f15b";
+    $font-Flaticon-093-invoice-5: "\f15c";
+    $font-Flaticon-094-shopping-cart-21: "\f15d";
+    $font-Flaticon-095-shopping-cart-22: "\f15e";
+    $font-Flaticon-096-shopping-cart-23: "\f15f";
+    $font-Flaticon-097-delivery-truck-2: "\f160";
+    $font-Flaticon-098-voucher: "\f161";
+    $font-Flaticon-099-gift: "\f162";
+    $font-Flaticon-100-gift-1: "\f163";
+    $font-Flaticon-101-shopping-bag-14: "\f164";
+    $font-Flaticon-102-shopping-bag-15: "\f165";
+    $font-Flaticon-103-shopping-basket-7: "\f166";
+    $font-Flaticon-104-invoice-6: "\f167";
+    $font-Flaticon-105-shopping-cart-24: "\f168";
+    $font-Flaticon-106-shopping-cart-25: "\f169";
+    $font-Flaticon-107-shopping-cart-26: "\f16a";
+    $font-Flaticon-108-credit-card-4: "\f16b";
+    $font-Flaticon-109-package-5: "\f16c";
+    $font-Flaticon-110-delivery-truck-3: "\f16d";
+    $font-Flaticon-111-online-shop-5: "\f16e";
+    $font-Flaticon-112-online-shop-6: "\f16f";
+    $font-Flaticon-113-online-shop-7: "\f170";
+    $font-Flaticon-114-online-shop-8: "\f171";
+    $font-Flaticon-115-online-shop-9: "\f172";
+    $font-Flaticon-116-online-shop-10: "\f173";
+    $font-Flaticon-117-online-shop-11: "\f174";
+    $font-Flaticon-118-shopping-bag-16: "\f175";
+    $font-Flaticon-119-shopping-bag-17: "\f176";
+    $font-Flaticon-120-shopping-basket-8: "\f177";
+    $font-Flaticon-121-invoice-7: "\f178";
+    $font-Flaticon-122-shopping-cart-27: "\f179";
+    $font-Flaticon-123-shopping-cart-28: "\f17a";
+    $font-Flaticon-124-shopping-cart-29: "\f17b";
+    $font-Flaticon-125-list: "\f17c";
+    $font-Flaticon-126-pin: "\f17d";
+    $font-Flaticon-127-pin-1: "\f17e";
+    $font-Flaticon-128-pin-2: "\f17f";
+    $font-Flaticon-129-pin-3: "\f180";
+    $font-Flaticon-130-pin-4: "\f181";
+    $font-Flaticon-131-pin-5: "\f182";
+    $font-Flaticon-132-credit-card-5: "\f183";
+    $font-Flaticon-133-microphone: "\f184";
+    $font-Flaticon-134-smartphone: "\f185";
+    $font-Flaticon-135-smartphone-1: "\f186";
+    $font-Flaticon-136-smartphone-2: "\f187";
+    $font-Flaticon-137-smartphone-3: "\f188";
+    $font-Flaticon-138-smartphone-4: "\f189";
+    $font-Flaticon-139-smartphone-5: "\f18a";
+    $font-Flaticon-140-smartphone-6: "\f18b";
+    $font-Flaticon-141-money-bag-2: "\f18c";
+    $font-Flaticon-142-online-shop-12: "\f18d";
+    $font-Flaticon-143-online-shop-13: "\f18e";
+    $font-Flaticon-144-online-shop-14: "\f18f";
+    $font-Flaticon-145-online-shop-15: "\f190";
+    $font-Flaticon-146-online-shop-16: "\f191";
+    $font-Flaticon-147-online-shop-17: "\f192";
+    $font-Flaticon-148-online-shop-18: "\f193";
+    $font-Flaticon-149-package-6: "\f194";
+    $font-Flaticon-150-online-shop-19: "\f195";
+    $font-Flaticon-151-online-shop-20: "\f196";
+    $font-Flaticon-152-online-shop-21: "\f197";
+    $font-Flaticon-153-online-shop-22: "\f198";
+    $font-Flaticon-154-online-shop-23: "\f199";
+    $font-Flaticon-155-online-shop-24: "\f19a";
+    $font-Flaticon-156-parking-ticket: "\f19b";
+    $font-Flaticon-157-parking-ticket-1: "\f19c";
+    $font-Flaticon-158-online-shop-25: "\f19d";
+    $font-Flaticon-159-online-shop-26: "\f19e";
+    $font-Flaticon-160-online-shop-27: "\f19f";
+    $font-Flaticon-161-online-shop-28: "\f1a0";
+    $font-Flaticon-162-online-shop-29: "\f1a1";
+    $font-Flaticon-163-online-shop-30: "\f1a2";
+    $font-Flaticon-164-online-shop-31: "\f1a3";
+    $font-Flaticon-165-delivery-truck-4: "\f1a4";
+    $font-Flaticon-166-shopping-bag-18: "\f1a5";
+    $font-Flaticon-167-shopping-bag-19: "\f1a6";
+    $font-Flaticon-168-shopping-basket-9: "\f1a7";
+    $font-Flaticon-169-invoice-8: "\f1a8";
+    $font-Flaticon-170-shopping-cart-30: "\f1a9";
+    $font-Flaticon-171-shopping-cart-31: "\f1aa";
+    $font-Flaticon-172-shopping-cart-32: "\f1ab";
+    $font-Flaticon-173-money-5: "\f1ac";
+    $font-Flaticon-174-money-6: "\f1ad";
+    $font-Flaticon-175-credit-card-6: "\f1ae";
+    $font-Flaticon-176-discount-3: "\f1af";
+    $font-Flaticon-177-money-bag-3: "\f1b0";
+    $font-Flaticon-178-invoice-9: "\f1b1";
+    $font-Flaticon-179-invoice-10: "\f1b2";
+    $font-Flaticon-180-invoice-11: "\f1b3";
+    $font-Flaticon-181-invoice-12: "\f1b4";
+    $font-Flaticon-182-invoice-13: "\f1b5";
+    $font-Flaticon-183-invoice-14: "\f1b6";
+    $font-Flaticon-184-invoice-15: "\f1b7";
+    $font-Flaticon-185-invoice-16: "\f1b8";
+    $font-Flaticon-186-invoice-17: "\f1b9";
+    $font-Flaticon-187-invoice-18: "\f1ba";
+    $font-Flaticon-188-invoice-19: "\f1bb";
+    $font-Flaticon-189-shopping-bag-20: "\f1bc";
+    $font-Flaticon-190-shopping-bag-21: "\f1bd";
+    $font-Flaticon-191-shopping-basket-10: "\f1be";
+    $font-Flaticon-192-shopping-cart-33: "\f1bf";
+    $font-Flaticon-193-shopping-cart-34: "\f1c0";
+    $font-Flaticon-194-shopping-cart-35: "\f1c1";
+    $font-Flaticon-195-shopping-bag-22: "\f1c2";
+    $font-Flaticon-196-shopping-bag-23: "\f1c3";
+    $font-Flaticon-197-shopping-basket-11: "\f1c4";
+    $font-Flaticon-198-shopping-cart-36: "\f1c5";
+    $font-Flaticon-199-shopping-cart-37: "\f1c6";
+    $font-Flaticon-200-shopping-cart-38: "\f1c7";
+    $font-Flaticon-201-package-7: "\f1c8";
+    $font-Flaticon-202-shopping-bag-24: "\f1c9";
+    $font-Flaticon-203-shopping-bag-25: "\f1ca";
+    $font-Flaticon-204-shopping-basket-12: "\f1cb";
+    $font-Flaticon-205-invoice-20: "\f1cc";
+    $font-Flaticon-206-shopping-cart-39: "\f1cd";
+    $font-Flaticon-207-shopping-cart-40: "\f1ce";
+    $font-Flaticon-208-shopping-cart-41: "\f1cf";
+    $font-Flaticon-209-rupee-1: "\f1d0";
+    $font-Flaticon-210-rupee-2: "\f1d1";
+    $font-Flaticon-211-credit-card-7: "\f1d2";
+    $font-Flaticon-212-discount-4: "\f1d3";
+    $font-Flaticon-213-money-bag-4: "\f1d4";
+    $font-Flaticon-214-search: "\f1d5";
+    $font-Flaticon-215-search-1: "\f1d6";
+    $font-Flaticon-216-search-2: "\f1d7";
+    $font-Flaticon-217-search-3: "\f1d8";
+    $font-Flaticon-218-search-4: "\f1d9";
+    $font-Flaticon-219-package-8: "\f1da";
+    $font-Flaticon-220-search-5: "\f1db";
+    $font-Flaticon-221-cctv: "\f1dc";
+    $font-Flaticon-222-package-9: "\f1dd";
+    $font-Flaticon-223-sign-1: "\f1de";
+    $font-Flaticon-224-sign-2: "\f1df";
+    $font-Flaticon-225-sign-3: "\f1e0";
+    $font-Flaticon-226-sign-4: "\f1e1";
+    $font-Flaticon-227-sign-5: "\f1e2";
+    $font-Flaticon-228-sign-6: "\f1e3";
+    $font-Flaticon-229-shop: "\f1e4";
+    $font-Flaticon-230-online-shop-32: "\f1e5";
+    $font-Flaticon-231-online-shop-33: "\f1e6";
+    $font-Flaticon-232-online-shop-34: "\f1e7";
+    $font-Flaticon-233-online-shop-35: "\f1e8";
+    $font-Flaticon-234-online-shop-36: "\f1e9";
+    $font-Flaticon-235-online-shop-37: "\f1ea";
+    $font-Flaticon-236-online-shop-38: "\f1eb";
+    $font-Flaticon-237-tag: "\f1ec";
+    $font-Flaticon-238-tag-1: "\f1ed";
+    $font-Flaticon-239-tag-2: "\f1ee";
+    $font-Flaticon-240-tag-3: "\f1ef";
+    $font-Flaticon-241-tag-4: "\f1f0";
+    $font-Flaticon-242-tag-5: "\f1f1";
+    $font-Flaticon-243-tag-6: "\f1f2";
+    $font-Flaticon-244-tag-7: "\f1f3";
+    $font-Flaticon-245-tag-8: "\f1f4";
+    $font-Flaticon-246-tag-9: "\f1f5";
+    $font-Flaticon-247-tag-10: "\f1f6";
+    $font-Flaticon-248-tag-11: "\f1f7";
+    $font-Flaticon-249-delivery-truck-5: "\f1f8";
+    $font-Flaticon-250-delivery-truck-6: "\f1f9";
+    $font-Flaticon-251-invoice-21: "\f1fa";
+    $font-Flaticon-252-invoice-22: "\f1fb";
+    $font-Flaticon-253-invoice-23: "\f1fc";
+    $font-Flaticon-254-invoice-24: "\f1fd";
+    $font-Flaticon-255-invoice-25: "\f1fe";
+    $font-Flaticon-256-invoice-26: "\f1ff";
+    $font-Flaticon-257-invoice-27: "\f200";
+    $font-Flaticon-258-invoice-28: "\f201";
+    $font-Flaticon-259-invoice-29: "\f202";
+    $font-Flaticon-260-invoice-30: "\f203";
+    $font-Flaticon-261-invoice-31: "\f204";
+    $font-Flaticon-262-wallet: "\f205";
+    $font-Flaticon-263-wallet-1: "\f206";
+    $font-Flaticon-264-wallet-2: "\f207";
+    $font-Flaticon-265-wallet-3: "\f208";
+    $font-Flaticon-266-wallet-4: "\f209";
+    $font-Flaticon-267-wallet-5: "\f20a";
+    $font-Flaticon-268-wallet-6: "\f20b";
+    $font-Flaticon-269-wallet-7: "\f20c";
+    $font-Flaticon-270-wallet-8: "\f20d";
+    $font-Flaticon-271-wallet-9: "\f20e";
+    $font-Flaticon-272-wallet-10: "\f20f";
+    $font-Flaticon-273-wallet-11: "\f210";
+    $font-Flaticon-274-wallet-12: "\f211";
+    $font-Flaticon-275-watch: "\f212";
+    $font-Flaticon-276-watch-1: "\f213";
+    $font-Flaticon-277-shopping-bags: "\f214";
+    $font-Flaticon-278-shopping-bags-1: "\f215";
+    $font-Flaticon-279-shopping-basket-13: "\f216";
+    $font-Flaticon-280-invoice-32: "\f217";
+    $font-Flaticon-281-shopping-cart-42: "\f218";
+    $font-Flaticon-282-shopping-cart-43: "\f219";
+    $font-Flaticon-283-shopping-cart-44: "\f21a";
+    $font-Flaticon-284-yen-1: "\f21b";
+    $font-Flaticon-285-yen-2: "\f21c";
+    $font-Flaticon-286-credit-card-8: "\f21d";
+    $font-Flaticon-287-discount-5: "\f21e";
+    $font-Flaticon-288-money-bag-5: "\f21f";
