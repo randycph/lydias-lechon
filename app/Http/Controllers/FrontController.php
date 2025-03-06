@@ -17,12 +17,13 @@ use App\Category;
 use App\Http\Requests\ContactUsRequest;
 use Illuminate\Support\Facades\Mail;
 use Response;
-use Auth;
 use Storage;
 use App\EcommerceModel\GiftCertificate;
+use App\Helpers\Shortcode;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Requests\PagePost;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Validator;
 
@@ -31,7 +32,7 @@ class FrontController extends Controller
 
     public function home()
     {
-        return $this->page('home')->withShortcodes();
+        return $this->page('home');
     }
 
     public function privacy_policy(){
@@ -67,8 +68,10 @@ class FrontController extends Controller
 
         $footer = Page::where('slug', 'footer')->where('name', 'footer')->first();
 
+        $content = Shortcode::process($page->content);
+
         if (!empty($page->template)) {
-            return view('theme.'.env('FRONTEND_TEMPLATE').'.pages.'.$page->template, compact('footer','page', 'breadcrumb'))->withShortcodes();
+            return view('theme.'.env('FRONTEND_TEMPLATE').'.pages.'.$page->template, compact('footer','page', 'breadcrumb', 'content'));
         }
 
         $parentPage = null;
@@ -84,7 +87,7 @@ class FrontController extends Controller
             }
         }
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.page', compact('footer', 'page', 'parentPage','breadcrumb'))->withShortcodes();
+        return view('theme.'.env('FRONTEND_TEMPLATE').'.page', compact('footer', 'page', 'parentPage','breadcrumb'));
     }
 
     public function contact_us(ContactUsRequest $request)

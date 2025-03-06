@@ -31,14 +31,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         if(strpos(url()->current(), "storage") === FALSE && strpos(url()->current(), "theme") === FALSE){
-            $insert_logs = \App\ActivityLog::create([
-                'created_by' => \Auth::id() ?? 'guest',
-                'activity_type' => 'visit',
-                'dashboard_activity' => 'visit page',
-                'activity_desc' => \Request::ip(),
-                'activity_date' => date('Y-m-d H:i:s'),
-                'reference' => url()->current()
-            ]);
+            // $insert_logs = \App\ActivityLog::create([
+            //     'created_by' => \Auth::id() ?? 'guest',
+            //     'activity_type' => 'visit',
+            //     'dashboard_activity' => 'visit page',
+            //     'activity_desc' => \Request::ip(),
+            //     'activity_date' => date('Y-m-d H:i:s'),
+            //     'reference' => url()->current()
+            // ]);
         }
         Paginator::defaultView('vendor.pagination.default');
         Blade::component('components.error', 'hasError');

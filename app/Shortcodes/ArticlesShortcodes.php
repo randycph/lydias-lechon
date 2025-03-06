@@ -1,6 +1,7 @@
 <?php
 namespace App\Shortcodes;
 use App\Article;
+use Illuminate\Support\Facades\URL;
 
 class ArticlesShortcodes {
 
@@ -16,7 +17,7 @@ class ArticlesShortcodes {
         foreach($latest_news as $latest){
             $thumb = $latest->thumbnail_url;
             if(empty($latest->thumbnail_url)){
-                $thumb = \URL::to('/').'/storage/products/0/no_image_available.png';
+                $thumb = URL::to('/').'/storage/products/0/no_image_available.png';
             }
             $url = 'href="'.$latest->slug.'"';
             if($latest->is_blog == 1){

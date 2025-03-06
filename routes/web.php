@@ -1,4 +1,8 @@
 <?php
+
+use Illuminate\Support\Facades\Route;
+
+
 Route::any('/ipay_response',  'ipayController@receive_data')->name('ipay.response');
 Route::get('/ipaysig',  'EcommerceControllers\CartController@payment');
 // Route::get('/page-test',  function(){
@@ -154,9 +158,9 @@ Route::group(['middleware' => ['authenticated']], function () {
 
 
 # ADMIN ROUTE #
-Route::prefix('admin')->group(function () {
-    Auth::routes(['verify' => true]);
-});
+// Route::prefix('admin')->group(function () {
+//     Auth::routes(['verify' => true]);
+// });
 
 // Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
 
@@ -492,3 +496,7 @@ Route::get('/{any}', 'FrontController@page')->where('any', '.*');  //// REMOVE F
 
 //Route::get('/{slug}', 'FrontController@page');
 //Route::get('{all}','FrontController@page');
+
+Route::get('/test', function(){
+    phpinfo();
+});

@@ -6,3 +6,4 @@ public/storage
 public/theme/legande/js/script.alt.js
 api.php
 vendor
+node_modules

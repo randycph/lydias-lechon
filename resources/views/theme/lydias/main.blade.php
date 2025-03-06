@@ -198,7 +198,7 @@
 
         {!! Setting::getAds()->contents !!}
 
-        [latest homepage][/latest homepage]
+        {!! \App\Helpers\Shortcode::process("[latest homepage]") !!}
 
         <section>
             <div class="subcription wrapper">

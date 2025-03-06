@@ -106,7 +106,7 @@ class ArticleFrontController extends Controller
 
         $footer = Page::where('slug', 'footer')->where('name', 'footer')->first();
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.pages.news-list',compact('page', 'footer', 'articles','breadcrumb','dates','categories'))->withShortcodes();
+        return view('theme.'.env('FRONTEND_TEMPLATE').'.pages.news-list',compact('page', 'footer', 'articles','breadcrumb','dates','categories'));
 
 
     }
@@ -203,7 +203,7 @@ class ArticleFrontController extends Controller
 
         $footer = Page::where('slug', 'footer')->where('name', 'footer')->first();
         $page = $news;
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.pages.news',compact('footer', 'news','breadcrumb', 'page'))->withShortcodes();
+        return view('theme.'.env('FRONTEND_TEMPLATE').'.pages.news',compact('footer', 'news','breadcrumb', 'page'));
 
     }
 
