@@ -4,10 +4,11 @@ namespace App\EcommerceModel;
 
 use App\Helpers\Webfocus\Setting;
 use App\Mail\Member\EnrollMemberMail;
-use App\User;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Mail;
 
 class Member extends Model
 {
@@ -34,7 +35,7 @@ class Member extends Model
     {
         $token = app('auth.password.broker')->createToken($this->user);
 
-        \Mail::to($this->email)->send(new EnrollMemberMail(Setting::info(), $this->user, $this->sponsor->user, $token));
+        Mail::to($this->email)->send(new EnrollMemberMail(Setting::info(), $this->user, $this->sponsor->user, $token));
     }
 
     public function sponsor()

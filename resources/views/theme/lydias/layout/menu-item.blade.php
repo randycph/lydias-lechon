@@ -25,7 +25,7 @@
 {{--                        foreach($cats as $cat){--}}
 {{--                            echo '<li><a href="/news?type=category&criteria='.$cat->id.'">'.$cat->name.'</a></li>';--}}
 {{--                        }--}}
-{{--                        $uncats = \App\Article::where('category_id', null)->orWhere('category_id', 0)->get();--}}
+{{--                        $uncats = \App\Models\Article::where('category_id', null)->orWhere('category_id', 0)->get();--}}
 {{--                        if(count($uncats)) {--}}
 {{--                            echo '<li><a href="/news?type=category&criteria=0">Uncategorized</a></li>';--}}
 {{--                        }--}}

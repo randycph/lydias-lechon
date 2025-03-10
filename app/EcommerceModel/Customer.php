@@ -3,7 +3,7 @@
 namespace App\EcommerceModel;
 
 use App\Notifications\Ecommerce\CustomerResetPasswordNotification;
-use App\User;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;

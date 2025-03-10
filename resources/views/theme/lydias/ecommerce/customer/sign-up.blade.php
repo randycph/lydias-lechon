@@ -36,33 +36,38 @@
                                     <option value="0" selected>Individual</option>
                                     <option value="1">Organization</option>
                                 </select>
-                                @hasError(['inputName' => 'is_org'])
-                                @endhasError
+                                @error('is_org'))
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>
                             <div class="form-group org" style="display:block">
                                 <label class="d-block">Organization Name *</label>
                                 <input type="text" name="organization" id="organization" value="{{ old('organization')}}" class="form-control @error('organization') is-invalid @enderror">
-                                @hasError(['inputName' => 'organization'])
-                                @endhasError
+                                @error('organization')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>
                             <div class="individual" style="display:block">
                                 <div class="form-group">
                                     <label class="d-block">First Name *</label>
                                     <input type="text" name="fname" id="fname" value="{{ old('fname')}}" class="form-control @error('fname') is-invalid @enderror">
-                                    @hasError(['inputName' => 'fname'])
-                                    @endhasError
+                                    @error('fname')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
                                 </div>
                                 <div class="form-group">
                                     <label class="d-block">Last Name *</label>
                                     <input type="text" name="lname" id="lname" value="{{ old('lname')}}" class="form-control @error('lname') is-invalid @enderror">
-                                    @hasError(['inputName' => 'lname'])
-                                    @endhasError
+                                    @error('lname')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
                                 </div>
                                 <div class="form-group">
                                     <label class="d-block">Birth Date </label>
                                     <input type="date" name="birthday" id="birthday" value="{{ old('birthday')}}" class="form-control @error('birthday') is-invalid @enderror">
-                                    @hasError(['inputName' => 'birthday'])
-                                    @endhasError
+                                    @error('birthday')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
                                 </div>
                             </div>
                             <br>
@@ -70,20 +75,23 @@
                             <div class="form-group">
                                 <label class="d-block">Email *</label>
                                 <input type="email" name="email" id="email" required="required" value="{{ old('email')}}" class="form-control @error('email') is-invalid @enderror" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
-                                @hasError(['inputName' => 'email'])
-                                @endhasError
+                                @error('email')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>
                             <div class="form-group">
                                 <label class="d-block">Password *</label>
                                 <input type="password" name="password" id="password" required="required" value="{{ old('password')}}" class="form-control @error('password') is-invalid @enderror">
-                                @hasError(['inputName' => 'password'])
-                                @endhasError
+                                @error('password')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>
                             <div class="form-group">
                                 <label class="d-block">Confirm Password *</label>
                                 <input type="password" name="password_confirmation" id="password_confirmation" required="required" value="{{ old('password_confirmation')}}" class="form-control @error('password_confirmation') is-invalid @enderror">
-                                @hasError(['inputName' => 'password_confirmation'])
-                                @endhasError
+                                @error('password_confirmation')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>
                             <br>
                             
@@ -92,26 +100,30 @@
                             <div class="form-group">
                                 <label class="d-block">Street *</label>
                                 <input type="text" name="address_street" id="address_street" value="{{ old('address_street')}}" class="form-control @error('address_street') is-invalid @enderror" required>
-                                @hasError(['inputName' => 'address_street'])
-                                @endhasError
+                                @error('address_street')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>  
                             <div class="form-group">
                                 <label class="d-block">Municipality *</label>
                                 <input type="text" name="address_municipality" id="address_municipality" value="{{ old('address_municipality')}}" class="form-control @error('address_municipality') is-invalid @enderror" required>
-                                @hasError(['inputName' => 'address_municipality'])
-                                @endhasError
+                                @error('address_municipality')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>  
                             <div class="form-group">
                                 <label class="d-block">City *</label>
                                 <input type="text" name="address_city" id="address_city" value="{{ old('address_city')}}" class="form-control @error('address_city') is-invalid @enderror" required>
-                                @hasError(['inputName' => 'address_city'])
-                                @endhasError
+                                @error('address_city')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>  
                             <div class="form-group">
                                 <label class="d-block">Region *</label>
                                 <input type="text" name="address_region" id="address_region" value="{{ old('address_region')}}" class="form-control @error('address_region') is-invalid @enderror" required>
-                                @hasError(['inputName' => 'address_region'])
-                                @endhasError
+                                @error('address_region')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>
                             <br>
                             <h4 class="mg-b-0 tx-spacing--1">Contact Information</h4>
@@ -119,32 +131,37 @@
                             <div class="form-group org" style="display:block">
                                 <label class="d-block">Contact Person *</label>
                                 <input type="text" name="contact_person" id="contact_person" value="{{ old('contact_person')}}" class="form-control @error('contact_person') is-invalid @enderror">
-                                @hasError(['inputName' => 'contact_person'])
-                                @endhasError
+                                @error('contact_person')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>                            
                             <div class="form-group">
                                 <label class="d-block">Telephone Number</label>
                                 <input type="text" name="contact_tel" id="contact_tel" value="{{ old('contact_tel')}}" class="form-control @error('contact_tel') is-invalid @enderror" maxlength="200">
-                                @hasError(['inputName' => 'contact_tel'])
-                                @endhasError
+                                @error('contact_tel')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>  
                             <div class="form-group">
                                 <label class="d-block">Mobile Number *</label>
                                 <input type="text" name="contact_mobile" id="contact_mobile" value="{{ old('contact_mobile')}}" class="form-control @error('contact_mobile') is-invalid @enderror" required="required" maxlength="13">
-                                @hasError(['inputName' => 'contact_mobile'])
-                                @endhasError
+                                @error('contact_mobile')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>  
                             <div class="form-group">
                                 <label class="d-block">Fax Number</label>
                                 <input type="text" name="contact_fax" id="contact_fax" value="{{ old('contact_fax')}}" class="form-control @error('contact_fax') is-invalid @enderror" maxlength="200">
-                                @hasError(['inputName' => 'contact_fax'])
-                                @endhasError
+                                @error('contact_fax')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>  
                             <div class="form-group">
                                 <label class="d-block">Agent Code </label>
                                 <input type="text" name="agent_code" id="agent_code" value="{{ old('agent_code')}}" class="form-control @error('agent_code') is-invalid @enderror">
-                                @hasError(['inputName' => 'agent_code'])
-                                @endhasError
+                                @error('agent_code')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>     
                             <div class="form-check" style="margin-bottom: 1rem;">
                                 <input type="checkbox" class="form-check-input" id="issubscribe" name="issubscribe" value="1">

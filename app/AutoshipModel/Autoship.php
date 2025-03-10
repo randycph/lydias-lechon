@@ -1,6 +1,8 @@
 <?php
 
 namespace App\AutoshipModel;
+
+use App\Models\User;
 use \Carbon\Carbon;
 
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +15,7 @@ class Autoship extends Model
 
     public function user()
     {
-        return $this->belongsTo('App\User');
+        return $this->belongsTo(User::class);
     }
 
     public function sales()

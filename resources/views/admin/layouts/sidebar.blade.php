@@ -14,7 +14,7 @@
                 </div>
                 <div class="aside-loggedin-user tx-center">
                     <h6 class="tx-semibold mg-b-0">{{ Auth::user()->fullname }}</h6>
-{{--                    <p class="tx-color-03 tx-11 mg-b-0 tx-uppercase">{{ App\User::userRole(Auth::user()->role_id) }}</p>--}}
+{{--                    <p class="tx-color-03 tx-11 mg-b-0 tx-uppercase">{{ App\Models\User::userRole(Auth::user()->role_id) }}</p>--}}
                     <p class="tx-color-03 tx-11 mg-b-0 tx-uppercase">{{ Auth::user()->user_role->name }}</p>
                 </div>
             @else
@@ -23,7 +23,7 @@
                 </div>
                 <div class="aside-loggedin-user tx-center">
                     <h6 class="tx-semibold mg-b-0">{{ Auth::user()->fullname }}</h6>
-                    <p class="tx-color-03 tx-11 mg-b-0 tx-uppercase">{{ App\User::userRole(Auth::user()->role_id) }}</p>
+                    <p class="tx-color-03 tx-11 mg-b-0 tx-uppercase">{{ App\Models\User::userRole(Auth::user()->role_id) }}</p>
                 </div>
             @endif
         </div>

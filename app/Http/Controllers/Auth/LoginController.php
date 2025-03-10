@@ -3,15 +3,16 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Page;
+use App\Models\ActivityLog;
+use App\Models\Page;
 use App\ViewPermissions;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 
-use Validator;
-use Auth;
-use Session;
-use Cookie;
+use Illuminate\Validation\Validator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Cookie;
 
 class LoginController extends Controller
 {
@@ -69,11 +70,11 @@ class LoginController extends Controller
             $userCredentials['email'] = $request->email;
         }
         
-        $insert_logs = \App\ActivityLog::create([
+        $insert_logs = ActivityLog::create([
                 'created_by' => $request->email ?? 'no record',
                 'activity_type' => 'login',
                 'dashboard_activity' => 'login',
-                'activity_desc' => \Request::ip(),
+                'activity_desc' => $request->ip(),
                 'activity_date' => date('Y-m-d H:i:s'),
                 'reference' => url()->current()
             ]);

@@ -167,7 +167,7 @@
             @php
                 $var = 0;
                 $misc_total = $miscs->count();
-                $misc = \App\Product::misc();
+                $misc = \App\Models\Product::misc();
             @endphp
 
             @foreach($productCategories as $category)
@@ -178,13 +178,13 @@
                         <div class="menu-block">
                             <div class="row">
                                 @php
-                                    $products = \App\Product::menu_products($category->id);
+                                    $products = \App\Models\Product::menu_products($category->id);
                                 @endphp
 
                                 @forelse($products as $product)
                                     @php
-                                        $main = \App\Product::info($product->name);
-                                        $sizes = \App\Product::detail($product->name);
+                                        $main = \App\Models\Product::info($product->name);
+                                        $sizes = \App\Models\Product::detail($product->name);
                                         $min_price = $sizes->min('price');
                                         $max_price = $sizes->max('price');
                                         $var++;

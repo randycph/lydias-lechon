@@ -5,11 +5,12 @@ namespace App\Http\Controllers\News;
 use App\Helpers\ListingHelper;
 use App\Helpers\ModelHelper;
 use App\Http\Controllers\Controller;
-use App\ArticleCategory;
-use App\Permission;
+use App\Models\ArticleCategory;
+use App\Models\Permission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use App\Http\Requests\ArticleCategoryRequest;
+use App\Models\Page;
 
 class ArticleCategoryController extends Controller
 {
@@ -59,7 +60,7 @@ class ArticleCategoryController extends Controller
     {
         $category = ArticleCategory::create([
             'name' => $request->category_name,
-            'slug' => \App\Page::convert_to_slug($request->category_name),
+            'slug' => Page::convert_to_slug($request->category_name),
             'user_id'  => auth()->user()->id
         ]);
 
@@ -69,7 +70,7 @@ class ArticleCategoryController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\ArticleCategory  $articleCategory
+     * @param  \App\Models\ArticleCategory  $articleCategory
      * @return \Illuminate\Http\Response
      */
     public function show(ArticleCategory $articleCategory)
@@ -94,7 +95,7 @@ class ArticleCategoryController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\ArticleCategory  $articleCategory
+     * @param  \App\Models\ArticleCategory  $articleCategory
      * @return \Illuminate\Http\Response
      */
     public function update(ArticleCategoryRequest $request, $id)
@@ -105,7 +106,7 @@ class ArticleCategoryController extends Controller
             $slug = $articleCategory->slug;
         }
         else{
-            $slug = \App\Page::convert_to_slug($request->category_name);
+            $slug = Page::convert_to_slug($request->category_name);
         }
 
         $articleCategory->update([
@@ -120,7 +121,7 @@ class ArticleCategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param \App\ArticleCategory $articleCategory
+     * @param \App\Models\ArticleCategory $articleCategory
      * @return \Illuminate\Http\Response
      * @throws \Exception
      */

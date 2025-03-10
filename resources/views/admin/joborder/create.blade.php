@@ -1114,7 +1114,7 @@
     <script>
     /** search customer and display customer details once selected **/
         $(document).ready(function(){
-            var customers = {!! \App\User::customer_lookup() !!}
+            var customers = {!! \App\Models\User::customer_lookup() !!}
 
             var customers = new Bloodhound({
                 datumTokenizer: Bloodhound.tokenizers.whitespace,

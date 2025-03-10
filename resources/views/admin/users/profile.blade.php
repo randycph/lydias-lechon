@@ -26,7 +26,7 @@
                 <div class="col-sm-8 col-md-7 col-lg mg-t-20 mg-sm-t-0 mg-lg-t-25">
                     <input type="hidden" id="user_id" value="{{ $user->id }}">
                     <h5 class="mg-b-2 tx-spacing--1">{{ $user->fullname }}</h5>
-                    <p class="tx-color-03 mg-b-25">{{ \App\User::userRole($user->role_id) }}</p>
+                    <p class="tx-color-03 mg-b-25">{{ \App\Models\User::userRole($user->role_id) }}</p>
                 </div>
             </div>
         </div>

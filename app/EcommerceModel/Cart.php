@@ -2,7 +2,8 @@
 
 namespace App\EcommerceModel;
 
-use App\Product;
+use App\Models\Product;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class Cart extends Model
@@ -18,7 +19,7 @@ class Cart extends Model
 
     public function product()
     {
-        return $this->belongsTo('\App\Product');
+        return $this->belongsTo(Product::class);
     }
 
     public function getItemTotalPriceAttribute()

@@ -2,6 +2,7 @@
 
 namespace App\AutoshipModel;
 
+use App\Models\Product;
 use Illuminate\Database\Eloquent\Model;
 
 class AutoshipDetail extends Model
@@ -12,12 +13,12 @@ class AutoshipDetail extends Model
 
     public function product()
     {
-        return $this->belongsTo('App\Product');
+        return $this->belongsTo(Product::class);
     }
 
     public function autoship()
     {
-    	return $this->hasMany('App\AutoshipModel\Autoship','autoship_header_id');
+    	return $this->hasMany(Autoship::class,'autoship_header_id');
     }
 
     public function getTotalPriceAttribute()

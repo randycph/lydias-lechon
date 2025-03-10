@@ -54,8 +54,8 @@
 @section('content')
     @php
 
-        $sizes = \App\Product::detail($product->name);
-        $misc = \App\Product::misc();
+        $sizes = \App\Models\Product::detail($product->name);
+        $misc = \App\Models\Product::misc();
     @endphp
     <main>
         <section id="content-wrapper">

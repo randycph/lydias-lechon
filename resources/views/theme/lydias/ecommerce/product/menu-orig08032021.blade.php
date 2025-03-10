@@ -33,7 +33,7 @@
                                         <div class="row">
                                             @forelse($products as $product)
                                                 @php
-                                                    $main = \App\Product::info($product->name);
+                                                    $main = \App\Models\Product::info($product->name);
                                                 @endphp
                                                 @if ($product->id == 1)
                                                     @continue

@@ -11,7 +11,7 @@ class MenusHasPagesSeeder extends Seeder
      */
     public function run()
     {
-        \App\MenusHasPages::insert([
+        \App\Models\MenusHasPages::insert([
             [
                 'menu_id' => 1,
                 'page_id' => 1,

@@ -15,23 +15,20 @@ use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\SalesDetail;
 use App\EcommerceModel\Branch;
 use App\EcommerceModel\Cart;
-use App\Deliverablecities;
-use App\ProductCategory;
+use App\Models\Deliverablecities;
+use App\Models\ProductCategory;
 
-
-use App\Page;
-use App\User;
-
-
+use App\Models\Page;
+use App\Models\User;
 
 use App\Mail\SalesCompletedRegistered;
 use App\Mail\SalesCompletedAdmin;
 use App\Mail\SalesCompleted;
-
+use App\Models\Product;
 use Carbon\Carbon;
-use Session;
-use Cookie;
-use DB;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\DB;
 
 
 class KioskController extends Controller
@@ -60,7 +57,7 @@ class KioskController extends Controller
     {
         $cart = Cart::where('user_id',Auth::id())->get();
 
-        $setting = \App\Setting::find(1);
+        $setting = Setting::find(1);
         $exp_categories = explode('|',$setting->kiosk_express_categories);
         $arr_cart_product_categories = [];
         foreach($exp_categories as $cat){
@@ -69,7 +66,7 @@ class KioskController extends Controller
 
         $expCounter = 0;
         foreach($cart as $c){
-            $product = \App\Product::find($c->product_id);
+            $product = Product::find($c->product_id);
             if (in_array($product->category_id, $arr_cart_product_categories)){
                 $expCounter++;
             }

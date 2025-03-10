@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Auth;
-use \App\Logs;
-use \App\Product;
-use \App\EcommerceModel\Member;
-use \App\EcommerceModel\Branch;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Logs;
+use App\Models\Product;
+use App\EcommerceModel\Member;
+use App\EcommerceModel\Branch;
 
 class SyncController extends Controller
 {

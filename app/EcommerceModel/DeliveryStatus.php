@@ -1,7 +1,7 @@
 <?php
 
 namespace App\EcommerceModel;
-use App\User;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 class DeliveryStatus extends Model

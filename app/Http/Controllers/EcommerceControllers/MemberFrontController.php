@@ -4,7 +4,7 @@ namespace App\Http\Controllers\EcommerceControllers;
 
 use App\EcommerceModel\Cart;
 use App\EcommerceModel\Member;
-use App\User;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;

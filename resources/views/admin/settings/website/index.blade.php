@@ -474,7 +474,7 @@
                                     <div class="form-group">
                                         <label>Applicable Products</label>
                                         <select name="products[]" multiple="multiple" id="products" class="form-control js-example-basic-multiple js-states select2" style="width:100%">
-                                            @foreach(\App\Product::where('for_sale_web','1')->orderBy('name')->get() as $p)
+                                            @foreach(\App\Models\Product::where('for_sale_web','1')->orderBy('name')->get() as $p)
                                                 @php
                                                     $rec_product = \App\DeliveryFeePromo::where('type','product')->where('ref_id',$p->id)->first();
                                                 @endphp
@@ -490,7 +490,7 @@
                                         <div id="title" class="parsley-input">
                                             <label>Selected Customers</label>
                                             <select name="customers[]" multiple="multiple" id="customers" class="form-control js-example-basic-multiple js-states select2" style="width:100%">
-                                                @foreach(\App\User::where('user_type','customer')->where('email','not like','lydtemp_%')
+                                                @foreach(\App\Models\User::where('user_type','customer')->where('email','not like','lydtemp_%')
                                                 ->where('email','not like','lydtmp_%')->orderBy('firstname')->orderBy('lastname')
                                                 ->get() as $c)
                                                     @php

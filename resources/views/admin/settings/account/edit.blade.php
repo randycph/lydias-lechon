@@ -70,7 +70,7 @@
                             @endif
                             <div class="media-body pd-t-30">
                                 <h5 class="mg-b-0 tx-inverse tx-bold">{{ $user->fullname }}</h5>
-                                <p>{{ \App\User::userRole($user->role_id) }}</p>
+                                <p>{{ \App\Models\User::userRole($user->role_id) }}</p>
                             </div>
                         </div>
                         <div class="form-group">

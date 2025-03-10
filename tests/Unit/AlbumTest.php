@@ -14,7 +14,7 @@ class AlbumTest extends TestCase
     public function setUp() : void
     {
         parent::setUp();
-        $this->album = factory('App\Album')->create();
+        $this->album = factory('App\Models\Album')->create();
     }
 
     /** @test */

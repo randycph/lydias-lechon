@@ -1,6 +1,6 @@
 @php
     if (!isset($page)) {
-        $page = new \App\Page;
+        $page = new \App\Models\Page;
     }
 @endphp
 <!DOCTYPE html>

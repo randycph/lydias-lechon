@@ -1,6 +1,7 @@
 <?php
 namespace App\Shortcodes;
-use App\Article;
+
+use App\Models\Article;
 use Illuminate\Support\Facades\URL;
 
 class ArticlesShortcodes {

@@ -146,7 +146,7 @@
                                         } else {
                                             $orderId = $key;
                                             $order = (object) $order;
-                                            $product = \App\Product::find($order->product_id);
+                                            $product = \App\Models\Product::find($order->product_id);
                                         }
 
                                         if (empty($product)) {

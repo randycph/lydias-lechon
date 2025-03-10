@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Settings;
 
-use App\Permission;
+use App\Models\Permission;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 
-use App\Setting;
-use App\MediaAccounts;
-use App\DeliveryFeePromo;
-use App\ProductCategory;
+use App\Models\Setting;
+use App\Models\MediaAccounts;
+use App\Models\DeliveryFeePromo;
+use App\Models\ProductCategory;
 
 class WebController extends Controller
 {

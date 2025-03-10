@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Product;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Auth;
-use App\Product;
-use App\ProductReview;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Product;
+use App\Models\ProductReview;
 
 class ProductReviewController extends Controller
 {    

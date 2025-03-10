@@ -2,8 +2,9 @@
 
 namespace App\EcommerceModel;
 
-use App\ActivityLog;
-use App\User;
+use App\Models\ActivityLog;
+use App\Models\Product;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -22,26 +23,26 @@ class JobOrder extends Model
 
     public function product()
     {
-        return $this->belongsTo('App\Product')->withTrashed();
+        return $this->belongsTo(Product::class)->withTrashed();
     }
 
     public function prodOrder()
     {
-        return $this->hasOne('App\EcommerceModel\ProductionOrder','joborder_id');
+        return $this->hasOne(ProductionOrder::class,'joborder_id');
     }
 
     public function receiver()
     {
-        return $this->belongsTo('App\EcommerceModel\Branch','pickup_branch')->where('pickup_branch','>',0);
+        return $this->belongsTo(Branch::class,'pickup_branch')->where('pickup_branch','>',0);
     }
 
     public function sales_detail()
     {
-        return $this->belongsTo('App\EcommerceModel\SalesDetail','sales_detail_id');
+        return $this->belongsTo(SalesDetail::class,'sales_detail_id');
     }
 
     public function deliveries(){
-        return $this->hasMany('App\EcommerceModel\DeliveryStatus','order_id');
+        return $this->hasMany(DeliveryStatus::class,'order_id');
     }
 
 

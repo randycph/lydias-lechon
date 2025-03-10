@@ -142,7 +142,7 @@ Manage Customer
 
                                 @if($product->category_id != 0)
                                     @php
-                                        $category = \App\ProductCategory::where('status', 'PUBLISHED')->where('id', $product->category_id)->first();
+                                        $category = \App\Models\ProductCategory::where('status', 'PUBLISHED')->where('id', $product->category_id)->first();
                                         if(!empty($category)){
                                             $cat = $category->name ?? 'Uncategorized';
                                         }

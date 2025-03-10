@@ -117,7 +117,7 @@
                                             <strong @if($user->is_active == 0) style="text-decoration:line-through;" @endif> {{$user->fullname}}</strong>
                                         </th>
                                         <td>{{ $user->email }}</td>
-                                        <td><span class="badge badge-primary">{{ \App\User::userRole($user->role_id) }}</span></td>
+                                        <td><span class="badge badge-primary">{{ \App\Models\User::userRole($user->role_id) }}</span></td>
                                         <td>
                                             @if($user->is_active == 1)
                                                 <span class="badge badge-success">Active</span>

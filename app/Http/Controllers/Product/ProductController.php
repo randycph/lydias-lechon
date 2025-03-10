@@ -5,17 +5,17 @@ namespace App\Http\Controllers\Product;
 use App\Http\Controllers\Controller;
 use App\Helpers\ListingHelper;
 use App\Http\Requests\ProductRequest;
-use App\Permission;
+use App\Models\Permission;
 use Illuminate\Http\Request;
-use Storage;
-use Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
-use App\ProductVariation;
-use App\ProductCategory;
-use App\ProductPhoto;
-use App\ProductTag;
-use App\Product;
-use App\Page;
+use App\Models\ProductVariation;
+use App\Models\ProductCategory;
+use App\Models\ProductPhoto;
+use App\Models\ProductTag;
+use App\Models\Product;
+use App\Models\Page;
 use Illuminate\Support\Facades\Input;
 class ProductController extends Controller
 {
@@ -203,7 +203,7 @@ class ProductController extends Controller
             $slug = $product->slug;
         }
         else{
-            $slug = \App\Page::convert_to_slug($request->name);
+            $slug = Page::convert_to_slug($request->name);
         }
 
         $product->update([

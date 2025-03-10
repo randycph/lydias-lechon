@@ -4,9 +4,9 @@ namespace App\Http\Controllers\EcommerceControllers;
 
 use App\EcommerceModel\Cart;
 use App\EcommerceModel\SalesHeader;
-use App\Page;
-use App\User;
-use Auth;
+use App\Models\Page;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;

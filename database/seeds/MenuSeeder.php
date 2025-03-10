@@ -11,7 +11,7 @@ class MenuSeeder extends Seeder
      */
     public function run()
     {
-        \App\Menu::insert([
+        \App\Models\Menu::insert([
             'name' => 'Menu 1',
             'is_active' => 1,
             'pages_json' => '[]',

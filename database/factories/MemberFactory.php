@@ -3,7 +3,7 @@
 /* @var $factory \Illuminate\Database\Eloquent\Factory */
 
 use App\EcommerceModel\Member;
-use App\User;
+use App\Models\User;
 use Faker\Generator as Faker;
 
 

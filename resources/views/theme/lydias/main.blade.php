@@ -1,10 +1,10 @@
 @php
     if (!isset($page)) {
-        $page = new \App\Page;
+        $page = new \App\Models\Page;
     }
     
     if(isset($_GET['origin'])){
-        \App\User::order_origin($_GET['origin']);
+        \App\Models\User::order_origin($_GET['origin']);
     }
 
 @endphp
@@ -125,7 +125,7 @@
         @if($page->slug == "home")
         @php
             $count = 0;
-            $productCategories = \App\ProductCategory::where('status', 'PUBLISHED')->orderByRaw("FIELD(id, 1,13,18,12,2,17,19,20,21,4,5,6,8,3,22)")->get();
+            $productCategories = \App\Models\ProductCategory::where('status', 'PUBLISHED')->orderByRaw("FIELD(id, 1,13,18,12,2,17,19,20,21,4,5,6,8,3,22)")->get();
             $catcount = $productCategories->count();
         @endphp
 
@@ -141,7 +141,7 @@
                                 <ul class="nav justify-content-center nav-pills mb-4" id="pills-tab" role="tablist">
                                     @forelse($productCategories as $category)
                                         @php
-                                            $product = \App\Product::where('status', 'PUBLISHED')->where('category_id', $category->id)->where('is_featured', 1)->get();
+                                            $product = \App\Models\Product::where('status', 'PUBLISHED')->where('category_id', $category->id)->where('is_featured', 1)->get();
                                         @endphp
                                             @php
                                                 $count++;
@@ -161,7 +161,7 @@
                                     @endphp
                                     @forelse($productCategories as $category)
                                         @php
-                                            $featured_product = \App\Product::where('status', 'PUBLISHED')->where('category_id', $category->id)->get();
+                                            $featured_product = \App\Models\Product::where('status', 'PUBLISHED')->where('category_id', $category->id)->get();
 
                                             $count2++;
                                         @endphp
@@ -170,7 +170,7 @@
 
                                                 @forelse($featured_product as $product)
                                                     @php
-                                                        $main = \App\Product::info($product->name);
+                                                        $main = \App\Models\Product::info($product->name);
                                                     @endphp
                                                     <div class="food-box">
                                                         <img src="{{ asset('storage/products/'.$main->photoPrimary) }}" class="mb-2"/>

@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers\Product;
 
-use App\Permission;
+use App\Models\Permission;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\ListingHelper;
-use \Carbon\Carbon;
-use Auth;
-use App\ProductCategory;
-use App\Page;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
+use App\Models\ProductCategory;
+use App\Models\Page;
 
 class ProductCategoryController extends Controller
 {
@@ -127,7 +127,7 @@ class ProductCategoryController extends Controller
             $slug = $productCategory->slug;
         }
         else{
-            $slug = \App\Page::convert_to_slug($request->name);
+            $slug = Page::convert_to_slug($request->name);
         }
 
         $productCategory->update([

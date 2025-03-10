@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\EcommerceControllers;
 
-use App\BranchNumbers;
+use App\Models\BranchNumbers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -69,7 +69,7 @@ class BranchNumbersController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\BranchNumbers  $branchNumbers
+     * @param  \App\Models\BranchNumbers  $branchNumbers
      * @return \Illuminate\Http\Response
      */
     public function show(BranchNumbers $branchNumbers)
@@ -80,7 +80,7 @@ class BranchNumbersController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\BranchNumbers  $branchNumbers
+     * @param  \App\Models\BranchNumbers  $branchNumbers
      * @return \Illuminate\Http\Response
      */
     public function edit(BranchNumbers $branchNumbers)
@@ -92,7 +92,7 @@ class BranchNumbersController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\BranchNumbers  $branchNumbers
+     * @param  \App\Models\BranchNumbers  $branchNumbers
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, BranchNumbers $branchNumbers)
@@ -103,7 +103,7 @@ class BranchNumbersController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\BranchNumbers  $branchNumbers
+     * @param  \App\Models\BranchNumbers  $branchNumbers
      * @return \Illuminate\Http\Response
      */
     public function destroy(BranchNumbers $branchNumbers)

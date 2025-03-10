@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Product\Front;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\ProductCategory;
-use App\Product;
-use App\Page;
-use DB;
+use App\Models\ProductCategory;
+use App\Models\Product;
+use App\Models\Page;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class ProductFrontController extends Controller

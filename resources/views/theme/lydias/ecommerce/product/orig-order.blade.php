@@ -57,12 +57,12 @@
                                 <div class="menu-block">
                                     <div class="row">
                                         @php
-                                            $cat_products = \App\Product::where('category_id',$category->category_id)->where('for_sale_web','1')->select('name')->distinct()->get();
+                                            $cat_products = \App\Models\Product::where('category_id',$category->category_id)->where('for_sale_web','1')->select('name')->distinct()->get();
                                         @endphp
                                         @forelse($cat_products as $product)
                                             @php
-                                                $main = \App\Product::info($product->name);
-                                                $sizes = \App\Product::detail($product->name);
+                                                $main = \App\Models\Product::info($product->name);
+                                                $sizes = \App\Models\Product::detail($product->name);
                                                 $min_price = $sizes->min('price');
                                                 $max_price = $sizes->max('price');
                                                 $var++;

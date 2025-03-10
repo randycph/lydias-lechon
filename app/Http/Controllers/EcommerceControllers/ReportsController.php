@@ -15,13 +15,13 @@ use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\SalesDetail;
 use App\EcommerceModel\JobOrder;
 use App\EcommerceModel\Branch;
-use App\ProductCategory;
-use App\Permission;
-use App\Product;
+use App\Models\ProductCategory;
+use App\Models\Permission;
+use App\Models\Product;
 
 use Carbon\Carbon;
-use Auth;
-use DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ReportsController extends Controller
 {
@@ -34,7 +34,7 @@ class ReportsController extends Controller
     {
         $wra="(";
         $wra_array=[];
-        $products = \App\Product::where('production_item',1)->where('is_misc',0)->get();
+        $products = Product::where('production_item',1)->where('is_misc',0)->get();
         foreach($products as $p){
             $wra.="'".$p->id."',";
             array_push($wra_array,$p->id);
@@ -150,7 +150,7 @@ class ReportsController extends Controller
         po.delivery_date as deldate, h.delivery_type,h.instruction, jo.jo_number,br.name as receiver,p.is_misc,u.name as username, jo.jo_order_type, u.address_street, u.address_municipality, u.address_city, u.address_region, IF(p.is_misc=1, 'Miscellaneous', c.name) as item_type,p.is_misc,p.production_item,*/
         $wra="(";
         $wra_array=[];
-        $products = \App\Product::where('production_item',1)->where('is_misc',0)->get();
+        $products = Product::where('production_item',1)->where('is_misc',0)->get();
         foreach($products as $p){
             $wra.="'".$p->id."',";
             array_push($wra_array,$p->id);

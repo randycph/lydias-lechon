@@ -225,7 +225,7 @@
                                     <label class="tx-13">Product</label>
                                     <select name="product" id="product" class="form-control">
                                         <option value="">- Select Product -</option>
-                                        @forelse(\App\Product::select('name')->distinct('name')->orderBy('name')->get() as $cus)
+                                        @forelse(\App\Models\Product::select('name')->distinct('name')->orderBy('name')->get() as $cus)
                                             <option value="{{$cus->name}}">{{$cus->name}}</option>
                                         @empty
                                         @endforelse

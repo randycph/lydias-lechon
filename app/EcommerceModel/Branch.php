@@ -3,6 +3,7 @@
 namespace App\EcommerceModel;
 
 use App\ActivityLog;
+use App\Models\BranchNumbers;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -101,7 +102,7 @@ class Branch extends Model
 
     public function numbers(){
 
-        return $this->hasMany('App\BranchNumbers','branch_id');
+        return $this->hasMany(BranchNumbers::class,'branch_id');
 
     }
     

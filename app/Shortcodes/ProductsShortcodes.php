@@ -4,7 +4,7 @@
 namespace App\Shortcodes;
 
 
-use App\Product;
+use App\Models\Product;
 
 class ProductsShortcodes
 {

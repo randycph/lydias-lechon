@@ -14,12 +14,12 @@ class BannerTest extends TestCase
     public function setUp() : void
     {
         parent::setUp();
-        $this->banner = factory('App\Banner')->create();
+        $this->banner = factory('App\Models\Banner')->create();
     }
 
      /** @test */
      function a_banner_has_an_album()
      {        
-         $this->assertInstanceOf('App\Album', $this->banner->album);
+         $this->assertInstanceOf('App\Models\Album', $this->banner->album);
      } 
 }

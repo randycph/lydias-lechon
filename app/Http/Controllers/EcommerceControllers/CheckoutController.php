@@ -6,15 +6,15 @@ use App\AutoshipModel\Autoship;
 use App\AutoshipModel\AutoshipDetail;
 use App\EcommerceModel\Cart;
 use App\EcommerceModel\SalesDetail;
-use App\User;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\Branch;
-use Auth;
-use Setting;
+use Illuminate\Support\Facades\Auth;
+use App\Helpers\Webfocus\Setting;
 use App\Deliverablecities;
 
 class CheckoutController extends Controller

@@ -2,7 +2,9 @@
 
 namespace App\EcommerceModel;
 
-use App\User;
+use App\Models\Product;
+use App\Models\ProductCategory;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -21,22 +23,22 @@ class SalesDetail extends Model
 
     public function joborders()
     {
-        return $this->hasMany('App\EcommerceModel\JobOrder','sales_detail_id');
+        return $this->hasMany(JobOrder::class,'sales_detail_id');
     }
 
     public function product()
     {
-        return $this->belongsTo('\App\Product')->withTrashed();
+        return $this->belongsTo(Product::class)->withTrashed();
     }
 
     public function header()
     {
-        return $this->belongsTo('\App\EcommerceModel\SalesHeader', 'sales_header_id')->withTrashed();
+        return $this->belongsTo(SalesHeader::class, 'sales_header_id')->withTrashed();
     }
 
     public function category()
     {
-        return $this->belongsTo('\App\ProductCategory','product_category');
+        return $this->belongsTo(ProductCategory::class,'product_category');
     }
 
 }

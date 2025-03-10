@@ -1,6 +1,10 @@
 <?php
 
+use App\Models\Article;
+use App\Models\Page;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 
 class ArticleSeeder extends Seeder
 {
@@ -11,7 +15,7 @@ class ArticleSeeder extends Seeder
      */
     public function run()
     {
-        \App\Article::insert([
+        Article::insert([
             [
                 'name' => 'Lorem ipsum 1',
                 'slug' => $this->convert_to_slug('Lorem ipsum 1'),
@@ -20,7 +24,7 @@ class ArticleSeeder extends Seeder
                 'status' => 'Published',
                 'is_featured' => '1',
                 'user_id' => '1',
-                'image_url' => \URL::to('/').'/theme/'.env('FRONTEND_TEMPLATE').'/images/misc/news1.jpg',
+                'image_url' => URL::to('/').'/theme/'.env('FRONTEND_TEMPLATE').'/images/misc/news1.jpg',
                 'meta_title' => 'title',
                 'meta_keyword' => 'keyword',
                 'meta_description' => 'description',
@@ -35,7 +39,7 @@ class ArticleSeeder extends Seeder
                 'status' => 'Published',
                 'is_featured' => '1',
                 'user_id' => '1',
-                'image_url' => \URL::to('/').'/theme/'.env('FRONTEND_TEMPLATE').'/images/misc/news1.jpg',
+                'image_url' => URL::to('/').'/theme/'.env('FRONTEND_TEMPLATE').'/images/misc/news1.jpg',
                 'meta_title' => 'title',
                 'meta_keyword' => 'keyword',
                 'meta_description' => 'description',
@@ -50,7 +54,7 @@ class ArticleSeeder extends Seeder
                 'status' => 'Published',
                 'is_featured' => '1',
                 'user_id' => '1',
-                'image_url' => \URL::to('/').'/theme/'.env('FRONTEND_TEMPLATE').'/images/misc/news1.jpg',
+                'image_url' => URL::to('/').'/theme/'.env('FRONTEND_TEMPLATE').'/images/misc/news1.jpg',
                 'meta_title' => 'title',
                 'meta_keyword' => 'keyword',
                 'meta_description' => 'description',
@@ -65,7 +69,7 @@ class ArticleSeeder extends Seeder
                 'status' => 'Published',
                 'is_featured' => '0',
                 'user_id' => '1',
-                'image_url' => \URL::to('/').'/theme/'.env('FRONTEND_TEMPLATE').'/images/misc/news1.jpg',
+                'image_url' => URL::to('/').'/theme/'.env('FRONTEND_TEMPLATE').'/images/misc/news1.jpg',
                 'meta_title' => 'title',
                 'meta_keyword' => 'keyword',
                 'meta_description' => 'description',
@@ -80,7 +84,7 @@ class ArticleSeeder extends Seeder
                 'status' => 'Published',
                 'is_featured' => '0',
                 'user_id' => '1',
-                'image_url' => \URL::to('/').'/theme/'.env('FRONTEND_TEMPLATE').'/images/misc/news1.jpg',
+                'image_url' => URL::to('/').'/theme/'.env('FRONTEND_TEMPLATE').'/images/misc/news1.jpg',
                 'meta_title' => 'title',
                 'meta_keyword' => 'keyword',
                 'meta_description' => 'description',
@@ -94,10 +98,10 @@ class ArticleSeeder extends Seeder
 
         $url = Str::slug($url, '-');
 
-        if (\App\Page::where('slug', '=', $url)->exists()) {
+        if (Page::where('slug', '=', $url)->exists()) {
             $url = $url."_2";
         }
-        elseif (\App\Article::where('slug', '=', $url)->exists()) {
+        elseif (Article::where('slug', '=', $url)->exists()) {
             $url = $url."_2";
         }
 

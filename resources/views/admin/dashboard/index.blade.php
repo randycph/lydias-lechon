@@ -36,7 +36,7 @@
                 <div class="card dashboard-widget">
                     <a href="{{route('pages.index')}}">
                         <div class="card-body">
-                            <h4 class="tx-bold mg-b-5 lh-1"><i data-feather="layers" class="mg-r-6"></i> {{ \App\Page::totalPages() }}</h4>
+                            <h4 class="tx-bold mg-b-5 lh-1"><i data-feather="layers" class="mg-r-6"></i> {{ \App\Models\Page::totalPages() }}</h4>
                             <span class="tx-uppercase tx-11 tx-spacing-1 tx-color-02 tx-semibold">Total Pages</span>
                         </div>
                     </a>
@@ -48,7 +48,7 @@
                 <div class="card dashboard-widget">
                     <a href="{{ route('albums.index') }}">
                         <div class="card-body">
-                            <h4 class="tx-bold mg-b-5 lh-1"><i data-feather="image" class="mg-r-6"></i> {{ \App\Album::totalAlbums() }}</h4>
+                            <h4 class="tx-bold mg-b-5 lh-1"><i data-feather="image" class="mg-r-6"></i> {{ \App\Models\Album::totalAlbums() }}</h4>
                             <span class="tx-uppercase tx-11 tx-spacing-1 tx-color-02 tx-semibold">Total Banner
                             Albums</span>
                         </div>
@@ -61,7 +61,7 @@
                 <div class="card dashboard-widget">
                     <a href="{{ route('news.index') }}">
                         <div class="card-body">
-                            <h4 class="tx-bold mg-b-5 lh-1"><i data-feather="edit" class="mg-r-6"></i> {{ \App\Article::totalArticles() }}</h4>
+                            <h4 class="tx-bold mg-b-5 lh-1"><i data-feather="edit" class="mg-r-6"></i> {{ \App\Models\Article::totalArticles() }}</h4>
                             <span class="tx-uppercase tx-11 tx-spacing-1 tx-color-02 tx-semibold">Total
                             News</span>
                         </div>
@@ -74,7 +74,7 @@
                 <div class="card dashboard-widget">
                     <a href="{{ route('products.index') }}">
                         <div class="card-body">
-                            <h4 class="tx-bold mg-b-5 lh-1"><i data-feather="box" class="mg-r-6"></i>{{ \App\Product::totalProduct() }}</h4>
+                            <h4 class="tx-bold mg-b-5 lh-1"><i data-feather="box" class="mg-r-6"></i>{{ \App\Models\Product::totalProduct() }}</h4>
                             <span class="tx-uppercase tx-11 tx-spacing-1 tx-color-02 tx-semibold">Total Products</span>
                         </div>
                     </a>
@@ -91,28 +91,28 @@
                         <div class="card-body" style="height:800px !important !important !important;">
                             @if (auth()->user()->has_access_to_pages_module())
                                 <h6><strong>Pages</strong></h6>
-                                <p><a href="{{route('pages.index.advance-search')}}?status=published"><span class="badge badge-dark">{{ \App\Page::totalPublicPages() }}</span> Published Pages</a></p>
-                                <p><a href="{{route('pages.index.advance-search')}}?status=private"><span class="badge badge-dark">{{ \App\Page::totalPrivatePages() }}</span> Private Pages</a></p>
-                                <p><a href="{{route('pages.index.advance-search')}}?showDeleted=on"><span class="badge badge-dark">{{ \App\Page::totalDeletePages() }}</span> Deleted Pages</a></p>
+                                <p><a href="{{route('pages.index.advance-search')}}?status=published"><span class="badge badge-dark">{{ \App\Models\Page::totalPublicPages() }}</span> Published Pages</a></p>
+                                <p><a href="{{route('pages.index.advance-search')}}?status=private"><span class="badge badge-dark">{{ \App\Models\Page::totalPrivatePages() }}</span> Private Pages</a></p>
+                                <p><a href="{{route('pages.index.advance-search')}}?showDeleted=on"><span class="badge badge-dark">{{ \App\Models\Page::totalDeletePages() }}</span> Deleted Pages</a></p>
                                 <hr>
                             @endif
                             @if (auth()->user()->has_access_to_albums_module())
                                 <h6><strong>Sub Banners</strong></h6>
-                                    <p><a href="{{ route('albums.index') }}"><span class="badge badge-dark">{{ \App\Album::totalNotDeletedAlbums() }}</span> Albums</a></p>
-                                <p><a href="{{ route('albums.index') }}"><span class="badge badge-dark">{{ \App\Album::totalDeletePages() }}</span> Deleted Albums</a></p>
+                                    <p><a href="{{ route('albums.index') }}"><span class="badge badge-dark">{{ \App\Models\Album::totalNotDeletedAlbums() }}</span> Albums</a></p>
+                                <p><a href="{{ route('albums.index') }}"><span class="badge badge-dark">{{ \App\Models\Album::totalDeletePages() }}</span> Deleted Albums</a></p>
                                 <hr>
                             @endif
                             @if (auth()->user()->has_access_to_user_module())
                                 <h6><strong>Users</strong></h6>
-                                <p><a href="{{ route('users.index') }}"><span class="badge badge-dark">{{ \App\User::activeTotalUser() }}</span> Active Users</a></p>
-                                    <p><a href="{{ route('users.index') }}?showDeleted=on"><span class="badge badge-dark">{{ \App\User::inactiveTotalUser() }}</span> Inactive Users</a></p>
+                                <p><a href="{{ route('users.index') }}"><span class="badge badge-dark">{{ \App\Models\User::activeTotalUser() }}</span> Active Users</a></p>
+                                    <p><a href="{{ route('users.index') }}?showDeleted=on"><span class="badge badge-dark">{{ \App\Models\User::inactiveTotalUser() }}</span> Inactive Users</a></p>
                                 <hr>
                             @endif
                             @if (auth()->user()->has_access_to_news_module())
                                 <h6><strong>News</strong></h6>
-                                <p><a href="{{ route('news.index.advance-search') }}?status=published"><span class="badge badge-dark">{{ \App\Article::totalPublishedArticles() }}</span> Published News</a></p>
-                                <p><a href="{{ route('news.index.advance-search') }}?status=private"><span class="badge badge-dark">{{ \App\Article::totalDraftArticles() }}</span> Private News</a></p>
-                                <p><a href="{{ route('news.index.advance-search') }}?status=private"><span class="badge badge-dark">{{ \App\Article::totalDeletedArticles() }}</span> Deleted News</a></p>
+                                <p><a href="{{ route('news.index.advance-search') }}?status=published"><span class="badge badge-dark">{{ \App\Models\Article::totalPublishedArticles() }}</span> Published News</a></p>
+                                <p><a href="{{ route('news.index.advance-search') }}?status=private"><span class="badge badge-dark">{{ \App\Models\Article::totalDraftArticles() }}</span> Private News</a></p>
+                                <p><a href="{{ route('news.index.advance-search') }}?status=private"><span class="badge badge-dark">{{ \App\Models\Article::totalDeletedArticles() }}</span> Deleted News</a></p>
 
                             @endif
                         </div>

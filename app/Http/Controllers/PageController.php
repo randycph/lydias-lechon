@@ -4,21 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ListingHelper;
 use App\Helpers\Webfocus\Setting;
-use App\Permission;
-use App\User;
-use App\Menu;
-use App\Page;
-use App\Album;
-use App\Article;
-use App\Category;
-use Response;
-use Auth;
-use Storage;
+
+use App\Models\Permission;
+use App\Models\User;
+use App\Models\Menu;
+use App\Models\Page;
+use App\Models\Album;
+use App\Models\Article;
+use App\Models\Category;
+
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
-use App\Http\Requests\PagePost;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Response;
+use Illuminate\Http\Request;
+
+use App\Http\Requests\PagePost;
 
 class PageController extends Controller
 {

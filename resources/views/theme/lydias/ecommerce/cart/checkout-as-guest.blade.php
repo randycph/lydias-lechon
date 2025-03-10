@@ -181,6 +181,9 @@
                                 </div> 
                                 <span id="complete_delivery_address" style="text-transform:capitalize;"></span> 
                             </div>
+
+
+                            {{ dd($products) }}
                     </div>
                     <div class="col-md-6">
                         <h2>Payment Summary</h2>

@@ -2,18 +2,20 @@
 
 namespace App\Http\Controllers\Product;
 
-use App\Leftovers;
-use App\Product;
+use App\EcommerceModel\Branch;
+use App\Models\Leftovers;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Auth;
+use App\Models\UserBranch;
+use Illuminate\Support\Facades\Auth;
 
 class LeftoversController extends Controller
 {
     
     public function index()
     {
-        $branches = \App\UserBranch::accessBranch();
+        $branches = UserBranch::accessBranch();
         $array = [];
         //dd($branches);
         if(isset($_GET['branch'])){
@@ -46,7 +48,7 @@ class LeftoversController extends Controller
      */
     public function create()
     {
-        $branches = \App\UserBranch::accessBranch();
+        $branches = UserBranch::accessBranch();
         $products = Product::withTrashed()->get();
         return view('admin.leftover.create',compact('branches','products'));
     }
@@ -101,7 +103,7 @@ class LeftoversController extends Controller
 
     public function print($date, $branch)
     {               
-        $branched = \App\EcommerceModel\Branch::whereId($branch)->first();        
+        $branched = Branch::whereId($branch)->first();        
         $los = Leftovers::where('branch_id',$branch)->where('date',$date)->get();
   
         
@@ -110,7 +112,7 @@ class LeftoversController extends Controller
 
     public function edit_all($date, $branch)
     {               
-        $branched = \App\EcommerceModel\Branch::whereId($branch)->first();        
+        $branched = Branch::whereId($branch)->first();        
         $los = Leftovers::where('branch_id',$branch)->where('date',$date)->get();
         $products = Product::all();
         

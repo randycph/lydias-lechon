@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\EcommerceControllers;
 
-use App\Permission;
+use App\Models\Permission;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Helpers\ListingHelper;
@@ -15,13 +15,14 @@ use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\SalesDetail;
 use App\EcommerceModel\JobOrder;
 use App\EcommerceModel\Branch;
-use App\Deliverablecities;
-use App\User;
-use App\Product;
-use App\Sms;
-use Auth;
+use App\Models\Deliverablecities;
+use App\Models\User;
+use App\Models\Product;
+use App\Models\Sms;
+use App\Models\UserBranch;
+use Illuminate\Support\Facades\Auth;
 use DateTime;
-use Storage;
+use Illuminate\Support\Facades\Storage;
 
 class JoborderController extends Controller
 {
@@ -116,7 +117,7 @@ class JoborderController extends Controller
             $model = Joborder::where('id','>',0);
                //logger($model->get());
         }else{
-            $branches = \App\UserBranch::accessBranch();
+            $branches = UserBranch::accessBranch();
 
             $locations = [];
             foreach($branches as $branch){

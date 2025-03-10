@@ -14,13 +14,13 @@ class ReadAlbumTest extends TestCase
     public function setUp() : void
     {
         parent::setUp();
-        $this->album = factory('App\Album')->create();
+        $this->album = factory('App\Models\Album')->create();
     }
 
     /** @test */
     function a_user_can_see_album_that_are_associated_with_a_banner()
     {        
-        $banner = factory('App\Banner')
+        $banner = factory('App\Models\Banner')
             ->create(['album_id' => $this->album->id]);             
         $this->get($this->album->path())
             ->assertSee($banner->name);        

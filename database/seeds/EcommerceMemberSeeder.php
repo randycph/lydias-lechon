@@ -71,7 +71,7 @@ class EcommerceMemberSeeder extends Seeder
 //
 //            $name = $faker->firstName.' '.$faker->lastName;
 //            $username = strtolower($faker->firstName.'_'.$faker->lastName);
-//            $user = \App\User::create([
+//            $user = \App\Models\User::create([
 //                'name' => $name,
 //                'firstname' => $faker->firstName,
 //                'lastname' => $faker->lastName,

@@ -280,19 +280,19 @@
                     </div>
                     <div class="form-group">
                         <label class="d-block">Tags</label>
-                        <input type="text" class="form-control @error('tags') is-invalid @enderror" data-role="tagsinput" name="tags" id="tags" value="{{ old('tags',\App\ProductTag::tags($product->id)) }}">
+                        <input type="text" class="form-control @error('tags') is-invalid @enderror" data-role="tagsinput" name="tags" id="tags" value="{{ old('tags',\App\Models\ProductTag::tags($product->id)) }}">
                         @hasError(['inputName' => 'tags'])
                         @endhasError
                     </div>
 {{--                        <div class="form-group">--}}
 {{--                            <label class="d-block">Colors</label>--}}
-{{--                            <input type="text" class="form-control @error('colors') is-invalid @enderror" data-role="tagsinput" name="colors" id="colors" value="{{ old('colors',\App\ProductVariation::colors($product->id)) }}">--}}
+{{--                            <input type="text" class="form-control @error('colors') is-invalid @enderror" data-role="tagsinput" name="colors" id="colors" value="{{ old('colors',\App\Models\ProductVariation::colors($product->id)) }}">--}}
 {{--                            @hasError(['inputName' => 'colors'])--}}
 {{--                            @endhasError--}}
 {{--                        </div>--}}
 {{--                        <div class="form-group">--}}
 {{--                            <label class="d-block">Sizes</label>--}}
-{{--                            <input type="text" class="form-control @error('sizes') is-invalid @enderror" data-role="tagsinput" name="sizes" id="sizes" value="{{ old('sizes',\App\ProductVariation::sizes($product->id)) }}">--}}
+{{--                            <input type="text" class="form-control @error('sizes') is-invalid @enderror" data-role="tagsinput" name="sizes" id="sizes" value="{{ old('sizes',\App\Models\ProductVariation::sizes($product->id)) }}">--}}
 {{--                            @hasError(['inputName' => 'sizes'])--}}
 {{--                            @endhasError--}}
 {{--                        </div>--}}

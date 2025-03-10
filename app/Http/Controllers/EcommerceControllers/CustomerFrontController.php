@@ -4,17 +4,19 @@ namespace App\Http\Controllers\EcommerceControllers;
 
 use App\EcommerceModel\Cart;
 use App\EcommerceModel\Member;
-use App\User;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\Webfocus\Setting;
+use App\Models\ActivityLog;
 use Illuminate\Validation\Rule;
-use Session;
-use App\Page;
-use App\Product;
+use Illuminate\Support\Facades\Session;
+use App\Models\Page;
+use App\Models\Product;
+use Illuminate\Support\Str;
 
 class CustomerFrontController extends Controller
 {
@@ -29,7 +31,7 @@ class CustomerFrontController extends Controller
 
     public function customer_sign_up(Request $request) {
 
-        Validator::make($request->all(), [
+        $request->validate([
             'email' => 'required|email|max:191|unique:users,email',
             'address_street' => 'required',
             'address_municipality' => 'required',
@@ -41,12 +43,12 @@ class CustomerFrontController extends Controller
             'contact_fax' => '',
             'password' => 'min:8|required_with:password_confirmation|same:password_confirmation',
             'password_confirmation' => 'min:8'
-        ])->validate();
+        ]);
 
         if($request->is_org == 1){ // for organization
             $user = User::create([
                 'name' => $request->organization,
-                'password' => \Hash::make($request->password),
+                'password' => Hash::make($request->password),
                 'email' => $request->email,
                 'lastname' => $request->organization,                
                 'address_street' => $request->address_street,
@@ -60,7 +62,7 @@ class CustomerFrontController extends Controller
                 'contact_fax' => $request->contact_fax,
                 'registration_source' => 'web',
                 'agent_code' => $request->agent_code,
-                'remember_token' => str_random(10),
+                'remember_token' => Str::random(10),
                 'is_active' => 1,
                 'is_org' => 1,
                 'is_subscribe' => $request->issubscribe ?? 0
@@ -68,7 +70,7 @@ class CustomerFrontController extends Controller
         } else {
             $user = User::create([
                 'name' => $request->fname.' '.$request->lname,
-                'password' => \Hash::make($request->password),
+                'password' => Hash::make($request->password),
                 'firstname' => $request->fname,
                 'lastname' => $request->lname,
                 'birthday' => $request->birthday,
@@ -84,7 +86,7 @@ class CustomerFrontController extends Controller
                 'contact_fax' => $request->contact_fax,
                 'registration_source' => 'web',
                 'agent_code' => $request->agent_code,
-                'remember_token' => str_random(10),
+                'remember_token' => Str::random(10),
                 'is_active' => 1,
                 'is_subscribe' => $request->issubscribe ?? 0
             ]);   
@@ -126,11 +128,11 @@ class CustomerFrontController extends Controller
 
     public function customer_login(Request $request)
     {
-        $insert_logs = \App\ActivityLog::create([
+        $insert_logs = ActivityLog::create([
                 'created_by' => $request->email ?? 'no record',
                 'activity_type' => 'login',
                 'dashboard_activity' => 'login',
-                'activity_desc' => \Request::ip(),
+                'activity_desc' => $request->ip(),
                 'activity_date' => date('Y-m-d H:i:s'),
                 'reference' => url()->current()
             ]);

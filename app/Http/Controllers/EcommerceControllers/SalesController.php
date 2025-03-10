@@ -1,33 +1,39 @@
 <?php
 
 namespace App\Http\Controllers\EcommerceControllers;
-use App\Album;
+
+use App\Http\Controllers\Controller;
+
+use App\Models\Album;
+use App\Models\Permission;
+use App\Helpers\ListingHelper;
+use App\Models\Page;
+use App\Models\Approvals;
+use App\Models\Sms;
+use App\Models\User;
+use App\Models\Deliverablecities;
+use App\Models\Product;
+
+use App\EcommerceModel\GiftCertificate;
+use App\EcommerceModel\SalesDetail;
+use App\EcommerceModel\DeliveryStatus;
+use App\EcommerceModel\SalesHeader;
+use App\EcommerceModel\SalesPayment;
+
 use App\Mail\PaymentSubmittedAdmin;
 use App\Mail\PaymentApprovedAdmin;
 use App\Mail\PaymentDisapprovedAdmin;
 use App\Mail\DeliveryMovement;
-use App\Permission;
+
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
-use App\EcommerceModel\GiftCertificate;
-use App\EcommerceModel\SalesDetail;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\EcommerceModel\DeliveryStatus;
-use App\EcommerceModel\SalesHeader;
-use App\EcommerceModel\SalesPayment;
 use Illuminate\Support\Facades\Validator;
-use App\Helpers\ListingHelper;
-use App\Page;
-use App\Approvals;
-use App\Sms;
-use Auth;
-use App\User;
-use App\Deliverablecities;
-use Storage;
-use App\Product;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 use App\EcommerceModel\Branch;
+use App\Models\UserBranch;
 
 class SalesController extends Controller
 {
@@ -458,7 +464,7 @@ class SalesController extends Controller
         if(auth()->user()->role_id == 1 || auth()->user()->role_id == 3 || auth()->user()->role_id == 13 ){
             $model = SalesHeader::where('id','>',0);
         }else{
-            $branches = \App\UserBranch::accessBranch();
+            $branches = UserBranch::accessBranch();
 
             $locations = [];
             foreach($branches as $branch){

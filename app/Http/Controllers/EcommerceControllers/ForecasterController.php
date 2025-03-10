@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\EcommerceControllers;
 
-use App\Permission;
+use App\Models\Permission;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
@@ -14,7 +14,7 @@ use App\EcommerceModel\ProductionOrder;
 use App\EcommerceModel\SalesDetail;
 use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\JobOrder;
-use App\Product;
+use App\Models\Product;
 
 
 class ForecasterController extends Controller

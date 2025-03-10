@@ -2,20 +2,21 @@
 
 namespace App\Http\Controllers\News;
 
-use App\ArticleTag;
+use App\Models\ArticleTag;
 use App\Helpers\ListingHelper;
 use App\Helpers\ModelHelper;
 use App\Http\Controllers\Controller;
-use App\Article;
-use App\ArticleCategory;
-use App\Permission;
-use DB;
-use Response;
-use Auth;
-use Storage;
+use App\Models\Article;
+use App\Models\ArticleCategory;
+use App\Models\Permission;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Requests\ArticlePost;
+use App\Models\Page;
 use Illuminate\Support\Facades\Input;
 
 class ArticleController extends Controller
@@ -221,7 +222,7 @@ class ArticleController extends Controller
             $slug = $article->slug;
         }
         else{
-            $slug = \App\Page::convert_to_slug($request->news_title);
+            $slug = Page::convert_to_slug($request->news_title);
         }
 
         $news->update([
@@ -287,7 +288,7 @@ class ArticleController extends Controller
             $slug = $article->slug;
         }
         else{
-            $slug = \App\Page::convert_to_slug($request->news_title);
+            $slug = Page::convert_to_slug($request->news_title);
         }
 
         $publish = Article::whereId($request->id)
