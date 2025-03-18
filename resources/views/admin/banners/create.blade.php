@@ -43,8 +43,8 @@
                     <div class="form-group">
                         <label class="d-block">Album Name *</label>
                         <input name="name" type="text" class="form-control @error('name') is-invalid @enderror" required value="{{ old('name') }}" @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                        @hasError(['inputName' => 'name'])
-                        @endhasError
+                        @error('name')
+                        @enderror
                     </div>
                     <div class="form-group">
                         <label class="d-block">Transition In *</label>
@@ -73,8 +73,8 @@
                     <div class="form-group mg-b-0">
                         <input type="file" id="upload_image" class="image_path" accept="image/*" multiple>
                         <button type="button" class="btn btn-light btn-xs btn-uppercase upload @error('banners') is-invalid @enderror"><i data-feather="upload"></i> Upload banner*</button>
-                        @hasError(['inputName' => 'banners'])
-                        @endhasError
+                        @error('banners')
+                        @enderror
                         <p class="tx-10">
                             Required image dimension: {{ env('SUB_BANNER_WIDTH') }}px by {{ env('SUB_BANNER_HEIGHT') }}px <br /> Maximum file size: 1MB <br /> Required file type: .jpeg .png
                         </p>

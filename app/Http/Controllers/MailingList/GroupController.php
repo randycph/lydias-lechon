@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\MailingList;
 
 use App\Helpers\ListingHelper;
-use App\Permission;
+use App\Models\Permission;
 use App\MailingListModel\Group;
 use App\MailingListModel\Subscriber;
 use Illuminate\Http\Request;

@@ -18,7 +18,7 @@
                     <li class="breadcrumb-item active" aria-current="page">Ecommerce Dashboard</li>
                 </ol>
             </nav>
-            <h4 class="mg-b-0 tx-spacing--1">Welcome, {{ Auth::user()->firstname }}!</h4>
+            <h4 class="mg-b-0 tx-spacing--1">Welcome, {{ auth()->user()->firstname }}!</h4>
         </div>
     </div>
 

@@ -59,8 +59,8 @@
                     <label class="d-block">Album Name *</label>
                     <input name="user_id" type="hidden" value="{{Auth::user()->id}}">
                     <input name="name" type="text" class="form-control @error('name') is-invalid @enderror" required value="{{ old('name',$album->name) }}">
-                    @hasError(['inputName' => 'name'])
-                    @endhasError
+                    @error('name')
+                    @enderror
                 </div>
                 <div class="form-group">
                     <label class="d-block">Transition In *</label>
@@ -89,8 +89,8 @@
                 <div class="form-group mg-b-0">
                     <input type="file" name="banner" class="d-none" id="upload_image" accept="image/*" multiple>
                     <button type="button" class="btn btn-light btn-xs btn-uppercase upload @error('banners') is-invalid @enderror" type="submit"><i data-feather="upload"></i> Upload image*</button>
-                    @hasError(['inputName' => 'banners'])
-                    @endhasError
+                    @error('banners')
+                    @enderror
                     @if ($album->id == 1)
                         <p class="tx-10">
                             Required image dimension: {{ env('MAIN_BANNER_WIDTH') }}px by {{ env('MAIN_BANNER_HEIGHT') }}px <br /> Maximum file size: 1MB <br /> Required file type: .jpeg .png

@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Deliverablecities;
 use App\Helpers\ListingHelper;
-use App\Permission;
+use App\Models\Permission;
 use Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\MailingList;
 
 use App\Helpers\ListingHelper;
-use App\Permission;
+use App\Models\Permission;
 use App\Helpers\Webfocus\Setting;
 use App\Mail\MailingList\WelcomeMail;
 use App\MailingListModel\Subscriber;

@@ -39,15 +39,15 @@
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">Branch Name <i class="tx-danger">*</i></label>
                                 <input required type="text" class="form-control @error('name') is-invalid @enderror" name="name" id="category_title" @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                                @hasError(['inputName' => 'name'])
-                                @endhasError
+                                @error('name')
+                                @enderror
                                 <small id="category_slug"></small>
                             </div>
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">Code <i class="tx-danger">*</i></label>
                                 <input required type="text" class="form-control @error('code') is-invalid @enderror" name="code" id="category_title" @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                                @hasError(['inputName' => 'code'])
-                                @endhasError
+                                @error('code')
+                                @enderror
                                 <small id="category_slug"></small>
                             </div>
                             <div class="form-group mg-b-20">
@@ -67,42 +67,42 @@
                             <div class="form-group mg-b-20" style="display:none;">
                                 <label class="mg-b-5 tx-color-03">Token <i class="tx-danger">*</i></label>
                                 <input required type="text" class="form-control @error('token') is-invalid @enderror" name="token" value="{{uniqid()}}" id="token" @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                                @hasError(['inputName' => 'token'])
-                                @endhasError
+                                @error('token')
+                                @enderror
                             </div>
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">Address <i class="tx-danger">*</i></label>
                                 <input required type="text" class="form-control @error('address') is-invalid @enderror" name="address" id="category_title" @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                                @hasError(['inputName' => 'address'])
-                                @endhasError
+                                @error('address')
+                                @enderror
                                 <small id="category_slug"></small>
                             </div>
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">Contact Number <i class="tx-danger">*</i></label>
                                 <input required type="text" class="form-control @error('contact_nos') is-invalid @enderror" name="contact_nos" id="contact_nos" maxlength="250" @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                                @hasError(['inputName' => 'contact_nos'])
-                                @endhasError
+                                @error('contact_nos')
+                                @enderror
                                 <small id="category_slug"></small>
                             </div>
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">Contact Person</label>
                                 <input type="text" class="form-control @error('contact_person') is-invalid @enderror" name="contact_person" id="category_title" >
-                                @hasError(['inputName' => 'contact_person'])
-                                @endhasError
+                                @error('contact_person')
+                                @enderror
                                 <small id="category_slug"></small>
                             </div>
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">Hotline </label>
                                 <input type="text" class="form-control @error('hotline') is-invalid @enderror" name="hotline" id="category_title">
-                                @hasError(['inputName' => 'hotline'])
-                                @endhasError
+                                @error('hotline')
+                                @enderror
                                 <small id="category_slug"></small>
                             </div>
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">Email Address <i class="tx-danger">*</i></label>
                                 <input type="email" class="form-control @error('email_address') is-invalid @enderror" name="email_address" id="category_title" >
-                                @hasError(['inputName' => 'email_address'])
-                                @endhasError
+                                @error('email_address')
+                                @enderror
                                 <small id="category_slug"></small>
                             </div>
                         </div>

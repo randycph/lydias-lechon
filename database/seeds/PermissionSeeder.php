@@ -11,7 +11,7 @@ class PermissionSeeder extends Seeder
      */
     public function run()
     {
-        \App\Permission::insert([
+        \App\Models\Permission::insert([
             // Website Settings
             [
                 'name' => 'admin/web/edit',

@@ -102,8 +102,8 @@
 										<a href="{{ route('users.show', !empty($log->created_by) ? $log->created_by : 1) }}"><strong>{{ ucwords($log->firstname) }} {{ ucwords($log->lastname) }}</strong></a>
 									</td>
 									<td><span class="badge badge-primary">{{ $log->role_name }}</span></td>
-									<td>{{ \App\Logs::logType($log->activity_type) }}</td>
-									<td><a class="log_values" href="#modal-values" data-toggle="modal" data-new="{{$log->new_value}}" data-old="{{$log->old_value}}">{{ App\Logs::getLogs($log->activity_type,$log->id) }}</a></td>
+									<td>{{ \App\Models\Logs::logType($log->activity_type) }}</td>
+									<td><a class="log_values" href="#modal-values" data-toggle="modal" data-new="{{$log->new_value}}" data-old="{{$log->old_value}}">{{ App\Models\Logs::getLogs($log->activity_type,$log->id) }}</a></td>
 									<td>{{ str_limit($log->old_value, 30, $end ='...') }}</td>
 									<td>{{ str_limit($log->new_value, 30, $end ='...') }}</td>
                                     <td>{{ ucwords($log->db_table) }}</td>

@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Banner;
 
 use App\Helpers\ListingHelper;
 use App\Http\Controllers\Controller;
-use App\Album;
-use App\Banner;
-use App\Option;
-use App\Permission;
+use App\Models\Album;
+use App\Models\Banner;
+use App\Models\Option;
+use App\Models\Permission;
 use Illuminate\Http\Request;
 use Storage;
 

@@ -450,32 +450,32 @@
                                 <option value="Cash">Cash</option>
                             </select>
                             <p class="tx-10 text-danger" id="error">
-                                @hasError(['inputName' => 'payment_type'])
-                                @endhasError
+                                @error('payment_type')
+                                @enderror
                             </p>
                         </div>
                         <div class="form-group">
                             <label class="d-block">Amount *</label>
                             <input type="text" class="form-control" name="amount" id="amount">
                             <p class="tx-10 text-danger" id="error">
-                                @hasError(['inputName' => 'amount'])
-                                @endhasError
+                                @error('amount')
+                                @enderror
                             </p>
                         </div>
                         <div class="form-group">
                             <label class="d-block">Payment date *</label>
                             <input type="date" class="form-control" name="payment_date" id="payment_date">
                             <p class="tx-10 text-danger" id="error">
-                                @hasError(['inputName' => 'payment_date'])
-                                @endhasError
+                                @error('payment_date')
+                                @enderror
                             </p>
                         </div>
                         <div class="form-group">
                             <label class="d-block">Receipt number *</label>
                             <input type="text" class="form-control" name="receipt_number" id="receipt_number">
                             <p class="tx-10 text-danger" id="error">
-                                @hasError(['inputName' => 'receipt_number'])
-                                @endhasError
+                                @error('receipt_number')
+                                @enderror
                             </p>
                         </div>
                     </div>
@@ -514,8 +514,8 @@
                                 <option value="Returned">Returned</option>
                             </select>
                             <p class="tx-10 text-danger" id="error">
-                                @hasError(['inputName' => 'delivery_status'])
-                                @endhasError
+                                @error('delivery_status')
+                                @enderror
                             </p>
                         </div>
                         <div class="form-group" style="display:none;" id="delivered_by_div">
@@ -677,7 +677,7 @@
                             <div class="form-group">
                                 <label class="d-block">Payment Date *</label>
                                 <input required type="text" name="payment_dt" class="form-control" id="payment_dt" placeholder="Choose date" value="{{ old('date') }}">
-                                @hasError(['inputName' => 'payment_dt'])@endhasError
+                                @error('payment_dt')@enderror
                             </div>
                             <div class="form-group">
                                 <label class="d-block">Amount *</label>

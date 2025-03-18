@@ -49,8 +49,8 @@
                                                     <label>First Name *</label>
                                                     <div class="form-group">
                                                         <input type="text" class="form-control @error('firstname') is-invalid @enderror" id="firstname" name="firstname" value="{{ old('firstname', $member->firstname) }}">
-                                                        @hasError(['inputName' => 'firstname'])
-                                                        @endhasError
+                                                        @error('firstname')
+                                                        @enderror
                                                     </div>
                                                     <div class="gap-20"></div>
                                                 </div>
@@ -58,8 +58,8 @@
                                                     <label>Last Name *</label>
                                                     <div class="form-group">
                                                         <input type="text" class="form-control @error('lastname') is-invalid @enderror" id="lastname" name="lastname" value="{{ old('lastname', $member->lastname) }}">
-                                                        @hasError(['inputName' => 'lastname'])
-                                                        @endhasError
+                                                        @error('lastname')
+                                                        @enderror
                                                     </div>
                                                     <div class="gap-20"></div>
                                                 </div>
@@ -68,8 +68,8 @@
                                                     <label>Organization Name</label>
                                                     <div class="form-group">
                                                         <input type="text" class="form-control @error('organization') is-invalid @enderror" id="organization" name="organization" value="{{ old('organization', $member->organization) }}">
-                                                        @hasError(['inputName' => 'organization'])
-                                                        @endhasError
+                                                        @error('organization')
+                                                        @enderror
                                                     </div>
                                                     <div class="gap-20"></div>
                                                 </div>
@@ -77,8 +77,8 @@
                                                     <label>Contact Person</label>
                                                     <div class="form-group">
                                                         <input type="text" class="form-control @error('contact_person') is-invalid @enderror" id="contact_person" name="contact_person" value="{{ old('contact_person', $member->contact_person) }}">
-                                                        @hasError(['inputName' => 'contact_person'])
-                                                        @endhasError
+                                                        @error('contact_person')
+                                                        @enderror
                                                     </div>
                                                     <div class="gap-20"></div>
                                                 </div>
@@ -87,8 +87,8 @@
                                                 <label>Birthday *</label>
                                                 <div class="form-group">
                                                     <input type="date" class="form-control @error('birthday') is-invalid @enderror" id="birthday" name="birthday" value="{{ old('birthday', $member->birthday) }}">
-                                                    @hasError(['inputName' => 'birthday'])
-                                                    @endhasError
+                                                    @error('birthday')
+                                                    @enderror
                                                 </div>
                                                 <div class="gap-20"></div>
                                             </div>
@@ -113,8 +113,8 @@
                                                 <label>Mobile Number *</label>
                                                 <div class="form-group">
                                                     <input type="text" class="form-control @error('mobile') is-invalid @enderror" id="mobile" name="mobile" value="{{ old('mobile', $member->contact_mobile) }}">
-                                                    @hasError(['inputName' => 'mobile'])
-                                                    @endhasError
+                                                    @error('mobile')
+                                                    @enderror
                                                 </div>
                                                 <div class="gap-20"></div>
                                             </div>
@@ -122,8 +122,8 @@
                                                 <label>Telephone Number </label>
                                                 <div class="form-group">
                                                     <input type="text" class="form-control @error('tel') is-invalid @enderror" id="tel" name="tel" value="{{ old('tel', $member->contact_tel) }}">
-                                                    @hasError(['inputName' => 'tel'])
-                                                    @endhasError
+                                                    @error('tel')
+                                                    @enderror
                                                 </div>
                                                 <div class="gap-20"></div>
                                             </div>
@@ -131,8 +131,8 @@
                                                 <label>Fax </label>
                                                 <div class="form-group">
                                                     <input type="text" class="form-control @error('fax') is-invalid @enderror" id="fax" name="fax" value="{{ old('fax', $member->contact_fax) }}">
-                                                    @hasError(['inputName' => 'fax'])
-                                                    @endhasError
+                                                    @error('fax')
+                                                    @enderror
                                                 </div>
                                                 <div class="gap-20"></div>
                                             </div>
@@ -159,8 +159,8 @@
                                                 <div class="form-group form-wrap">
                                                     <label>Unit No./Building/House No./Street *</label>
                                                     <input type="text" class="form-control @error('address_delivery_street') is-invalid @enderror" id="delivery_street" name="address_delivery_street" value="{{ old('address_delivery_street', $member->address_street) }}"/>
-                                                    @hasError(['inputName' => 'address_delivery_street'])
-                                                    @endhasError
+                                                    @error('address_delivery_street')
+                                                    @enderror
                                                 </div>
                                                
                                                 <div class="gap-10"></div>
@@ -168,15 +168,15 @@
                                                     <label>City/Municipality *</label>
                                                     <input type="text" class="form-control @error('address_delivery_city') is-invalid @enderror" id="delivery_zip" name="address_delivery_city" value="{{ old('address_delivery_city', $member->address_city) }}"/>      
 
-                                                    @hasError(['inputName' => 'address_delivery_city'])
-                                                    @endhasError
+                                                    @error('address_delivery_city')
+                                                    @enderror
                                                 </div>       
                                                 <div class="gap-10"></div>                                        
                                                  <div class="form-group form-wrap">
                                                     <label>Region *</label>
                                                     <input type="text" class="form-control @error('address_delivery_province') is-invalid @enderror" id="delivery_zip" name="address_delivery_province" value="{{ old('address_delivery_province', $member->address_region) }}"/>                                                  
-                                                    @hasError(['inputName' => 'address_delivery_province'])
-                                                    @endhasError
+                                                    @error('address_delivery_province')
+                                                    @enderror
                                                 </div>
                                                 
                                                 <div class="gap-10"></div>

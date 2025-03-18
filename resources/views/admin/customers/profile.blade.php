@@ -89,7 +89,7 @@
                             <tbody>
                             @foreach($logs as $log)
                                 <tr>
-                                    <td>{{ App\Logs::getLogs($log->activity_type,$log->id) }} {{ Setting::date_for_listing($log->activity_date) }}</td>
+                                    <td>{{ App\Models\Logs::getLogs($log->activity_type,$log->id) }} {{ Setting::date_for_listing($log->activity_date) }}</td>
                                 </tr>
                             @endforeach
                             </tbody>

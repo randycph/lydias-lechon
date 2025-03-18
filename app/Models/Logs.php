@@ -3,9 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\ModelsArticle;
-use App\ModelsAlbum;
-use App\ModelsPage;
+use Illuminate\Support\Str;
 
 class Logs extends Model
 {
@@ -36,11 +34,11 @@ class Logs extends Model
 
         switch($type){
             case 'update':
-                return str_limit(str_replace(['<p>','</p>'],'',$log->activity_desc), 100, $end ='...');
+                return Str::limit(str_replace(['<p>','</p>'],'',$log->activity_desc), 100, $end ='...');
                 break;
 
             case 'update_content':
-                return $log->activity_desc.' '.str_limit(str_replace(['<p>','</p>'],'',$log->old_value), 60, $end = '...').' to '.str_limit(str_replace(['<p>','</p>'],'',$log->new_value), 60, $end = '...');
+                return $log->activity_desc.' '.Str::limit(str_replace(['<p>','</p>'],'',$log->old_value), 60, $end = '...').' to '.Str::limit(str_replace(['<p>','</p>'],'',$log->new_value), 60, $end = '...');
                 break;
             
             case 'delete' || 'restore':

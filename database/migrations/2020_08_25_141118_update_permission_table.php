@@ -18,10 +18,10 @@ class UpdatePermissionTable extends Migration
             $table->text('methods')->nullable()->after('routes');
         });
 
-        \App\Permission::truncate();
-        \App\Rolepermission::truncate();
+        \App\Models\Permission::truncate();
+        \App\Models\Rolepermission::truncate();
 
-        \App\Permission::insert([
+        \App\Models\Permission::insert([
             ['name' => 'View Customer','module' => 'customer','description' => 'User can view customer list and detail','routes' => '["customers.index","customers.show"]','methods' => '["index","show"]','user_id' => '1','is_view_page' => '1'],
             ['name' => 'Create Customer','module' => 'customer','description' => 'User can create customers','routes' => '["customers.create","customers.store"]','methods' => '["create","store"]','user_id' => '1','is_view_page' => '0'],
             ['name' => 'Edit Customer','module' => 'customer','description' => 'User can edit customers','routes' => '["customers.edit","customers.update"]','methods' => '["edit","update"]','user_id' => '1','is_view_page' => '0'],

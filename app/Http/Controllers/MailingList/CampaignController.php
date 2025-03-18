@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\MailingList;
 
 use App\Helpers\ListingHelper;
-use App\Permission;
+use App\Models\Permission;
 use App\Jobs\SendCampaignToSubscriberJob;
 use App\Jobs\SendEmailJob;
 use App\MailingListModel\Campaign;

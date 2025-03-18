@@ -149,7 +149,20 @@ class CustomerFrontController extends Controller
 
         $cart = session('cart', []);
 
+        // dd($userCredentials);
+
+
+        try {
+            $user = Auth::attempt($userCredentials);
+            dd($user);
+        } catch (\Exception $e) {
+            dd($e->getMessage());
+            return back()->with('error', __('auth.login.incorrect_input'));
+        }
+        
         if (Auth::attempt($userCredentials) && (Auth::user()->is_a_customer_user())) {
+
+            dd('here');
 
             foreach ($cart as $order) {
                 $product = Product::find($order['product_id']);
@@ -179,7 +192,7 @@ class CustomerFrontController extends Controller
 
             return redirect(route('cart.front.show'));
         } else {
-            Auth::logout();
+            // Auth::logout();
 
             return back()->with('error', __('auth.login.incorrect_input'));
         }

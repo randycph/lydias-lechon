@@ -1,7 +1,13 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+Route::group(['prefix' => 'v2'], function () {
+    Route::get('/home', function () {
+        return view('v2.home');
+    });
+});
 
 Route::any('/ipay_response',  'ipayController@receive_data')->name('ipay.response');
 Route::get('/ipaysig',  'EcommerceControllers\CartController@payment');
@@ -162,7 +168,9 @@ Route::group(['middleware' => ['authenticated']], function () {
 //     Auth::routes(['verify' => true]);
 // });
 
-// Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
+// Auth::routes();
+
+Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
 
     Route::get('/admin', function () { return redirect(route('dashboard')); })->name('admin');
     Route::get('/admin/dashboard', 'DashboardController@index')->name('dashboard');
@@ -187,9 +195,13 @@ Route::group(['middleware' => ['authenticated']], function () {
     Route::post('/admin/albums/banners/{album}', 'Banner\AlbumController@get_album_details')->name('albums.banners');
 //
 
+Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']], function () {
+    '\vendor\UniSharp\LaravelFilemanager\Lfm::routes()'; 
+});
+
 // Files
-    Route::get('/laravel-filemanager', '\UniSharp\LaravelFilemanager\Controllers\LfmController@show')->name('file-manager.show');
-    Route::post('/laravel-filemanager/upload', '\UniSharp\LaravelFilemanager\Controllers\UploadController@upload');
+    // Route::get('/laravel-filemanager', '\UniSharp\LaravelFilemanager\Controllers\LfmController@show')->name('file-manager.show');
+    // Route::post('/laravel-filemanager/upload', '\UniSharp\LaravelFilemanager\Controllers\UploadController@upload');
     Route::get('/admin/file-manager', 'FileManagerController@index')->name('file-manager.index');
 //
 
@@ -487,7 +499,7 @@ Route::group(['middleware' => ['authenticated']], function () {
     Route::post('/shareable-links/single-delete', 'EcommerceControllers\ShareableLinkController@single_delete')->name('shareable-link.single.delete');
     Route::post('/shareable-links/multiple-delete','EcommerceControllers\ShareableLinkController@multiple_delete')->name('shareable-link.multiple.delete');
 ///
-// });
+});
 ##### END ADMIN ROUTE #####
 #####################################################################################################################################################
 
@@ -500,3 +512,5 @@ Route::get('/{any}', 'FrontController@page')->where('any', '.*');  //// REMOVE F
 Route::get('/test', function(){
     phpinfo();
 });
+
+

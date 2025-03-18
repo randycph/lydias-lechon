@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Auth;
 
-use App\Permission;
+use App\Models\Permission;
 
 class PermissionController extends Controller
 {

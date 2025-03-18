@@ -7,18 +7,19 @@ use Illuminate\Http\Request;
 use \App\EcommerceModel\SalesDetail;
 use \App\EcommerceModel\SalesHeader;
 use \App\EcommerceModel\Product;
-use \App\Logs;
+use \App\Models\Logs;
 
 use Carbon\CarbonPeriod;
 use Carbon\Carbon;
 use DateTime;
-use Auth;
-use DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     public function index(Request $request)
     {
+        dd(auth()->user());
         $logs = Logs::where('created_by',Auth::id())->orderBy('id','desc')->paginate(15);
 
         return view('admin.dashboard.index',compact('logs'));

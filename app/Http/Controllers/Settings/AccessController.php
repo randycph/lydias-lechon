@@ -7,9 +7,9 @@ use Illuminate\Http\Request;
 use Auth;
 use DB;
 
-use App\Rolepermission;
-use App\Permission;
-use App\Role;
+use App\Models\Rolepermission;
+use App\Models\Permission;
+use App\Models\Role;
 
 class AccessController extends Controller
 {

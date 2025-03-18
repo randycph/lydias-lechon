@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
-use App\Permission;
+use App\Models\Permission;
 use Illuminate\Http\Request;
 use App\Helpers\ListingHelper;
 
 use Illuminate\Support\Facades\Input;
-use App\Logs;
+use App\Models\Logs;
 
 class LogsController extends Controller
 {

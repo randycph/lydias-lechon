@@ -210,8 +210,8 @@
                     <div class="form-group mg-b-0" id="imageDiv" @if (old("banner_type") == "ON" || $album->banner_type == "video") style="display: none;" @endif>
 						<input type="file" name="banner" class="d-none" id="upload_image" accept="image/*" multiple>
                         <button type="button" class="btn btn-light btn-xs btn-uppercase upload @error('banners') is-invalid @enderror" type="submit"><i data-feather="upload"></i> Upload images*</button>
-                        @hasError(['inputName' => 'banners'])
-						@endhasError
+                        @error('banners')
+						@enderror
 						@if ($album->is_main_banner())
                             <p class="tx-10">
                                 Required image dimension: {{ env('MAIN_BANNER_WIDTH') }}px by {{ env('MAIN_BANNER_HEIGHT') }}px <br /> Maximum file size: 1MB <br /> Required file type: .jpeg .png
@@ -225,8 +225,8 @@
                     <div class="form-group mg-b-0" id="videoDiv" @if (old("banner_type") == "OFF" || $album->banner_type != "video") style="display: none;" @endif>
                         <input type="file" name="banner" class="d-none" id="upload_video" accept="video/mp4" multiple>
                         <button type="button" class="btn btn-light btn-xs btn-uppercase upload-video @error('banners') is-invalid @enderror" type="submit"><i data-feather="upload"></i> Upload videos*</button>
-                        @hasError(['inputName' => 'banners'])
-                        @endhasError
+                        @error('banners')
+                        @enderror
                         <p class="tx-10">
                             Maximum file size: 25MB <br /> Required file type: .mp4
                         </p>

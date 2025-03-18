@@ -38,14 +38,14 @@
                         <div class="form-group">
                             <label class="d-block">Branch Name *</label>
                             <input name="name" id="name" value="{{ old('name', $branches->name) }}" required type="text" class="form-control @error('name') is-invalid @enderror" maxlength="250">
-                            @hasError(['inputName' => 'name'])
-                            @endhasError
+                            @error('name')
+                            @enderror
                         </div>
                         <div class="form-group">
                             <label class="d-block">Code *</label>
                             <input name="code" id="code" value="{{ old('code',$branches->code) }}" required type="text" class="form-control @error('code') is-invalid @enderror" maxlength="250">
-                            @hasError(['inputName' => 'code'])
-                            @endhasError
+                            @error('code')
+                            @enderror
                         </div>
                         <div class="form-group mg-b-20">
                             <label class="mg-b-5 tx-color-03">Store Type </label>
@@ -63,38 +63,38 @@
                         <div class="form-group" style="display:none;">
                             <label class="d-block">Token *</label>
                             <input name="token" id="token" value="{{ old('token',$branches->token) }}" required type="text" class="form-control @error('token') is-invalid @enderror" maxlength="250">
-                            @hasError(['inputName' => 'token'])
-                            @endhasError
+                            @error('token')
+                            @enderror
                         </div>
                         <div class="form-group">
                             <label class="d-block">Address *</label>
                             <input name="address" id="address" value="{{ old('address',$branches->address) }}" required type="text" class="form-control @error('address') is-invalid @enderror" maxlength="250">
-                            @hasError(['inputName' => 'address'])
-                            @endhasError
+                            @error('address')
+                            @enderror
                         </div>
                         <div class="form-group">
                             <label class="d-block">Contact Number *</label>
                             <input name="contact_nos" id="contact_nos" value="{{ old('contact_nos',$branches->contact_nos) }}" required type="text" class="form-control @error('contact_nos') is-invalid @enderror" maxlength="250">
-                            @hasError(['inputName' => 'contact_nos'])
-                            @endhasError
+                            @error('contact_nos')
+                            @enderror
                         </div>
                         <div class="form-group">
                             <label class="d-block">Contact Person *</label>
                             <input name="contact_person" id="contact_person" value="{{ old('name',$branches->contact_person) }}" type="text" class="form-control @error('contact_person') is-invalid @enderror" maxlength="250">
-                            @hasError(['inputName' => 'contact_person'])
-                            @endhasError
+                            @error('contact_person')
+                            @enderror
                         </div>
                         <div class="form-group">
                             <label class="d-block">Hotline</label>
                             <input name="hotline" id="hotline" value="{{ old('name',$branches->hotline) }}" type="text" class="form-control @error('hotline') is-invalid @enderror" maxlength="250">
-                            @hasError(['inputName' => 'hotline'])
-                            @endhasError
+                            @error('hotline')
+                            @enderror
                         </div>
                         <div class="form-group">
                             <label class="d-block">Email Address *</label>
                             <input name="email_address" id="email_address" value="{{ old('name',$branches->email_address) }}" type="text" class="form-control @error('email_address') is-invalid @enderror" maxlength="250">
-                            @hasError(['inputName' => 'email_address'])
-                            @endhasError
+                            @error('email_address')
+                            @enderror
                         </div>
                     </div>
                     <div class="col-lg-12 mg-t-30">

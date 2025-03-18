@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\EcommerceControllers;
 
 use App\Http\Requests\GiftCertificateRequest;
-use App\Permission;
+use App\Models\Permission;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\EcommerceModel\GiftCertificate;

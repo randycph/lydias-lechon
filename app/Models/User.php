@@ -9,13 +9,18 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Laravel\Sanctum\HasApiTokens;
 
-use App\Role;
+
+use App\Models\Role;
 
 use Cookie;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
+    use HasApiTokens;
+    use HasFactory;
     use Notifiable;
     use SoftDeletes;
 
@@ -248,7 +253,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function assign_role()
     {
-        return $this->belongsTo(Role::class,'role_id', 'id');
+        return $this->belongsTo(ModelsRole::class,'role_id', 'id');
     }
 
     public function has_access_to_module($module)

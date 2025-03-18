@@ -1,5 +1,5 @@
 @php
-    $page_routes = \App\Permission::where('module', 'pages')->pluck('name');
+    $page_routes = \App\Models\Permission::where('module', 'pages')->pluck('name');
     $show_page = false;
     foreach($page_routes as $route) {
         if (\App\ViewPermissions::check_permission(Auth::user()->role_id,$route) == 1) {
