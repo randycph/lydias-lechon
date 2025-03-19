@@ -10,7 +10,7 @@
             <h3 class="font-bold text-lg md:text-xl uppercase">About Us</h3>
             <ul class="mt-2 flex flex-col gap-2">
                 <li><a href="{{ route('our-story') }}">Our Story</a></li>
-                <li>Our Stores</li>
+                <li><a href="{{ route('our-stores') }}">Our Stores</a></li>
                 <li>Blog</li>
             </ul>
         </div>
@@ -18,7 +18,7 @@
             <h3 class="font-bold text-lg md:text-xl uppercase mt-3">SHOP</h3>
             <ul class="mt-2 flex flex-col gap-2">
                 <li>Menu</li>
-                <li>Lechon Pricelist</li>
+                <li><a href="{{ route('lechon-pricelist') }}">Lechon Pricelist</a></li>
             </ul>
         </div>
         <div>

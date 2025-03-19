@@ -28,9 +28,9 @@
             </ul>
 
             <a href="{{ route('our-story') }}" class="block text-2xl font-medium font-cubao uppercase py-5 border-y border-[#DFDFDF] pl-10">Our Story</a>
-            <a href="#" class="block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Our Stores</a>
+            <a href="{{ route('our-stores') }}" class="block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Our Stores</a>
             <a href="#" class="block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Menu</a>
-            <a href="#" class="block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">lechon Pricelist</a>
+            <a href="{{ route('lechon-pricelist') }}" class="block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Lechon Pricelist</a>
             <a href="#" class="block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Hotline</a>
             <a href="#" class="block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Careers</a>
         </div>

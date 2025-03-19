@@ -10,6 +10,12 @@ Route::group(['prefix' => 'v2'], function () {
     Route::get('/our-story', function () {
         return view('v2.our-story');
     })->name('our-story');
+    Route::get('/our-stores', function () {
+        return view('v2.our-stores');
+    })->name('our-stores');
+    Route::get('/lechon-pricelist', function () {
+        return view('v2.lechon-pricelist');
+    })->name('lechon-pricelist');
 });
 
 Route::any('/ipay_response',  'ipayController@receive_data')->name('ipay.response');
