@@ -6,7 +6,10 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'v2'], function () {
     Route::get('/home', function () {
         return view('v2.home');
-    });
+    })->name('index');
+    Route::get('/our-story', function () {
+        return view('v2.our-story');
+    })->name('our-story');
 });
 
 Route::any('/ipay_response',  'ipayController@receive_data')->name('ipay.response');

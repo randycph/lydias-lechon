@@ -3,6 +3,8 @@
 @tailwind components;
 @tailwind utilities;
 
+[x-cloak] { display: none !important; }
+
 body {
     font-family: "Noto Sans", sans-serif;
     font-optical-sizing: auto;
