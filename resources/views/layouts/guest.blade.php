@@ -44,7 +44,7 @@
         openContactUs: false,
     }">
     
-    <x-navigation-component />
+    <x-navigation-component :page="$page ?? ''" />
 
     <x-cart-component />
 

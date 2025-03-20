@@ -19,6 +19,10 @@ Route::group(['prefix' => 'v2'], function () {
     Route::get('/lechon-menu', function () {
         return view('v2.lechon-menu');
     })->name('lechon-menu');
+    Route::get('/checkout', function () {
+        $page = 'checkout';
+        return view('v2.checkout', compact('page'));
+    })->name('checkout');
 });
 
 Route::any('/ipay_response',  'ipayController@receive_data')->name('ipay.response');
