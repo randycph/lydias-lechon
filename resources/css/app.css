@@ -18,10 +18,6 @@ body {
     width: 100%;
 }
 
-.swiper-slide {
-    width: 300px !important;
-}
-
 .mobile-menu {
     left: -200%;
     transition: 0.5s;

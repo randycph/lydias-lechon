@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 prevEl: '.swiper-button-prev-custom',
             },
         });
-    }, 100); // Small delay to ensure elements are loaded
+    }, 100);
 
     setTimeout(() => {
         const swiper = new Swiper('.swiper-stores', {
@@ -55,5 +55,26 @@ document.addEventListener("DOMContentLoaded", function () {
                 prevEl: '.swiper-button-prev-custom',
             },
         });
-    }, 100); // Small delay to ensure elements are loaded
+    }, 100);
+
+    setTimeout(() => {
+        const swiper = new Swiper('.swiper-addons', {
+            modules: [Navigation, Pagination], // ✅ Register Swiper modules
+            loop: false,
+            slidesPerView: 2,
+            centeredSlides: false,
+
+            spaceBetween: 15,
+
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+
+            navigation: {
+                nextEl: '.swiper-button-next-custom',
+                prevEl: '.swiper-button-prev-custom',
+            },
+        });
+    }, 100);
 });
