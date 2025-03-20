@@ -2,20 +2,110 @@
 
 @section('content')
 
+@php
+
+$lists = [
+    [
+        'image' => 'petite.png',
+        'name' => 'Petite',
+        'price' => '₱9,800',
+        'description' => 'Good for 8-10 persons',
+        'weight' => 'Cooked Weight Approx. 3-4Kgs',
+        'serving' => 'Approximate Serving 1.5ft',
+        'add' => 'Add ₱2,800 for Boneless Lechon Stuffed with Seafood Paella'
+    ],
+    [
+        'image' => 'chochinillo.png',
+        'name' => 'COCHINILLO',
+        'price' => '₱10,800',
+        'description' => 'Good for 8-10 persons',
+        'weight' => 'Cooked Weight Approx. 3-4Kgs',
+        'serving' => 'Approximate Serving 2ft',
+        'free' => 'FREE Mexican Flavored Rice'
+    ],
+    [
+        'image' => 'deleche.png',
+        'name' => 'De leche',
+        'price' => '₱12,800',
+        'description' => 'Good for 12-15 persons',
+        'weight' => 'Cooked Weight Approx. 5-6Kgs',
+        'serving' => 'Approximate Serving 2.5ft',
+        'add' => 'Add ₱2,800 for Boneless Lechon Stuffed with Seafood Paella'
+    ],
+    [
+        'image' => 'small.png',
+        'name' => 'Small',
+        'price' => '₱9,800',
+        'description' => 'Good for 20-25 persons',
+        'weight' => 'Cooked Weight Approx. 8-11Kgs',
+        'serving' => 'Approximate Serving 3ft',
+        'add' => 'Add ₱4,800 for Boneless Lechon Stuffed with Seafood Paella'
+    ],
+    [
+        'image' => 'medium.png',
+        'name' => 'Medium',
+        'price' => '₱17,800',
+        'description' => 'Good for 30-45 persons',
+        'weight' => 'Cooked Weight Approx. 12-15Kgs',
+        'serving' => 'Approximate Serving 3.5ft',
+        'add' => 'Add ₱5,800 for Boneless Lechon stuffed with Seafood Paella'
+    ],
+    [
+        'image' => 'large.png',
+        'name' => 'Large',
+        'price' => '₱21,800',
+        'description' => 'Good for 40-50 persons',
+        'weight' => 'Cooked Weight Approx. 16-20Kgs',
+        'serving' => 'Approximate Serving 3.5-4ft',
+        'add' => 'Add ₱6,800 for Boneless Lechon stuffed with Seafood Paella'
+    ],
+    [
+        'image' => 'xlarge.png',
+        'name' => 'X-Large',
+        'price' => '₱24,800',
+        'description' => 'Good for 60-70 persons',
+        'weight' => 'Cooked Weight Approx. 21-25Kgs',
+        'serving' => 'Approximate Serving 4ft',
+        'add' => 'Add ₱7,800 for Boneless Lechon stuffed with Seafood Paella'
+    ],
+    [
+        'image' => 'jumbo.png',
+        'name' => 'Jumbo',
+        'price' => '₱30,800',
+        'description' => 'Good for 100-120 persons',
+        'weight' => 'Cooked Weight Approx. 26-30Kgs',
+        'serving' => 'Approximate Serving 4ft-4.5ft',
+        'add' => 'Add ₱8,800 for Boneless Lechon stuffed with Seafood Paella'
+    ],
+    [
+        'image' => 'lechonbaka.png',
+        'name' => 'Lechon Baka',
+        'price' => '₱65,800',
+        'description' => 'Good for 150-200 persons',
+        'weight' => 'Cooked Weight Approx. 26-30Kgs',
+        'serving' => 'Live Weight 100-120Kgs',
+        'add' => 'Add ₱3,500 for Service Fee Of Delivery and Reheating'
+    ]
+];
+
+@endphp
+
     <div class="pt-20 pb-5 px-4">
         <h3 class="font-medium uppercase text-center mt-10">Find the perfect lechon for your budget</hh3>
         <h1 class="text-4xl font-cubao font-medium text-primary text-center">lechon pricelist</h1>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 lechons pb-10">
+        @foreach ($lists as $list)
         <div class="bg-white shadow-md rounded-lg  border-primary border-2 lechon">
-            <img src="{{ asset('images/petite.png')}}" alt="petite" class="px-4">
+            <img src="{{ asset('images/' .  $list['image']) }}" alt="{{ $list['name'] }}" class="px-4">
             <div class="mt-4 px-4">
-                <h2 class="text-2xl font-cubao font-medium text-primary text-left">Petite</h2>
-                <div class="text-tertiary text-2xl font-semibold mt-2">₱9,800</div>
+                <h2 class="text-2xl font-cubao font-medium text-primary text-left">{{ $list['name'] }}</h2>
+                <div class="text-tertiary text-2xl font-semibold mt-2">{{ $list['price'] }}</div>
             </div>
             <hr class="text-primary my-4">
             <div class="mt-4 flex flex-col gap-2 p-4">
+                @if (isset($list['description']))
                 <div class="flex items-center text-primary gap-2">
                     <svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <g clip-path="url(#clip0_73_19609)">
@@ -27,8 +117,10 @@
                         </clipPath>
                         </defs>
                     </svg>
-                    <span class=" font-semibold">Good for 8-10 persons</span>
+                    <span class=" font-semibold">{{ $list['description'] }}</span>
                 </div>
+                @endif
+                @if (isset($list['weight']))
                 <div class="flex items-center text-primary gap-2">
                     <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <g clip-path="url(#clip0_73_19612)">
@@ -40,8 +132,10 @@
                         </clipPath>
                         </defs>
                     </svg>
-                    <span class=" font-semibold">Cooked Weight Approx. 3-4Kgs</span>
+                    <span class=" font-semibold">{{ $list['weight'] }}</span>
                 </div>
+                @endif
+                @if (isset($list['serving']))
                 <div class="flex items-center text-primary gap-2">
                     <svg width="15" height="18" viewBox="0 0 15 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <g clip-path="url(#clip0_73_19615)">
@@ -53,8 +147,10 @@
                         </clipPath>
                         </defs>
                     </svg>
-                    <span class="font-semibold">Approximate Serving 2ft</span>
+                    <span class="font-semibold">{{ $list['serving'] }}</span>
                 </div>
+                @endif
+                @if (isset($list['free']))
                 <div class="flex items-center text-primary gap-2">
                     <svg width="15" height="10" viewBox="0 0 15 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <g clip-path="url(#clip0_73_19618)">
@@ -67,16 +163,20 @@
                         </defs>
                     </svg>
                         
-                    <span class=" font-semibold">FREE Mexican Flavored Rice</span>
+                    <span class=" font-semibold">{{ $list['free'] }}</span>
                 </div>
+                @endif
+                @if (isset($list['add']))
                 <div class="text-sm text-tertiary mt-2">
-                    Add ₱2,800 for Boneless Lechon Stuffed with Seafood Paella
+                    {{ $list['add'] }}
                 </div>
+                @endif
             </div>
             <div class="mt-4 border-t-2 border-primary ">
                 <button class="text-primary px-4 py-3 w-full hover:bg-primary hover:text-white">Add to Cart</button>
             </div>
         </div>
+        @endforeach
     </div>
 
     <x-faq-component />
