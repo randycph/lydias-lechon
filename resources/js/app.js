@@ -77,4 +77,34 @@ document.addEventListener("DOMContentLoaded", function () {
             },
         });
     }, 100);
+
+    setTimeout(() => {
+        const swiper = new Swiper('.swiper-menus', {
+            modules: [Navigation, Pagination], // ✅ Register Swiper modules
+            loop: false,
+            slidesPerView: 2,
+            centeredSlides: false,
+
+            spaceBetween: 15,
+
+            breakpoints: {
+                768: {
+                    slidesPerView: 3,
+                },
+                1024: {
+                    slidesPerView: 4,
+                },
+            },
+
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+
+            navigation: {
+                nextEl: '.swiper-button-next-custom',
+                prevEl: '.swiper-button-prev-custom',
+            },
+        });
+    }, 100);
 });

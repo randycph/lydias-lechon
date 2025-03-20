@@ -17,7 +17,7 @@
         <div>
             <h3 class="font-bold text-lg md:text-xl uppercase mt-3">SHOP</h3>
             <ul class="mt-2 flex flex-col gap-2">
-                <li>Menu</li>
+                <li><a href="{{ route('lechon-menu') }}">Menu</a></li>
                 <li><a href="{{ route('lechon-pricelist') }}">Lechon Pricelist</a></li>
             </ul>
         </div>
