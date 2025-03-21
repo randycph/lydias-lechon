@@ -1,6 +1,3 @@
-import Vue from 'vue'; // Ensure Vue is imported properly
-import ExampleComponent from './components/ExampleComponent.vue';
-
 // Import Swiper and required modules
 import Swiper from 'swiper';
 import { Navigation, Pagination, EffectCoverflow } from 'swiper/modules';
@@ -10,6 +7,9 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
+// import 'flowbite';
+
+// Import Swiper styles
 document.addEventListener("DOMContentLoaded", function () {
     setTimeout(() => {
         const swiper = new Swiper('.swiper-blogs', {

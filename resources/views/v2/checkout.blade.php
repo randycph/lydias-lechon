@@ -2,94 +2,8 @@
 
 @section('content')
 
-@php
-$lists = [
-    [
-        'image' => 'petite.png',
-        'name' => 'Petite',
-        'price' => '₱9,800',
-        'description' => 'Good for 8-10 persons',
-        'weight' => 'Cooked Weight Approx. 3-4Kgs',
-        'serving' => 'Approximate Serving 1.5ft',
-        'add' => 'Add ₱2,800 for Boneless Lechon Stuffed with Seafood Paella'
-    ],
-    [
-        'image' => 'chochinillo.png',
-        'name' => 'COCHINILLO',
-        'price' => '₱10,800',
-        'description' => 'Good for 8-10 persons',
-        'weight' => 'Cooked Weight Approx. 3-4Kgs',
-        'serving' => 'Approximate Serving 2ft',
-        'free' => 'FREE Mexican Flavored Rice'
-    ],
-    [
-        'image' => 'deleche.png',
-        'name' => 'De leche',
-        'price' => '₱12,800',
-        'description' => 'Good for 12-15 persons',
-        'weight' => 'Cooked Weight Approx. 5-6Kgs',
-        'serving' => 'Approximate Serving 2.5ft',
-        'add' => 'Add ₱2,800 for Boneless Lechon Stuffed with Seafood Paella'
-    ],
-    [
-        'image' => 'small.png',
-        'name' => 'Small',
-        'price' => '₱9,800',
-        'description' => 'Good for 20-25 persons',
-        'weight' => 'Cooked Weight Approx. 8-11Kgs',
-        'serving' => 'Approximate Serving 3ft',
-        'add' => 'Add ₱4,800 for Boneless Lechon Stuffed with Seafood Paella'
-    ],
-    [
-        'image' => 'medium.png',
-        'name' => 'Medium',
-        'price' => '₱17,800',
-        'description' => 'Good for 30-45 persons',
-        'weight' => 'Cooked Weight Approx. 12-15Kgs',
-        'serving' => 'Approximate Serving 3.5ft',
-        'add' => 'Add ₱5,800 for Boneless Lechon stuffed with Seafood Paella'
-    ],
-    [
-        'image' => 'large.png',
-        'name' => 'Large',
-        'price' => '₱21,800',
-        'description' => 'Good for 40-50 persons',
-        'weight' => 'Cooked Weight Approx. 16-20Kgs',
-        'serving' => 'Approximate Serving 3.5-4ft',
-        'add' => 'Add ₱6,800 for Boneless Lechon stuffed with Seafood Paella'
-    ],
-    [
-        'image' => 'xlarge.png',
-        'name' => 'X-Large',
-        'price' => '₱24,800',
-        'description' => 'Good for 60-70 persons',
-        'weight' => 'Cooked Weight Approx. 21-25Kgs',
-        'serving' => 'Approximate Serving 4ft',
-        'add' => 'Add ₱7,800 for Boneless Lechon stuffed with Seafood Paella'
-    ],
-    [
-        'image' => 'jumbo.png',
-        'name' => 'Jumbo',
-        'price' => '₱30,800',
-        'description' => 'Good for 100-120 persons',
-        'weight' => 'Cooked Weight Approx. 26-30Kgs',
-        'serving' => 'Approximate Serving 4ft-4.5ft',
-        'add' => 'Add ₱8,800 for Boneless Lechon stuffed with Seafood Paella'
-    ],
-    [
-        'image' => 'lechonbaka.png',
-        'name' => 'Lechon Baka',
-        'price' => '₱65,800',
-        'description' => 'Good for 150-200 persons',
-        'weight' => 'Cooked Weight Approx. 26-30Kgs',
-        'serving' => 'Live Weight 100-120Kgs',
-        'add' => 'Add ₱3,500 for Service Fee Of Delivery and Reheating'
-    ]
-];
-@endphp
-
-    <div x-data="{ lechonCart: false }" class="px-4 bg-cream">
-        <div class="pb-20">
+    <div x-data="{ bankDepositProof: false, paymentCenterProof: false }" class="bg-cream">
+        <div class="pb-20 px-4">
             <div class="pt-20 pb-5 px-4">
                 <h1 class="text-4xl font-cubao font-medium text-primary text-center mt-10">Checkout</h1>
                 <h3 class="font-medium text-center">You're almost there! Review your order details, choose your payment method, and finalize your purchase to enjoy your Lydia's Lechon meal.</h3>
@@ -171,14 +85,130 @@ $lists = [
                 </div>
             </div>
 
+            <div class="rounded-lg border bg-white border-[#DFDFDF] shadow-md mt-5">
+                <div>
+                    <div class="px-4 py-3 border-b border-[#DFDFDF]">
+                        <h2 class="text-lg font-semibold text-left">Delivery Information</h2>
+                    </div>
+    
+                    <div class="my-3 px-4 " x-data="{ method: 'pickup' }">
+                        <div class="font-bold">Choose Pickup or Delivery</div>
+                        <div class="flex items-center gap-4 mt-2">
+                            <button 
+                                class="px-6 py-3 rounded-md w-full transition"
+                                :class="method === 'pickup' ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-700'"
+                                @click="method = 'pickup'">
+                                Pickup
+                            </button>
+                    
+                            <button 
+                                class="px-6 py-3 rounded-md w-full transition"
+                                :class="method === 'delivery' ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-700'"
+                                @click="method = 'delivery'">
+                                Delivery
+                            </button>
+                        </div>
+                        <div class="mt-4">
+                            <label for="countries"  class="font-bold">Select Branch  <span class="text-red-700">*</span></label>
+                            <select id="countries" class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                              <option selected>Choose a branch</option>
+                              <option value="US">United States</option>
+                              <option value="CA">Canada</option>
+                              <option value="FR">France</option>
+                              <option value="DE">Germany</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="px-4 py-3 border-b border-[#DFDFDF]">
+                        <div class="font-bold">Contact Information</div>
+
+                        <div class="mt-3">
+                            <div class="my-2">
+                                <label for="name" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">Full Name <span class="text-red-700">*</span></label>
+                                <input type="text" id="name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Randy ..." required />
+                            </div>
+                            <div class="my-2">
+                                <label for="phone" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">Mobile Number <span class="text-red-700">*</span></label>
+                                <input type="tel" pattern="[0-9]{3}-[0-9]{2}-[0-9]{3}" id="phone" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="+63" required />
+                            </div>
+                            <div class="my-2">
+                                <label for="email" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">Email <span class="text-red-700">*</span></label>
+                                <input type="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="email@email.com" required />
+                            </div>
+                            <div class="my-2">
+                                <label for="date" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">Select Date <span class="text-red-700">*</span></label>
+                                <div class="relative max-w-sm">
+                                    <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                                    </svg>
+                                    </div>
+                                    <input datepicker datepicker-autohide id="default-datepicker" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date">
+                                </div>
+                            </div>
+                            <div class="my-2">
+                                <label for="time" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">Select Time <span class="text-red-700">*</span></label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 end-0 top-0 flex items-center pe-3.5 pointer-events-none">
+                                        <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                                            <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <input type="time" id="time" class="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" min="09:00" max="18:00" value="00:00" required />
+                                </div>
+                            </div>
+                            <div class="my-2">
+                                <label for="time" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">Instruction</label>
+                                <div class="relative">
+                                    <textarea class="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" name="" id="" cols="30" rows="10"></textarea>
+                                </div>
+                            </div>
+  
+                        </div>
+
+                        <div class="mt-5">
+                            <div class="font-bold">Choose Payment Method</div>
+
+                            <div class="mt-3">
+                                <div x-data="{ selected: '' }" class="space-y-4">
+                                    @foreach([
+                                        ['id' => 'bdo', 'logo' => '/images/bdo.png', 'name' => 'Bank Transfer or Deposit ', 'description' => 'Bank Transfer or Deposit'],
+                                        ['id' => 'gcash', 'logo' => '/images/gcash.png', 'name' => 'GCash', 'description' => 'GCash'],
+                                        ['id' => 'maya', 'logo' => '/images/maya.png', 'name' => 'Maya', 'description' => 'Maya'],
+                                        ['id' => 'card', 'logo' => '/images/visa.png', 'name' => 'Credit/Debit Card', 'description' => 'Credit/Debit Card', 'click' => 'bankDepositProof = true'],
+                                        ['id' => 'mlhuillier', 'logo' => '/images/ml.png', 'name' => 'Payment Center', 'description' => 'Payment Center', 'click' => 'paymentCenterProof = true'],
+                                    ] as $option)
+                                        <button 
+                                            @click="selected = '{{ $option['id'] }}'; {{ $option['click'] ?? '' }}"
+                                            :class="{ 'border-blue-500 bg-blue-100': selected === '{{ $option['id'] }}' }"
+                                            class="flex items-start flex-col p-4 border rounded-lg w-full transition duration-300 ease-in-out hover:bg-gray-100">
+                                            <img src="{{ $option['logo'] }}" alt="{{ $option['name'] }}" class="h-10 mr-4">
+                                            <div>
+                                                <p class="font-bold text-gray-800">{{ $option['name'] }}</p>
+                                            </div>
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <div>
+                                <button class="bg-primary text-white px-6 py-4 mt-4 w-full rounded-md">Place Order</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 
         </div>
-
-
     
         <x-footer-component />
     
-        <x-lechon-cart-component />
+        <x-bank-deposit-proof />
+        <x-payment-center-proof />
     </div>
     
 @endsection

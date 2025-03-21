@@ -23,6 +23,18 @@ Route::group(['prefix' => 'v2'], function () {
         $page = 'checkout';
         return view('v2.checkout', compact('page'));
     })->name('checkout');
+    Route::get('/confirmation', function () {
+        $page = 'confirmation';
+        return view('v2.confirmation', compact('page'));
+    })->name('confirmation');
+    Route::get('/login', function () {
+        $page = 'login';
+        return view('v2.login', compact('page'));
+    })->name('login');
+    Route::get('/signup', function () {
+        $page = 'signup';
+        return view('v2.signup', compact('page'));
+    })->name('signup');
 });
 
 Route::any('/ipay_response',  'ipayController@receive_data')->name('ipay.response');
