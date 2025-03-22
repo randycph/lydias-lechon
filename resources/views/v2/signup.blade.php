@@ -2,7 +2,7 @@
 
 @section('content')
 
-<div x-data="{ step: 2 }" class="bg-cream">
+<div x-data="{ step: 1, accountType: 'individual' }" class="bg-cream">
     <div class="pb-20 px-4">
         <div class="pt-20 pb-5">
             <h1 class="text-4xl font-cubao font-medium text-primary text-left mt-10">sign up now!</h1>
@@ -10,7 +10,7 @@
         </div>
 
         <div class="">
-            <div class="max-w-lg mx-auto p-4">
+            <div class="max-w-lg mx-auto py-4">
                 <!-- Stepper Indicator -->
                 <div class="flex items-center justify-between mb-4">
                     <template x-for="index in 4" :key="index">
@@ -24,17 +24,19 @@
                     </template>
                 </div>
             </div>
-            
-            <button class="border border-primary text-primary px-6 py-4 mt-4 w-full rounded-md">
-                <img src="{{ asset('images/google.png') }}" alt="Google" class="w-6 h-6 inline-block">
-                <span>Sign in with Google</span>
-            </button>
 
-            <div class="flex text-sm items-center justify-center gap-4 mt-6 w-full">
-                <div class="border-t border-[#DFDFDF] w-1/6"></div>
-                <div class="text-gray-400 uppercase text-center">OR SIGN UP WITH your EMAIL</div>
-                <div class="border-t border-[#DFDFDF] w-1/6"></div>
-            </div>
+            <template x-if="step === 1">
+                <button class="border border-primary text-primary px-6 py-4 w-full rounded-md">
+                    <img src="{{ asset('images/google.png') }}" alt="Google" class="w-6 h-6 inline-block">
+                    <span>Sign in with Google</span>
+                </button>
+
+                <div class="flex text-sm items-center justify-center gap-4 mt-6 w-full">
+                    <div class="border-t border-[#DFDFDF] w-1/6"></div>
+                    <div class="text-gray-400 uppercase text-center">OR SIGN UP WITH your EMAIL</div>
+                    <div class="border-t border-[#DFDFDF] w-1/6"></div>
+                </div>
+            </template>
 
             <template x-if="step === 1">
                 <div class="mt-5">
@@ -69,11 +71,11 @@
 
             <template x-if="step === 2">
                 <div x-data="{ selected: 'individual' }" class="max-w-md mx-auto">
-                    <h2 class="text font-bold text-green-700 mb-4 mt-5">Choose Account Type</h2>
+                    <h2 class="text font-bold text-green-700 mb-4">Choose Account Type</h2>
                 
                     <!-- Individual Account -->
                     <button 
-                        @click="selected = 'individual'" 
+                        @click="selected = 'individual'; accountType = 'individual'" 
                         class="flex items-center justify-between w-full p-4 border-2 rounded-lg transition duration-300 ease-in-out relative"
                         :class="selected === 'individual' ? 'border-primary bg-green-50' : 'border-gray-300 bg-white'"
                     >
@@ -94,7 +96,7 @@
                 
                     <!-- Organization Account -->
                     <button 
-                        @click="selected = 'organization'" 
+                        @click="selected = 'organization'; accountType = 'organization'" 
                         class="flex items-center justify-between w-full p-4 mt-3 border-2 rounded-lg transition duration-300 ease-in-out relative"
                         :class="selected === 'organization' ? 'border-primary bg-green-50' : 'border-gray-300 bg-white'"
                     >
@@ -126,10 +128,205 @@
                 </div>
             </template>
 
-            <template x-if="step === 3">
+            <template x-if="step === 3" && accountType == 'individual'">
+                <template x-if="accountType == 'individual'">
+                    <div>
+                        <h2 class="text font-bold text-green-700 mb-4">Personal Information</h2>
+                        
+                        <div>
+                            <div class="mb-5">
+                                <label for="firstname" class="block mb-2 font-bold text-gray-900 dark:text-white">First Name <span class="text-red-800">*</span> </label>
+                                <input type="text" id="firstname"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    placeholder="Randy" required />
+                            </div>
+                            <div class="mb-5">
+                                <label for="lastname" class="block mb-2 font-bold text-gray-900 dark:text-white">Last Name <span class="text-red-800">*</span> </label>
+                                <input type="text" id="lastname"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    placeholder="Corpuz" required />
+                            </div>
+                            <div class="mb-5">
+                                <label for="date" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">Birth Date <span class="text-red-700">*</span></label>
+                                <div class="relative max-w-sm">
+                                    <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                    <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
+                                    </svg>
+                                    </div>
+                                    <input datepicker datepicker-autohide id="default-datepicker" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date">
+                                </div>
+                            </div>
+                            <div class="mb-5">
+                                <label for="address" class="block mb-2 font-bold text-gray-900 dark:text-white">Address <span class="text-red-800">*</span> </label>
+                                <input type="text" id="address"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    placeholder="Corpuz" required />
+                            </div>
+                            <div class="mb-5">
+                                <label for="city" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">City <span class="text-red-700">*</span></label>
+                                <select id="city" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                    <option selected>Select</option>
+                                    <option value="bdo">Quezon City</option>
+                                    <option value="un">Manila</option>
+                                    <option value="metrobank">Pasig</option>
+                                </select>
+                            </div>
+                            <div class="mb-5">
+                                <label for="municipality" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">Municipality <span class="text-red-700">*</span></label>
+                                <select id="municipality" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                    <option selected>Select</option>
+                                    <option value="bdo">Quezon City</option>
+                                    <option value="un">Manila</option>
+                                    <option value="metrobank">Pasig</option>
+                                </select>
+                            </div>
+                            <div class="mb-5">
+                                <label for="region" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">Region <span class="text-red-700">*</span></label>
+                                <select id="region" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                    <option selected>Select</option>
+                                    <option value="bdo">Region 1</option>
+                                    <option value="un">Region 2</option>
+                                    <option value="metrobank">Region 3</option>
+                                </select>
+                            </div>
+                        </div>
 
-                <h2 class="text font-bold text-green-700 mb-4 mt-5">Personal Information</h2>
+                        <div class="flex flex-col mt-6">
+                            <button type="button" @click="step < 4 ? step++ : step" :disabled="step === 4"
+                                class="text-white bg-primary hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
+                                Continue
+                            </button>
+                            <button type="button" @click="step > 1 ? step-- : step" :disabled="step === 1"
+                                class="text-primary bg-white border border-primary hover:bg-primary hover:text-white font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center mt-2">
+                                Back
+                            </button>
+                        </div>
+                    </div>
+                </template>
 
+            </template>
+
+            <template x-if="step === 3" && accountType == 'organization'">
+                <template x-if="accountType == 'organization'">
+                    <div>
+                        <h2 class="text font-bold text-green-700 mb-4">Organization Information</h2>
+                    
+                        <div>
+                            <div class="mb-5">
+                                <label for="org_name" class="block mb-2 font-bold text-gray-900 dark:text-white">Organization Name * <span class="text-red-800">*</span> </label>
+                                <input type="text" id="org_name"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    placeholder="Randy" required />
+                            </div>
+                            <div class="mb-5">
+                                <label for="address" class="block mb-2 font-bold text-gray-900 dark:text-white">Address * <span class="text-red-800">*</span> </label>
+                                <input type="text" id="address"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    placeholder="Randy" required />
+                            </div>
+                            <div class="mb-5">
+                                <label for="city" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">City <span class="text-red-700">*</span></label>
+                                <select id="city" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                    <option selected>Select</option>
+                                    <option value="bdo">Quezon City</option>
+                                    <option value="un">Manila</option>
+                                    <option value="metrobank">Pasig</option>
+                                </select>
+                            </div>
+                            <div class="mb-5">
+                                <label for="municipality" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">Municipality <span class="text-red-700">*</span></label>
+                                <select id="municipality" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                    <option selected>Select</option>
+                                    <option value="bdo">Quezon City</option>
+                                    <option value="un">Manila</option>
+                                    <option value="metrobank">Pasig</option>
+                                </select>
+                            </div>
+                            <div class="mb-5">
+                                <label for="region" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">Region <span class="text-red-700">*</span></label>
+                                <select id="region" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                    <option selected>Select</option>
+                                    <option value="bdo">Region 1</option>
+                                    <option value="un">Region 2</option>
+                                    <option value="metrobank">Region 3</option>
+                                </select>
+                            </div>
+
+                            <div class="flex flex-col mt-6">
+                                <button type="button" @click="step < 4 ? step++ : step" :disabled="step === 4"
+                                    class="text-white bg-primary hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
+                                    Continue
+                                </button>
+                                <button type="button" @click="step > 1 ? step-- : step" :disabled="step === 1"
+                                    class="text-primary bg-white border border-primary hover:bg-primary hover:text-white font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center mt-2">
+                                    Back
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </template>
+
+            <template x-if="step === 4">
+                <div>
+                    <h2 class="text font-bold text-green-700 mb-4">Contact Details</h2>
+                
+                    <div>
+                        <div class="mb-5">
+                            <label for="phone" class="block mb-2 font-bold text-gray-900 dark:text-white">Mobile Number <span class="text-red-800">*</span> </label>
+                            <input type="tel" id="phone"
+                                class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                placeholder="" required />
+                        </div>
+                        <div class="mb-5">
+                            <label for="tel" class="block mb-2 font-bold text-gray-900 dark:text-white">Telephone Number</label>
+                            <input type="tel" id="tel"
+                                class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                placeholder="" />
+                        </div>
+                        <div class="mb-5">
+                            <label for="fax" class="block mb-2 font-bold text-gray-900 dark:text-white">Fax Number</label>
+                            <input type="tel" id="fax"
+                                class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                placeholder="" />
+                        </div>
+                        <div class="mb-5">
+                            <label for="agent_code" class="block mb-2 font-bold text-gray-900 dark:text-white">Agent Code</label>
+                            <input type="tel" id="agent_code"
+                                class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                placeholder="" />
+                        </div>
+
+                        <div class="flex items-start mb-2">
+                            <div class="flex items-center h-5">
+                                <input id="remember" type="checkbox" value=""
+                                    class="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-3 focus:ring-blue-300" />
+                            </div>
+                            <label for="remember" class="ms-2 text-sm font-medium">I want to receive exclusive offers and promotions.</label>
+                        </div>
+
+                        
+                        <div class="flex items-start mb-5">
+                            <div class="flex items-center h-5">
+                                <input id="remember" type="checkbox" value=""
+                                    class="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-3 focus:ring-blue-300" />
+                            </div>
+                            <label for="remember" class="ms-2 text-sm font-medium">I agree to Lydia’s Lechon’s Privacy Protection Policy</label>
+                        </div>
+
+                        <div class="flex flex-col mt-6">
+                            <button type="button" @click="step < 4 ? step++ : step" :disabled="step === 4"
+                                class="text-white bg-primary hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
+                                Sign up
+                            </button>
+                            <button type="button" @click="step > 1 ? step-- : step" :disabled="step === 1"
+                                class="text-primary bg-white border border-primary hover:bg-primary hover:text-white font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center mt-2">
+                                Back
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </template>
 
         </div>
