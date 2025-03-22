@@ -7,3 +7,5 @@ public/theme/legande/js/script.alt.js
 api.php
 vendor
 node_modules
+composer.lock
+package-lock.json
