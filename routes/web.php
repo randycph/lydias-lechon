@@ -35,6 +35,14 @@ Route::group(['prefix' => 'v2'], function () {
         $page = 'signup';
         return view('v2.signup', compact('page'));
     })->name('signup');
+    Route::get('/my-account', function () {
+        $page = 'my-account';
+        return view('v2.my-account', compact('page'));
+    })->name('my-account');
+    Route::get('/order-history', function () {
+        $page = 'order-history';
+        return view('v2.order-history', compact('page'));
+    })->name('order-history');
 });
 
 Route::any('/ipay_response',  'ipayController@receive_data')->name('ipay.response');

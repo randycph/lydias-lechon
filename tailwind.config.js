@@ -15,6 +15,7 @@ export default {
         'primary-dark': '#014F27',
         'tertiary-light': '#F9C8A7',
         'cream': '#FFFDF1',
+        'blue': '#006CD4'
       },
       fontFamily: {
         cubao: ['Cubao', 'sans-serif'],
