@@ -2,34 +2,23 @@
 
 @section('content')
 
-<div x-data="{ checkoutModal: false }" class="bg-cream">
+<div
+    x-data="{ cancelOrderModal: false, successPaymentModal: false, trackOrderModal: false }"
+    x-init="
+        const lockBody = () => {
+            const anyOpen = cancelOrderModal || successPaymentModal || trackOrderModal;
+            if (anyOpen) {
+                document.body.classList.add('overflow-hidden');
+            } else {
+                document.body.classList.remove('overflow-hidden');
+            }
+        };
+        $watch('trackOrderModal', lockBody);
+        $watch('cancelOrderModal', lockBody);
+        $watch('successPaymentModal', lockBody);
+    ">
     <div class="py-20 px-4">
-        <div class="rounded-lg border bg-white border-[#DFDFDF] shadow-md mt-10">
-            <div class="px-6 py-4 border-b border-[#DFDFDF]">
-                <h2 class="text-lg font-bold text-primary text-left uppercase">my account</h2>
-            </div>
-            <div class="flex items-start font-bold gap-4 flex-col px-6 py-5 border-b border-[#DFDFDF]">
-                <div class="">Hi, Juan Dela Cruz!</div>
-                <div class="text-tertiary  underline">Sign out</div>
-            </div>
-            <div class="flex items-start font-bold flex-col gap-2  py-5 border-b border-[#DFDFDF]">
-
-                <div class="group relative items-center flex pl-6 hover:text-tertiary  cursor-pointer">
-                    <div class="absolute left-0 top-0 h-10 w-1 bg-orange-500 opacity-0 group-hover:opacity-100 transition duration-200"></div>
-                    <div class="py-2">Manage Account</div>
-                </div>
-                
-                <div class="group relative items-center flex pl-6 hover:text-tertiary  cursor-pointer">
-                    <div class="absolute left-0 top-0 h-10 w-1 bg-orange-500 opacity-0 group-hover:opacity-100 transition duration-200"></div>
-                    <div class="py-2">Change Password</div>
-                </div>
-                
-                <div class="group relative items-center flex pl-6 hover:text-tertiary text-tertiary cursor-pointer">
-                    <div class="absolute left-0 top-0 h-10 w-1 bg-orange-500 opacity-100 group-hover:opacity-100 transition duration-200"></div>
-                    <div class="py-2">Order History</div>
-                </div>
-            </div>
-        </div>
+        <x-account-menu-component />
 
         <div class="font-bold text-lg mt-10 mb-5">
             Order History
@@ -85,15 +74,15 @@
                 </div>
 
                 <div class="w-full flex flex-col gap-2 px-4 mt-4">
-                    <button type="button"
+                    <button @click="successPaymentModal = true" type="button"
                         class="text-white bg-primary hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
                         Pay Now
                     </button>
-                    <button type="button"
+                    <button @click="trackOrderModal = true" type="button"
                         class="text-primary border hover:text-white border-primary bg-white hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
                         Track Order
                     </button>
-                    <button type="button"
+                    <button @click="cancelOrderModal = true" type="button"
                         class="text-white bg-tertiary hover:bg-secondary font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
                         Cancel Order
                     </button>
@@ -203,11 +192,11 @@
                 </div>
 
                 <div class="w-full flex flex-col gap-2 px-4 mt-4">
-                    <button type="button"
+                    <button @click="trackOrderModal = true" type="button"
                         class="text-primary border hover:text-white border-primary bg-white hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
                         Track Order
                     </button>
-                    <button @click="checkoutModal = true" type="button"
+                    <button @click="cancelOrderModal = true" type="button"
                         class="text-white bg-tertiary hover:bg-secondary font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
                         Cancel Order
                     </button>
@@ -216,14 +205,13 @@
         </div>
     </div>
 
-    <div x-show="checkoutModal"
+    <div x-show="cancelOrderModal"
         x-transition
-        class="relative z-10"
+        class="relative z-50"
         aria-labelledby="modal-title"
         role="dialog"
         aria-modal="true"
-        style="display: none;"
-    >
+        style="display: none;">
         <!-- Backdrop -->
         <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
 
@@ -235,14 +223,14 @@
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     <div class="sm:flex sm:items-end">
                         <div class="flex justify-end">
-                            <button @click="checkoutModal = false" class="self-end text-2xl text-gray-800">
+                            <button @click="cancelOrderModal = false" class="self-end text-2xl text-gray-800">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                                 </svg>
                             </button>
                         </div>
                         <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                            <h3 class="text-base font-semibold text-gray-900" id="modal-title">Are you sure you want to cancel your order?</h3>
+                            <h3 class="text-lg font-semibold" id="modal-title">Are you sure you want to cancel your order?</h3>
                             <div class="mt-2">
                             <p class="text-sm text-gray-500">This action cannot be undone.</p>
                             </div>
@@ -251,11 +239,11 @@
                 </div>
 
                 <div class="w-full flex flex-col gap-2 px-4 pt-4 pb-6">
-                    <button  @click="checkoutModal = false" type="button"
+                    <button  @click="cancelOrderModal = false" type="button"
                         class="text-primary border hover:text-white border-primary bg-white hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3 text-center">
                         Yes
                     </button>
-                    <button  @click="checkoutModal = false" type="button"
+                    <button  @click="cancelOrderModal = false" type="button"
                         class="text-white bg-primary hover:bg-primary font-medium rounded-lg w-full sm:w-auto px-5 py-3 text-center">
                         No
                     </button>
@@ -265,7 +253,140 @@
     </div>
 </div>
 
+<div x-show="successPaymentModal"
+    x-transition
+    class="relative z-50"
+    aria-labelledby="modal-title"
+    role="dialog"
+    aria-modal="true"
+    style="display: none;">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
 
+    <!-- Modal content -->
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+            <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg pb-5">
+                <!-- Modal body -->
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-end">
+                        <div class="flex justify-end">
+                            <button @click="successPaymentModal = false" class="self-end text-2xl text-gray-800">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mb-2 rounded-full size-10 bg-primary flex items-center justify-center mx-auto text-white">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+
+                            <h3 class="text-lg font-semibold" id="modal-title">Order successfully paid!</h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500">Thank you for your payment! We will verify it and notify you once the payment is confirmed and your order is being processed.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div x-show="trackOrderModal"
+    x-transition
+    class="relative z-50"
+    aria-labelledby="modal-title"
+    role="dialog"
+    aria-modal="true"
+    style="display: none;">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
+
+    <!-- Modal content -->
+    <div class="fixed inset-0 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+          <!-- Scrollable content container -->
+          <div class="relative transform overflow-y-auto h-auto rounded-lg bg-white text-left shadow-xl transition-all sm:w-full sm:max-w-lg pb-5">
+            <!-- Modal body -->
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-end">
+                        <div class="flex justify-end">
+                            <button @click="trackOrderModal = false" class="self-end text-2xl text-gray-800">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="text-left sm:mt-0 sm:ml-4 sm:text-left">
+                            <div class="font-bold text-xl">Track Order</div>
+                            <div class="text-slate-500 font-semibold mt-2">Order #12345678</div>
+                            <div class="text-slate-500 font-semibold">Oct 20, 2024</div>
+                            <div class="mt-5 px-4">
+                                <ol class="relative border-s border-gray-200 dark:border-gray-700">                  
+                                    <li class="mb-10 ms-8">            
+                                        <span class="absolute flex items-center justify-center w-10 h-10 bg-[#ECECEC] border border-[#ACACAC] rounded-full -start-5 p-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-[#ACACAC]">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 0 1-2.25 2.25M16.5 7.5V18a2.25 2.25 0 0 0 2.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 0 0 2.25 2.25h13.5M6 7.5h3v3H6v-3Z" />
+                                            </svg>
+                                        </span>
+                                        <h3 class="mb-1 font-semibold text-[#ACACAC]">Order Placed</h3>
+                                        <time class="block mb-2 text-xs font-normal leading-none text-[#ACACAC] float-right mt-1">10/20/24 5:43PM</time>
+                                        <p class="text-sm font-normal text-[#ACACAC]">Your order has been received.</p>
+                                    </li>
+                                    <li class="mb-10 ms-8">
+                                       <span class="absolute flex items-center justify-center w-10 h-10 bg-[#ECECEC] border border-[#ACACAC] rounded-full -start-5 p-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-[#ACACAC]">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />
+                                            </svg>
+                                        </span>
+                                        <h3 class="mb-1 font-semibold text-[#ACACAC]">Payment Confirmed</h3>
+                                        <time class="block mb-2 text-xs font-normal leading-none text-[#ACACAC] float-right mt-1">10/20/24 5:45PM</time>
+                                        <p class="text-sm font-normal text-[#ACACAC]">Waiting for your payment confirmation.</p>
+                                    </li>
+                                    <li class="mb-10 ms-8">
+                                       <span class="absolute flex items-center justify-center w-10 h-10 bg-[#ECECEC] border border-[#ACACAC] rounded-full -start-5 p-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-[#ACACAC]">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0 1 18 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3 1.5 1.5 3-3.75" />
+                                            </svg>
+                                          
+                                        </span>
+                                        <h3 class="mb-1 font-semibold text-[#ACACAC]">Order Processed</h3>
+                                        <time class="block mb-2 text-xs font-normal leading-none text-[#ACACAC] float-right mt-1">10/20/24 6:12PM</time>
+                                        <p class="text-sm font-normal text-[#ACACAC]">We are currently preparing your order.</p>
+                                    </li>
+                                    <li class="mb-10 ms-8">
+                                       <span class="absolute flex items-center justify-center w-10 h-10 bg-[#ECECEC] border border-[#ACACAC] rounded-full -start-5 p-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-[#ACACAC]">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                                            </svg>
+                                        </span>
+                                        <h3 class="mb-1 font-semibold text-[#ACACAC]">Ready to Pickup</h3>
+                                        <time class="block mb-2 text-xs font-normal leading-none text-[#ACACAC] float-right mt-1">10/20/24 6:43PM</time>
+                                        <p class="text-sm font-normal text-[#ACACAC]">Your order is ready for pickup.</p>
+                                    </li>
+                                    <li class="mb-10 ms-8">
+                                       <span class="absolute flex items-center justify-center w-10 h-10 bg-[#CFEDD6] border border-primary rounded-full -start-5 p-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-primary">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                            </svg>
+                                        </span>
+                                        <h3 class="mb-1 font-semibold text-primary">Completed</h3>
+                                        <time class="block mb-2 text-xs font-normal leading-none text-[#717171] float-right mt-1">10/20/24 7:30PM</time>
+                                        <p class="text-sm font-normal text-[#717171]">Your order has been picked up.</p>
+                                    </li>
+                                </ol>
+                                
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
   
     
 <x-footer-component />

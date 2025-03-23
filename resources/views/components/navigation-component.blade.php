@@ -5,7 +5,7 @@ x-data="{
         window.history.back();
     },
 
-}"  class="fixed top-5 left-1/2 transform -translate-x-[50%] w-[90%] bg-green-700 px-4 py-3 flex justify-between items-center z-50 rounded-full">
+}"  class="fixed top-5 left-1/2 transform -translate-x-[50%] w-[90%] bg-green-700 px-4 py-3 flex justify-between items-center z-40 rounded-full">
     @if (isset($page) && $page == 'checkout')
         <div class="text-white font-bold text-lg">
             <a href="{{ route('index') }}">

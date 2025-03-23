@@ -1049,16 +1049,16 @@
         },
         {
             "name": "egulias/email-validator",
-            "version": "4.0.3",
+            "version": "4.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/egulias/EmailValidator.git",
-                "reference": "b115554301161fa21467629f1e1391c1936de517"
+                "reference": "d42c8731f0624ad6bdc8d3e5e9a4524f68801cfa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/egulias/EmailValidator/zipball/b115554301161fa21467629f1e1391c1936de517",
-                "reference": "b115554301161fa21467629f1e1391c1936de517",
+                "url": "https://api.github.com/repos/egulias/EmailValidator/zipball/d42c8731f0624ad6bdc8d3e5e9a4524f68801cfa",
+                "reference": "d42c8731f0624ad6bdc8d3e5e9a4524f68801cfa",
                 "shasum": ""
             },
             "require": {
@@ -1104,7 +1104,7 @@
             ],
             "support": {
                 "issues": "https://github.com/egulias/EmailValidator/issues",
-                "source": "https://github.com/egulias/EmailValidator/tree/4.0.3"
+                "source": "https://github.com/egulias/EmailValidator/tree/4.0.4"
             },
             "funding": [
                 {
@@ -1112,7 +1112,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2024-12-27T00:36:43+00:00"
+            "time": "2025-03-06T22:45:56+00:00"
         },
         {
             "name": "ezyang/htmlpurifier",
@@ -1933,16 +1933,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v11.44.1",
+            "version": "v11.44.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "0883d4175f4e2b5c299e7087ad3c74f2ce195c6d"
+                "reference": "f85216c82cbd38b66d67ebd20ea762cb3751a4b4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/0883d4175f4e2b5c299e7087ad3c74f2ce195c6d",
-                "reference": "0883d4175f4e2b5c299e7087ad3c74f2ce195c6d",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/f85216c82cbd38b66d67ebd20ea762cb3751a4b4",
+                "reference": "f85216c82cbd38b66d67ebd20ea762cb3751a4b4",
                 "shasum": ""
             },
             "require": {
@@ -2144,7 +2144,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2025-03-05T15:34:10+00:00"
+            "time": "2025-03-12T14:34:30+00:00"
         },
         {
             "name": "laravel/jetstream",
@@ -4673,16 +4673,16 @@
         },
         {
             "name": "psy/psysh",
-            "version": "v0.12.7",
+            "version": "v0.12.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bobthecow/psysh.git",
-                "reference": "d73fa3c74918ef4522bb8a3bf9cab39161c4b57c"
+                "reference": "85057ceedee50c49d4f6ecaff73ee96adb3b3625"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bobthecow/psysh/zipball/d73fa3c74918ef4522bb8a3bf9cab39161c4b57c",
-                "reference": "d73fa3c74918ef4522bb8a3bf9cab39161c4b57c",
+                "url": "https://api.github.com/repos/bobthecow/psysh/zipball/85057ceedee50c49d4f6ecaff73ee96adb3b3625",
+                "reference": "85057ceedee50c49d4f6ecaff73ee96adb3b3625",
                 "shasum": ""
             },
             "require": {
@@ -4746,9 +4746,9 @@
             ],
             "support": {
                 "issues": "https://github.com/bobthecow/psysh/issues",
-                "source": "https://github.com/bobthecow/psysh/tree/v0.12.7"
+                "source": "https://github.com/bobthecow/psysh/tree/v0.12.8"
             },
-            "time": "2024-12-10T01:58:33+00:00"
+            "time": "2025-03-16T03:05:19+00:00"
         },
         {
             "name": "ralouphie/getallheaders",
@@ -4796,16 +4796,16 @@
         },
         {
             "name": "ramsey/collection",
-            "version": "2.1.0",
+            "version": "2.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ramsey/collection.git",
-                "reference": "3c5990b8a5e0b79cd1cf11c2dc1229e58e93f109"
+                "reference": "344572933ad0181accbf4ba763e85a0306a8c5e2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ramsey/collection/zipball/3c5990b8a5e0b79cd1cf11c2dc1229e58e93f109",
-                "reference": "3c5990b8a5e0b79cd1cf11c2dc1229e58e93f109",
+                "url": "https://api.github.com/repos/ramsey/collection/zipball/344572933ad0181accbf4ba763e85a0306a8c5e2",
+                "reference": "344572933ad0181accbf4ba763e85a0306a8c5e2",
                 "shasum": ""
             },
             "require": {
@@ -4866,9 +4866,9 @@
             ],
             "support": {
                 "issues": "https://github.com/ramsey/collection/issues",
-                "source": "https://github.com/ramsey/collection/tree/2.1.0"
+                "source": "https://github.com/ramsey/collection/tree/2.1.1"
             },
-            "time": "2025-03-02T04:48:29+00:00"
+            "time": "2025-03-22T05:38:12+00:00"
         },
         {
             "name": "ramsey/uuid",
@@ -7247,19 +7247,21 @@
         },
         {
             "name": "unisharp/laravel-filemanager",
-            "version": "v1.8.0",
+            "version": "v1.9.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/UniSharp/laravel-filemanager.git",
-                "reference": "63a788e5f62d3e9c8b8be8fd5bac9c9d59325e29"
+                "reference": "aaf2764f26eb8dcc9356bea1e25010333c2e61f4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/UniSharp/laravel-filemanager/zipball/63a788e5f62d3e9c8b8be8fd5bac9c9d59325e29",
-                "reference": "63a788e5f62d3e9c8b8be8fd5bac9c9d59325e29",
+                "url": "https://api.github.com/repos/UniSharp/laravel-filemanager/zipball/aaf2764f26eb8dcc9356bea1e25010333c2e61f4",
+                "reference": "aaf2764f26eb8dcc9356bea1e25010333c2e61f4",
                 "shasum": ""
             },
             "require": {
+                "ext-exif": "*",
+                "ext-fileinfo": "*",
                 "illuminate/support": ">=4.2.0",
                 "intervention/image": "2.*",
                 "php": ">=5.4.0"
@@ -7277,9 +7279,17 @@
                 "bin/debug"
             ],
             "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": [],
+                    "providers": [
+                        "UniSharp\\LaravelFilemanager\\LaravelFilemanagerServiceProvider"
+                    ]
+                }
+            },
             "autoload": {
                 "psr-4": {
-                    "Unisharp\\Laravelfilemanager\\": "src/"
+                    "UniSharp\\LaravelFilemanager\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -7309,9 +7319,9 @@
             ],
             "support": {
                 "issues": "https://github.com/UniSharp/laravel-filemanager/issues",
-                "source": "https://github.com/UniSharp/laravel-filemanager/tree/master"
+                "source": "https://github.com/UniSharp/laravel-filemanager/tree/v1"
             },
-            "time": "2017-06-11T15:15:20+00:00"
+            "time": "2018-07-05T11:36:08+00:00"
         },
         {
             "name": "vlucas/phpdotenv",
@@ -7601,16 +7611,16 @@
         },
         {
             "name": "filp/whoops",
-            "version": "2.17.0",
+            "version": "2.18.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filp/whoops.git",
-                "reference": "075bc0c26631110584175de6523ab3f1652eb28e"
+                "reference": "a7de6c3c6c3c022f5cfc337f8ede6a14460cf77e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/filp/whoops/zipball/075bc0c26631110584175de6523ab3f1652eb28e",
-                "reference": "075bc0c26631110584175de6523ab3f1652eb28e",
+                "url": "https://api.github.com/repos/filp/whoops/zipball/a7de6c3c6c3c022f5cfc337f8ede6a14460cf77e",
+                "reference": "a7de6c3c6c3c022f5cfc337f8ede6a14460cf77e",
                 "shasum": ""
             },
             "require": {
@@ -7660,7 +7670,7 @@
             ],
             "support": {
                 "issues": "https://github.com/filp/whoops/issues",
-                "source": "https://github.com/filp/whoops/tree/2.17.0"
+                "source": "https://github.com/filp/whoops/tree/2.18.0"
             },
             "funding": [
                 {
@@ -7668,7 +7678,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-01-25T12:00:00+00:00"
+            "time": "2025-03-15T12:00:00+00:00"
         },
         {
             "name": "hamcrest/hamcrest-php",
@@ -7723,16 +7733,16 @@
         },
         {
             "name": "laravel/breeze",
-            "version": "v2.3.5",
+            "version": "v2.3.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/breeze.git",
-                "reference": "1d85805c4aecc425a0ce157147384d4becea3fa2"
+                "reference": "390cbc433cb72fa6050965000b2d56c9ba6fd713"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/breeze/zipball/1d85805c4aecc425a0ce157147384d4becea3fa2",
-                "reference": "1d85805c4aecc425a0ce157147384d4becea3fa2",
+                "url": "https://api.github.com/repos/laravel/breeze/zipball/390cbc433cb72fa6050965000b2d56c9ba6fd713",
+                "reference": "390cbc433cb72fa6050965000b2d56c9ba6fd713",
                 "shasum": ""
             },
             "require": {
@@ -7780,7 +7790,7 @@
                 "issues": "https://github.com/laravel/breeze/issues",
                 "source": "https://github.com/laravel/breeze"
             },
-            "time": "2025-02-19T23:49:42+00:00"
+            "time": "2025-03-06T14:02:32+00:00"
         },
         {
             "name": "mockery/mockery",
@@ -9531,12 +9541,12 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.2"
     },
-    "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "platform-dev": [],
+    "plugin-api-version": "2.3.0"
 }

@@ -43,6 +43,10 @@ Route::group(['prefix' => 'v2'], function () {
         $page = 'order-history';
         return view('v2.order-history', compact('page'));
     })->name('order-history');
+    Route::get('/change-password', function () {
+        $page = 'change-password';
+        return view('v2.change-password', compact('page'));
+    })->name('change-password');
 });
 
 Route::any('/ipay_response',  'ipayController@receive_data')->name('ipay.response');
