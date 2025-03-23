@@ -47,6 +47,15 @@ Route::group(['prefix' => 'v2'], function () {
         $page = 'change-password';
         return view('v2.change-password', compact('page'));
     })->name('change-password');
+    Route::get('/careers', function () {
+        return view('v2.careers');
+    })->name('careers');
+    Route::get('/blogs', function () {
+        return view('v2.blogs');
+    })->name('blogs');
+    Route::get('/article', function () {
+        return view('v2.article');
+    })->name('article');
 });
 
 Route::any('/ipay_response',  'ipayController@receive_data')->name('ipay.response');
