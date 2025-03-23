@@ -57,7 +57,7 @@
 
     <x-contact-us-component />
 
-    <main class="container" x-cloak>
+    <main class="" x-cloak>
         @yield('content')
     </main>
 
