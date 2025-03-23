@@ -12,7 +12,9 @@
 
             <div>
                 <button class="bg-primary border-primary border text-white px-6 py-4 mt-4 w-full rounded-md">Go Shopping</button>
-                <button class="border border-primary text-primary px-6 py-4 mt-4 w-full rounded-md">View Order History</button>
+                <div class="border border-primary text-primary px-6 py-4 mt-4 w-full text-center rounded-md">
+                    <a href="{{ route('order-history') }}" class="text-center">View Order History</a>
+                </div>
 
             </div>
     

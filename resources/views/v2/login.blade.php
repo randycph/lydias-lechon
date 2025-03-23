@@ -45,10 +45,12 @@
                     </div>
                     <label for="remember" class="ms-2 text-sm font-medium dark:text-gray-300">Remember me</label>
                 </div>
-                <button type="submit"
-                    class="text-white bg-primary hover:bg-primary-dark focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
-                    Sign in
-                </button>
+                <div class="text-white bg-primary text-center hover:bg-primary-dark focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 ">
+                    <a href="{{ route('my-account') }}" type="submit"
+                        class="text-center">
+                        Sign in
+                    </a>
+                </div>
             </div>
 
             <div>

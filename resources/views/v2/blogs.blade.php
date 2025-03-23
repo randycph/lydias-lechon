@@ -17,7 +17,7 @@
             </div>
             <div class="p-6 ">
                 <div class="w-full rounded-md border border-white py-3 px-4 ">
-                    <a href="#" class="text-center text-white flex justify-center relative">Read Article</a>
+                    <a href="{{ route('article') }}" class="text-center text-white flex justify-center relative">Read Article</a>
                 </div>
             </div>
         </div>
@@ -55,12 +55,12 @@
                 <div class="swiper swiper-menus relative">
                     <div class="swiper-wrapper">
                         @foreach ($products as $product)
-                        <div class="swiper-slide !flex items-center justify-center p-4 flex-col !w-[140px] h-[140px]">
+                        <a href="{{ route('article') }}" class="swiper-slide !flex items-center justify-center p-4 flex-col !w-[140px] h-[140px]">
                             <div class="bg-white border-secondary border-2 p-2 rounded-lg items-center w-[140px] h-[140px] flex flex-col justify-center overflow-hidden">
                                 <img src="{{ asset('images/' . $product['image']) }}" alt="Anniversary Give-Back Promo" class="rounded-lg">
                             </div>
                             <div class="font-semibold text-center mt-2">{{ $product['name'] }}</div>
-                        </div>
+                        </a>
                         @endforeach
                     </div>
                 </div>
@@ -117,10 +117,10 @@
                 <h2 class="font-cubao text-3xl text-center text-primary mt-12">latest blogs</h2>
                 <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
                     @foreach ($blogs as $blog)
-                    <div class="rounded-lg">
+                    <a href="{{ route('article') }}" class="rounded-lg">
                         <img src="{{ asset('images/' . $blog['image']) }}" alt="{{ $blog['title'] }}" class="w-full h-[188px] object-cover rounded-t-lg">
                         <div class="uppercase font-semibold py-2 px-1">{{ $blog['title'] }}</div>
-                    </div>
+                    </a>
                     @endforeach
                 </div>
 

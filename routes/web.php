@@ -49,7 +49,7 @@ Route::group(['prefix' => 'v2'], function () {
     })->name('change-password');
     Route::get('/careers', function () {
         return view('v2.careers');
-    })->name('careers');
+    })->name('careers.v2');
     Route::get('/blogs', function () {
         return view('v2.blogs');
     })->name('blogs');

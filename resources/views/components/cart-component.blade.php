@@ -23,8 +23,8 @@
             </div>
 
             <div class="bg-tertiary text-white py-2 text-center w-full mt-2">
-                You need <strong>₱1,050.00</strong> more to checkout
-            </div>
+                You need <strong>₱1,050.00</strong> more to 
+            </div>checkout
 
             <div class="mt-4 px-6 flex flex-col gap-4">
                 <div class="flex justify-between items-center gap-4">
@@ -142,7 +142,7 @@
                 </div>
 
                 <!-- Checkout Button -->
-                <button class="bg-primary text-white px-6 py-3 rounded-md mt-10 w-full">Checkout</button>
+                <a href="{{ route('checkout') }}" class="bg-primary text-white text-center px-6 py-3 rounded-md mt-10 w-full">Checkout</a>
 
             </div>
         </div>

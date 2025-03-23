@@ -7,7 +7,7 @@
         x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
         x-transition:leave="transition-transform transform duration-300"
         x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full"
-        class="fixed inset-0 bg-white text-black w-full h-full z-50 py-6 flex flex-col">
+        class="fixed inset-0 bg-white text-black w-full h-full z-50 py-6 flex flex-col overflow-y-auto">
 
         <!-- Close Button -->
         <button @click="open = false" class="self-start text-2xl text-gray-800 px-6">
@@ -21,10 +21,10 @@
 
             <a href="#" class="block text-2xl font-medium font-cubao uppercase border-[#DFDFDF] text-primary pl-10">Hi, juan!</a>
             <ul class="flex flex-col gap-4 pl-10">
-                <li class="uppercase font-light">Manage account</li>
-                <li class="uppercase font-light">Change password</li>
-                <li class="uppercase font-light">Order History</li>
-                <li class="uppercase font-light">Sign out</li>
+                <li class="uppercase font-light"><a href="{{ route('my-account') }}">Manage account</a></li>
+                <li class="uppercase font-light"><a href="{{ route('change-password') }}">Change password</a></li>
+                <li class="uppercase font-light"><a href="{{ route('order-history') }}">Order History</a></li>
+                <li class="uppercase font-light"><a href="{{ route('login') }}">Sign out</a></li>
             </ul>
 
             <a href="{{ route('our-story') }}" class="block text-2xl font-medium font-cubao uppercase py-5 border-y border-[#DFDFDF] pl-10">Our Story</a>
@@ -32,7 +32,7 @@
             <a href="{{ route('lechon-menu') }}" class="block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Menu</a>
             <a href="{{ route('lechon-pricelist') }}" class="block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Lechon Pricelist</a>
             <a href="#" class="block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Hotline</a>
-            <a href="#" class="block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Careers</a>
+            <a href="{{ route('careers.v2') }}" class="block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Careers</a>
         </div>
     </div>
 </div>

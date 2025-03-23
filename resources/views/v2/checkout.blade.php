@@ -194,8 +194,8 @@
                                 </div>
                             </div>
 
-                            <div>
-                                <button class="bg-primary text-white px-6 py-4 mt-4 w-full rounded-md">Place Order</button>
+                            <div class="bg-primary text-center text-white px-6 py-4 mt-4 w-full rounded-md">
+                                <a href="{{ route('confirmation') }}" class="text-center">Place Order</a>
                             </div>
                         </div>
                     </div>

@@ -316,10 +316,10 @@
                         </div>
 
                         <div class="flex flex-col mt-6">
-                            <button type="button" @click="step < 4 ? step++ : step" :disabled="step === 4"
+                            <a href="{{ route('my-account') }}" type="button" @click="step < 4 ? step++ : step" :disabled="step === 4"
                                 class="text-white bg-primary hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
                                 Sign up
-                            </button>
+                            </a>
                             <button type="button" @click="step > 1 ? step-- : step" :disabled="step === 1"
                                 class="text-primary bg-white border border-primary hover:bg-primary hover:text-white font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center mt-2">
                                 Back
