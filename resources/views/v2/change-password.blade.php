@@ -64,57 +64,6 @@
                 </div>
             </div>
         </div>
-
-        <div class="rounded-lg border bg-white border-[#DFDFDF] shadow-md mt-5">
-            <div class="px-6 py-4 border-b border-[#DFDFDF]">
-                <h2 class="font-semibold text-tertiary text-left uppercase">Delivery Address</h2>
-            </div>
-            <div class="flex items-start font-bold flex-col gap-2  py-5 border-b border-[#DFDFDF]">
-                <div class="px-6 w-full text-sm">
-                    <div class="mb-5">
-                        <label for="address" class="block mb-2 font-bold text-gray-900">Address <span class="text-red-800">*</span> </label>
-                        <input type="text" id="address"
-                            class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                            placeholder="" required />
-                    </div>
-                    <div class="mb-5">
-                        <label for="city" class="block mb-2 text-sm font-bold text-gray-900">City <span class="text-red-700">*</span></label>
-                        <select id="city" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
-                            <option selected>Select</option>
-                            <option value="bdo">Quezon City</option>
-                            <option value="un">Manila</option>
-                            <option value="metrobank">Pasig</option>
-                        </select>
-                    </div>
-                    <div class="mb-5">
-                        <label for="municipality" class="block mb-2 text-sm font-bold text-gray-900">Municipality <span class="text-red-700">*</span></label>
-                        <select id="municipality" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
-                            <option selected>Select</option>
-                            <option value="bdo">Quezon City</option>
-                            <option value="un">Manila</option>
-                            <option value="metrobank">Pasig</option>
-                        </select>
-                    </div>
-                    <div class="mb-5">
-                        <label for="region" class="block mb-2 text-sm font-bold text-gray-900">Region <span class="text-red-700">*</span></label>
-                        <select id="region" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
-                            <option selected>Select</option>
-                            <option value="bdo">Region 1</option>
-                            <option value="un">Region 2</option>
-                            <option value="metrobank">Region 3</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="w-full px-6">
-                    <button type="button"
-                        class="text-white bg-primary hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
-                        Save
-                    </button>
-                </div>
-                
-            </div>
-        </div>
     </div>
 </div>
     

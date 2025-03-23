@@ -3,10 +3,35 @@
 @section('content')
 
 <div
-    x-data="{ cancelOrderModal: false, successPaymentModal: false, trackOrderModal: false }"
+    x-data="{ 
+        cancelOrderModal: false, 
+        successPaymentModal: false, 
+        trackOrderModal: false, 
+        paymentMethodModal: false, 
+        bankDepositProof: false, 
+        paymentCenterProof: false,
+        paymentMethod: '',
+        choosePaymentMethod() {
+            if (this.paymentMethod == '') {
+                return;closeBankParentModal
+            }
+
+            if (this.paymentMethod == 'bank') {
+                this.bankDepositProof = true;
+            } else if (this.paymentMethod == 'paymentCenter') {
+                this.paymentCenterProof = true;
+            }
+
+        },
+        closeBankDepositProof() {
+                console.log('xxxx')
+            this.bankDepositProof = false;
+        }
+    }"
+    @closeBankParentModal.window="closeBankDepositProof"
     x-init="
         const lockBody = () => {
-            const anyOpen = cancelOrderModal || successPaymentModal || trackOrderModal;
+            const anyOpen = cancelOrderModal || successPaymentModal || trackOrderModal || paymentMethodModal || bankDepositProof || paymentCenterProof;
             if (anyOpen) {
                 document.body.classList.add('overflow-hidden');
             } else {
@@ -16,6 +41,9 @@
         $watch('trackOrderModal', lockBody);
         $watch('cancelOrderModal', lockBody);
         $watch('successPaymentModal', lockBody);
+        $watch('paymentMethodModal', lockBody);
+        $watch('bankDepositProof', lockBody);
+        $watch('paymentCenterProof', lockBody);
     ">
     <div class="py-20 px-4">
         <x-account-menu-component />
@@ -74,7 +102,7 @@
                 </div>
 
                 <div class="w-full flex flex-col gap-2 px-4 mt-4">
-                    <button @click="successPaymentModal = true" type="button"
+                    <button @click="paymentMethodModal = true" type="button"
                         class="text-white bg-primary hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
                         Pay Now
                     </button>
@@ -205,54 +233,6 @@
         </div>
     </div>
 
-    <div x-show="cancelOrderModal"
-        x-transition
-        class="relative z-50"
-        aria-labelledby="modal-title"
-        role="dialog"
-        aria-modal="true"
-        style="display: none;">
-        <!-- Backdrop -->
-        <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
-
-        <!-- Modal content -->
-        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
-            <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-                <!-- Modal body -->
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="sm:flex sm:items-end">
-                        <div class="flex justify-end">
-                            <button @click="cancelOrderModal = false" class="self-end text-2xl text-gray-800">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                            <h3 class="text-lg font-semibold" id="modal-title">Are you sure you want to cancel your order?</h3>
-                            <div class="mt-2">
-                            <p class="text-sm text-gray-500">This action cannot be undone.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="w-full flex flex-col gap-2 px-4 pt-4 pb-6">
-                    <button  @click="cancelOrderModal = false" type="button"
-                        class="text-primary border hover:text-white border-primary bg-white hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3 text-center">
-                        Yes
-                    </button>
-                    <button  @click="cancelOrderModal = false" type="button"
-                        class="text-white bg-primary hover:bg-primary font-medium rounded-lg w-full sm:w-auto px-5 py-3 text-center">
-                        No
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div x-show="successPaymentModal"
     x-transition
     class="relative z-50"
@@ -288,6 +268,54 @@
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div x-show="cancelOrderModal"
+    x-transition
+    class="relative z-50"
+    aria-labelledby="modal-title"
+    role="dialog"
+    aria-modal="true"
+    style="display: none;">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
+
+    <!-- Modal content -->
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+            <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                <!-- Modal body -->
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-end">
+                        <div class="flex justify-end">
+                            <button @click="cancelOrderModal = false" class="self-end text-2xl text-gray-800">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg font-semibold" id="modal-title">Are you sure you want to cancel your order?</h3>
+                            <div class="mt-2">
+                            <p class="text-sm text-gray-500">This action cannot be undone.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full flex flex-col gap-2 px-4 pt-4 pb-6">
+                    <button  @click="cancelOrderModal = false" type="button"
+                        class="text-primary border hover:text-white border-primary bg-white hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3 text-center">
+                        Yes
+                    </button>
+                    <button  @click="cancelOrderModal = false" type="button"
+                        class="text-white bg-primary hover:bg-primary font-medium rounded-lg w-full sm:w-auto px-5 py-3 text-center">
+                        No
+                    </button>
                 </div>
             </div>
         </div>
@@ -388,7 +416,111 @@
     </div>
 </div>
   
-    
+<div x-show="paymentMethodModal"
+    x-transition
+    class="relative z-50"
+    aria-labelledby="modal-title"
+    role="dialog"
+    aria-modal="true"
+    style="display: none;">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
+
+    <!-- Modal content -->
+    <div class="fixed inset-0 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+          <!-- Scrollable content container -->
+          <div class="relative transform overflow-y-auto h-auto rounded-lg bg-cream text-left shadow-xl transition-all w-full pb-5">
+            <!-- Modal body -->
+            <div class="bg-cream px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="w-full">
+                        <div class="flex justify-end">
+                            <button @click="paymentMethodModal = false" class="self-end text-2xl text-gray-800">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="text-left sm:mt-0 sm:ml-4 sm:text-left">
+                            <div class="font-bold text-xl">Choose Payment Method</div>
+
+                            <div class="flex flex-col gap-2 mt-5">
+                                <button 
+                                    :class="[
+                                        'bg-white border rounded-md p-3',
+                                        paymentMethod === 'bank' ? 'border-primary ring-2 ring-primary' : 'border-border'
+                                    ]"
+                                    @click="paymentMethod = 'bank'" class="bg-white border-border border rounded-md p-3">
+                                    <div class="flex justify-between items-center"> 
+                                        <div class="font-semibold">
+                                            Bank Transfer or Deposit 
+                                        </div>
+                                        <div>
+                                            <img src="{{ asset('images/bdo.png') }}" alt="bdo" class="h-4">
+                                        </div>
+                                    </div>
+                                </button>
+                                <button class="bg-white border-border border rounded-md p-3">
+                                    <div class="flex justify-between items-center"> 
+                                        <div class="font-semibold">
+                                            GCash
+                                        </div>
+                                        <div>
+                                            <img src="{{ asset('images/gcash.png') }}" alt="gcash" class="w-14">
+                                        </div>
+                                    </div>
+                                </button>
+                                <button class="bg-white border-border border rounded-md p-3">
+                                    <div class="flex justify-between items-center"> 
+                                        <div class="font-semibold">
+                                            Maya
+                                        </div>
+                                        <div>
+                                            <img src="{{ asset('images/maya.png') }}" alt="maya" class="w-14">
+                                        </div>
+                                    </div>
+                                </button>
+                                <button class="bg-white border-border border rounded-md p-3">
+                                    <div class="flex justify-between items-center"> 
+                                        <div class="font-semibold">
+                                            Credit/Debit Card
+                                        </div>
+                                        <div>
+                                            <img src="{{ asset('images/cc.png') }}" alt="cc" class="w-24">
+                                        </div>
+                                    </div>
+                                </button>
+                                <button
+                                    :class="[
+                                        'bg-white border rounded-md p-3',
+                                        paymentMethod === 'paymentCenter' ? 'border-primary ring-2 ring-primary' : 'border-border'
+                                    ]"
+                                    @click="paymentMethod = 'paymentCenter'" class="bg-white border-border border rounded-md p-3">
+                                    <div class="flex justify-between items-center"> 
+                                        <div class="font-semibold">
+                                            Payment Center
+                                        </div>
+                                        <div>
+                                            <img src="{{ asset('images/ml.png') }}" alt="ml" class="w-28">
+                                        </div>
+                                    </div>
+                                </button>
+                            </div>
+
+                            <button @click="choosePaymentMethod" type="button"
+                                class="text-white bg-primary hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center mt-5">
+                                Choose
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<x-bank-deposit-proof />
+<x-payment-center-proof />
 <x-footer-component />
 
 @endsection
