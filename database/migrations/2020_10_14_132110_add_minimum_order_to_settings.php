@@ -14,6 +14,9 @@ class AddMinimumOrderToSettings extends Migration
     public function up()
     {
         Schema::table('settings', function (Blueprint $table) {
+            if (Schema::hasColumn('settings', 'minimum_order')) {
+                return;
+            }
             $table->decimal('minimum_order',16,2)->default(0.00);            
         });
     }

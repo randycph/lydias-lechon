@@ -13,6 +13,10 @@ class CreateApprovalsTable extends Migration
      */
     public function up()
     {
+        if (Schema::hasTable('approvals')) {
+            return;
+        }
+
         Schema::create('approvals', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();

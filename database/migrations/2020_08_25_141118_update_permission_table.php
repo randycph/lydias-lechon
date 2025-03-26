@@ -14,8 +14,8 @@ class UpdatePermissionTable extends Migration
     public function up()
     {
         Schema::table('permission', function (Blueprint $table) {
-            $table->text('routes')->nullable()->after('description');
-            $table->text('methods')->nullable()->after('routes');
+            $table->text('routes')->nullable()->after('description')->change();
+            $table->text('methods')->nullable()->after('routes')->change();
         });
 
         \App\Models\Permission::truncate();
