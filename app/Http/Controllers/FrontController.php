@@ -70,6 +70,8 @@ class FrontController extends Controller
 
         $content = Shortcode::process($page->content);
 
+        dd(env('FRONTEND_TEMPLATE'));
+
         if (!empty($page->template)) {
             return view('theme.'.env('FRONTEND_TEMPLATE').'.pages.'.$page->template, compact('footer','page', 'breadcrumb', 'content'));
         }
