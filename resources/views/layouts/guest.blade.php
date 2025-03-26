@@ -37,15 +37,47 @@
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
 </head>
-<body x-cloak 
-    class="bg-gray-100 text-gray-900" 
+<body 
+    x-cloak 
+    class="bg-gray-100 text-gray-900 mx-auto" 
     x-data="{ 
         open: false, 
         openCart: false, 
         marketingPopup: false, 
         openHotline: false,
         openContactUs: false,
-    }">
+    }"
+    x-init="
+        const lockScroll = () => {
+            const scrollY = window.scrollY;
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollY}px`;
+            document.body.style.width = '100%';
+            document.body.dataset.scrollY = scrollY;
+        };
+
+        const unlockScroll = () => {
+            const scrollY = document.body.dataset.scrollY;
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            window.scrollTo(0, parseInt(scrollY || '0'));
+        };
+
+        const lockBody = () => {
+            if (open || openCart || marketingPopup || openHotline || openContactUs) {
+                lockScroll();
+            } else {
+                unlockScroll();
+            }
+        };
+        $watch('open', lockBody);
+        $watch('openCart', lockBody);
+        $watch('marketingPopup', lockBody);
+        $watch('openHotline', lockBody);
+        $watch('openContactUs', lockBody);
+    "
+    >
     
     <x-navigation-component :page="$page ?? ''" />
 

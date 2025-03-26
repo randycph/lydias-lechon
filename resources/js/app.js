@@ -15,8 +15,16 @@ document.addEventListener("DOMContentLoaded", function () {
         const swiper = new Swiper('.swiper-blogs', {
             modules: [Navigation, Pagination], // ✅ Register Swiper modules
             loop: true,
-            slidesPerView: 1,
-            centeredSlides: false,
+            slidesPerView: 1.2,
+
+            breakpoints: {
+                768: {
+                    slidesPerView: 2,
+                },
+                1024: {
+                    slidesPerView: 3.2,
+                },
+            },
 
             pagination: {
                 el: '.swiper-pagination',

@@ -2,11 +2,11 @@
 <footer class="relative bg-primary-dark text-white pt-10 pb-16 px-4" style="background-image: url('{{ asset('images/our-story-bg.png') }}'); background-size: cover; background-position: center;">
     <!-- Green Overlay -->
     <div class="absolute inset-0 bg-primary-dark opacity-80"></div>
-    <div class="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div>
-            <img src="{{ asset('images/lydia-logo.png') }}" alt="Lydia's Logo" class="">
+    <div class="relative container flex flex-wrap flex-col lg:flex-row items-start justify-between gap-4">
+        <div class="flex justify-start items-start">
+            <img src="{{ asset('images/lydias-logo-footer.png') }}" alt="Lydia's Logo" class="w-[180px] lg:w-[230px]">
         </div>
-        <div class="mt-6">
+        <div class="mt-3 lg:mt-0">
             <h3 class="font-bold text-lg md:text-xl uppercase">About Us</h3>
             <ul class="mt-2 flex flex-col gap-2">
                 <li><a href="{{ route('our-story') }}">Our Story</a></li>
@@ -14,15 +14,15 @@
                 <li>Blog</li>
             </ul>
         </div>
-        <div>
-            <h3 class="font-bold text-lg md:text-xl uppercase mt-3">SHOP</h3>
+        <div class="mt-3 lg:mt-0">
+            <h3 class="font-bold text-lg md:text-xl uppercase ">SHOP</h3>
             <ul class="mt-2 flex flex-col gap-2">
                 <li><a href="{{ route('lechon-menu') }}">Menu</a></li>
                 <li><a href="{{ route('lechon-pricelist') }}">Lechon Pricelist</a></li>
             </ul>
         </div>
-        <div>
-            <h3 class="font-bold text-lg md:text-xl uppercase mt-3">Contact</h3>
+        <div class="mt-3 lg:mt-0">
+            <h3 class="font-bold text-lg md:text-xl uppercase ">Contact</h3>
             <ul class="mt-2 flex flex-col gap-2">
                 <li>
                     <button @click="openContactUs = true">Contact Us</button>
@@ -35,8 +35,8 @@
             <div class="mt-3">Or get in touch with us via email:</div>
             <div><a href="mailto:orders@lydias-lechon.com" class="font-semibold">orders@lydias-lechon.com</a></div>
         </div>
-        <div>
-            <h3 class="font-bold text-lg md:text-xl uppercase mt-3">Follow Us</h3>
+        <div class="mt-3 lg:mt-0">
+            <h3 class="font-bold text-lg md:text-xl uppercase">Follow Us</h3>
             <div class="mt-2 flex">
                 <a href="#" class="text-gray-400 hover:text-gray-500">
                     <span class="sr-only">Facebook</span>
@@ -58,6 +58,9 @@
                 </a>
             </div>
         </div>
+    </div>
+    
+    <div class="text-white">
         <hr class="w-full border-[#46B57C] mt-5">
         <div class="text-xs text-center w-full mt-5 text-white">
             All information, pictures and images on this site are copyrighted material and owned by their respective creators or owners.
@@ -65,5 +68,5 @@
         <div class="text-center text-sm w-full mt-4">
             Copyright © 2020 - {{ now()->year }} | Lydia’s Lechon
         </div>
-    </footer>
+    </div>
 </footer>

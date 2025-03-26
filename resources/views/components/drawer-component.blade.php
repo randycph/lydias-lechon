@@ -31,7 +31,7 @@
             <a href="{{ route('our-stores') }}" class="block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Our Stores</a>
             <a href="{{ route('lechon-menu') }}" class="block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Menu</a>
             <a href="{{ route('lechon-pricelist') }}" class="block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Lechon Pricelist</a>
-            <a href="#" class="block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Hotline</a>
+            <button @click="open = false; openHotline = true; " class="block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Hotline</button>
             <a href="{{ route('careers.v2') }}" class="block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Careers</a>
         </div>
     </div>

@@ -21,6 +21,9 @@ export default {
       fontFamily: {
         cubao: ['Cubao', 'sans-serif'],
       },
+      maxWidth: {
+        '8xl': '1312px',
+      },
     },
   },
   plugins: [

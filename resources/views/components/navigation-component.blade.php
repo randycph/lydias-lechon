@@ -5,7 +5,7 @@ x-data="{
         window.history.back();
     },
 
-}"  class="fixed top-5 left-1/2 transform -translate-x-[50%] w-[90%] bg-green-700 px-4 py-3 flex justify-between items-center z-40 rounded-full">
+}"  class="fixed max-w-8xl top-5 left-1/2 transform -translate-x-[50%] w-[90%] bg-green-700 px-4 py-3 flex justify-between items-center z-40 rounded-full">
     @if (isset($page) && $page == 'checkout')
         <div class="text-white font-bold text-lg">
             <a href="{{ route('index') }}">
@@ -44,9 +44,9 @@ x-data="{
             <a href="{{ route('blogs') }}" class="uppercase">
                 Blogs
             </a>
-            <a href="#" class="uppercase">
+            <button @click="openHotline = true" class="uppercase">
                 Hotline
-            </a>
+            </button>
         </div>
         <div class="flex md:gap-4 gap-2">
             <a href="{{ route('my-account') }}" class="text-white">

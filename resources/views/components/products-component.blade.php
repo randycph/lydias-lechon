@@ -1,4 +1,4 @@
-<div>
+<div class="relative container">
     {{-- Product Section --}}
     <div class="px-4">
         <div class="flex flex-col items-center text-center py-10 gap-6">
@@ -7,69 +7,49 @@
             <button class="text-white bg-primary mx-auto rounded-md px-6 py-3 mt-3 font-medium">View Menu</button>
         </div>
     </div>
-    <div class="products">
-        <div class="product pb-20 px-4">
-            <div class="relative bg-orange-500 rounded-md w-full h-[210px]  p-10 flex justify-center items-end">
-                <img src="{{ asset('images/product1.png') }}" alt="Shop Whole Lechon" class="scale-125 w-auto top-0 left-0 px-10 overflow-hidden">
+    @php
+        $products = [
+            [
+                'title' => 'Shop Whole Lechon',
+                'image' => 'product1.png',
+            ],
+            [
+                'title' => 'Shop Lechon-In-A-Box',
+                'image' => 'product2.png',
+            ],
+            [
+                'title' => 'Shop Lydia’s Family Box',
+                'image' => 'product3.png',
+            ],
+            [
+                'title' => 'Shop Party Trays',
+                'image' => 'product4.png',
+            ],
+            [
+                'title' => 'Shop Lechon Espesyal',
+                'image' => 'product5.png',
+            ],
+            [
+                'title' => 'Shop Bento Box',
+                'image' => 'product6.png',
+            ],
+            [
+                'title' => 'Shop Pampagana',
+                'image' => 'product7.png',
+            ],
+        ];
+    @endphp
+    <div class="products grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
+        @foreach ($products as $product)
+        <div class="product pb-12 px-4">
+            <div class="relative bg-orange-500 rounded-md w-full h-[300px] p-2 flex justify-center clip-bottom  items-center">
+                <img src="{{ asset('images/'.$product['image']) }}" alt="Shop Whole Lechon" class="scale-110 md:scale-125 top-0 left-0 px-10 overflow-hidden ">
             </div>
             <div class="flex justify-between mt-4">
-                <div class="font-bold">Shop Whole Lechon</div>
-                <button class="bg-primary text-white rounded-md px-4 py-2 flex items-center justify-center">Shop Now</button>
+                <div class="font-bold">{{ $product['title']}}</div>
+                <button class="bg-primary text-white rounded-md px-4 py-2 flex items-center justify-center text-sm">Shop Now</button>
             </div>
         </div>
-        <div class="product pb-20 px-4">
-            <div class="relative bg-orange-500 rounded-md w-full h-[210px]  p-10 flex justify-center items-end">
-                <img src="{{ asset('images/product2.png') }}" alt="Shop Whole Lechon" class="scale-125 top-0 left-0 px-10 overflow-hidden">
-            </div>
-            <div class="flex justify-between mt-4">
-                <div class="font-bold">Shop Lechon-In-A-Box</div>
-                <button class="bg-primary text-white rounded-md px-4 py-2 flex items-center justify-center">Shop Now</button>
-            </div>
-        </div>
-        <div class="product pb-20 px-4">
-            <div class="relative bg-orange-500 rounded-md w-full h-[210px]  p-10 flex justify-center items-end">
-                <img src="{{ asset('images/product3.png') }}" alt="Shop Whole Lechon" class="scale-125 top-0 left-0 px-10 overflow-hidden">
-            </div>
-            <div class="flex justify-between mt-4">
-                <div class="font-bold">Shop Lydia’s Family Box</div>
-                <button class="bg-primary text-white rounded-md px-4 py-2 flex items-center justify-center">Shop Now</button>
-            </div>
-        </div>
-        <div class="product pb-20 px-4">
-            <div class="relative bg-orange-500 rounded-md w-full h-[210px]  p-10 flex justify-center items-end">
-                <img src="{{ asset('images/product4.png') }}" alt="Shop Whole Lechon" class="scale-125 top-0 left-0 px-10 overflow-hidden">
-            </div>
-            <div class="flex justify-between mt-4">
-                <div class="font-bold">Shop Party Trays</div>
-                <button class="bg-primary text-white rounded-md px-4 py-2 flex items-center justify-center">Shop Now</button>
-            </div>
-        </div>
-        <div class="product pb-20 px-4">
-            <div class="relative bg-orange-500 rounded-md w-full h-[210px]  p-10 flex justify-center items-end">
-                <img src="{{ asset('images/product5.png') }}" alt="Shop Whole Lechon" class="scale-125 top-0 left-0 px-10 overflow-hidden">
-            </div>
-            <div class="flex justify-between mt-4">
-                <div class="font-bold">Shop Lechon Espesyal</div>
-                <button class="bg-primary text-white rounded-md px-4 py-2 flex items-center justify-center">Shop Now</button>
-            </div>
-        </div>
-        <div class="product pb-20 px-4">
-            <div class="relative bg-orange-500 rounded-md w-full h-[210px]  p-10 flex justify-center items-end">
-                <img src="{{ asset('images/product6.png') }}" alt="Shop Whole Lechon" class="scale-125 top-0 left-0 px-10 overflow-hidden">
-            </div>
-            <div class="flex justify-between mt-4">
-                <div class="font-bold">Shop Bento Box</div>
-                <button class="bg-primary text-white rounded-md px-4 py-2 flex items-center justify-center">Shop Now</button>
-            </div>
-        </div>
-        <div class="product pb-20 px-4">
-            <div class="relative bg-orange-500 rounded-md w-full h-[210px]  p-10 flex justify-center items-end">
-                <img src="{{ asset('images/product7.png') }}" alt="Shop Whole Lechon" class="scale-125 top-0 left-0 px-10 overflow-hidden">
-            </div>
-            <div class="flex justify-between mt-4">
-                <div class="font-bold">Shop Pampagana</div>
-                <button class="bg-primary text-white rounded-md px-4 py-2 flex items-center justify-center">Shop Now</button>
-            </div>
-        </div>
+        @endforeach
     </div>
 </div>
