@@ -34,7 +34,8 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "platform-check": false
     },
     "extra": {
         "laravel": {
@@ -53,7 +54,6 @@
             "database/factories"
         ]
     },
-    "platform-check": false,
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/"
