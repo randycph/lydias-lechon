@@ -126,7 +126,7 @@ class UpdatePermissionTable extends Migration
             ['name' => 'Change Status of Sales Transaction','module' => 'sales_transaction','description' => 'User can change status of sales transaction','routes' => '["sales-transaction.quick_update"]','methods' => '["quick_update"]','user_id' => '1','is_view_page' => '0']
         ]);
 
-        \App\Rolepermission::insert([
+        \App\Models\Rolepermission::insert([
             ['role_id' => '2','permission_id' => '1','user_id' => '1','isAllowed' => '1'],
             ['role_id' => '4','permission_id' => '1','user_id' => '1','isAllowed' => '1'],
             ['role_id' => '2','permission_id' => '2','user_id' => '1','isAllowed' => '1'],
