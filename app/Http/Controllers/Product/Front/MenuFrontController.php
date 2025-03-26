@@ -16,7 +16,7 @@ class MenuFrontController extends Controller
     {
         $productCategories = ProductCategory::where('status', 'PUBLISHED')->where('category_id','>',1)->get();
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.ecommerce.product.menu',compact('productCategories'));
+        return view('theme.'.config('app.frontend_template').'.ecommerce.product.menu',compact('productCategories'));
     }
 
     public function list(Request $request)
@@ -29,7 +29,7 @@ class MenuFrontController extends Controller
         $miscs = DB::table('products')->where('for_sale', '1')->whereNull('deleted_at')->where('status','PUBLISHED')->where('for_sale_web','1')->where('is_misc','1')->select('name')->distinct()->get();
 
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.ecommerce.product.menu',compact('productCategories','page','miscs'));
+        return view('theme.'.config('app.frontend_template').'.ecommerce.product.menu',compact('productCategories','page','miscs'));
 
     }
     
@@ -158,7 +158,7 @@ class MenuFrontController extends Controller
         $page = new Page();
         $page->name = 'Menu';
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.ecommerce.product.menu',compact('products','categories','max', 'selectedCategory','productCategories','page'));
+        return view('theme.'.config('app.frontend_template').'.ecommerce.product.menu',compact('products','categories','max', 'selectedCategory','productCategories','page'));
 
     }
     
@@ -182,7 +182,7 @@ class MenuFrontController extends Controller
     {
         $featured_best_seller = Product::where('status', 'PUBLISHED')->where('is_featured', '1')->where('category_id', '3')->get();
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'main',compact('featured_best_seller'));
+        return view('theme.'.config('app.frontend_template').'main',compact('featured_best_seller'));
     }
 
 }

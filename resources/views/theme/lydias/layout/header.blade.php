@@ -204,7 +204,7 @@
                 <div class="col-lg-9">
                     <div id="navigation">
                         <div id="menu-desk">
-                            @include('theme.'.env('FRONTEND_TEMPLATE').'.layout.menu')
+                            @include('theme.'.config('app.frontend_template').'.layout.menu')
                         </div>
                     </div>
                 </div>

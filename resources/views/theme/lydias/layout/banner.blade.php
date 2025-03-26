@@ -1,11 +1,11 @@
 @if(isset($page) && $page->album && count($page->album->banners) > 0 && $page->album->is_main_banner() && $page->album->banner_type == 'video')
-    @include('theme.'.env('FRONTEND_TEMPLATE').'.layout.home-slider-video')
+    @include('theme.'.config('app.frontend_template').'.layout.home-slider-video')
 @elseif(isset($page) && $page->album && count($page->album->banners) > 0 && $page->album->is_main_banner())
-    @include('theme.'.env('FRONTEND_TEMPLATE').'.layout.home-slider')
+    @include('theme.'.config('app.frontend_template').'.layout.home-slider')
 @elseif(isset($page) && $page->album && count($page->album->banners) > 1 && !$page->album->is_main_banner())
-    @include('theme.'.env('FRONTEND_TEMPLATE').'.layout.page-slider')
+    @include('theme.'.config('app.frontend_template').'.layout.page-slider')
 @elseif(isset($page) && !empty($page->image_url))
-    @include('theme.'.env('FRONTEND_TEMPLATE').'.layout.page-banner')
+    @include('theme.'.config('app.frontend_template').'.layout.page-banner')
 
 @else
 	<div class="sub-banner">

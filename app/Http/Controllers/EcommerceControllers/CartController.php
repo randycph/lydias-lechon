@@ -387,7 +387,7 @@ class CartController extends Controller
         $page = new Page();
         $page->name = 'Cart';
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.ecommerce.cart.cart', compact('cart', 'totalProducts','page'));
+        return view('theme.'.config('app.frontend_template').'.ecommerce.cart.cart', compact('cart', 'totalProducts','page'));
     }
 
     public function show($id)

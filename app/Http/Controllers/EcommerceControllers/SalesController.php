@@ -545,7 +545,7 @@ class SalesController extends Controller
         $page = new Page();
         $page->name = 'Sales Transaction';
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.pages.ecommerce.sales',compact('sales','page'));
+        return view('theme.'.config('app.frontend_template').'.pages.ecommerce.sales',compact('sales','page'));
     }
 
     public function store(Request $request)

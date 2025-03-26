@@ -9,6 +9,6 @@ class NewslettersShortcodes extends Model
     public function latest_homepage($shortcode, $content, $compiler, $name, $viewData)
     {
 
-        return sprintf(view('theme.'.env('FRONTEND_TEMPLATE').'.pages.shortcodes.home-newsletter'), $shortcode->class, $content);
+        return sprintf(view('theme.'.config('app.frontend_template').'.pages.shortcodes.home-newsletter'), $shortcode->class, $content);
     }
 }

@@ -403,7 +403,7 @@ class ReportsController extends Controller
         $status = 'PAID';
         else $status = 'UNPAID';
 
-       // return view('theme.'.env('FRONTEND_TEMPLATE').'.pages.ecommerce.sales_summary',compact('sales','salesPayments','salesDetails','status','deliveries'));
+       // return view('theme.'.config('app.frontend_template').'.pages.ecommerce.sales_summary',compact('sales','salesPayments','salesDetails','status','deliveries'));
 
         return view('admin.sales.delivery_receipt',compact('sales','salesPayments','salesDetails','status','deliveries'));
 

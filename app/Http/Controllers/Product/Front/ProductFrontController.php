@@ -28,7 +28,7 @@ class ProductFrontController extends Controller
         }
 
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.ecommerce.product.profile',compact('product', 'page','sales_history'));
+        return view('theme.'.config('app.frontend_template').'.ecommerce.product.profile',compact('product', 'page','sales_history'));
     }
 
     public function show_forsale(){
@@ -50,7 +50,7 @@ class ProductFrontController extends Controller
         //     }
         // }
         // return $d;
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.ecommerce.product.order',compact('products','page','miscs','categories'));
+        return view('theme.'.config('app.frontend_template').'.ecommerce.product.order',compact('products','page','miscs','categories'));
 
     }
 
@@ -190,7 +190,7 @@ class ProductFrontController extends Controller
 
         $selectedCategory = $request->has('criteria') ? $request->criteria : 'test';
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.ecommerce.product.product-list',compact('products','categories','max', 'selectedCategory'));
+        return view('theme.'.config('app.frontend_template').'.ecommerce.product.product-list',compact('products','categories','max', 'selectedCategory'));
 
     }
 

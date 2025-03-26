@@ -1,4 +1,4 @@
-@extends('theme.'.env('FRONTEND_TEMPLATE').'.main')
+@extends('theme.'.config('app.frontend_template').'.main')
 
 @section('pagecss')
     <style>

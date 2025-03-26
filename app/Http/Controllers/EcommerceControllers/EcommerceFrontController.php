@@ -17,7 +17,7 @@ class EcommerceFrontController extends Controller
     {
         $footer = Page::where('slug', 'footer')->where('name', 'footer')->first();
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.pages.ecommerce.profile', compact('footer','page', 'breadcrumb'));
+        return view('theme.'.config('app.frontend_template').'.pages.ecommerce.profile', compact('footer','page', 'breadcrumb'));
     }
 
     public function update_name(Request $request)

@@ -50,7 +50,7 @@ class ArticlesShortcodes {
             return '';
         }
 
-        return sprintf(view('theme.'.env('FRONTEND_TEMPLATE').'.pages.shortcodes.home-news',compact('featuredNews')), $shortcode->class, $content);
+        return sprintf(view('theme.'.config('app.frontend_template').'.pages.shortcodes.home-news',compact('featuredNews')), $shortcode->class, $content);
     }
 }
 

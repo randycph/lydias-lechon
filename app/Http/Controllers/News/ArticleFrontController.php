@@ -39,7 +39,7 @@ class ArticleFrontController extends Controller
 
         $breadcrumb = $this->breadcrumb($article);
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.main',compact('page','breadcrumb'));
+        return view('theme.'.config('app.frontend_template').'.main',compact('page','breadcrumb'));
 
     }
 
@@ -106,7 +106,7 @@ class ArticleFrontController extends Controller
 
         $footer = Page::where('slug', 'footer')->where('name', 'footer')->first();
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.pages.news-list',compact('page', 'footer', 'articles','breadcrumb','dates','categories'));
+        return view('theme.'.config('app.frontend_template').'.pages.news-list',compact('page', 'footer', 'articles','breadcrumb','dates','categories'));
 
 
     }
@@ -203,7 +203,7 @@ class ArticleFrontController extends Controller
 
         $footer = Page::where('slug', 'footer')->where('name', 'footer')->first();
         $page = $news;
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.pages.news',compact('footer', 'news','breadcrumb', 'page'));
+        return view('theme.'.config('app.frontend_template').'.pages.news',compact('footer', 'news','breadcrumb', 'page'));
 
     }
 
@@ -215,7 +215,7 @@ class ArticleFrontController extends Controller
             abort(404);
         }
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.pages.news-print',compact('news'));
+        return view('theme.'.config('app.frontend_template').'.pages.news-print',compact('news'));
 
     }
 

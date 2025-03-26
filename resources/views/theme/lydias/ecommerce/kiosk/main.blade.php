@@ -83,7 +83,7 @@
 
     <div class="page">
 
-        @include('theme.'.env('FRONTEND_TEMPLATE').'.ecommerce.kiosk.header')
+        @include('theme.'.config('app.frontend_template').'.ecommerce.kiosk.header')
 
         @yield('content')
 

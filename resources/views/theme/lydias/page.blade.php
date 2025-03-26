@@ -1,4 +1,4 @@
-@extends('theme.'.env('FRONTEND_TEMPLATE').'.main')
+@extends('theme.'.config('app.frontend_template').'.main')
 @section('pagecss')   
     <style>
         .timeline-item:hover .border {background-color: #28a745 !important;border:none !important;}

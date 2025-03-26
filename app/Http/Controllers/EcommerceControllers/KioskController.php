@@ -36,7 +36,7 @@ class KioskController extends Controller
     public function home()
     {
         session()->forget('shid');
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.ecommerce.kiosk.home');
+        return view('theme.'.config('app.frontend_template').'.ecommerce.kiosk.home');
     }
 
     public function menu(Request $request)
@@ -49,7 +49,7 @@ class KioskController extends Controller
         $miscs = DB::table('products')->where('for_sale', '1')->whereNull('deleted_at')->where('status','PUBLISHED')->where('for_sale_kiosk','1')->where('is_misc','1')->select('name')->distinct()->get();
 
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.ecommerce.kiosk.menu',compact('productCategories','page','miscs'));
+        return view('theme.'.config('app.frontend_template').'.ecommerce.kiosk.menu',compact('productCategories','page','miscs'));
 
     }
 
@@ -77,7 +77,7 @@ class KioskController extends Controller
         $page = new Page();
         $page->name = 'Cart';
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.ecommerce.kiosk.cart', compact('cart', 'totalProducts','page','expCounter'));
+        return view('theme.'.config('app.frontend_template').'.ecommerce.kiosk.cart', compact('cart', 'totalProducts','page','expCounter'));
     }
 
     public function batch_update(Request $request)
@@ -141,7 +141,7 @@ class KioskController extends Controller
             return redirect()->route('kiosk.menu');
         }
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.ecommerce.kiosk.checkout', compact('user','profile', 'products','locations','coupon','counter'));
+        return view('theme.'.config('app.frontend_template').'.ecommerce.kiosk.checkout', compact('user','profile', 'products','locations','coupon','counter'));
     }
 
     public function save_sales(Request $request)
@@ -455,7 +455,7 @@ class KioskController extends Controller
     {
         $sales = SalesHeader::find(session::get('shid'));
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.ecommerce.kiosk.success',compact('sales'));
+        return view('theme.'.config('app.frontend_template').'.ecommerce.kiosk.success',compact('sales'));
     }
 
 

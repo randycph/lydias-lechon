@@ -33,6 +33,6 @@ class EcommerceLoginController extends Controller
     {
         $footer = Page::where('slug', 'footer')->where('name', 'footer')->first();
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.pages.login', compact('footer'));
+        return view('theme.'.config('app.frontend_template').'.pages.login', compact('footer'));
     }
 }

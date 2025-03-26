@@ -288,7 +288,7 @@ class PageController extends Controller
         $breadcrumb = $this->breadcrumb($page);
 
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.main', compact('page', 'breadcrumb', 'menu', 'settings'));
+        return view('theme.'.config('app.frontend_template').'.main', compact('page', 'breadcrumb', 'menu', 'settings'));
     }
 
     public function breadcrumb($page)

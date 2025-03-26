@@ -1,4 +1,4 @@
-@extends('theme.'.env('FRONTEND_TEMPLATE').'.ecommerce.kiosk.main')
+@extends('theme.'.config('app.frontend_template').'.ecommerce.kiosk.main')
 
 @section('pagecss')
     <link rel="stylesheet" href="{{ asset('theme/lydias/plugins/slick/slick.css') }}">

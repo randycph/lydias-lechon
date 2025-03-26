@@ -1,4 +1,4 @@
-@extends('theme.'.env('FRONTEND_TEMPLATE').'.main')
+@extends('theme.'.config('app.frontend_template').'.main')
 @section('pagecss')
 {{--     <link rel="stylesheet" href="{{ asset('theme/lydias/plugins/vanilla-zoom/vanilla-zoom.css') }}" />
     <link rel="stylesheet" href="{{ asset('theme/lydias/plugins/responsive-tabs/css/responsive-tabs.css') }}" />

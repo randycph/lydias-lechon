@@ -39,7 +39,7 @@ class FrontController extends Controller
 
         $footer = Page::where('slug', 'footer')->where('name', 'footer')->first();
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.pages.privacy-policy', compact('page', 'footer'));
+        return view('theme.'.config('app.frontend_template').'.pages.privacy-policy', compact('page', 'footer'));
 
     }
 
@@ -70,10 +70,8 @@ class FrontController extends Controller
 
         $content = Shortcode::process($page->content);
 
-        dd(env('FRONTEND_TEMPLATE'));
-
         if (!empty($page->template)) {
-            return view('theme.'.env('FRONTEND_TEMPLATE').'.pages.'.$page->template, compact('footer','page', 'breadcrumb', 'content'));
+            return view('theme.'.config('app.frontend_template').'.pages.'.$page->template, compact('footer','page', 'breadcrumb', 'content'));
         }
 
         $parentPage = null;
@@ -89,7 +87,7 @@ class FrontController extends Controller
             }
         }
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.page', compact('footer', 'page', 'parentPage','breadcrumb'));
+        return view('theme.'.config('app.frontend_template').'.page', compact('footer', 'page', 'parentPage','breadcrumb'));
     }
 
     public function contact_us(ContactUsRequest $request)
@@ -110,7 +108,7 @@ class FrontController extends Controller
     public function careers() {
         $careers = Page::where('slug', 'careers')->where('name', 'Careers')->first();
         $page = $careers;
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.pages.careers', compact( 'careers','page'));
+        return view('theme.'.config('app.frontend_template').'.pages.careers', compact( 'careers','page'));
 
     }
 
@@ -146,7 +144,7 @@ class FrontController extends Controller
         $status = 'PAID';
         else $status = 'UNPAID';
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.pages.ecommerce.sales_summary',compact('sales','salesPayments','salesDetails','status','deliveries','gc'));
+        return view('theme.'.config('app.frontend_template').'.pages.ecommerce.sales_summary',compact('sales','salesPayments','salesDetails','status','deliveries','gc'));
     }
 
     public function show_sales_summary_guest($id)
@@ -171,7 +169,7 @@ class FrontController extends Controller
             }
         }
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.pages.ecommerce.sales_summary_guest',compact('sales','salesPayments','salesDetails','status','deliveries','gc'));
+        return view('theme.'.config('app.frontend_template').'.pages.ecommerce.sales_summary_guest',compact('sales','salesPayments','salesDetails','status','deliveries','gc'));
     }
 
     public function show_salessummary_admin($id)
@@ -194,7 +192,7 @@ class FrontController extends Controller
             }
         }
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.pages.ecommerce.sales_summary_admin',compact('sales','salesPayments','salesDetails','status','deliveries','gc'));
+        return view('theme.'.config('app.frontend_template').'.pages.ecommerce.sales_summary_admin',compact('sales','salesPayments','salesDetails','status','deliveries','gc'));
     }
 
 

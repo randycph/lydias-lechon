@@ -14,7 +14,7 @@ class BannerSeeder extends Seeder
         \App\Banner::insert([
             [
                 'album_id' => 1,
-                'image_path' => asset('theme/'.env('FRONTEND_TEMPLATE').'/images/banners/banner1.jpg'),
+                'image_path' => asset('theme/'.config('app.frontend_template').'/images/banners/banner1.jpg'),
                 'title' => 'EVERYDAY LECHON HAPPINESS',
                 'description' => 'HOME OF THE PHILIPPINES BEST TASTING ORIGINAL BONELESS LECHON WITH PAELLA.',
                 'alt' => '',
@@ -27,7 +27,7 @@ class BannerSeeder extends Seeder
             ],
             [
                 'album_id' => 2,
-                'image_path' => asset('theme/'.env('FRONTEND_TEMPLATE').'/images/banners/sub/subimage1.jpg'),
+                'image_path' => asset('theme/'.config('app.frontend_template').'/images/banners/sub/subimage1.jpg'),
                 'title' => null,
                 'description' => null,
                 'alt' => null,
@@ -40,7 +40,7 @@ class BannerSeeder extends Seeder
             ],
             [
                 'album_id' => 2,
-                'image_path' => asset('theme/'.env('FRONTEND_TEMPLATE').'/images/banners/sub/subimage2.jpg'),
+                'image_path' => asset('theme/'.config('app.frontend_template').'/images/banners/sub/subimage2.jpg'),
                 'title' => null,
                 'description' => null,
                 'alt' => null,
@@ -52,7 +52,7 @@ class BannerSeeder extends Seeder
                 'updated_at' => '2019-10-06 20:31:26'
             ],[
                 'album_id' => 1,
-                'image_path' => asset('theme/'.env('FRONTEND_TEMPLATE').'/images/banners/banner1.jpg'),
+                'image_path' => asset('theme/'.config('app.frontend_template').'/images/banners/banner1.jpg'),
                 'title' => 'EVERYDAY LECHON HAPPINESS',
                 'description' => 'HOME OF THE PHILIPPINES BEST TASTING ORIGINAL BONELESS LECHON WITH PAELLA.',
                 'alt' => '',

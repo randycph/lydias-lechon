@@ -17,6 +17,6 @@ class ProductsShortcodes
             return '';
         }
 
-        return sprintf(view('theme.'.env('FRONTEND_TEMPLATE').'.pages.shortcodes.home-products', compact('featuredProducts')), $shortcode->class, $content);
+        return sprintf(view('theme.'.config('app.frontend_template').'.pages.shortcodes.home-products', compact('featuredProducts')), $shortcode->class, $content);
     }
 }

@@ -1,4 +1,4 @@
-@extends('theme.'.env('FRONTEND_TEMPLATE').'.main')
+@extends('theme.'.config('app.frontend_template').'.main')
 
 @section('pagecss')
     <link rel="stylesheet" href="{{ asset('theme/lydias/plugins/jssocials/jssocials-theme-flat.min.css') }}" />
@@ -109,7 +109,7 @@
                             </div>
                         @endforelse
                         </div>
-                        {{ $articles->links('theme.'.env('FRONTEND_TEMPLATE').'.layout.pagination') }}
+                        {{ $articles->links('theme.'.config('app.frontend_template').'.layout.pagination') }}
                     </div>
                 </div>
             </div>
@@ -187,7 +187,7 @@
 {{--                                </div>--}}
 {{--                            </div>--}}
 {{--                        @endforelse--}}
-{{--                        {{ $articles->links('theme.'.env('FRONTEND_TEMPLATE').'.layout.pagination') }}--}}
+{{--                        {{ $articles->links('theme.'.config('app.frontend_template').'.layout.pagination') }}--}}
 {{--                    </div>--}}
 {{--                </div>--}}
 {{--            </div>--}}

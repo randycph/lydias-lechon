@@ -61,7 +61,7 @@ class CheckoutController extends Controller
                 $has_cochi = 1;
             }
         }
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.ecommerce.cart.checkout-lydias', compact('user','profile', 'products','branches','locations','coupon', 'has_cochi'));
+        return view('theme.'.config('app.frontend_template').'.ecommerce.cart.checkout-lydias', compact('user','profile', 'products','branches','locations','coupon', 'has_cochi'));
     }
 
     public function checkout_as_guest()
@@ -96,7 +96,7 @@ class CheckoutController extends Controller
                 $has_cochi = 1;
             }
         }
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.ecommerce.cart.checkout-as-guest', compact('products','branches','locations', 'has_cochi'));
+        return view('theme.'.config('app.frontend_template').'.ecommerce.cart.checkout-as-guest', compact('products','branches','locations', 'has_cochi'));
     }
 
     public function payment_completed() {
@@ -266,7 +266,7 @@ class CheckoutController extends Controller
 
         Cart::where('user_id', Auth::id())->delete();
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.ecommerce.cart.paynamics-sender', compact('products','requestId', 'member'));
+        return view('theme.'.config('app.frontend_template').'.ecommerce.cart.paynamics-sender', compact('products','requestId', 'member'));
     }
 
     public function receive_data_from_payment_gateway(Request $request)

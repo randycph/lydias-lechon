@@ -328,7 +328,7 @@ class ArticleController extends Controller
 
         $breadcrumb = $this->breadcrumb($article);
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.main',compact('page','breadcrumb'));
+        return view('theme.'.config('app.frontend_template').'.main',compact('page','breadcrumb'));
 
     }
 
@@ -342,7 +342,7 @@ class ArticleController extends Controller
         $date = collect($dates);
         $years = $date->unique('yr')->all();
 
-        return view('theme.'.env('FRONTEND_TEMPLATE').'.pages.news-list',compact('articles','breadcrumb','years'));
+        return view('theme.'.config('app.frontend_template').'.pages.news-list',compact('articles','breadcrumb','years'));
 
     }
 

@@ -78,8 +78,8 @@
 
     <div class="page">
 
-        @include('theme.'.env('FRONTEND_TEMPLATE').'.layout.header')
-        @include('theme.'.env('FRONTEND_TEMPLATE').'.layout.banner')
+        @include('theme.'.config('app.frontend_template').'.layout.header')
+        @include('theme.'.config('app.frontend_template').'.layout.banner')
 {{--                <div id="alert_success" style="display:none;" class="alert alert-success" role="alert">--}}
 {{--                    {{ Session::get('success') }}--}}
 {{--                </div>--}}
@@ -255,7 +255,7 @@
             </div>
         </div>
 
-        @include('theme.'.env('FRONTEND_TEMPLATE').'.layout.footer')
+        @include('theme.'.config('app.frontend_template').'.layout.footer')
         <!-- Page Footer -->
 
             <!-- END Page Footer -->

@@ -144,6 +144,8 @@ return [
         // 'store' => 'redis',
     ],
 
+    'frontend_template' => env('FRONTEND_TEMPLATE', 'home'),
+
     /*
     |--------------------------------------------------------------------------
     | Autoloaded Service Providers

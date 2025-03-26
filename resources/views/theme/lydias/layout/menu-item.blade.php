@@ -14,7 +14,7 @@
         @if ($item->has_sub_menus())
             <ul>
                 @foreach ($item->sub_pages as $subItem)
-                    @include('theme.'.env('FRONTEND_TEMPLATE').'.layout.menu-item', ['item' => $subItem])
+                    @include('theme.'.config('app.frontend_template').'.layout.menu-item', ['item' => $subItem])
                 @endforeach
 
 {{--            START NEWS CATEGORY--}}
@@ -42,7 +42,7 @@
         @if ($item->has_sub_menus())
             <ul>
                 @foreach ($item->sub_pages as $subItem)
-                    @include('theme.'.env('FRONTEND_TEMPLATE').'.layout.menu-item', ['item' => $subItem])
+                    @include('theme.'.config('app.frontend_template').'.layout.menu-item', ['item' => $subItem])
                 @endforeach
             </ul>
         @endif
