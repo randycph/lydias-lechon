@@ -16,18 +16,18 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @if(!empty($page->name) && $page->name == 'Home')
-        <title>{{ \App\Helpers\Webfocus\Setting::info()->company_name }}</title>
+        <title>{{ App\Helpers\Webfocus\Setting::info()->company_name }}</title>
     @else
         @if (!empty($page->name) || !empty($page->meta_title))
-            <title>{{ (empty($page->meta_title) ? $page->name:$page->meta_title) }} | {{ \App\Helpers\Webfocus\Setting::info()->company_name }}</title>
+            <title>{{ (empty($page->meta_title) ? $page->name:$page->meta_title) }} | {{ App\Helpers\Webfocus\Setting::info()->company_name }}</title>
         @else
-             <title>{{ \App\Helpers\Webfocus\Setting::info()->company_name }}</title>
+             <title>{{ App\Helpers\Webfocus\Setting::info()->company_name }}</title>
         @endif
     @endif
     <meta name="description" content="{{ $page->meta_description }}">
     <meta name="keywords" content="{{ $page->meta_keyword }}">
 
-    <link rel="shortcut icon" href="{{ \App\Helpers\Webfocus\Setting::get_company_favicon_storage_path() }}" type="image/x-icon" />
+    <link rel="shortcut icon" href="{{ App\Helpers\Webfocus\Setting::get_company_favicon_storage_path() }}" type="image/x-icon" />
     <link href="https://fonts.googleapis.com/css?family=Work+Sans:300,400,700" rel="stylesheet">
     {{-- <script  src="https://code.jquery.com/jquery-3.5.1.js"  integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="  crossorigin="anonymous"></script> 
     <script  src="https://code.jquery.com/jquery-2.2.4.js"  integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI="  crossorigin="anonymous"></script>--}}
@@ -72,7 +72,7 @@
         });
     </script>
 
-    {!! \App\Helpers\Webfocus\Setting::info()->google_analytics !!}
+    {!! App\Helpers\Webfocus\Setting::info()->google_analytics !!}
 
     <script>
         window.Laravel = {!! json_encode([
@@ -196,7 +196,7 @@
         </div>
 
 
-        {!! \App\Helpers\Webfocus\Setting::getAds()->contents !!}
+        {!! App\Helpers\Webfocus\Setting::getAds()->contents !!}
 
         {!! \App\Helpers\Shortcode::process("[latest homepage]") !!}
 
@@ -400,13 +400,13 @@
         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalCenterTitle">{!! \App\Helpers\Webfocus\Setting::getImportantReminders()->label !!}</h5>
+                    <h5 class="modal-title" id="exampleModalCenterTitle">{!! App\Helpers\Webfocus\Setting::getImportantReminders()->label !!}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    {!! \App\Helpers\Webfocus\Setting::getImportantReminders()->contents !!}
+                    {!! App\Helpers\Webfocus\Setting::getImportantReminders()->contents !!}
                 </div>
                 <div class="modal-footer">
                     <a href="{{route('product.front.show_forsale')}}" class="btn btn-success">I accept</a>
@@ -419,11 +419,11 @@
         <div class="modal-dialog modal-dialog-centered modal" role="document">
             <div class="modal-content">
             @php
-                $disabled_order_dates = explode(",",\App\Helpers\Webfocus\Setting::info()->disable_pickup_dates);
-                $disabled_delivery_dates = explode(",",\App\Helpers\Webfocus\Setting::info()->disable_delivery_dates);
+                $disabled_order_dates = explode(",",App\Helpers\Webfocus\Setting::info()->disable_pickup_dates);
+                $disabled_delivery_dates = explode(",",App\Helpers\Webfocus\Setting::info()->disable_delivery_dates);
                 $current_date=date('Y-m-d');
                 $is_order_allow = 1;
-                if(\App\Helpers\Webfocus\Setting::info()->disable_order == 1 && \App\Helpers\Webfocus\Setting::info()->disable_delivery == 1){
+                if(App\Helpers\Webfocus\Setting::info()->disable_order == 1 && App\Helpers\Webfocus\Setting::info()->disable_delivery == 1){
                     if(in_array($current_date, $disabled_order_dates) && in_array($current_date, $disabled_delivery_dates)){
                         $is_order_allow = 0;
                     }
@@ -444,7 +444,7 @@
                             <div class="row no-gutters">
                                 <div class="col-6 text-center border rounded p-3">
                                     <h6><strong>Pick-up</strong></h6>
-                                    @if(\App\Helpers\Webfocus\Setting::info()->disable_order == 0)
+                                    @if(App\Helpers\Webfocus\Setting::info()->disable_order == 0)
                                         <a href="#" onclick="set_deliver_option('pick-up');">
                                             <img src="{{ asset('images/order/pickup.jpg') }}" />
                                         </a>
@@ -463,7 +463,7 @@
                                 </div>
                                 <div class="col-6 text-center border rounded p-3">
                                     <h6><strong>Delivery</strong></h6>
-                                    @if(\App\Helpers\Webfocus\Setting::info()->disable_delivery == 0)
+                                    @if(App\Helpers\Webfocus\Setting::info()->disable_delivery == 0)
                                         <a href="#"  onclick="set_deliver_option('delivery');">                                            
                                             <img src="{{ asset('images/order/delivery.jpg') }}" />
                                         </a>
@@ -500,7 +500,7 @@
                 </div>
                 <div class="modal-body">
                     <div style="white-space: pre-line">
-                   {!! \App\Helpers\Webfocus\Setting::info()->order_message !!}
+                   {!! App\Helpers\Webfocus\Setting::info()->order_message !!}
                    </div>
                 </div>
             @endif
@@ -521,7 +521,7 @@
                 </div>
                 <div class="modal-body">
                     <div style="white-space: pre-line">
-                   {!! \App\Helpers\Webfocus\Setting::info()->order_message !!}
+                   {!! App\Helpers\Webfocus\Setting::info()->order_message !!}
                    </div>
                 </div>
             </div>            
@@ -539,7 +539,7 @@
                 </div>
                 <div class="modal-body">
                     <div style="white-space: pre-line">
-                   {!! \App\Helpers\Webfocus\Setting::info()->announcement !!}
+                   {!! App\Helpers\Webfocus\Setting::info()->announcement !!}
                     </div>
                 </div>   
                 <div class="modal-footer">
@@ -550,7 +550,7 @@
     </div>
 
 
-    @if(\App\Helpers\Webfocus\Setting::getPromoAds()->status == "PUBLISHED")
+    @if(App\Helpers\Webfocus\Setting::getPromoAds()->status == "PUBLISHED")
         <div id="ns-box" class="modal fade onload-page" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
@@ -561,7 +561,7 @@
                     </div>
                     <div class="modal-body">
                         <div class="modal-promo">
-                         {!! \App\Helpers\Webfocus\Setting::getPromoAds()->contents !!}
+                         {!! App\Helpers\Webfocus\Setting::getPromoAds()->contents !!}
                         </div>
                     </div>
                 </div>
@@ -624,7 +624,7 @@
 
     <script>
         function show_announcement_global(){
-            @if(strlen(\App\Helpers\Webfocus\Setting::info()->announcement) > 7)
+            @if(strlen(App\Helpers\Webfocus\Setting::info()->announcement) > 7)
                 $('#announcement_modal').modal('show');
             @endif
         }
