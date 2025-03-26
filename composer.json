@@ -53,6 +53,7 @@
             "database/factories"
         ]
     },
+    "platform-check": false,
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/"
