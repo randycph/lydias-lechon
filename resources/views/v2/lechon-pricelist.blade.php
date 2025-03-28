@@ -88,22 +88,28 @@ $lists = [
 ];
 @endphp
 
-    <div x-data="{ lechonCart: false }">
-        <div class="pt-20 pb-5 px-4">
-            <h3 class="font-medium uppercase text-center mt-10">Find the perfect lechon for your budget</hh3>
-            <h1 class="text-4xl font-cubao font-medium text-primary text-center">lechon pricelist</h1>
+    <div x-data="{ lechonCart: false }" class="">
+        <div class="pt-20 pb-5 px-4 container">
+            <h3 class="font-medium uppercase text-center mt-10 text-base lg:text-3xl">Find the perfect lechon for your budget</hh3>
+            <h1 class="text-4xl lg:text-7xl font-cubao font-medium text-primary text-center">lechon pricelist</h1>
+        </div>
+
+        <div>
+
         </div>
     
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 lechons pb-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 lechons pb-10 container">
             @foreach ($lists as $list)
-            <div class="bg-white shadow-md rounded-lg  border-primary border-2 lechon">
+            <div class="bg-white shadow-md rounded-lg  border-primary border lechon flex flex-col justify-between">
                 <img src="{{ asset('images/' .  $list['image']) }}" alt="{{ $list['name'] }}" class="px-4">
                 <div class="mt-4 px-4">
-                    <h2 class="text-2xl font-cubao font-medium text-primary text-left">{{ $list['name'] }}</h2>
-                    <div class="text-tertiary text-2xl font-semibold mt-2">{{ $list['price'] }}</div>
+                    <h2 class="text-2xl lg:text-3xl font-cubao font-medium text-primary text-left">{{ $list['name'] }}</h2>
+                    <div class="text-tertiary text-2xl lg:text-5xl font-semibold mt-2">{{ $list['price'] }}</div>
                 </div>
-                <hr class="text-primary my-4">
-                <div class="mt-4 flex flex-col gap-2 p-4">
+                <div class="lg:border-t border-primary border-opacity-50 border-t mt-5">
+
+                </div>
+                <div class="mt-2 flex flex-col gap-2 p-4">
                     @if (isset($list['description']))
                     <div class="flex items-center text-primary gap-2">
                         <svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -116,7 +122,7 @@ $lists = [
                             </clipPath>
                             </defs>
                         </svg>
-                        <span class=" font-semibold">{{ $list['description'] }}</span>
+                        <span class="font-semibold">{{ $list['description'] }}</span>
                     </div>
                     @endif
                     @if (isset($list['weight']))
@@ -166,13 +172,13 @@ $lists = [
                     </div>
                     @endif
                     @if (isset($list['add']))
-                    <div class="text-sm text-tertiary mt-2">
+                    <div class="text-sm  lg:text-base text-tertiary lg:text-primary mt-2">
                         {{ $list['add'] }}
                     </div>
                     @endif
                 </div>
-                <div class="mt-4 border-t-2 border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 w-full hover:bg-primary hover:text-white">Add to Cart</button>
+                <div class="mt-4 border-t border-primary ">
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -180,8 +186,8 @@ $lists = [
     
         <x-faq-component />
     
-        <div class="py-10 px-4">
-            <h2 class="text-2xl font-cubao font-medium text-tertiary text-center">your #everydaylechonhappiness</h2>
+        <div class="py-10 lg:py-20 px-4">
+            <h2 class="text-2xl lg:text-7xl font-cubao font-medium text-secondary text-center">your #everydaylechonhappiness</h2>
         </div>
     
         <x-footer-component />
