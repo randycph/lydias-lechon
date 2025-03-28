@@ -72,32 +72,41 @@
 
     <x-timeline-component />
 
-    <div class="px-4 py-10 flex flex-col gap-10">
-        <div>
-            <img src="{{ asset('images/story1.png') }}" alt="Lechon delivery at your doorstep" class="w-full rounded-md h-[250px] object-cover">
-            <h2 class="text-3xl font-cubao font-light text-primary text-left my-2">More than just lechon</h2>
-            <p class="font-medium">
-                While our lechon is often the star of big celebrations, we believe <strong>great food can make any day special</strong>. Lydia’s Lechon is perfect for any meal, whether you’re gathering with friends or enjoying a quiet family dinner. Over the years, we’ve expanded our menu with traditional Filipino dishes that pair perfectly with our famous lechon, offering something for every occasion.
-            </p>
-        </div>
-        <div>
-            <img src="{{ asset('images/story2.png') }}" alt="Lechon delivery at your doorstep" class="w-full rounded-md h-[250px] object-cover">
-            <h2 class="text-3xl font-cubao font-light text-primary text-left my-2">Rooted in Family and Togetherness</h2>
-            <p class="font-medium">
-                At Lydia’s Lechon, our values are simple: <strong>food brings people together</strong>. We’re proud to have been part of countless family traditions, celebrations, and milestones over the decades. Every meal with Lydia’s is an opportunity to connect, share, and create memories.
-            </p>
-        </div>
-        <div>
-            <img src="{{ asset('images/story3.png') }}" alt="Lechon delivery at your doorstep" class="w-full rounded-md h-[250px] object-cover">
-            <div class="text-lg font-bold text-secondary text-left my-2">
-                #SmallWinsMatter
+    <div class="py-20">
+        <div class="px-4 flex flex-col gap-2 lg:flex-row lg:gap-20 container items-center">
+            <img src="{{ asset('images/story1.png') }}" alt="Lechon delivery at your doorstep" class="max-w-[650px] max-h-[500px] order-1 lg:h-auto w-full rounded-md h-[250px] object-cover">
+            <div class="order-2">
+                <h2 class="text-4xl lg:text-7xl font-cubao font-medium text-primary text-left my-4">More than just lechon</h2>
+                <p>
+                    While our lechon is often the star of big celebrations, we believe <strong>great food can make any day special</strong>. Lydia’s Lechon is perfect for any meal, whether you’re gathering with friends or enjoying a quiet family dinner. Over the years, we’ve expanded our menu with traditional Filipino dishes that pair perfectly with our famous lechon, offering something for every occasion.
+                </p>
             </div>
-            <h2 class="text-3xl font-cubao font-light text-primary text-left my-2">Celebrating Everyday Moments</h2>
-            <p class="font-medium">
-                At Lydia’s Lechon, we believe that life’s <strong>small victories deserve to be celebrated</strong>. Whether it’s gathering with loved ones for a simple meal or surprising someone with a thoughtful gesture, these everyday moments bring joy and connection. Lydia’s Lechon is proud to be part of these occasions, making even the smallest wins feel special.
-            </p>
+        </div>
+    
+        <div class="px-4 flex flex-col gap-2 lg:flex-row lg:gap-20 container items-center mt-10 lg:mt-20">
+            <img src="{{ asset('images/story2.png') }}" alt="Lechon delivery at your doorstep" class="max-w-[650px] max-h-[500px] order-1 lg:order-2 lg:h-auto mt-10 w-full rounded-md h-[250px] object-cover">
+            <div class="order-2 lg:order-1">
+                <h2 class="text-4xl lg:text-7xl font-cubao font-medium text-primary text-left my-4">Rooted in Family and Togetherness</h2>
+                <p>
+                    At Lydia’s Lechon, our values are simple: <strong>food brings people together</strong>. We’re proud to have been part of countless family traditions, celebrations, and milestones over the decades. Every meal with Lydia’s is an opportunity to connect, share, and create memories.
+                </p>
+            </div>
+        </div>
+
+        <div class="px-4 flex flex-col gap-2 lg:flex-row lg:gap-20 container items-center lg:mt-20">
+            <img src="{{ asset('images/story3.png') }}" alt="Lechon delivery at your doorstep" class="max-w-[650px] max-h-[500px] order-1 lg:h-auto w-full rounded-md h-[250px] object-cover">
+            <div class="order-2">
+                <div class="text-lg lg:text-3xl font-bold text-secondary text-left my-2">
+                    #SmallWinsMatter
+                </div>
+                <h2 class="text-4xl lg:text-7xl font-cubao font-medium text-primary text-left my-4">Celebrating Everyday Moments</h2>
+                <p>
+                    At Lydia’s Lechon, we believe that life’s <strong>small victories deserve to be celebrated</strong>. Whether it’s gathering with loved ones for a simple meal or surprising someone with a thoughtful gesture, these everyday moments bring joy and connection. Lydia’s Lechon is proud to be part of these occasions, making even the smallest wins feel special.
+                </p>
+            </div>
         </div>
     </div>
+
 
     <x-footer-component />
     
