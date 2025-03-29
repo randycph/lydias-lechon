@@ -46,6 +46,14 @@
         marketingPopup: false, 
         openHotline: false,
         openContactUs: false,
+        addedToCart: false,
+        addToCart() {
+        console.log('sssss')
+            this.addedToCart = true;
+            setTimeout(() => {
+                this.addedToCart = false;
+            }, 3000);
+        }
     }"
     x-init="
         const lockScroll = () => {
@@ -80,6 +88,10 @@
     >
     
     <x-navigation-component :page="$page ?? ''" />
+
+    <div class="container relative">
+        <x-added-to-cart-component />
+    </div>
 
     <x-cart-component />
 

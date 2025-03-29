@@ -74,6 +74,15 @@ document.addEventListener("DOMContentLoaded", function () {
             slidesPerView: 2,
             centeredSlides: false,
 
+            breakpoints: {
+                768: {
+                    slidesPerView: 4,
+                },
+                1024: {
+                    slidesPerView: 5,
+                },
+            },
+
             spaceBetween: 15,
 
             pagination: {
