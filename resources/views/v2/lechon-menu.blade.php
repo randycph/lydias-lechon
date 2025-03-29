@@ -88,10 +88,10 @@ $lists = [
 ];
 @endphp
 
-    <div x-data="{ lechonCart: false }" class="px-1">
+    <div class="px-1 container">
         <div class="pt-20 pb-5 px-4">
-            <h3 class="font-medium uppercase text-center mt-10">LECHON AND BEYOND</hh3>
-            <h1 class="text-4xl font-cubao font-medium text-primary text-center">a menu made for every occassion</h1>
+            <h3 class="font-medium uppercase text-center mt-10 lg:text-2xl text-base">LECHON AND BEYOND</hh3>
+            <h1 class="text-4xl lg:text-7xl font-cubao font-medium text-primary text-center">a menu made for every occassion</h1>
         </div>
 
         @php
@@ -163,13 +163,13 @@ $lists = [
             ];
         @endphp
 
-        <div class="relative px-4">
+        <div class="relative px-4 py-5 lg:py-10">
             <div class="swiper swiper-menus relative">
                 <div class="swiper-wrapper">
                     @foreach ($products as $product)
                     <div class="swiper-slide !flex items-center justify-center p-4 flex-col !w-[140px] h-[140px]">
                         <div class="bg-secondary p-2 rounded-lg items-center w-[140px] h-[140px] flex flex-col justify-center overflow-hidden">
-                            <img src="{{ asset('images/' . $product['image']) }}" alt="Anniversary Give-Back Promo" class="scale-125">
+                            <img src="{{ asset('images/' . $product['image']) }}" alt="Anniversary Give-Back Promo" class="">
                         </div>
                         <div class="font-semibold text-center mt-2">{{ $product['name'] }}</div>
                     </div>
@@ -188,22 +188,25 @@ $lists = [
             </button>
         </div>
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
             whole lechon
         </div>
     
         <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
             @foreach ($lists as $list)
-            <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                    <img src="{{ asset('images/' .  $list['image']) }}" alt="{{ $list['name'] }}" class="px-4 scale-125">
+            <div class="bg-white shadow-md  rounded-lg border-primary border lechon">
+                <div class="p-2">
+                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md lg:rounded-lg bg-center">
+                        <img src="{{ asset('images/' .  $list['image']) }}" alt="{{ $list['name'] }}" class="px-4 scale-110">
+                    </div>
+                    <div class="mt-4 px-2">
+                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $list['price'] }}</div>
+                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $list['name'] }}</h2>
+                    </div>
                 </div>
-                <div class="mt-4 px-2">
-                    <div class="text-primary text-base font-bold mt-2">{{ $list['price'] }}</div>
-                    <h2 class="text-left text-sm mt-1 uppercase">{{ $list['name'] }}</h2>
-                </div>
+                
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary text-sm px-4 py-3 w-full hover:bg-primary hover:text-white">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -239,22 +242,24 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
             lechon-in-a-box
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
             @foreach ($boxes as $box)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                    <img src="{{ asset('images/' .  $box['image']) }}" alt="{{ $box['name'] }}" class="px-4 scale-125">
-                </div>
-                <div class="mt-4 px-2">
-                    <div class="text-primary text-base font-bold mt-2">{{ $box['price'] }}</div>
-                    <h2 class="text-left text-sm mt-1 uppercase">{{ $box['name'] }}</h2>
+                <div class="p-2">
+                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                        <img src="{{ asset('images/' .  $box['image']) }}" alt="{{ $box['name'] }}" class="px-4 scale-110">
+                    </div>
+                    <div class="mt-4 px-2">
+                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $box['price'] }}</div>
+                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $box['name'] }}</h2>
+                    </div>
                 </div>
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary text-sm px-4 py-3 w-full hover:bg-primary hover:text-white">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -275,22 +280,24 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
             Lydia’s family boxes
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
             @foreach ($familyboxes as $box)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                    <img src="{{ asset('images/' .  $box['image']) }}" alt="{{ $box['name'] }}" class="px-4 scale-125">
-                </div>
-                <div class="mt-4 px-2">
-                    <div class="text-primary text-base font-bold mt-2">{{ $box['price'] }}</div>
-                    <h2 class="text-left text-sm mt-1 uppercase">{{ $box['name'] }}</h2>
+                <div class="p-2">
+                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                        <img src="{{ asset('images/' .  $box['image']) }}" alt="{{ $box['name'] }}" class="px-4 scale-110">
+                    </div>
+                    <div class="mt-4 px-2">
+                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $box['price'] }}</div>
+                        <h2 class="text-left text-sm mt-1 lg:text-xl uppercase">{{ $box['name'] }}</h2>
+                    </div>
                 </div>
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary text-sm px-4 py-3 w-full hover:bg-primary hover:text-white">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -331,22 +338,24 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
             lechon espesyal
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
             @foreach ($specials as $box)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                    <img src="{{ asset('images/' .  $box['image']) }}" alt="{{ $box['name'] }}" class="px-4 scale-125">
-                </div>
-                <div class="mt-4 px-2">
-                    <div class="text-primary text-base font-bold mt-2">{{ $box['price'] }}</div>
-                    <h2 class="text-left text-sm mt-1 uppercase">{{ $box['name'] }}</h2>
+                <div class="p-2">
+                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                        <img src="{{ asset('images/' .  $box['image']) }}" alt="{{ $box['name'] }}" class="px-4 scale-110">
+                    </div>
+                    <div class="mt-4 px-2">
+                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $box['price'] }}</div>
+                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $box['name'] }}</h2>
+                    </div>
                 </div>
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary text-sm px-4 py-3 w-full hover:bg-primary hover:text-white">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -397,22 +406,25 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
             party trays
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
             @foreach ($trays as $tray)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                    <img src="{{ asset('images/' .  $tray['image']) }}" alt="{{ $tray['name'] }}" class="px-4 scale-125">
+                <div class="p-2">
+                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                        <img src="{{ asset('images/' .  $tray['image']) }}" alt="{{ $tray['name'] }}" class="px-4 scale-110">
+                    </div>
+                    <div class="mt-4 px-2">
+                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $tray['price'] }}</div>
+                        <h2 class="text-left text-sm mt-1 lg:text-xl uppercase">{{ $tray['name'] }}</h2>
+                    </div>
                 </div>
-                <div class="mt-4 px-2">
-                    <div class="text-primary text-base font-bold mt-2">{{ $tray['price'] }}</div>
-                    <h2 class="text-left text-sm mt-1 uppercase">{{ $tray['name'] }}</h2>
-                </div>
+                
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary text-sm px-4 py-3 w-full hover:bg-primary hover:text-white">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -453,22 +465,25 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
             lechon quick meals
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
             @foreach ($trays as $tray)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                    <img src="{{ asset('images/' .  $tray['image']) }}" alt="{{ $tray['name'] }}" class="px-4 scale-125">
+                <div class="p-2">
+                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                        <img src="{{ asset('images/' .  $tray['image']) }}" alt="{{ $tray['name'] }}" class="px-4 scale-110">
+                    </div>
+                    <div class="mt-4 px-2">
+                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $tray['price'] }}</div>
+                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $tray['name'] }}</h2>
+                    </div>
                 </div>
-                <div class="mt-4 px-2">
-                    <div class="text-primary text-base font-bold mt-2">{{ $tray['price'] }}</div>
-                    <h2 class="text-left text-sm mt-1 uppercase">{{ $tray['name'] }}</h2>
-                </div>
+                
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary text-sm px-4 py-3 w-full hover:bg-primary hover:text-white">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -494,22 +509,25 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
             lydia’s bento meals
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
             @foreach ($bentos as $bento)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                    <img src="{{ asset('images/' .  $bento['image']) }}" alt="{{ $bento['name'] }}" class="px-4 scale-125">
+                <div class="p-2">
+                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                        <img src="{{ asset('images/' .  $bento['image']) }}" alt="{{ $bento['name'] }}" class="px-4 scale-110">
+                    </div>
+                    <div class="mt-4 px-2">
+                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $bento['price'] }}</div>
+                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $bento['name'] }}</h2>
+                    </div>
                 </div>
-                <div class="mt-4 px-2">
-                    <div class="text-primary text-base font-bold mt-2">{{ $bento['price'] }}</div>
-                    <h2 class="text-left text-sm mt-1 uppercase">{{ $bento['name'] }}</h2>
-                </div>
+                
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary text-sm px-4 py-3 w-full hover:bg-primary hover:text-white">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -530,22 +548,25 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
             pampagana
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
             @foreach ($pampaganas as $pampagana)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                    <img src="{{ asset('images/' .  $pampagana['image']) }}" alt="{{ $pampagana['name'] }}" class="px-4 scale-125">
+                <div class="p-2">
+                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                        <img src="{{ asset('images/' .  $pampagana['image']) }}" alt="{{ $pampagana['name'] }}" class="px-4 scale-110">
+                    </div>
+                    <div class="mt-4 px-2">
+                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $pampagana['price'] }}</div>
+                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $pampagana['name'] }}</h2>
+                    </div>
                 </div>
-                <div class="mt-4 px-2">
-                    <div class="text-primary text-base font-bold mt-2">{{ $pampagana['price'] }}</div>
-                    <h2 class="text-left text-sm mt-1 uppercase">{{ $pampagana['name'] }}</h2>
-                </div>
+                
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary text-sm px-4 py-3 w-full hover:bg-primary hover:text-white">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -581,22 +602,25 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
             meaty espesyal
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
             @foreach ($meaties as $meaty)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                    <img src="{{ asset('images/' .  $meaty['image']) }}" alt="{{ $meaty['name'] }}" class="px-4 scale-125">
+                <div class="p-2">
+                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                        <img src="{{ asset('images/' .  $meaty['image']) }}" alt="{{ $meaty['name'] }}" class="px-4 scale-110">
+                    </div>
+                    <div class="mt-4 px-2">
+                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $meaty['price'] }}</div>
+                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $meaty['name'] }}</h2>
+                    </div>
                 </div>
-                <div class="mt-4 px-2">
-                    <div class="text-primary text-base font-bold mt-2">{{ $meaty['price'] }}</div>
-                    <h2 class="text-left text-sm mt-1 uppercase">{{ $meaty['name'] }}</h2>
-                </div>
+                
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary text-sm px-4 py-3 w-full hover:bg-primary hover:text-white">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -622,22 +646,25 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
             gulay atbp.
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
             @foreach ($gulays as $gulay)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                    <img src="{{ asset('images/' .  $gulay['image']) }}" alt="{{ $gulay['name'] }}" class="px-4 scale-125">
+                <div class="p-2">
+                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                        <img src="{{ asset('images/' .  $gulay['image']) }}" alt="{{ $gulay['name'] }}" class="px-4 scale-110">
+                    </div>
+                    <div class="mt-4 px-2">
+                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $gulay['price'] }}</div>
+                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $gulay['name'] }}</h2>
+                    </div>
                 </div>
-                <div class="mt-4 px-2">
-                    <div class="text-primary text-base font-bold mt-2">{{ $gulay['price'] }}</div>
-                    <h2 class="text-left text-sm mt-1 uppercase">{{ $gulay['name'] }}</h2>
-                </div>
+                
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary text-sm px-4 py-3 w-full hover:bg-primary hover:text-white">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -658,22 +685,25 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
             yamang dagat
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
             @foreach ($yamangdagats as $yamangdagat)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                    <img src="{{ asset('images/' .  $yamangdagat['image']) }}" alt="{{ $yamangdagat['name'] }}" class="px-4 scale-125">
+                <div class="p-2">
+                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                        <img src="{{ asset('images/' .  $yamangdagat['image']) }}" alt="{{ $yamangdagat['name'] }}" class="px-4 scale-110">
+                    </div>
+                    <div class="mt-4 px-2">
+                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $yamangdagat['price'] }}</div>
+                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $yamangdagat['name'] }}</h2>
+                    </div>
                 </div>
-                <div class="mt-4 px-2">
-                    <div class="text-primary text-base font-bold mt-2">{{ $yamangdagat['price'] }}</div>
-                    <h2 class="text-left text-sm mt-1 uppercase">{{ $yamangdagat['name'] }}</h2>
-                </div>
+                
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary text-sm px-4 py-3 w-full hover:bg-primary hover:text-white">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -694,22 +724,25 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
             meryenda
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
             @foreach ($meryendas as $meryenda)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                    <img src="{{ asset('images/' .  $meryenda['image']) }}" alt="{{ $meryenda['name'] }}" class="px-4 scale-125">
+                <div class="p-2">
+                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                        <img src="{{ asset('images/' .  $meryenda['image']) }}" alt="{{ $meryenda['name'] }}" class="px-4 scale-110">
+                    </div>
+                    <div class="mt-4 px-2">
+                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $meryenda['price'] }}</div>
+                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $meryenda['name'] }}</h2>
+                    </div>
                 </div>
-                <div class="mt-4 px-2">
-                    <div class="text-primary text-base font-bold mt-2">{{ $meryenda['price'] }}</div>
-                    <h2 class="text-left text-sm mt-1 uppercase">{{ $meryenda['name'] }}</h2>
-                </div>
+                
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary text-sm px-4 py-3 w-full hover:bg-primary hover:text-white">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -725,22 +758,25 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
             kanin
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
             @foreach ($kanins as $kanin)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                    <img src="{{ asset('images/' .  $kanin['image']) }}" alt="{{ $kanin['name'] }}" class="px-4 scale-125">
+                <div class="p-2">
+                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                        <img src="{{ asset('images/' .  $kanin['image']) }}" alt="{{ $kanin['name'] }}" class="px-4 scale-110">
+                    </div>
+                    <div class="mt-4 px-2">
+                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $kanin['price'] }}</div>
+                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $kanin['name'] }}</h2>
+                    </div>
                 </div>
-                <div class="mt-4 px-2">
-                    <div class="text-primary text-base font-bold mt-2">{{ $kanin['price'] }}</div>
-                    <h2 class="text-left text-sm mt-1 uppercase">{{ $kanin['name'] }}</h2>
-                </div>
+                
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary text-sm px-4 py-3 w-full hover:bg-primary hover:text-white">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -776,30 +812,33 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
             mga inumin
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
             @foreach ($drinks as $drink)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                    <img src="{{ asset('images/' .  $drink['image']) }}" alt="{{ $drink['name'] }}" class="px-4 scale-125">
+                <div class="p-2">
+                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                        <img src="{{ asset('images/' .  $drink['image']) }}" alt="{{ $drink['name'] }}" class="px-4 scale-110">
+                    </div>
+                    <div class="mt-4 px-2">
+                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $drink['price'] }}</div>
+                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $drink['name'] }}</h2>
+                    </div>
                 </div>
-                <div class="mt-4 px-2">
-                    <div class="text-primary text-base font-bold mt-2">{{ $drink['price'] }}</div>
-                    <h2 class="text-left text-sm mt-1 uppercase">{{ $drink['name'] }}</h2>
-                </div>
+                
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary text-sm px-4 py-3 w-full hover:bg-primary hover:text-white">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
         </div>
     
-        <x-footer-component />
-    
         <x-lechon-cart-component />
     </div>
+    
+    <x-footer-component />
     
 @endsection

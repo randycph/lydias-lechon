@@ -88,7 +88,7 @@ $lists = [
 ];
 @endphp
 
-    <div x-data="{ lechonCart: false }" class="">
+    <div class="">
         <div class="pt-20 pb-5 px-4 container">
             <h3 class="font-medium uppercase text-center mt-10 text-base lg:text-3xl">Find the perfect lechon for your budget</hh3>
             <h1 class="text-4xl lg:text-7xl font-cubao font-medium text-primary text-center">lechon pricelist</h1>

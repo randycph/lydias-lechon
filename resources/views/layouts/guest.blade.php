@@ -47,8 +47,8 @@
         openHotline: false,
         openContactUs: false,
         addedToCart: false,
+        lechonCart: false,
         addToCart() {
-        console.log('sssss')
             this.addedToCart = true;
             setTimeout(() => {
                 this.addedToCart = false;
@@ -73,7 +73,7 @@
         };
 
         const lockBody = () => {
-            if (open || openCart || marketingPopup || openHotline || openContactUs) {
+            if (open || openCart || marketingPopup || openHotline || openContactUs || lechonCart) {
                 lockScroll();
             } else {
                 unlockScroll();
@@ -84,6 +84,7 @@
         $watch('marketingPopup', lockBody);
         $watch('openHotline', lockBody);
         $watch('openContactUs', lockBody);
+        $watch('lechonCart', lockBody);
     "
     >
     
