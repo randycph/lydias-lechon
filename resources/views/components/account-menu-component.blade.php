@@ -1,4 +1,4 @@
-<div class="rounded-lg border bg-white border-[#DFDFDF] shadow-md mt-10">
+<div class="rounded-lg border bg-white border-[#DFDFDF] shadow-md">
     <div class="px-6 py-4 border-b border-[#DFDFDF]">
         <h2 class="text-lg font-bold text-primary text-left uppercase">my account</h2>
     </div>
