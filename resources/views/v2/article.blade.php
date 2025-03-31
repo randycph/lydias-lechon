@@ -2,18 +2,18 @@
 
 @section('content')
 
-    <div class="pt-20 pb-10 px-4">
-        <a href="{{ route('blogs') }}" class="text-tertiary flex items-center gap-1 cursor-pointer mt-5 font-semibold">  
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
-                <path fill-rule="evenodd" d="M7.72 12.53a.75.75 0 0 1 0-1.06l7.5-7.5a.75.75 0 1 1 1.06 1.06L9.31 12l6.97 6.97a.75.75 0 1 1-1.06 1.06l-7.5-7.5Z" clip-rule="evenodd" />
-            </svg>
-            <span>Go Back</span>
-        </a>
-
-        <div class="mt-10">
-            <div class="text-center">
+    <div class="pt-20 pb-10 px-4 container lg:pt-32">
+        <div class="w-full max-w-4xl mx-auto">
+            <a href="{{ route('blogs') }}" class="text-tertiary flex items-center gap-1 cursor-pointer mt-5 font-semibold">  
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+                    <path fill-rule="evenodd" d="M7.72 12.53a.75.75 0 0 1 0-1.06l7.5-7.5a.75.75 0 1 1 1.06 1.06L9.31 12l6.97 6.97a.75.75 0 1 1-1.06 1.06l-7.5-7.5Z" clip-rule="evenodd" />
+                </svg>
+                <span>Go Back</span>
+            </a>
+    
+            <div class="flex flex-col justify-center mt-10 items-center w-full">
                 <div class="font-light">PUBLISHED SEPTEMBER 25, 2024</div>
-                <h1 class="text-4xl font-semibold my-5">
+                <h1 class="text-4xl lg:text-6xl font-semibold my-5">
                     “Lydiandary” the story of how a little girl’s idea became the world famous Lydia’s Lechon
                 </h1>
                 <div class="flex gap-2 justify-center my-5 items-center">
@@ -52,49 +52,61 @@
                           
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="mt-10">
+            <div class="text-center">
+
                 <div class="text-left">
-                    <img src="{{ asset('images/featured-blog.png') }}" alt="Lydiandary the story of how a little girl’s idea became the world famous Lydia’s Lechon"  class="mb-5">
-                    <p class="mb-4">Whoever said eating too much lechon will make you sick and weak, obviously hasn’t met Lydia de Roca—the woman behind the lechon empire carrying her name.</p>
-                    <p class="mb-4">We met Lydia last week over lunch at their newest branch in Marcos Highway and it was honestly the first time I saw her. Of course I know Lydia’s Lechon but I never actually googled her or saw any of her photos. And because Lydia’s Lechon just turned 55, I was actually expecting a frail old woman with several assistants backing her up.</p>
-                    <p class="mb-4">Instead we saw a sprightly lady who didn’t look her age. A proud 72 year old, Lydia says she still makes regular rounds at her numerous restaurants.</p>
-                    <p class="mb-4"><img src="{{ asset('images/featured-blog1.png')}}" alt="blog1"></p>
-                    <p class="mb-4">And when our host Spanky Enriquez called her to chop the lechon, I was thinking of just a ceremonial photo. So you could just probably imagine my surprise as she raised the knife and chopped the lechon all the way through in just one motion (complete with small bits of lechon flying toward us)—and she didn’t just do it once or twice—but three times to split the whole lechon and showcase their famous seafood paella filling.</p>
-                    <p class="mb-4">This woman meant business and as she told me later—it was a business that began way back when she was just seven years old.</p>
-                    <p class="mb-4"><img src="{{ asset('images/featured-blog2.png')}}" alt="blog1"></p>
-                    <p class="mb-4"><strong>DEVOTION MEETS PASSION</strong><br>The Redemptorist street near the National Shrine of or more commonly known as Baclaran Church, is known for a lot of things a refuge for devotees of Our Mother of Perpetual Help, the endless tiangge stores that sell clothes, vendors’ stalls, jeepneys, traffic jams and the landmark restaurant that is Lydia’s Lechon.</p>
-                    <p class="mb-4"><strong>A CRISPY, CRUNCHY BREAK</strong> <br>It was during that time that they got their first significant break happened as a well-known hotel requested for a delivery of ten whole lechons every day. This presented a huge challenge for Lydia as they never encountered an order this huge before. Using the Php500 they received from the godparents of their second child as business capital they purchased 10 live pigs and sold them at Php80 per roasting.</p>
+                    <img src="{{ asset('images/single-article.png') }}" alt="Lydiandary the story of how a little girl’s idea became the world famous Lydia’s Lechon"  class="mb-5 rounded-lg">
+
+                    <div class="w-full max-w-5xl mx-auto mt-10">
+                        <p class="mb-4">Whoever said eating too much lechon will make you sick and weak, obviously hasn’t met Lydia de Roca—the woman behind the lechon empire carrying her name.</p>
+                        <p class="mb-4">We met Lydia last week over lunch at their newest branch in Marcos Highway and it was honestly the first time I saw her. Of course I know Lydia’s Lechon but I never actually googled her or saw any of her photos. And because Lydia’s Lechon just turned 55, I was actually expecting a frail old woman with several assistants backing her up.</p>
+                        <p class="mb-4">Instead we saw a sprightly lady who didn’t look her age. A proud 72 year old, Lydia says she still makes regular rounds at her numerous restaurants.</p>
+                        <p class="mb-4"><img src="{{ asset('images/featured-blog1.png')}}" alt="blog1"></p>
+                        <p class="mb-4">And when our host Spanky Enriquez called her to chop the lechon, I was thinking of just a ceremonial photo. So you could just probably imagine my surprise as she raised the knife and chopped the lechon all the way through in just one motion (complete with small bits of lechon flying toward us)—and she didn’t just do it once or twice—but three times to split the whole lechon and showcase their famous seafood paella filling.</p>
+                        <p class="mb-4">This woman meant business and as she told me later—it was a business that began way back when she was just seven years old.</p>
+                        <p class="mb-4"><img src="{{ asset('images/featured-blog2.png')}}" alt="blog1"></p>
+                        <p class="mb-4"><strong>DEVOTION MEETS PASSION</strong><br>The Redemptorist street near the National Shrine of or more commonly known as Baclaran Church, is known for a lot of things a refuge for devotees of Our Mother of Perpetual Help, the endless tiangge stores that sell clothes, vendors’ stalls, jeepneys, traffic jams and the landmark restaurant that is Lydia’s Lechon.</p>
+                        <p class="mb-4"><strong>A CRISPY, CRUNCHY BREAK</strong> <br>It was during that time that they got their first significant break happened as a well-known hotel requested for a delivery of ten whole lechons every day. This presented a huge challenge for Lydia as they never encountered an order this huge before. Using the Php500 they received from the godparents of their second child as business capital they purchased 10 live pigs and sold them at Php80 per roasting.</p>
+                        
+                        <div class="flex flex-col gap-4 lg:flex-row">
+                            <div class="w-full lg:w-1/2 py-4 px-6 rounded-lg lg:rounded-tl-lg flex flex-col lg:rounded-bl-lg border border-tertiary">
+                                <div class="flex justify-start">
+                                    <a href="#" class="uppercase text-xs">Previous news</a>
+                                </div>
+                                <div class="flex mt-3 gap-2 items-start">
+                                    <img src="{{ asset('images/featured-blog1.png')}}" alt="Blog1" class="h-[114px] w-[114px] object-cover rounded-lg">
+                                    <div>
+                                        <div class="font-bold text-base lg:text-xl w-full max-w-xs">LYDIA’S LECHON: A FILIPINO PASSION FOR FOOD</div>
+                                        <div class="font-light text-sm mt-3">July 07, 2020</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="w-full lg:w-1/2 py-4 px-6 rounded-lg lg:rounded-tr-lg flex flex-col lg:rounded-br-lg border border-tertiary">
+                                <div class="flex justify-end">
+                                    <a href="#" class="uppercase text-xs">Next news</a>
+                                </div>
+                                <div class="flex mt-3 gap-2 items-start">
+                                    <img src="{{ asset('images/featured-blog1.png')}}" alt="Blog1" class="h-[114px] w-[114px] object-cover rounded-lg">
+                                    <div>
+                                        <div class="font-bold text-base lg:text-xl w-full max-w-xs">LYDIA’S LECHON: A FILIPINO PASSION FOR FOOD</div>
+                                        <div class="font-light text-sm mt-3">July 07, 2020</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div>
-        <div class="border-y border-tertiary p-4">
-            <div class="font-light">Previous News</div>
-
-            <div class="flex mt-3 gap-2 items-start">
-                <img src="{{ asset('images/featured-blog1.png')}}" alt="Blog1" class="h-[130px] w-[114px] object-cover rounded-lg">
-                <div>
-                    <div class="font-bold">LYDIA’S LECHON: A FILIPINO PASSION FOR FOOD</div>
-                    <div class="font-light text-sm mt-3">July 07, 2020</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="border-b border-tertiary p-4">
-            <div class="font-light text-right">Next News</div>
-
-            <div class="flex mt-3 gap-2 items-start">
-                <img src="{{ asset('images/featured-blog2.png')}}" alt="Blog1" class="h-[130px] w-[114px] object-cover rounded-lg">
-                <div>
-                    <div class="font-bold">DIGITAL EXPANSION: FOODPANDA AND GRABFOOD</div>
-                    <div class="font-light text-sm mt-3">July 07, 2020</div>
-                </div>
-            </div>
-        </div>
-
+    <div class="pt-20 pb-10 px-4 container">
         <div class="px-4 pt-10 flex justify-between">
-            <h2 class="text-2xl text-primary">Related News</h2>
+            <h2 class="text-2xl lg:text-4xl text-primary">Related News</h2>
             <div class="underline text-lg">
                 View All
             </div>
@@ -119,27 +131,11 @@
                         'title' => "Lydia’s Lechon: from a street into a popular dining chain",
                         'image' => 'blog4.png',
                     ],
-                    [
-                        'title' => "lechon-in-a-box",
-                        'image' => 'blog5.png',
-                    ],
-                    [
-                        'title' => "Lydia’s Lechon: A staple in filipino celebration",
-                        'image' => 'blog6.png',
-                    ],
-                    [
-                        'title' => "Lydia’s Lechon: A culinary legacy",
-                        'image' => 'blog6.png',
-                    ],
-                    [
-                        'title' => "the secret to lydia’s lechon’s success",
-                        'image' => 'blog6.png',
-                    ],
                 ];
             @endphp
 
             <div class="px-4 pb-10">
-                <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+                <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
                     @foreach ($blogs as $blog)
                     <div class="rounded-lg">
                         <img src="{{ asset('images/' . $blog['image']) }}" alt="{{ $blog['title'] }}" class="w-full h-[188px] object-cover rounded-t-lg">
