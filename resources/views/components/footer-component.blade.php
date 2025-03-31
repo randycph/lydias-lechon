@@ -11,7 +11,7 @@
             <ul class="mt-2 flex flex-col gap-2">
                 <li><a href="{{ route('our-story') }}">Our Story</a></li>
                 <li><a href="{{ route('our-stores') }}">Our Stores</a></li>
-                <li>Blog</li>
+                <li><a href="{{ route('blogs') }}">Blog</a></li>
             </ul>
         </div>
         <div class="mt-3 lg:mt-0">
@@ -30,7 +30,7 @@
                 <li>
                     <button @click="openHotline = true">Hotline</button>
                 </li>
-                <li>Careers</li>
+                <li><a href="{{ route('careers.v2') }}">Careers</a></li>
             </ul>
             <div class="mt-3">Or get in touch with us via email:</div>
             <div><a href="mailto:orders@lydias-lechon.com" class="font-semibold">orders@lydias-lechon.com</a></div>
