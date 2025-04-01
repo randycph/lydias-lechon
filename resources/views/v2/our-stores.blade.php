@@ -2,7 +2,20 @@
 
 @section('content')
 
-<div class="bg-cream">
+<div 
+x-data="{
+    mapModal: false,
+    mapAddress: '',
+    embedMap: '',
+    openMap(mapAddress, embedMap) {
+        this.mapAddress = mapAddress;
+        this.embedMap = embedMap;
+        this.mapModal = true;
+    }
+}">
+
+<div 
+    class="bg-cream">
     <div class="py-20 px-4 container ">
         <h1 class="text-4xl lg:text-7xl font-cubao font-medium text-primary text-center my-10 max-w-3xl mx-auto">lechon
             goodness in every neighborhood</h1>
@@ -94,7 +107,11 @@
         </div>
 
         <div class="flex gap-4 mt-5">
-            <div class="flex text-tertiary gap-1">
+            <div @click="openMap(
+                    'Block 4 Lot 4 - Carol Street, San Miguel Subdivision, Quezon City, Metro Manila', 
+                    'https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d3859.556058229893!2d121.04215022428801!3d14.681117335814788!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1sBlock%204%20Lot%204%20-%20Carol%20Street%2C%20San%20Miguel%20Subdivision%2C%20Quezon%20City%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743410127825!5m2!1sen!2sph'
+                )" 
+                class="flex text-tertiary gap-1 cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="size-6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
@@ -103,7 +120,10 @@
                 </svg>
                 Get Directions
             </div>
-            <div class="flex text-tertiary gap-1">
+            <div @click="openMap(
+                    'Block 4 Lot 4 - Carol Street, San Miguel Subdivision, Quezon City, Metro Manila', 
+                    'https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d3859.556058229893!2d121.04215022428801!3d14.681117335814788!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1sBlock%204%20Lot%204%20-%20Carol%20Street%2C%20San%20Miguel%20Subdivision%2C%20Quezon%20City%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743410127825!5m2!1sen!2sph'
+                )" class="flex text-tertiary gap-1 cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                     stroke="currentColor" class="size-6">
                     <path stroke-linecap="round" stroke-linejoin="round"
@@ -218,7 +238,10 @@
                 </div>
     
                 <div class="flex gap-4 mt-5">
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                            '49-A Roces Avenue, Corner Scout Reyes, Q.C. Metro Manila', 
+                            'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3860.4439847546587!2d121.02269977428699!3d14.630720585859256!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b64ed0aad229%3A0xd185169a6af9b07d!2s49%20Don%20A.%20Roces%20Ave%2C%20Diliman%2C%20Quezon%20City%2C%201103%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743410983735!5m2!1sen!2sph'
+                        )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -228,7 +251,10 @@
                         </svg>
                         Get Directions
                     </div>
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                            '49-A Roces Avenue, Corner Scout Reyes, Q.C. Metro Manila', 
+                            'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3860.4439847546587!2d121.02269977428699!3d14.630720585859256!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b64ed0aad229%3A0xd185169a6af9b07d!2s49%20Don%20A.%20Roces%20Ave%2C%20Diliman%2C%20Quezon%20City%2C%201103%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743410983735!5m2!1sen!2sph'
+                        )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -280,7 +306,10 @@
                 </div>
     
                 <div class="flex gap-4 mt-5">
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                            'Lot 4 Blk 4 Carol St., San Miguel Subd., Tandang Sora, Quezon City, Metro Manila', 
+                            'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3859.5567418523683!2d121.0419057!3d14.6810786!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b72d160be693%3A0x1e03a638f7bc1808!2sSan%20Gregorio%20All%20Ventures!5e0!3m2!1sen!2sph!4v1743411080555!5m2!1sen!2sph'
+                        )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -290,7 +319,10 @@
                         </svg>
                         Get Directions
                     </div>
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                            'Lot 4 Blk 4 Carol St., San Miguel Subd., Tandang Sora, Quezon City, Metro Manila', 
+                            'https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3859.5567418523683!2d121.0419057!3d14.6810786!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b72d160be693%3A0x1e03a638f7bc1808!2sSan%20Gregorio%20All%20Ventures!5e0!3m2!1sen!2sph!4v1743411080555!5m2!1sen!2sph'
+                        )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -333,7 +365,10 @@
                 </div>
     
                 <div class="flex gap-4 mt-5">
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                            '77 Fairview Avenue, Fairview Subdivision, Quezon City, Metro Manila', 
+                            'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3859.1274267692284!2d121.07274207140898!3d14.705385054395673!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b09dd94cb529%3A0x63684a9f27d06f78!2sFairview%20Subdivision%2C%2077%20Fairview%20Avenue%2C%20Quezon%20City%2C%201121%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743411202705!5m2!1sen!2sph'
+                        )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -343,7 +378,10 @@
                         </svg>
                         Get Directions
                     </div>
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                            '77 Fairview Avenue, Fairview Subdivision, Quezon City, Metro Manila', 
+                            'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3859.1274267692284!2d121.07274207140898!3d14.705385054395673!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b09dd94cb529%3A0x63684a9f27d06f78!2sFairview%20Subdivision%2C%2077%20Fairview%20Avenue%2C%20Quezon%20City%2C%201121%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743411202705!5m2!1sen!2sph'
+                        )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -386,7 +424,10 @@
                 </div>
     
                 <div class="flex gap-4 mt-5">
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                            '551 Service Road, Roxas Blvd. Baclaran, Parañaque Metro Manila', 
+                            'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3862.26811281623!2d120.9911556742844!3d14.526650585950987!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c9535a160a57%3A0xbc305274dfc17007!2s551%20Roxas%20Blvd%2C%20Para%C3%B1aque%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743411256958!5m2!1sen!2sph'
+                        )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -396,7 +437,10 @@
                         </svg>
                         Get Directions
                     </div>
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                            '551 Service Road, Roxas Blvd. Baclaran, Parañaque Metro Manila', 
+                            'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3862.26811281623!2d120.9911556742844!3d14.526650585950987!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c9535a160a57%3A0xbc305274dfc17007!2s551%20Roxas%20Blvd%2C%20Para%C3%B1aque%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743411256958!5m2!1sen!2sph'
+                        )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -447,7 +491,10 @@
                 </div>
     
                 <div class="flex gap-4 mt-5">
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                            '77 Fairview Avenue, Fairview Subdivision, Quezon City, Metro Manila', 
+                            'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3859.1273344940173!2d121.07478057577477!3d14.705390274501147!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b09dd94cb529%3A0x63684a9f27d06f78!2sFairview%20Subdivision%2C%2077%20Fairview%20Avenue%2C%20Quezon%20City%2C%201121%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743466707724!5m2!1sen!2sph'
+                        )"  class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -457,7 +504,10 @@
                         </svg>
                         Get Directions
                     </div>
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                            '77 Fairview Avenue, Fairview Subdivision, Quezon City, Metro Manila', 
+                            'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3859.1273344940173!2d121.07478057577477!3d14.705390274501147!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b09dd94cb529%3A0x63684a9f27d06f78!2sFairview%20Subdivision%2C%2077%20Fairview%20Avenue%2C%20Quezon%20City%2C%201121%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743466707724!5m2!1sen!2sph'
+                        )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -517,7 +567,10 @@
                 </div>
     
                 <div class="flex gap-4 mt-5">
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                            '551 Service Road, Roxas Blvd. Baclaran, Parañaque Metro Manila', 
+                            'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3862.268022112934!2d120.99115567577265!3d14.526655778881405!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c9535a160a57%3A0xbc305274dfc17007!2s551%20Roxas%20Blvd%2C%20Para%C3%B1aque%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743466764659!5m2!1sen!2sph'
+                        )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -527,7 +580,10 @@
                         </svg>
                         Get Directions
                     </div>
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                            '551 Service Road, Roxas Blvd. Baclaran, Parañaque Metro Manila', 
+                            'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3862.268022112934!2d120.99115567577265!3d14.526655778881405!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c9535a160a57%3A0xbc305274dfc17007!2s551%20Roxas%20Blvd%2C%20Para%C3%B1aque%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743466764659!5m2!1sen!2sph'
+                        )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -570,7 +626,10 @@
                 </div>
     
                 <div class="flex gap-4 mt-5">
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        '312 Aguirre Avenue, Phase 3 BF Homes, Paranaque City Metro Manila', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3863.6170247513223!2d121.01437018452965!3d14.449220944733906!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397ce25a66d3b27%3A0x4e34203183e67797!2sAdela%20Bldg.%2C%203%20Aguirre%20Ave%2C%20Para%C3%B1aque%2C%201720%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743466855112!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -580,7 +639,10 @@
                         </svg>
                         Get Directions
                     </div>
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        '312 Aguirre Avenue, Phase 3 BF Homes, Paranaque City Metro Manila', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3863.6170247513223!2d121.01437018452965!3d14.449220944733906!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397ce25a66d3b27%3A0x4e34203183e67797!2sAdela%20Bldg.%2C%203%20Aguirre%20Ave%2C%20Para%C3%B1aque%2C%201720%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743466855112!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -623,7 +685,10 @@
                 </div>
     
                 <div class="flex gap-4 mt-5">
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        '116 Timog Avenue, Cor. 11th Jamboree St. Quezon City, Metro Manila', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3860.397973102159!2d121.03864787577389!3d14.633336276273031!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b7ae25ad7b53%3A0x77777c3f265821a!2s116%20Timog%20Ave%2C%20Diliman%2C%20Quezon%20City%2C%201103%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743466923388!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -633,7 +698,10 @@
                         </svg>
                         Get Directions
                     </div>
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        '116 Timog Avenue, Cor. 11th Jamboree St. Quezon City, Metro Manila', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3860.397973102159!2d121.03864787577389!3d14.633336276273031!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b7ae25ad7b53%3A0x77777c3f265821a!2s116%20Timog%20Ave%2C%20Diliman%2C%20Quezon%20City%2C%201103%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743466923388!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -669,7 +737,10 @@
                 </div>
     
                 <div class="flex gap-4 mt-5">
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        '9002 Governors Drive, Manggahan General Trias Cavite, 4107', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3866.3306506431663!2d120.90579407576992!3d14.292211084551184!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397d55830aaffff%3A0xec6886d1bd92ecfb!2s9002%20Governor\'s%20Dr%2C%20General%20Trias%2C%204107%20Cavite!5e0!3m2!1sen!2sph!4v1743466972465!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -679,7 +750,10 @@
                         </svg>
                         Get Directions
                     </div>
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        '9002 Governors Drive, Manggahan General Trias Cavite, 4107', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3866.3306506431663!2d120.90579407576992!3d14.292211084551184!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397d55830aaffff%3A0xec6886d1bd92ecfb!2s9002%20Governor\'s%20Dr%2C%20General%20Trias%2C%204107%20Cavite!5e0!3m2!1sen!2sph!4v1743466972465!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -714,7 +788,10 @@
                 </div>
     
                 <div class="flex gap-4 mt-5">
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        '667 United Nations Ave., Ermita Manila', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.2964723387736!2d120.98008307577338!3d14.582174977526213!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397ca2685f8cfa1%3A0x66cb857209e513ca!2s667%20United%20Nations%20Ave%2C%20Ermita%2C%20Manila%2C%201000%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743467028109!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -724,7 +801,10 @@
                         </svg>
                         Get Directions
                     </div>
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        '667 United Nations Ave., Ermita Manila', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.2964723387736!2d120.98008307577338!3d14.582174977526213!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397ca2685f8cfa1%3A0x66cb857209e513ca!2s667%20United%20Nations%20Ave%2C%20Ermita%2C%20Manila%2C%201000%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743467028109!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -768,7 +848,10 @@
                 </div>
     
                 <div class="flex gap-4 mt-5">
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        'Bucal Bypass Rd, Calamba, 4027 Laguna', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3868.278456947958!2d121.15251067576864!3d14.178462087271072!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd63f187a47f83%3A0x2ffe83460cdc293b!2sBucal%20Bypass%20Rd%2C%20Calamba%2C%204027%20Laguna!5e0!3m2!1sen!2sph!4v1743467074919!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -778,7 +861,10 @@
                         </svg>
                         Get Directions
                     </div>
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        'Bucal Bypass Rd, Calamba, 4027 Laguna', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3868.278456947958!2d121.15251067576864!3d14.178462087271072!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd63f187a47f83%3A0x2ffe83460cdc293b!2sBucal%20Bypass%20Rd%2C%20Calamba%2C%204027%20Laguna!5e0!3m2!1sen!2sph!4v1743467074919!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -814,7 +900,10 @@
                 </div>
     
                 <div class="flex gap-4 mt-5">
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        'Santa Rosa - Tagaytay Rd, Tagaytay, Cavite', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3867.5888761378365!2d121.03314807576912!3d14.218834486308035!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd7d4402a5a155%3A0x318a6c53ddae598a!2sSanta%20Rosa%20-%20Tagaytay%20Rd!5e0!3m2!1sen!2sph!4v1743467290801!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -824,7 +913,10 @@
                         </svg>
                         Get Directions
                     </div>
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        'Santa Rosa - Tagaytay Rd, Tagaytay, Cavite', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3867.5888761378365!2d121.03314807576912!3d14.218834486308035!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd7d4402a5a155%3A0x318a6c53ddae598a!2sSanta%20Rosa%20-%20Tagaytay%20Rd!5e0!3m2!1sen!2sph!4v1743467290801!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -851,7 +943,10 @@
                 </div>
     
                 <div class="flex gap-4 mt-5">
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        'Stall 69, Terminal Section, Bayanan Bacoor Cavite, 4102', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15456.275788223656!2d120.95015205104683!3d14.423188932624603!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397d23e8f4611c7%3A0x2b2746d354b077af!2sBayanan%2C%20Bacoor%2C%20Cavite!5e0!3m2!1sen!2sph!4v1743467358566!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -861,7 +956,10 @@
                         </svg>
                         Get Directions
                     </div>
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        'Stall 69, Terminal Section, Bayanan Bacoor Cavite, 4102', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15456.275788223656!2d120.95015205104683!3d14.423188932624603!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397d23e8f4611c7%3A0x2b2746d354b077af!2sBayanan%2C%20Bacoor%2C%20Cavite!5e0!3m2!1sen!2sph!4v1743467358566!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -905,7 +1003,10 @@
                 </div>
     
                 <div class="flex gap-4 mt-5">
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        '20 Filmore St., Palanan, Makati City, Metro Manila', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.70709056556!2d121.00315897577303!3d14.558735478098901!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c973c4f8a031%3A0xbd50617da4c17ebc!2s20%20Filmore%20St%2C%20Makati%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743467401036!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -915,7 +1016,10 @@
                         </svg>
                         Get Directions
                     </div>
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        '20 Filmore St., Palanan, Makati City, Metro Manila', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.70709056556!2d121.00315897577303!3d14.558735478098901!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c973c4f8a031%3A0xbd50617da4c17ebc!2s20%20Filmore%20St%2C%20Makati%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743467401036!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -951,7 +1055,10 @@
                 </div>
     
                 <div class="flex gap-4 mt-5">
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        'Unit A2, RLC Bldg, Manila S Rd, Los Baños, 4030 Laguna', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3868.397138638728!2d121.19836638450244!3d14.171502352041937!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd61c5b370e6bf%3A0x4b5ad6a1a347ffbf!2sLydias%20Lechon%20Los%20Ba%C3%B1os%20-%20The%20Best%20Lechon%20in%20Manila!5e0!3m2!1sen!2sph!4v1743467533757!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -961,7 +1068,10 @@
                         </svg>
                         Get Directions
                     </div>
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        'Unit A2, RLC Bldg, Manila S Rd, Los Baños, 4030 Laguna', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3868.397138638728!2d121.19836638450244!3d14.171502352041937!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd61c5b370e6bf%3A0x4b5ad6a1a347ffbf!2sLydias%20Lechon%20Los%20Ba%C3%B1os%20-%20The%20Best%20Lechon%20in%20Manila!5e0!3m2!1sen!2sph!4v1743467533757!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -1002,7 +1112,10 @@
                 </div>
     
                 <div class="flex gap-4 mt-5">
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        'Unit A2, RLC Bldg, Manila S Rd, Los Baños, 4030 Laguna', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3868.397138638728!2d121.19836638450244!3d14.171502352041937!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd61c5b370e6bf%3A0x4b5ad6a1a347ffbf!2sLydias%20Lechon%20Los%20Ba%C3%B1os%20-%20The%20Best%20Lechon%20in%20Manila!5e0!3m2!1sen!2sph!4v1743467533757!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -1012,7 +1125,10 @@
                         </svg>
                         Get Directions
                     </div>
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        'Unit A2, RLC Bldg, Manila S Rd, Los Baños, 4030 Laguna', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3868.397138638728!2d121.19836638450244!3d14.171502352041937!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd61c5b370e6bf%3A0x4b5ad6a1a347ffbf!2sLydias%20Lechon%20Los%20Ba%C3%B1os%20-%20The%20Best%20Lechon%20in%20Manila!5e0!3m2!1sen!2sph!4v1743467533757!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -1037,7 +1153,10 @@
                     <div class="text-base">Fax No: (+632) 8829 4460</div>
                 </div>
                 <div class="flex gap-4 mt-5">
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        'SMFC, New Sucat Road, San Dionisio Sucat, Parañaque Metro Manila', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3863.3099392982385!2d121.01285917577202!3d14.466883780335081!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397ce8559fc3823%3A0xe397efef85bd1e31!2sDr%20Arcadio%20Santos%20Ave%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743467587477!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -1047,7 +1166,10 @@
                         </svg>
                         Get Directions
                     </div>
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        'SMFC, New Sucat Road, San Dionisio Sucat, Parañaque Metro Manila', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3863.3099392982385!2d121.01285917577202!3d14.466883780335081!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397ce8559fc3823%3A0xe397efef85bd1e31!2sDr%20Arcadio%20Santos%20Ave%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743467587477!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -1072,7 +1194,10 @@
                     <div class="text-base">Fax No: (+632) 8633 4966</div>
                 </div>
                 <div class="flex gap-4 mt-5">
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        'SMFC, Julia Vargas Ave., Corner EDSA, Mandaluyong City Metro Manila', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.265104589392!2d121.05125618454329!3d14.583964041145935!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c83e0128a243%3A0xf64836253bea4489!2sEDSA%20Do%C3%B1a%20Julia%20Vargas%20Ave%2C%20Ortigas%20Center%2C%20Mandaluyong%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743467637957!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -1082,7 +1207,10 @@
                         </svg>
                         Get Directions
                     </div>
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        'SMFC, Julia Vargas Ave., Corner EDSA, Mandaluyong City Metro Manila', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.265104589392!2d121.05125618454329!3d14.583964041145935!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c83e0128a243%3A0xf64836253bea4489!2sEDSA%20Do%C3%B1a%20Julia%20Vargas%20Ave%2C%20Ortigas%20Center%2C%20Mandaluyong%2C%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1743467637957!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -1117,7 +1245,10 @@
                     <div class="text-base">Mobile: 0995-0692241</div>
                 </div>
                 <div class="flex gap-4 mt-5">
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        'FS6, SM Food Court, Felix Huertas St., Corner A.H Lacson Ave., Brgy. 350 Zone 035, Sta. Cruz, Manila', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3860.6009963510114!2d120.98237047577389!3d14.621791276556115!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b5e2dfcc456f%3A0x2ab2ffb42c1da5d!2sBRGY.%20350%20Zone%20350!5e0!3m2!1sen!2sph!4v1743467700201!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -1127,7 +1258,10 @@
                         </svg>
                         Get Directions
                     </div>
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        'FS6, SM Food Court, Felix Huertas St., Corner A.H Lacson Ave., Brgy. 350 Zone 035, Sta. Cruz, Manila', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3860.6009963510114!2d120.98237047577389!3d14.621791276556115!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397b5e2dfcc456f%3A0x2ab2ffb42c1da5d!2sBRGY.%20350%20Zone%20350!5e0!3m2!1sen!2sph!4v1743467700201!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -1153,7 +1287,10 @@
                     <div class="text-base">Mobile: 0917-1569616</div>
                 </div>
                 <div class="flex gap-4 mt-5">
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        'Stall No. 14 The Landmark Food Center, Ayala Center, San Lorenzo Makati City, Metro Manila', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.846584506381!2d121.01660017577305!3d14.550764278293462!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c9a9d9e1c98b%3A0x1818fb675e4f25e4!2sLydias%20Lechon%20Landmark%20Makati%20-%20The%20Best%20Lechon%20in%20Manila!5e0!3m2!1sen!2sph!4v1743467750319!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -1163,7 +1300,10 @@
                         </svg>
                         Get Directions
                     </div>
-                    <div class="flex text-tertiary gap-1">
+                    <div @click="openMap(
+                        'Stall No. 14 The Landmark Food Center, Ayala Center, San Lorenzo Makati City, Metro Manila', 
+                        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3861.846584506381!2d121.01660017577305!3d14.550764278293462!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c9a9d9e1c98b%3A0x1818fb675e4f25e4!2sLydias%20Lechon%20Landmark%20Makati%20-%20The%20Best%20Lechon%20in%20Manila!5e0!3m2!1sen!2sph!4v1743467750319!5m2!1sen!2sph'
+                    )" class="flex text-tertiary gap-1 cursor-pointer">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="size-6">
                             <path stroke-linecap="round" stroke-linejoin="round"
@@ -1183,5 +1323,11 @@
 </div>
 
 <x-footer-component />
+
+<x-map-modal-component />
+
+</div>
+
+
 
 @endsection
