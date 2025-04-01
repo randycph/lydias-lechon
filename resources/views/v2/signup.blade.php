@@ -41,21 +41,21 @@
             <template x-if="step === 1">
                 <div class="mt-5">
                     <div class="mb-5">
-                        <label for="email" class="block mb-2 font-bold text-gray-900 dark:text-white">Email Address</label>
+                        <label for="email" class="block mb-2 font-bold text-gray-900">Email Address</label>
                         <input type="email" id="email"
-                            class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                             placeholder="email@email.com" required />
                     </div>
                     <div class="mb-5">
-                        <label for="password" class="block mb-2 font-bold text-gray-900 dark:text-white">Password</label>
+                        <label for="password" class="block mb-2 font-bold text-gray-900">Password</label>
                         <input type="password" id="password"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                             required />
                     </div>
                     <div class="mb-5">
-                        <label for="password" class="block mb-2 font-bold text-gray-900 dark:text-white">Confirm Password</label>
+                        <label for="password" class="block mb-2 font-bold text-gray-900">Confirm Password</label>
                         <input type="password" id="password"
-                            class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                             required />
                     </div>
                     <button type="submit" @click="step < 4 ? step++ : step" :disabled="step === 4"
@@ -135,37 +135,37 @@
                         
                         <div>
                             <div class="mb-5">
-                                <label for="firstname" class="block mb-2 font-bold text-gray-900 dark:text-white">First Name <span class="text-red-800">*</span> </label>
+                                <label for="firstname" class="block mb-2 font-bold text-gray-900">First Name <span class="text-red-800">*</span> </label>
                                 <input type="text" id="firstname"
-                                    class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                     placeholder="Randy" required />
                             </div>
                             <div class="mb-5">
-                                <label for="lastname" class="block mb-2 font-bold text-gray-900 dark:text-white">Last Name <span class="text-red-800">*</span> </label>
+                                <label for="lastname" class="block mb-2 font-bold text-gray-900">Last Name <span class="text-red-800">*</span> </label>
                                 <input type="text" id="lastname"
-                                    class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                     placeholder="Corpuz" required />
                             </div>
                             <div class="mb-5">
-                                <label for="date" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">Birth Date <span class="text-red-700">*</span></label>
+                                <label for="date" class="block mb-2 text-sm font-bold text-gray-900">Birth Date <span class="text-red-700">*</span></label>
                                 <div class="relative max-w-sm">
                                     <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                     <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                                         <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
                                     </svg>
                                     </div>
-                                    <input datepicker datepicker-autohide id="default-datepicker" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Select date">
+                                    <input datepicker datepicker-autohide id="default-datepicker" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
                                 </div>
                             </div>
                             <div class="mb-5">
-                                <label for="address" class="block mb-2 font-bold text-gray-900 dark:text-white">Address <span class="text-red-800">*</span> </label>
+                                <label for="address" class="block mb-2 font-bold text-gray-900">Address <span class="text-red-800">*</span> </label>
                                 <input type="text" id="address"
-                                    class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                     placeholder="Corpuz" required />
                             </div>
                             <div class="mb-5">
-                                <label for="city" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">City <span class="text-red-700">*</span></label>
-                                <select id="city" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                <label for="city" class="block mb-2 text-sm font-bold text-gray-900">City <span class="text-red-700">*</span></label>
+                                <select id="city" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
                                     <option selected>Select</option>
                                     <option value="bdo">Quezon City</option>
                                     <option value="un">Manila</option>
@@ -173,8 +173,8 @@
                                 </select>
                             </div>
                             <div class="mb-5">
-                                <label for="municipality" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">Municipality <span class="text-red-700">*</span></label>
-                                <select id="municipality" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                <label for="municipality" class="block mb-2 text-sm font-bold text-gray-900">Municipality <span class="text-red-700">*</span></label>
+                                <select id="municipality" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
                                     <option selected>Select</option>
                                     <option value="bdo">Quezon City</option>
                                     <option value="un">Manila</option>
@@ -182,8 +182,8 @@
                                 </select>
                             </div>
                             <div class="mb-5">
-                                <label for="region" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">Region <span class="text-red-700">*</span></label>
-                                <select id="region" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                <label for="region" class="block mb-2 text-sm font-bold text-gray-900">Region <span class="text-red-700">*</span></label>
+                                <select id="region" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
                                     <option selected>Select</option>
                                     <option value="bdo">Region 1</option>
                                     <option value="un">Region 2</option>
@@ -214,20 +214,20 @@
                     
                         <div>
                             <div class="mb-5">
-                                <label for="org_name" class="block mb-2 font-bold text-gray-900 dark:text-white">Organization Name * <span class="text-red-800">*</span> </label>
+                                <label for="org_name" class="block mb-2 font-bold text-gray-900">Organization Name * <span class="text-red-800">*</span> </label>
                                 <input type="text" id="org_name"
-                                    class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                     placeholder="Randy" required />
                             </div>
                             <div class="mb-5">
-                                <label for="address" class="block mb-2 font-bold text-gray-900 dark:text-white">Address * <span class="text-red-800">*</span> </label>
+                                <label for="address" class="block mb-2 font-bold text-gray-900">Address * <span class="text-red-800">*</span> </label>
                                 <input type="text" id="address"
-                                    class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                     placeholder="Randy" required />
                             </div>
                             <div class="mb-5">
-                                <label for="city" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">City <span class="text-red-700">*</span></label>
-                                <select id="city" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                <label for="city" class="block mb-2 text-sm font-bold text-gray-900">City <span class="text-red-700">*</span></label>
+                                <select id="city" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
                                     <option selected>Select</option>
                                     <option value="bdo">Quezon City</option>
                                     <option value="un">Manila</option>
@@ -235,8 +235,8 @@
                                 </select>
                             </div>
                             <div class="mb-5">
-                                <label for="municipality" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">Municipality <span class="text-red-700">*</span></label>
-                                <select id="municipality" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                <label for="municipality" class="block mb-2 text-sm font-bold text-gray-900">Municipality <span class="text-red-700">*</span></label>
+                                <select id="municipality" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
                                     <option selected>Select</option>
                                     <option value="bdo">Quezon City</option>
                                     <option value="un">Manila</option>
@@ -244,8 +244,8 @@
                                 </select>
                             </div>
                             <div class="mb-5">
-                                <label for="region" class="block mb-2 text-sm font-bold text-gray-900 dark:text-white">Region <span class="text-red-700">*</span></label>
-                                <select id="region" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                <label for="region" class="block mb-2 text-sm font-bold text-gray-900">Region <span class="text-red-700">*</span></label>
+                                <select id="region" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
                                     <option selected>Select</option>
                                     <option value="bdo">Region 1</option>
                                     <option value="un">Region 2</option>
@@ -274,27 +274,27 @@
                 
                     <div>
                         <div class="mb-5">
-                            <label for="phone" class="block mb-2 font-bold text-gray-900 dark:text-white">Mobile Number <span class="text-red-800">*</span> </label>
+                            <label for="phone" class="block mb-2 font-bold text-gray-900">Mobile Number <span class="text-red-800">*</span> </label>
                             <input type="tel" id="phone"
-                                class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                 placeholder="" required />
                         </div>
                         <div class="mb-5">
-                            <label for="tel" class="block mb-2 font-bold text-gray-900 dark:text-white">Telephone Number</label>
+                            <label for="tel" class="block mb-2 font-bold text-gray-900">Telephone Number</label>
                             <input type="tel" id="tel"
-                                class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                 placeholder="" />
                         </div>
                         <div class="mb-5">
-                            <label for="fax" class="block mb-2 font-bold text-gray-900 dark:text-white">Fax Number</label>
+                            <label for="fax" class="block mb-2 font-bold text-gray-900">Fax Number</label>
                             <input type="tel" id="fax"
-                                class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                 placeholder="" />
                         </div>
                         <div class="mb-5">
-                            <label for="agent_code" class="block mb-2 font-bold text-gray-900 dark:text-white">Agent Code</label>
+                            <label for="agent_code" class="block mb-2 font-bold text-gray-900">Agent Code</label>
                             <input type="tel" id="agent_code"
-                                class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                 placeholder="" />
                         </div>
 

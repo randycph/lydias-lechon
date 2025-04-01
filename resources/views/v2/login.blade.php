@@ -23,15 +23,15 @@
 
             <div class="mt-5">
                 <div class="mb-5">
-                    <label for="email" class="block mb-2 font-bold text-gray-900 dark:text-white">Email Address</label>
+                    <label for="email" class="block mb-2 font-bold text-gray-900 ">Email Address</label>
                     <input type="email" id="email"
-                        class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                         placeholder="email@email.com" required />
                 </div>
                 <div class="mb-5">
-                    <label for="password" class="block mb-2 font-bold text-gray-900 dark:text-white">Password</label>
+                    <label for="password" class="block mb-2 font-bold text-gray-900 ">Password</label>
                     <input type="password" id="password"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                         required />
                 </div>
                 <div class="flex items-start mb-5">
