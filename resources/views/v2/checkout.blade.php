@@ -361,7 +361,7 @@
                                         <button @click="selected = '{{ $option['id'] }}'; {{ $option['click'] ?? '' }}"
                                             :class="{ 'border-blue-500 bg-blue-100': selected === '{{ $option['id'] }}' }"
                                             class="flex items-start flex-col p-4 border rounded-lg w-full transition duration-300 ease-in-out hover:bg-gray-100">
-                                            <img src="{{ $option['logo'] }}" alt="{{ $option['name'] }}" class="h-10 mr-4">
+                                            <img src="{{ asset($option['logo'])}}" alt="{{ $option['name'] }}" class="h-10 mr-4">
                                             <div>
                                                 <p class="font-bold text-gray-800">{{ $option['name'] }}</p>
                                             </div>
