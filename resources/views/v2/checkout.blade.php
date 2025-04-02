@@ -126,7 +126,7 @@
                             </div>
                             
                             <div x-data="{
-                                allowMultiple: true,
+                                allowMultiple: false,
                                 deliveries: [{ address: '', name: '', phone: '', qty: 1 }],
                                 totalQty: 3,
                                 orders: [
