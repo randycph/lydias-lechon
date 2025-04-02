@@ -3,7 +3,7 @@
 @section('content')
 
 <div x-data="{ step: 1, accountType: 'individual' }" class="bg-cream">
-    <div class="pb-20 px-4">
+    <div class="pb-20 px-4 container">
         <div class="pt-20 pb-5">
             <h1 class="text-4xl font-cubao font-medium text-primary text-left mt-10">sign up now!</h1>
             <h3 class="font-medium text-left">Create an account with Lydia's Lechon to enjoy faster orders, exclusive offers, and stay updated on our latest promos!</h3>
@@ -26,7 +26,7 @@
             </div>
 
             <template x-if="step === 1">
-                <button class="border border-primary text-primary px-6 py-4 w-full rounded-md">
+                <button class="hover:bg-gray-50 border border-primary text-primary px-6 py-4 w-full rounded-md">
                     <img src="{{ asset('images/google.png') }}" alt="Google" class="w-6 h-6 inline-block">
                     <span>Sign in with Google</span>
                 </button>
@@ -59,7 +59,7 @@
                             required />
                     </div>
                     <button type="submit" @click="step < 4 ? step++ : step" :disabled="step === 4"
-                        class="text-white bg-primary hover:bg-primary-dark focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
+                        class="text-white bg-primary custom-btn btn-primary-dark focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
                         Continue
                     </button>
                 </div>
@@ -117,7 +117,7 @@
                     
                     <div class="flex flex-col mt-6">
                         <button type="button" @click="step < 4 ? step++ : step" :disabled="step === 4"
-                            class="text-white bg-primary hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
+                            class="text-white bg-primary custom-btn btn-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
                             Continue
                         </button>
                         <button type="button" @click="step > 1 ? step-- : step" :disabled="step === 1"
@@ -194,7 +194,7 @@
 
                         <div class="flex flex-col mt-6">
                             <button type="button" @click="step < 4 ? step++ : step" :disabled="step === 4"
-                                class="text-white bg-primary hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
+                                class="text-white bg-primary custom-btn btn-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
                                 Continue
                             </button>
                             <button type="button" @click="step > 1 ? step-- : step" :disabled="step === 1"
@@ -255,7 +255,7 @@
 
                             <div class="flex flex-col mt-6">
                                 <button type="button" @click="step < 4 ? step++ : step" :disabled="step === 4"
-                                    class="text-white bg-primary hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
+                                    class="text-white bg-primary custom-btn btn-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
                                     Continue
                                 </button>
                                 <button type="button" @click="step > 1 ? step-- : step" :disabled="step === 1"
@@ -317,7 +317,7 @@
 
                         <div class="flex flex-col mt-6">
                             <a href="{{ route('my-account') }}" type="button" @click="step < 4 ? step++ : step" :disabled="step === 4"
-                                class="text-white bg-primary hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
+                                class="text-white bg-primary custom-btn btn-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
                                 Sign up
                             </a>
                             <button type="button" @click="step > 1 ? step-- : step" :disabled="step === 1"

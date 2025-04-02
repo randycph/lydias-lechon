@@ -13,7 +13,7 @@
             <h3 class="font-medium mt-8 text-base lg:text-3xl uppercase">Our Story</h3>
             <h2 class="text-4xl lg:text-6xl  font-cubao font-medium">60 Years of Bringing Filipino Flavors to Life!</h2>
             <p class="font-light">Lydia De Roca and her husband Benigno started Lydia’s Lechon in Baclaran in the 1960s with a dream to serve delicious, flavorful lechon to every Filipino home. Their iconic boneless lechon stuffed with seafood paella became an instant favorite, creating a brand that now has over 25 stores. Through their dedication, Lydia and Benigno created more than just a dish—they brought joy and tradition to every Filipino table, one delicious bite at a time. Today, Lydia’s Lechon continues to honor their legacy, bringing the joy of Filipino cooking to every meal, whether for grand celebrations or simple everyday feasts. With each bite, we celebrate 60 years of passion, tradition, and happiness.</p>
-            <a href="{{ route('our-story') }}" class="text-white bg-secondary rounded-md px-6 py-3 mt-3 font-medium">Read More</a>
+            <a href="{{ route('our-story') }}" class="text-white custom-btn btn-tertiary-dark bg-secondary rounded-md px-6 py-3 mt-3 font-medium">Read More</a>
         </div>
     </div>
 </div>

@@ -128,7 +128,7 @@
                     <div class="flex items-center border border-gray-200 rounded-md overflow-hidden">
                         <input type="text" placeholder="Have a coupon code?" 
                             class="w-full p-3 outline-none border-none text-gray-700">
-                        <button class="bg-green-700 text-white px-6 py-3">Apply</button>
+                        <button class="bg-primary hover:bg-primary-dark text-white px-6 py-3">Apply</button>
                     </div>
 
                     <!-- Subtotal Section -->
@@ -142,7 +142,7 @@
                 </div>
 
                 <!-- Checkout Button -->
-                <a href="{{ route('checkout') }}" class="bg-primary text-white text-center px-6 py-3 rounded-md mt-10 w-full">Checkout</a>
+                <a href="{{ route('checkout') }}" class="bg-primary custom-btn btn-primary-dark text-white text-center px-6 py-3 rounded-md mt-10 w-full">Checkout</a>
 
             </div>
         </div>
@@ -152,7 +152,7 @@
             </svg>
             <div class="font-bold text-lg">Your cart is empty</div>
 
-            <button class="bg-primary text-white px-6 py-3 rounded-md mt-4 w-full">Continue Shopping</button>
+            <button class="bg-primary custom-btn btn-primary-dark text-white px-6 py-3 rounded-md mt-4 w-full">Continue Shopping</button>
         </div>
     </div>
 </div>

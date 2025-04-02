@@ -37,8 +37,8 @@
                     <div class="font-medium px-6 text-left mt-5">Join us today and enjoy an exclusive 10% discount on your first purchase, plus free shipping! Sign up now to unlock these great perks and start shopping with savings.</div>
         
                     <div class="w-full px-6 mt-5">
-                        <button class="bg-primary text-white rounded-md  w-full px-6 py-4 mt-3 font-medium uppercase">Sign Up Now</button>
-                        <button class="bg-white border border-primary w-full text-primary rounded-md px-6 py-4 mt-3 font-medium uppercase">No, Thanks</button>
+                        <button class="bg-primary custom-btn btn-primary-dark text-white rounded-md  w-full px-6 py-4 mt-3 font-medium uppercase">Sign Up Now</button>
+                        <button class="bg-white border  custom-btn btn-primary-dark border-primary w-full text-primary rounded-md px-6 py-4 mt-3 font-medium uppercase">No, Thanks</button>
                     </div>
                 </div>
             </div>

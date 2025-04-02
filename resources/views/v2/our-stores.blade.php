@@ -102,7 +102,7 @@ x-data="{
                         d="M6 1a2.5 2.5 0 0 0-2.5 2.5v9A2.5 2.5 0 0 0 6 15h4a2.5 2.5 0 0 0 2.5-2.5v-9A2.5 2.5 0 0 0 10 1H6Zm4 1.5h-.5V3a.5.5 0 0 1-.5.5H7a.5.5 0 0 1-.5-.5v-.5H6a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1Z"
                         clip-rule="evenodd" />
                 </svg>
-                <div class="text-base">Mobile: 0918-9675213 (Smart)</div>
+                <div>Mobile: 0918-9675213 (Smart)</div>
             </div>
         </div>
 
@@ -118,7 +118,7 @@ x-data="{
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                 </svg>
-                Get Directions
+                <span class="link-tertiary">Get Directions</span>
             </div>
             <div @click="openMap(
                     'Block 4 Lot 4 - Carol Street, San Miguel Subdivision, Quezon City, Metro Manila', 
@@ -129,7 +129,7 @@ x-data="{
                     <path stroke-linecap="round" stroke-linejoin="round"
                         d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                 </svg>
-                View Full Map
+                <span class="link-tertiary">View Full Map</span>
             </div>
         </div>
 
@@ -249,7 +249,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
-                        Get Directions
+                        <span class="link-tertiary">Get Directions</span>
                     </div>
                     <div @click="openMap(
                             '49-A Roces Avenue, Corner Scout Reyes, Q.C. Metro Manila', 
@@ -260,7 +260,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>
-                        View Full Map
+                        <span class="link-tertiary">View Full Map</span>
                     </div>
                 </div>
             </div>
@@ -317,7 +317,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
-                        Get Directions
+                        <span class="link-tertiary">Get Directions</span>
                     </div>
                     <div @click="openMap(
                             'Lot 4 Blk 4 Carol St., San Miguel Subd., Tandang Sora, Quezon City, Metro Manila', 
@@ -328,7 +328,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>
-                        View Full Map
+                        <span class="link-tertiary">View Full Map</span>
                     </div>
                 </div>
             </div>
@@ -376,7 +376,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
-                        Get Directions
+                        <span class="link-tertiary">Get Directions</span>
                     </div>
                     <div @click="openMap(
                             '77 Fairview Avenue, Fairview Subdivision, Quezon City, Metro Manila', 
@@ -387,7 +387,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>
-                        View Full Map
+                        <span class="link-tertiary">View Full Map</span>
                     </div>
                 </div>
             </div>
@@ -435,7 +435,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
-                        Get Directions
+                        <span class="link-tertiary">Get Directions</span>
                     </div>
                     <div @click="openMap(
                             '551 Service Road, Roxas Blvd. Baclaran, Parañaque Metro Manila', 
@@ -446,7 +446,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>
-                        View Full Map
+                        <span class="link-tertiary">View Full Map</span>
                     </div>
                 </div>
             </div>
@@ -502,7 +502,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
-                        Get Directions
+                        <span class="link-tertiary">Get Directions</span>
                     </div>
                     <div @click="openMap(
                             '77 Fairview Avenue, Fairview Subdivision, Quezon City, Metro Manila', 
@@ -513,7 +513,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>
-                        View Full Map
+                        <span class="link-tertiary">View Full Map</span>
                     </div>
                 </div>
             </div>
@@ -578,7 +578,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
-                        Get Directions
+                        <span class="link-tertiary">Get Directions</span>
                     </div>
                     <div @click="openMap(
                             '551 Service Road, Roxas Blvd. Baclaran, Parañaque Metro Manila', 
@@ -589,7 +589,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>
-                        View Full Map
+                        <span class="link-tertiary">View Full Map</span>
                     </div>
                 </div>
             </div>
@@ -637,7 +637,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
-                        Get Directions
+                        <span class="link-tertiary">Get Directions</span>
                     </div>
                     <div @click="openMap(
                         '312 Aguirre Avenue, Phase 3 BF Homes, Paranaque City Metro Manila', 
@@ -648,7 +648,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>
-                        View Full Map
+                        <span class="link-tertiary">View Full Map</span>
                     </div>
                 </div>
             </div>
@@ -696,7 +696,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
-                        Get Directions
+                        <span class="link-tertiary">Get Directions</span>
                     </div>
                     <div @click="openMap(
                         '116 Timog Avenue, Cor. 11th Jamboree St. Quezon City, Metro Manila', 
@@ -707,7 +707,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>
-                        View Full Map
+                        <span class="link-tertiary">View Full Map</span>
                     </div>
                 </div>
             </div>
@@ -748,7 +748,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
-                        Get Directions
+                        <span class="link-tertiary">Get Directions</span>
                     </div>
                     <div @click="openMap(
                         '9002 Governors Drive, Manggahan General Trias Cavite, 4107', 
@@ -759,7 +759,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>
-                        View Full Map
+                        <span class="link-tertiary">View Full Map</span>
                     </div>
                 </div>
             </div>
@@ -799,7 +799,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
-                        Get Directions
+                        <span class="link-tertiary">Get Directions</span>
                     </div>
                     <div @click="openMap(
                         '667 United Nations Ave., Ermita Manila', 
@@ -810,7 +810,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>
-                        View Full Map
+                        <span class="link-tertiary">View Full Map</span>
                     </div>
                 </div>
             </div>
@@ -859,7 +859,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
-                        Get Directions
+                        <span class="link-tertiary">Get Directions</span>
                     </div>
                     <div @click="openMap(
                         'Bucal Bypass Rd, Calamba, 4027 Laguna', 
@@ -870,7 +870,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>
-                        View Full Map
+                        <span class="link-tertiary">View Full Map</span>
                     </div>
                 </div>
             </div>
@@ -911,7 +911,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
-                        Get Directions
+                        <span class="link-tertiary">Get Directions</span>
                     </div>
                     <div @click="openMap(
                         'Santa Rosa - Tagaytay Rd, Tagaytay, Cavite', 
@@ -922,7 +922,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>
-                        View Full Map
+                        <span class="link-tertiary">View Full Map</span>
                     </div>
                 </div>
             </div>
@@ -954,7 +954,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
-                        Get Directions
+                        <span class="link-tertiary">Get Directions</span>
                     </div>
                     <div @click="openMap(
                         'Stall 69, Terminal Section, Bayanan Bacoor Cavite, 4102', 
@@ -965,7 +965,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>
-                        View Full Map
+                        <span class="link-tertiary">View Full Map</span>
                     </div>
                 </div>
             </div>
@@ -1014,7 +1014,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
-                        Get Directions
+                        <span class="link-tertiary">Get Directions</span>
                     </div>
                     <div @click="openMap(
                         '20 Filmore St., Palanan, Makati City, Metro Manila', 
@@ -1025,7 +1025,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>
-                        View Full Map
+                        <span class="link-tertiary">View Full Map</span>
                     </div>
                 </div>
             </div>
@@ -1066,7 +1066,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
-                        Get Directions
+                        <span class="link-tertiary">Get Directions</span>
                     </div>
                     <div @click="openMap(
                         'Unit A2, RLC Bldg, Manila S Rd, Los Baños, 4030 Laguna', 
@@ -1077,7 +1077,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>
-                        View Full Map
+                        <span class="link-tertiary">View Full Map</span>
                     </div>
                 </div>
             </div>
@@ -1123,7 +1123,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
-                        Get Directions
+                        <span class="link-tertiary">Get Directions</span>
                     </div>
                     <div @click="openMap(
                         'Unit A2, RLC Bldg, Manila S Rd, Los Baños, 4030 Laguna', 
@@ -1134,7 +1134,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>
-                        View Full Map
+                        <span class="link-tertiary">View Full Map</span>
                     </div>
                 </div>
             </div>
@@ -1164,7 +1164,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
-                        Get Directions
+                        <span class="link-tertiary">Get Directions</span>
                     </div>
                     <div @click="openMap(
                         'SMFC, New Sucat Road, San Dionisio Sucat, Parañaque Metro Manila', 
@@ -1175,7 +1175,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>
-                        View Full Map
+                        <span class="link-tertiary">View Full Map</span>
                     </div>
                 </div>
             </div>
@@ -1205,7 +1205,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
-                        Get Directions
+                        <span class="link-tertiary">Get Directions</span>
                     </div>
                     <div @click="openMap(
                         'SMFC, Julia Vargas Ave., Corner EDSA, Mandaluyong City Metro Manila', 
@@ -1216,7 +1216,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>
-                        View Full Map
+                        <span class="link-tertiary">View Full Map</span>
                     </div>
                 </div>
             </div>
@@ -1256,7 +1256,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
-                        Get Directions
+                        <span class="link-tertiary">Get Directions</span>
                     </div>
                     <div @click="openMap(
                         'FS6, SM Food Court, Felix Huertas St., Corner A.H Lacson Ave., Brgy. 350 Zone 035, Sta. Cruz, Manila', 
@@ -1267,7 +1267,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>
-                        View Full Map
+                        <span class="link-tertiary">View Full Map</span>
                     </div>
                 </div>
             </div>
@@ -1298,7 +1298,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
-                        Get Directions
+                        <span class="link-tertiary">Get Directions</span>
                     </div>
                     <div @click="openMap(
                         'Stall No. 14 The Landmark Food Center, Ayala Center, San Lorenzo Makati City, Metro Manila', 
@@ -1309,7 +1309,7 @@ x-data="{
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>
-                        View Full Map
+                        <span class="link-tertiary">View Full Map</span>
                     </div>
                 </div>
             </div>

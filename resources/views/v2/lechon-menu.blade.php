@@ -88,7 +88,18 @@ $lists = [
 ];
 @endphp
 
-    <div class="px-1 container">
+    <div class="px-1 container"
+        x-data="{ 
+            goToAnchor(anchor) {
+                const element = document.getElementById(anchor);
+                if (element) {
+                    const yOffset = -160;
+                    const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        
+                    window.scrollTo({ top: y, behavior: 'smooth' });
+                }
+            }
+        }">
         <div class="pt-20 pb-5 px-4">
             <h3 class="font-medium uppercase text-center mt-10 lg:text-2xl text-base">LECHON AND BEYOND</hh3>
             <h1 class="text-4xl lg:text-7xl font-cubao font-medium text-primary text-center">a menu made for every occassion</h1>
@@ -99,66 +110,82 @@ $lists = [
                 [
                     'name' => 'Pork BBQ',
                     'image' => 'pork-bbq.png',
+                    'id' => 'pork-bbq'
                 ],
                 [   
                     'name' => 'Whole Lechon',
                     'image' => 'whole-lechon.png',
+                    'id' => 'whole-lechon'
                 ],
                 [
                     'name' => 'Lechon Espesyal',
                     'image' => 'lechon1kg.png',
+                    'id' => 'lechon-espesyal'
                 ],
                 [
                     'name' => 'Lydias Family Boxes',
                     'image' => 'family-box-2.png',
+                    'id' => 'lydias-family-boxes'
                 ],
                 [
                     'name' => 'Lechon-In-A-Box',
                     'image' => 'lechon-in-a-box.png',
+                    'id' => 'lechon-in-a-box'
                 ],
                 [
                     'name' => 'Party Trays',
                     'image' => 'party-trays.png',
+                    'id' => 'party-trays'
                 ],
                 [
                     'name' => 'Lechon Quick Meals',
                     'image' => 'bopis.png',
+                    'id' => 'lechon-quick-meals'
                 ],
                 [
                     'name' => 'Lydias Bento Meals',
                     'image' => 'bento-b.png',
+                    'id' => 'lydias-bento-meals'
                 ],
                 [
                     'name' => 'Pampagana',
                     'image' => 'chicharon-bulaklak.png',
+                    'id' => 'pampagana'
                 ],
                 [
                     'name' => 'Meaty Espesyal',
                     'image' => 'bopis.png',
+                    'id' => 'meaty-espesyal'
                 ],
                 [
                     'name' => 'Lechon Humba',
                     'image' => 'lechon-humba.png',
+                    'id' => 'lechon-humba'
                 ],
                 [
                     'name' => 'Gulay ATBP.',
                     'image' => 'chapsauey.png',
+                    'id' => 'gulay-atbp'
                 ],
                 [
                     'name' => 'Yamang Dagat',
                     'image' => 'sinigang-salmon.png',
+                    'id' => 'yamang-dagat'
                 ],
                 [
                     'name' => 'Meryeda',
                     'image' => 'pancit-con-lechon.png',
+                    'id' => 'meryenda'
                 ],
                 [
                     'name' => 'Kanin',
                     'image' => 'rice-platter.png',
+                    'id' => 'kanin'
                 ],
                 [
                     'name' => 'Mga Inumin',
                     'image' => 'mango-cooler.png',
+                    'id' => 'mga-inumin'
                 ]
             ];
         @endphp
@@ -167,9 +194,9 @@ $lists = [
             <div class="swiper swiper-menus relative">
                 <div class="swiper-wrapper">
                     @foreach ($products as $product)
-                    <div class="swiper-slide !flex items-center justify-center p-4 flex-col !w-[140px] h-[140px]">
+                    <div @click="goToAnchor('{{$product['id']}}')" class="swiper-slide !flex items-center justify-center p-4 flex-col !w-[140px] h-[140px]">
                         <div class="bg-secondary p-2 rounded-lg items-center w-[140px] h-[140px] flex flex-col justify-center overflow-hidden">
-                            <img src="{{ asset('images/' . $product['image']) }}" alt="Anniversary Give-Back Promo" class="">
+                            <img src="{{ asset('images/' . $product['image']) }}" alt="Anniversary Give-Back Promo" class="cursor-pointer hover:scale-125 transition duration-300">
                         </div>
                         <div class="font-semibold text-center mt-2">{{ $product['name'] }}</div>
                     </div>
@@ -188,7 +215,7 @@ $lists = [
             </button>
         </div>
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="whole-lechon">
             whole lechon
         </div>
     
@@ -206,7 +233,7 @@ $lists = [
                 </div>
                 
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -242,7 +269,7 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="lechon-in-a-box">
             lechon-in-a-box
         </div>
 
@@ -259,7 +286,7 @@ $lists = [
                     </div>
                 </div>
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -280,7 +307,7 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="lydias-family-boxes">
             Lydia’s family boxes
         </div>
 
@@ -297,7 +324,7 @@ $lists = [
                     </div>
                 </div>
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -338,7 +365,7 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="lechon-espesyal">
             lechon espesyal
         </div>
 
@@ -355,7 +382,7 @@ $lists = [
                     </div>
                 </div>
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -406,7 +433,7 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="party-trays">
             party trays
         </div>
 
@@ -424,7 +451,7 @@ $lists = [
                 </div>
                 
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -465,7 +492,7 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="lechon-quick-meals">
             lechon quick meals
         </div>
 
@@ -483,7 +510,7 @@ $lists = [
                 </div>
                 
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -509,7 +536,7 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="lydias-bento-meals">
             lydia’s bento meals
         </div>
 
@@ -527,7 +554,7 @@ $lists = [
                 </div>
                 
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -548,7 +575,7 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="pampagana">
             pampagana
         </div>
 
@@ -566,7 +593,7 @@ $lists = [
                 </div>
                 
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -602,7 +629,7 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="meaty-espesyal">
             meaty espesyal
         </div>
 
@@ -620,7 +647,7 @@ $lists = [
                 </div>
                 
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -646,7 +673,7 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="gulay-atbp">
             gulay atbp.
         </div>
 
@@ -664,7 +691,7 @@ $lists = [
                 </div>
                 
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -685,7 +712,7 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="yamang-dagat">
             yamang dagat
         </div>
 
@@ -703,7 +730,7 @@ $lists = [
                 </div>
                 
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -724,7 +751,7 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="meryenda">
             meryenda
         </div>
 
@@ -742,7 +769,7 @@ $lists = [
                 </div>
                 
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -758,7 +785,7 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="kanin">
             kanin
         </div>
 
@@ -776,7 +803,7 @@ $lists = [
                 </div>
                 
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -812,7 +839,7 @@ $lists = [
             ];
         @endphp
 
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4">
+        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="inumin">
             mga inumin
         </div>
 
@@ -830,7 +857,7 @@ $lists = [
                 </div>
                 
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach

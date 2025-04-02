@@ -4,7 +4,7 @@
         <div class="flex flex-col items-center text-center py-10 gap-6">
             <h2 class="text-4xl font-cubao font-medium text-primary">You've Never Had Lechon Like Lydia's</h2>
             <p>For 60 years, Lydia’s Lechon has perfected the art of roasting—whether it’s a grand feast or a simple craving, we’ve got the best lechon for every occasion.</p>
-            <button class="text-white bg-primary mx-auto rounded-md px-6 py-3 mt-3 font-medium">View Menu</button>
+            <button class="custom-btn btn-primary-dark text-white bg-primary mx-auto rounded-md px-6 py-3 mt-3 font-medium">View Menu</button>
         </div>
     </div>
     @php
@@ -47,7 +47,7 @@
             </div>
             <div class="flex justify-between mt-4">
                 <div class="font-bold">{{ $product['title']}}</div>
-                <button class="bg-primary text-white rounded-md px-4 py-2 flex items-center justify-center text-sm">Shop Now</button>
+                <button class="bg-primary custom-btn btn-primary-dark text-white rounded-md px-4 py-2 flex items-center justify-center text-sm">Shop Now</button>
             </div>
         </div>
         @endforeach

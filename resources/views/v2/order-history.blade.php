@@ -109,17 +109,17 @@
                             <div class="w-full flex flex-col gap-2 px-4 mt-4 lg:flex-row justify-between">
                                 <div class="flex flex-col lg:flex-row gap-2 order-1 lg:order-2">
                                     <button @click="paymentMethodModal = true" type="button"
-                                        class="order-1 lg:order-2 text-white bg-primary hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
+                                        class="order-1 lg:order-2 text-white bg-primary custom-btn btn-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
                                         Pay Now
                                     </button>
                                     <button @click="trackOrderModal = true" type="button"
-                                        class="order-2 lg:order-1 text-primary border hover:text-white border-primary bg-white hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
+                                        class="order-2 lg:order-1 custom-btn btn-primary-dark text-primary border hover:text-white border-primary bg-white hover:bg-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
                                         Track Order
                                     </button>
                                 </div>
                                 <div class="order-2 lg:order-1">
                                     <button @click="cancelOrderModal = true" type="button"
-                                        class="text-white bg-tertiary hover:bg-secondary font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
+                                        class="text-white custom-btn btn-tertiary-dark bg-tertiary hover:bg-secondary font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
                                         Cancel Order
                                     </button>
                                 </div>
@@ -231,13 +231,13 @@
                             <div class="w-full flex flex-col gap-2 px-4 mt-4 lg:flex-row justify-between">
                                 <div class="flex flex-col lg:flex-row gap-2 order-1 lg:order-2">
                                     <button @click="trackOrderModal = true" type="button"
-                                        class="order-2 lg:order-1 text-primary border hover:text-white border-primary bg-white hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
+                                        class="order-2 lg:order-1 text-primary custom-btn btn-primary-dark border hover:text-white border-primary bg-white hover:bg-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
                                         Track Order
                                     </button>
                                 </div>
                                 <div class="order-2 lg:order-1">
                                     <button @click="cancelOrderModal = true" type="button"
-                                        class="text-white bg-tertiary hover:bg-secondary font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
+                                        class="text-white custom-btn btn-tertiary-dark bg-tertiary hover:bg-secondary font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
                                         Cancel Order
                                     </button>
                                 </div>
@@ -476,7 +476,7 @@
                                         </div>
                                     </div>
                                 </button>
-                                <button class="bg-white border-border border rounded-md p-3">
+                                <button class="primary-btn bg-white border-border border rounded-md p-3">
                                     <div class="flex justify-between items-center"> 
                                         <div class="font-semibold">
                                             GCash
@@ -486,7 +486,7 @@
                                         </div>
                                     </div>
                                 </button>
-                                <button class="bg-white border-border border rounded-md p-3">
+                                <button class="primary-btn bg-white border-border border rounded-md p-3">
                                     <div class="flex justify-between items-center"> 
                                         <div class="font-semibold">
                                             Maya
@@ -496,7 +496,7 @@
                                         </div>
                                     </div>
                                 </button>
-                                <button class="bg-white border-border border rounded-md p-3">
+                                <button class="primary-btn bg-white border-border border rounded-md p-3">
                                     <div class="flex justify-between items-center"> 
                                         <div class="font-semibold">
                                             Credit/Debit Card

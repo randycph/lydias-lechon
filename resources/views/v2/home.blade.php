@@ -78,7 +78,7 @@
             <div class="flex flex-col items-start py-6 px-4 text-white gap-4 order-2 lg:order-1 lg:w-2/5 bg-tertiary lg:my-10 lg:py-12 lg:px-12 lg:rounded-bl-lg lg:rounded-tl-lg">
                 <h2 class="text-4xl font-cubao font-medium text-left lg:text-5xl">Find a Lydia's Lechon Near You</h2>
                 <p class="text-left">With over 25 stores across Manila, Lydia’s Lechon is always close by to bring the taste of tradition to your table. Visit us today and experience the joy of Filipino flavors!</p>
-                <button class="text-white bg-primary rounded-md px-6 py-3 mt-3 text-sm font-medium">Our Stores</button>
+                <button class="custom-btn btn-primary-dark text-white bg-primary rounded-md px-6 py-3 mt-3 text-sm font-medium">Our Stores</button>
             </div>
         </div>
     </div>

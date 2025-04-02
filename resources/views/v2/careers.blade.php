@@ -19,7 +19,7 @@
                         Find your next opportunity, new jobs are posted every day. Learn more about the hottest jobs in the organic industry.
                     </p>
                     <a href="#"
-                       class="bg-tertiary w-full flex justify-center  lg:w-max text-white text-base lg:text-lg font-semibold rounded-md px-6 py-4 transition">
+                       class="bg-tertiary custom-btn btn-tertiary w-full flex justify-center  lg:w-max text-white text-base lg:text-lg font-semibold px-6 py-4 transition">
                         See Our Job Openings
                     </a>
                     <img src="{{ asset('images/careers-img.png') }}" alt="Apply here" class="z-10 hidden lg:block absolute bottom-0 right-0">
@@ -52,7 +52,7 @@
                                 <label for="file" class="block mb-2 font-bold text-gray-900">Upload your CV <span class="text-red-800">*</span></label>
                                 <div class="flex">
                                     <input type="text" class="flex-1 border border-gray-300 rounded-l px-4 py-2.5 focus:outline-none" readonly>
-                                    <label class="bg-tertiary text-white px-4 py-2 cursor-pointer flex items-center rounded-r">
+                                    <label class="bg-tertiary hover:bg-secondary text-white px-4 py-2 cursor-pointer flex items-center rounded-r">
                                         Choose File
                                         <input type="file" class="hidden">
                                     </label>
@@ -61,7 +61,7 @@
                         </div>
             
                         <button type="submit"
-                                class="w-full bg-primary text-white font-semibold py-3 rounded-md hover:bg-primary-dark transition">
+                                class="w-full custom-btn btn-primary-dark bg-primary text-white font-semibold py-3 rounded-md hover:bg-primary-dark transition">
                             Submit
                         </button>
                     </form>

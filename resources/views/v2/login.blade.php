@@ -3,14 +3,14 @@
 @section('content')
 
 <div x-data="{ expanded: false }" class="bg-cream">
-    <div class="pb-20 px-4">
+    <div class="pb-20 px-4 container">
         <div class="pt-20 pb-5">
             <h1 class="text-4xl font-cubao font-medium text-primary text-left mt-10">Welcome back!</h1>
             <h3 class="font-medium text-left">Sign in to your account now</h3>
         </div>
 
         <div class="">
-            <button class="border border-primary text-primary px-6 py-4 mt-4 w-full rounded-md">
+            <button class="hover:bg-gray-50 border border-primary text-primary px-6 py-4 mt-4 w-full rounded-md">
                 <img src="{{ asset('images/google.png') }}" alt="Google" class="w-6 h-6 inline-block">
                 <span>Sign in with Google</span>
             </button>
@@ -45,7 +45,7 @@
                     </div>
                     <label for="remember" class="ms-2 text-sm font-medium dark:text-gray-300">Remember me</label>
                 </div>
-                <div class="text-white bg-primary text-center hover:bg-primary-dark focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 ">
+                <div class="text-white bg-primary text-center custom-btn btn-primary-dark focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-md w-full sm:w-auto px-5 py-3.5 ">
                     <a href="{{ route('my-account') }}" type="submit"
                         class="text-center">
                         Sign in

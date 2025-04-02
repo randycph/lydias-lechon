@@ -67,7 +67,7 @@
                         <div class="flex items-center border mx-3 border-gray-200 rounded-md overflow-hidden">
                             <input type="text" placeholder="Have a coupon code?"
                                 class="w-full p-3 outline-none border-none text-gray-700">
-                            <button class="bg-green-700 text-white px-6 py-3 text-sm">Apply</button>
+                            <button class="bg-primary hover:bg-primary-dark text-white px-6 py-3 text-sm">Apply</button>
                         </div>
     
                         <!-- Subtotal Section -->
@@ -100,13 +100,13 @@
                         <div class="my-3 px-4 " x-data="{ method: 'pickup' }">
                             <div class="font-bold my-2">Choose Pickup or Delivery</div>
                             <div class="flex items-center gap-4 mt-2">
-                                <button class="px-6 py-3 rounded-md w-full transition"
+                                <button class="px-6 py-3 rounded-md w-full transition border-2"
                                     :class="method === 'pickup' ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-700'"
                                     @click="method = 'pickup'">
                                     Pickup
                                 </button>
     
-                                <button class="px-6 py-3 rounded-md w-full transition"
+                                <button class="px-6 py-3 rounded-md w-full transition border-2"
                                     :class="method === 'delivery' ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-700'"
                                     @click="method = 'delivery'">
                                     Delivery
@@ -370,7 +370,7 @@
                                     </div>
                                 </div>
     
-                                <div class="bg-primary text-center text-white px-6 py-4 mt-4 w-full rounded-md">
+                                <div class="bg-primary custom-btn btn-primary-dark text-center text-white px-6 py-4 mt-4 w-full rounded-md">
                                     <a href="{{ route('confirmation') }}" class="text-center">Place Order</a>
                                 </div>
                             </div>

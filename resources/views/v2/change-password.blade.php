@@ -22,7 +22,7 @@
                                 <strong>least 10 characters</strong>, it must also include at least one upper case
                                 letter, one lower case letter, one number and one special character.
                             </div>
-                            <div class="px-6 w-full text-sm">
+                            <div class="px-6 w-full text-sm mt-5">
                                 <div class="mb-5">
                                     <label for="current-password" class="block mb-2 font-bold text-gray-900">Current
                                         Password <span class="text-red-800">*</span> </label>
@@ -48,7 +48,7 @@
 
                             <div class="w-full px-6">
                                 <button @click="passwordSuccess = true" type="button"
-                                    class="text-white bg-primary hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
+                                    class="text-white bg-primary custom-btn btn-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
                                     Change password
                                 </button>
                             </div>

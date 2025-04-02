@@ -96,12 +96,7 @@
                                     id="check1" />
                                 <span
                                     class="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 lg:h-4 lg:w-4" viewBox="0 0 20 20"
-                                        fill="currentColor" stroke="currentColor" stroke-width="1">
-                                        <path fill-rule="evenodd"
-                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                            clip-rule="evenodd"></path>
-                                    </svg>
+                               
                                 </span>
                             </label>
                             <div class="flex flex-col mt-2">
@@ -178,7 +173,7 @@
                                                 </label>
                                             </div>
                                             <img src="{{ asset('images/' . $addon['image']) }}"
-                                                alt="{{ $addon['name'] }}" class="object-cover w-full h-full">
+                                                alt="{{ $addon['name'] }}" class="object-cover w-full h-full hover:scale-125 transition duration-300">
                                         </div>
                                         <div class="text-xs text-center mt-2">{{ $addon['name'] }}</div>
                                     </div>
@@ -221,7 +216,7 @@
 
                     <div x-data="{ added: false }" class="mt-10">
                         <button @click="added = true; addToCart()"
-                            class="bg-primary text-white w-full px-6 py-3 rounded-md font-semibold flex items-center justify-center gap-2 transition-all duration-300 ease-in-out">
+                            class="bg-primary primary-btn text-white w-full px-6 py-3 rounded-md font-semibold flex items-center justify-center gap-2 transition-all duration-300 ease-in-out custom-btn btn-primary">
                             <template x-if="!added">
                                 <span x-transition.opacity> Add to Cart </span>
                             </template>

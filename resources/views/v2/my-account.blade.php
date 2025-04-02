@@ -49,7 +49,7 @@
         
                         <div class="w-full px-6">
                             <button type="button"
-                                class="text-white bg-primary hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
+                                class="text-white  bg-primary custom-btn btn-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
                                 Save
                             </button>
                         </div>
@@ -100,7 +100,7 @@
         
                         <div class="w-full px-6">
                             <button type="button"
-                                class="text-white bg-primary hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
+                                class="text-white bg-primary custom-btn btn-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
                                 Save
                             </button>
                         </div>

@@ -178,7 +178,7 @@ $lists = [
                     @endif
                 </div>
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full hover:bg-primary hover:text-white text-base lg:text-xl">Add to Cart</button>
+                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach

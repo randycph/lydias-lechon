@@ -39,3 +39,96 @@ body {
 .mobile-menu ul li:hover ul {
     display: block;
 }
+
+button.primary-btn {
+    @apply hover:bg-primary-dark hover:text-white;
+}
+
+a.primary-btn {
+    @apply hover:bg-primary-dark hover:text-white;
+}
+
+img.default {
+    @apply hover:opacity-70 transition-all hover:duration-300 hover:scale-110;
+}
+
+.link-underline-light {
+    @apply relative after:bg-white after:absolute after:h-0.5 after:w-0 after:bottom-[-2px] after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer;
+}
+
+.link-underline-dark {
+    @apply relative after:bg-black/50 after:absolute after:h-0.5 after:pt-1 after:w-0 after:bottom-[-2px] after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer;
+}
+
+.link-tertiary {
+    @apply relative after:bg-tertiary after:absolute after:h-0.5 after:pt-1 after:w-0 after:bottom-[-2px] after:left-0 hover:after:w-full after:transition-all after:duration-300 cursor-pointer;
+}
+
+.custom-btn {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    outline: none;
+}
+
+.btn-tertiary,
+.btn-primary,
+.btn-primary-dark,
+.btn-tertiary-dark {
+    z-index: 1;
+}
+
+.btn-tertiary:hover:after,
+.btn-primary:hover:after,
+.btn-primary-dark:hover:after,
+.btn-tertiary-dark:hover:after {
+    @apply left-0 w-full;
+}
+
+/* tertiary buttons */
+.btn-tertiary:after {
+    content: "";
+    z-index: -1;
+    @apply bg-secondary/50 top-0 right-0 w-0 absolute h-full;
+    transition: all 0.3s ease;
+}
+
+.btn-tertiary:hover {
+    @apply text-white;
+}
+
+/* tertiary dark buttons */
+.btn-tertiary-dark:after {
+    content: "";
+    z-index: -1;
+    @apply bg-tertiary top-0 right-0 w-0 absolute h-full rounded-md;
+    transition: all 0.3s ease;
+}
+
+.btn-tertiary-dark:hover {
+    @apply text-white;
+}
+
+/* primary buttons */
+.btn-primary:after {
+    content: "";
+    z-index: -1;
+    @apply bg-primary top-0 right-0 w-0 absolute h-full rounded-br-md rounded-bl-md;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    @apply text-white;
+}
+
+/* primary dark buttons */
+.btn-primary-dark:after {
+    content: "";
+    z-index: -1;
+    @apply bg-primary-dark top-0 right-0 w-0 absolute h-full rounded-md;
+    transition: all 0.3s ease;
+}
+
+.btn-primary-dark:hover {
+    @apply text-white;
+}

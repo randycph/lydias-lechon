@@ -1,5 +1,5 @@
 {{-- Footer --}}
-<footer class="relative bg-primary-dark text-white pt-10 pb-16 px-4" style="background-image: url('{{ asset('images/our-story-bg.png') }}'); background-size: cover; background-position: center;">
+<footer class="relative  text-white pt-10 pb-16 px-4" style="background-image: url('{{ asset('images/our-story-bg.png') }}'); background-size: cover; background-position: center;">
     <!-- Green Overlay -->
     <div class="absolute inset-0 bg-primary-dark opacity-80"></div>
     <div class="relative container flex flex-wrap flex-col lg:flex-row items-start justify-between gap-4">
@@ -9,31 +9,31 @@
         <div class="mt-3 lg:mt-0">
             <h3 class="font-bold text-lg md:text-xl uppercase">About Us</h3>
             <ul class="mt-2 flex flex-col gap-2">
-                <li><a href="{{ route('our-story') }}">Our Story</a></li>
-                <li><a href="{{ route('our-stores') }}">Our Stores</a></li>
-                <li><a href="{{ route('blogs') }}">Blog</a></li>
+                <li><a href="{{ route('our-story') }}" class="link-underline-light">Our Story</a></li>
+                <li><a href="{{ route('our-stores') }}" class="link-underline-light">Our Stores</a></li>
+                <li><a href="{{ route('blogs') }}" class="link-underline-light">Blog</a></li>
             </ul>
         </div>
         <div class="mt-3 lg:mt-0">
             <h3 class="font-bold text-lg md:text-xl uppercase ">SHOP</h3>
             <ul class="mt-2 flex flex-col gap-2">
-                <li><a href="{{ route('lechon-menu') }}">Menu</a></li>
-                <li><a href="{{ route('lechon-pricelist') }}">Lechon Pricelist</a></li>
+                <li><a href="{{ route('lechon-menu') }}" class="link-underline-light">Menu</a></li>
+                <li><a href="{{ route('lechon-pricelist') }}" class="link-underline-light">Lechon Pricelist</a></li>
             </ul>
         </div>
         <div class="mt-3 lg:mt-0">
             <h3 class="font-bold text-lg md:text-xl uppercase ">Contact</h3>
             <ul class="mt-2 flex flex-col gap-2">
                 <li>
-                    <button @click="openContactUs = true">Contact Us</button>
+                    <button @click="openContactUs = true" class="link-underline-light">Contact Us</button>
                 </li>
                 <li>
-                    <button @click="openHotline = true">Hotline</button>
+                    <button @click="openHotline = true" class="link-underline-light">Hotline</button>
                 </li>
-                <li><a href="{{ route('careers.v2') }}">Careers</a></li>
+                <li><a href="{{ route('careers.v2') }}" class="link-underline-light">Careers</a></li>
             </ul>
             <div class="mt-3">Or get in touch with us via email:</div>
-            <div><a href="mailto:orders@lydias-lechon.com" class="font-semibold">orders@lydias-lechon.com</a></div>
+            <div><a href="mailto:orders@lydias-lechon.com" class="font-semibold link-underline-light">orders@lydias-lechon.com</a></div>
         </div>
         <div class="mt-3 lg:mt-0">
             <h3 class="font-bold text-lg md:text-xl uppercase">Follow Us</h3>
@@ -60,13 +60,13 @@
         </div>
     </div>
     
-    <div class="text-white">
+    <div class="relative">
         <hr class="w-full border-[#46B57C] mt-5">
-        <div class="text-xs text-center w-full mt-5 text-white">
+        <div class="text-center w-full mt-5 text-gray-300">
             All information, pictures and images on this site are copyrighted material and owned by their respective creators or owners.
         </div>
-        <div class="text-center text-sm w-full mt-4">
-            Copyright © 2020 - {{ now()->year }} | Lydia’s Lechon
+        <div class="text-center w-full mt-2 text-gray-300">
+            Copyright © 2020 - {{ now()->year }} | <a href="{{ config('app.url') }}" class="link-underline-light">Lydia’s Lechon</a>
         </div>
     </div>
 </footer>
