@@ -3,7 +3,7 @@
 @section('content')
 
     <div x-data="{ expanded: false }" class="bg-cream">
-        <div class="pb-20 container">
+        <div class="pb-10 px-4 container">
             <div class="pt-20 pb-5 px-4 flex flex-col justify-start">
                 <h1 class="text-4xl lg:text-7xl font-cubao font-medium text-primary mt-10">order confirmation</h1>
                 <h3 class="font-medium text-base lg:text-xl mt-2">Thank you for ordering with us! Your delicious Lydia's Lechon meal is on its way. We’ll send you an update once it’s ready for pickup or delivery. Your order details has also been sent to your email. Enjoy!</h3>
