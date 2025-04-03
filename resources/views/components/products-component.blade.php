@@ -42,12 +42,12 @@
     <div class="products grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
         @foreach ($products as $product)
         <div class="product pb-12 px-4">
-            <div class="relative bg-orange-500 rounded-md w-full h-[300px] p-2 flex justify-center clip-bottom  items-center">
-                <img src="{{ asset('images/'.$product['image']) }}" alt="Shop Whole Lechon" class="scale-110 md:scale-125 top-0 left-0 px-10 overflow-hidden ">
-            </div>
+            <a href="{{ route('lechon-menu') }}" class="cursor-pointer relative bg-orange-500 rounded-md w-full h-[300px] p-2 flex justify-center clip-bottom  items-center">
+                <img src="{{ asset('images/'.$product['image']) }}" alt="Shop Whole Lechon" class="scale-110 md:scale-125 top-0 left-0 px-10 overflow-hidden hover:scale-150 transition-all duration-300 ease-in-out">
+            </a>
             <div class="flex justify-between mt-4">
                 <div class="font-bold">{{ $product['title']}}</div>
-                <button class="bg-primary custom-btn btn-primary-dark text-white rounded-md px-4 py-2 flex items-center justify-center text-sm">Shop Now</button>
+                <a href="{{ route('lechon-menu') }}" class="bg-primary custom-btn btn-primary-dark text-white rounded-md px-4 py-2 flex items-center justify-center text-sm">Shop Now</a>
             </div>
         </div>
         @endforeach
