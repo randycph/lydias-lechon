@@ -247,8 +247,7 @@
                     <div class="form-group">
                         <input required type="text" class="form-control" name="sales_transaction" id="sales_transaction">
                         <p class="tx-10 text-danger" id="error">
-                            @hasError(['inputName' => 'code'])
-                            @endhasError
+                            <x-error-message inputName="code" />
                         </p>
                     </div>
                 </div>

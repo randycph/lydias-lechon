@@ -68,20 +68,17 @@
                     <div class="form-group">
                         <label class="d-block">First Name *</label>
                         <input type="text" name="fname" id="fname" value="{{ old('fname')}}" class="form-control @error('fname') is-invalid @enderror" required>
-                        @hasError(['inputName' => 'fname'])
-                        @endhasError
+                        <x-error-message inputName="fname" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Last Name *</label>
                         <input type="text" name="lname" id="lname" value="{{ old('lname')}}" class="form-control @error('lname') is-invalid @enderror" required>
-                        @hasError(['inputName' => 'lname'])
-                        @endhasError
+                        <x-error-message inputName="lname" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Email *</label>
                         <input type="email" name="email" id="email" value="{{ old('email')}}" class="form-control @error('email') is-invalid @enderror" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
-                        @hasError(['inputName' => 'email'])
-                        @endhasError
+                        <x-error-message inputName="email" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Role *</label>
@@ -91,8 +88,7 @@
                                 <option value="{{ $role->id }}" {{ (old("role") == $role->id ? "selected":"") }}>{{ $role->name }}</option>
                             @endforeach
                         </select>
-                        @hasError(['inputName' => 'role'])
-                        @endhasError
+                        <x-error-message inputName="role" />
                     </div>
 
                     <div class="form-group d-none" id="branches_div">
@@ -103,8 +99,7 @@
                                 <option value="{{ $branch->id }}" {{ (old("branches") == $branch->id ? "selected":"") }}>{{ ucwords($branch->name) }}</option>
                             @endforeach
                         </select>
-                        @hasError(['inputName' => 'branches'])
-                        @endhasError
+                        <x-error-message inputName="branches" />
                     </div>
 
                     <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Create User</button>

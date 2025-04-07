@@ -53,7 +53,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function user_role()
     {
-        return $this->belongsTo('\App\Role', 'role_id');
+        return $this->belongsTo('\App\Models\Role', 'role_id');
     }
 
     public function branches()
@@ -281,7 +281,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     private function is_route_exist_to_user_permission($route)
     {
-        return \App\ViewPermissions::check_permission($this->role_id, $route) == 1;
+        return \App\Models\ViewPermissions::check_permission($this->role_id, $route) == 1;
     }
 
     public function get_image_url_storage_path()

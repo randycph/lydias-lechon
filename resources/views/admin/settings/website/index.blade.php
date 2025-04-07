@@ -476,7 +476,7 @@
                                         <select name="products[]" multiple="multiple" id="products" class="form-control js-example-basic-multiple js-states select2" style="width:100%">
                                             @foreach(\App\Models\Product::where('for_sale_web','1')->orderBy('name')->get() as $p)
                                                 @php
-                                                    $rec_product = \App\DeliveryFeePromo::where('type','product')->where('ref_id',$p->id)->first();
+                                                    $rec_product = \App\Models\DeliveryFeePromo::where('type','product')->where('ref_id',$p->id)->first();
                                                 @endphp
                                                 <option value="{{$p->id}}" @if(!empty($rec_product)) selected="selected" @endif>{{$p->name}}</option>
                                             @endforeach
@@ -494,7 +494,7 @@
                                                 ->where('email','not like','lydtmp_%')->orderBy('firstname')->orderBy('lastname')
                                                 ->get() as $c)
                                                     @php
-                                                        $rec_customer = \App\DeliveryFeePromo::where('type','customer')->where('ref_id',$c->id)->first();
+                                                        $rec_customer = \App\Models\DeliveryFeePromo::where('type','customer')->where('ref_id',$c->id)->first();
                                                     @endphp
                                                     <option value="{{$c->id}}" @if(!empty($rec_customer)) selected="selected" @endif>{{$c->name}}</option>
                                                 @endforeach

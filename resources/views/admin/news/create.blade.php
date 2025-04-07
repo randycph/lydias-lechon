@@ -33,15 +33,13 @@
                 <div class="form-group">
                     <label class="d-block">Title *</label>
                     <input type="text" class="form-control @error('news_title') is-invalid @enderror" name="news_title" id="news_title" value="{{ old('news_title') }}" required @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                    @hasError(['inputName' => 'news_title'])
-                    @endhasError
+                    <x-error-message inputName="news_title" />
                     <small id="news_slug"></small>
                 </div>
                 <div class="form-group">
                     <label class="d-block">Date *</label>
                     <input type="date" class="form-control @error('date') is-invalid @enderror" name="date" id="date" value="{{ old('date',date('Y-m-d')) }}">
-                    @hasError(['inputName' => 'date'])
-                    @endhasError
+                    <x-error-message inputName="date" />
                 </div>
                 <div class="form-group">
                     <label class="d-block">Category</label>
@@ -52,8 +50,7 @@
                         @empty
                         @endforelse
                     </select>
-                    @hasError(['inputName' => 'category'])
-                    @endhasError
+                    <x-error-message inputName="category" />
                 </div>
                 <div class="form-group">
                     <label class="d-block">Article banner *</label>
@@ -90,8 +87,7 @@
                 <div class="form-group">
                     <label class="d-block">Teaser *</label>
                     <textarea class="form-control @error('teaser') is-invalid @enderror" name="teaser" rows="4" required @htmlValidationMessage({{__('standard.empty_all_field')}})>{{ old("teaser") }}</textarea>
-                    @hasError(['inputName' => 'teaser'])
-                    @endhasError
+                    <x-error-message inputName="teaser" />
                 </div>
             </div>
             <div class="col-lg-12">
@@ -100,8 +96,7 @@
                     <textarea name="content" id="editor1" rows="10" cols="80" required>
                          {{ old('content') }}
                     </textarea>
-                    @hasError(['inputName' => 'content'])
-                    @endhasError
+                    <x-error-message inputName="content" />
                     <span class="invalid-feedback" role="alert" id="contentRequired" style="display: none;">
                         <strong>The content field is required</strong>
                     </span>
@@ -112,8 +107,7 @@
                 <div class="form-group">
                     <label class="d-block">Tags *</label>
                     <input name="tags" type="text" class="form-control" data-role="tagsinput">
-                    @hasError(['inputName' => 'tags'])
-                    @endhasError
+                    <x-error-message inputName="tags" />
                 </div>
                 <div class="form-group">
                     <label class="d-block">Page Visibility</label>
@@ -121,8 +115,7 @@
                         <input type="checkbox" class="custom-control-input" name="visibility" {{ (old("visibility") ? "checked":"") }} id="customSwitch1">
                         <label class="custom-control-label" id="label_visibility" for="customSwitch1">@if (old("visibility")) Published @else Private @endif</label>
                     </div>
-                    @hasError(['inputName' => 'visibility'])
-                    @endhasError
+                    <x-error-message inputName="visibility" />
                 </div>
                 <div class="form-group">
                     <label class="d-block">Display</label>
@@ -130,8 +123,7 @@
                         <input type="checkbox" class="custom-control-input" name="is_featured" {{ (old("is_featured") ? "checked":"") }} id="customSwitch2">
                         <label class="custom-control-label" for="customSwitch2">Featured</label>
                     </div>
-                    @hasError(['inputName' => 'is_featured'])
-                    @endhasError
+                    <x-error-message inputName="is_featured" />
                 </div>
             </div>
 
@@ -144,22 +136,19 @@
                 <div class="form-group">
                     <label class="d-block">Title <code>(meta title)</code></label>
                     <input type="text" class="form-control @error('seo_title') is-invalid @enderror" name="seo_title" value="{{ old('seo_title') }}">
-                    @hasError(['inputName' => 'seo_title'])
-                    @endhasError
+                    <x-error-message inputName="seo_title" />
                     <p class="tx-11 mg-t-4">{{ __('standard.seo.title') }}</p>
                 </div>
                 <div class="form-group">
                     <label class="d-block">Description <code>(meta description)</code></label>
                     <textarea rows="3" class="form-control @error('seo_description') is-invalid @enderror" name="seo_description">{{ old('seo_description') }}</textarea>
-                    @hasError(['inputName' => 'seo_description'])
-                    @endhasError
+                    <x-error-message inputName="seo_description" />
                     <p class="tx-11 mg-t-4">{{ __('standard.seo.description') }}</p>
                 </div>
                 <div class="form-group">
                     <label class="d-block">Keywords <code>(meta keywords)</code></label>
                     <textarea rows="3" class="form-control @error('seo_keywords') is-invalid @enderror" name="seo_keywords">{{ old('seo_keywords') }}</textarea>
-                    @hasError(['inputName' => 'seo_keywords'])
-                    @endhasError
+                    <x-error-message inputName="seo_keywords" />
                     <p class="tx-11 mg-t-4">{{ __('standard.seo.keywords') }}</p>
                 </div>
             </div>

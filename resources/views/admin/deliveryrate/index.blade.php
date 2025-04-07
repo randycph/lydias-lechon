@@ -99,7 +99,7 @@ Delivery Rates
                             </form>
                         </div>
                         <div class="mg-t-10">
-                            @if(\App\ViewPermissions::check_permission(Auth::user()->role_id,'admin/page/create') == 1)
+                            @if(\App\Models\ViewPermissions::check_permission(Auth::user()->role_id,'admin/page/create') == 1)
                                 <a class="btn btn-primary btn-sm mg-b-20" href="{{ route('deliveryrate.create') }}">Create New Rate</a>
                             @endif
                         </div>

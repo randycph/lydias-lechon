@@ -958,7 +958,7 @@ class CartController extends Controller
         
         if (Auth::user()) { 
             $carts = Cart::where('user_id',Auth::id())->get();
-            $check_customer_promo = \App\DeliveryFeePromo::check_customer(Auth::id());
+            $check_customer_promo = \App\Models\DeliveryFeePromo::check_customer(Auth::id());
             if($check_customer_promo == 1){
                 $check_customer = 1;
             }
@@ -972,7 +972,7 @@ class CartController extends Controller
         }        
         foreach($carts as $cart){
             
-            $delivery_promo = \App\DeliveryFeePromo::check_product($cart->product_id);
+            $delivery_promo = \App\Models\DeliveryFeePromo::check_product($cart->product_id);
             if($delivery_promo == 1){
                 $check_product = 1;
             }

@@ -11,7 +11,7 @@ class LocationSeeder extends Seeder
      */
     public function run()
     {
-        \App\Deliverablecities::insert([          
+        \App\Models\Deliverablecities::insert([          
 	            [
 	                'name' => 'Cubao',
 	                'rate' => '450',

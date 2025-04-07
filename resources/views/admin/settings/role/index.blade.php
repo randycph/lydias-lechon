@@ -23,7 +23,7 @@
             <div class="filter-buttons mg-b-10">
                 <div class="d-md-flex bd-highlight">
                     <div class="ml-auto bd-highlight mg-t-10">
-                    @if(\App\ViewPermissions::check_permission(Auth::user()->role_id,'admin/role/create') == 1)
+                    @if(\App\Models\ViewPermissions::check_permission(Auth::user()->role_id,'admin/role/create') == 1)
                         <a class="btn btn-primary btn-sm mg-b-5" href="{{ route('role.create') }}">Create a Role</a>
                     @endif
                     </div>
@@ -50,10 +50,10 @@
                                     <td>{{ $role->description }}</td>
                                     <td>
                                         <nav class="nav table-options justify-content-end">
-                                        @if(\App\ViewPermissions::check_permission(Auth::user()->role_id,'admin/role/edit') == 1)
+                                        @if(\App\Models\ViewPermissions::check_permission(Auth::user()->role_id,'admin/role/edit') == 1)
                                             <a href="{{ route('role.edit',$role->id) }}" class="nav-link"><i data-feather="edit"></i></a>
                                         @endif
-                                        @if(\App\ViewPermissions::check_permission(Auth::user()->role_id,'admin/role/delete') == 1)
+                                        @if(\App\Models\ViewPermissions::check_permission(Auth::user()->role_id,'admin/role/delete') == 1)
                                             <a href="#modalDeleteRole" class="nav-link delete_role"  data-rid="{{ $role->id }}" data-toggle="modal"><i data-feather="trash"></i></a>
                                         @endif
                                         </nav>

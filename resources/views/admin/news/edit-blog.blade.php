@@ -41,14 +41,12 @@
                     <div class="form-group">
                         <label class="d-block">Title *</label>
                         <input type="text" class="form-control @error('news_title') is-invalid @enderror" maxlength="150" name="news_title" id="news_title" value="{{ old('news_title',$article->name) }}" required>
-                        @hasError(['inputName' => 'news_title'])
-                        @endhasError
+                        <x-error-message inputName="news_title" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Date *</label>
                         <input type="date" class="form-control @error('date') is-invalid @enderror" name="date" id="date" value="{{ old('date',$article->date) }}">
-                        @hasError(['inputName' => 'date'])
-                        @endhasError
+                        <x-error-message inputName="date" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Category</label>
@@ -59,8 +57,7 @@
                             @empty
                             @endforelse
                         </select>
-                        @hasError(['inputName' => 'category'])
-                        @endhasError
+                        <x-error-message inputName="category" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Article thumbnail *</label>
@@ -71,8 +68,7 @@
                         <p class="tx-10">
                             Required image dimension: {{ env('NEWS_THUMBNAIL_WIDTH') }}px by {{ env('NEWS_THUMBNAIL_HEIGHT') }}px <br /> Maximum file size: 1MB <br /> Required file type: .jpeg .png
                         </p>
-                        @hasError(['inputName' => 'news_thumbnail'])
-                        @endhasError
+                        <x-error-message inputName="news_thumbnail" />
                         <div id="image_div" @if(empty($article->thumbnail_url)) style="display:none;" @endif>                          
                             <img src="{{ $article->thumbnail_url }}" height="100" width="150" id="img_temp" alt="">  <br /><br />
                             <a href="javascript:void(0)" class="btn btn-sm btn-danger remove-upload" >Remove Image</a>
@@ -81,8 +77,7 @@
                     <div class="form-group">
                         <label class="d-block">External Link *</label>
                         <input type="text" class="form-control @error('external_link') is-invalid @enderror" maxlength="150" name="external_link" id="news_title" value="{{ old('external_link',$article->external_link) }}" required>
-                        @hasError(['inputName' => 'external_link'])
-                        @endhasError
+                        <x-error-message inputName="external_link" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Teaser *</label>

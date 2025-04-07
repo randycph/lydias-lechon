@@ -40,14 +40,12 @@
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">Code <i class="tx-danger">*</i></label>
                                 <input required type="text" class="form-control @error('code') is-invalid @enderror" name="code" id="code" @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                                @hasError(['inputName' => 'code'])
-                                @endhasError
+                                <x-error-message inputName="code" />
                             </div>
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">Amount <i class="tx-danger">*</i></label>
                                 <input required type="text" class="form-control @error('amount') is-invalid @enderror" name="amount" id="amount" @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                                @hasError(['inputName' => 'amount'])
-                                @endhasError
+                                <x-error-message inputName="amount" />
                             </div>
                             <div class="form-group">
                                 <label class="mg-b-5 tx-color-03">Gift certificate Type <i class="tx-danger">*</i></label>

@@ -36,7 +36,6 @@
                         @endif
                         <form autocomplete="off" method="POST" action="{{ route('customer-front.customer_login') }}">
                             @csrf
-                            @method('POST')
                             <h4>Login</h4>
                             @if($message = Session::get('error'))
                                 <div class="alert alert-danger d-flex align-items-center" role="alert">

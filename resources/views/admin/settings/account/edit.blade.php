@@ -86,14 +86,12 @@
                         <div class="form-group">
                             <label class="d-block">First Name <span class="tx-danger">*</span></label>
                             <input type="text" name="firstname" class="form-control" required value="{{ old('firstname', $user->firstname) }}">
-                            @hasError(['inputName' => 'firstname'])
-                            @endhasError
+                            <x-error-message inputName="firstname" />
                         </div>
                         <div class="form-group">
                             <label class="d-block">Last Name <span class="tx-danger">*</span></label>
                             <input type="text" name="lastname" class="form-control" required value="{{ old('lastname', $user->lastname) }}">
-                            @hasError(['inputName' => 'lastname'])
-                            @endhasError
+                            <x-error-message inputName="lastname" />
                         </div>
                         <div class="form-row">
                             <div class="col-lg-12 mg-t-10">
@@ -112,8 +110,7 @@
                                     <label class="d-block">Email <i class="tx-danger">*</i></label>
                                     <input type="hidden" name="user_id" value="{{ $user->id }}">
                                     <input type="email" name="email" class="form-control" required value="{{ $user->email }}" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$">
-                                    @hasError(['inputName' => 'email'])
-                                    @endhasError
+                                    <x-error-message inputName="email" />
                                 </div>
                             </div>
 
@@ -138,20 +135,17 @@
                                     <div class="form-group">
                                         <label class="d-block">Old Password *</label>
                                         <input type="password" name="current_password" class="form-control" required>
-                                        @hasError(['inputName' => 'current_password'])
-                                        @endhasError
+                                        <x-error-message inputName="current_password" />
                                     </div>
                                     <div class="form-group">
                                         <label class="d-block">New Password * <span class="tx-color-03">(Min. 8, alphanumeric, at least 1 upper case, 1 number and 1 special character)</span></label>
                                         <input type="password" name="new_password" class="form-control" required>
-                                        @hasError(['inputName' => 'new_password'])
-                                        @endhasError
+                                        <x-error-message inputName="new_password" />
                                     </div>
                                     <div class="form-group">
                                         <label class="d-block">Confirm Password *</label>
                                         <input type="password" class="form-control" name="confirm_password" required>
-                                        @hasError(['inputName' => 'confirm_password'])
-                                        @endhasError
+                                        <x-error-message inputName="confirm_password" />
                                     </div>
 
 {{--                                <div class="form-group mg-b-10">--}}

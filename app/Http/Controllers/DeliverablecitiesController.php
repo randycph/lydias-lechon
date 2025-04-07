@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Deliverablecities;
+use App\Models\Deliverablecities;
 use App\Helpers\ListingHelper;
 use App\Models\Permission;
 use Auth;
@@ -71,7 +71,7 @@ class DeliverablecitiesController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Deliverablecities  $deliverablecities
+     * @param  \App\Models\Deliverablecities  $deliverablecities
      * @return \Illuminate\Http\Response
      */
     public function show(Deliverablecities $deliverablecities)
@@ -82,7 +82,7 @@ class DeliverablecitiesController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Deliverablecities  $deliverablecities
+     * @param  \App\Models\Deliverablecities  $deliverablecities
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -95,7 +95,7 @@ class DeliverablecitiesController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Deliverablecities  $deliverablecities
+     * @param  \App\Models\Deliverablecities  $deliverablecities
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -117,7 +117,7 @@ class DeliverablecitiesController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Deliverablecities  $deliverablecities
+     * @param  \App\Models\Deliverablecities  $deliverablecities
      * @return \Illuminate\Http\Response
      */
     public function destroy(Deliverablecities $deliverablecities)

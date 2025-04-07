@@ -27,25 +27,21 @@
                 <div class="form-group">
                     <label class="d-block">Campaign Name *</label>
                     <input name="name" type="text" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $campaign->name) }}" required>
-                    @hasError(['inputName' => 'name'])
-                    @endhasError
+                    <x-error-message inputName="name" />
                 </div><div class="form-group">
                     <label class="d-block">Sender Name *</label>
                     <input name="from_name" type="text" class="form-control @error('from_name') is-invalid @enderror" value="{{ old('from_name', $campaign->from_name) }}" required>
-                    @hasError(['inputName' => 'from_name'])
-                    @endhasError
+                    <x-error-message inputName="from_name" />
                 </div>
                 <div class="form-group">
                     <label class="d-block">Sender Email *</label>
                     <input name="from_email" type="email" class="form-control @error('from_email') is-invalid @enderror" value="{{ old('from_email', $campaign->from_email) }}" required>
-                    @hasError(['inputName' => 'from_email'])
-                    @endhasError
+                    <x-error-message inputName="from_email" />
                 </div>
                 <div class="form-group">
                     <label class="d-block">Subject *</label>
                     <input name="subject" type="text" class="form-control @error('subject') is-invalid @enderror" value="{{ old('subject', $campaign->subject) }}" required>
-                    @hasError(['inputName' => 'subject'])
-                    @endhasError
+                    <x-error-message inputName="subject" />
                 </div>
 
                 <div class="form-group">
@@ -55,10 +51,8 @@
                             <option value="{{ $subscriber->id }}" @if (in_array($subscriber->id, old('recipients', []))) selected @endif>{{ $subscriber->email_with_name() }}</option>
                         @endforeach
                     </select>
-                    @hasError(['inputName' => 'recipients'])
-                    @endhasError
-                    @hasError(['inputName' => 'recipients.*'])
-                    @endhasError
+                    <x-error-message inputName="recipients" />
+                    <x-error-message inputName="recipients.*" />
                 </div>
                 <div class="form-group">
                     <label class="d-block">Recipient Group</label>
@@ -67,10 +61,8 @@
                             <option value="{{ $group->id }}" @if (in_array($group->id, old('recipient_groups', []))) selected @endif>{{ $group->name }}</option>
                         @endforeach
                     </select>
-                    @hasError(['inputName' => 'recipient_groups'])
-                    @endhasError
-                    @hasError(['inputName' => 'recipient_groups.*'])
-                    @endhasError
+                    <x-error-message inputName="recipient_groups" />
+                    <x-error-message inputName="recipient_groups.*" />
                 </div>
             </div>
             <div class="col-md-12">
@@ -80,8 +72,7 @@
                         <label class="d-block"> Note: {Article Title} will change to the selected article title. {Article Link Button} will change to HTML button with selected article url. </label>
                     @endif
                     <textarea name="content" id="cke_editor1" rows="10" cols="80" required>{{ old('content', $campaign->content) }}</textarea>
-                    @hasError(['inputName' => 'content'])
-                    @endhasError
+                    <x-error-message inputName="content" />
                     <span class="invalid-feedback" role="alert" id="contentRequired" style="display: none;">
                         <strong>The content field is required</strong>
                     </span>

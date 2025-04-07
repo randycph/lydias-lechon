@@ -38,14 +38,12 @@
                     <div class="form-group">
                         <label class="d-block">Code *</label>
                         <input name="code" id="code" value="{{ old('code', $giftcertificate->code) }}" required type="text" class="form-control @error('code') is-invalid @enderror" maxlength="250">
-                        @hasError(['inputName' => 'code'])
-                        @endhasError
+                        <x-error-message inputName="code" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Amount *</label>
                         <input name="amount" id="amount" value="{{ old('code', $giftcertificate->amount) }}" required type="text" class="form-control @error('amount') is-invalid @enderror" maxlength="250">
-                        @hasError(['inputName' => 'amount'])
-                        @endhasError
+                        <x-error-message inputName="amount" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Gift Certificate Type *</label>
@@ -60,8 +58,7 @@
                         <div class="custom-control custom-switch @error('status') is-invalid @enderror">
                             <input type="checkbox" class="custom-control-input" name="status" {{ (old("status") == "ON" || $giftcertificate->status == "Used" ? "checked":"") }} id="customSwitch1">
                             <label class="custom-control-label" id="label_visibility" for="customSwitch1">{{ucfirst(strtolower($giftcertificate->status))}}</label>
-                            @hasError(['inputName' => 'status'])
-                            @endhasError
+                            <x-error-message inputName="status" />
                         </div>
                     </div>
                 </div>

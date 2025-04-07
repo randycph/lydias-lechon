@@ -6,7 +6,7 @@ use Closure;
 use Auth;
 use DB;
 
-use App\ViewPermissions;
+use App\Models\ViewPermissions;
 
 class CheckPermission
 {

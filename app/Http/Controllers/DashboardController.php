@@ -19,7 +19,6 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        dd(auth()->user());
         $logs = Logs::where('created_by',Auth::id())->orderBy('id','desc')->paginate(15);
 
         return view('admin.dashboard.index',compact('logs'));

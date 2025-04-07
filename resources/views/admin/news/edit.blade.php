@@ -39,14 +39,12 @@
                         <label class="d-block">Title *</label>
                         <input type="text" class="form-control @error('news_title') is-invalid @enderror" maxlength="150" name="news_title" id="news_title" value="{{ old('news_title',$article->name) }}" required>
                         <small id="news_slug">{{ $article->get_url() }}</small>
-                        @hasError(['inputName' => 'news_title'])
-                        @endhasError
+                        <x-error-message inputName="news_title" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Date *</label>
                         <input type="date" class="form-control @error('date') is-invalid @enderror" name="date" id="date" value="{{ old('date',$article->date) }}">
-                        @hasError(['inputName' => 'date'])
-                        @endhasError
+                        <x-error-message inputName="date" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Category</label>
@@ -57,8 +55,7 @@
                             @empty
                             @endforelse
                         </select>
-                        @hasError(['inputName' => 'category'])
-                        @endhasError
+                        <x-error-message inputName="category" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Article banner</label>
@@ -69,8 +66,7 @@
                         <p class="tx-10">
                             Required image dimension: {{ env('NEWS_BANNER_WIDTH') }}px by {{ env('NEWS_BANNER_HEIGHT') }}px <br /> Maximum file size: 1MB <br /> Required file type: .jpeg .png
                         </p>
-                        @hasError(['inputName' => 'news_image'])
-                        @endhasError
+                        <x-error-message inputName="news_image" />
                         <div id="image_div" @if(empty($article->image_url)) style="display:none;" @endif>
                             <img src="{{ $article->image_url }}" height="100" width="300" id="img_temp" alt="">  <br /><br />
                             <a href="javascript:void(0)" class="btn btn-sm btn-danger remove-upload" >Remove Image</a>
@@ -85,8 +81,7 @@
                         <p class="tx-10">
                             Required image dimension: {{ env('NEWS_THUMBNAIL_WIDTH') }}px by {{ env('NEWS_THUMBNAIL_HEIGHT') }}px <br /> Maximum file size: 1MB <br /> Required file type: .jpeg .png
                         </p>
-                        @hasError(['inputName' => 'news_thumbnail'])
-                        @endhasError
+                        <x-error-message inputName="news_thumbnail" />
                         <div id="image_div_thumbnail" @if(empty($article->thumbnail_url)) style="display:none;" @endif>
                             <img src="{{ $article->thumbnail_url }}" height="100" width="150" id="img_temp_thumbnail" alt="">  <br /><br />
                             <a href="javascript:void(0)" class="btn btn-sm btn-danger remove-upload-thumbnail" >Remove Image</a>
@@ -100,8 +95,7 @@
                     <textarea name="content" id="editor1" rows="10" cols="80" required>
                         {{ old('content', $article->contents) }}
                     </textarea>
-                    @hasError(['inputName' => 'content'])
-                    @endhasError
+                    <x-error-message inputName="content" />
                     <span class="invalid-feedback" role="alert" id="contentRequired" style="display: none;">
                         <strong>The content field is required</strong>
                     </span>
@@ -119,8 +113,7 @@
                 <div class="form-group">
                     <label class="d-block">Tags *</label>
                     <input name="tags" type="text" class="form-control" data-role="tagsinput" value="{{ $article->tags_string() }}">
-                    @hasError(['inputName' => 'tags'])
-                    @endhasError
+                    <x-error-message inputName="tags" />
                 </div>
                 <div class="form-group">
 					<label class="d-block">Page Visibility</label>
@@ -155,22 +148,19 @@
                 <div class="form-group">
                     <label class="d-block">Title <code>(meta title)</code></label>
                     <input type="text" class="form-control @error('seo_title') is-invalid @enderror" name="seo_title" value="{{ old('seo_title',$article->meta_title) }}">
-                    @hasError(['inputName' => 'seo_title'])
-                    @endhasError
+                    <x-error-message inputName="seo_title" />
                     <p class="tx-11 mg-t-4">{{ __('standard.seo.title') }}</p>
                 </div>
                 <div class="form-group">
                     <label class="d-block">Description <code>(meta description)</code></label>
                     <textarea rows="3" class="form-control @error('seo_description') is-invalid @enderror" name="seo_description">{{ old('seo_description',$article->meta_description) }}</textarea>
-                    @hasError(['inputName' => 'seo_description'])
-                    @endhasError
+                    <x-error-message inputName="seo_description" />
                     <p class="tx-11 mg-t-4">{{ __('standard.seo.description') }}</p>
                 </div>
                 <div class="form-group">
                     <label class="d-block">Keywords <code>(meta keywords)</code></label>
                     <textarea rows="3" class="form-control @error('seo_keywords') is-invalid @enderror" name="seo_keywords">{{ old('seo_keywords',$article->meta_keyword) }}</textarea>
-                    @hasError(['inputName' => 'seo_keywords'])
-                    @endhasError
+                    <x-error-message inputName="seo_keywords" />
                     <p class="tx-11 mg-t-4">{{ __('standard.seo.keywords') }}</p>
                 </div>
             </div>

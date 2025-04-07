@@ -33,14 +33,12 @@
                     <div class="form-group">
                         <label class="d-block">Title *</label>
                         <input type="text" class="form-control @error('news_title') is-invalid @enderror" name="news_title" id="news_title" value="{{ old('news_title') }}" required @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                        @hasError(['inputName' => 'news_title'])
-                        @endhasError
+                        <x-error-message inputName="news_title" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Date *</label>
                         <input type="date" class="form-control @error('date') is-invalid @enderror" name="date" id="date" value="{{ old('date',date('Y-m-d')) }}">
-                        @hasError(['inputName' => 'date'])
-                        @endhasError
+                        <x-error-message inputName="date" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Category</label>
@@ -51,8 +49,7 @@
                             @empty
                             @endforelse
                         </select>
-                        @hasError(['inputName' => 'category'])
-                        @endhasError
+                        <x-error-message inputName="category" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Article thumbnail *</label>
@@ -74,14 +71,12 @@
                     <div class="form-group">
                         <label class="d-block">External Link *</label>
                         <input type="url" class="form-control @error('external_link') is-invalid @enderror" name="external_link" id="news_title" value="{{ old('external_link') }}" required @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                        @hasError(['inputName' => 'external_link'])
-                        @endhasError
+                        <x-error-message inputName="external_link" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Teaser *</label>
                         <textarea class="form-control @error('teaser') is-invalid @enderror" name="teaser" rows="4" required @htmlValidationMessage({{__('standard.empty_all_field')}})>{{ old("teaser") }}</textarea>
-                        @hasError(['inputName' => 'teaser'])
-                        @endhasError
+                        <x-error-message inputName="teaser" />
                     </div>
                 </div>
 
@@ -92,8 +87,7 @@
                             <input type="checkbox" class="custom-control-input" name="visibility" {{ (old("visibility") ? "checked":"") }} id="customSwitch1">
                             <label class="custom-control-label" id="label_visibility" for="customSwitch1">@if (old("visibility")) Published @else Private @endif</label>
                         </div>
-                        @hasError(['inputName' => 'visibility'])
-                        @endhasError
+                        <x-error-message inputName="visibility" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Display</label>
@@ -101,8 +95,7 @@
                             <input type="checkbox" class="custom-control-input" name="is_featured" {{ (old("is_featured") ? "checked":"") }} id="customSwitch2">
                             <label class="custom-control-label" for="customSwitch2">Featured</label>
                         </div>
-                        @hasError(['inputName' => 'is_featured'])
-                        @endhasError
+                        <x-error-message inputName="is_featured" />
                     </div>
                 </div>
 

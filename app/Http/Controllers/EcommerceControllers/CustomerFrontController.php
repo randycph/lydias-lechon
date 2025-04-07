@@ -119,6 +119,12 @@ class CustomerFrontController extends Controller
 
     public function login(Request $request) {
 
+        // $user = User::where('email', 'olivet@webfocus.ph')->get();
+
+        // $user = User::find(29918);
+        // $user->password = Hash::make('password');
+        // $user->save();
+
         $page = new Page();
         $page->name = 'Login';
 
@@ -129,18 +135,18 @@ class CustomerFrontController extends Controller
     public function customer_login(Request $request)
     {
         $insert_logs = ActivityLog::create([
-                'created_by' => $request->email ?? 'no record',
-                'activity_type' => 'login',
-                'dashboard_activity' => 'login',
-                'activity_desc' => $request->ip(),
-                'activity_date' => date('Y-m-d H:i:s'),
-                'reference' => url()->current()
-            ]);
-        
-        $userCredentials = [
-            'email'    => $request->email,
-            'password' => $request->password
-        ];
+            'created_by' => $request->email ?? 'no record',
+            'activity_type' => 'login',
+            'dashboard_activity' => 'login',
+            'activity_desc' => $request->ip(),
+            'activity_date' => date('Y-m-d H:i:s'),
+            'reference' => url()->current()
+        ]);
+    
+        $userCredentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
 
         if (filter_var($request->email, FILTER_VALIDATE_EMAIL)) {
             unset($userCredentials['username']);
@@ -151,44 +157,40 @@ class CustomerFrontController extends Controller
 
         // dd($userCredentials);
 
-
-        try {
-            $user = Auth::attempt($userCredentials);
-            dd($user);
-        } catch (\Exception $e) {
-            dd($e->getMessage());
-            return back()->with('error', __('auth.login.incorrect_input'));
-        }
         
-        if (Auth::attempt($userCredentials) && (Auth::user()->is_a_customer_user())) {
+        if (Auth::attempt($userCredentials)) {
 
-            dd('here');
-
-            foreach ($cart as $order) {
-                $product = Product::find($order['product_id']);
-                $cart = Cart::where('product_id', $order['product_id'])
-                    ->where('user_id', Auth::id())
-                    ->first();
-
-                if (!empty($cart)) {
-                    $newQty = $cart->qty + $order['qty'];
-                    $cart->update([
-                        'qty' => $newQty,
-                        'price' => $product->price,
-                        'paella_price' => $order['paella_price']
-                    ]);
-                } else {
-                    Cart::create([
-                        'product_id' => $order['product_id'],
-                        'user_id' => Auth::id(),
-                        'qty' => $order['qty'],
-                        'price' => $product->price,
-                        'paella_price' => $order['paella_price']
-                    ]);
+            if ((Auth::user()->is_a_customer_user())) {
+                foreach ($cart as $order) {
+                    $product = Product::find($order['product_id']);
+                    $cart = Cart::where('product_id', $order['product_id'])
+                        ->where('user_id', Auth::id())
+                        ->first();
+    
+                    if (!empty($cart)) {
+                        $newQty = $cart->qty + $order['qty'];
+                        $cart->update([
+                            'qty' => $newQty,
+                            'price' => $product->price,
+                            'paella_price' => $order['paella_price']
+                        ]);
+                    } else {
+                        Cart::create([
+                            'product_id' => $order['product_id'],
+                            'user_id' => Auth::id(),
+                            'qty' => $order['qty'],
+                            'price' => $product->price,
+                            'paella_price' => $order['paella_price']
+                        ]);
+                    }
                 }
-            }
+    
+                session()->forget('cart');
+            } else {
+                
+                return redirect()->route('admin');
 
-            session()->forget('cart');
+            }
 
             return redirect(route('cart.front.show'));
         } else {

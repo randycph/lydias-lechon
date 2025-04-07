@@ -39,56 +39,47 @@
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">Name <i class="tx-danger">*</i></label>
                                 <input required type="text" class="form-control @error('name') is-invalid @enderror" name="name" id="name" @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                                @hasError(['inputName' => 'name'])
-                                @endhasError
+                                <x-error-message inputName="name" />
                             </div>
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">Region <i class="tx-danger">*</i></label>
                                 <input required type="text" class="form-control @error('address_region') is-invalid @enderror" name="address_region" id="address_region" @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                                @hasError(['inputName' => 'address_region'])
-                                @endhasError
+                                <x-error-message inputName="address_region" />
                             </div>
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">Province <i class="tx-danger">*</i></label>
                                 <input required type="text" class="form-control @error('address_province') is-invalid @enderror" name="address_province" id="address_province" @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                                @hasError(['inputName' => 'address_province'])
-                                @endhasError
+                                <x-error-message inputName="address_province" />
                             </div>
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">City <i class="tx-danger">*</i></label>
                                 <input required type="text" class="form-control @error('address_city') is-invalid @enderror" name="address_city" id="address_city" @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                                @hasError(['inputName' => 'address_city'])
-                                @endhasError
+                                <x-error-message inputName="address_city" />
                             </div>
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">Street <i class="tx-danger">*</i></label>
                                 <input required type="text" class="form-control @error('address_street') is-invalid @enderror" name="address_street" id="address_street" @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                                @hasError(['inputName' => 'address_street'])
-                                @endhasError
+                                <x-error-message inputName="address_street" />
                             </div>
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">Zip<i class="tx-danger">*</i></label>
                                 <input required type="text" class="form-control @error('address_zip') is-invalid @enderror" name="address_zip" id="address_zip" @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                                @hasError(['inputName' => 'address_zip'])
-                                @endhasError
+                                <x-error-message inputName="address_zip" />
                             </div>
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">Telephone Number <i class="tx-danger">*</i></label>
                                 <input required type="text" class="form-control @error('contact_tel') is-invalid @enderror" name="contact_tel" id="contact_tel" @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                                @hasError(['inputName' => 'contact_tel'])
-                                @endhasError
+                                <x-error-message inputName="contact_tel" />
                             </div>
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">Mobile Number <i class="tx-danger">*</i></label>
                                 <input required type="text" class="form-control @error('contact_mobile') is-invalid @enderror" name="contact_mobile" id="contact_mobile" @htmlValidationMessage({{__('standard.empty_all_field')}}) maxlength="13">
-                                @hasError(['inputName' => 'contact_mobile'])
-                                @endhasError
+                                <x-error-message inputName="contact_mobile" />
                             </div>
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">Contact Person <i class="tx-danger">*</i></label>
                                 <input required type="text" class="form-control @error('contact_person') is-invalid @enderror" name="contact_person" id="contact_person" @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                                @hasError(['inputName' => 'contact_person'])
-                                @endhasError
+                                <x-error-message inputName="contact_person" />
                             </div>
                         </div>
                     </div>

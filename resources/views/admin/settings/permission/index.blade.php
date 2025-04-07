@@ -79,7 +79,7 @@
                                     <input type="text" name="search" id="search" class="form-control" placeholder="Search Module" @isset($_GET['search']) value="{{$_GET['search']}}" @endisset>
                                     <button class="btn filter" type="button"><i data-feather="search"></i></button>
                                 </div>
-                                @if(\App\ViewPermissions::check_permission(Auth::user()->role_id,'admin/permission/create') == 1)
+                                @if(\App\Models\ViewPermissions::check_permission(Auth::user()->role_id,'admin/permission/create') == 1)
                                     <a class="btn btn-primary btn-sm mg-b-5" href="{{ route('permission.create') }}">Create a Permission</a>
                                 @endif
                             </form>
@@ -112,10 +112,10 @@
                                             </nav>
                                         @else
                                             <nav class="nav table-options justify-content-end">
-                                                @if(\App\ViewPermissions::check_permission(Auth::user()->role_id,'admin/permission/edit') == 1)
+                                                @if(\App\Models\ViewPermissions::check_permission(Auth::user()->role_id,'admin/permission/edit') == 1)
                                                     <a href="{{ route('permission.edit',$permission->id) }}" class="nav-link"><i data-feather="edit"></i></a>
                                                 @endif
-                                                @if(\App\ViewPermissions::check_permission(Auth::user()->role_id,'admin/permission/delete') == 1)
+                                                @if(\App\Models\ViewPermissions::check_permission(Auth::user()->role_id,'admin/permission/delete') == 1)
                                                     <a href="#modalDeletePermission" class="nav-link delete_permission" data-pid="{{ $permission->id }}" data-toggle="modal"><i data-feather="trash"></i></a>
                                                 @endif
                                             </nav>

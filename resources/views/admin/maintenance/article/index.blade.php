@@ -106,7 +106,7 @@
                                     <input name="search" type="search" id="search" class="form-control"  placeholder="Search by Name" value="{{ $filter->search }}">
                                     <button class="btn filter" type="button" id="btnSearch"><i data-feather="search"></i></button>
                                 </div>
-                                @if(\App\ViewPermissions::check_permission(Auth::user()->role_id, 'admin/news-categories/create') == 1)
+                                @if(\App\Models\ViewPermissions::check_permission(Auth::user()->role_id, 'admin/news-categories/create') == 1)
                                     <a class="btn btn-primary btn-sm mg-b-5" href="{{ route('news-categories.create') }}">Create a Category</a>
                                 @endif
                             </form>
@@ -152,16 +152,16 @@
                                         <td>
                                             @if($category->trashed())
                                                 <nav class="nav table-options">
-                                                    @if(\App\ViewPermissions::check_permission(Auth::user()->role_id,'admin/news-categories/restore') == 1)
+                                                    @if(\App\Models\ViewPermissions::check_permission(Auth::user()->role_id,'admin/news-categories/restore') == 1)
                                                         <a class="nav-link" href="{{route('news.category.restore',$category->id)}}" title="Restore this category"><i data-feather="rotate-ccw"></i></a>
                                                     @endif
                                                 </nav>
                                             @else
                                                 <nav class="nav table-options">
-                                                    @if(\App\ViewPermissions::check_permission(Auth::user()->role_id,'admin/news-categories/edit') == 1)
+                                                    @if(\App\Models\ViewPermissions::check_permission(Auth::user()->role_id,'admin/news-categories/edit') == 1)
                                                         <a class="nav-link" href="{{ route('news-categories.edit',$category->id) }}" title="Edit Category"><i data-feather="edit"></i></a>
                                                     @endif
-                                                    @if(\App\ViewPermissions::check_permission(Auth::user()->role_id,'admin/news-categories/delete') == 1)
+                                                    @if(\App\Models\ViewPermissions::check_permission(Auth::user()->role_id,'admin/news-categories/delete') == 1)
                                                         <a class="nav-link" href="javascript:void(0)" onclick="delete_one_category({{$category->id}},'{{$category->name}}')" title="Delete Category"><i data-feather="trash"></i></a>
                                                     @endif
                                                 </nav>

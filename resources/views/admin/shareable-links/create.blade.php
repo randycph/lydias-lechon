@@ -39,8 +39,7 @@
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">Name <i class="tx-danger">*</i></label>
                                 <input required type="text" class="form-control @error('name') is-invalid @enderror" name="name" maxlength="150">
-                                @hasError(['inputName' => 'name'])
-                                @endhasError
+                                <x-error-message inputName="name" />
                             </div>
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">Social Media <i class="tx-danger">*</i></label>
@@ -60,8 +59,7 @@
                                     <option value="whatsapp">WhatsApp</option>
                                     <option value="other">Other</option>
                                 </select>
-                                @hasError(['inputName' => 'soc_med'])
-                                @endhasError
+                                <x-error-message inputName="soc_med" />
                             </div>
 
                             <div class="form-group mg-b-20" id="other_socmed" style="display:none;">
@@ -71,8 +69,7 @@
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">URL <i class="tx-danger">*</i></label>
                                 <input type="url" class="form-control @error('url') is-invalid @enderror" name="url" >
-                                @hasError(['inputName' => 'url'])
-                                @endhasError
+                                <x-error-message inputName="url" />
                             </div>
                         </div>
                     </div>

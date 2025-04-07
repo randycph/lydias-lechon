@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+Auth::routes(['verify' => true]);
+
 Route::group(['prefix' => 'v2'], function () {
     Route::get('/home', function () {
         return view('v2.home');
@@ -217,24 +219,22 @@ Route::group(['middleware' => ['authenticated']], function () {
 //     Auth::routes(['verify' => true]);
 // });
 
-// Auth::routes();
-
 Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
 
     Route::get('/admin', function () { return redirect(route('dashboard')); })->name('admin');
     Route::get('/admin/dashboard', 'DashboardController@index')->name('dashboard');
     Route::get('/admin/ecommerce-dashboard', 'DashboardController@ecommerce')->name('ecom-dashboard');
 
-// Users
+    // Users
     Route::resource('/admin/users', 'Settings\UserController');
     Route::post('/user/deactivate', 'Settings\UserController@deactivate')->name('user.deactivate');
     Route::post('/user/activate', 'Settings\UserController@activate')->name('user.activate');
     Route::get('/admin/user-search/', 'Settings\UserController@search')->name(
         'user.search');
     Route::get('/admin/profile-log-search/', 'Settings\UserController@filter')->name('user.activity.search');
-//
+    //
 
-// Albums
+    // Albums
     Route::resource('/admin/albums', 'Banner\AlbumController');
     Route::post('/admin/albums/upload', 'Banner\AlbumController@upload')->name('albums.upload');
     Route::delete('/admin/albums/upload', 'Banner\AlbumController@upload')->name('albums.upload');
@@ -242,26 +242,26 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::put('/admin/albums/quick/{album}', 'Banner\AlbumController@quick_update')->name('albums.quick_update');
     Route::post('/admin/albums/{album}/restore', 'Banner\AlbumController@restore')->name('albums.restore');
     Route::post('/admin/albums/banners/{album}', 'Banner\AlbumController@get_album_details')->name('albums.banners');
-//
+    //
 
-Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']], function () {
-    '\vendor\UniSharp\LaravelFilemanager\Lfm::routes()'; 
-});
+    Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']], function () {
+        '\vendor\UniSharp\LaravelFilemanager\Lfm::routes()'; 
+    });
 
-// Files
+    // Files
     // Route::get('/laravel-filemanager', '\UniSharp\LaravelFilemanager\Controllers\LfmController@show')->name('file-manager.show');
     // Route::post('/laravel-filemanager/upload', '\UniSharp\LaravelFilemanager\Controllers\UploadController@upload');
     Route::get('/admin/file-manager', 'FileManagerController@index')->name('file-manager.index');
-//
+    //
 
-// Menu
+    // Menu
     Route::resource('/admin/menus', 'Menu\MenuController');
     Route::delete('/admin/many/menu', 'Menu\MenuController@destroy_many')->name('menus.destroy_many');
     Route::put('/admin/menus/quick1/{menu}', 'Menu\MenuController@quick_update')->name('menus.quick_update');
     Route::get('/admin/menu-restore/{menu}', 'Menu\MenuController@restore')->name('menus.restore');
-//
+    //
 
-// News
+    // News
     Route::resource('/admin/news', 'News\ArticleController');
     Route::get('/admin/news-advance-search', 'News\ArticleController@advance_index')->name('news.index.advance-search');
     Route::post('/admin/news-get-slug', 'News\ArticleController@get_slug')->name('news.get-slug');
@@ -269,31 +269,31 @@ Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']
     Route::post('/admin/news-delete', 'News\ArticleController@delete')->name('news.delete');
     Route::get('/admin/news-restore/{news}', 'News\ArticleController@restore')->name('news.restore');
     Route::get('/admin/news-search/', 'News\ArticleController@search');
-//
+    //
 
-// Blogs
+    // Blogs
     Route::get('/admin/blogs', 'News\ArticleController@create_blog')->name('blogs.create');
     Route::post('/admin/blog-create', 'News\ArticleController@store_blog')->name('blogs.store');
     Route::get('/admin/blogs/{id}/edit', 'News\ArticleController@edit_blog')->name('blogs.edit');
     Route::post('/admin/blogs/{id}/update', 'News\ArticleController@update_blog')->name('blogs.update');
-//
+    //
 
 
-// News Category
+    // News Category
     Route::resource('/admin/news-categories', 'News\ArticleCategoryController');
     Route::post('/admin/news-categories/get-slug', 'News\ArticleCategoryController@get_slug')->name('news.categories.get-slug');
     Route::post('/admin/news-categories/delete', 'News\ArticleCategoryController@delete')->name('news.categories.delete');
     Route::get('/admin/news-category/restore/{id}', 'News\ArticleCategoryController@restore')->name('news.category.restore');
     Route::get('/admin/news-category/search', 'News\ArticleCategoryController@search')->name('news.category.search');
-//
+    //
 
-// Account
+    // Account
     Route::resource('/admin/account', 'Settings\AccountController');
     Route::post('/admin/update_email', 'Settings\AccountController@update_email')->name('email.update');
     Route::put('/admin/password_change', 'Settings\AccountController@update_password')->name('admin.password_change');
-//
+    //
 
-// Website
+    // Website
     Route::resource('/admin/settings', 'Settings\WebController');
     Route::post('/update/contacts/{id}', 'Settings\WebController@update_contacts')->name('contacts.update');
     Route::post('/update/media_accounts', 'Settings\WebController@update_media_accounts')->name('media.accounts.update');
@@ -306,14 +306,14 @@ Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']
     Route::post('/remove/media', 'Settings\WebController@remove_media')->name('media.remove');
 
     Route::post('/update/deliveryfee/', 'Settings\WebController@update_deliveryfee')->name('deliveryfee.update');
-//
+    //
 
-// Audit
+    // Audit
     Route::get('/admin/audit/index', 'Settings\LogsController@index')->name('settings.audit');
     Route::get('/admin/log-search/', 'Settings\LogsController@search')->name('logs.search');
-//
+    //
 
-// CMS
+    // CMS
     Route::view('/admin/settings/cms/index', 'admin.settings.cms.index')->name('settings.cms')->middleware('checkPermission:admin/settings');
 
     Route::group(['middleware' => ['adminOnly']], function () {
@@ -335,7 +335,7 @@ Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']
         Route::post('/admin/roles_and_permissions/update', 'Settings\AccessController@update_roles_and_permissions')->name('role-permission.update');
     });
 
-//Pages
+    //Pages
     Route::resource('/admin/pages', 'PageController');
     Route::get('/admin/pages-advance-search', 'PageController@advance_index')->name('pages.index.advance-search');
     Route::post('/admin/pages/get-slug', 'PageController@get_slug');
@@ -343,17 +343,17 @@ Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']
     Route::post('/admin/pages-change-status', 'PageController@change_status')->name('pages.change.status');
     Route::post('/admin/pages-delete', 'PageController@delete')->name('pages.delete');
     Route::get('/admin/page-restore/{page}', 'PageController@restore')->name('pages.restore');
-//
+    //
 
-// Members
+    // Members
     Route::get('/admin/members', 'EcommerceControllers\MemberController@index')->name('members.index');
     Route::get('/admin/members-unregistered', 'EcommerceControllers\MemberController@unregistered')->name('members.unregistered');
     Route::get('/admin/members-advance-search', 'EcommerceControllers\MemberController@advance_index')->name('members.index.advance-search');
     Route::post('/admin/members/change-sponsor', 'EcommerceControllers\MemberController@change_sponsor')->name('members.change-sponsor');
     Route::post('/admin/members/update_code', 'EcommerceControllers\MemberController@update_code')->name('admin.members.update_code');
-//
+    //
 
-// Product Categories
+    // Product Categories
     Route::resource('/admin/product-categories','Product\ProductCategoryController');
     Route::post('/admin/product-category-get-slug', 'Product\ProductCategoryController@get_slug')->name('product.category.get-slug');
     Route::post('/admin/product-categories-single-delete', 'Product\ProductCategoryController@single_delete')->name('product.category.single.delete');
@@ -362,9 +362,9 @@ Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']
     Route::get('/admin/product-category/{id}/{status}', 'Product\ProductCategoryController@update_status')->name('product.category.change-status');
     Route::post('/admin/product-categories-multiple-change-status','Product\ProductCategoryController@multiple_change_status')->name('product.category.multiple.change.status');
     Route::post('/admin/product-category-multiple-delete','Product\ProductCategoryController@multiple_delete')->name('product.category.multiple.delete');
-//
+    //
 
-// Products
+    // Products
     Route::resource('/admin/products','Product\ProductController');
     Route::post('/admin/product-get-slug','Product\ProductController@get_slug')->name('product.get-slug');
     Route::post('/admin/products/upload', 'Product\ProductController@upload')->name('products.upload');
@@ -374,14 +374,14 @@ Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']
     Route::get('/admin/product/restore/{id}', 'Product\ProductController@restore')->name('product.restore');
     Route::post('/admin/product-multiple-change-status','Product\ProductController@multiple_change_status')->name('product.multiple.change.status');
     Route::post('/admin/product-multiple-delete','Product\ProductController@multiple_delete')->name('products.multiple.delete');
-//
-//Delivery Rate
+    //
+    //Delivery Rate
     Route::resource('/admin/deliveryrate', 'EcommerceControllers\DeliveryRateController');
     Route::get('/admin/deliveryrate/restore/{id}', 'EcommerceControllers\DeliveryRateController@restore')->name('deliveryrate.restore');
     Route::post('/admin/deliveryrate/single-delete', 'EcommerceControllers\DeliveryRateController@single_delete')->name('deliveryrate.single.delete');
     Route::post('/admin/deliveryrate/multiple-delete','EcommerceControllers\DeliveryRateController@multiple_delete')->name('deliveryrate.multiple.delete');
-//
-//Branches
+    //
+    //Branches
     Route::resource('/admin/branch', 'EcommerceControllers\BranchController');
     Route::get('/admin/branch/restore/{id}', 'EcommerceControllers\BranchController@restore')->name('branch.restore');
     Route::post('/admin/branch/single-delete', 'EcommerceControllers\BranchController@single_delete')->name('branch.single.delete');
@@ -389,13 +389,13 @@ Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']
     Route::post('/admin/branch/show-numbers/','EcommerceControllers\BranchNumbersController@index')->name('branch.show.numbers');
     Route::post('/admin/branch/add-number/','EcommerceControllers\BranchNumbersController@store')->name('branch.add.number');
     Route::post('/admin/branch/delete-number/','EcommerceControllers\BranchNumbersController@delete')->name('branch.delete.number');
-//
+    //
 
-//Orders
+    //Orders
     Route::resource('/admin/forecaster/orders', 'EcommerceControllers\OrderController');
-//
+    //
 
-//Reports
+    //Reports
     //Route::resource('/admin/forecaster/reports', 'EcommerceControllers\ReportController');
     Route::get('/admin/report/sales', 'EcommerceControllers\ReportsController@sales')->name('admin.report.sales');
     Route::get('/admin/report/sales_payments', 'EcommerceControllers\ReportsController@sales_payment')->name('admin.report.sales_payment');
@@ -424,15 +424,15 @@ Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']
     Route::get('/admin/report/dispatcher', 'EcommerceControllers\ReportsController@dispatcher')->name('admin.report.dispatcher');
 
 
-//
+    //
 
-//Production Branch
+    //Production Branch
     Route::resource('/admin/production-branches', 'EcommerceControllers\ProductionBranchController');
     Route::get('/admin/production-branches/restore/{id}', 'EcommerceControllers\ProductionBranchController@restore')->name('production-branches.restore');
     Route::post('/admin/production-branches/single-delete', 'EcommerceControllers\ProductionBranchController@single_delete')->name('production-branches.single.delete');
     Route::post('/admin/production-branches/multiple-delete','EcommerceControllers\ProductionBranchController@multiple_delete')->name('production-branches.multiple.delete');
-//
-//Gift Certificate
+    //
+    //Gift Certificate
     Route::resource('/admin/gift-certificate', 'EcommerceControllers\GiftCertificateController');
     Route::get('/admin/gift-certificate/restore/{id}', 'EcommerceControllers\GiftCertificateController@restore')->name('gift-certificate.restore');
     Route::post('/admin/gift-certificate/single-delete', 'EcommerceControllers\GiftCertificateController@single_delete')->name('gift-certificate.single.delete');
@@ -441,9 +441,9 @@ Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']
     Route::get('/admin/gift-certificate-upload', 'EcommerceControllers\GiftCertificateController@upload')->name('gift-certificate.upload');
     Route::post('/admin/gift-certificate-upload', 'EcommerceControllers\GiftCertificateController@upload_submit')->name('gift-certificate.upload_submit');
     Route::get('/admin/gift-certificate-export', 'EcommerceControllers\GiftCertificateController@export')->name('gift-certificate.export');
-//
+    //
 
-//Sales Transaction
+    //Sales Transaction
     Route::resource('/admin/sales-transaction', 'EcommerceControllers\SalesController');
     Route::get('/admin/sales-transaction/{sales}/restore', 'EcommerceControllers\SalesController@restore')->name('sales-transaction.restore');
     Route::post('/admin/sales-transaction/change-status', 'EcommerceControllers\SalesController@change_status')->name('sales-transaction.change.status');
@@ -475,9 +475,9 @@ Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']
     Route::post('/update_dateneeded', 'EcommerceControllers\SalesController@update_dateneeded')->name('update_dateneeded');
     Route::get('/prepare_dateneeded', 'EcommerceControllers\SalesController@prepare_dateneeded')->name('prepare_dateneeded');
     Route::get('/disapprove_payment/{id}', 'EcommerceControllers\SalesController@disapprove_payment')->name('disapprove_payment');
-//
+    //
 
-// Forecaster
+    // Forecaster
     Route::resource('/admin/forecaster','EcommerceControllers\ForecasterController');
     Route::get('/admin/forecaster/assign-order/{id}','EcommerceControllers\ForecasterController@assign')->name('joborder.assign');
 
@@ -490,9 +490,9 @@ Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']
     Route::get('/display-assigned-orders', 'EcommerceControllers\ForecasterController@display_orders')->name('display.assigned-orders');
     Route::get('/admin/forecaster-remove-order/{id}', 'EcommerceControllers\ForecasterController@remove')->name('forecaster.remove.order');
     Route::post('/admin/forecaster-order-multiple-delete','EcommerceControllers\ForecasterController@multiple_cancel')->name('forecaster.order.multiple.delete');
-//
+    //
 
-//job orders
+    //job orders
     Route::resource('/admin/joborders','EcommerceControllers\JoborderController');
     Route::post('/joborder-delete','EcommerceControllers\JoborderController@delete')->name('jo.delete');
     Route::post('/admin/get_shipping_fee_joborder', 'EcommerceControllers\JoborderController@get_shipping_fee')->name('cart.joborder.get_shipping_fee');
@@ -540,14 +540,14 @@ Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']
     Route::delete('/delete/mailing-list/campaign', 'MailingList\CampaignController@destroy_many')->name('mailing-list.campaigns.destroy_many');
     Route::post('/campaigns/{id}/restore', 'MailingList\CampaignController@restore')->name('mailing-list.campaigns.restore');
 
-//// END MAILING LIST ////
+    //// END MAILING LIST ////
 
     //Shareable Links
     Route::resource('/shareable-links', 'EcommerceControllers\ShareableLinkController');
     Route::get('/shareable-links/restore/{id}', 'EcommerceControllers\ShareableLinkController@restore')->name('shareable-link.restore');
     Route::post('/shareable-links/single-delete', 'EcommerceControllers\ShareableLinkController@single_delete')->name('shareable-link.single.delete');
     Route::post('/shareable-links/multiple-delete','EcommerceControllers\ShareableLinkController@multiple_delete')->name('shareable-link.multiple.delete');
-///
+    ///
 });
 ##### END ADMIN ROUTE #####
 #####################################################################################################################################################
@@ -561,5 +561,3 @@ Route::get('/{any}', 'FrontController@page')->where('any', '.*');  //// REMOVE F
 Route::get('/test', function(){
     phpinfo();
 });
-
-

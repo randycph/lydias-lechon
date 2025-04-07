@@ -45,15 +45,19 @@
                     <div class="form-group">
                         <label class="d-block">Code</label>
                         <input name="code" id="code" value="{{ old('code', $product->code) }}" type="text" class="form-control @error('code') is-invalid @enderror" maxlength="250">
-                        @hasError(['inputName' => 'code'])
-                        @endhasError
+                        <x-error-message inputName="code" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Name *</label>
-                        <input name="name" id="name" value="{{ old('name',$product->name) }}" required type="text" class="form-control @error('name') is-invalid @enderror" maxlength="250">
+                        <input name="name" id="name" value="{{ old('name',$product->name) }}"  type="text" class="form-control @error('name') is-invalid @enderror" maxlength="250">
                         <small id="product_slug"><a target="_blank" href="{{ $product->get_url() }}">{{ $product->get_url() }}</a></small>
-                        @hasError(['inputName' => 'name'])
-                        @endhasError
+                        <div>
+                            @error('name')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
                     </div>
                     <div class="form-group">
                         <label class="d-block">Category</label>
@@ -63,14 +67,12 @@
                                 <option value="{{$category->id}}" @if($product->category_id == $category->id) selected @endif>{{strtoupper($category->name)}}</option>
                             @endforeach
                         </select>
-                        @hasError(['inputName' => 'category'])
-                        @endhasError
+                        <x-error-message inputName="category" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Short Description</label>
                         <textarea name="short_description" rows="3" class="form-control">{{ old('short_description',$product->short_description) }}</textarea>
-                        @hasError(['inputName' => 'short_description'])
-                        @endhasError
+                        <x-error-message inputName="short_description" />
                     </div>
                 </div>
                 <div class="col-lg-12">
@@ -79,8 +81,7 @@
                         <textarea name="long_description" id="editor1" rows="10" cols="80">
                              {{ old('long_description', $product->description) }}
                         </textarea>
-                        @hasError(['inputName' => 'long_description'])
-                        @endhasError
+                        <x-error-message inputName="long_description" />
                         <span class="invalid-feedback" role="alert" id="long_descriptionRequired" style="display: none;">
                             <strong>The description field is required</strong>
                         </span>
@@ -96,7 +97,7 @@
 {{--                    <div class="form-group">--}}
 {{--                        <label class="d-block">Currency *</label>--}}
                         <select hidden name="currency" id="currency" class="form-control @error('currency') is-invalid @enderror">
-                            {!! \App\Option::currency_options() !!}
+                            {!! \App\Models\Option::currency_options() !!}
                         </select>
 {{--                        @hasError(['inputName' => 'currency'])--}}
 {{--                        @endhasError--}}
@@ -107,32 +108,27 @@
                     <div class="form-group">
                         <label class="d-block">Price (in Php) *</label>
                         <input type="number" class="form-control @error('price') is-invalid @enderror" name="price" id="price" value="{{ old('price', number_format($product->price,2,'.','')) }}" required min="0.00" step="0.01">
-                        @hasError(['inputName' => 'price'])
-                        @endhasError
+                        <x-error-message inputName="price" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Paella Price</label>
                         <input type="number" class="form-control @error('paella_price') is-invalid @enderror" name="paella_price" id="paella_price" value="{{ old('paella_price', number_format($product->paella_price,2,'.','')) }}" step="0.01">
-                        @hasError(['inputName' => 'paella_price'])
-                        @endhasError
+                        <x-error-message inputName="paella_price" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Size</label>
                         <input type="text" class="form-control @error('size') is-invalid @enderror" name="size" id="size" value="{{ old('size', $product->size) }}" min="0" step="1">
-                        @hasError(['inputName' => 'size'])
-                        @endhasError
+                        <x-error-message inputName
                     </div>
                     <div class="form-group">
                         <label class="d-block">Weight</label>
                         <input type="text" class="form-control @error('weight') is-invalid @enderror" name="weight" id="weight" value="{{ old('weight', $product->weight) }}" >
-                        @hasError(['inputName' => 'weight'])
-                        @endhasError
+                        <x-error-message inputName="weight" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">No of pax</label>
                         <input type="text" class="form-control @error('no_of_pax') is-invalid @enderror" name="no_of_pax" id=no_of_pax" value="{{ old('no_of_pax', $product->no_of_pax) }}">
-                        @hasError(['inputName' => 'no_of_pax'])
-                        @endhasError
+                        <x-error-message inputName="no_of_pax" />
                     </div>
 
                     <div class="form-group">
@@ -141,8 +137,7 @@
                             <input type="hidden" value="{{$product->for_sale}}" id="is_forsale">
                             <input type="checkbox" class="custom-control-input" name="for_sale" {{ (old("for_sale") == "0" || $product->for_sale == "0" ? "":"checked") }} id="customSwitch3">
                             <label class="custom-control-label" id="label_visibility3" for="customSwitch3">{{ (old("for_sale") == "0" || $product->for_sale == "Yes" ? "No":"Yes") }}</label>
-                            @hasError(['inputName' => 'for_sale'])
-                            @endhasError
+                            <x-error-message inputName="for_sale" />
                         </div>
                     </div>
                     <div class="form-group" id="for_sale_web_div" style="display:none;">
@@ -150,8 +145,7 @@
                         <div class="custom-control custom-switch @error('for_sale_web') is-invalid @enderror">
                             <input type="checkbox" class="custom-control-input" name="for_sale_web" {{ (old("for_sale_web") == "0" || $product->for_sale_web == "0" ? "":"checked") }} id="for_sale_web">
                             <label class="custom-control-label" id="for_sale_web_label" for="for_sale_web">{{ (old("for_sale_web") == "0" || $product->for_sale_web == "Yes" ? "No":"Yes") }}</label>
-                            @hasError(['inputName' => 'for_sale_web'])
-                            @endhasError
+                            <x-error-message inputName="for_sale_web" />
                         </div>
                     </div>
                     <div class="form-group" id="for_sale_kiosk_div" style="display:none;">
@@ -159,8 +153,7 @@
                         <div class="custom-control custom-switch @error('for_sale_kiosk') is-invalid @enderror">
                             <input type="checkbox" class="custom-control-input" name="for_sale_kiosk" {{ (old("for_sale_kiosk") == "0" || $product->for_sale_kiosk == "0" ? "":"checked") }} id="for_sale_kiosk">
                             <label class="custom-control-label" id="for_sale_kiosk_label" for="for_sale_kiosk">{{ (old("for_sale_kiosk") == "0" || $product->for_sale_kiosk == "Yes" ? "No":"Yes") }}</label>
-                            @hasError(['inputName' => 'for_sale_kiosk'])
-                            @endhasError
+                            <x-error-message inputName="for_sale_kiosk" />
                         </div>
                     </div>
                     <div class="form-group" id="is_misc_div" style="display:none;">
@@ -168,8 +161,7 @@
                         <div class="custom-control custom-switch @error('is_misc') is-invalid @enderror">
                             <input type="checkbox" class="custom-control-input" name="is_misc" {{ (old("is_misc") == "0" || $product->is_misc == "0" ? "":"checked") }} id="is_misc">
                             <label class="custom-control-label" id="is_misc_label" for="is_misc">{{ (old("is_misc") == "0" || $product->is_misc == "Yes" ? "No":"Yes") }}</label>
-                            @hasError(['inputName' => 'is_misc'])
-                            @endhasError
+                            <x-error-message inputName="is_misc" />
                         </div>
                     </div>
 
@@ -178,8 +170,7 @@
                         <div class="custom-control custom-switch @error('production_item') is-invalid @enderror">
                             <input type="checkbox" class="custom-control-input" name="production_item" {{ (old("production_item") == "0" || $product->production_item == "0" ? "":"checked") }} id="production_item">
                             <label class="custom-control-label" id="is_misc_label" for="production_item">{{ (old("production_item") == "0" || $product->production_item == "Yes" ? "No":"Yes") }}</label>
-                            @hasError(['inputName' => 'production_item'])
-                            @endhasError
+                            <x-error-message inputName="production_item" />
                         </div>
                     </div>
 
@@ -281,8 +272,7 @@
                     <div class="form-group">
                         <label class="d-block">Tags</label>
                         <input type="text" class="form-control @error('tags') is-invalid @enderror" data-role="tagsinput" name="tags" id="tags" value="{{ old('tags',\App\Models\ProductTag::tags($product->id)) }}">
-                        @hasError(['inputName' => 'tags'])
-                        @endhasError
+                        <x-error-message inputName="tags" />
                     </div>
 {{--                        <div class="form-group">--}}
 {{--                            <label class="d-block">Colors</label>--}}
@@ -302,8 +292,7 @@
                             <input type="checkbox" class="custom-control-input" name="status" {{ (old("status") == "ON" || $product->status == "PUBLISHED" ? "checked":"") }} id="customSwitch1">
                             <label class="custom-control-label" id="label_visibility" for="customSwitch1">{{ucfirst(strtolower($product->status))}}</label>
                         </div>
-                        @hasError(['inputName' => 'status'])
-                        @endhasError
+                        <x-error-message inputName="status" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Display</label>
@@ -311,8 +300,7 @@
                             <input type="checkbox" class="custom-control-input" name="is_featured" {{ (old("visibility") || $product->is_featured ? "checked":"") }} id="customSwitch2">
                             <label class="custom-control-label" for="customSwitch2">Featured</label>
                         </div>
-                        @hasError(['inputName' => 'is_featured'])
-                        @endhasError
+                        <x-error-message inputName="is_featured" />
                     </div>
                 </div>
 
@@ -325,22 +313,19 @@
                     <div class="form-group">
                         <label class="d-block">Title <code>(meta title)</code></label>
                         <input type="text" class="form-control @error('seo_title') is-invalid @enderror" name="seo_title" value="{{ old('seo_title', $product->meta_title) }}">
-                        @hasError(['inputName' => 'seo_title'])
-                        @endhasError
+                        <x-error-message inputName="seo_title" />
                         <p class="tx-11 mg-t-4">{{ __('standard.seo.title') }}</p>
                     </div>
                     <div class="form-group">
                         <label class="d-block">Description <code>(meta description)</code></label>
                         <textarea rows="3" class="form-control @error('seo_description') is-invalid @enderror" name="seo_description">{!! old('seo_description',$product->meta_description) !!}</textarea>
-                        @hasError(['inputName' => 'seo_description'])
-                        @endhasError
+                        <x-error-message inputName="seo_description" />
                         <p class="tx-11 mg-t-4">{{ __('standard.seo.description') }}</p>
                     </div>
                     <div class="form-group">
                         <label class="d-block">Keywords <code>(meta keywords)</code></label>
                         <textarea rows="3" class="form-control @error('seo_keywords') is-invalid @enderror" name="seo_keywords">{!! old('seo_keywords',$product->meta_keyword) !!}</textarea>
-                        @hasError(['inputName' => 'seo_keywords'])
-                        @endhasError
+                        <x-error-message inputName="seo_keywords" />
                         <p class="tx-11 mg-t-4">{{ __('standard.seo.keywords') }}</p>
                     </div>
                 </div>

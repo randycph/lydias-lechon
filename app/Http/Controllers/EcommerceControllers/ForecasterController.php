@@ -47,7 +47,7 @@ class ForecasterController extends Controller
             ->where('Joborder_id',0)
             ->where('delivery_date','>=','2021-12-01')
             ->orderBy('delivery_date')
-            ->get();
+            ->paginate();
 
             //->where('delivery_date','>=',date('Y-m-d 00:00:00'))
         return view('admin.forecaster.index',compact('branches','orders','param'));

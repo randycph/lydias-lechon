@@ -37,7 +37,7 @@
                     <div class="form-group">
                         <label class="d-block">Name *</label>
                         <input type="text" name="name" id="name" value="{{ old('name')}}" class="form-control @error('name') is-invalid @enderror">
-                        @hasError(['inputName' => 'name'])@endhasError
+                        <x-error-message inputName="name" />
                         <small id="category_slug"></small>
                     </div>
 
@@ -54,7 +54,7 @@
                     <div class="form-group">
                         <label class="d-block">Description</label>
                         <textarea rows="3" class="form-control @error('description') is-invalid @enderror" name="description">{{ old('description') }}</textarea>
-                        @hasError(['inputName' => 'description'])@endhasError
+                        <x-error-message inputName="description" />
                     </div>
 
                     <div class="form-group">

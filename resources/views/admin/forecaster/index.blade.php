@@ -237,6 +237,14 @@ Manage Customer
                             @endforelse
                         </tbody>
                     </table>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="float-right">
+                                {{ $orders->appends(request()->input())->links() }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -365,8 +373,7 @@ Manage Customer
 
                             </select>
                             <p class="tx-10 text-danger" id="error">
-                                @hasError(['inputName' => 'delivery_status'])
-                                @endhasError
+                                <x-error-message inputName="delivery_status" />
                             </p>
                         </div>
                         <div class="form-group" style="display:none;" id="delivered_by_div">

@@ -40,19 +40,17 @@
                         <label>{{ $page->name }}</label></br>
                         <input type="hidden" class="form-control" name="page_title" value="{{ $page->name }}">
                     @else
-					    <input type="text" class="form-control @error('page_title') is-invalid @enderror" name="page_title" id="page_title" value="{{ old('page_title', $page->name) }}" required>
+					    <input type="text" class="form-control @error('page_title') is-invalid @enderror" name="page_title" id="page_title" value="{{ old('page_title', $page->name) }}" >
 					@endif
-                    @hasError(['inputName' => 'page_title'])
-                    @endhasError
+                    <x-error-message inputName="page_title" />
                     <small id="page_slug"><a target="_blank" href="{{env('APP_URL')}}/{{$page->slug}}">{{env('APP_URL')}}/{{$page->slug}}</a></small>
-                    @hasError(['inputName' => 'slug'])
-                    @endhasError
+
+                    <x-error-message inputName="slug" />
 				</div>
                 <div class="form-group">
                     <label class="d-block">Page Label *</label>
                     <input type="text" class="form-control @error('label') is-invalid @enderror" name="label" id="label" value="{{ old('label', $page->label) }}" required>
-                    @hasError(['inputName' => 'label'])
-                    @endhasError
+                    <x-error-message inputName="label" />
                 </div>
                 @if ($page->page_type != "default")
                     <div class="form-group">
@@ -65,8 +63,7 @@
                             @endforelse
 
                         </select>
-                        @hasError(['inputName' => 'parent_page'])
-                        @endhasError
+                        <x-error-message inputName="parent_page" />
                     </div>
                 @endif
 				@php
@@ -129,8 +126,7 @@
 						    </div>
 						</div>
 					</div>
-                    @hasError(['inputName' => 'page_banner'])
-                    @endhasError
+                    <x-error-message inputName="page_banner" />
 				</div>
 			</div>
             @if ($page->slug != "news")
@@ -140,8 +136,7 @@
 					<textarea name="content" id="editor1" rows="10" cols="80" required>
                         {{ old('content',$page->contents) }}
 					</textarea>
-                    @hasError(['inputName' => 'content'])
-                    @endhasError
+                    <x-error-message inputName="content" />
                     <span class="invalid-feedback" role="alert" id="contentRequired" style="display: none;">
                         <strong>The content field is required</strong>
                     </span>
@@ -156,8 +151,7 @@
                         <div class="custom-control custom-switch @error('visibility') is-invalid @enderror">
                             <input type="checkbox" class="custom-control-input" name="visibility" {{ (old("visibility") == "ON" || $page->status == "PUBLISHED" ? "checked":"") }} id="customSwitch1">
                             <label class="custom-control-label" id="label_visibility" for="customSwitch1">{{ucfirst(strtolower($page->status))}}</label>
-                            @hasError(['inputName' => 'visibility'])
-                            @endhasError
+                            <x-error-message inputName="visibility" />
                         </div>
                     @endif
 				</div>
@@ -172,22 +166,19 @@
 				<div class="form-group">
 					<label class="d-block">Title <code>(meta title)</code></label>
 					<input type="text" class="form-control @error('seo_title') is-invalid @enderror" name="seo_title" value="{{ old('seo_title',$page->meta_title) }}">
-                    @hasError(['inputName' => 'seo_title'])
-                    @endhasError
+                    <x-error-message inputName="seo_title" />
 					<p class="tx-11 mg-t-4">{{ __('standard.seo.title') }}</p>
 				</div>
 				<div class="form-group">
 					<label class="d-block">Description <code>(meta description)</code></label>
 					<textarea rows="3" class="form-control @error('seo_description') is-invalid @enderror" name="seo_description">{!! old('seo_description',$page->meta_description) !!}</textarea>
-                    @hasError(['inputName' => 'seo_description'])
-                    @endhasError
+                    <x-error-message inputName="seo_description" />
 					<p class="tx-11 mg-t-4">{{ __('standard.seo.description') }}</p>
 				</div>
 				<div class="form-group">
 					<label class="d-block">Keywords <code>(meta keywords)</code></label>
 					<textarea rows="3" class="form-control @error('seo_keywords') is-invalid @enderror" name="seo_keywords">{!! old('seo_keywords',$page->meta_keyword) !!}</textarea>
-                    @hasError(['inputName' => 'seo_keywords'])
-                    @endhasError
+                    <x-error-message inputName="seo_keywords" />
 					<p class="tx-11 mg-t-4">{{ __('standard.seo.keywords') }}</p>
 				</div>
 			</div>

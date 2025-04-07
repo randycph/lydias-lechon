@@ -51,8 +51,7 @@
                     <div class="form-group mg-b-20">
                         <label class="d-block">Menu Name *</label>
                         <input type="text" class="form-control @error('name') is-invalid @enderror" required name="name" value="{{ $menu->name }}">
-                        @hasError(['inputName' => 'name'])
-                        @endhasError
+                        <x-error-message inputName="name" />
                         <input type="hidden" required name="pages_json" id="menuPages" value="{{ $menu->pages_json }}">
                         <input type="hidden" required name="is_active" id="menuIsActive" value="{{ $menu->is_active }}">
                         <input type="submit" id="submitForm" class="d-none"></button>
@@ -145,8 +144,7 @@
                     </div>
                     <!-- /.nestable -->
                 </section>
-                @hasError(['inputName' => 'pages_json'])
-                @endhasError
+                <x-error-message inputName="pages_json" />
                 <div class="mg-t-20"></div>
                 <div class="form-group">
                     <!-- <label class="d-block">Set as active?</label> -->

@@ -2,10 +2,10 @@
 
 namespace App\MailingListModel;
 
-use App\ActivityLog;
+use App\Models\ActivityLog;
 use App\Helpers\Webfocus\Setting;
 use App\Mail\MailingList\CampaignMail;
-use App\SentCampaign;
+use App\Models\SentCampaign;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Mail;

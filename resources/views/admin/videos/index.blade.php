@@ -103,7 +103,7 @@ Manage Videos
                             </form>
                         </div>
                         <div class="mg-t-10">
-                            @if(\App\ViewPermissions::check_permission(Auth::user()->role_id,'admin/videos/create') == 1)
+                            @if(\App\Models\ViewPermissions::check_permission(Auth::user()->role_id,'admin/videos/create') == 1)
                                 <a class="btn btn-primary btn-sm mg-b-20" href="{{ route('videos.create') }}">Add a Video</a>
                             @endif
                         </div>

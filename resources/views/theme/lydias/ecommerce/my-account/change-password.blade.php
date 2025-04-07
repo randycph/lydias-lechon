@@ -31,8 +31,7 @@
                             <div class="form-group">
                                 <label for="inputPasswordOld">Current Password</label>
                                 <input type="password" class="form-control col-md-6 @error('current_password') is-invalid @enderror" name="current_password" required id="inputPasswordOld">
-                                @hasError(['inputName' => 'current_password'])
-                                @endhasError
+                                <x-error-message inputName="current_password" />
                             </div>
                             <div class="form-group">
                                 <label for="inputPasswordNew">New Password</label>
@@ -40,8 +39,7 @@
                                 <span class="form-text small text-muted">
 									Minimum of 10 characters, at least one 1 upper case and 1 special character
 								</span>
-                                @hasError(['inputName' => 'password'])
-                                @endhasError
+                                <x-error-message inputName="password" />
 
                             </div>
                             <div class="form-group">
@@ -50,8 +48,7 @@
                                 <span class="form-text small text-muted">
 									To confirm, type the new password again.
 								</span>
-                                @hasError(['inputName' => 'confirm_password'])
-                                @endhasError
+                                <x-error-message inputName="confirm_password" />
 
                             </div>
                             <div class="form-group">

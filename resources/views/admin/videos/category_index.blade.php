@@ -96,7 +96,7 @@
                                     <input type="text" name="search" id="search" class="form-control" placeholder="Search" @isset($_GET['search']) value="{{$_GET['search']}}" @endisset>
                                     <button class="btn filter" type="button"><i data-feather="search"></i></button>
                                 </div>
-                                @if(\App\ViewPermissions::check_permission(Auth::user()->role_id, 'admin/news-categories/create') == 1)
+                                @if(\App\Models\ViewPermissions::check_permission(Auth::user()->role_id, 'admin/news-categories/create') == 1)
                                     <a class="btn btn-primary btn-sm mg-b-5" href="{{ route('video-categories.create') }}">Create a Category</a>
                                 @endif
                             </form>

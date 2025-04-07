@@ -443,32 +443,28 @@
                                 <option value="Cash">Cash</option>
                             </select>
                             <p class="tx-10 text-danger" id="error">
-                                @hasError(['inputName' => 'payment_type'])
-                                @endhasError
+                                <x-error-message inputName="payment_type" />
                             </p>
                         </div>
                         <div class="form-group">
                             <label class="d-block">Amount *</label>
                             <input type="text" class="form-control" name="amount" id="amount">
                             <p class="tx-10 text-danger" id="error">
-                                @hasError(['inputName' => 'amount'])
-                                @endhasError
+                                <x-error-message inputName="amount" />
                             </p>
                         </div>
                         <div class="form-group">
                             <label class="d-block">Payment date *</label>
                             <input type="date" class="form-control" name="payment_date" id="payment_date">
                             <p class="tx-10 text-danger" id="error">
-                                @hasError(['inputName' => 'payment_date'])
-                                @endhasError
+                                <x-error-message inputName
                             </p>
                         </div>
                         <div class="form-group">
                             <label class="d-block">Receipt number *</label>
                             <input type="text" class="form-control" name="receipt_number" id="receipt_number">
                             <p class="tx-10 text-danger" id="error">
-                                @hasError(['inputName' => 'receipt_number'])
-                                @endhasError
+                                <x-error-message inputName="receipt_number" />
                             </p>
                         </div>
                     </div>
@@ -505,8 +501,7 @@
                                 <option value="Returned">Returned</option>
                             </select>
                             <p class="tx-10 text-danger" id="error">
-                                @hasError(['inputName' => 'delivery_status'])
-                                @endhasError
+                                <x-error-message inputName="delivery_status" />
                             </p>
                         </div>
                         <div class="form-group" style="display:none;" id="delivered_by_div">
@@ -658,7 +653,7 @@
                             <div class="form-group">
                                 <label class="d-block">Payment Date *</label>
                                 <input required type="text" name="payment_dt" class="form-control" id="payment_dt" placeholder="Choose date" value="{{ old('date') }}">
-                                @hasError(['inputName' => 'payment_dt'])@endhasError
+                                <x-error-message inputName="payment_dt" />
                             </div>
                             <div class="form-group">
                                 <label class="d-block">Amount *</label>
@@ -816,7 +811,7 @@
                             <select class="form-control" style="display:none;" name="update_dateneeded_d2d" id="update_dateneeded_d2d">
                                 <option value="">Select new location</option>
                                 
-                                @foreach(\App\Deliverablecities::all() as $b)
+                                @foreach(\App\Models\Deliverablecities::all() as $b)
                                 <option value="{{$b->name}}">{{$b->name}}</option>
                                 @endforeach
                                 <option value="Other">Other</option>

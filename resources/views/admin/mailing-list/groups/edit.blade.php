@@ -26,14 +26,12 @@
                 <div class="form-group">
                     <label class="d-block">Name *</label>
                     <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name', $group->name) }}">
-                    @hasError(['inputName' => 'name'])
-                    @endhasError
+                    <x-error-message inputName="name" />
                 </div>
                 <div class="form-group">
                     <label class="d-block">Description</label>
                     <textarea class="form-control @error('description') is-invalid @enderror" rows="4" name="description">{{ old('description', $group->description) }}</textarea>
-                    @hasError(['inputName' => 'description'])
-                    @endhasError
+                    <x-error-message inputName="description" />
                 </div>
                 <div class="form-group">
                     <label class="d-block">Subscribers
@@ -47,8 +45,7 @@
                             <option value="{{ $subscriber->id }}" @if (in_array($subscriber->id, old('subscribers', $group->subscribers->pluck('id')->toArray()))) selected @endif>{{ $subscriber->email }}</option>
                         @endforeach
                     </select>
-                    @hasError(['inputName' => 'subscribers'])
-                    @endhasError
+                    <x-error-message inputName="subscribers" />
                 </div>
             </div>
             <div class="col-lg-12 mg-t-10">

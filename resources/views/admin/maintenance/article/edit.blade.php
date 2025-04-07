@@ -35,8 +35,7 @@
                                     <div class="col-sm">
                                         <label class="tx-10 tx-uppercase tx-medium tx-spacing-1 mg-b-5 tx-color-03">Category Name <i class="tx-danger">*</i></label>
                                         <input required type="text" class="form-control @error('category_name') is-invalid @enderror" name="category_name" id="category_title" value="{{$articleCategory->name}}" @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                                        @hasError(['inputName' => 'category_name'])
-										@endhasError
+                                        <x-error-message inputName="category_name" />
 										<small id="category_slug"><a target="_blank" href="{{env('APP_URL')}}/{{$articleCategory->slug}}">{{env('APP_URL')}}/{{$articleCategory->slug}}</a></small>
                                     </div>
                                 </div>

@@ -25,20 +25,17 @@
                 <div class="form-group">
                     <label class="d-block">First Name</label>
                     <input type="text" class="form-control @error('first_name') is-invalid @enderror" name="first_name" value="{{ old('first_name', $subscriber->first_name) }}">
-                    @hasError(['inputName' => 'first_name'])
-                    @endhasError
+                    <x-error-message inputName="first_name" />
                 </div>
                 <div class="form-group">
                     <label class="d-block">Last Name</label>
                     <input type="text" class="form-control @error('last_name') is-invalid @enderror" name="last_name" value="{{ old('last_name', $subscriber->last_name) }}">
-                    @hasError(['inputName' => 'last_name'])
-                    @endhasError
+                    <x-error-message inputName="last_name" />
                 </div>
                 <div class="form-group">
                     <label class="d-block">E-mail Address *</label>
                     <input type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email', $subscriber->email) }}" required>
-                    @hasError(['inputName' => 'email'])
-                    @endhasError
+                    <x-error-message inputName="email" />
                 </div>
                 <div class="form-group">
                     <label class="d-block">Status</label>

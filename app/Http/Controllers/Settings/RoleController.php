@@ -5,7 +5,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Auth;
 
-use App\Role;
+use App\Models\Role;
 
 class RoleController extends Controller
 {

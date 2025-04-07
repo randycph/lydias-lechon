@@ -39,8 +39,7 @@
                             <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">Category Name <i class="tx-danger">*</i></label>
                                 <input required type="text" class="form-control @error('category_name') is-invalid @enderror" name="category_name" id="category_title" @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                                @hasError(['inputName' => 'category_name'])
-                                @endhasError
+                                <x-error-message inputName="category_name" />
                                 <small id="category_slug"></small>
                             </div>
                         </div>

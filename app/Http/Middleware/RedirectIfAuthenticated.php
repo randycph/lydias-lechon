@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\ViewPermissions;
+use App\Models\ViewPermissions;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 

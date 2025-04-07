@@ -71,7 +71,7 @@
 
                             @if($salesheader->delivery_type == 'Door to door delivery')
                                 <select class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Choose New Location" data-width="100%" name="update_dateneeded_d2d">
-                                    @foreach(\App\Deliverablecities::all() as $b)
+                                    @foreach(\App\Models\Deliverablecities::all() as $b)
                                     <option @if($b->name == $locationed) selected @endif value="{{$b->name}}">{{$b->name}}</option>
                                     @endforeach
                                     <option value="Other">Other</option>

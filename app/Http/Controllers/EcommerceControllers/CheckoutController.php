@@ -15,7 +15,7 @@ use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\Branch;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\Webfocus\Setting;
-use App\Deliverablecities;
+use App\Models\Deliverablecities;
 
 class CheckoutController extends Controller
 {
