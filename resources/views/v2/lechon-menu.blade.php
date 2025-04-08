@@ -218,12 +218,12 @@ $lists = [
         <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="whole-lechon">
             whole lechon
         </div>
-    
+        {{-- style="background-image: url('{{ asset('images/checkout-bg.png') }}')" --}}
         <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
             @foreach ($lists as $list)
             <div class="bg-white shadow-md  rounded-lg border-primary border lechon">
                 <div class="p-2">
-                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md lg:rounded-lg bg-center">
+                    <div  class="object-cover overflow-hidden m-2 rounded-md lg:rounded-lg bg-center">
                         <img src="{{ asset('images/' .  $list['image']) }}" alt="{{ $list['name'] }}" class="px-4 scale-110">
                     </div>
                     <div class="mt-4 px-2">
@@ -277,7 +277,7 @@ $lists = [
             @foreach ($boxes as $box)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
                 <div class="p-2">
-                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
                         <img src="{{ asset('images/' .  $box['image']) }}" alt="{{ $box['name'] }}" class="px-4 scale-110">
                     </div>
                     <div class="mt-4 px-2">
@@ -315,7 +315,7 @@ $lists = [
             @foreach ($familyboxes as $box)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
                 <div class="p-2">
-                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
                         <img src="{{ asset('images/' .  $box['image']) }}" alt="{{ $box['name'] }}" class="px-4 scale-110">
                     </div>
                     <div class="mt-4 px-2">
@@ -373,7 +373,7 @@ $lists = [
             @foreach ($specials as $box)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
                 <div class="p-2">
-                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
                         <img src="{{ asset('images/' .  $box['image']) }}" alt="{{ $box['name'] }}" class="px-4 scale-110">
                     </div>
                     <div class="mt-4 px-2">
@@ -441,7 +441,7 @@ $lists = [
             @foreach ($trays as $tray)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
                 <div class="p-2">
-                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
                         <img src="{{ asset('images/' .  $tray['image']) }}" alt="{{ $tray['name'] }}" class="px-4 scale-110">
                     </div>
                     <div class="mt-4 px-2">
@@ -500,7 +500,7 @@ $lists = [
             @foreach ($trays as $tray)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
                 <div class="p-2">
-                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
                         <img src="{{ asset('images/' .  $tray['image']) }}" alt="{{ $tray['name'] }}" class="px-4 scale-110">
                     </div>
                     <div class="mt-4 px-2">
@@ -544,7 +544,7 @@ $lists = [
             @foreach ($bentos as $bento)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
                 <div class="p-2">
-                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
                         <img src="{{ asset('images/' .  $bento['image']) }}" alt="{{ $bento['name'] }}" class="px-4 scale-110">
                     </div>
                     <div class="mt-4 px-2">
@@ -583,7 +583,7 @@ $lists = [
             @foreach ($pampaganas as $pampagana)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
                 <div class="p-2">
-                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
                         <img src="{{ asset('images/' .  $pampagana['image']) }}" alt="{{ $pampagana['name'] }}" class="px-4 scale-110">
                     </div>
                     <div class="mt-4 px-2">
@@ -637,7 +637,7 @@ $lists = [
             @foreach ($meaties as $meaty)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
                 <div class="p-2">
-                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
                         <img src="{{ asset('images/' .  $meaty['image']) }}" alt="{{ $meaty['name'] }}" class="px-4 scale-110">
                     </div>
                     <div class="mt-4 px-2">
@@ -681,7 +681,7 @@ $lists = [
             @foreach ($gulays as $gulay)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
                 <div class="p-2">
-                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
                         <img src="{{ asset('images/' .  $gulay['image']) }}" alt="{{ $gulay['name'] }}" class="px-4 scale-110">
                     </div>
                     <div class="mt-4 px-2">
@@ -720,7 +720,7 @@ $lists = [
             @foreach ($yamangdagats as $yamangdagat)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
                 <div class="p-2">
-                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
                         <img src="{{ asset('images/' .  $yamangdagat['image']) }}" alt="{{ $yamangdagat['name'] }}" class="px-4 scale-110">
                     </div>
                     <div class="mt-4 px-2">
@@ -759,7 +759,7 @@ $lists = [
             @foreach ($meryendas as $meryenda)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
                 <div class="p-2">
-                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
                         <img src="{{ asset('images/' .  $meryenda['image']) }}" alt="{{ $meryenda['name'] }}" class="px-4 scale-110">
                     </div>
                     <div class="mt-4 px-2">
@@ -793,7 +793,7 @@ $lists = [
             @foreach ($kanins as $kanin)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
                 <div class="p-2">
-                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
                         <img src="{{ asset('images/' .  $kanin['image']) }}" alt="{{ $kanin['name'] }}" class="px-4 scale-110">
                     </div>
                     <div class="mt-4 px-2">
@@ -847,7 +847,7 @@ $lists = [
             @foreach ($drinks as $drink)
             <div class="bg-white shadow-md rounded-lg border-primary border lechon">
                 <div class="p-2">
-                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="object-cover overflow-hidden m-2 rounded-md bg-center">
+                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
                         <img src="{{ asset('images/' .  $drink['image']) }}" alt="{{ $drink['name'] }}" class="px-4 scale-110">
                     </div>
                     <div class="mt-4 px-2">
