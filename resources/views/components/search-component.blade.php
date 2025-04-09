@@ -24,7 +24,7 @@
                 </svg>
             </button>
 
-            <div class="flex flex-col mt-5" x-data="voiceSearch()">
+            <div class="flex flex-col mt-5" x-data="voiceSearch()" @voice-search-finished.window="alert('Search for:', $event.detail.query)">
                 
                 <form class="flex items-center px-6 pt-16 w-full" >   
                     <label for="voice-search" class="sr-only">Search</label>

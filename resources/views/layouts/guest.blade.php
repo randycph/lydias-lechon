@@ -141,6 +141,7 @@
                     this.recognition.maxAlternatives = 1;
         
                     this.recognition.onresult = (event) => {
+                        console.log(event)
                         const transcript = event.results[0][0].transcript;
                         this.query = transcript;
                         this.isListening = false;
@@ -154,7 +155,8 @@
                     };
         
                     this.recognition.onerror = (event) => {
-                        console.error('Speech recognition error:', event.error);
+                        console.log(event)
+                        alert('Speech recognition error:', event.error);
                         this.isListening = false;
                     };
         
