@@ -126,6 +126,7 @@
                 recognition: null,
                 isListening: false,
                 search: '',
+                errorMessage: '',
         
                 init() {
                     // Check if browser supports SpeechRecognition
@@ -155,25 +156,29 @@
                     };
         
                     this.recognition.onerror = (event) => {
-                        console.log(event)
-                        alert('Speech recognition error:', event.error);
+                        console.log(event.error)
+                        this.errorMessage = `Speech recognition error: ${event.error}`;
                         this.isListening = false;
                     };
         
                     this.recognition.onend = () => {
-                        this.isListening = false;
+                        // Keep it listening-like for just a moment
+                        setTimeout(() => {
+                            if (!this.query) {
+                                this.isListening = false;
+                            }
+                        }, 500);
                     };
                 },
         
                 startListening() {
                     if (!this.recognition) return;
-        
                     this.isListening = true;
                     this.recognition.start();
-                }
+                },
             };
         }
-        </script>
+    </script>
 
 </body>
 </html>
