@@ -33,6 +33,10 @@ Route::group(['prefix' => 'v2'], function () {
         $page = 'login';
         return view('v2.login', compact('page'));
     })->name('login');
+    Route::get('/forgot-password', function () {
+        $page = 'forgot-password';
+        return view('v2.forgot-password', compact('page'));
+    })->name('forgot-password');
     Route::get('/signup', function () {
         $page = 'signup';
         return view('v2.signup', compact('page'));

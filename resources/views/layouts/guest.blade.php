@@ -53,6 +53,10 @@
             setTimeout(() => {
                 this.addedToCart = false;
             }, 3000);
+        },
+        searchModal: false,
+        toggleSearch() {
+            this.searchModal = !this.searchModal;
         }
     }"
     x-init="
@@ -73,7 +77,7 @@
         };
 
         const lockBody = () => {
-            if (open || openCart || marketingPopup || openHotline || openContactUs || lechonCart) {
+            if (open || openCart || marketingPopup || openHotline || openContactUs || lechonCart || searchModal) {
                 lockScroll();
             } else {
                 unlockScroll();
@@ -85,10 +89,13 @@
         $watch('openHotline', lockBody);
         $watch('openContactUs', lockBody);
         $watch('lechonCart', lockBody);
+        $watch('searchModal', lockBody);
     "
     >
     
     <x-navigation-component :page="$page ?? ''" />
+
+    <x-search-component />
 
     <div class="container relative">
         <x-added-to-cart-component />
@@ -111,5 +118,60 @@
     <x-mobile-menu-component />
 
     {{-- <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script> --}}
+
+    <script>
+        function voiceSearch() {
+            return {
+                query: '',
+                recognition: null,
+                isListening: false,
+                search: '',
+        
+                init() {
+                    // Check if browser supports SpeechRecognition
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    if (!SpeechRecognition) {
+                        alert('Your browser does not support voice recognition.');
+                        return;
+                    }
+        
+                    this.recognition = new SpeechRecognition();
+                    this.recognition.lang = 'en-US';
+                    this.recognition.interimResults = false;
+                    this.recognition.maxAlternatives = 1;
+        
+                    this.recognition.onresult = (event) => {
+                        const transcript = event.results[0][0].transcript;
+                        this.query = transcript;
+                        this.isListening = false;
+        
+                        // OPTIONAL: Trigger search immediately
+                        this.$nextTick(() => {
+                            this.$dispatch('voice-search-finished', { query: this.query });
+                        });
+
+                        this.search = this.query;
+                    };
+        
+                    this.recognition.onerror = (event) => {
+                        console.error('Speech recognition error:', event.error);
+                        this.isListening = false;
+                    };
+        
+                    this.recognition.onend = () => {
+                        this.isListening = false;
+                    };
+                },
+        
+                startListening() {
+                    if (!this.recognition) return;
+        
+                    this.isListening = true;
+                    this.recognition.start();
+                }
+            };
+        }
+        </script>
+
 </body>
 </html>

@@ -49,6 +49,13 @@ x-data="{
             </button>
         </div>
         <div class="flex">
+            <button @click="toggleSearch()" aria-label="Search Lydia's lechon website" class="text-white" title="Search Lydia's lechon website">
+                <div class="relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-10 text-white cursor-pointer hover:bg-primary-dark p-2 hover:rounded-full">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                    </svg>
+                </div>
+            </button>
             <a href="{{ route('my-account') }}" class="text-white" aria-label="My Account" title="My Account">
                 <div class="relative">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-10 text-white cursor-pointer hover:bg-primary-dark p-2 hover:rounded-full">
