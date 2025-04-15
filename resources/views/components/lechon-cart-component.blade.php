@@ -34,9 +34,7 @@
 
                 <div class="lg:w-1/2 w-full ">
                     <div class="flex lg:justify-between flex-col lg:flex-row justify-start items-start mb-5 lg:mt-0">
-                        <div class="font-bold text-xl lg:text-4xl text-left text-primary">
-                            Lechon Baka
-                        </div>
+                        <div class="font-bold text-xl lg:text-4xl text-left text-primary" x-text="product?.name"></div>
                         <div>
                             <div class="mt-2 flex">
                                 <span class="text-gray-500 pr-3">Share us:</span> 
@@ -71,11 +69,9 @@
                     </div>
 
                     <div class="flex justify-between items-center gap-4 my-2 lg:my-5">
-                        <div class="text-gray-600 text-2xl lg:text-4xl font-bold">
-                            ₱65,800.00
-                        </div>
+                        <div class="text-gray-600 text-2xl lg:text-4xl font-bold" x-text="new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(product?.price)"></div>
                         <!-- Quantity Selector -->
-                        <div x-data="{ quantity: 1 }" class="flex items-center space-x-1">
+                        <div class="flex items-center space-x-1">
                             <!-- Minus Button -->
                             <button @click="if(quantity > 1) quantity--"
                                 class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
@@ -107,20 +103,17 @@
                         <div class="flex flex-col text-gray-600 mt-2">
                             <div class="flex gap-4">
                                 <div class="text-gray-500">Weight</div>
-                                <div class="font-bold">5-6 kgs</div>
+                                <div class="font-bold" x-text="product?.weight"></div>
                             </div>
                             <div class="flex gap-4">
                                 <div class="text-gray-500">Serves:</div>
-                                <div class="font-bold">12-15 pax</div>
+                                <div class="font-bold" x-text="product?.no_of_pax"></div>
                             </div>
                         </div>
-                        <div class="mt-3 text-sm">Available for <strong>store pick-up</strong> and
-                            <strong>delivery</strong> around Metro Manila.</div>
-                        <div class="mt-2 text-sm">Accepted Payment Methods: <strong>GCash</strong>,
-                            <strong>Maya</strong> and <strong>Bank Transfer</strong></div>
+                        <div class="mt-3 text-sm" x-html="product?.description"></div>
                     </div>
 
-                    <div>
+                    {{-- <div>
                         <div class="font-bold lg:mt-4">Add-Ons</div>
                         <div class="inline-flex items-center gap-2">
                             <label class="flex items-center cursor-pointer relative">
@@ -137,7 +130,7 @@
                                 <span class="text-sm lg:text-xl font-semibold">₱2,800.00</span>
                             </div>
                         </div>
-                    </div>
+                    </div> --}}
 
                     <div class="mt-2">
                         <div class="flex justify-between">
@@ -155,44 +148,52 @@
 
                         @php
                         $addons = [
-                        [
-                        'image' => 'pinakbet.png',
-                        'name' => 'Pinakbet',
-                        ],
-                        [
-                        'image' => 'party-tray.png',
-                        'name' => 'Party Tray',
-                        ],
-                        [
-                        'image' => 'pancit.png',
-                        'name' => 'Pancit',
-                        ],
-                        [
-                        'image' => 'dinuguan.png',
-                        'name' => 'Dinuguan',
-                        ],
-                        [
-                        'image' => 'sisig.png',
-                        'name' => 'Sisig',
-                        ],
-                        [
-                        'image' => 'coke.png',
-                        'name' => 'Coke',
-                        ],
+                            [
+                            'image' => 'pinakbet.png',
+                            'name' => 'Pinakbet',
+                            'price' => '₱100.00',
+                            ],
+                            [
+                            'image' => 'party-tray.png',
+                            'name' => 'Party Tray',
+                            'price' => '300.00',
+                            ],
+                            [
+                            'image' => 'pancit.png',
+                            'name' => 'Pancit',
+                            'price' => '80.00',
+                            ],
+                            [
+                            'image' => 'dinuguan.png',
+                            'name' => 'Dinuguan',
+                            'price' => '150.00',
+                            ],
+                            [
+                            'image' => 'sisig.png',
+                            'name' => 'Sisig',
+                            'price' => '120.00',
+                            ],
+                            [
+                            'image' => 'coke.png',
+                            'name' => 'Coke',
+                            'price' => '50.00',
+                            ],
                         ];
                         @endphp
 
                         <div>
                             <div class="swiper-addons relative mt-5 overflow-hidden">
                                 <div class="swiper-wrapper">
-                                    @foreach ($addons as $addon)
+                                    @foreach ($addons as $key => $addon)
                                     <div class="swiper-slide !w-[120px]">
                                         <div class="rounded-xl border-gray-200 border w-[120px]">
-                                            <div class="inline-flex items-center absolute top-0 right-0 p-1">
-                                                <label class="flex items-center cursor-pointer relative">
+                                            <div class="inline-flex items-center absolute top-0 right-0 p-1 z-20">
+                                                <label for="check{{$key}}" class="flex items-center cursor-pointer relative">
                                                     <input type="checkbox"
+                                                        x-model="addons[{{ $key }}].selected"
+                                                        :id="'check' + {{ $key }}"
                                                         class="peer h-5 w-5 cursor-pointer transition-all appearance-none rounded-full shadow hover:shadow-md border border-slate-300 checked:bg-green-600 checked:border-green-600"
-                                                        id="check4" />
+                                                    />
                                                     <span
                                                         class="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5"
@@ -206,7 +207,7 @@
                                                 </label>
                                             </div>
                                             <img src="{{ asset('images/' . $addon['image']) }}"
-                                                alt="{{ $addon['name'] }}" class="object-cover w-full h-full hover:scale-125 transition duration-300">
+                                                alt="{{ $addon['name'] }}" class="object-cover z-10 w-full h-full hover:scale-125 transition duration-300">
                                         </div>
                                         <div class="text-xs text-center mt-2">{{ $addon['name'] }}</div>
                                     </div>
@@ -231,16 +232,25 @@
                                     </thead>
                                     <tbody>
                                         <tr class="border-b">
-                                            <td class="py-2">Lechon Baka</td>
-                                            <td class="py-2">65,800.00</td>
-                                            <td class="py-2">1</td>
-                                            <td class="py-2">65,800.00</td>
+                                            <td class="py-2" x-text="product?.name"></td>
+                                            <td class="py-2" x-text="format(product?.price)"></td>
+                                            <td class="py-2" x-text="quantity"></td>
+                                            <td class="py-2" x-text="format(baseTotal)"></td>
                                         </tr>
+                                    
+                                        <template x-for="addon in addons.filter(a => a.selected)" :key="addon.name">
+                                            <tr class="border-b">
+                                                <td class="py-2" x-text="addon.name"></td>
+                                                <td class="py-2" x-text="format(addon.price)"></td>
+                                                <td class="py-2">1</td>
+                                                <td class="py-2" x-text="format(addon.price * quantity)"></td>
+                                            </tr>
+                                        </template>
                                     </tbody>
                                 </table>
 
                                 <div class="mt-4 flex justify-end">
-                                    <span class="text-tertiary font-bold text-xl">₱65,800.00</span>
+                                    <span class="text-tertiary font-bold text-xl" x-text="format(grandTotal)"></span>
                                 </div>
                             </div>
 

@@ -10,7 +10,7 @@ class ProductCategory extends Model
     use SoftDeletes;
 
     public $table = 'product_categories';
-    protected $fillable = [ 'parent_id', 'name', 'slug', 'description', 'status', 'created_by',];
+    protected $fillable = [ 'parent_id', 'name', 'slug', 'description', 'status', 'created_by','image'];
 
     // Need to change every model
     static $oldModel;

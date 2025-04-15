@@ -118,7 +118,8 @@ class ProductCategoryController extends Controller
     {
         Validator::make($request->all(), [
             'name' => 'required',
-            'description' => 'required|min:3|max:1000'
+            'description' => 'required|min:3|max:1000',
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:10240', 
         ])->validate();
 
         $productCategory = ProductCategory::findOrFail($id);
@@ -128,6 +129,18 @@ class ProductCategoryController extends Controller
         }
         else{
             $slug = Page::convert_to_slug($request->name);
+        }
+
+        if($request->hasFile('image')){
+            $image = $request->file('image');
+            $imageName = time().'.'.$image->getClientOriginalExtension();
+
+            if (!file_exists(public_path('/images/category'))) {
+                mkdir(public_path('/images/category'), 0777, true);
+            }
+            $destinationPath = public_path('/images/category');
+            $image->move($destinationPath, $imageName);
+            $productCategory->update(['image' => $imageName]);
         }
 
         $productCategory->update([

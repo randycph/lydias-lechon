@@ -17,6 +17,8 @@ use App\Models\ProductTag;
 use App\Models\Product;
 use App\Models\Page;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Log;
+
 class ProductController extends Controller
 {
     private $searchFields = ['name'];
@@ -431,21 +433,35 @@ class ProductController extends Controller
 
     public function upload_file_to_temporary_storage($file)
     {
+        logger(auth()->id());
+        Log::info('File info:', [
+            'is_valid' => $file->isValid(),
+            'mime_type' => $file->getMimeType(),
+            'original_name' => $file->getClientOriginalName(),
+        ]);
+    
         $temporaryFolder = 'temporary_products'.auth()->id();
+    
+        if (!Storage::disk('public')->exists($temporaryFolder)) {
+            Storage::disk('public')->makeDirectory($temporaryFolder);
+        }
+    
         $fileName = $file->getClientOriginalName();
+    
         if (Storage::disk('public')->exists($temporaryFolder.'/'.$fileName)) {
             $fileName = $this->make_unique_file_name($temporaryFolder, $fileName);
         }
-
-        $path = Storage::disk('public')->putFileAs($temporaryFolder, $file, $fileName);
+    
+        $path = $file->storeAs($temporaryFolder, $fileName, 'public');
         $url = Storage::disk('public')->url($path);
-
+    
         return [
-            'path' => $temporaryFolder.'/'.$fileName,
+            'path' => $path,
             'name' => $fileName,
-            'url' => $url
+            'url' => $url,
         ];
     }
+    
 //
 
 // move uploaded product files to official product folder

@@ -1,5 +1,8 @@
 <?php
 
+use App\Helpers\ListingHelper;
+use App\Models\Product;
+use App\Models\ProductCategory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -7,7 +10,9 @@ Auth::routes(['verify' => true]);
 
 Route::group(['prefix' => 'v2'], function () {
     Route::get('/home', function () {
-        return view('v2.home');
+        $categories = ProductCategory::where('status', 'PUBLISHED')->get();
+
+        return view('v2.home', compact('categories'));
     })->name('index');
     Route::get('/our-story', function () {
         return view('v2.our-story');
@@ -19,7 +24,14 @@ Route::group(['prefix' => 'v2'], function () {
         return view('v2.lechon-pricelist');
     })->name('lechon-pricelist');
     Route::get('/lechon-menu', function () {
-        return view('v2.lechon-menu');
+        $categories = ProductCategory::with(['products' => function ($query) {
+            $query->with(['photos' => function ($q) {
+                $q->limit(1);
+            }]);
+        }])
+        ->where('status', 'PUBLISHED')
+        ->get();
+        return view('v2.lechon-menu', compact('categories'));
     })->name('lechon-menu');
     Route::get('/checkout', function () {
         $page = 'checkout';

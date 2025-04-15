@@ -13,7 +13,7 @@ import 'swiper/css/pagination';
 document.addEventListener("DOMContentLoaded", function () {
     setTimeout(() => {
         const swiper = new Swiper('.swiper-blogs', {
-            modules: [Navigation, Pagination], // ✅ Register Swiper modules
+            modules: [Navigation, Pagination],
             loop: true,
             slidesPerView: 1.2,
 
@@ -69,17 +69,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     setTimeout(() => {
         const swiper = new Swiper('.swiper-addons', {
-            modules: [Navigation, Pagination], // ✅ Register Swiper modules
+            modules: [Navigation, Pagination],
             loop: false,
             slidesPerView: 2,
             centeredSlides: false,
 
             breakpoints: {
                 768: {
-                    slidesPerView: 4,
+                    slidesPerView: 3,
                 },
                 1024: {
-                    slidesPerView: 5,
+                    slidesPerView: 3,
                 },
             },
 
@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     setTimeout(() => {
         const swiper = new Swiper('.swiper-menus', {
-            modules: [Navigation, Pagination], // ✅ Register Swiper modules
+            modules: [Navigation, Pagination],
             loop: false,
             slidesPerView: 2,
             centeredSlides: false,

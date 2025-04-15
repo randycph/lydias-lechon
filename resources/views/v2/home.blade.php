@@ -66,7 +66,7 @@
         </div>
     </div>
 
-    <x-products-component />
+    <x-products-component :categories="$categories" />
 
     <x-our-story-component />
 

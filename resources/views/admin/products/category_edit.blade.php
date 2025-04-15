@@ -25,7 +25,7 @@
 
     <div class="row">
         <div class="col-md-6">
-            <form action="{{ route('product-categories.update',$category->id) }}" method="post">
+            <form action="{{ route('product-categories.update',$category->id) }}" method="post" enctype="multipart/form-data" id="category_form">
                     @csrf
                     @method('PUT')
                     <div class="form-group">
@@ -33,6 +33,22 @@
                         <input type="text" name="name" id="name" value="{{ old('name',$category->name)}}" class="form-control @error('name') is-invalid @enderror">
                         <x-error-message inputName="name" />
                         <small id="category_slug"><a target="_blank" href="{{ url('/').'/products-list?type=category&criteria='.$category->id }}">{{ url('/').'/?type=category&criteria='.$category->id }}</a></small>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="d-block">Category image *</label>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input @error('image') is-invalid @enderror" name="image" id="image"  accept="image/*">
+                            <label class="custom-file-label" for="image" id="img_name">Choose file</label>
+                        </div>
+                        @error('image')
+                            <div class="alert alert-danger">{{ $message }}</div>
+                        @enderror
+                        <div id="image_div" style="display:none;">
+                            <img src="" height="100" width="300" id="img_temp" alt="">  <br /><br />
+                            <a href="javascript:void(0)" class="btn btn-xs btn-danger" onclick="remove_image();">Remove Image</a>
+                        </div>
                     </div>
 
                     <div class="form-group">

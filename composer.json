@@ -46,7 +46,9 @@
             "App\\": "app/"
         },
         "files": [
-            "app/Helpers/Shortcode.php"
+            "app/Helpers/Shortcode.php",
+            "app/Helpers/Helpers.php"
+
         ],
         "classmap": [
             "database/seeds",
