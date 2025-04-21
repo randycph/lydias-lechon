@@ -56,9 +56,8 @@
         },
         
         async add_to_cart(act,id){
-        console.log(act,id)
             if (act && id) {
-                await save_to_cart(act,id);
+                await this.save_to_cart(act,id);
             } else {
                 return false;
             }
@@ -71,7 +70,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': {{ csrf_token() }},
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     },
                     body: JSON.stringify({
                         ac_item: id
@@ -87,6 +86,8 @@
                 let data = await response.json();
 
                 {{-- this.fetchedSession = data; --}}
+
+                $dispatch('update-cart');
 
                 this.addedToCart = true;
                 setTimeout(() => {

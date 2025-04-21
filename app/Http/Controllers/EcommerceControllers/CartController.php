@@ -1009,6 +1009,20 @@ class CartController extends Controller
         ]);
     }  
 
+    public function cartCount(Request $request)
+    {
+        if (auth()->check()) {
+            $cart = Cart::where('user_id', Auth::id())->get();
 
+            return response()->json([
+                'totalItems' => $cart->count()
+            ]);
+        } else {
+            $cart = session('cart', []);
 
+            return response()->json([
+                'totalItems' => count(session('cart', []))
+            ]);
+        }
+    }
 }

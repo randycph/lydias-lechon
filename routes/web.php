@@ -172,6 +172,7 @@ Route::post('/payment-add-store-customer','EcommerceControllers\SalesController@
 
 
 Route::post('add-to-cart','EcommerceControllers\CartController@store')->name('cart.add');
+Route::get('cart-count','EcommerceControllers\CartController@cartCount')->name('cart.count');
 Route::post('cart/batch_update','EcommerceControllers\CartController@batch_update')->name('cart.front.batch_update');
 Route::post('cart-remove-product','EcommerceControllers\CartController@remove_product')->name('cart.remove_product');
 

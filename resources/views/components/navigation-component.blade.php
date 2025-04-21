@@ -1,9 +1,38 @@
 <nav 
+@update-cart.window="showCartCount()"
+x-init="init()"
 x-data="{
     cartCount: 0,
     goback() {
         window.history.back();
     },
+    init() {
+        this.showCartCount();
+    },
+    async showCartCount() {
+        try {
+            let response = await fetch('{{ route('cart.count') }}', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                }
+            }).then((response) => {
+                return response;
+            }).catch((error) => {
+                
+            });
+
+            if (!response.ok) throw new Error('Network response was not ok');
+
+            let data = await response.json();
+
+            this.cartCount = data.totalItems;
+
+        } catch (error) {
+            console.error('There was a problem with the fetch operation:', error);
+        }
+    }
 }"  class="fixed max-w-8xl top-5 left-1/2 transform -translate-x-[50%] w-[90%] bg-green-700 px-4 flex justify-between items-center z-40 rounded-full">
     @if (isset($page) && $page == 'checkout')
         <div class="text-white font-bold text-lg py-3">
