@@ -247,6 +247,7 @@
                                                         </button>
                                                     </div>
                                                     <div class="modal-body">
+                                                        vvvvvv
                                                         <h4 class="mb-2">{{ $main->name }}</h4>
                                                         @if($min_price == $max_price)
                                                             <p class="price">&#8369;{{number_format($max_price,2)}}</p>

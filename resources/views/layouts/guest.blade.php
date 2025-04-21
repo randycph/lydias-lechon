@@ -54,6 +54,49 @@
                 this.addedToCart = false;
             }, 3000);
         },
+        
+        async add_to_cart(act,id){
+        console.log(act,id)
+            if (act && id) {
+                await save_to_cart(act,id);
+            } else {
+                return false;
+            }
+        },
+
+        async save_to_cart(act, id) {
+
+            try {
+                let response = await fetch('{{ route('cart.add') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': {{ csrf_token() }},
+                    },
+                    body: JSON.stringify({
+                        ac_item: id
+                    })
+                }).then((response) => {
+                    return response;
+                }).catch((error) => {
+                    
+                });
+
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                let data = await response.json();
+
+                {{-- this.fetchedSession = data; --}}
+
+                this.addedToCart = true;
+                setTimeout(() => {
+                    this.addedToCart = false;
+                }, 3000);
+
+            } catch (error) {
+                console.error('There was a problem with the fetch operation:', error);
+            }
+        },
         searchModal: false,
         toggleSearch() {
             this.searchModal = !this.searchModal;

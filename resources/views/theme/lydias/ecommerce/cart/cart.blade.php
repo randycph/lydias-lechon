@@ -111,7 +111,7 @@
                         <div class="shopping-cart-wrapper">
                             <div class="shopping-cart-label mb-5 text-center d-none d-lg-block">
                                 <div class="row bg-secondary text-light rounded" style="font-family: sans-serif;">
-                                    <div class="col-lg-4 border-right py-2"><span>Item(s)</span></div>
+                                    <div class="col-lg-4 border-right py-2"><span>Item(ssss)</span></div>
                                     <div class="col-lg-2 border-right py-2"><span>Quantity</span></div>
                                     <div class="col-lg-1 border-right py-2"><span>Size</span></div>
                                     <div class="col-lg-2 border-right py-2"><span>Additional</span></div>

@@ -309,636 +309,244 @@ $lists = [
             @endforeach
         </div>
         @endforeach
-
-        {{-- @php
-            $boxes = [
-                [
-                    'image' => 'box1.png',
-                    'name' => 'lechon-in-a-box at pancit',
-                    'price' => '₱2,300.00',
-                ],
-                [
-                    'image' => 'box2.png',
-                    'name' => 'lechon-in-a-box MINI (1.5kls)',
-                    'price' => '₱2,400.00',
-                ],
-                [
-                    'image' => 'box3.png',
-                    'name' => 'lechon-in-a-box at fresh lumpia',
-                    'price' => '₱2,500.00',
-                ],
-                [
-                    'image' => 'box4.png',
-                    'name' => 'lechon-in-a-box At seafood paella',
-                    'price' => '₱2,520.00',
-                ],
-                [
-                    'image' => 'box5.png',
-                    'name' => 'lechon-in-a-box (2kls)',
-                    'price' => '₱3,200.00',
-                ]
-            ];
-        @endphp
-
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="lechon-in-a-box">
-            lechon-in-a-box
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
-            @foreach ($boxes as $box)
-            <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div class="p-2">
-                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                        <img src="{{ asset('images/' .  $box['image']) }}" alt="{{ $box['name'] }}" class="px-4 scale-110">
-                    </div>
-                    <div class="mt-4 px-2">
-                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $box['price'] }}</div>
-                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $box['name'] }}</h2>
-                    </div>
-                </div>
-                <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
-                </div>
-            </div>
-            @endforeach
-        </div>
-
-        @php
-            $familyboxes = [
-                [
-                    'image' => 'family-box1.png',
-                    'name' => 'Family box a',
-                    'price' => '₱1,500.00',
-                ],
-                [
-                    'image' => 'family-box2.png',
-                    'name' => 'Family box b',
-                    'price' => '₱1,650.00',
-                ],
-            ];
-        @endphp
-
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="lydias-family-boxes">
-            Lydia’s family boxes
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
-            @foreach ($familyboxes as $box)
-            <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div class="p-2">
-                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                        <img src="{{ asset('images/' .  $box['image']) }}" alt="{{ $box['name'] }}" class="px-4 scale-110">
-                    </div>
-                    <div class="mt-4 px-2">
-                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $box['price'] }}</div>
-                        <h2 class="text-left text-sm mt-1 lg:text-xl uppercase">{{ $box['name'] }}</h2>
-                    </div>
-                </div>
-                <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
-                </div>
-            </div>
-            @endforeach
-        </div>
-        
-        @php
-            $specials = [
-                [
-                    'image' => 'sepcial1.png',
-                    'name' => 'lechon paksiw',
-                    'price' => '₱395.00',
-                ],
-                [
-                    'image' => 'special2.png',
-                    'name' => 'Lechon sisig',
-                    'price' => '₱395.00',
-                ],
-                [
-                    'image' => 'special3.png',
-                    'name' => '1/4 kilo lechon',
-                    'price' => '₱400.00',
-                ],
-                [
-                    'image' => 'special4.png',
-                    'name' => 'lechon sinigang',
-                    'price' => '₱650.00',
-                ],
-                [
-                    'image' => 'special5.png',
-                    'name' => '1/2 kilo lechon',
-                    'price' => '₱800.00',
-                ],
-                [
-                    'image' => 'special6.png',
-                    'name' => '1 kilo lechon',
-                    'price' => '₱1,600.00',
-                ]
-            ];
-        @endphp
-
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="lechon-espesyal">
-            lechon espesyal
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
-            @foreach ($specials as $box)
-            <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div class="p-2">
-                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                        <img src="{{ asset('images/' .  $box['image']) }}" alt="{{ $box['name'] }}" class="px-4 scale-110">
-                    </div>
-                    <div class="mt-4 px-2">
-                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $box['price'] }}</div>
-                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $box['name'] }}</h2>
-                    </div>
-                </div>
-                <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
-                </div>
-            </div>
-            @endforeach
-        </div>
-        
-        @php
-            $trays = [
-                [
-                    'image' => 'party1.png',
-                    'name' => 'pork bbq tray',
-                    'price' => '₱1,150.00',
-                ],
-                [
-                    'image' => 'party2.png',
-                    'name' => 'fresh lumpia tray',
-                    'price' => '₱1,600.00',
-                ],
-                [
-                    'image' => 'party3.png',
-                    'name' => 'pancit con lechon tray a',
-                    'price' => '₱2,050.00',
-                ],
-                [
-                    'image' => 'party4.png',
-                    'name' => 'pancit con lechon tray b',
-                    'price' => '₱2,150.00',
-                ],
-                [
-                    'image' => 'party5.png',
-                    'name' => 'bopis tray',
-                    'price' => '₱2,650.00',
-                ],
-                [
-                    'image' => 'party6.png',
-                    'name' => 'lechon paksiw tray',
-                    'price' => '₱2,650.00',
-                ],
-                [
-                    'image' => 'party7.png',
-                    'name' => 'pork dinuguan tray',
-                    'price' => '₱2,650.00',
-                ],
-                [
-                    'image' => 'party8.png',
-                    'name' => 'seafood paella tray',
-                    'price' => '₱4,250.00',
-                ]
-            ];
-        @endphp
-
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="party-trays">
-            party trays
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
-            @foreach ($trays as $tray)
-            <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div class="p-2">
-                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                        <img src="{{ asset('images/' .  $tray['image']) }}" alt="{{ $tray['name'] }}" class="px-4 scale-110">
-                    </div>
-                    <div class="mt-4 px-2">
-                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $tray['price'] }}</div>
-                        <h2 class="text-left text-sm mt-1 lg:text-xl uppercase">{{ $tray['name'] }}</h2>
-                    </div>
-                </div>
-                
-                <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
-                </div>
-            </div>
-            @endforeach
-        </div>
-        
-        @php
-            $trays = [
-                [
-                    'image' => 'quick1.png',
-                    'name' => 'lechon + pakbet',
-                    'price' => '₱288.00',
-                ],
-                [
-                    'image' => 'quick2.png',
-                    'name' => 'lechon + chopseuy',
-                    'price' => '₱288.00',
-                ],
-                [
-                    'image' => 'quick3.png',
-                    'name' => 'lechon + bopis',
-                    'price' => '₱350.00',
-                ],
-                [
-                    'image' => 'quick4.png',
-                    'name' => 'lechon + lechon paksiw',
-                    'price' => '₱350.00',
-                ],
-                [
-                    'image' => 'quick5.png',
-                    'name' => 'lechon + dinuguan',
-                    'price' => '₱350.00',
-                ],
-                [
-                    'image' => 'quick6.png',
-                    'name' => 'lechon + kare-kare',
-                    'price' => '₱350.00',
-                ]
-            ];
-        @endphp
-
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="lechon-quick-meals">
-            lechon quick meals
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
-            @foreach ($trays as $tray)
-            <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div class="p-2">
-                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                        <img src="{{ asset('images/' .  $tray['image']) }}" alt="{{ $tray['name'] }}" class="px-4 scale-110">
-                    </div>
-                    <div class="mt-4 px-2">
-                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $tray['price'] }}</div>
-                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $tray['name'] }}</h2>
-                    </div>
-                </div>
-                
-                <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
-                </div>
-            </div>
-            @endforeach
-        </div>
-        
-        @php
-            $bentos = [
-                [
-                    'image' => 'bento1.png',
-                    'name' => 'BENTO BOX A',
-                    'price' => '₱390.00',
-                ],
-                [
-                    'image' => 'bento2.png',
-                    'name' => 'BENTO BOX B',
-                    'price' => '₱450.00',
-                ],
-                [
-                    'image' => 'bento3.png',
-                    'name' => 'BENTO BOX C',
-                    'price' => '₱450.00',
-                ]
-            ];
-        @endphp
-
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="lydias-bento-meals">
-            lydia’s bento meals
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
-            @foreach ($bentos as $bento)
-            <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div class="p-2">
-                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                        <img src="{{ asset('images/' .  $bento['image']) }}" alt="{{ $bento['name'] }}" class="px-4 scale-110">
-                    </div>
-                    <div class="mt-4 px-2">
-                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $bento['price'] }}</div>
-                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $bento['name'] }}</h2>
-                    </div>
-                </div>
-                
-                <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
-                </div>
-            </div>
-            @endforeach
-        </div>
-        
-        @php
-            $pampaganas = [
-                [
-                    'image' => 'pampagana1.png',
-                    'name' => 'chicharon bituka',
-                    'price' => '₱210.00',
-                ],
-                [
-                    'image' => 'pampagana2.png',
-                    'name' => 'chicharon bulaklak',
-                    'price' => '₱265.00',
-                ]
-            ];
-        @endphp
-
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="pampagana">
-            pampagana
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
-            @foreach ($pampaganas as $pampagana)
-            <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div class="p-2">
-                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                        <img src="{{ asset('images/' .  $pampagana['image']) }}" alt="{{ $pampagana['name'] }}" class="px-4 scale-110">
-                    </div>
-                    <div class="mt-4 px-2">
-                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $pampagana['price'] }}</div>
-                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $pampagana['name'] }}</h2>
-                    </div>
-                </div>
-                
-                <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
-                </div>
-            </div>
-            @endforeach
-        </div>
-        
-        @php
-            $meaties = [
-                [
-                    'image' => 'meaty1.png',
-                    'name' => 'pork bbq large (per pc.)',
-                    'price' => '₱99.00',
-                ],
-                [
-                    'image' => 'meaty2.png',
-                    'name' => 'bopis',
-                    'price' => '₱395.00',
-                ],
-                [
-                    'image' => 'meaty3.png',
-                    'name' => 'Dinuguan',
-                    'price' => '₱395.00',
-                ],
-                [
-                    'image' => 'meaty4.png',
-                    'name' => 'papaitan',
-                    'price' => '₱395.00',
-                ],
-                [
-                    'image' => 'meaty5.png',
-                    'name' => 'kare-kare',
-                    'price' => '₱395.00',
-                ]
-            ];
-        @endphp
-
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="meaty-espesyal">
-            meaty espesyal
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
-            @foreach ($meaties as $meaty)
-            <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div class="p-2">
-                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                        <img src="{{ asset('images/' .  $meaty['image']) }}" alt="{{ $meaty['name'] }}" class="px-4 scale-110">
-                    </div>
-                    <div class="mt-4 px-2">
-                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $meaty['price'] }}</div>
-                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $meaty['name'] }}</h2>
-                    </div>
-                </div>
-                
-                <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
-                </div>
-            </div>
-            @endforeach
-        </div>
-        
-        @php
-            $gulays = [
-                [
-                    'image' => 'gulay1.png',
-                    'name' => 'fresh lumpia',
-                    'price' => '₱150.00',
-                ],
-                [
-                    'image' => 'gulay2.png',
-                    'name' => 'chopsuey',
-                    'price' => '₱295.00',
-                ],
-                [
-                    'image' => 'gulay3.png',
-                    'name' => 'Classic pinakbet',
-                    'price' => '₱295.00',
-                ],
-            ];
-        @endphp
-
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="gulay-atbp">
-            gulay atbp.
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
-            @foreach ($gulays as $gulay)
-            <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div class="p-2">
-                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                        <img src="{{ asset('images/' .  $gulay['image']) }}" alt="{{ $gulay['name'] }}" class="px-4 scale-110">
-                    </div>
-                    <div class="mt-4 px-2">
-                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $gulay['price'] }}</div>
-                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $gulay['name'] }}</h2>
-                    </div>
-                </div>
-                
-                <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
-                </div>
-            </div>
-            @endforeach
-        </div>
-        
-        @php
-            $yamangdagats = [
-                [
-                    'image' => 'yamangdagat1.png',
-                    'name' => 'crab relleno',
-                    'price' => '₱320.00',
-                ],
-                [
-                    'image' => 'yamangdagat2.png',
-                    'name' => 'salmon head sinigang',
-                    'price' => '₱425.00',
-                ]
-            ];
-        @endphp
-
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="yamang-dagat">
-            yamang dagat
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
-            @foreach ($yamangdagats as $yamangdagat)
-            <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div class="p-2">
-                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                        <img src="{{ asset('images/' .  $yamangdagat['image']) }}" alt="{{ $yamangdagat['name'] }}" class="px-4 scale-110">
-                    </div>
-                    <div class="mt-4 px-2">
-                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $yamangdagat['price'] }}</div>
-                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $yamangdagat['name'] }}</h2>
-                    </div>
-                </div>
-                
-                <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
-                </div>
-            </div>
-            @endforeach
-        </div>
-        
-        @php
-            $meryendas = [
-                [
-                    'image' => 'meryenda1.png',
-                    'name' => 'pancit con lechon regular (150g)',
-                    'price' => '₱275.00',
-                ],
-                [
-                    'image' => 'meryenda2.png',
-                    'name' => 'pancit con lechon medium (225g)',
-                    'price' => '₱505.00',
-                ]
-            ];
-        @endphp
-
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="meryenda">
-            meryenda
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
-            @foreach ($meryendas as $meryenda)
-            <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div class="p-2">
-                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                        <img src="{{ asset('images/' .  $meryenda['image']) }}" alt="{{ $meryenda['name'] }}" class="px-4 scale-110">
-                    </div>
-                    <div class="mt-4 px-2">
-                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $meryenda['price'] }}</div>
-                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $meryenda['name'] }}</h2>
-                    </div>
-                </div>
-                
-                <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
-                </div>
-            </div>
-            @endforeach
-        </div>
-        
-        @php
-            $kanins = [
-                [
-                    'image' => 'rice1.png',
-                    'name' => 'plain rice',
-                    'price' => '₱50.00',
-                ]
-            ];
-        @endphp
-
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="kanin">
-            kanin
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
-            @foreach ($kanins as $kanin)
-            <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div class="p-2">
-                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                        <img src="{{ asset('images/' .  $kanin['image']) }}" alt="{{ $kanin['name'] }}" class="px-4 scale-110">
-                    </div>
-                    <div class="mt-4 px-2">
-                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $kanin['price'] }}</div>
-                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $kanin['name'] }}</h2>
-                    </div>
-                </div>
-                
-                <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
-                </div>
-            </div>
-            @endforeach
-        </div>
-        
-        @php
-            $drinks = [
-                [
-                    'image' => 'inumin1.png',
-                    'name' => 'bottled water',
-                    'price' => '₱45.00',
-                ],
-                [
-                    'image' => 'inumin2.png',
-                    'name' => 'coke (can)',
-                    'price' => '₱85.00',
-                ],
-                [
-                    'image' => 'inumin3.png',
-                    'name' => 'coke zero (can)',
-                    'price' => '₱85.00',
-                ],
-                [
-                    'image' => 'inumin4.png',
-                    'name' => 'sprite (can)',
-                    'price' => '₱85.00',
-                ],
-                [
-                    'image' => 'inumin5.png',
-                    'name' => 'Pineapple juice',
-                    'price' => '₱85.00',
-                ]
-            ];
-        @endphp
-
-        <div class="mt-5 pb-5 font-cubao font-medium text-4xl lg:text-5xl text-primary px-4" id="inumin">
-            mga inumin
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 px-2 lechons pb-10">
-            @foreach ($drinks as $drink)
-            <div class="bg-white shadow-md rounded-lg border-primary border lechon">
-                <div class="p-2">
-                    <div  class="object-cover overflow-hidden m-2 rounded-md bg-center">
-                        <img src="{{ asset('images/' .  $drink['image']) }}" alt="{{ $drink['name'] }}" class="px-4 scale-110">
-                    </div>
-                    <div class="mt-4 px-2">
-                        <div class="text-primary text-base lg:text-2xl font-bold mt-2">{{ $drink['price'] }}</div>
-                        <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $drink['name'] }}</h2>
-                    </div>
-                </div>
-                
-                <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
-                </div>
-            </div>
-            @endforeach
-        </div> --}}
     
         <x-lechon-cart-component />
-
 
     </div>
     
     <x-footer-component />
+
+    {{-- <script>
+        function buyNow(id){
+
+            var size = parseInt($('#item'+id+'_size').val());
+            if(size == 1){
+                summarize_order(id);
+            }
+
+            $('#btn-buy-now-'+id).css('display','block');
+            $('#btn-add-to-cart-'+id).css('display','none');
+            $('#add-to-cart-modal-'+id).modal('show');
+        }
+
+        function addCart(id){
+
+            var size = parseInt($('#item'+id+'_size').val());
+            if(size == 1){
+                summarize_order(id);
+            }
+
+            $('#btn-buy-now-'+id).css('display','none');
+            $('#btn-add-to-cart-'+id).css('display','block');
+            $('#add-to-cart-modal-'+id).modal('show');
+        }
+
+        function misc_total(id,x){
+            var tot = parseFloat($('#misc_price'+id+'_'+x).val()) * parseFloat($('#misc_qty'+id+'_'+x).val());
+            $('#misc_td_'+id+'_'+x).html(addCommas(parseFloat(tot).toFixed(2)));
+            summarize_order(id);
+        }
+
+        function misc_remove(id,x){
+            var result = confirm("Are you sure you want to delete this item?");
+            if (result) {
+                $('#misc_tr'+id+'_'+x).remove();
+                summarize_order(id);
+            }
+        }
+
+        function add_misc(id){
+            
+            if($("#misc"+id).val() == ""){
+                alert('Please select a product.');
+                return false;
+            }
+
+            $('#misc_div'+id).show();
+            var a = ($("#misc"+id).val()).split('|');
+
+
+            var misc_cntr = parseInt($('#misc_cntr'+id).val()) + 1;
+
+            $('#misc_tbody'+id).append(
+                '<tr id="misc_tr'+id+'_'+misc_cntr+'">'+
+                    '<td><input type="hidden" value="'+a[0]+'" name="misc_id'+misc_cntr+'" id="misc_id'+misc_cntr+'"><a title="remove" href="javascript:void(0)" onclick="misc_remove('+id+','+misc_cntr+')">x</a> '+a[2]+'</td>'+
+                    '<td><input type="hidden" value="'+a[1]+'" name="misc_price'+misc_cntr+'" id="misc_price'+id+'_'+misc_cntr+'">'+addCommas(parseFloat(a[1]).toFixed(2))+'</td>'+
+                    '<td><input type="number" onchange="misc_total('+id+','+misc_cntr+')" id="misc_qty'+id+'_'+misc_cntr+'" name="misc_qty'+misc_cntr+'" min="1" size="3" maxlength="3" value="1" style="text-align:right;width: 60px;"></td>'+
+                    '<td align="right" id="misc_td_'+id+'_'+misc_cntr+'">'+addCommas(parseFloat(a[1]).toFixed(2))+'</td>'+
+                '</tr>'
+            );
+
+            $('#misc_cntr'+id).val(misc_cntr);
+
+            //remove selected option
+            var index = $('#misc'+id).get(0).selectedIndex;
+            $('#misc'+id+' option:eq(' + index + ')').remove();
+
+            summarize_order(id);
+        }
+
+        function item_weight(id){
+            compute_item(id);
+        }
+
+        function item_qty(id){
+            compute_item(id);
+        }
+
+
+        function compute_item(id){
+            if ($("#item"+id).val() === "") {
+                $('#order_table'+id).empty();
+            }
+            else{
+                summarize_order(id);
+            }
+        }
+
+        function item_paella(id){
+            compute_item(id);
+        }
+
+        function summarize_order(id){
+            var total_amount = 0;
+
+            if ($("#item"+id).val() === "") {
+                var total_amount = 0;
+                $('#order_table'+id).empty();
+            } else{
+                $('#order_table'+id).empty();
+                var a = ($("#item"+id).val()).split('|');
+                
+                var price_total = parseFloat(a[1]) * parseFloat($('#qty'+id).val());
+                total_amount += price_total;
+
+                $('#order_table'+id).append(
+                    '<tr>'+
+                        '<td><input type="hidden" value="'+a[0]+'" name="ac_item"><input type="hidden" value="'+$('#qty'+id).val()+'" name="ac_qty"><i class="fa fa-cart-plus"></i> '+a[2]+'</td>'+
+                        '<td>'+addCommas(parseFloat(a[1]).toFixed(2))+' x'+$('#qty'+id).val()+'</td>'+
+                        '<td align="right">'+addCommas(price_total.toFixed(2))+'</td>'+
+                    '</tr>'
+                );
+
+                if($('#customCheck'+id).is(':checked')){
+
+                    var paella = parseFloat($('#paella_price'+id).val()) * parseFloat($('#qty'+id).val());
+                    $('#order_table'+id).append(
+                        '<tr>'+
+                            '<td><i class="fa fa-cart-plus"></i> Seafood Paella</td>'+
+                            '<td>'+addCommas(parseFloat($('#paella_price'+id).val()).toFixed(2))+' x'+$('#qty'+id).val()+'</td>'+
+                            '<td align="right">'+addCommas(paella.toFixed(2))+'</td>'+
+                        '</tr>'
+                    );
+
+                    total_amount += paella;
+                    $('#ac_paella'+id).val('1');
+                } else{
+                    $('#ac_paella'+id).val('0');
+                }
+
+
+                var total_misc_count = $('#misc_cntr'+id).val();
+                for(i=1;i<=total_misc_count;i++){
+                    if( $('#misc_price'+id+'_'+i).length ) {
+                        total_amount += parseFloat($('#misc_price'+id+'_'+i).val()) * parseFloat($('#misc_qty'+id+'_'+i).val());
+                    }
+                }
+
+                $('#total_price'+id).html(addCommas(parseFloat(total_amount).toFixed(2)));
+            }
+
+        }
+
+
+        function add_to_cart(act,id){
+            if ($("#item"+id).val() === "") {
+                alert("Please select the item's weight!");
+            } else {
+                save_to_cart(act,id);
+            }
+            return false;
+        }
+
+
+        function save_to_cart(act,id) {
+            if($('#utype').length){
+                var uty = $('#utype').val();
+                if(uty != 'customer'){
+                    swal({
+                        title: '',
+                        text: "You are logged in as CMS user. Please use a customer account to complete this transaction.",         
+                    });
+                    return false;
+                }
+            }
+
+            let data = $('#cart_frm'+id).serialize();
+
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+            $.ajax({
+                data: data,
+                type: "post",
+                url: "{{route('cart.add')}}",
+                beforeSend: function(){
+                    $("#loading-overlay").show();
+                },
+                success: function(returnData) {
+                    $("#loading-overlay").hide();
+                    if (returnData['success']) {
+                        $('.cart-counter').html(returnData['totalItems']);
+                        if(act == 'addcart'){
+                            swal({
+                                toast: true,
+                                position: 'center',
+                                title: "Product Added to your cart!",
+                                type: "success",
+                                showCancelButton: true,
+                                cancelButtonColor: "#DD6B55",
+                                timerProgressBar: true,
+                                showCancelButton: true,
+                                confirmButtonClass: "btn-danger",
+                                confirmButtonText: "View Cart",
+                                cancelButtonText: "Continue Shopping",
+                                closeOnConfirm: false,
+                                closeOnCancel: false
+                            },
+                            function(isConfirm) {
+                                if (isConfirm) {
+                                    window.location.href = "{{route('cart.front.show')}}";
+                                } else {
+                                    window.location.href = "{{route('menu.front.list')}}";
+                                }
+                            });
+                        }
+                        else{
+                            window.location.href = "{{route('cart.front.show')}}";
+                        }
+                    }
+                },
+                failed: function() {
+                    $("#loading-overlay").hide();
+                }
+            });
+        }
+
+        function addCommas(nStr){
+            nStr += '';
+            x = nStr.split('.');
+            x1 = x[0];
+            x2 = x.length > 1 ? '.' + x[1] : '';
+            var rgx = /(\d+)(\d{3})/;
+            while (rgx.test(x1)) {
+                x1 = x1.replace(rgx, '$1' + ',' + '$2');
+            }
+            return x1 + x2;
+        }
+    </script> --}}
     
 @endsection

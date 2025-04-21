@@ -27,8 +27,15 @@
                     class="lg:w-1/2 w-full border rounded-lg px-5 py-2 border-primary overflow-hidden flex items-center">
                     <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')"
                         class="object-cover rounded-lg max-w-[240px] lg:max-w-[587px] max-h-[215px] lg:max-h-max mx-auto bg-center relative">
-                        <img src="{{ asset('images/lechonbaka.png') }}" alt="Add Lechon Baka in Cart"
-                            class="object-cover p-2">
+                        
+                        <div class="swiper-cart-image relative mt-5 overflow-hidden">
+                            <div class="swiper-wrapper">
+                                <div class="swiper-slide" x-for="(photo, idx) in product?.photos" :key="idx">
+                                    <div x-text="'storage/products/'+photo.path"></div>
+                                    <img :src="'storage/products/'+photo.path" alt="Product Image" class="object-cover p-2">
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -258,7 +265,7 @@
                     </div>
 
                     <div x-data="{ added: false }" class="mt-10">
-                        <button @click="added = true; addToCart()"
+                        <button @click="added = true; add_to_cart('addcart', product.id)"
                             class="bg-primary primary-btn text-white w-full px-6 py-3 rounded-md font-semibold flex items-center justify-center gap-2 transition-all duration-300 ease-in-out custom-btn btn-primary">
                             <template x-if="!added">
                                 <span x-transition.opacity> Add to Cart </span>

@@ -123,4 +123,22 @@ document.addEventListener("DOMContentLoaded", function () {
             },
         });
     }, 100);
+
+    setTimeout(() => {
+        const swiper = new Swiper('.swiper-cart-image', {
+            modules: [Navigation, Pagination],
+            loop: false,
+            slidesPerView: 1,
+
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+
+            navigation: {
+                nextEl: '.swiper-button-next-custom',
+                prevEl: '.swiper-button-prev-custom',
+            },
+        });
+    }, 100);
 });
