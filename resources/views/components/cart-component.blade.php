@@ -1,4 +1,67 @@
-<div >
+<div 
+x-init="init"
+x-data="{
+    cartCount: 0,
+    carts: [],
+    async getCarts() {
+        try {
+            let response = await fetch('{{ route('cart.get') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                }
+            }).then((response) => {
+                return response;
+            }).catch((error) => {
+                
+            });
+
+            if (!response.ok) throw new Error('Network response was not ok');
+
+            let data = await response.json();
+
+            this.carts = data.cart;
+
+            this.cartCount = this.carts?.length ?? 0;
+
+        } catch (error) {
+            console.error('There was a problem with the fetch operation:', error);
+        }
+    },
+    init() {
+        this.getCarts();
+    },
+    async removeCart(index) {
+        try {
+            let response = await fetch('{{ route('cart.remove') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                },
+                body: JSON.stringify({
+                    product_remove_id: this.carts[index].product.id
+                })
+            }).then((response) => {
+                return response;
+            }).catch((error) => {
+                
+            });
+
+            if (!response.ok) throw new Error('Network response was not ok');
+
+            let data = await response.json();
+
+            this.getCarts();
+
+        } catch (error) {
+            console.error('There was a problem with the fetch operation:', error);
+        }
+    },
+}"
+@fetch-cart.window="cartCount = $event.detail.cartCount;"
+>
     <!-- Drawer Overlay -->
     <div x-show="openCart" x-transition.opacity class="fixed inset-0 bg-black/50 z-40" @click="openCart = false"></div>
 
@@ -13,7 +76,7 @@
         <div class="">
             <div class="flex justify-between items-center px-3">
                 <div class="flex gap-2 items-center">
-                    <div class="text-2xl font-bold">Cart</div><span class="bg-primary text-white size-3 flex justify-center items-center p-3 rounded-full text-xs">1</span>
+                    <div class="text-2xl font-bold">Cart</div><span x-show="cartCount > 0" class="bg-primary text-white size-3 flex justify-center items-center p-3 rounded-full text-xs" x-text="cartCount"></span>
                 </div>
                 <button @click="openCart = false" class="self-end text-2xl text-gray-800">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
@@ -23,86 +86,51 @@
             </div>
 
             <div class="bg-tertiary text-white py-2 text-center w-full mt-2">
-                You need <strong>₱1,050.00</strong> more to 
+                You need <strong>₱1,050.00</strong> more for free delivery
             </div>
 
             <div class="mt-4 px-6 flex flex-col gap-4">
-                <div class="flex justify-between items-center gap-4">
-                    <div class="flex gap-4 items-center">
-                        <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="w-20 h-20 object-cover rounded-md scale-110 bg-center">
-                            <img src="{{ asset('images/checkout1.png') }}" alt="Checkout" class="w-20 h-20 object-cover rounded-md scale-110">
-                        </div>
-                        <div class="flex flex-col gap-1">
-                            <div class="font-bold">Pork BBQ Tray</div>
-                            <div class="text-sm text-gray-600">₱950.00 PHP</div>
 
-                            <!-- Quantity Selector -->
-                            <div x-data="{ quantity: 1 }" class="flex items-center space-x-1">
-                                <!-- Minus Button -->
-                                <button @click="if(quantity > 1) quantity--" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
-                                        <path fill-rule="evenodd" d="M4 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H4.75A.75.75 0 0 1 4 10Z" clip-rule="evenodd" />
-                                    </svg>
-                                </button>
+                <template x-for="(cart, index) in carts" :key="index">
+                    <div class="flex justify-between items-center gap-4" >
+                        <div class="flex gap-4 items-center">
+                            <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="w-20 h-20 object-cover rounded-md scale-110 bg-center">
+                                <img :src="cart.photo" alt="Checkout" class="w-20 h-20 object-cover rounded-md scale-110">
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <div class="font-bold" x-text="cart.product.name"></div>
+                                <div class="text-sm text-gray-600" x-text="new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cart.product.price)"></div>
 
-                                <!-- Quantity Display (Fix: Use `x-text`) -->
-                                <span class="w-8 text-center font-bold text-green-600" x-text="quantity"></span>
+                                <!-- Quantity Selector -->
+                                <div x-data="{ quantity: 1 }" class="flex items-center space-x-1">
+                                    <!-- Minus Button -->
+                                    <button @click="if(quantity > 1) quantity--" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                                            <path fill-rule="evenodd" d="M4 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H4.75A.75.75 0 0 1 4 10Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
 
-                                <!-- Plus Button -->
-                                <button @click="quantity++" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
-                                        <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
-                                    </svg>
-                                </button>
+                                    <!-- Quantity Display (Fix: Use `x-text`) -->
+                                    <span class="w-8 text-center font-bold text-green-600" x-text="quantity"></span>
+
+                                    <!-- Plus Button -->
+                                    <button @click="quantity++" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                                            <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div>
-                        <button class="text-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                <div class="flex justify-between items-center gap-4">
-                    <div class="flex gap-4 items-center">
-                        <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="w-20 h-20 object-cover rounded-md scale-110 bg-center">
-                            <img src="{{ asset('images/checkout2.png') }}" alt="Checkout" class="w-20 h-20 object-cover rounded-md scale-110">
-                        </div>
-                        <div class="flex flex-col gap-1">
-                            <div class="font-bold">Petite (Lechon Cebu)</div>
-                            <div class="text-sm text-gray-600">₱9,800.00</div>
-
-                            <!-- Quantity Selector -->
-                            <div x-data="{ quantity: 1 }" class="flex items-center space-x-1">
-                                <!-- Minus Button -->
-                                <button @click="if(quantity > 1) quantity--" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
-                                        <path fill-rule="evenodd" d="M4 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H4.75A.75.75 0 0 1 4 10Z" clip-rule="evenodd" />
-                                    </svg>
-                                </button>
-
-                                <!-- Quantity Display (Fix: Use `x-text`) -->
-                                <span class="w-8 text-center font-bold text-green-600" x-text="quantity"></span>
-
-                                <!-- Plus Button -->
-                                <button @click="quantity++" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
-                                        <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
-                                    </svg>
-                                </button>
-                            </div>
+                        <div>
+                            <button @click="removeCart(index)" class="text-primary">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
-                    <div>
-                        <button class="text-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
+            </template>
 
                 <div class="mt-10" x-data="{ method: 'pickup' }">
                     <div class="font-bold">Choose a shipping method</div>

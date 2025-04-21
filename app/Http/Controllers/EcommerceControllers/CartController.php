@@ -234,7 +234,9 @@ class CartController extends Controller
 
     public function store(Request $request)
     {
-        $product = Product::whereId($request->ac_item)->first();
+        $product = Product::with('photos')->whereId($request->ac_item)->first();
+        $photos = $product->photos()->where('is_primary', 1)->first();
+        $photo = !empty($photos) ? asset('storage/products/'.$photos->path ) : '';
         $paella_cost = ($request->ac_paella == '1' ? ($product->paella_price * $request->ac_qty) : 0);
         if (auth()->check()) {
 
@@ -255,7 +257,9 @@ class CartController extends Controller
                     'user_id' => Auth::id(),
                     'qty' => $request->ac_qty,
                     'price' => $product->price,
-                    'paella_price' => $paella_cost
+                    'paella_price' => $paella_cost,
+                    'photo' => $photo,
+                    'product' => $product,
                 ]);
             }
 
@@ -280,6 +284,8 @@ class CartController extends Controller
                             'user_id' => Auth::id(),
                             'qty' => $request->input('misc_qty'.$x),
                             'price' => $product->price,
+                            'photo' => $photo,
+                            'product' => $product,
                             'paella_price' => 0
                         ]);
                     }
@@ -299,6 +305,8 @@ class CartController extends Controller
                     $cart[$key]->qty = $request->ac_qty;
                     $cart[$key]->price = $product->price;
                     $cart[$key]->paella_price = $paella_cost;
+                    $cart[$key]->photo = $photo;
+                    $cart[$key]->product = $product;
 
                     $not_exist = false;
                     break;
@@ -311,6 +319,8 @@ class CartController extends Controller
                 $order->qty = $request->ac_qty;
                 $order->price = $product->price;
                 $order->paella_price = $paella_cost;
+                $order->photo = $photo;
+                $order->product = $product;
                 $order->coupon_code = '';
                 $order->coupon_amount = '0';
 
@@ -331,6 +341,8 @@ class CartController extends Controller
                             $cart[$key]->qty = $request->input('misc_qty'.$x);
                             $cart[$key]->price = $product->price;
                             $cart[$key]->paella_price = 0;
+                            $cart[$key]->photo = $photo;
+                            $cart[$key]->product = $product;
 
                             $not_exist = false;
                             break;
@@ -343,6 +355,8 @@ class CartController extends Controller
                         $order->qty = $request->input('misc_qty'.$x);
                         $order->price = $product->price;
                         $order->paella_price = 0;
+                        $order->photo = $photo;
+                        $order->product = $product;
 
                         array_push($cart, $order);
                     }
@@ -1024,5 +1038,40 @@ class CartController extends Controller
                 'totalItems' => count(session('cart', []))
             ]);
         }
+    }
+
+    public function getCart(Request $request)
+    {
+        if (auth()->check()) {
+            $cart = Cart::where('user_id', Auth::id())->get();
+        } else {
+            $cart = session('cart', []);
+        }
+
+        return response()->json([
+            'cart' => $cart
+        ]);
+    }
+
+    public function removeCart(Request $request)
+    {
+        if (auth()->check()) {
+            $delete = Cart::whereId($request->product_remove_id)->delete();
+        } else {
+            $cart = session('cart', []);
+
+            $productId = $request->product_remove_id;
+            $index = array_search($productId, array_column($cart, 'product_id'));
+            if ($index !== false) {
+                unset($cart[$index]);
+            }
+            
+            session(['cart' => $cart]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product removed from cart'
+        ]);
     }
 }

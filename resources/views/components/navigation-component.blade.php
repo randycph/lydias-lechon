@@ -29,6 +29,10 @@ x-data="{
 
             this.cartCount = data.totalItems;
 
+            $dispatch('fetch-cart', {
+                cartCount: this.cartCount
+            });
+
         } catch (error) {
             console.error('There was a problem with the fetch operation:', error);
         }
