@@ -264,7 +264,7 @@
                         </div>
                     </div>
 
-                    <div x-data="{ added: false }" class="mt-10">
+                    <div class="mt-10">
                         <button @click="added = true; add_to_cart('addcart', product.id)"
                             class="bg-primary primary-btn text-white w-full px-6 py-3 rounded-md font-semibold flex items-center justify-center gap-2 transition-all duration-300 ease-in-out custom-btn btn-primary">
                             <template x-if="!added">

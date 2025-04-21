@@ -94,10 +94,14 @@
                     this.addedToCart = false;
                 }, 3000);
 
+                this.lechonCart = false;
+                this.added = false;
+
             } catch (error) {
                 console.error('There was a problem with the fetch operation:', error);
             }
         },
+        added: false,
         searchModal: false,
         toggleSearch() {
             this.searchModal = !this.searchModal;
