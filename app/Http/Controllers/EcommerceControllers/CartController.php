@@ -230,7 +230,157 @@ class CartController extends Controller
             return back()->with('product_added', 'New Product has been added on your cart!');
     }
 
+    public function updateQty(Request $request)
+    {
+        $product = Product::with('photos')->whereId($request->ac_item)->first();
+        $photos = $product->photos()->where('is_primary', 1)->first();
+        $photo = !empty($photos) ? asset('storage/products/'.$photos->path ) : '';
+        $paella_cost = ($request->ac_paella == '1' ? ($product->paella_price * $request->ac_qty) : 0);
+        if (auth()->check()) {
 
+            $cart = Cart::where('product_id', $request->ac_item)
+                ->where('user_id', Auth::id())
+                ->first();
+
+            if (!empty($cart)) {
+                $newQty = $cart->qty + $request->ac_qty;
+                $save = $cart->update([
+                    'qty' => $newQty,
+                    'price' => $product->price,
+                    'paella_price' => $paella_cost
+                ]);
+            } else {
+                $save = Cart::create([
+                    'product_id' => $request->ac_item,
+                    'user_id' => Auth::id(),
+                    'qty' => $request->ac_qty,
+                    'price' => $product->price,
+                    'paella_price' => $paella_cost,
+                    'photo' => $photo,
+                    'product' => $product,
+                ]);
+            }
+
+            //misc items
+            for($x =1; $x<=$request->misc_cntr;$x++){
+                if($request->has('misc_id'.$x)){
+
+                    $product = Product::whereId($request->input('misc_id'.$x))->first();
+                    $cart = Cart::where('product_id', $request->input('misc_id'.$x))
+                        ->where('user_id', Auth::id())
+                        ->first();
+
+                    if (!empty($cart)) {
+                        $newQty = $cart->qty + $request->input('misc_qty'.$x);
+                        $save = $cart->update([
+                            'qty' => $newQty,
+                            'price' => $product->price
+                        ]);
+                    } else {
+                        $save = Cart::create([
+                            'product_id' => $request->input('misc_id'.$x),
+                            'user_id' => Auth::id(),
+                            'qty' => $request->input('misc_qty'.$x),
+                            'price' => $product->price,
+                            'photo' => $photo,
+                            'product' => $product,
+                            'paella_price' => 0
+                        ]);
+                    }
+
+                }
+            }
+
+
+        }
+        else
+        {
+            $cart = session('cart', []);
+            $not_exist = true;
+
+            foreach ($cart as $key => $order) {
+                if ($order->product_id == $request->ac_item) {
+                    $cart[$key]->qty = $request->ac_qty;
+                    $cart[$key]->price = $product->price;
+                    $cart[$key]->paella_price = $paella_cost;
+                    $cart[$key]->photo = $photo;
+                    $cart[$key]->product = $product;
+
+                    $not_exist = false;
+                    break;
+                }
+            }
+
+            if ($not_exist) {
+                $order = new Cart();
+                $order->product_id = $request->ac_item;
+                $order->qty = $request->ac_qty;
+                $order->price = $product->price;
+                $order->paella_price = $paella_cost;
+                $order->photo = $photo;
+                $order->product = $product;
+                $order->coupon_code = '';
+                $order->coupon_amount = '0';
+
+                array_push($cart, $order);
+            }
+
+            session(['cart' => $cart]);
+
+            //misc items
+            for($x =1; $x<=$request->misc_cntr;$x++){
+                if($request->has('misc_id'.$x)){
+
+                    $cart = session('cart', []);
+                    $not_exist = true;
+
+                    foreach ($cart as $key => $order) {
+                        if ($order->product_id == $request->input('misc_id'.$x)) {
+                            $cart[$key]->qty = $request->input('misc_qty'.$x);
+                            $cart[$key]->price = $product->price;
+                            $cart[$key]->paella_price = 0;
+                            $cart[$key]->photo = $photo;
+                            $cart[$key]->product = $product;
+
+                            $not_exist = false;
+                            break;
+                        }
+                    }
+
+                    if ($not_exist) {
+                        $order = new Cart();
+                        $order->product_id = $request->input('misc_id'.$x);
+                        $order->qty = $request->input('misc_qty'.$x);
+                        $order->price = $product->price;
+                        $order->paella_price = 0;
+                        $order->photo = $photo;
+                        $order->product = $product;
+
+                        array_push($cart, $order);
+                    }
+
+                    session(['cart' => $cart]);
+                }
+
+            }
+
+        }
+
+        if($request->action == 'buynow'){
+            return response()->json([
+                'success' => true,
+                'act' => 'buynow',
+                'totalItems' => Setting::EcommerceCartTotalItems()
+            ]);
+
+        }else{
+            return response()->json([
+                'success' => true,
+                'act' => 'addcart',
+                'totalItems' => Setting::EcommerceCartTotalItems()
+            ]);
+        }
+    }
 
     public function store(Request $request)
     {

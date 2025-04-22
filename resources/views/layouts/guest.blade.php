@@ -55,15 +55,15 @@
             }, 3000);
         },
         
-        async add_to_cart(act,id){
+        async add_to_cart(act,id, qty){
             if (act && id) {
-                await this.save_to_cart(act,id);
+                await this.save_to_cart(act,id, qty);
             } else {
                 return false;
             }
         },
 
-        async save_to_cart(act, id) {
+        async save_to_cart(act, id, qty) {
 
             try {
                 let response = await fetch('{{ route('cart.add') }}', {
@@ -73,7 +73,8 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     },
                     body: JSON.stringify({
-                        ac_item: id
+                        ac_item: id,
+                        ac_qty: qty,
                     })
                 }).then((response) => {
                     return response;
@@ -96,6 +97,36 @@
 
                 this.lechonCart = false;
                 this.added = false;
+
+            } catch (error) {
+                console.error('There was a problem with the fetch operation:', error);
+            }
+        },
+
+        async updateCartQty(act, id, qty) {
+
+            try {
+                let response = await fetch('{{ route('cart.qty.update') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                    body: JSON.stringify({
+                        ac_item: id,
+                        ac_qty: qty,
+                    })
+                }).then((response) => {
+                    return response;
+                }).catch((error) => {
+                    
+                });
+
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                let data = await response.json();
+
+                $dispatch('update-cart');
 
             } catch (error) {
                 console.error('There was a problem with the fetch operation:', error);
