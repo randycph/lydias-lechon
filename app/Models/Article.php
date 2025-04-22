@@ -74,6 +74,7 @@ class Article extends Model
     {
         return $this->belongsTo(ArticleCategory::class)->withDefault([
             'name' => 'Uncategorized',
+            'slug' => 'uncategorized',
             'id' => '0',
         ]);
     }

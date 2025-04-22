@@ -11,7 +11,7 @@ class ArticleCategory extends Model
     use SoftDeletes;
 
     protected $table = 'article_categories';
-    protected $fillable = ['name', 'slug', 'user_id'];
+    protected $fillable = ['name', 'slug', 'user_id', 'image'];
     public $timestamps = true;
 
     public function articles()

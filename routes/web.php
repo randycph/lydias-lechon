@@ -1,10 +1,14 @@
 <?php
 
+use App\EcommerceModel\Cart;
 use App\Helpers\ListingHelper;
+use App\Models\Article;
+use App\Models\ArticleCategory;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
 Auth::routes(['verify' => true]);
 
@@ -35,7 +39,14 @@ Route::group(['prefix' => 'v2'], function () {
     })->name('lechon-menu');
     Route::get('/checkout', function () {
         $page = 'checkout';
-        return view('v2.checkout', compact('page'));
+
+        if (auth()->check()) {
+            $carts = Cart::where('user_id', Auth::id())->with('product.photos')->get();
+        } else {
+            $carts = collect(session('cart', [])); 
+        }
+
+        return view('v2.checkout', compact('page', 'carts'));
     })->name('checkout');
     Route::get('/confirmation', function () {
         $page = 'confirmation';
@@ -69,12 +80,46 @@ Route::group(['prefix' => 'v2'], function () {
         return view('v2.careers');
     })->name('careers.v2');
     Route::get('/blogs', function () {
-        return view('v2.blogs');
+        $featuredArticle = Article::with('category')
+                                ->where('is_featured', 1)
+                                ->where('category_id', '>', 0)
+                                ->where('status', 'Published')
+                                ->latest()
+                                ->first();
+        $featuredArticle->image_url = empty($featuredArticle->image_url) ? $featuredArticle->thumbnail_url : $featuredArticle->image_url;
+
+        $categories = ArticleCategory::get();
+        $blogs = Article::with('category')
+                        ->where('is_blog', 1)
+                        ->where('status', 'Published')
+                        ->where('category_id', '>', 0)
+                        ->latest()
+                        ->paginate(1);
+        return view('v2.blogs', compact('featuredArticle', 'categories', 'blogs'));
     })->name('blogs');
-    Route::get('/article', function () {
-        return view('v2.article');
+    Route::get('{category}/{slug}', function ($category, $slug) {
+        return view('v2.article', compact('category', 'slug'));
     })->name('article');
 });
+
+Route::get('/articles/load-more', function(Request $request) {
+    $page = $request->input('page', 1);
+    $limit = $request->input('limit', 1);
+
+    $articles = Article::with('category')
+        ->where('is_blog', 1)
+        ->where('status', 'Published')
+        ->where('category_id', '>', 0)
+        ->latest()
+        ->paginate($limit, ['*'], 'page', $page);
+
+    $html = view('v2.partials.articles', compact('articles'))->render();
+
+    return response()->json([
+        'html' => $html,
+        'hasMore' => $articles->hasMorePages()
+    ]);
+})->name('articles.load-more');
 
 Route::any('/ipay_response',  'ipayController@receive_data')->name('ipay.response');
 Route::get('/ipaysig',  'EcommerceControllers\CartController@payment');

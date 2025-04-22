@@ -11,81 +11,93 @@
                     method, and finalize your purchase to enjoy your Lydia's Lechon meal.</h3>
             </div>
 
+            @if ($carts->isEmpty())
+                <div class="flex flex-col items-center justify-center h-96">
+                    <img src="{{ asset('images/empty-cart.png') }}" alt="Empty Cart" class="w-1/2 lg:w-1/3">
+                    <h2 class="text-xl font-semibold mt-4">Your cart is empty</h2>
+                    <p class="text-gray-500">Looks like you haven't added anything to your cart yet.</p>
+                    <a href="{{ route('home') }}" class="mt-4 bg-primary text-white px-4 py-2 rounded-md">Start Shopping</a>
+                </div>
+            @else
             <div class="flex flex-col lg:flex-row gap-4 w-full mt-10">
                 <div class="w-full order-1 lg:order-2 rounded-lg border bg-white border-[#DFDFDF] shadow-md ">
                     <div class="px-4 py-3 border-b border-[#DFDFDF]">
                         <h2 class="text-lg lg:text-3xl font-semibold text-left">Order Summary</h2>
                     </div>
                     <div class="flex items-center text-sm lg:text-base justify-between px-4 py-3 border-b border-[#DFDFDF]">
-                        <div>3 items</div>
-                        <div class="font-bold">₱13,175.00</div>
+                        <div>{{ count($carts) }} items</div>
+                        <div class="font-bold">
+                            @php
+                                $total = 0;
+                                $deliveryFee = 100;
+                                foreach ($carts as $cart) {
+                                    $total += $cart['price'];
+                                }
+                            @endphp
+                            ₱{{ number_format($total, 2) }}
+                        </div>
                     </div>
     
-                    @php
-                    $carts = [
-                    [
-                    'image' => 'checkout1.png',
-                    'name' => 'Lechon-In-A-Box (2Kg)',
-                    'price' => '₱2,800.00',
-                    'qty' => 1
-                    ],
-                    [
-                    'image' => 'checkout2.png',
-                    'name' => 'Petite (Lechon Cebu)',
-                    'price' => '₱9,800.00',
-                    'qty' => 1
-                    ],
-                    [
-                    'image' => 'checkout3.png',
-                    'name' => 'Pancit con Lechon Medium (225G)',
-                    'price' => '₱475.00',
-                    'qty' => 1
-                    ]
-                    ];
-                    @endphp
     
                     <div class="flex flex-col items-center gap-8 px-4 py-3 border-b border-[#DFDFDF] w-full">
                         @foreach ($carts as $cart)
                         <div class="flex gap-4 items-start w-full relative">
                             <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')"
                                 class="w-20 h-20 min-w-20 min-h-20 object-cover overflow-hidden rounded-md bg-center">
-                                <img src="{{ asset('images/'.$cart['image']) }}" alt="Checkout"
+                                <img onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'" src="{{ $cart['photo'] ??  asset('storage/products/' . $cart?->product?->photo_primary) }}" alt="Checkout"
                                     class="w-20 h-20 object-cover">
                             </div>
                             <div class="flex flex-col">
-                                <div class="font-bold">{{ $cart['name'] }}</div>
+                                <div class="font-bold">{{ $cart['name'] ?? $cart?->product?->name }}</div>
                                 <div class="text-sm  text-gray-600 font-medium">QTY: {{ $cart['qty'] }}</div>
                             </div>
-                            <div class="text-sm lg:text-base text-black font-bold text-right w-full absolute right-0 bottom-0">{{
-                                $cart['price'] }}</div>
+                            <div class="text-sm lg:text-base text-black font-bold text-right w-full absolute right-0 bottom-0">
+                                ₱{{ number_format($cart['price'], 2) }}
+                            </div>
                         </div>
                         @endforeach
                     </div>
     
                     <!-- Coupon Code Section -->
-                    <div class="bg-white rounded-md mt-2 text-sm">
-                        <div class="flex items-center border mx-3 border-gray-200 rounded-md overflow-hidden">
-                            <input type="text" placeholder="Have a coupon code?"
+                    <div class="bg-white rounded-md mt-2 text-sm" x-data="{ 
+                        couponCode: '',
+                        showMessage: false,
+                        submitCouponCode() {
+                            this.showMessage = true;
+                        }
+                    }">
+                        <form class="flex items-center border mx-3 border-gray-200 rounded-md overflow-hidden">
+                            <input x-model="couponCode" type="text" required placeholder="Have a coupon code?"
                                 class="w-full p-3 outline-none border-none text-gray-700">
-                            <button class="bg-primary hover:bg-primary-dark text-white px-6 py-3 text-sm">Apply</button>
-                        </div>
+                            <button @click="submitCouponCode" type="button" class="bg-primary hover:bg-primary-dark text-white px-6 py-3 text-sm">Apply</button>
+                        </form>
+                        <div x-show="showMessage" class="text-[#28A745] mx-5 py-2">Voucher code successfully applied.</div>
     
                         <!-- Subtotal Section -->
                         <div class="border-t border-gray-200 mt-2 pt-3 pb-1 gap-1 flex flex-col text-sm lg:text-base px-3">
                             <div class="flex justify-between">
                                 <span class="font-medium text-gray-800">Subtotal</span>
-                                <span class="font-medium">₱13,075.00</span>
+                                <span class="font-medium">₱{{ number_format($total, 2) }}</span>
                             </div>
                             <div class="flex justify-between lg:mt-2">
                                 <span class="font-medium text-gray-800">Delivery Fee</span>
-                                <span class="font-medium">₱100.00</span>
+                                <span class="font-medium">₱{{ number_format($deliveryFee, 2) }}</span>
+                            </div>
+                            <div class="flex justify-between lg:mt-2" x-show="showMessage">
+                                <span class="font-medium text-red-700 italic">Coupon (<span x-text="couponCode"></span>)</span>
+                                <span class="font-medium italic text-red-700">- ₱250.00</span>
                             </div>
                         </div>
     
                         <div class="border-t border-gray-200 mt-2 py-4 gap-1 flex flex-col text-sm lg:text-base px-3">
                             <div class="flex justify-between">
                                 <span class="font-medium text-gray-800">Total</span>
-                                <span class="font-bold">₱13,075.00</span>
+                                <span class="font-bold">
+                                    @php
+                                        $total += $deliveryFee;
+                                    @endphp
+                                    ₱{{ number_format($total, 2) }}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -97,7 +109,9 @@
                             <h2 class="text-lg lg:text-3xl font-semibold text-left">Delivery Information</h2>
                         </div>
     
-                        <div class="my-3 px-4 " x-data="{ method: 'pickup' }">
+                        <div class="my-3 px-4 " x-data="{ 
+                            method: document.cookie.split('; ').find(row => row.startsWith('shipping_method=')).split('=')[1] || 'pickup', 
+                        }">
                             <div class="font-bold my-2">Choose Pickup or Delivery</div>
                             <div class="flex items-center gap-4 mt-2">
                                 <button class="px-6 py-3 rounded-md w-full transition border-2"
@@ -341,7 +355,7 @@
     
                             </div>
     
-                            <div class="mt-5">
+                            {{-- <div class="mt-5">
                                 <div class="font-bold">Choose Payment Method</div>
     
                                 <div class="mt-3">
@@ -373,11 +387,15 @@
                                 <div class="bg-primary custom-btn btn-primary-dark text-center text-white px-6 py-4 mt-4 w-full rounded-md">
                                     <a href="{{ route('confirmation') }}" class="text-center">Place Order</a>
                                 </div>
+                            </div> --}}
+                            <div class="bg-primary custom-btn btn-primary-dark text-center text-white px-6 py-4 mt-4 w-full rounded-md">
+                                <button class="text-center">Place Order</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            @endif
 
 
         </div>
