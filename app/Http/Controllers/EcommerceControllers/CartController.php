@@ -1206,19 +1206,19 @@ class CartController extends Controller
     public function removeCart(Request $request)
     {
         if (auth()->check()) {
-            $delete = Cart::whereId($request->product_remove_id)->delete();
+            Cart::whereId($request->product_remove_id)->delete();
         } else {
             $cart = session('cart', []);
-
-            $productId = $request->product_remove_id;
-            $index = array_search($productId, array_column($cart, 'product_id'));
-            if ($index !== false) {
-                unset($cart[$index]);
-            }
-            
-            session(['cart' => $cart]);
+            $productId = (int) $request->product_remove_id;
+    
+            // Filter out the Cart objects by checking product_id directly
+            $filtered = array_values(array_filter($cart, function ($item) use ($productId) {
+                return (int) $item->product_id !== $productId;
+            }));
+    
+            session(['cart' => $filtered]);
         }
-
+    
         return response()->json([
             'success' => true,
             'message' => 'Product removed from cart'
