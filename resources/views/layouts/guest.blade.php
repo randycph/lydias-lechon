@@ -65,6 +65,8 @@
 
         async save_to_cart(act, id, qty) {
 
+            this.loading = true;
+
             try {
                 let response = await fetch('{{ route('cart.add') }}', {
                     method: 'POST',
@@ -86,8 +88,6 @@
 
                 let data = await response.json();
 
-                {{-- this.fetchedSession = data; --}}
-
                 $dispatch('update-cart');
 
                 this.addedToCart = true;
@@ -98,12 +98,18 @@
                 this.lechonCart = false;
                 this.added = false;
 
+                this.loading = false;
+
             } catch (error) {
                 console.error('There was a problem with the fetch operation:', error);
             }
         },
 
+        loading: false,
+
         async updateCartQty(act, id, qty) {
+
+            this.loading = true;
 
             try {
                 let response = await fetch('{{ route('cart.qty.update') }}', {
@@ -127,7 +133,8 @@
                 let data = await response.json();
 
                 $dispatch('update-cart');
-
+                
+                this.loading = false;
             } catch (error) {
                 console.error('There was a problem with the fetch operation:', error);
             }

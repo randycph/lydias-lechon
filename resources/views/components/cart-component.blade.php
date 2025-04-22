@@ -33,8 +33,10 @@ x-data="{
     },
     init() {
         this.getCarts();
+        this.shippingMethod = document.cookie.split('; ').find(row => row.startsWith('shipping_method=')).split('=')[1] || 'pickup';
     },
     async removeCart(index) {
+        this.loading = true;
         try {
             let response = await fetch('{{ route('cart.remove') }}', {
                 method: 'POST',
@@ -57,9 +59,16 @@ x-data="{
 
             this.getCarts();
 
+            this.loading = false;
+
         } catch (error) {
             console.error('There was a problem with the fetch operation:', error);
         }
+    },
+    shippingMethod: 'pickup',
+    chooseShippingMethod(method) {
+        this.shippingMethod = method;
+        document.cookie = `shipping_method=${method}; path=/; max-age=31536000;`;
     },
 }"
 @fetch-cart.window="init()"
@@ -86,99 +95,103 @@ x-data="{
                     </svg>
                 </button>
             </div>
-            
-            <template x-if="carts.length > 0"> 
-                <div>
-                    <div class="bg-tertiary text-white py-2 text-center w-full mt-2">
-                        You need <strong>₱1,050.00</strong> more for free delivery
-                    </div>
-    
-                    <div class="mt-4 flex flex-col gap-4">
-    
-                        <template x-for="(cart, index) in carts" :key="index">
-                            <div class="flex justify-between items-center gap-4 hover:bg-gray-100 py-2" >
-                                <div class="flex gap-4 items-center px-6">
-                                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="w-20 h-20 object-cover rounded-md scale-110 bg-center">
-                                        <img :src="cart.photo" alt="Checkout" class="w-20 h-20 object-cover rounded-md scale-110">
-                                    </div>
-                                    <div class="flex flex-col gap-1">
-                                        <div class="font-bold" x-text="cart.product.name"></div>
-                                        <div class="text-sm text-gray-600" x-text="new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cart.product.price * (cart.qty || 1))"></div>
-    
-                                        <!-- Quantity Selector -->
-                                        <div x-data="{ quantity: cart.qty }" class="flex items-center space-x-1">
-                                            <!-- Minus Button -->
-                                            <button @click="if(quantity > 1) quantity--; updateCartQty('addcart', cart.product.id, quantity)" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
-                                                    <path fill-rule="evenodd" d="M4 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H4.75A.75.75 0 0 1 4 10Z" clip-rule="evenodd" />
-                                                </svg>
-                                            </button>
-    
-                                            <!-- Quantity Display (Fix: Use `x-text`) -->
-                                            <span class="w-8 text-center font-bold text-green-600" x-text="quantity"></span>
-    
-                                            <!-- Plus Button -->
-                                            <button @click="quantity++; updateCartQty('addcart', cart.product.id, quantity)" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
-                                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
-                                                    <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
-                                                </svg>
-                                            </button>
+            <div x-show="!loading" x-transition.opacity>
+                <template x-if="carts.length > 0"> 
+                    <div>
+                        <div class="bg-tertiary text-white py-2 text-center w-full mt-2">
+                            You need <strong>₱1,050.00</strong> more for free delivery
+                        </div>
+        
+                        <div class="mt-4 flex flex-col gap-4">
+        
+                            <template x-for="(cart, index) in carts" :key="index">
+                                <div class="flex justify-between items-center gap-4 hover:bg-gray-100 py-2" >
+                                    <div class="flex gap-4 items-center px-6">
+                                        <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="w-20 h-20 object-cover rounded-md scale-110 bg-center">
+                                            <img :src="cart.photo" alt="Checkout" class="w-20 h-20 object-cover rounded-md scale-110">
+                                        </div>
+                                        <div class="flex flex-col gap-1">
+                                            <div class="font-bold" x-text="cart.product.name"></div>
+                                            <div class="text-sm text-gray-600" x-text="new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cart.product.price * (cart.qty || 1))"></div>
+        
+                                            <!-- Quantity Selector -->
+                                            <div x-data="{ quantity: cart.qty }" class="flex items-center space-x-1">
+                                                <!-- Minus Button -->
+                                                <button @click="if(quantity > 1) quantity--; updateCartQty('addcart', cart.product.id, quantity)" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                                                        <path fill-rule="evenodd" d="M4 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H4.75A.75.75 0 0 1 4 10Z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </button>
+        
+                                                <!-- Quantity Display (Fix: Use `x-text`) -->
+                                                <span class="w-8 text-center font-bold text-green-600" x-text="quantity"></span>
+        
+                                                <!-- Plus Button -->
+                                                <button @click="quantity++; updateCartQty('addcart', cart.product.id, quantity)" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                                                        <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
+                                    <div class="pr-2">
+                                        <button @click="removeCart(index)" class="text-primary">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="pr-2">
-                                    <button @click="removeCart(index)" class="text-primary">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                                        </svg>
+                            </template>
+        
+                            <div class="mt-10 px-6">
+                                <div class="font-bold">Choose a shipping method</div>
+                                <div class="flex items-center gap-4 mt-2">
+                                    <button 
+                                        class="px-6 py-3 rounded-md w-full transition"
+                                        :class="shippingMethod === 'pickup' ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-700'"
+                                        @click="shippingMethod = 'pickup'; chooseShippingMethod('pickup')">
+                                        Pickup
+                                    </button>
+                            
+                                    <button 
+                                        class="px-6 py-3 rounded-md w-full transition"
+                                        :class="shippingMethod === 'delivery' ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-700'"
+                                        @click="shippingMethod = 'delivery'; chooseShippingMethod('delivery')">
+                                        Delivery
                                     </button>
                                 </div>
                             </div>
-                        </template>
-    
-                        <div class="mt-10 px-6" x-data="{ method: 'pickup' }">
-                            <div class="font-bold">Choose a shipping method</div>
-                            <div class="flex items-center gap-4 mt-2">
-                                <button 
-                                    class="px-6 py-3 rounded-md w-full transition"
-                                    :class="method === 'pickup' ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-700'"
-                                    @click="method = 'pickup'">
-                                    Pickup
-                                </button>
-                        
-                                <button 
-                                    class="px-6 py-3 rounded-md w-full transition"
-                                    :class="method === 'delivery' ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-700'"
-                                    @click="method = 'delivery'">
-                                    Delivery
-                                </button>
-                            </div>
-                        </div>
-    
-                        <!-- Coupon Code Section -->
-                        <div class="bg-cream rounded-md mt-10 px-6">
-                            <div class="flex items-center border border-gray-200 rounded-md overflow-hidden">
-                                <input type="text" placeholder="Have a coupon code?" 
-                                    class="w-full p-3 outline-none border-none text-gray-700">
-                                <button class="bg-primary hover:bg-primary-dark text-white px-6 py-3">Apply</button>
-                            </div>
-    
-                            <!-- Subtotal Section -->
-                            <div class="border-t border-gray-200 mt-4 pt-4">
-                                <div class="flex justify-between">
-                                    <span class="font-bold text-gray-800">Subtotal</span>
-                                    <span class="font-bold text-lg" x-text="new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(carts.reduce((total, cart) => total + (cart.product.price * (cart.qty || 1)), 0))"></span>
+        
+                            <!-- Coupon Code Section -->
+                            <div class="bg-cream rounded-md mt-10 px-6">
+                                <div class="flex items-center border border-gray-200 rounded-md overflow-hidden">
+                                    <input type="text" placeholder="Have a coupon code?" 
+                                        class="w-full p-3 outline-none border-none text-gray-700">
+                                    <button class="bg-primary hover:bg-primary-dark text-white px-6 py-3">Apply</button>
                                 </div>
-                                <p class="text-gray-600 text-sm">Delivery fee is calculated upon checkout</p>
+        
+                                <!-- Subtotal Section -->
+                                <div class="border-t border-gray-200 mt-4 pt-4">
+                                    <div class="flex justify-between">
+                                        <span class="font-bold text-gray-800">Subtotal</span>
+                                        <span class="font-bold text-lg" x-text="new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(carts.reduce((total, cart) => total + (cart.product.price * (cart.qty || 1)), 0))"></span>
+                                    </div>
+                                    <p class="text-gray-600 text-sm">Delivery fee is calculated upon checkout</p>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="px-6 w-full flex">
-                            <a href="{{ route('checkout') }}" class="bg-primary custom-btn btn-primary-dark text-white text-center px-6 py-3 rounded-md mt-10 w-full">Checkout</a>
+                            
+                            <div class="px-6 w-full flex">
+                                <a href="{{ route('checkout') }}" class="bg-primary custom-btn btn-primary-dark text-white text-center px-6 py-3 rounded-md mt-10 w-full">Checkout</a>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </template>
+                </template>
+            </div>
+            <div x-show="loading" class="animate-pulse mt-4 ">
+                <x-cart-loading-component />
+            </div>
         </div>
         <template x-if="carts.length == 0">
             <div class="mt-6 px-6 flex items-center justify-center flex-col h-full">
