@@ -25,15 +25,22 @@
 
                 <div
                     class="lg:w-1/2 w-full border rounded-lg px-5 py-2 border-primary overflow-hidden flex items-center">
-                    <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')"
-                        class="object-cover rounded-lg max-w-[240px] lg:max-w-[587px] max-h-[215px] lg:max-h-max mx-auto bg-center relative">
+                    {{-- <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" --}}
+                    <div
+                        class="object-cover rounded-lg  mx-auto bg-center relative">
                         
                         <div class="swiper-cart-image relative mt-5 overflow-hidden">
                             <div class="swiper-wrapper">
-                                <div class="swiper-slide" x-for="(photo, idx) in product?.photos" :key="idx">
-                                    <div x-text="'storage/products/'+photo.path"></div>
-                                    <img :src="'storage/products/'+photo.path" alt="Product Image" class="object-cover p-2">
-                                </div>
+                                <template x-for="(photo, idx) in product?.photos" :key="idx">
+                                    <div class="swiper-slide">
+                                        <img 
+                                            x-show="photo?.path"
+                                            :src="`/storage/products/${photo.path}`"
+                                            alt="Product Image"
+                                            class="object-cover w-full rounded-md"
+                                        >
+                                    </div>
+                                </template>
                             </div>
                         </div>
                     </div>
