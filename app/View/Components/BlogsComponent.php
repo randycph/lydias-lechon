@@ -8,12 +8,20 @@ use Illuminate\View\Component;
 
 class BlogsComponent extends Component
 {
+    public $blogs;
+
     /**
      * Create a new component instance.
      */
-    public function __construct()
+    public function __construct($blogs = null)
     {
-        //
+        if (is_null($blogs)) {
+            $this->blogs = collect();
+        } elseif (!is_a($blogs, 'Illuminate\Support\Collection')) {
+            $this->blogs = collect($blogs);
+        } else {
+            $this->blogs = $blogs;
+        }
     }
 
     /**
@@ -21,6 +29,8 @@ class BlogsComponent extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.blogs-component');
+        return view('components.blogs-component', [
+            'blogs' => $this->blogs,
+        ]);
     }
 }

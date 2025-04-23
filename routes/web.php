@@ -15,8 +15,14 @@ Auth::routes(['verify' => true]);
 Route::group(['prefix' => 'v2'], function () {
     Route::get('/home', function () {
         $categories = ProductCategory::where('status', 'PUBLISHED')->get();
-
-        return view('v2.home', compact('categories'));
+        $blogs = Article::with('category')
+            ->where('is_blog', 1)
+            ->where('status', 'Published')
+            ->where('category_id', '>', 0)
+            ->latest()
+            ->limit(10)
+            ->get();
+        return view('v2.home', compact('categories', 'blogs'));
     })->name('index');
     Route::get('/our-story', function () {
         return view('v2.our-story');
@@ -94,9 +100,35 @@ Route::group(['prefix' => 'v2'], function () {
                         ->where('status', 'Published')
                         ->where('category_id', '>', 0)
                         ->latest()
-                        ->paginate(1);
+                        ->paginate(4);
         return view('v2.blogs', compact('featuredArticle', 'categories', 'blogs'));
     })->name('blogs');
+    Route::get('/blogs/{category}', function () {
+        $featuredArticle = Article::with('category')
+                                ->where('is_featured', 1)
+                                ->where('category_id', '>', 0)
+                                ->where('status', 'Published')
+                                ->latest()
+                                ->first();
+        $featuredArticle->image_url = empty($featuredArticle->image_url) ? $featuredArticle->thumbnail_url : $featuredArticle->image_url;
+
+        $categories = ArticleCategory::get();
+
+        $category = ArticleCategory::where('slug', request()->category)->first();
+
+        if (!$category) {
+            abort(404);
+        }
+
+        $blogs = Article::with('category')
+                        ->where('category_id', $category->id)
+                        ->where('is_blog', 1)
+                        ->where('status', 'Published')
+                        ->where('category_id', '>', 0)
+                        ->latest()
+                        ->paginate(4);
+        return view('v2.blogs-category', compact('featuredArticle', 'categories', 'blogs', 'category'));
+    })->name('blogs-category');
     Route::get('{category}/{slug}', function ($category, $slug) {
         return view('v2.article', compact('category', 'slug'));
     })->name('article');
@@ -104,7 +136,7 @@ Route::group(['prefix' => 'v2'], function () {
 
 Route::get('/articles/load-more', function(Request $request) {
     $page = $request->input('page', 1);
-    $limit = $request->input('limit', 1);
+    $limit = $request->input('limit', 4);
 
     $articles = Article::with('category')
         ->where('is_blog', 1)
@@ -120,6 +152,28 @@ Route::get('/articles/load-more', function(Request $request) {
         'hasMore' => $articles->hasMorePages()
     ]);
 })->name('articles.load-more');
+
+Route::get('/articles-category/load-more', function(Request $request) {
+    $page = $request->input('page', 1);
+    $limit = $request->input('limit', 4);
+    $category = $request->input('category');
+    $category = ArticleCategory::where('slug', $category)->first();
+
+    $articles = Article::with('category')
+        ->where('category_id', $category->id)
+        ->where('is_blog', 1)
+        ->where('status', 'Published')
+        ->where('category_id', '>', 0)
+        ->latest()
+        ->paginate($limit, ['*'], 'page', $page);
+
+    $html = view('v2.partials.articles', compact('articles'))->render();
+
+    return response()->json([
+        'html' => $html,
+        'hasMore' => $articles->hasMorePages()
+    ]);
+})->name('articles-category.load-more');
 
 Route::any('/ipay_response',  'ipayController@receive_data')->name('ipay.response');
 Route::get('/ipaysig',  'EcommerceControllers\CartController@payment');

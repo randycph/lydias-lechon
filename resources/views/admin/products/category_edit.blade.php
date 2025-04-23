@@ -45,8 +45,8 @@
                         @error('image')
                             <div class="alert alert-danger">{{ $message }}</div>
                         @enderror
-                        <div id="image_div" style="display:none;">
-                            <img src="" height="100" width="300" id="img_temp" alt="">  <br /><br />
+                        <div id="image_div" style="display:{{ isset($category?->image) ? 'block' : 'none' }};">
+                            <img src="{{ asset('images/category/'. (isset($category?->image) ? $category?->image : '') ) }}" height="200" width="300" id="img_temp" alt="" style="object-fit: cover; margin-top: 15px">  <br /><br />
                             <a href="javascript:void(0)" class="btn btn-xs btn-danger" onclick="remove_image();">Remove Image</a>
                         </div>
                     </div>
@@ -128,5 +128,29 @@
                 $('#category_slug').html("<a target='_blank' href='"+slug_url+"'>"+slug_url+"</a>");
             });
         });
+    </script>
+    <script>
+        document.getElementById('image').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+        
+            if (file) {
+                const reader = new FileReader();
+        
+                reader.onload = function(e) {
+                    document.getElementById('img_temp').src = e.target.result;
+                    document.getElementById('image_div').style.display = 'block';
+                    document.getElementById('img_name').innerText = file.name;
+                };
+        
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        function remove_image() {
+            document.getElementById('image').value = "";
+            document.getElementById('img_temp').src = "";
+            document.getElementById('image_div').style.display = 'none';
+            document.getElementById('img_name').innerText = "Choose file";
+        }
     </script>
 @endsection

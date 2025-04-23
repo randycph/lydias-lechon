@@ -27,7 +27,7 @@
                 </div><!-- card-header -->
                 <div class="card-body pd-0">
                     <div class="table-responsive">
-                        <form autocomplete="off" action="{{ route('news-categories.update', $articleCategory->id) }}" method="post">
+                        <form autocomplete="off" action="{{ route('news-categories.update', $articleCategory->id) }}" method="post" enctype="multipart/form-data">
                             @method('PUT')
                             @csrf
                             <div class="modal-body pd-sm-t-30 pd-sm-b-40 pd-sm-x-30">
@@ -37,6 +37,20 @@
                                         <input required type="text" class="form-control @error('category_name') is-invalid @enderror" name="category_name" id="category_title" value="{{$articleCategory->name}}" @htmlValidationMessage({{__('standard.empty_all_field')}})>
                                         <x-error-message inputName="category_name" />
 										<small id="category_slug"><a target="_blank" href="{{env('APP_URL')}}/{{$articleCategory->slug}}">{{env('APP_URL')}}/{{$articleCategory->slug}}</a></small>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="d-block">Category image *</label>
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input @error('image') is-invalid @enderror" name="image" id="image" accept="image/*">
+                                        <label class="custom-file-label" for="image" id="img_name">Choose file</label>
+                                    </div>
+                                    @error('image')
+                                        <div class="alert alert-danger">{{ $message }}</div>
+                                    @enderror
+                                    <div id="image_div" style="display:{{ isset($articleCategory?->image) ? 'block' : 'none' }};">
+                                        <img src="{{ asset('images/news/'. (isset($articleCategory?->image) ? $articleCategory?->image : '') ) }}" height="200" width="300" id="img_temp" alt="" style="object-fit: cover; margin-top: 15px">  <br /><br />
+                                        <a href="javascript:void(0)" class="btn btn-xs btn-danger" onclick="remove_image();">Remove Image</a>
                                     </div>
                                 </div>
                             </div>
@@ -81,4 +95,28 @@
 
                 });
         </script>
+    <script>
+        document.getElementById('image').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+        
+            if (file) {
+                const reader = new FileReader();
+        
+                reader.onload = function(e) {
+                    document.getElementById('img_temp').src = e.target.result;
+                    document.getElementById('image_div').style.display = 'block';
+                    document.getElementById('img_name').innerText = file.name;
+                };
+        
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        function remove_image() {
+            document.getElementById('image').value = "";
+            document.getElementById('img_temp').src = "";
+            document.getElementById('image_div').style.display = 'none';
+            document.getElementById('img_name').innerText = "Choose file";
+        }
+    </script>
 @endsection

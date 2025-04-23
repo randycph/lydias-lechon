@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use App\Http\Requests\ArticleCategoryRequest;
 use App\Models\Page;
+use Illuminate\Support\Facades\Validator;
 
 class ArticleCategoryController extends Controller
 {
@@ -102,11 +103,28 @@ class ArticleCategoryController extends Controller
     {
         $articleCategory = ArticleCategory::findOrFail($id);
 
+        Validator::make($request->all(), [
+            'category_name' => 'required',
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:10240', 
+        ])->validate();
+
         if($articleCategory->name == $request->category_name){
             $slug = $articleCategory->slug;
         }
         else{
             $slug = Page::convert_to_slug($request->category_name);
+        }
+
+        if($request->hasFile('image')){
+            $image = $request->file('image');
+            $imageName = time().'.'.$image->getClientOriginalExtension();
+
+            if (!file_exists(public_path('/images/news'))) {
+                mkdir(public_path('/images/news'), 0777, true);
+            }
+            $destinationPath = public_path('/images/news');
+            $image->move($destinationPath, $imageName);
+            $articleCategory->update(['image' => $imageName]);
         }
 
         $articleCategory->update([

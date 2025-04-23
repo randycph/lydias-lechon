@@ -44,6 +44,24 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row row-sm">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label class="d-block">Category image *</label>
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input @error('image') is-invalid @enderror" name="image" id="image" accept="image/*">
+                                    <label class="custom-file-label" for="image" id="img_name">Choose file</label>
+                                </div>
+                                @error('image')
+                                    <div class="alert alert-danger">{{ $message }}</div>
+                                @enderror
+                                <div id="image_div" style="display:{{ isset($articleCategory?->image) ? 'block' : 'none' }};">
+                                    <img src="{{ asset('images/news/'. (isset($articleCategory?->image) ? $articleCategory?->image : '') ) }}" height="200" width="300" id="img_temp" alt="" style="object-fit: cover; margin-top: 15px">  <br /><br />
+                                    <a href="javascript:void(0)" class="btn btn-xs btn-danger" onclick="remove_image();">Remove Image</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <button type="submit" class="btn btn-sm btn-primary btn-uppercase">Save Category</button>
                     <a href="{{ route('news-categories.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
                 </form>
@@ -70,5 +88,29 @@
            });
        });
 
+    </script>
+    <script>
+        document.getElementById('image').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+        
+            if (file) {
+                const reader = new FileReader();
+        
+                reader.onload = function(e) {
+                    document.getElementById('img_temp').src = e.target.result;
+                    document.getElementById('image_div').style.display = 'block';
+                    document.getElementById('img_name').innerText = file.name;
+                };
+        
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        function remove_image() {
+            document.getElementById('image').value = "";
+            document.getElementById('img_temp').src = "";
+            document.getElementById('image_div').style.display = 'none';
+            document.getElementById('img_name').innerText = "Choose file";
+        }
     </script>
 @endsection

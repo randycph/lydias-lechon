@@ -87,7 +87,7 @@
 
     <x-faq-component />
 
-    <x-blogs-component />
+    <x-blogs-component :blogs="$blogs"/>
 
     <x-as-seen-in-component />
 

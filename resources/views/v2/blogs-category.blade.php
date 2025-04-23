@@ -29,17 +29,16 @@
         <div class="container">
             <h2 class="font-cubao text-3xl lg:text-6xl text-center text-primary mt-12">savor the flavor</h2>
 
-            
             <div class=" px-4 py-10 mx-auto w-full flex justify-center">
                 <div class="relative">
                     <div class="swiper swiper-menus relative">
                         <div class="swiper-wrapper lg:gap-10">
-                            @foreach ($categories as $category)
-                            <a href="{{ route('blogs-category', $category->slug) }}" class="swiper-slide !flex items-center justify-center p-4 flex-col !w-[140px] lg:!w-[175px] h-[140px] lg:h-[175px]">
+                            @foreach ($categories as $cat)
+                            <a href="{{ route('blogs-category', $cat->slug) }}" class="swiper-slide !flex items-center justify-center p-4 flex-col !w-[140px] lg:!w-[175px] h-[140px] lg:h-[175px]">
                                 <div class="bg-white border-secondary border-2 p-2 rounded-lg items-center w-[140px] lg:w-[175px] h-[140px] lg:h-[175px] flex flex-col justify-center overflow-hidden">
-                                    <img src="{{ asset('images/news/' . $category->image) }}" alt="Anniversary Give-Back Promo" class="rounded-lg hover:scale-125 transition-transform duration-300">
+                                    <img src="{{ asset('images/news/' . $cat->image) }}" alt="Anniversary Give-Back Promo" class="rounded-lg hover:scale-125 transition-transform duration-300">
                                 </div>
-                                <div class="font-semibold text-base lg:text-lg text-center mt-2">{{ $category->name }}</div>
+                                <div class="font-semibold text-base lg:text-lg text-center mt-2">{{ $cat->name }}</div>
                             </a>
                             @endforeach
                         </div>
@@ -62,8 +61,9 @@
                     page: 1,
                     loaded: false,
                     hasMore: true,
+                    hasData: true,
                     async init() {
-                        if (this.loaded) return; // 🛡️ prevent double run
+                        if (this.loaded) return;
                         this.loaded = true;
                         console.log('[Alpine] init triggered once');
                         await this.loadArticles();
@@ -78,8 +78,9 @@
                         this.loading = false;
                     },
                     async fetchArticles() {
+                        let category = '{{ $category->slug }}';
                         try {
-                            const response = await fetch(`{{ route('articles.load-more') }}?page=${this.page}`, {
+                            const response = await fetch(`{{ route('articles-category.load-more') }}?page=${this.page}&category=${category}`, {
                                 method: 'GET',
                                 headers: {
                                     'X-Requested-With': 'XMLHttpRequest'
@@ -89,6 +90,10 @@
                             if (!response.ok) throw new Error('Network response was not ok');
 
                             const data = await response.json();
+
+                            if (data.html === '') {
+                                this.hasData = false;
+                            }
 
                             document.getElementById('blogs').insertAdjacentHTML('beforeend', data.html);
                             this.hasMore = data.hasMore;
@@ -103,6 +108,9 @@
                 <h2 class="font-cubao text-3xl lg:text-5xl text-center text-primary mt-12">latest blogs</h2>
                 <div id="blogs" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
                     
+                </div>
+                <div x-show="!hasData" class="text-center text-lg text-gray-500 mt-6">
+                    No articles found.
                 </div>
                 <div class="flex justify-center mt-6" x-show="hasMore">
                     <button
