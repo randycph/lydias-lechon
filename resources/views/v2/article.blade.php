@@ -12,9 +12,9 @@
             </a>
     
             <div class="flex flex-col justify-center mt-10 items-center w-full">
-                <div class="font-light">PUBLISHED SEPTEMBER 25, 2024</div>
+                <div class="font-light">PUBLISHED {{ $article?->created_at->format('F d, Y') }}</div>
                 <h1 class="text-4xl lg:text-6xl font-semibold my-5">
-                    “Lydiandary” the story of how a little girl’s idea became the world famous Lydia’s Lechon
+                    {{ $article?->name }}
                 </h1>
                 <div class="flex gap-2 justify-center my-5 items-center">
                     <span class="font-light text-sm">Share via</span>
@@ -59,44 +59,43 @@
             <div class="text-center">
 
                 <div class="text-left">
-                    <img src="{{ asset('images/single-article.png') }}" alt="Lydiandary the story of how a little girl’s idea became the world famous Lydia’s Lechon"  class="mb-5 rounded-lg">
+                    @php
+                        $image = !empty($article?->image_url) ? $article?->image_url : $article?->thumbnail_url;
+                    @endphp
+                    <img src="{{ $image }}" alt="Lydiandary the story of how a little girl’s idea became the world famous Lydia’s Lechon"  class="mb-5 rounded-lg mx-auto">
 
                     <div class="w-full max-w-5xl mx-auto mt-10">
-                        <p class="mb-4">Whoever said eating too much lechon will make you sick and weak, obviously hasn’t met Lydia de Roca—the woman behind the lechon empire carrying her name.</p>
-                        <p class="mb-4">We met Lydia last week over lunch at their newest branch in Marcos Highway and it was honestly the first time I saw her. Of course I know Lydia’s Lechon but I never actually googled her or saw any of her photos. And because Lydia’s Lechon just turned 55, I was actually expecting a frail old woman with several assistants backing her up.</p>
-                        <p class="mb-4">Instead we saw a sprightly lady who didn’t look her age. A proud 72 year old, Lydia says she still makes regular rounds at her numerous restaurants.</p>
-                        <p class="mb-4"><img src="{{ asset('images/featured-blog1.png')}}" alt="blog1"></p>
-                        <p class="mb-4">And when our host Spanky Enriquez called her to chop the lechon, I was thinking of just a ceremonial photo. So you could just probably imagine my surprise as she raised the knife and chopped the lechon all the way through in just one motion (complete with small bits of lechon flying toward us)—and she didn’t just do it once or twice—but three times to split the whole lechon and showcase their famous seafood paella filling.</p>
-                        <p class="mb-4">This woman meant business and as she told me later—it was a business that began way back when she was just seven years old.</p>
-                        <p class="mb-4"><img src="{{ asset('images/featured-blog2.png')}}" alt="blog1"></p>
-                        <p class="mb-4"><strong>DEVOTION MEETS PASSION</strong><br>The Redemptorist street near the National Shrine of or more commonly known as Baclaran Church, is known for a lot of things a refuge for devotees of Our Mother of Perpetual Help, the endless tiangge stores that sell clothes, vendors’ stalls, jeepneys, traffic jams and the landmark restaurant that is Lydia’s Lechon.</p>
-                        <p class="mb-4"><strong>A CRISPY, CRUNCHY BREAK</strong> <br>It was during that time that they got their first significant break happened as a well-known hotel requested for a delivery of ten whole lechons every day. This presented a huge challenge for Lydia as they never encountered an order this huge before. Using the Php500 they received from the godparents of their second child as business capital they purchased 10 live pigs and sold them at Php80 per roasting.</p>
-                        
-                        <div class="flex flex-col gap-4 lg:flex-row">
+                        {!! $article?->contents !!}
+
+                        <div class="flex flex-col gap-4 lg:flex-row mt-10">
+                            @if ($previous)
                             <div class="w-full lg:w-1/2 py-4 px-6 rounded-lg lg:rounded-tl-lg flex flex-col lg:rounded-bl-lg border border-tertiary">
                                 <div class="flex justify-start">
-                                    <a href="#" class="uppercase text-xs">Previous news</a>
+                                    <a href="{{ route('article', ['category' => $previous->category->slug, 'slug' => $previous->slug]) }}" class="uppercase text-xs">Previous news</a>
                                 </div>
-                                <div class="flex mt-3 gap-2 items-start">
-                                    <img src="{{ asset('images/featured-blog1.png')}}" alt="Blog1" class="h-[114px] w-[114px] object-cover rounded-lg">
+                                <a href="{{ route('article', ['category' => $previous->category->slug, 'slug' => $previous->slug]) }}" class="flex mt-3 gap-2 items-start">
+                                    <img src="{{ $previous->thumbnail_url }}" alt="Blog1" class="h-[114px] w-[114px] object-cover rounded-lg hover:scale-110 transition-transform duration-300">
                                     <div>
-                                        <div class="font-bold text-base lg:text-xl w-full max-w-xs">LYDIA’S LECHON: A FILIPINO PASSION FOR FOOD</div>
-                                        <div class="font-light text-sm mt-3">July 07, 2020</div>
+                                        <div class="font-bold text-base lg:text-xl w-full max-w-xs">{{ $previous->name }}</div>
+                                        <div class="font-light text-sm mt-3">{{ $previous->created_at->format('F d, Y') }}</div>
                                     </div>
-                                </div>
+                                </a>
                             </div>
+                            @endif
+                            @if ($next)
                             <div class="w-full lg:w-1/2 py-4 px-6 rounded-lg lg:rounded-tr-lg flex flex-col lg:rounded-br-lg border border-tertiary">
                                 <div class="flex justify-end">
-                                    <a href="#" class="uppercase text-xs">Next news</a>
+                                    <a href="{{ route('article', ['category' => $next->category->slug, 'slug' => $next->slug]) }}" class="uppercase text-xs">Next news</a>
                                 </div>
-                                <div class="flex mt-3 gap-2 items-start">
-                                    <img src="{{ asset('images/featured-blog1.png')}}" alt="Blog1" class="h-[114px] w-[114px] object-cover rounded-lg">
+                                <a href="{{ route('article', ['category' => $next->category->slug, 'slug' => $next->slug]) }}" class="flex mt-3 gap-2 items-start">
+                                    <img src="{{ $next->thumbnail_url }}" alt="Blog1" class="h-[114px] w-[114px] object-cover rounded-lg hover:scale-110 transition-transform duration-300">
                                     <div>
-                                        <div class="font-bold text-base lg:text-xl w-full max-w-xs">LYDIA’S LECHON: A FILIPINO PASSION FOR FOOD</div>
-                                        <div class="font-light text-sm mt-3">July 07, 2020</div>
+                                        <div class="font-bold text-base lg:text-xl w-full max-w-xs">{{ $next->name }}</div>
+                                        <div class="font-light text-sm mt-3">{{ $next->created_at->format('F d, Y') }}</div>
                                     </div>
-                                </div>
+                                </a>
                             </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -107,46 +106,24 @@
     <div class="pt-20 pb-10 px-4 container">
         <div class="px-4 pt-10 flex justify-between">
             <h2 class="text-2xl lg:text-4xl text-primary">Related News</h2>
-            <div class="underline text-lg">
+            <a href="{{ route('blogs-category', $article->category->slug) }}" class="underline text-lg">
                 View All
-            </div>
+            </a>
         </div>
 
         <div>
-            @php
-                $blogs = [
-                    [
-                        'title' => "Lydia’s Lechon: A Filipino Passion for Food",
-                        'image' => 'blog1.png',
-                    ],
-                    [
-                        'title' => "Lydia’s Lechon: Celebrating 55 years of bringing happiness",
-                        'image' => 'blog2.png',
-                    ],
-                    [
-                        'title' => "digital expansion: foodpanda and grabfood",
-                        'image' => 'blog3.png',
-                    ],
-                    [
-                        'title' => "Lydia’s Lechon: from a street into a popular dining chain",
-                        'image' => 'blog4.png',
-                    ],
-                ];
-            @endphp
-
             <div class="px-4 pb-10">
                 <div class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-                    @foreach ($blogs as $blog)
-                    <div class="rounded-lg">
-                        <img src="{{ asset('images/' . $blog['image']) }}" alt="{{ $blog['title'] }}" class="w-full h-[188px] object-cover rounded-t-lg">
-                        <div class="uppercase font-semibold py-2 px-1">{{ $blog['title'] }}</div>
-                    </div>
+                    @foreach ($relatedNews as $related)
+                    <a href="{{ route('article', ['category' => $related->category->slug, 'slug' => $related->slug]) }}" class="rounded-lg group">
+                        <img src="{{ $related->thumbnail_url }}" alt="{{ $related->name }}" class="w-full h-[188px] object-cover rounded-t-lg group-hover:scale-110 transition-transform duration-300">
+                        <div class="uppercase font-semibold py-2 px-1 ">{{ $related->name }}</div>
+                    </a>
                     @endforeach
                 </div>
             </div>
         </div>
     </div>
-
 
     <x-newsletter-component />
 

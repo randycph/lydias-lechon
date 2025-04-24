@@ -14,7 +14,7 @@ class Product extends Model
     use SoftDeletes;
 
     public $table = 'products';
-    protected $fillable = [ 'code', 'category_id', 'name', 'slug', 'short_description', 'description', 'currency', 'price', 'size', 'weight', 'no_of_pax', 'for_sale', 'status', 'is_featured', 'uom', 'created_by', 'meta_title', 'meta_keyword', 'meta_description','is_group','paella_price','for_sale_web','for_sale_kiosk','is_misc','production_item' ];
+    protected $fillable = ['free', 'upsell', 'code', 'category_id', 'name', 'slug', 'short_description', 'description', 'currency', 'price', 'size', 'weight', 'no_of_pax', 'for_sale', 'status', 'is_featured', 'uom', 'created_by', 'meta_title', 'meta_keyword', 'meta_description','is_group','paella_price','for_sale_web','for_sale_kiosk','is_misc','production_item' ];
 
     public function get_url()
     {

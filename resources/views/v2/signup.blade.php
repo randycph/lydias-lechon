@@ -2,7 +2,7 @@
 
 @section('content')
 
-<div x-data="{ step: 3, accountType: 'individual' }" class="bg-cream">
+<div class="bg-cream">
     <div class="flex container">
         <div class="w-full lg:w-1/2 lg:pr-10 pr-0">
             <div class="pb-20 px-4 ">
@@ -11,7 +11,12 @@
                     <h3 class="font-medium text-left">Create an account with Lydia's Lechon to enjoy faster orders, exclusive offers, and stay updated on our latest promos!</h3>
                 </div>
         
-                <div class="">
+                <form 
+                    class="" 
+                    action="{{ route('signup.store') }}" 
+                    method="POST"
+                    x-data="registrationForm">
+                    @csrf
                     <div class="mx-auto py-4">
                         <!-- Stepper Indicator -->
                         <div class="flex items-center justify-between mb-4">
@@ -44,24 +49,33 @@
                         <div class="mt-5">
                             <div class="mb-5">
                                 <label for="email" class="block mb-2 font-bold text-gray-900">Email Address</label>
-                                <input type="email" id="email"
+                                <input type="email" id="email" x-model="email" value="{{ old('email') }}" name="email"
                                     class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                     placeholder="email@email.com" required />
+                                <template x-if="errors.email">
+                                    <p class="text-sm text-red-500 mt-1" x-text="errors.email[0]"></p>
+                                </template>
                             </div>
                             <div class="mb-5">
                                 <label for="password" class="block mb-2 font-bold text-gray-900">Password</label>
-                                <input type="password" id="password"
+                                <input type="password" id="password" x-model="password" value="{{ old('password') }}" name="password"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                     required />
+                                <template x-if="errors.password">
+                                    <p class="text-sm text-red-500 mt-1" x-text="errors.password[0]"></p>
+                                </template>
                             </div>
                             <div class="mb-5">
-                                <label for="password" class="block mb-2 font-bold text-gray-900">Confirm Password</label>
-                                <input type="password" id="password"
+                                <label for="password_confirmation" class="block mb-2 font-bold text-gray-900">Confirm Password</label>
+                                <input type="password" id="password_confirmation" x-model="password_confirmation" value="{{ old('password_confirmation') }}" name="password_confirmation"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                     required />
+                                <template x-if="password_confirmation.email">
+                                    <p class="text-sm text-red-500 mt-1" x-text="password_confirmation.email[0]"></p>
+                                </template>
                             </div>
-                            <button type="submit" @click="step < 4 ? step++ : step" :disabled="step === 4"
-                                class="text-white bg-primary custom-btn btn-primary-dark focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
+                            <button type="button" @click="nextStep($event)" :disabled="step === 4"
+                                class="lg:w-1/2 text-white bg-primary custom-btn btn-primary-dark focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg w-full px-5 py-3.5 text-center">
                                 Continue
                             </button>
                         </div>
@@ -77,6 +91,7 @@
                         
                             <!-- Individual Account -->
                             <button 
+                                type="button"
                                 @click="selected = 'individual'; accountType = 'individual'" 
                                 class="flex items-center justify-between w-full p-4 border-2 rounded-lg transition duration-300 ease-in-out relative"
                                 :class="selected === 'individual' ? 'border-primary bg-green-50' : 'border-gray-300 bg-white'"
@@ -98,6 +113,7 @@
                         
                             <!-- Organization Account -->
                             <button 
+                                type="button"
                                 @click="selected = 'organization'; accountType = 'organization'" 
                                 class="flex items-center justify-between w-full p-4 mt-3 border-2 rounded-lg transition duration-300 ease-in-out relative"
                                 :class="selected === 'organization' ? 'border-primary bg-green-50' : 'border-gray-300 bg-white'"
@@ -118,13 +134,13 @@
                             </button>
                             
                             <div class="flex flex-col mt-6 lg:flex-row gap-4">
-                                <button type="button" @click="step < 4 ? step++ : step" :disabled="step === 4"
-                                    class="text-white bg-primary custom-btn btn-primary-dark font-medium rounded-lg w-full lg:w-1/2 sm:w-auto px-5 py-3.5 text-center">
-                                    Continue
-                                </button>
                                 <button type="button" @click="step > 1 ? step-- : step" :disabled="step === 1"
                                     class="text-primary bg-white border border-primary hover:bg-primary hover:text-white font-medium rounded-lg w-full lg:w-1/2 sm:w-auto px-5 py-3.5 text-center">
                                     Back
+                                </button>
+                                <button type="button" @click="nextStep($event)" :disabled="step === 4"
+                                    class="text-white bg-primary custom-btn btn-primary-dark font-medium rounded-lg w-full lg:w-1/2 sm:w-auto px-5 py-3.5 text-center">
+                                    Continue
                                 </button>
                             </div>
                         </div>
@@ -145,91 +161,115 @@
                                 <div>
                                     <div class="flex flex-col gap-4 mb-5">
                                         <div class="w-full">
-                                            <label for="first_name" class="block mb-2 font-bold text-gray-900">First Name <span class="text-red-800">*</span> </label>
-                                            <input type="text" id="first_name"
+                                            <label for="first_name" class="block mb-2 font-bold text-gray-900">First Name </label>
+                                            <input type="text" id="first_name" x-model="first_name" value="{{ old('first_name') }}" name="first_name"
                                                 class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                                 placeholder="Randy" required />
+                                            <template x-if="errors.first_name">
+                                                <p class="text-sm text-red-500 mt-1" x-text="errors.first_name[0]"></p>
+                                            </template>
                                         </div>
                                         <div class="w-full">
-                                            <label for="last_name" class="block mb-2 font-bold text-gray-900">Last Name <span class="text-red-800">*</span> </label>
-                                            <input type="text" id="last_name"
+                                            <label for="last_name" class="block mb-2 font-bold text-gray-900">Last Name </label>
+                                            <input type="text" id="last_name" x-model="last_name" value="{{ old('last_name') }}" name="last_name"
                                                 class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                                 placeholder="Corpuz" required />
+                                            <template x-if="errors.last_name">
+                                                <p class="text-sm text-red-500 mt-1" x-text="errors.last_name[0]"></p>
+                                            </template>
                                         </div>
                                     </div>
                                     <div class="flex flex-col gap-4 mb-5">
         
                                         <div class="w-full">
-                                            <label for="date" class="block mb-2 text-sm font-bold text-gray-900">Birth Date <span class="text-red-700">*</span></label>
+                                            <label for="date" class="block mb-2 text-sm font-bold text-gray-900">Birth Date</label>
                                             <div class="relative w-full">
                                                 <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                                 <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                                                     <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
                                                 </svg>
                                                 </div>
-                                                <input datepicker datepicker-autohide id="default-datepicker" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
+                                                <input id="default-datepicker" type="date" x-model="birth_date" name="birth_date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
+                                                <template x-if="errors.birth_date">
+                                                    <p class="text-sm text-red-500 mt-1" x-text="errors.birth_date[0]"></p>
+                                                </template>
                                             </div>
                                         </div>
         
                                         <div class="w-full">
-                                            <label for="country" class="block mb-2 text-sm font-bold text-gray-900">Country <span class="text-red-700">*</span></label>
-                                            <select x-model="country" @change="changeCountry" id="country" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
-                                                <option selected>Select</option>
+                                            <label for="country" class="block mb-2 text-sm font-bold text-gray-900">Country</label>
+                                            <select name="country" x-model="country" @change="changeCountry" id="country" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
+                                                <option selected value="">Select</option>
                                                 <option value="Philippines">Philippines</option>
                                                 <option value="USA">USA</option>
                                                 <option value="Canada">Canada</option>
                                             </select>
+                                            <template x-if="errors.country">
+                                                <p class="text-sm text-red-500 mt-1" x-text="errors.country[0]"></p>
+                                            </template>
                                         </div>
                                     </div>
                                     <div class="flex flex-col gap-4 mb-5">
                                         <div class="w-full">
-                                            <label for="address" class="block mb-2 font-bold text-gray-900">Address <span class="text-red-800">*</span> </label>
-                                            <input type="text" id="address"
+                                            <label for="address" class="block mb-2 font-bold text-gray-900">Address </label>
+                                            <input type="text" id="address" x-model="address" value="{{ old('address') }}" name="address"
                                                 class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                                 placeholder="Corpuz" required />
+                                            <template x-if="errors.address">
+                                                <p class="text-sm text-red-500 mt-1" x-text="errors.address[0]"></p>
+                                            </template>
                                         </div>
         
                                         <div class="w-full" x-show="local">
-                                            <label for="city" class="block mb-2 text-sm font-bold text-gray-900">City <span class="text-red-700">*</span></label>
-                                            <select id="city" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
-                                                <option selected>Select</option>
+                                            <label for="city" class="block mb-2 text-sm font-bold text-gray-900">City</label>
+                                            <select id="city" x-model="city" name="city" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
+                                                <option selected value="">Select</option>
                                                 <option value="Quezon">Quezon City</option>
                                                 <option value="Manila">Manila</option>
                                                 <option value="Pasig">Pasig</option>
                                             </select>
+                                            <template x-if="errors.city">
+                                                <p class="text-sm text-red-500 mt-1" x-text="errors.city[0]"></p>
+                                            </template>
                                         </div>
                                     </div>
         
                                     <div class="flex flex-col gap-4 mb-5" x-show="local">
                                         <div class="w-full">
-                                            <label for="municipality" class="block mb-2 text-sm font-bold text-gray-900">Municipality <span class="text-red-700">*</span></label>
-                                            <select id="municipality" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
-                                                <option selected>Select</option>
+                                            <label for="municipality" class="block mb-2 text-sm font-bold text-gray-900">Municipality</label>
+                                            <select id="municipality" x-model="municipality" name="municipality" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
+                                                <option selected value="">Select</option>
                                                 <option value="Quezon City">Quezon City</option>
                                                 <option value="Manila">Manila</option>
                                                 <option value="Pasig">Pasig</option>
                                             </select>
+                                            <template x-if="errors.municipality">
+                                                <p class="text-sm text-red-500 mt-1" x-text="errors.municipality[0]"></p>
+                                            </template>
                                         </div>
                                         <div class="w-full">
-                                            <label for="region" class="block mb-2 text-sm font-bold text-gray-900">Region <span class="text-red-700">*</span></label>
-                                            <select id="region" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
-                                                <option selected>Select</option>
+                                            <label for="region" class="block mb-2 text-sm font-bold text-gray-900">Region</label>
+                                            <select id="region" x-model="region" name="region" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
+                                                <option selected value="">Select</option>
                                                 <option value="region1">Region 1</option>
                                                 <option value="region2">Region 2</option>
                                                 <option value="region3">Region 3</option>
                                             </select>
+                                            <template x-if="errors.region">
+                                                <p class="text-sm text-red-500 mt-1" x-text="errors.region[0]"></p>
+                                            </template>
                                         </div>
                                     </div>
                                 </div>
         
                                 <div class="flex flex-col mt-6 lg:flex-row gap-4">
-                                    <button type="button" @click="step < 4 ? step++ : step" :disabled="step === 4"
-                                        class="text-white bg-primary custom-btn btn-primary-dark font-medium rounded-lg w-full lg:w-1/2 sm:w-auto px-5 py-3.5 text-center">
-                                        Continue
-                                    </button>
                                     <button type="button" @click="step > 1 ? step-- : step" :disabled="step === 1"
                                         class="text-primary bg-white border border-primary hover:bg-primary hover:text-white font-medium rounded-lg w-full lg:w-1/2 sm:w-auto px-5 py-3.5 text-center">
                                         Back
+                                    </button>
+                                    <button type="button" @click="nextStep($event)" :disabled="step === 4"
+                                        class="text-white bg-primary custom-btn btn-primary-dark font-medium rounded-lg w-full lg:w-1/2 sm:w-auto px-5 py-3.5 text-center">
+                                        Continue
                                     </button>
                                 </div>
                             </div>
@@ -244,53 +284,77 @@
                             
                                 <div>
                                     <div class="mb-5">
-                                        <label for="org_name" class="block mb-2 font-bold text-gray-900">Organization Name * <span class="text-red-800">*</span> </label>
-                                        <input type="text" id="org_name"
+                                        <label for="org_name" class="block mb-2 font-bold text-gray-900">Organization Name </label>
+                                        <input type="text" id="org_name" x-model="org_name" value="{{ old('org_name') }}" name="org_name"
                                             class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                             placeholder="Randy" required />
+                                        <template x-if="errors.org_name">
+                                            <p class="text-sm text-red-500 mt-1" x-text="errors.org_name[0]"></p>
+                                        </template>
                                     </div>
                                     <div class="mb-5">
-                                        <label for="address" class="block mb-2 font-bold text-gray-900">Address * <span class="text-red-800">*</span> </label>
-                                        <input type="text" id="address"
+                                        <label for="contact_person" class="block mb-2 font-bold text-gray-900">Contact Person </label>
+                                        <input type="text" id="contact_person" x-model="contact_person" value="{{ old('contact_person') }}" name="contact_person"
                                             class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                             placeholder="Randy" required />
+                                        <template x-if="errors.contact_person">
+                                            <p class="text-sm text-red-500 mt-1" x-text="errors.contact_person[0]"></p>
+                                        </template>
                                     </div>
                                     <div class="mb-5">
-                                        <label for="city" class="block mb-2 text-sm font-bold text-gray-900">City <span class="text-red-700">*</span></label>
-                                        <select id="city" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
-                                            <option selected>Select</option>
+                                        <label for="address" class="block mb-2 font-bold text-gray-900">Addres </label>
+                                        <input type="text" id="address" x-model="address" value="{{ old('address') }}" name="address"
+                                            class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                                            placeholder="Randy" required />
+                                        <template x-if="errors.address">
+                                            <p class="text-sm text-red-500 mt-1" x-text="errors.address[0]"></p>
+                                        </template>
+                                    </div>
+                                    <div class="mb-5">
+                                        <label for="city" class="block mb-2 text-sm font-bold text-gray-900">City</label>
+                                        <select id="city" x-model="city" name="city" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
+                                            <option selected value="">Select</option>
                                             <option value="bdo">Quezon City</option>
                                             <option value="un">Manila</option>
                                             <option value="metrobank">Pasig</option>
                                         </select>
+                                        <template x-if="errors.city">
+                                            <p class="text-sm text-red-500 mt-1" x-text="errors.city[0]"></p>
+                                        </template>
                                     </div>
                                     <div class="mb-5">
-                                        <label for="municipality" class="block mb-2 text-sm font-bold text-gray-900">Municipality <span class="text-red-700">*</span></label>
-                                        <select id="municipality" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
-                                            <option selected>Select</option>
+                                        <label for="municipality" class="block mb-2 text-sm font-bold text-gray-900">Municipality</label>
+                                        <select id="municipality" x-model="municipality" name="municipality" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
+                                            <option selected value="">Select</option>
                                             <option value="bdo">Quezon City</option>
                                             <option value="un">Manila</option>
                                             <option value="metrobank">Pasig</option>
                                         </select>
+                                        <template x-if="errors.municipality">
+                                            <p class="text-sm text-red-500 mt-1" x-text="errors.municipality[0]"></p>
+                                        </template>
                                     </div>
                                     <div class="mb-5">
-                                        <label for="region" class="block mb-2 text-sm font-bold text-gray-900">Region <span class="text-red-700">*</span></label>
-                                        <select id="region" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
-                                            <option selected>Select</option>
+                                        <label for="region" class="block mb-2 text-sm font-bold text-gray-900">Region</label>
+                                        <select id="region" x-model="region" name="region" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
+                                            <option selected value="">Select</option>
                                             <option value="bdo">Region 1</option>
                                             <option value="un">Region 2</option>
                                             <option value="metrobank">Region 3</option>
                                         </select>
+                                        <template x-if="errors.region">
+                                            <p class="text-sm text-red-500 mt-1" x-text="errors.region[0]"></p>
+                                        </template>
                                     </div>
         
                                     <div class="flex flex-col mt-6 lg:flex-row gap-4">
-                                        <button type="button" @click="step < 4 ? step++ : step" :disabled="step === 4"
-                                            class="text-white bg-primary custom-btn btn-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center">
-                                            Continue
-                                        </button>
                                         <button type="button" @click="step > 1 ? step-- : step" :disabled="step === 1"
-                                            class="text-primary bg-white border border-primary hover:bg-primary hover:text-white font-medium rounded-lg w-full sm:w-auto px-5 py-3.5 text-center mt-2">
+                                            class="text-primary bg-white border border-primary hover:bg-primary hover:text-white font-medium rounded-lg w-full lg:w-1/2 sm:w-auto px-5 py-3.5 text-center">
                                             Back
+                                        </button>
+                                        <button type="button" @click="nextStep($event)" :disabled="step === 4"
+                                            class="text-white bg-primary custom-btn btn-primary-dark font-medium rounded-lg w-full lg:w-1/2 sm:w-auto px-5 py-3.5 text-center">
+                                            Continue
                                         </button>
                                     </div>
                                 </div>
@@ -304,62 +368,97 @@
                         
                             <div>
                                 <div class="mb-5">
-                                    <label for="phone" class="block mb-2 font-bold text-gray-900">Mobile Number <span class="text-red-800">*</span> </label>
-                                    <input type="tel" id="phone"
+                                    <label for="mobile" class="block mb-2 font-bold text-gray-900">Mobile Number </label>
+                                    <input type="tel" id="mobile" x-model="mobile" value="{{ old('mobile') }}" name="mobile"
                                         class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                         placeholder="" required />
+                                    <template x-if="errors.mobile">
+                                        <p class="text-sm text-red-500 mt-1" x-text="errors.mobile[0]"></p>
+                                    </template>
                                 </div>
                                 <div class="mb-5">
                                     <label for="tel" class="block mb-2 font-bold text-gray-900">Telephone Number</label>
-                                    <input type="tel" id="tel"
+                                    <input type="tel" id="tel" x-model="tel" value="{{ old('tel') }}" name="tel"
                                         class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                         placeholder="" />
+                                    <template x-if="errors.tel">
+                                        <p class="text-sm text-red-500 mt-1" x-text="errors.tel[0]"></p>
+                                    </template>
                                 </div>
                                 <div class="mb-5">
                                     <label for="fax" class="block mb-2 font-bold text-gray-900">Fax Number</label>
-                                    <input type="tel" id="fax"
+                                    <input type="tel" id="fax" x-model="fax" value="{{ old('fax') }}" name="fax"
                                         class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                         placeholder="" />
+                                    <template x-if="errors.fax">
+                                        <p class="text-sm text-red-500 mt-1" x-text="errors.fax[0]"></p>
+                                    </template>
                                 </div>
                                 <div class="mb-5">
                                     <label for="agent_code" class="block mb-2 font-bold text-gray-900">Agent Code</label>
-                                    <input type="tel" id="agent_code"
+                                    <input type="text" id="agent_code" x-model="agent_code" value="{{ old('agent_code') }}" name="agent_code"
                                         class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                         placeholder="" />
+                                    <template x-if="errors.agent_code">
+                                        <p class="text-sm text-red-500 mt-1" x-text="errors.agent_code[0]"></p>
+                                    </template>
                                 </div>
         
                                 <div class="flex items-start mb-2">
                                     <div class="flex items-center h-5">
-                                        <input id="remember" type="checkbox" value=""
+                                        <input id="is_subscribe" x-model="is_subscribe" type="checkbox" value="" name="is_subscribe"
                                             class="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-3 focus:ring-blue-300" />
                                     </div>
-                                    <label for="remember" class="ms-2 text-sm font-medium">I want to receive exclusive offers and promotions.</label>
+                                    <label for="is_subscribe" class="ms-2 text-sm font-medium">I want to receive exclusive offers and promotions.</label>
                                 </div>
         
                                 
                                 <div class="flex items-start mb-5">
                                     <div class="flex items-center h-5">
-                                        <input id="remember" type="checkbox" value=""
+                                        <input id="privacy" type="checkbox" value="" name="privacy"
                                             class="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-3 focus:ring-blue-300" />
                                     </div>
-                                    <label for="remember" class="ms-2 text-sm font-medium">I agree to Lydia’s Lechon’s Privacy Protection Policy</label>
+                                    <label for="privacy" class="ms-2 text-sm font-medium">I agree to Lydia’s Lechon’s Privacy Protection Policy</label>
                                 </div>
+
+                                
+                                <template x-for="[key, value] in Object.entries({
+                                    email,
+                                    password,
+                                    password_confirmation,
+                                    account_type: accountType,
+                                    first_name,
+                                    last_name,
+                                    birth_date,
+                                    org_name,
+                                    address,
+                                    city,
+                                    municipality,
+                                    region,
+                                    mobile,
+                                    tel,
+                                    fax,
+                                    agent_code,
+                                    is_subscribe
+                                })" :key="key">
+                                    <input type="hidden" :name="key" :value="value">
+                                </template>
         
                                 <div class="flex flex-col mt-6 lg:flex-row gap-4">
-                                    <a href="{{ route('my-account') }}" type="button" @click="step < 4 ? step++ : step" :disabled="step === 4"
-                                        class="text-white bg-primary custom-btn btn-primary-dark font-medium rounded-lg w-full lg:w-1/2 sm:w-auto px-5 py-3.5 text-center">
-                                        Sign up
-                                    </a>
                                     <button type="button" @click="step > 1 ? step-- : step" :disabled="step === 1"
                                         class="text-primary bg-white border border-primary hover:bg-primary hover:text-white font-medium rounded-lg w-full lg:w-1/2 sm:w-auto px-5 py-3.5 text-center">
                                         Back
+                                    </button>
+                                    <button @click="nextStep($event)" type="button"
+                                        class="text-white bg-primary custom-btn btn-primary-dark font-medium rounded-lg w-full lg:w-1/2 sm:w-auto px-5 py-3.5 text-center">
+                                        Sign up
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </template>
         
-                </div>
+                </form>
             </div>
         </div>
 
@@ -370,5 +469,71 @@
 </div>
     
 <x-footer-component />
+
+<script>
+function registrationForm() {
+    return {
+        step: 1,
+        accountType: 'individual',
+        errors: {},
+
+        // Collected data
+        email: '',
+        password: '',
+        password_confirmation: '',
+        first_name: '',
+        last_name: '',
+        birth_date: '',
+        org_name: '',
+        address: '',
+        city: '',
+        municipality: '',
+        region: '',
+        mobile: '',
+        tel: '',
+        fax: '',
+        agent_code: '',
+        is_subscribe: false,
+
+        async nextStep(event) {
+            this.errors = {};
+
+            const form = event.target.closest('form');
+            const formData = new FormData(form);
+
+            formData.append('step', this.step);
+            formData.append('account_type', this.accountType);
+
+            try {
+                const response = await fetch(`{{ route('signup.validate-fields') }}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    this.errors = result.errors || {};
+                    return;
+                }
+
+                if (this.step < 4) {
+                    this.step++;
+                } else {
+                    form.submit();
+                }
+
+            } catch (error) {
+                console.error('Validation failed', error);
+            }
+        }
+    }
+}
+
+</script>
 
 @endsection

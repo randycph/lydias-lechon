@@ -63,7 +63,11 @@
                         couponCode: '',
                         showMessage: false,
                         submitCouponCode() {
-                            this.showMessage = true;
+                            if (this.couponCode != '') {
+                                this.showMessage = true;
+                            } else {
+                                this.showMessage = false;
+                            }
                         }
                     }">
                         <form class="flex items-center border mx-3 border-gray-200 rounded-md overflow-hidden">
@@ -131,11 +135,10 @@
                                         class="text-red-700">*</span></label>
                                 <select id="countries"
                                     class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                                    <option selected>Choose a branch</option>
-                                    <option value="US">United States</option>
-                                    <option value="CA">Canada</option>
-                                    <option value="FR">France</option>
-                                    <option value="DE">Germany</option>
+                                    <option selected value="">Choose a branch</option>
+                                    @foreach ($branches as $branch)
+                                        <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                             
@@ -284,25 +287,43 @@
                                     <label for="name"
                                         class="block mb-2 text-sm font-bold text-gray-900">Full Name <span
                                             class="text-red-700">*</span></label>
-                                    <input type="text" id="name"
+                                    <input type="text" id="name" name="name" value="{{ auth()->check() ? auth()->user()->name : '' }}"
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                                         placeholder="Randy ..." required />
+
+                                    @error('name')
+                                        <div class="text-red-500 text-sm mt-1">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
                                 <div class="my-2">
-                                    <label for="phone"
+                                    <label for="contact_mobile"
                                         class="block mb-2 text-sm font-bold text-gray-900">Mobile Number
                                         <span class="text-red-700">*</span></label>
-                                    <input type="tel" pattern="[0-9]{3}-[0-9]{2}-[0-9]{3}" id="phone"
+                                    <input type="tel" pattern="[0-9]{3}-[0-9]{2}-[0-9]{3}" id="contact_mobile" name="contact_mobile" value="{{ auth()->check() ? auth()->user()->contact_mobile : '' }}"
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                                         placeholder="+63" required />
+
+                                    @error('contact_mobile')
+                                        <div class="text-red-500 text-sm mt-1">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
                                 <div class="my-2">
                                     <label for="email"
                                         class="block mb-2 text-sm font-bold text-gray-900">Email <span
                                             class="text-red-700">*</span></label>
-                                    <input type="email" id="email"
+                                    <input type="email" id="email" name="email" value="{{ auth()->check() ? auth()->user()->email : '' }}"
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                                         placeholder="email@email.com" required />
+
+                                    @error('email')
+                                        <div class="text-red-500 text-sm mt-1">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
                                 </div>
                                 <div class="w-full flex gap-4">
                                     <div class="my-2 w-full lg:w-1/2">

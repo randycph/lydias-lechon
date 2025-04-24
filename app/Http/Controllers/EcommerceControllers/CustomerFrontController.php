@@ -153,12 +153,12 @@ class CustomerFrontController extends Controller
             $userCredentials['email'] = $request->email;
         }
 
+        $remember = $request->has('remember');
+
         $cart = session('cart', []);
 
-        // dd($userCredentials);
-
         
-        if (Auth::attempt($userCredentials)) {
+        if (Auth::attempt($userCredentials, $remember)) {
 
             if ((Auth::user()->is_a_customer_user())) {
                 foreach ($cart as $order) {
@@ -192,11 +192,10 @@ class CustomerFrontController extends Controller
 
             }
 
-            return redirect(route('cart.front.show'));
+            return redirect(route('my-account'));
         } else {
             // Auth::logout();
-
-            return back()->with('error', __('auth.login.incorrect_input'));
+            return back()->with('error', __('auth.login.incorrect_input'))->withErrors(['email' => 'Invalid credentials.']);
         }
     }
 

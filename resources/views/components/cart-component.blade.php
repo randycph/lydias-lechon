@@ -106,7 +106,12 @@ x-data="{
                                 <div class="flex justify-between items-center gap-4 hover:bg-gray-100 py-2" >
                                     <div class="flex gap-4 items-center px-6">
                                         <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="w-20 h-20 object-cover rounded-md scale-110 bg-center">
-                                            <img :src="cart?.photo" alt="Checkout" class="w-20 h-20 object-cover rounded-md scale-110">
+                                            <template x-if="cart?.product?.photos.length > 0">
+                                                <img :src="'/storage/products/' + cart?.product?.photos[0]?.path" alt="Checkout" class="w-20 h-20 object-cover rounded-md scale-110" onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}';">
+                                            </template>
+                                            <template x-if="cart?.product?.photos.length == 0">
+                                                <img src="{{ asset('images/no-image.jpg') }}" alt="placeholder">
+                                            </template>
                                         </div>
                                         <div class="flex flex-col gap-1">
                                             <div class="font-bold" x-text="cart?.product?.name"></div>

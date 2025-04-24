@@ -2,93 +2,77 @@
 
 @section('content')
 
-@php
-$lists = [
-    [
-        'image' => 'petite.png',
-        'name' => 'Petite',
-        'price' => '₱9,800',
-        'description' => 'Good for 8-10 persons',
-        'weight' => 'Cooked Weight Approx. 3-4Kgs',
-        'serving' => 'Approximate Serving 1.5ft',
-        'add' => 'Add ₱2,800 for Boneless Lechon Stuffed with Seafood Paella'
-    ],
-    [
-        'image' => 'chochinillo.png',
-        'name' => 'COCHINILLO',
-        'price' => '₱10,800',
-        'description' => 'Good for 8-10 persons',
-        'weight' => 'Cooked Weight Approx. 3-4Kgs',
-        'serving' => 'Approximate Serving 2ft',
-        'free' => 'FREE Mexican Flavored Rice'
-    ],
-    [
-        'image' => 'deleche.png',
-        'name' => 'De leche',
-        'price' => '₱12,800',
-        'description' => 'Good for 12-15 persons',
-        'weight' => 'Cooked Weight Approx. 5-6Kgs',
-        'serving' => 'Approximate Serving 2.5ft',
-        'add' => 'Add ₱2,800 for Boneless Lechon Stuffed with Seafood Paella'
-    ],
-    [
-        'image' => 'small.png',
-        'name' => 'Small',
-        'price' => '₱9,800',
-        'description' => 'Good for 20-25 persons',
-        'weight' => 'Cooked Weight Approx. 8-11Kgs',
-        'serving' => 'Approximate Serving 3ft',
-        'add' => 'Add ₱4,800 for Boneless Lechon Stuffed with Seafood Paella'
-    ],
-    [
-        'image' => 'medium.png',
-        'name' => 'Medium',
-        'price' => '₱17,800',
-        'description' => 'Good for 30-45 persons',
-        'weight' => 'Cooked Weight Approx. 12-15Kgs',
-        'serving' => 'Approximate Serving 3.5ft',
-        'add' => 'Add ₱5,800 for Boneless Lechon stuffed with Seafood Paella'
-    ],
-    [
-        'image' => 'large.png',
-        'name' => 'Large',
-        'price' => '₱21,800',
-        'description' => 'Good for 40-50 persons',
-        'weight' => 'Cooked Weight Approx. 16-20Kgs',
-        'serving' => 'Approximate Serving 3.5-4ft',
-        'add' => 'Add ₱6,800 for Boneless Lechon stuffed with Seafood Paella'
-    ],
-    [
-        'image' => 'xlarge.png',
-        'name' => 'X-Large',
-        'price' => '₱24,800',
-        'description' => 'Good for 60-70 persons',
-        'weight' => 'Cooked Weight Approx. 21-25Kgs',
-        'serving' => 'Approximate Serving 4ft',
-        'add' => 'Add ₱7,800 for Boneless Lechon stuffed with Seafood Paella'
-    ],
-    [
-        'image' => 'jumbo.png',
-        'name' => 'Jumbo',
-        'price' => '₱30,800',
-        'description' => 'Good for 100-120 persons',
-        'weight' => 'Cooked Weight Approx. 26-30Kgs',
-        'serving' => 'Approximate Serving 4ft-4.5ft',
-        'add' => 'Add ₱8,800 for Boneless Lechon stuffed with Seafood Paella'
-    ],
-    [
-        'image' => 'lechonbaka.png',
-        'name' => 'Lechon Baka',
-        'price' => '₱65,800',
-        'description' => 'Good for 150-200 persons',
-        'weight' => 'Cooked Weight Approx. 26-30Kgs',
-        'serving' => 'Live Weight 100-120Kgs',
-        'add' => 'Add ₱3,500 for Service Fee Of Delivery and Reheating'
-    ]
-];
-@endphp
+    <div 
+        class=""
+        x-data="{ 
+            goToAnchor(anchor) {
+                const element = document.getElementById(anchor);
+                if (element) {
+                    const yOffset = -160;
+                    const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    window.scrollTo({ top: y, behavior: 'smooth' });
+                }
+            },
+            product: null,
+            show(product) {
+                this.product = product;
+                this.lechonCart = true;
+                console.log(product);
+            },
+            close() {
+                this.lechonCart = false;
+                this.product = null;
+            },
+            quantity: 1,
+            addons: [
+                { name: 'Pinakbet', price: 100, selected: false },
+                { name: 'Party Tray', price: 300, selected: false },
+                { name: 'Pancit', price: 80, selected: false },
+                { name: 'Dinuguan', price: 150, selected: false },
+                { name: 'Sisig', price: 120, selected: false },
+                { name: 'Coke', price: 50, selected: false },
+            ],
+            get baseTotal() {
+                return this.product?.price * this.quantity || 0;
+            },
+            get addonsTotal() {
+                return this.addons
+                    .filter(a => a.selected)
+                    .reduce((sum, a) => sum + a.price, 0);
+            },
+            get grandTotal() {
+                return this.baseTotal + this.addonsTotal;
+            },
+            toggleAddon(index) {
+                this.addons[index].selected = !this.addons[index].selected;
+            },
+            format(value) {
+                return new Intl.NumberFormat('en-PH', {
+                    style: 'currency',
+                    currency: 'PHP'
+                }).format(value);
+            },
+            setProduct(prod) {
+                this.product = prod;
+                this.quantity = 1;
+                this.addons.forEach(a => a.selected = false);
+                this.open = true;
+            }
+            
+        }" 
+        x-init="
+            (() => {
+                const params = new URLSearchParams(window.location.search);
+                const anchor = params.get('s');
+                if (anchor) {
+                    setTimeout(() => goToAnchor(anchor), 100);
 
-    <div class="">
+                    params.delete('s');
+                    const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+                    history.replaceState(null, '', newUrl);
+                }
+            })()
+        ">
         <div class="pt-20 pb-5 px-4 container">
             <h3 class="font-medium uppercase text-center mt-10 text-base lg:text-3xl">Find the perfect lechon for your budget</hh3>
             <h1 class="text-4xl lg:text-7xl font-cubao font-medium text-primary text-center">lechon pricelist</h1>
@@ -99,18 +83,18 @@ $lists = [
         </div>
     
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 lechons pb-10 container">
-            @foreach ($lists as $list)
+            @foreach ($products as $product)
             <div class="bg-white shadow-md rounded-lg  border-primary border lechon flex flex-col justify-between">
-                <img src="{{ asset('images/' .  $list['image']) }}" alt="{{ $list['name'] }}" class="px-4">
+                <img src="{{ asset('storage/products/' .  $product?->photos[0]?->path) }}" alt="{{ $product->name }}" class="px-4" onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'">
                 <div class="mt-4 px-4">
-                    <h2 class="text-2xl lg:text-3xl font-cubao font-medium text-primary text-left">{{ $list['name'] }}</h2>
-                    <div class="text-tertiary text-2xl lg:text-5xl font-semibold mt-2">{{ $list['price'] }}</div>
+                    <h2 class="text-2xl lg:text-3xl font-cubao font-medium text-primary text-left">{{ $product->name }}</h2>
+                    <div class="text-tertiary text-2xl lg:text-5xl font-semibold mt-2">₱{{ number_format($product->price, 2) }}</div>
                 </div>
                 <div class="lg:border-t border-primary border-opacity-50 border-t mt-5">
 
                 </div>
                 <div class="mt-2 flex flex-col gap-2 p-4">
-                    @if (isset($list['description']))
+                    @if (isset($product->no_of_pax))
                     <div class="flex items-center text-primary gap-2">
                         <svg width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <g clip-path="url(#clip0_73_19609)">
@@ -122,10 +106,10 @@ $lists = [
                             </clipPath>
                             </defs>
                         </svg>
-                        <span class="font-semibold">{{ $list['description'] }}</span>
+                        <span class="font-semibold">Good for {{ $product->no_of_pax }}</span>
                     </div>
                     @endif
-                    @if (isset($list['weight']))
+                    @if (isset($product->weight))
                     <div class="flex items-center text-primary gap-2">
                         <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <g clip-path="url(#clip0_73_19612)">
@@ -137,10 +121,10 @@ $lists = [
                             </clipPath>
                             </defs>
                         </svg>
-                        <span class=" font-semibold">{{ $list['weight'] }}</span>
+                        <span class=" font-semibold">Cooked Weight Approx. {{ $product->weight }}</span>
                     </div>
                     @endif
-                    @if (isset($list['serving']))
+                    @if (isset($product->size))
                     <div class="flex items-center text-primary gap-2">
                         <svg width="15" height="18" viewBox="0 0 15 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <g clip-path="url(#clip0_73_19615)">
@@ -152,10 +136,10 @@ $lists = [
                             </clipPath>
                             </defs>
                         </svg>
-                        <span class="font-semibold">{{ $list['serving'] }}</span>
+                        <span class="font-semibold">Approximate Serving {{ $product->size }}</span>
                     </div>
                     @endif
-                    @if (isset($list['free']))
+                    @if (isset($product->free))
                     <div class="flex items-center text-primary gap-2">
                         <svg width="15" height="10" viewBox="0 0 15 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <g clip-path="url(#clip0_73_19618)">
@@ -168,17 +152,17 @@ $lists = [
                             </defs>
                         </svg>
                             
-                        <span class=" font-semibold">{{ $list['free'] }}</span>
+                        <span class=" font-semibold">{{ $product->free }}</span>
                     </div>
                     @endif
-                    @if (isset($list['add']))
+                    @if (isset($product->upsell))
                     <div class="text-sm  lg:text-base text-tertiary lg:text-primary mt-2">
-                        {{ $list['add'] }}
+                        {{ $product->upsell }}
                     </div>
                     @endif
                 </div>
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="lechonCart = true" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
+                    <button @click="show(@js($product))" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach

@@ -38,6 +38,7 @@
                                             :src="`/storage/products/${photo.path}`"
                                             alt="Product Image"
                                             class="object-cover w-full rounded-md"
+                                            onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'"
                                         >
                                     </div>
                                 </template>

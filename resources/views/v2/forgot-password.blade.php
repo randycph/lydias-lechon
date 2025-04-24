@@ -12,23 +12,36 @@
                         Enter your email address and we will send you a link to reset your password.
                     </h3>
                 </div>
+
+                @if (session('status'))
+                    <div class="my-4 text-sm text-green-600 font-semibold text-center">
+                        {{ session('status') }}vbbb
+                    </div>
+                @endif
         
-                <div class="">
+                <form class="" action="{{ route('ecommerce.send_reset_link_email') }}" method="POST">
+                    @csrf
                     <div class="mt-5">
                         <div class="mb-5">
                             <label for="email" class="block mb-2 font-bold text-gray-900 ">Email Address</label>
-                            <input type="email" id="email"
-                                class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                            <input type="email" id="email" name="email" value="{{ old('email') }}"
+                                class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 @if ($errors->has('email')) border-red-500 @endif"
                                 placeholder="email@email.com" required />
+                            @error('email')
+                                <p class="text-sm text-red-500 mt-2 text-left">{{ $message }}</p>
+                            @enderror
                         </div>
-                        <div class="text-white bg-primary text-center custom-btn btn-primary-dark focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-md w-full sm:w-auto px-5 py-3.5 ">
-                            <button  type="button"
-                                class="text-center">
-                                Reset Password
-                            </button>
-                        </div>
+                        <button type="submit" class="text-white bg-primary text-center custom-btn btn-primary-dark focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-md w-full px-5 py-3.5 ">
+                            Reset Password
+                        </button>
+
+                        @if (session('error'))
+                            <div class="my-4 text-sm text-red-600 font-semibold text-center">
+                                {{ session('error') }}sfsdfsdfs
+                            </div>
+                        @endif
                     </div>
-                </div>
+                </form>
             </div>
         </div>
         <div class="w-full lg:w-1/2 hidden lg:block">

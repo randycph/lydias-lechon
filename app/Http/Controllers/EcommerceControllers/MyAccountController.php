@@ -9,6 +9,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Validator;
 
 class MyAccountController extends Controller
@@ -84,28 +86,26 @@ class MyAccountController extends Controller
 
     public function update_password(Request $request)
     {
-        $personalInfo = $request->validate([
-            'current_password' => ['required', function ($attribute, $value, $fail) {
-                if (!\Hash::check($value, auth()->user()->password)) {
-                    return $fail(__('The current password is incorrect.'));
-                }
-            }],
-            'password' => [
-                'required',
-                'min:10',
-                'max:150',
-                'regex:/[a-z]/', // must contain at least one lowercase letter
-                'regex:/[A-Z]/', // must contain at least one uppercase letter
-                'regex:/[0-9]/', // must contain at least one digit
-                'regex:/[@$!%*#?&]/', // must contain a special character
-            ],
-            'confirm_password' => 'required|same:password',
-        ]);
-
-        auth()->user()->update(['password' => bcrypt($personalInfo['password'])]);
-
-        return redirect()->back()->with('success', 'Password has been updated');
+        try {
+            $request->validate([
+                'current_password' => ['required', 'current_password'],
+                'password' => [
+                    'required',
+                    'confirmed',
+                    Password::min(8)
+                ],
+            ]);
+        
+            $user = Auth::user();
+            $user->password = Hash::make($request->password);
+            $user->save();
+        
+            return back()->with('success', 'Your password has been changed successfully.');
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
 
 }
+// corpuz.randy@webfocus.ph

@@ -42,13 +42,13 @@
                             @if (session('error'))
                                 <div class="gap-20"></div>
                                 <div class="alert alert-danger" role="alert">
-                                    {{ session('error') }}
+                                    {{ session('error') }}ccc
                                 </div>
                             @endif
                             @if (session('status'))
                                 <div class="gap-20"></div>
                                 <div class="alert alert-success" role="alert">
-                                    {{ session('status') }}
+                                    {{ session('status') }}asdasd
                                 </div>
                             @endif
                             <div class="form-group">

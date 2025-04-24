@@ -1,14 +1,17 @@
 <?php
 
+use App\EcommerceModel\Branch;
 use App\EcommerceModel\Cart;
 use App\Helpers\ListingHelper;
 use App\Models\Article;
 use App\Models\ArticleCategory;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 Auth::routes(['verify' => true]);
 
@@ -31,7 +34,13 @@ Route::group(['prefix' => 'v2'], function () {
         return view('v2.our-stores');
     })->name('our-stores');
     Route::get('/lechon-pricelist', function () {
-        return view('v2.lechon-pricelist');
+        $products = Product::with(['photos' => function ($query) {
+            $query->limit(1);
+        }])
+        ->where('category_id', 1)
+        ->where('status', 'PUBLISHED')->get();
+
+        return view('v2.lechon-pricelist', compact('products'));
     })->name('lechon-pricelist');
     Route::get('/lechon-menu', function () {
         $categories = ProductCategory::with(['products' => function ($query) {
@@ -52,7 +61,9 @@ Route::group(['prefix' => 'v2'], function () {
             $carts = collect(session('cart', [])); 
         }
 
-        return view('v2.checkout', compact('page', 'carts'));
+        $branches = Branch::orderBy('name', 'asc')->get();
+
+        return view('v2.checkout', compact('page', 'carts', 'branches'));
     })->name('checkout');
     Route::get('/confirmation', function () {
         $page = 'confirmation';
@@ -60,6 +71,11 @@ Route::group(['prefix' => 'v2'], function () {
     })->name('confirmation');
     Route::get('/login', function () {
         $page = 'login';
+
+        if (auth()->check()) {
+            return redirect()->route('my-account');
+        }
+
         return view('v2.login', compact('page'));
     })->name('login');
     Route::get('/forgot-password', function () {
@@ -72,14 +88,33 @@ Route::group(['prefix' => 'v2'], function () {
     })->name('signup');
     Route::get('/my-account', function () {
         $page = 'my-account';
+        
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
         return view('v2.my-account', compact('page'));
     })->name('my-account');
+    Route::get('/my-cart', function () {
+        $page = 'my-cart';
+        
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        return view('v2.my-cart', compact('page'));
+    })->name('my-cart');
     Route::get('/order-history', function () {
         $page = 'order-history';
         return view('v2.order-history', compact('page'));
     })->name('order-history');
     Route::get('/change-password', function () {
         $page = 'change-password';
+
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
         return view('v2.change-password', compact('page'));
     })->name('change-password');
     Route::get('/careers', function () {
@@ -130,9 +165,211 @@ Route::group(['prefix' => 'v2'], function () {
         return view('v2.blogs-category', compact('featuredArticle', 'categories', 'blogs', 'category'));
     })->name('blogs-category');
     Route::get('{category}/{slug}', function ($category, $slug) {
-        return view('v2.article', compact('category', 'slug'));
-    })->name('article');
+        $article = Article::with('category')
+            ->where('slug', $slug)
+            ->where('status', 'Published')
+            ->firstOrFail();
+    
+        // Get next article (newer)
+        $next = Article::where('status', 'Published')
+            ->where('id', '>', $article->id)
+            ->orderBy('id', 'asc')
+            ->first();
+    
+        // Get previous article (older)
+        $previous = Article::where('status', 'Published')
+            ->where('id', '<', $article->id)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        $relatedNews = Article::with('category')
+            ->where('category_id', $article->category_id)
+            ->where('status', 'Published')
+            ->where('id', '!=', $article->id)
+            ->latest()
+            ->limit(4)
+            ->get();
+    
+        return view('v2.article', compact('category', 'slug', 'article', 'next', 'previous', 'relatedNews'));
+    })->name('article');    
 });
+
+Route::post('/signup-store', function(Request $request) {
+    try {
+        $validated = $request->validate([
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|confirmed|min:6',
+            'account_type' => 'required|in:individual,organization',
+            'first_name' => 'required_if:account_type,individual',
+            'last_name' => 'required_if:account_type,individual',
+            'birth_date' => 'required_if:account_type,individual|date',
+            'org_name' => 'required_if:account_type,organization',
+            'address' => 'required|string',
+            'city' => 'required|string',
+            'municipality' => 'required|string',
+            'region' => 'required|string',
+            'mobile' => 'required|string',
+        ]);
+
+        if ($request->account_type == 'organization') {
+            $user = User::create([
+                'name' => $request->org_name,
+                'firstname' => $request->org_name,
+                'lastname' => $request->org_name,
+                'password' => Hash::make($request->password),
+                'email' => $request->email,
+                'organization' => $request->org_name,
+                'address_street' => $request->address,
+                'address_municipality' => $request->municipality,
+                'address_city' => $request->city,
+                'address_region' => $request->region,
+                'contact_person' => $request->contact_person,
+                'organization' => $request->organization,
+                'contact_tel' => $request->tel,
+                'contact_mobile' => $request->mobile,
+                'contact_fax' => $request->fax,
+                'registration_source' => 'web',
+                'agent_code' => $request->agent_code,
+                'remember_token' => Str::random(10),
+                'is_active' => 1,
+                'is_org' => $request->input('account_type') === 'organization' ? 1 : 0,
+                'is_subscribe' => $request->is_subscribe ?? 0
+            ]);
+        } elseif ($request->account_type == 'individual') {
+            $user = User::create([
+                'name' => $request->first_name . ' ' . $request->last_name,
+                'firstname' => $request->first_name,
+                'lastname' => $request->last_name,
+                'password' => Hash::make($request->password),
+                'email' => $request->email,
+                'birthday' => $request->birth_date,
+                'address_street' => $request->address,
+                'address_municipality' => $request->municipality,
+                'address_city' => $request->city,
+                'address_region' => $request->region,
+                'contact_person' => null,
+                'organization' => null,
+                'contact_tel' => $request->tel,
+                'contact_mobile' => $request->mobile,
+                'contact_fax' => $request->fax,
+                'registration_source' => 'web',
+                'agent_code' => $request->agent_code,
+                'remember_token' => Str::random(10),
+                'is_active' => 1,
+                'is_subscribe' => $request->is_subscribe ?? 0
+            ]);
+        }
+
+        // Auth::login($user);
+
+        return redirect()->route('login')->with('success', 'Registration successful!');
+    } catch (\Throwable $th) {
+        throw $th;
+    }
+
+})->name('signup.store');
+
+Route::post('save-personal-information', function(Request $request) {
+
+    if (!auth()->check()) {
+        return redirect()->route('login');
+    }
+
+    $validated = $request->validate([
+        'firstname' => 'required|string',
+        'lastname' => 'required|string',
+        'birthday' => 'required|date',
+        'contact_mobile' => 'required|string',
+    ]);
+
+    $user = auth()->user();
+    $user->update($validated);
+
+    return redirect(route('my-account'))->with('success', 'Personal information updated successfully!');
+
+})->name('save-personal-information');
+
+Route::post('save-delivery-address', function(Request $request) {
+
+    if (!auth()->check()) {
+        return redirect()->route('login');
+    }
+
+    $validated = $request->validate([
+        'address_street' => 'required|string',
+        'address_municipality' => 'required|string',
+        'address_city' => 'required|string',
+        'address_brgy' => 'required|string',
+        'address_region' => 'required|string',
+    ]);
+
+    $user = auth()->user();
+    $user->update($validated);
+
+    return redirect(route('my-account'))->with('success', 'Delivery address updated successfully!');
+
+})->name('save-delivery-address');
+
+Route::post('/signup-validate-fields', function(Request $request) {
+    $step = $request->input('step');
+
+    $rules = [];
+
+    switch ($step) {
+        case 1:
+            $rules = [
+                'email' => 'required|email|max:191|unique:users,email',
+                'password' => 'required|min:6|confirmed',
+            ];
+            break;
+
+        case 2:
+            $rules = [
+                'account_type' => 'required|in:individual,organization',
+            ];
+            break;
+
+        case 3:
+            $rules = $request->input('account_type') === 'individual'
+                ? [
+                    'first_name' => 'required|string',
+                    'last_name' => 'required|string',
+                    'birth_date' => 'required|date',
+                    'country' => 'required|string',
+                    'address' => 'required|string',
+                    'city' => 'required|string',
+                    'municipality' => 'required|string',
+                    'region' => 'required|string',
+                  ]
+                : [
+                    'org_name' => 'required|string',
+                    'contact_person' => 'required|string',
+                    'address' => 'required|string',
+                    'city' => 'required|string',
+                    'municipality' => 'required|string',
+                    'region' => 'required|string',
+                ];
+            break;
+
+        case 4:
+            $rules = [
+                'mobile' => 'required|string',
+            ];
+            break;
+    }
+
+    $validator = Validator::make($request->all(), $rules);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'errors' => $validator->errors(),
+        ], 422);
+    }
+
+
+    return response()->json(['success' => true]);
+})->name('signup.validate-fields');
 
 Route::get('/articles/load-more', function(Request $request) {
     $page = $request->input('page', 1);

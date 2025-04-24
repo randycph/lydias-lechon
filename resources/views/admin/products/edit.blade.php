@@ -130,6 +130,26 @@
                         <input type="text" class="form-control @error('no_of_pax') is-invalid @enderror" name="no_of_pax" id=no_of_pax" value="{{ old('no_of_pax', $product->no_of_pax) }}">
                         <x-error-message inputName="no_of_pax" />
                     </div>
+                    <div class="form-group">
+                        <label class="d-block">Free</label>
+                        <input type="text" class="form-control @error('free') is-invalid @enderror" name="free" id=free" value="{{ old('free', $product->free) }}">
+                        <x-error-message inputName="free" />
+                    </div>
+                    <div class="form-group">
+                        <label class="d-block">Upsell</label>
+                        <input type="text" class="form-control @error('upsell') is-invalid @enderror" name="upsell" id=upsell" value="{{ old('upsell', $product->upsell) }}">
+                        <x-error-message inputName="upsell" />
+                    </div>
+                    <div class="form-group">
+                        <label class="d-block">Free</label>
+                        <input type="text" class="form-control @error('free') is-invalid @enderror" name="free" id=free" value="{{ old('free', $product->free) }}">
+                        <x-error-message inputName="free" />
+                    </div>
+                    <div class="form-group">
+                        <label class="d-block">Upsell</label>
+                        <input type="text" class="form-control @error('upsell') is-invalid @enderror" name="upsell" id=upsell" value="{{ old('upsell', $product->upsell) }}">
+                        <x-error-message inputName="upsell" />
+                    </div>
 
                     <div class="form-group">
                         <label class="d-block">For sale </label>

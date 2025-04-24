@@ -212,6 +212,8 @@ class ProductController extends Controller
             'code' => $request->code,
             'category_id' => $request->category,
             'name' => $request->name,
+            'free' => $request->free,
+            'upsell' => $request->upsell,
             'slug' => $slug,
             'short_description' => $request->short_description,
             'description' => $request->long_description,
