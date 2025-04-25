@@ -92,7 +92,7 @@
                         <h2 class="font-semibold text-tertiary text-left uppercase">My Cart</h2>
                     </div>
                     <div class="flex items-start font-bold flex-col gap-2  py-5 border-b border-[#DFDFDF]">
-                        <template x-if="carts.length > 0"> 
+                        <template x-if="carts?.length > 0"> 
                             <div class="w-full px-4">
                                 <div class="mt-4 flex flex-col gap-4">
                 
@@ -201,7 +201,7 @@
                             </div>
                         </template>
                         
-                        <template x-if="carts.length == 0">
+                        <template x-if="carts?.length == 0">
                             <div class="w-full flex justify-center mb-10">
                                 <div class="mt-6 px-6 flex items-center justify-center flex-col h-full">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-20">

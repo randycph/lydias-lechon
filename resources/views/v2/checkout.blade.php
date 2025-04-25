@@ -4,7 +4,12 @@
 
 <div class="bg-cream">
     <div x-data="{ bankDepositProof: false, paymentCenterProof: false }" class="container">
-        <div class="pb-20 px-4">
+        <form
+            action="{{ route('cart.temp_sales') }}" 
+            method="POST" 
+            enctype="multipart/form-data"
+            x-data="checkoutForm"
+            @submit.prevent="submitForm" class="pb-20 px-4">
             <div class="pt-20 pb-5 px-4">
                 <h1 class="text-4xl lg:text-7xl font-cubao font-medium text-primary text-center mt-10">Checkout</h1>
                 <h3 class="font-medium lg:text-2xl text-center">You're almost there! Review your order details, choose your payment
@@ -13,13 +18,20 @@
 
             @if ($carts->isEmpty())
                 <div class="flex flex-col items-center justify-center h-96">
-                    <img src="{{ asset('images/empty-cart.png') }}" alt="Empty Cart" class="w-1/2 lg:w-1/3">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-20">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                    </svg>
                     <h2 class="text-xl font-semibold mt-4">Your cart is empty</h2>
                     <p class="text-gray-500">Looks like you haven't added anything to your cart yet.</p>
                     <a href="{{ route('home') }}" class="mt-4 bg-primary text-white px-4 py-2 rounded-md">Start Shopping</a>
                 </div>
             @else
-            <div class="flex flex-col lg:flex-row gap-4 w-full mt-10">
+            <div
+    
+            
+                class="flex flex-col lg:flex-row gap-4 w-full mt-10">
+                
+                @csrf
                 <div class="w-full order-1 lg:order-2 rounded-lg border bg-white border-[#DFDFDF] shadow-md ">
                     <div class="px-4 py-3 border-b border-[#DFDFDF]">
                         <h2 class="text-lg lg:text-3xl font-semibold text-left">Order Summary</h2>
@@ -59,22 +71,12 @@
                     </div>
     
                     <!-- Coupon Code Section -->
-                    <div class="bg-white rounded-md mt-2 text-sm" x-data="{ 
-                        couponCode: '',
-                        showMessage: false,
-                        submitCouponCode() {
-                            if (this.couponCode != '') {
-                                this.showMessage = true;
-                            } else {
-                                this.showMessage = false;
-                            }
-                        }
-                    }">
-                        <form class="flex items-center border mx-3 border-gray-200 rounded-md overflow-hidden">
-                            <input x-model="couponCode" type="text" required placeholder="Have a coupon code?"
+                    <div class="bg-white rounded-md mt-2 text-sm">
+                        <div class="flex items-center border mx-3 border-gray-200 rounded-md overflow-hidden">
+                            <input x-model="couponCode" type="text" placeholder="Have a coupon code?"
                                 class="w-full p-3 outline-none border-none text-gray-700">
                             <button @click="submitCouponCode" type="button" class="bg-primary hover:bg-primary-dark text-white px-6 py-3 text-sm">Apply</button>
-                        </form>
+                        </div>
                         <div x-show="showMessage" class="text-[#28A745] mx-5 py-2">Voucher code successfully applied.</div>
     
                         <!-- Subtotal Section -->
@@ -83,12 +85,24 @@
                                 <span class="font-medium text-gray-800">Subtotal</span>
                                 <span class="font-medium">₱{{ number_format($total, 2) }}</span>
                             </div>
+                            <template x-if="deliveryFees.length == 0 && !allowMultiple">
                             <div class="flex justify-between lg:mt-2">
                                 <span class="font-medium text-gray-800">Delivery Fee</span>
-                                <span class="font-medium">₱{{ number_format($deliveryFee, 2) }}</span>
+                                <span class="font-medium" x-text="deliveryFee > 0 ? '₱' + deliveryFee : 'Free'"></span>
                             </div>
+                            </template>
+                            <template x-if="deliveryFees.length > 0">
+                                <div class="flex flex-col gap-1 mt-2">
+                                    <template x-for="(item, i) in deliveryFees" :key="i">
+                                        <div class="flex justify-between text-gray-500 text-sm">
+                                            <span x-text="'• ' + item.location"></span>
+                                            <span x-text="'₱' + item.fee.toLocaleString()"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
                             <div class="flex justify-between lg:mt-2" x-show="showMessage">
-                                <span class="font-medium text-red-700 italic">Coupon (<span x-text="couponCode"></span>)</span>
+                                <span class="font-medium text-red-700 italic">Coupon (<span x-text="couponCode"></span>) <span class="text-xs underline cursor-pointer" @click="removeCoupon">Remove Coupon</span></span>
                                 <span class="font-medium italic text-red-700">- ₱250.00</span>
                             </div>
                         </div>
@@ -96,12 +110,7 @@
                         <div class="border-t border-gray-200 mt-2 py-4 gap-1 flex flex-col text-sm lg:text-base px-3">
                             <div class="flex justify-between">
                                 <span class="font-medium text-gray-800">Total</span>
-                                <span class="font-bold">
-                                    @php
-                                        $total += $deliveryFee;
-                                    @endphp
-                                    ₱{{ number_format($total, 2) }}
-                                </span>
+                                <span class="font-bold" x-text="computeTotal()"></span>
                             </div>
                         </div>
                     </div>
@@ -130,10 +139,10 @@
                                     Delivery
                                 </button>
                             </div>
-                            <div class="mt-4" x-show="method === 'pickup'">	
-                                <label for="countries" class="font-bold">Select Branch <span
+                            <div class="mt-4">	
+                                <label for="branches" class="font-bold">Select Branch <span
                                         class="text-red-700">*</span></label>
-                                <select id="countries"
+                                <select id="branches" name="delivery_branch" @change="getDeliveryFee" x-ref="branch" required
                                     class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                     <option selected value="">Choose a branch</option>
                                     @foreach ($branches as $branch)
@@ -142,9 +151,22 @@
                                 </select>
                             </div>
                             
+                            <template x-if="!allowMultiple">
+                            <div class="mt-4">	
+                                <label for="locations" class="font-bold">Select Location <span
+                                        class="text-red-700">*</span></label>
+                                <select id="locations" name="location" @change="getDeliveryFee" x-ref="location" required
+                                    class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                    <option selected value="">Choose a location</option>
+                                    @foreach ($locations as $location)
+                                        <option value="{{ $location->name }}">{{ $location->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            </template>
+
+                            
                             <div x-data="{
-                                allowMultiple: false,
-                                deliveries: [{ address: '', name: '', phone: '', qty: 1 }],
                                 totalQty: 3,
                                 orders: [
                                     {
@@ -200,7 +222,7 @@
                                                 <div class="w-full flex gap-4">
                                                     <div class="w-full lg:w-1/2">
                                                         <label class="font-bold block text-sm mb-1">Orders</label>
-                                                        <select x-model="delivery.qty" class="w-full border border-gray-300 p-2 rounded-md">
+                                                        <select x-model="delivery.order" class="w-full border border-gray-300 p-2 rounded-md">
                                                             <template x-for="order in orders">
                                                                 <option :value="order.id" x-text="order.name"></option>
                                                             </template>
@@ -225,7 +247,7 @@
                                                                 <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
                                                             </svg>
                                                             </div>
-                                                            <input datepicker datepicker-autohide id="default-datepicker" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
+                                                            <input id="default-datepicker" name="need_date" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
                                                         </div>
                                                     </div>
                                                     <div class="w-full lg:w-1/2">
@@ -236,8 +258,22 @@
                                                                     <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clip-rule="evenodd"/>
                                                                 </svg>
                                                             </div>
-                                                            <input type="time" id="time" class="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " min="09:00" max="18:00" value="00:00" required />
+                                                            <input type="time" id="time" name="need_time" class="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " value="00:00" required />
                                                         </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="w-full flex gap-4">
+                                                    <div class="w-full">
+                                                        <label :for="'locations' + index" class="font-bold">Select Location <span
+                                                                class="text-red-700">*</span></label>
+                                                        <select x-model="delivery.location" :id="'locations' + index" name="location" @change="getDeliveryFeeForMultipleDelivery" required
+                                                            class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                                            <option selected value="">Choose a location</option>
+                                                            @foreach ($locations as $location)
+                                                                <option value="{{ $location->name }}">{{ $location->name }}</option>
+                                                            @endforeach
+                                                        </select>
                                                     </div>
                                                 </div>
 
@@ -268,7 +304,7 @@
                                     <label for="delivery_address"
                                     class="block mb-2 font-bold text-gray-900">Delivery Address <span
                                         class="text-red-700">*</span></label>
-                                <input type="text" id="delivery_address"
+                                <input type="text" id="delivery_address" name="delivery_address" value="{{ auth()->check() ? auth()->user()->address_street : '' }}"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                                     placeholder="" required />
                                 </div>
@@ -298,14 +334,14 @@
                                     @enderror
                                 </div>
                                 <div class="my-2">
-                                    <label for="contact_mobile"
+                                    <label for="mobile"
                                         class="block mb-2 text-sm font-bold text-gray-900">Mobile Number
                                         <span class="text-red-700">*</span></label>
-                                    <input type="tel" pattern="[0-9]{3}-[0-9]{2}-[0-9]{3}" id="contact_mobile" name="contact_mobile" value="{{ auth()->check() ? auth()->user()->contact_mobile : '' }}"
+                                    <input type="tel" id="mobile" name="mobile" value="{{ auth()->check() ? auth()->user()->contact_mobile : '' }}"
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                                         placeholder="+63" required />
 
-                                    @error('contact_mobile')
+                                    @error('mobile')
                                         <div class="text-red-500 text-sm mt-1">
                                             {{ $message }}
                                         </div>
@@ -325,6 +361,20 @@
                                         </div>
                                     @enderror
                                 </div>
+                                <div class="my-2">
+                                    <label for="agent"
+                                        class="block mb-2 text-sm font-bold text-gray-900">Agent Code</label>
+                                    <input type="text" id="agent" name="agent" value=""
+                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                                        placeholder="" />
+
+                                    @error('agent')
+                                        <div class="text-red-500 text-sm mt-1">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+                                </div>
+                                <template x-if="!allowMultiple">
                                 <div class="w-full flex gap-4">
                                     <div class="my-2 w-full lg:w-1/2">
                                         <label for="date"
@@ -339,7 +389,7 @@
                                                         d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
                                                 </svg>
                                             </div>
-                                            <input datepicker datepicker-autohide id="default-datepicker" type="date"
+                                            <input id="default-datepicker" type="date" name="need_date" value="{{ old('need_date') }}"
                                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 "
                                                 placeholder="Select date">
                                         </div>
@@ -358,60 +408,26 @@
                                                         clip-rule="evenodd" />
                                                 </svg>
                                             </div>
-                                            <input type="time" id="time"
+                                            <input type="time" id="time" name="need_time" value="{{ old('need_time') }}"
                                                 class="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                                                min="09:00" max="18:00" value="00:00" required />
+                                             value="00:00" required />
                                         </div>
                                     </div>
                                 </div>
+                                </template>
                                 <div class="my-2">
                                     <label for="time"
                                         class="block mb-2 text-sm font-bold text-gray-900">Instruction</label>
                                     <div class="relative">
                                         <textarea
                                             class="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                                            name="" id="" cols="30" rows="10"></textarea>
+                                            name="instruction" id="" cols="30" rows="10"></textarea>
                                     </div>
                                 </div>
-    
                             </div>
-    
-                            {{-- <div class="mt-5">
-                                <div class="font-bold">Choose Payment Method</div>
-    
-                                <div class="mt-3">
-                                    <div x-data="{ selected: '' }" class="space-y-4">
-                                        @foreach([
-                                        ['id' => 'bdo', 'logo' => '/images/bdo.png', 'name' => 'Bank Transfer or Deposit ',
-                                        'description' => 'Bank Transfer or Deposit'],
-                                        ['id' => 'gcash', 'logo' => '/images/gcash.png', 'name' => 'GCash', 'description' =>
-                                        'GCash'],
-                                        ['id' => 'maya', 'logo' => '/images/maya.png', 'name' => 'Maya', 'description' =>
-                                        'Maya'],
-                                        ['id' => 'card', 'logo' => '/images/visa.png', 'name' => 'Credit/Debit Card',
-                                        'description' => 'Credit/Debit Card', 'click' => 'bankDepositProof = true'],
-                                        ['id' => 'mlhuillier', 'logo' => '/images/ml.png', 'name' => 'Payment Center',
-                                        'description' => 'Payment Center', 'click' => 'paymentCenterProof = true'],
-                                        ] as $option)
-                                        <button @click="selected = '{{ $option['id'] }}'; {{ $option['click'] ?? '' }}"
-                                            :class="{ 'border-blue-500 bg-blue-100': selected === '{{ $option['id'] }}' }"
-                                            class="flex items-start flex-col p-4 border rounded-lg w-full transition duration-300 ease-in-out hover:bg-gray-100">
-                                            <img src="{{ asset($option['logo'])}}" alt="{{ $option['name'] }}" class="h-10 mr-4">
-                                            <div>
-                                                <p class="font-bold text-gray-800">{{ $option['name'] }}</p>
-                                            </div>
-                                        </button>
-                                        @endforeach
-                                    </div>
-                                </div>
-    
-                                <div class="bg-primary custom-btn btn-primary-dark text-center text-white px-6 py-4 mt-4 w-full rounded-md">
-                                    <a href="{{ route('confirmation') }}" class="text-center">Place Order</a>
-                                </div>
-                            </div> --}}
-                            <div class="bg-primary custom-btn btn-primary-dark text-center text-white px-6 py-4 mt-4 w-full rounded-md">
-                                <button class="text-center">Place Order</button>
-                            </div>
+                            <button type="submit" class="bg-primary custom-btn btn-primary-dark text-center text-white px-6 py-4 mt-4 w-full rounded-md">
+                                Place Order
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -419,7 +435,7 @@
             @endif
 
 
-        </div>
+        </form>
 
         <x-bank-deposit-proof />
         <x-payment-center-proof />
@@ -428,5 +444,162 @@
 
 
 <x-footer-component />
+
+<script>
+    function checkoutForm() {
+        return {
+            method: 'pickup',
+            deliveries: [{ address: '', name: '', phone: '', qty: 1, location: '', order: '' }],
+            allowMultiple: false,
+            couponCode: '',
+            formEl: null,
+            deliveryFee: 0,
+            orderAmount: {{ $total }},
+            totalAmount: 0,
+            deposit: 0,
+            deliveryFees: [],
+            couponCode: '',
+            showMessage: false,
+            submitCouponCode() {
+                if (this.couponCode != '') {
+                    this.showMessage = true;
+                } else {
+                    this.showMessage = false;
+                }
+            },
+            removeCoupon() {
+                this.couponCode = '';
+                this.showMessage = false;
+            },
+            init() {
+                this.method = document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('shipping_method='))
+                    ?.split('=')[1] || 'pickup';
+            },
+
+            submitForm() {
+                // Build a FormData object
+                this.formEl = this.$root;
+                const formData = new FormData(this.formEl);
+
+                // Add dynamic fields
+                formData.append('shipping_type', this.method);
+                formData.append('coupon', this.couponCode);
+                formData.append('delivery_fee', this.deliveryFee);
+                formData.append('order_amount', this.orderAmount);
+                formData.append('deposit', this.deposit);
+                formData.append('total_amount', this.totalAmount);
+
+                // If multiple addresses allowed, send as JSON
+                if (this.allowMultiple) {
+                    formData.append('deliveries', JSON.stringify(this.deliveries));
+                }
+
+                // Now do the POST
+                fetch(this.formEl.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json',
+                    },
+                })
+                .then(response => {
+                    if (!response.ok) throw response;
+                    return response.json();
+                })
+                .then(data => {
+                    // Show success message or redirect
+                    console.log('Order submitted:', data);
+                    window.location.href = data.redirect || '/thank-you';
+                })
+                .catch(async error => {
+                    let errText = await error.text();
+                    console.error('Error:', errText);
+                });
+            },
+
+            async getDeliveryFee() {
+                const location = this.$refs?.location?.value;
+                const branch = this.$refs?.branch?.value;
+
+                if (location && branch) {
+
+                    try {
+                        let response = await fetch('{{route('cart.front.get_shipping_fee')}}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            },
+                            body: JSON.stringify({
+                                location: location,
+                                branch: branch,
+                            }),
+                        }).then((response) => {
+                            return response;
+                        }).catch((error) => {
+                            
+                        });
+
+                        if (!response.ok) throw new Error('Network response was not ok');
+
+                        let data = await response.json();
+
+                        this.deliveryFee = data.fee;
+
+                    } catch (error) {
+                        console.error('There was a problem with the fetch operation:', error);
+                    }
+                }
+            },
+
+            computeTotal() {
+                let total = parseFloat(this.orderAmount) + parseFloat(this.deliveryFee);
+                this.totalAmount = total;
+                return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(total);
+            },
+
+            async getDeliveryFeeForMultipleDelivery() {
+                const branch = this.$refs.branch?.value;
+                const locations = this.deliveries.map(d => d.location).filter(Boolean);
+
+                if (!branch || locations.length === 0) return;
+
+                try {
+                    let response = await fetch('{{ route('cart.front.get_shipping_fee_for_multiple_address') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        },
+                        body: JSON.stringify({ branch, locations }),
+                    });
+
+                    if (!response.ok) throw new Error('Network error');
+
+                    const data = await response.json();
+
+                    // Optional: update deliveryFees if backend returns breakdown
+                    if (data.fees) {
+                        this.deliveryFees = data.fees; // [{ location: 'Imus Cavite', fee: 100 }]
+                    } else {
+                        // fallback single total
+                        this.deliveryFees = locations.map(l => ({ location: l, fee: data.fee / locations.length }));
+                    }
+                    
+                    console.log('Delivery Fees:', this.deliveryFees);
+
+                    // Update total fee
+                    this.deliveryFee = this.deliveryFees.reduce((acc, item) => acc + item.fee, 0);
+
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+        }
+    }
+</script>
 
 @endsection

@@ -595,10 +595,18 @@ class CartController extends Controller
                 return redirect()->route('product.front.list');
             }
 
-            for ($x = 1; $x <= $request->total_products; $x++) {
-                Cart::whereId($request->record_id[$x])->where('user_id', auth()->id())->update([
-                    'qty' => $request->quantity[$x]
-                ]);
+            // for ($x = 1; $x <= $request->total_products; $x++) {
+            //     Cart::whereId($request->record_id[$x])->where('user_id', auth()->id())->update([
+            //         'qty' => $request->quantity[$x]
+            //     ]);
+            // }
+
+            foreach ($request->record_id as $index => $recordId) {
+                Cart::whereId($recordId)
+                    ->where('user_id', auth()->id())
+                    ->update([
+                        'qty' => $request->quantity[$index] ?? 1,
+                    ]);
             }
 
             return redirect()->route('cart.front.checkout');
@@ -626,6 +634,7 @@ class CartController extends Controller
 
     public function save_sales(Request $request) {
      
+        dd($request->all());
         if (auth()->guest()) {
             $user = User::find(9999);
             if (empty($user)) {
@@ -1106,6 +1115,81 @@ class CartController extends Controller
         DB::insert('insert into users (id, name, password, firstname, email, registration_source, remember_token, is_active) values (?, ?, ?, ?, ?, ?, ?, ?)', $guestAccount);
 
         return User::find(9999);
+    }
+
+    public function get_shipping_fee_for_multiple_address(Request $request)
+    {
+        $locations = $request->input('locations');
+        $rate = 0;
+        $totalFee = 0;
+
+        $carts = Auth::check()
+            ? Cart::where('user_id', Auth::id())->get()
+            : collect(session('cart', []));
+
+        $check_customer = Auth::check() && \App\Models\DeliveryFeePromo::check_customer(Auth::id()) ? 1 : 0;
+
+        // Handle single location (string)
+        if (is_string($locations)) {
+            $totalFee = $this->calculateRate($locations, $carts, $check_customer);
+        }
+
+        // Handle multiple locations (array)
+        if (is_array($locations)) {
+            foreach ($locations as $loc) {
+                $totalFee += $this->calculateRate($loc, $carts, $check_customer);
+            }
+        }
+
+        return response()->json([
+            'fee' => $totalFee
+        ]);
+    }
+
+    private function calculateRate($location, $carts, $check_customer)
+    {
+        $rate = 0;
+        $baka = 0;
+        $check_product = 0;
+
+        $location_lechon = Deliverablecities::whereName($location)->where('item_type', 'lechon')->first();
+        $location_misc = Deliverablecities::whereName($location)->where('item_type', 'misc')->first();
+
+        if (!empty($location_misc)) {
+            $rate = $location_misc->rate;
+        }
+
+        foreach ($carts as $cart) {
+            $delivery_promo = \App\Models\DeliveryFeePromo::check_product($cart->product_id);
+            if ($delivery_promo == 1) {
+                $check_product = 1;
+            }
+
+            $p = Product::find($cart->product_id);
+            if (!$p) continue;
+
+            if ($p->is_misc == 0) {
+                $rate = $location_lechon?->rate ?? 0;
+            }
+
+            if ($p->id == 42) { // lechon baka
+                $baka = 1;
+            }
+        }
+
+        if ($baka == 1) {
+            $rate = 0;
+        }
+
+        if ($baka == 1 && $location_lechon && $location_lechon->outside_manila == 1) {
+            $rate = 3000;
+        }
+
+        if ($check_product == 1 || $check_customer == 1) {
+            $rate = 0;
+        }
+
+        return $rate;
     }
 
     public function get_shipping_fee(Request $request){

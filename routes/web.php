@@ -5,6 +5,7 @@ use App\EcommerceModel\Cart;
 use App\Helpers\ListingHelper;
 use App\Models\Article;
 use App\Models\ArticleCategory;
+use App\Models\Deliverablecities;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\User;
@@ -63,7 +64,9 @@ Route::group(['prefix' => 'v2'], function () {
 
         $branches = Branch::orderBy('name', 'asc')->get();
 
-        return view('v2.checkout', compact('page', 'carts', 'branches'));
+        $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
+
+        return view('v2.checkout', compact('page', 'carts', 'branches', 'locations'));
     })->name('checkout');
     Route::get('/confirmation', function () {
         $page = 'confirmation';
@@ -464,6 +467,7 @@ Route::get('/menu', 'Product\Front\MenuFrontController@show')->name('menu.front.
 Route::get('/menu', 'Product\Front\MenuFrontController@list')->name('menu.front.list');
 //End Product
 Route::post('get_shipping_fee', 'EcommerceControllers\CartController@get_shipping_fee')->name('cart.front.get_shipping_fee');
+Route::post('get_shipping_fee_for_multiple_address', 'EcommerceControllers\CartController@get_shipping_fee_for_multiple_address')->name('cart.front.get_shipping_fee_for_multiple_address');
 
 ##### START CUSTOMER ROUTE #####
 Route::get('/customer-sign-up', 'EcommerceControllers\CustomerFrontController@sign_up')->name('customer-front.sign-up');
