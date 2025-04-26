@@ -146,7 +146,7 @@
                                     class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                     <option selected value="">Choose a branch</option>
                                     @foreach ($branches as $branch)
-                                        <option value="{{ $branch->id }}">{{ $branch->name }}</option>
+                                        <option value="{{ $branch->name }}">{{ $branch->name }}</option>
                                     @endforeach
                                 </select>
                             </div>

@@ -732,6 +732,31 @@ class CartController extends Controller
             'order_number' => sprintf('%07d', $salesHeader->id)
         ]);
 
+        if ($request->has('$request->deliveries') && count($request->deliveries) > 0) {
+            foreach ($request->deliveries as $key => $delivery) {
+                $single_address = $delivery->address;
+                $single_name = $delivery->name;
+                $single_phone = $delivery->phone;
+                $single_qty = $delivery->qty;
+                $single_order = $delivery->order;
+                $single_location = $delivery->location;
+                $single_delivery_fee = $delivery->delivery_fee;
+                $single_date = $delivery->date;
+                $single_time = $delivery->time;
+                $single_note = $delivery->note;
+
+
+                $delivery = explode("|", $delivery);
+                $delivery = SalesHeader::where('id', $delivery[0])->first();
+                if (!empty($delivery)) {
+                    $delivery->update([
+                        'sales_header_id' => $salesHeader->id,
+                        'status' => 'active'
+                    ]);
+                }
+            }
+        }
+
         $grand_gross = 0;
         $grand_tax = 0;
 
