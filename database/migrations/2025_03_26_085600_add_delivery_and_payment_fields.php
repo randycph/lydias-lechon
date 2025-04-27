@@ -9,10 +9,10 @@ return new class extends Migration {
     {
         Schema::table('settings', function (Blueprint $table) {
             if (!Schema::hasColumn('settings', 'disable_pickup_dates')) {
-                $table->text('disable_pickup_dates')->nullable()->after('minimum_order_pickup');
+                $table->text('disable_pickup_dates')->nullable();
             }
             if (!Schema::hasColumn('settings', 'disable_delivery_dates')) {
-                $table->text('disable_delivery_dates')->nullable()->after('disable_pickup_dates');
+                $table->text('disable_delivery_dates')->nullable();
             }
         });
 

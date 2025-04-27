@@ -209,55 +209,70 @@
                                             </template>
                                         </div>
                                     </div>
-                                    <div class="flex flex-col gap-4 mb-5">
-                                        <div class="w-full">
-                                            <label for="address" class="block mb-2 font-bold text-gray-900">Address </label>
-                                            <input type="text" id="address" x-model="address" value="{{ old('address') }}" name="address"
-                                                class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                                                placeholder="Corpuz" required />
-                                            <template x-if="errors.address">
-                                                <p class="text-sm text-red-500 mt-1" x-text="errors.address[0]"></p>
-                                            </template>
-                                        </div>
-        
-                                        <div class="w-full" x-show="local">
-                                            <label for="city" class="block mb-2 text-sm font-bold text-gray-900">City</label>
-                                            <select id="city" x-model="city" name="city" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
-                                                <option selected value="">Select</option>
-                                                <option value="Quezon">Quezon City</option>
-                                                <option value="Manila">Manila</option>
-                                                <option value="Pasig">Pasig</option>
+                                    <div 
+                                        x-init="loadData()"
+                                        x-data="registrationForm()"
+                                        class="space-y-4">
+
+                                        <!-- Region -->
+                                        <div>
+                                            <label class="block mb-2 font-bold text-gray-900">Region</label>
+                                            <select name="address_region" x-model="regionCode" @change="filterProvinces"
+                                                class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                                <option value="">Select Region</option>
+                                                <template x-for="region in regions" :key="region.region_code + '-' + region.region_name">
+                                                    <option :value="region.region_name" x-text="region.region_name"></option>
+                                                </template>
                                             </select>
-                                            <template x-if="errors.city">
-                                                <p class="text-sm text-red-500 mt-1" x-text="errors.city[0]"></p>
-                                            </template>
+                                    
+                                            @error('address_region')
+                                                <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+                                            @enderror
                                         </div>
-                                    </div>
-        
-                                    <div class="flex flex-col gap-4 mb-5" x-show="local">
-                                        <div class="w-full">
-                                            <label for="municipality" class="block mb-2 text-sm font-bold text-gray-900">Municipality</label>
-                                            <select id="municipality" x-model="municipality" name="municipality" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
-                                                <option selected value="">Select</option>
-                                                <option value="Quezon City">Quezon City</option>
-                                                <option value="Manila">Manila</option>
-                                                <option value="Pasig">Pasig</option>
+                                    
+                                        <!-- Province -->
+                                        <div>
+                                            <label class="block mb-2 font-bold text-gray-900">Province</label>
+                                            <select name="address_municipality" x-model="provinceCode" @change="filterCities" class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                                <option value="">Select Province</option>
+                                                <template x-for="province in provincesFiltered" :key="province.province_code + '-'  + province.province_name">
+                                                    <option :value="province.province_name" x-text="province.province_name"></option>
+                                                </template>
                                             </select>
-                                            <template x-if="errors.municipality">
-                                                <p class="text-sm text-red-500 mt-1" x-text="errors.municipality[0]"></p>
-                                            </template>
+
+                                            @error('address_municipality')
+                                                <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+                                            @enderror
                                         </div>
-                                        <div class="w-full">
-                                            <label for="region" class="block mb-2 text-sm font-bold text-gray-900">Region</label>
-                                            <select id="region" x-model="region" name="region" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
-                                                <option selected value="">Select</option>
-                                                <option value="region1">Region 1</option>
-                                                <option value="region2">Region 2</option>
-                                                <option value="region3">Region 3</option>
+                                    
+                                        <!-- City / Municipality -->
+                                        <div>
+                                            <label class="block mb-2 font-bold text-gray-900">City / Municipality</label>
+                                            <select name="address_city" x-model="cityCode" @change="filterBarangays" class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                                <option value="">Select City</option>
+                                                <template x-for="city in citiesFiltered" :key="city.city_code + '-'  + city.city_name">
+                                                    <option :value="city.city_name" x-text="city.city_name"></option>
+                                                </template>
                                             </select>
-                                            <template x-if="errors.region">
-                                                <p class="text-sm text-red-500 mt-1" x-text="errors.region[0]"></p>
-                                            </template>
+
+                                            @error('address_city')
+                                                <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                    
+                                        <!-- Barangay -->
+                                        <div>
+                                            <label class="block mb-2 font-bold text-gray-900">Barangay</label>
+                                            <select name="address_brgy" x-model="barangayCode" class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                                <option value="">Select Barangay</option>
+                                                <template x-for="barangay in barangaysFiltered" :key="barangay.brgy_code + '-'  + barangay.brgy_name">
+                                                    <option :value="barangay.brgy_name" x-text="barangay.brgy_name"></option>
+                                                </template>
+                                            </select>
+
+                                            @error('address_brgy')
+                                                <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                     </div>
                                 </div>
@@ -530,6 +545,77 @@ function registrationForm() {
             } catch (error) {
                 console.error('Validation failed', error);
             }
+        },
+
+
+        regions: [],
+        provinces: [],
+        cities: [],
+        barangays: [],
+        provincesFiltered: [],
+        citiesFiltered: [],
+        barangaysFiltered: [],
+
+        regionCode: '',
+        provinceCode: '',
+        cityCode: '',
+        barangayCode: '',
+        isReady: false,
+
+        async loadData() {
+            const [regions, provinces, cities, barangays] = await Promise.all([
+                fetch('/addresses/region.json').then(res => res.json()),
+                fetch('/addresses/province.json').then(res => res.json()),
+                fetch('/addresses/city.json').then(res => res.json()),
+                fetch('/addresses/barangay.json').then(res => res.json()),
+            ]);
+
+            this.regions = regions;
+            this.provinces = provinces;
+            this.cities = cities;
+            this.barangays = barangays;
+
+            this.isReady = true;
+
+            this.$nextTick(() => {
+                this.regionCode = @json(old('address_region', auth()->user()->address_region));
+                this.filterProvinces();
+
+                this.$nextTick(() => {
+                    this.provinceCode = @json(old('address_municipality', auth()->user()->address_municipality));
+                    this.filterCities();
+
+                    this.$nextTick(() => {
+                        this.cityCode = @json(old('address_city', auth()->user()->address_city));
+                        this.filterBarangays();
+
+                        this.$nextTick(() => {
+                            this.barangayCode = @json(old('address_brgy', auth()->user()->address_brgy));
+                        });
+                    });
+                });
+            });
+        },
+
+        filterProvinces() {
+            const region = this.regions.find(r => r.region_name === this.regionCode);
+            const regionCode = region?.region_code;
+            this.provincesFiltered = this.provinces.filter(p => p.region_code === regionCode);
+            this.citiesFiltered = [];
+            this.barangaysFiltered = [];
+        },
+
+        filterCities() {
+            const province = this.provinces.find(p => p.province_name === this.provinceCode);
+            const provinceCode = province?.province_code;
+            this.citiesFiltered = this.cities.filter(c => c.province_code === provinceCode);
+            this.barangaysFiltered = [];
+        },
+
+        filterBarangays() {
+            const city = this.cities.find(c => c.city_name === this.cityCode);
+            const cityCode = city?.city_code;
+            this.barangaysFiltered = this.barangays.filter(b => b.city_code === cityCode);
         }
     }
 }
