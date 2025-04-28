@@ -3,7 +3,7 @@
 @section('content')
 
 <div class="bg-cream">
-    <div x-data="{ bankDepositProof: false, paymentCenterProof: false }" class="container">
+    <div x-data="{ depositModal: false, paymentCenterProof: false }" class="container">
         <form
             action="{{ route('cart.temp_sales') }}" 
             method="POST" 
@@ -247,7 +247,7 @@
                                                                 <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
                                                             </svg>
                                                             </div>
-                                                            <input id="default-datepicker" name="need_date" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
+                                                            <input x-model="delivery.need_date" name="need_date" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
                                                         </div>
                                                     </div>
                                                     <div class="w-full lg:w-1/2">
@@ -258,7 +258,7 @@
                                                                     <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clip-rule="evenodd"/>
                                                                 </svg>
                                                             </div>
-                                                            <input type="time" id="time" name="need_time" class="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " value="00:00" required />
+                                                            <input type="time" id="time" x-model="delivery.need_time" name="need_time" class="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " value="00:00" required />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -279,7 +279,7 @@
 
                                                 <div class="w-full">
                                                     <label class="font-bold block text-sm mb-1">Note</label>
-                                                    <textarea x-model="delivery.address"
+                                                    <textarea x-model="delivery.note"
                                                         class="w-full border border-gray-300 p-2 rounded-md" placeholder="Add instructions or notes about your delivery."></textarea>
                                                 </div>
                                                 
@@ -294,7 +294,7 @@
                                     </template>
                         
                                     <div>
-                                        <button type="button" @click="deliveries.push({ address: '', name: '', phone: '', qty: 1 })"
+                                        <button type="button" @click="deliveries.push({ address: '', name: '', phone: '', qty: 1, location: '', order: '', need_date: '', need_time: '', note: '' })"
                                             class="bg-green-700 text-white px-4 py-2 rounded-md text-sm">Add Another Delivery</button>
                                     </div>
                                 </div>
@@ -425,7 +425,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit" class="bg-primary custom-btn btn-primary-dark text-center text-white px-6 py-4 mt-4 w-full rounded-md">
+                            <button type="button" @click="depositModal = true" class="bg-primary custom-btn btn-primary-dark text-center text-white px-6 py-4 mt-4 w-full rounded-md">
                                 Place Order
                             </button>
                         </div>
@@ -434,11 +434,73 @@
             </div>
             @endif
 
-
+            <div>
+    
+                <div x-show="depositModal"
+                    x-transition
+                    class="relative z-50"
+                    aria-labelledby="modal-title"
+                    role="dialog"
+                    aria-modal="true"
+                    style="display: none;">
+                    <!-- Backdrop -->
+                    <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
+            
+                    <!-- Modal content -->
+                    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+                            <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg pb-5">
+                                <!-- Modal body -->
+                                <div class="">
+                                    <div class="flex justify-between items-center px-3 pt-3">
+                                        <div class="flex gap-2 items-center">
+                                            <div class="text-2xl font-bold">Amount to pay</div>
+                                        </div>
+                                        <button @click="depositModal = false" class="self-end text-2xl text-gray-800">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                        
+                                    <div class="text-gray-600 font-medium px-4 mt-4">
+                                        To complete your order, please enter the amount you wish to pay. You can choose to pay the full amount or a partial amount.
+                                    </div>
+                        
+                                    <div class="px-4 mt-5">
+                                        <div class="mt-3">
+                                            <div class="my-2">
+                                                <label for="deposit" class="block mb-2 font-bold text-gray-900 ">Amount to pay<span class="text-red-700">*</span></label>
+                                                <div class="flex">
+                                                    <span class="inline-flex items-center px-3 text-sm text-gray-900 p-2.5 bg-gray-200 border rounded-e-0 border-gray-300 border-e-0 rounded-s-md">
+                                                        ₱
+                                                    </span>
+                                                    <input 
+                                                        x-data
+                                                        x-mask:dynamic="$money($input)" 
+                                                        x-model="deposit" 
+                                                        name="deposit"
+                                                        placeholder="0.00"
+                                                        required
+                                                        type="text"
+                                                        class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full border-gray-300 p-2.5"
+                                                    >
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <button @click="submitForm" type="button" class="bg-primary text-white py-4 px-4 rounded-lg mt-4 w-full">Submit</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </form>
 
-        <x-bank-deposit-proof />
-        <x-payment-center-proof />
+
     </div>
 </div>
 
@@ -449,14 +511,15 @@
     function checkoutForm() {
         return {
             method: 'pickup',
-            deliveries: [{ address: '', name: '', phone: '', qty: 1, location: '', order: '' }],
+            deliveries: [{ address: '', name: '', phone: '', qty: 1, location: '', order: '', need_date: '', need_time: '', note: '' }],
             allowMultiple: false,
             couponCode: '',
             formEl: null,
             deliveryFee: 0,
             orderAmount: {{ $total }},
             totalAmount: 0,
-            deposit: 0,
+            deposit: '',
+            rawDeposit: '',
             deliveryFees: [],
             couponCode: '',
             showMessage: false,
@@ -479,7 +542,6 @@
             },
 
             submitForm() {
-                // Build a FormData object
                 this.formEl = this.$root;
                 const formData = new FormData(this.formEl);
 
@@ -547,7 +609,7 @@
                         let data = await response.json();
 
                         this.deliveryFee = data.fee;
-
+                        
                     } catch (error) {
                         console.error('There was a problem with the fetch operation:', error);
                     }
@@ -557,6 +619,15 @@
             computeTotal() {
                 let total = parseFloat(this.orderAmount) + parseFloat(this.deliveryFee);
                 this.totalAmount = total;
+                this.deposit = this.totalAmount.toFixed(2);
+
+                this.$nextTick(() => {
+                    let input = this.$root.querySelector('input[name="deposit"]');
+                    if (input) {
+                        input.dispatchEvent(new Event('input'));
+                    }
+                });
+                
                 return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(total);
             },
 
@@ -601,5 +672,10 @@
         }
     }
 </script>
+
+@section('alpine.plugins')
+<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/mask@3.x.x/dist/cdn.min.js"></script>
+@endsection
+
 
 @endsection
