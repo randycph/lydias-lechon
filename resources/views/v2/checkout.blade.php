@@ -2,13 +2,27 @@
 
 @section('content')
 
+
+@php
+    $total = 0;
+    $deliveryFee = 0;
+    if (count($carts) > 1) {
+        foreach ($carts as $cart) {
+            $total += $cart['price'];
+        }
+    }
+@endphp
+
 <div class="bg-cream">
-    <div x-data="{ depositModal: false, paymentCenterProof: false }" class="container">
+    <div 
+    x-data="checkoutForm" class="container">
         <form
             action="{{ route('cart.temp_sales') }}" 
             method="POST" 
+            id="checkoutForm"
             enctype="multipart/form-data"
-            x-data="checkoutForm"
+            init="init()"
+            x-ref="formEl"
             @submit.prevent="submitForm" class="pb-20 px-4">
             <div class="pt-20 pb-5 px-4">
                 <h1 class="text-4xl lg:text-7xl font-cubao font-medium text-primary text-center mt-10">Checkout</h1>
@@ -23,7 +37,7 @@
                     </svg>
                     <h2 class="text-xl font-semibold mt-4">Your cart is empty</h2>
                     <p class="text-gray-500">Looks like you haven't added anything to your cart yet.</p>
-                    <a href="{{ route('home') }}" class="mt-4 bg-primary text-white px-4 py-2 rounded-md">Start Shopping</a>
+                    <a href="{{ route('lechon-menu') }}" class="mt-4 bg-primary text-white px-4 py-2 rounded-md">Start Shopping</a>
                 </div>
             @else
             <div
@@ -39,13 +53,6 @@
                     <div class="flex items-center text-sm lg:text-base justify-between px-4 py-3 border-b border-[#DFDFDF]">
                         <div>{{ count($carts) }} items</div>
                         <div class="font-bold">
-                            @php
-                                $total = 0;
-                                $deliveryFee = 100;
-                                foreach ($carts as $cart) {
-                                    $total += $cart['price'];
-                                }
-                            @endphp
                             ₱{{ number_format($total, 2) }}
                         </div>
                     </div>
@@ -166,29 +173,7 @@
                             </template>
 
                             
-                            <div x-data="{
-                                totalQty: 3,
-                                orders: [
-                                    {
-                                        id: 1,
-                                        name: 'Lechon-In-A-Box (2Kg)',
-                                        price: '₱2,800.00',
-                                        qty: 1
-                                    },
-                                    {
-                                        id: 2,
-                                        name: 'Petite (Lechon Cebu)',
-                                        price: '₱9,800.00',
-                                        qty: 1
-                                    },
-                                    {
-                                        id: 3,
-                                        name: 'Pancit con Lechon Medium (225G)',
-                                        price: '₱475.00',
-                                        qty: 1
-                                    }
-                                ]
-                            }" x-show="method === 'delivery'" class="space-y-4">
+                            <div x-show="method === 'delivery'" class="space-y-4">
                         
                             <div class="flex items-center me-4 my-4">
                                 <input x-model="allowMultiple" checked id="multiple-address" type="checkbox" value="" class="w-5 h-5 text-primary bg-gray-100 border-gray-300 rounded-sm focus:ring-primary-dark focus:ring-2">
@@ -219,24 +204,36 @@
                                                             class="w-full border border-gray-300 p-2 rounded-md" placeholder="+63..." />
                                                     </div>
                                                 </div>
+                                                
+                                                <!-- Order Dropdown -->
                                                 <div class="w-full flex gap-4">
-                                                    <div class="w-full lg:w-1/2">
-                                                        <label class="font-bold block text-sm mb-1">Orders</label>
-                                                        <select x-model="delivery.order" class="w-full border border-gray-300 p-2 rounded-md">
-                                                            <template x-for="order in orders">
-                                                                <option :value="order.id" x-text="order.name"></option>
-                                                            </template>
-                                                        </select>
-                                                    </div>
-                                                    <div class="w-full lg:w-1/2">
-                                                        <label class="font-bold block text-sm mb-1">Quantity</label>
-                                                        <select x-model="delivery.qty" class="w-full border border-gray-300 p-2 rounded-md">
-                                                            <template x-for="i in totalQty">
-                                                                <option :value="i" x-text="i"></option>
+                                                    <div class="w-full">
+                                                        <label class="font-bold block text-sm mb-1">Order</label>
+                                                        <select @change="delivery.order = JSON.parse($event.target.value); updateAvailableQty(delivery)" class="w-full border border-gray-300 p-2 rounded-md">
+                                                            <option selected value="">Select Order</option>
+                                                            <template x-for="order in getAvailableOrders()" :key="order.id">
+                                                                <option :value="JSON.stringify(order)" x-text="order.product.name"></option>
                                                             </template>
                                                         </select>
                                                     </div>
                                                 </div>
+
+                                                <!-- Quantity Dropdown -->
+                                                <div class="w-full flex gap-4">
+                                                    <div class="w-full">
+                                                        <label class="font-bold block text-sm mb-1">Quantity</label>
+                                                        <select x-model="delivery.qty" class="w-full border border-gray-300 p-2 rounded-md">
+                                                            <option selected value="">Select Quantity</option>
+                                                            <template x-if="delivery.order">
+                                                                <template x-for="i in delivery.availableQty">
+                                                                    <option :value="i" x-text="i"></option>
+                                                                </template>
+                                                            </template>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <input type="hidden" x-model="delivery.delivery_fee" />
                                                 
                                                 <div class="w-full flex gap-4">
                                                     <div class="w-full lg:w-1/2">
@@ -247,7 +244,9 @@
                                                                 <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
                                                             </svg>
                                                             </div>
-                                                            <input x-model="delivery.need_date" name="need_date" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
+                                                            <input 
+                                                                @change="validateDeliveryDateTime(delivery)"
+                                                                x-model="delivery.need_date" name="need_date" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
                                                         </div>
                                                     </div>
                                                     <div class="w-full lg:w-1/2">
@@ -258,17 +257,24 @@
                                                                     <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clip-rule="evenodd"/>
                                                                 </svg>
                                                             </div>
-                                                            <input type="time" id="time" x-model="delivery.need_time" name="need_time" class="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " value="00:00" required />
+                                                            <input @change="validateDeliveryDateTime(delivery)" 
+                                                            type="time" id="time" x-model="delivery.need_time" name="need_time" class="bg-gray-50 border leading-none border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " value="00:00" required />
                                                         </div>
                                                     </div>
                                                 </div>
+
+                                                <template x-if="delivery.warningMessage">
+                                                    <div class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
+                                                        <div x-html="delivery.warningMessage"></div>
+                                                    </div>
+                                                </template>
 
                                                 <div class="w-full flex gap-4">
                                                     <div class="w-full">
                                                         <label :for="'locations' + index" class="font-bold">Select Location <span
                                                                 class="text-red-700">*</span></label>
                                                         <select x-model="delivery.location" :id="'locations' + index" name="location" @change="getDeliveryFeeForMultipleDelivery" required
-                                                            class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                                            class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                                             <option selected value="">Choose a location</option>
                                                             @foreach ($locations as $location)
                                                                 <option value="{{ $location->name }}">{{ $location->name }}</option>
@@ -293,9 +299,12 @@
                                         </div>
                                     </template>
                         
-                                    <div>
-                                        <button type="button" @click="deliveries.push({ address: '', name: '', phone: '', qty: 1, location: '', order: '', need_date: '', need_time: '', note: '' })"
-                                            class="bg-green-700 text-white px-4 py-2 rounded-md text-sm">Add Another Delivery</button>
+                                    <div x-show="canAddMoreDeliveries()">
+                                        <button type="button" 
+                                            @click="validateBeforeAddDelivery"
+                                            class="bg-green-700 text-white px-4 py-2 rounded-md text-sm">
+                                            Add Another Delivery
+                                        </button>
                                     </div>
                                 </div>
                             </template>
@@ -389,7 +398,7 @@
                                                         d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
                                                 </svg>
                                             </div>
-                                            <input id="default-datepicker" type="date" name="need_date" value="{{ old('need_date') }}"
+                                            <input @change="validateDateTime" x-model="need_date" type="date" name="need_date" value="{{ old('need_date') }}"
                                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 "
                                                 placeholder="Select date">
                                         </div>
@@ -408,13 +417,18 @@
                                                         clip-rule="evenodd" />
                                                 </svg>
                                             </div>
-                                            <input type="time" id="time" name="need_time" value="{{ old('need_time') }}"
+                                            <input @change="validateDateTime" x-model="need_time" type="time" id="time" name="need_time" value="{{ old('need_time') }}"
                                                 class="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                                              value="00:00" required />
                                         </div>
                                     </div>
                                 </div>
                                 </template>
+                                <div x-show="warningMessage">
+                                    <div class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
+                                        <div x-html="warningMessage"></div>
+                                    </div>
+                                </div>
                                 <div class="my-2">
                                     <label for="time"
                                         class="block mb-2 text-sm font-bold text-gray-900">Instruction</label>
@@ -425,7 +439,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <button type="button" @click="depositModal = true" class="bg-primary custom-btn btn-primary-dark text-center text-white px-6 py-4 mt-4 w-full rounded-md">
+                            <button type="submit" class="bg-primary custom-btn btn-primary-dark text-center text-white px-6 py-4 mt-4 w-full rounded-md">
                                 Place Order
                             </button>
                         </div>
@@ -434,73 +448,90 @@
             </div>
             @endif
 
-            <div>
-    
-                <div x-show="depositModal"
-                    x-transition
-                    class="relative z-50"
-                    aria-labelledby="modal-title"
-                    role="dialog"
-                    aria-modal="true"
-                    style="display: none;">
-                    <!-- Backdrop -->
-                    <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
+        </form>
+
+        <div x-show="depositModal"
+        x-transition
+        class="relative z-50"
+        aria-labelledby="modal-title"
+        role="dialog"
+        aria-modal="true"
+        style="display: none;">
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
+
+        <!-- Modal content -->
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+                <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg pb-5">
+                    <!-- Modal body -->
+                    <div class="">
+
+                        <div class="flex justify-between items-center px-3 pt-3">
+                            <div class="flex gap-2 items-center">
+                                <div class="text-2xl font-bold">Amount to pay</div>
+                            </div>
+                            <button @click="depositModal = false" class="self-end text-2xl text-gray-800">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
             
-                    <!-- Modal content -->
-                    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-                        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
-                            <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg pb-5">
-                                <!-- Modal body -->
-                                <div class="">
-                                    <div class="flex justify-between items-center px-3 pt-3">
-                                        <div class="flex gap-2 items-center">
-                                            <div class="text-2xl font-bold">Amount to pay</div>
+                        <div class="text-gray-600 font-medium px-4 mt-4">
+                            To complete your order, please enter the amount you wish to pay. You can choose to pay the full amount or a partial amount.
+                        </div>
+            
+                        <div class="px-4 mt-5">
+                            <div>
+                                <form action="{{ route('payment.add.store_customer') }}" method="POST" enctype="multipart/form-data" class="flex flex-col">
+                                    @csrf
+                                    <input type="hidden" name="sales_header_id" :value="paymentDetails.sales_header_id">
+                        
+                                    <div class="pb-4">
+                                        <img src="http://172.16.11.50/images/payment/pay-maya.jpg">
+                                    </div>
+
+                                    <!-- GCash / PayMaya -->
+                                    <div>
+                                        <label class="font-semibold block mb-1">PayMaya:</label>
+                                        <select name="pamenty_mode" id="pamenty_mode_gpay" x-model="paymentMode" @change="gcash_paymaya_change" required class="border-gray-300 rounded-md w-full p-2">
+                                            <option value="PayMaya">PayMaya</option>
+                                        </select>
+                                    </div>
+                        
+                                    <!-- GCash QR Code -->
+                                    <div x-show="paymentMode === 'GCash'" class="text-center">
+                                        <p class="font-semibold">GCash</p>
+                                        <p class="text-sm">Scan the QR Code below</p>
+                                        <img src="http://172.16.11.50/images/gcash.png" alt="GCash QR" class="mx-auto mt-2 w-40 h-40 object-contain">
+                                    </div>
+                        
+                                    <!-- Amount -->
+                                    <div class="mt-4">
+                                        <label class="font-semibold block mb-1">Amount to Pay:</label>
+                                        <div class="flex">
+                                            <span class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 border-e-0 rounded-s-md dark:bg-gray-600 dark:text-gray-400 dark:border-gray-600">
+                                                ₱
+                                            </span>
+                                            <input required name="amount" :value="paymentDetails.amount"  x-mask:dynamic="$money($input)" type="text" id="money" class="rounded-none rounded-e-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full border-gray-300 p-2.5  " placeholder="">
                                         </div>
-                                        <button @click="depositModal = false" class="self-end text-2xl text-gray-800">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                                            </svg>
+                                    </div>
+                        
+                                    <!-- Submit Button -->
+                                    <div class="text-right mt-4">
+                                        <button type="submit" class="bg-primary hover:bg-primary-dark text-white font-semibold px-6 py-2 rounded-md">
+                                            Submit
                                         </button>
                                     </div>
-                        
-                                    <div class="text-gray-600 font-medium px-4 mt-4">
-                                        To complete your order, please enter the amount you wish to pay. You can choose to pay the full amount or a partial amount.
-                                    </div>
-                        
-                                    <div class="px-4 mt-5">
-                                        <div class="mt-3">
-                                            <div class="my-2">
-                                                <label for="deposit" class="block mb-2 font-bold text-gray-900 ">Amount to pay<span class="text-red-700">*</span></label>
-                                                <div class="flex">
-                                                    <span class="inline-flex items-center px-3 text-sm text-gray-900 p-2.5 bg-gray-200 border rounded-e-0 border-gray-300 border-e-0 rounded-s-md">
-                                                        ₱
-                                                    </span>
-                                                    <input 
-                                                        x-data
-                                                        x-mask:dynamic="$money($input)" 
-                                                        x-model="deposit" 
-                                                        name="deposit"
-                                                        placeholder="0.00"
-                                                        required
-                                                        type="text"
-                                                        class="rounded-none rounded-e-md bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full border-gray-300 p-2.5"
-                                                    >
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <button @click="submitForm" type="button" class="bg-primary text-white py-4 px-4 rounded-lg mt-4 w-full">Submit</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                </form>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </form>
-
-
+        </div>
+    </div>
     </div>
 </div>
 
@@ -510,8 +541,35 @@
 <script>
     function checkoutForm() {
         return {
+            paymentDetails: {
+                sales_header_id: '',
+                order_number: '',
+                customer_contact_number: '',
+                customer_name: '',
+                amount: '',
+                signature: '',
+                saved_items: ''
+            },
+            paymentMode: '',
+            currentDate: new Date().toISOString().split('T')[0],
             method: 'pickup',
-            deliveries: [{ address: '', name: '', phone: '', qty: 1, location: '', order: '', need_date: '', need_time: '', note: '' }],
+            depositModal: false,
+            orders: @json($carts) || [],
+            totalQty: 1,
+            deliveries: [
+                { 
+                    address: '', 
+                    name: '',
+                    phone: '', 
+                    qty: 1, 
+                    location: '', 
+                    order: '', 
+                    need_date: new Date().toISOString().split('T')[0], 
+                    need_time: new Date().toTimeString().slice(0,5), 
+                    note: '', 
+                    delivery_fee: 0 
+                }
+            ],
             allowMultiple: false,
             couponCode: '',
             formEl: null,
@@ -523,6 +581,10 @@
             deliveryFees: [],
             couponCode: '',
             showMessage: false,
+            need_date: '',
+            need_time: '',
+            warningMessage: '',
+            isSubmitting: false,
             submitCouponCode() {
                 if (this.couponCode != '') {
                     this.showMessage = true;
@@ -543,6 +605,7 @@
 
             submitForm() {
                 this.formEl = this.$root;
+
                 const formData = new FormData(this.formEl);
 
                 // Add dynamic fields
@@ -553,12 +616,10 @@
                 formData.append('deposit', this.deposit);
                 formData.append('total_amount', this.totalAmount);
 
-                // If multiple addresses allowed, send as JSON
                 if (this.allowMultiple) {
                     formData.append('deliveries', JSON.stringify(this.deliveries));
                 }
 
-                // Now do the POST
                 fetch(this.formEl.action, {
                     method: 'POST',
                     body: formData,
@@ -571,9 +632,21 @@
                     return response.json();
                 })
                 .then(data => {
-                    // Show success message or redirect
                     console.log('Order submitted:', data);
-                    window.location.href = data.redirect || '/thank-you';
+                    if (data.success) {
+                        this.paymentDetails = {
+                            sales_header_id: data.sales_header_id,
+                            order_number: data.order_number,
+                            customer_contact_number: data.customer_contact_number,
+                            customer_name: data.customer_name,
+                            amount: data.amount,
+                            signature: data.signature,
+                            saved_items: data.saved_items
+                        };
+                        this.depositModal = true;
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
                 })
                 .catch(async error => {
                     let errText = await error.text();
@@ -652,14 +725,27 @@
                     const data = await response.json();
 
                     // Optional: update deliveryFees if backend returns breakdown
+
                     if (data.fees) {
-                        this.deliveryFees = data.fees; // [{ location: 'Imus Cavite', fee: 100 }]
+                        this.deliveryFees = data.fees;
+
+                        // 🛠 Assign the correct fee to each delivery based on location
+                        this.deliveries.forEach(delivery => {
+                            const feeObj = this.deliveryFees.find(f => f.location === delivery.location);
+                            delivery.delivery_fee = feeObj ? feeObj.fee : 0;
+                        });
+
                     } else {
-                        // fallback single total
+                        // fallback if backend only returns a single total
+                        const perDeliveryFee = data.fee / locations.length;
+                        this.deliveries.forEach(delivery => {
+                            delivery.delivery_fee = perDeliveryFee;
+                        });
+
                         this.deliveryFees = locations.map(l => ({ location: l, fee: data.fee / locations.length }));
                     }
-                    
-                    console.log('Delivery Fees:', this.deliveryFees);
+
+
 
                     // Update total fee
                     this.deliveryFee = this.deliveryFees.reduce((acc, item) => acc + item.fee, 0);
@@ -667,8 +753,153 @@
                 } catch (e) {
                     console.error(e);
                 }
-            }
+            },
 
+            init() {
+                this.checkMultipleDeliveries();
+            },
+
+            checkMultipleDeliveries() {
+                let multipleItems = this.orders.length > 1;
+                let multipleQty = this.orders.some(order => order.qty > 1);
+                
+                // this.allowMultiple = multipleItems || multipleQty;
+            },
+
+            updateAvailableQty(delivery) {
+                if (!delivery.order) {
+                    delivery.availableQty = [];
+                    return;
+                }
+
+                // Get total available qty from the selected product
+                let totalProductQty = delivery.order.qty;
+
+                // Calculate already assigned qty for this same product (excluding current delivery)
+                let alreadyAssignedQty = this.deliveries
+                    .filter(d => d !== delivery && d.order && d.order.id === delivery.order.id)
+                    .reduce((sum, d) => sum + (parseInt(d.qty) || 0), 0);
+
+                // Compute remaining qty
+                let remainingQty = totalProductQty - alreadyAssignedQty;
+
+                // Rebuild the available quantity options
+                delivery.availableQty = Array.from({ length: remainingQty }, (_, i) => i + 1);
+            },
+
+            getAvailableOrders() {
+                // Create a shallow copy of orders
+                let availableOrders = JSON.parse(JSON.stringify(this.orders));
+
+                // Loop through each delivery and subtract assigned qty from the order
+                for (let delivery of this.deliveries) {
+                    if (delivery.order) {
+                        let matchingOrder = availableOrders.find(o => o.id === delivery.order.id);
+                        if (matchingOrder) {
+                            matchingOrder.qty -= (parseInt(delivery.qty) || 0);
+                        }
+                    }
+                }
+
+                // Only return orders that still have qty left
+                return availableOrders.filter(order => order.qty > 0);
+            },
+
+            canAddMoreDeliveries() {
+                // Get total qty across all products
+                let totalAvailableQty = this.orders.reduce((sum, order) => sum + order.qty, 0);
+
+                // Get total qty already assigned to deliveries
+                let assignedQty = this.deliveries.reduce((sum, delivery) => sum + (parseInt(delivery.qty) || 0), 0);
+
+                return assignedQty < totalAvailableQty;
+            },
+
+            validateBeforeAddDelivery() {
+                const lastDelivery = this.deliveries[this.deliveries.length - 1];
+
+                if (!lastDelivery || !lastDelivery.order || !lastDelivery.qty) {
+                    alert('Please select a product and quantity before adding another new delivery address.');
+                    return;
+                }
+
+                if (!lastDelivery || !lastDelivery.address || !lastDelivery.name || !lastDelivery.phone || !lastDelivery.location || !lastDelivery.need_date || !lastDelivery.need_time) {
+                    alert('Please fill in all required fields before adding another new delivery address.');
+                    return;
+                }
+
+                // If valid, add a new blank delivery
+                this.deliveries.push({
+                    address: '',
+                    name: '',
+                    phone: '',
+                    qty: 1,
+                    location: '',
+                    order: '',
+                    need_date: new Date().toISOString().split('T')[0],
+                    need_time: new Date().toTimeString().slice(0,5),
+                    note: '',
+                    delivery_fee: 0,
+                });
+            },
+
+            validateDeliveryDateTime(delivery) {
+                if (!delivery.need_date || !delivery.need_time) return;
+
+                const selectedDateTime = new Date(`${delivery.need_date}T${delivery.need_time}`);
+                const now = new Date();
+
+                const diffInMs = selectedDateTime - now;
+                const diffInHours = diffInMs / (1000 * 60 * 60);
+
+                delivery.warningMessage = '';
+
+                if (diffInHours < 24) {
+                    delivery.warningMessage = `⚠️ Warning! The date and time you've selected (${delivery.need_date} - ${this.formatTime(delivery.need_time)}) is less than 24 hours from now. Our standard processing time is at least 24 hours. However, you can still proceed by contacting our store directly at our <span class='underline text-blue-600 cursor-pointer' @click='openHotline = true'>Call Hotline</span> tab.`;
+                }
+            },
+
+            formatTime(timeStr) {
+                const [hours, minutes] = timeStr.split(':');
+                const hoursNum = parseInt(hours, 10);
+                const isPM = hoursNum >= 12;
+                const adjustedHours = hoursNum % 12 || 12;
+                return `${adjustedHours}:${minutes} ${isPM ? 'PM' : 'AM'}`;
+            },
+
+            validateDateTime() {
+                console.log('Validating date and time...');
+                if (!this.need_date || !this.need_time) return;
+
+                console.log('Need date:', this.need_date);
+                console.log('Need time:', this.need_time);
+
+                const selectedDateTime = new Date(`${this.need_date}T${this.need_time}`);
+                const now = new Date();
+
+                const diffInMs = selectedDateTime - now;
+                const diffInHours = diffInMs / (1000 * 60 * 60);
+
+                this.warningMessage = '';
+
+                if (diffInHours < 24) {
+                    this.warningMessage = `⚠️ Warning! The date and time you've selected (${this.need_date} - ${this.formatTime(this.need_time)}) is less than 24 hours from now. Our standard processing time is at least 24 hours. However, you can still proceed by contacting our store directly at our <span class='underline text-blue-600 cursor-pointer' @click='openHotline = true'>Call Hotline</span> tab.`;
+                }
+                console.log('diffInHours:', diffInHours);
+                console.log(this.warningMessage);
+            },
+
+            async submit() {
+                this.isSubmitting = true;
+
+                try {
+                    await this.submitForm();
+                } catch (e) {
+                    console.error('Submit error', e);
+                } finally {
+                    this.isSubmitting = false;
+                }
+            }
         }
     }
 </script>

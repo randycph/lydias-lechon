@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Page;
 use Illuminate\Support\Facades\Auth;
 use App\EcommerceModel\GiftCertificate;
+use App\Models\ProductDeliveryAddress;
 use Redirect;
 use DateTime;
 
@@ -633,8 +634,7 @@ class CartController extends Controller
     }
 
     public function save_sales(Request $request) {
-     
-        dd($request->all());
+        
         if (auth()->guest()) {
             $user = User::find(9999);
             if (empty($user)) {
@@ -655,7 +655,7 @@ class CartController extends Controller
         $dn = explode(" - ", $request->dateneeded);
         $date_needed = date('Y-m-d H:i:s',strtotime($dn[0]." ".$dn[1]));
         $deposit = $request->deposit;
-        if($request->shipping_type == 'storepickup'){
+        if($request->shipping_type == 'pickup'){
             $delivery_type='Store Pickup';
             $outlet = $request->delivery_branch;
             $customer_delivery_adress = $request->delivery_branch;            
@@ -674,7 +674,7 @@ class CartController extends Controller
                      
             $customer_contact_number = $request->mobile;
             $customer_location = $request->location;
-            $contact_person = $request->uname1;
+            $contact_person = $request->name;
             $outlet = '';
         }
         $totalPrice = $request->total_amount;
@@ -682,10 +682,6 @@ class CartController extends Controller
         $today = getdate();
         $requestId = $today[0].substr($ran, 2,6);
         $member = $user;
-        
-        
-        
-        
         
         if($request->hasCookie('origin')) {
             $origin = Cookie::get('origin');
@@ -734,24 +730,32 @@ class CartController extends Controller
 
         if ($request->has('$request->deliveries') && count($request->deliveries) > 0) {
             foreach ($request->deliveries as $key => $delivery) {
-                $single_address = $delivery->address;
-                $single_name = $delivery->name;
-                $single_phone = $delivery->phone;
-                $single_qty = $delivery->qty;
-                $single_order = $delivery->order;
-                $single_location = $delivery->location;
-                $single_delivery_fee = $delivery->delivery_fee;
-                $single_date = $delivery->date;
-                $single_time = $delivery->time;
-                $single_note = $delivery->note;
+                if ($delivery?->order?->product_id) {
+                    $single_address = $delivery->address;
+                    $single_name = $delivery->name;
+                    $single_phone = $delivery->phone;
+                    $single_qty = $delivery->qty;
+                    $single_order = $delivery->order->product_id;
+                    $single_location = $delivery->location;
+                    $single_delivery_fee = $delivery->delivery_fee;
+                    $single_date = $delivery->need_date;
+                    $single_time = $delivery->need_time;
+                    $single_note = $delivery->note;
 
-
-                $delivery = explode("|", $delivery);
-                $delivery = SalesHeader::where('id', $delivery[0])->first();
-                if (!empty($delivery)) {
-                    $delivery->update([
+                    ProductDeliveryAddress::create([
                         'sales_header_id' => $salesHeader->id,
-                        'status' => 'active'
+                        'address' => $single_address,
+                        'name' => $single_name,
+                        'phone' => $single_phone,
+                        'qty' => $single_qty,
+                        'order' => $single_order,
+                        'location' => $single_location,
+                        'delivery_fee' => $single_delivery_fee,
+                        'delivery_date' => $single_date,
+                        'delivery_time' => $single_time,
+                        'note' => $single_note,
+                        'product_id' => $single_order,
+                        'branch' => $request->delivery_branch,
                     ]);
                 }
             }

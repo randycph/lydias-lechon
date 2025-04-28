@@ -66,6 +66,7 @@ Route::group(['prefix' => 'v2'], function () {
 
         $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
 
+
         return view('v2.checkout', compact('page', 'carts', 'branches', 'locations'));
     })->name('checkout');
     Route::get('/confirmation', function () {
