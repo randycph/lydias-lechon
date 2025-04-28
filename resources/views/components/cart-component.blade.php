@@ -5,7 +5,7 @@ x-data="{
     carts: [],
     async getCarts() {
         try {
-            let response = await fetch('{{route('cart.front.get_shipping_fee')}}', {
+            let response = await fetch('{{route('cart.get')}}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -22,6 +22,8 @@ x-data="{
             let data = await response.json();
 
             this.carts = data.cart;
+
+            console.log(this.carts)
 
             this.cartCount = this.carts?.length ?? 0;
 

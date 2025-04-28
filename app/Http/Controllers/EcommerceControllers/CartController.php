@@ -634,7 +634,6 @@ class CartController extends Controller
     }
 
     public function save_sales(Request $request) {
-        
         if (auth()->guest()) {
             $user = User::find(9999);
             if (empty($user)) {
@@ -652,7 +651,7 @@ class CartController extends Controller
         }
 
         //dd($request);
-        $dn = explode(" - ", $request->dateneeded);
+        $dn = explode(" - ", $request->need_date . ' - ' . $request->need_time);
         $date_needed = date('Y-m-d H:i:s',strtotime($dn[0]." ".$dn[1]));
         $deposit = $request->deposit;
         if($request->shipping_type == 'pickup'){
@@ -723,6 +722,8 @@ class CartController extends Controller
             'origin' => $origin,
             'forecast_date' => $forecast_date
         ]);
+
+        logger('salesHeader', [$salesHeader]);
 
         $salesHeader->update([
             'order_number' => sprintf('%07d', $salesHeader->id)
@@ -868,6 +869,13 @@ class CartController extends Controller
         $sign = $this->generateSignature($merchantkey,$merchantcode,$refno,$amount,$currency);
 
         //$payment = $this->ipay($salesHeader,$deposit,$sign);
+
+        logger('sales_header_id', [$salesHeader->id]);
+        logger('order_number', [$salesHeader->order_number]);
+        logger('customer_contact_number', [$salesHeader->customer_contact_number]);
+        logger('amount', [$deposit]);
+        logger('signature', [$sign]);
+        logger('saved_items', [$saved_items]);
 
         return response()->json([
                 'success' => true,

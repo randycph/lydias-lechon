@@ -15,14 +15,14 @@
 
 <div class="bg-cream">
     <div 
-    x-data="checkoutForm" class="container">
+    x-data="checkoutForm" 
+    init="init()" 
+    class="container">
         <form
             action="{{ route('cart.temp_sales') }}" 
             method="POST" 
             id="checkoutForm"
             enctype="multipart/form-data"
-            init="init()"
-            x-ref="formEl"
             @submit.prevent="submitForm" class="pb-20 px-4">
             <div class="pt-20 pb-5 px-4">
                 <h1 class="text-4xl lg:text-7xl font-cubao font-medium text-primary text-center mt-10">Checkout</h1>
@@ -439,8 +439,18 @@
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit" class="bg-primary custom-btn btn-primary-dark text-center text-white px-6 py-4 mt-4 w-full rounded-md">
-                                Place Order
+                            <div x-show="hasErrorMessage" class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
+                                We are not able to accommodate your order base on your preferred date and time. Kindly refer to the warning message that appeared on your order screen or call our hotline at 89391221 / 89394665.  Thank you.
+                            </div>
+                            <button :disable="isSubmitting" type="submit" class="bg-primary custom-btn btn-primary-dark text-center text-white px-6 py-4 mt-4 w-full rounded-md">
+                                <span x-show="!isSubmitting">Place Order</span>
+                                <span x-show="isSubmitting" class="flex items-center justify-center gap-2">
+                                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                                    </svg>
+                                    Processing...
+                                </span>
                             </button>
                         </div>
                     </div>
@@ -484,9 +494,12 @@
             
                         <div class="px-4 mt-5">
                             <div>
-                                <form action="{{ route('payment.add.store_customer') }}" method="POST" enctype="multipart/form-data" class="flex flex-col">
+                                <form
+                                    x-data="{ isFormSubmitting: false }"
+                                    @submit="isFormSubmitting = true"
+                                    action="{{ route('paymaya.pay') }}" method="POST" enctype="multipart/form-data" class="flex flex-col">
                                     @csrf
-                                    <input type="hidden" name="sales_header_id" :value="paymentDetails.sales_header_id">
+                                    <input type="hidden" name="sales_header_id" :value="paymentDetails.order_number">
                         
                                     <div class="pb-4">
                                         <img src="http://172.16.11.50/images/payment/pay-maya.jpg">
@@ -506,6 +519,9 @@
                                         <p class="text-sm">Scan the QR Code below</p>
                                         <img src="http://172.16.11.50/images/gcash.png" alt="GCash QR" class="mx-auto mt-2 w-40 h-40 object-contain">
                                     </div>
+
+                                    <input type="hidden" id="payment_dt" name="payment_dt">
+                                    <input type="hidden" id="ref_no" name="ref_no">
                         
                                     <!-- Amount -->
                                     <div class="mt-4">
@@ -520,8 +536,15 @@
                         
                                     <!-- Submit Button -->
                                     <div class="text-right mt-4">
-                                        <button type="submit" class="bg-primary hover:bg-primary-dark text-white font-semibold px-6 py-2 rounded-md">
-                                            Submit
+                                        <button :disabled="isFormSubmitting" type="submit" class="bg-primary hover:bg-primary-dark text-white font-semibold px-6 py-2 rounded-md">
+                                            <span x-show="!isFormSubmitting">Submit</span>
+                                            <span x-show="isFormSubmitting" class="flex items-center justify-center gap-2">
+                                                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                                                </svg>
+                                                Submitting...
+                                            </span>
                                         </button>
                                     </div>
                                 </form>
@@ -584,7 +607,10 @@
             need_date: '',
             need_time: '',
             warningMessage: '',
+            errorMessage: '',
+            hasErrorMessage: false,
             isSubmitting: false,
+            isPaymentLoading: false,
             submitCouponCode() {
                 if (this.couponCode != '') {
                     this.showMessage = true;
@@ -604,9 +630,20 @@
             },
 
             submitForm() {
-                this.formEl = this.$root;
+                this.formEl = document.getElementById('checkoutForm');
 
                 const formData = new FormData(this.formEl);
+
+                this.isSubmitting = true;
+
+                if (this.errorMessage) {
+                    this.hasErrorMessage = true;
+                    return;
+                }
+
+                if (this.hasErrorMessage) {
+                    return;
+                }
 
                 // Add dynamic fields
                 formData.append('shipping_type', this.method);
@@ -644,6 +681,8 @@
                             saved_items: data.saved_items
                         };
                         this.depositModal = true;
+
+                        this.isSubmitting = false;
                     } else {
                         alert('Error: ' + data.message);
                     }
@@ -868,11 +907,7 @@
             },
 
             validateDateTime() {
-                console.log('Validating date and time...');
                 if (!this.need_date || !this.need_time) return;
-
-                console.log('Need date:', this.need_date);
-                console.log('Need time:', this.need_time);
 
                 const selectedDateTime = new Date(`${this.need_date}T${this.need_time}`);
                 const now = new Date();
@@ -884,21 +919,15 @@
 
                 if (diffInHours < 24) {
                     this.warningMessage = `⚠️ Warning! The date and time you've selected (${this.need_date} - ${this.formatTime(this.need_time)}) is less than 24 hours from now. Our standard processing time is at least 24 hours. However, you can still proceed by contacting our store directly at our <span class='underline text-blue-600 cursor-pointer' @click='openHotline = true'>Call Hotline</span> tab.`;
+                    this.errorMessage = `⚠️ We are not able to accommodate your order base on your preferred date and time. Kindly refer to the warning message that appeared on your order screen or call our hotline at 89391221 / 89394665.  Thank you.`;
+                } else {
+                    this.errorMessage = '';
+                    this.hasErrorMessage = false;
                 }
-                console.log('diffInHours:', diffInHours);
-                console.log(this.warningMessage);
             },
 
             async submit() {
                 this.isSubmitting = true;
-
-                try {
-                    await this.submitForm();
-                } catch (e) {
-                    console.error('Submit error', e);
-                } finally {
-                    this.isSubmitting = false;
-                }
             }
         }
     }

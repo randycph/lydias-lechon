@@ -205,6 +205,8 @@ class PaymayaController extends Controller
             )
         ));
 
+        // dd($data);
+
         $first_response = file_get_contents($this->paymaya_url(), FALSE, $context);
 
         if($first_response === FALSE){
