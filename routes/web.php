@@ -3,6 +3,7 @@
 use App\EcommerceModel\Branch;
 use App\EcommerceModel\Cart;
 use App\Helpers\ListingHelper;
+use App\Http\Controllers\Auth\GoogleController;
 use App\Models\Article;
 use App\Models\ArticleCategory;
 use App\Models\Deliverablecities;
@@ -204,6 +205,9 @@ Route::group(['prefix' => 'v2'], function () {
         return view('v2.article', compact('category', 'slug', 'article', 'next', 'previous', 'relatedNews'));
     })->name('article');    
 });
+
+Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
 Route::post('/signup-store', function(Request $request) {
     try {

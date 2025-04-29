@@ -33,10 +33,10 @@
                     </div>
         
                     <template x-if="step === 1">
-                        <button class="hover:bg-gray-50 border border-primary text-primary px-6 py-4 w-full rounded-md">
+                        <a href="{{ route('google.login') }}" class="hover:bg-gray-50 border mx-auto border-primary text-primary px-6 py-4 rounded-md flex justify-center w-full">
                             <img src="{{ asset('images/google.png') }}" alt="Google" class="w-6 h-6 inline-block">
                             <span>Sign in with Google</span>
-                        </button>
+                        </a>
         
                         <div class="flex text-sm items-center justify-center gap-4 mt-6 w-full">
                             <div class="border-t border-[#DFDFDF] w-1/6"></div>
@@ -78,10 +78,10 @@
                                 class="lg:w-1/2 text-white bg-primary custom-btn btn-primary-dark focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg w-full px-5 py-3.5 text-center">
                                 Continue
                             </button>
-                        </div>
         
-                        <div class="flex items-center justify-center mt-8">
-                            <div class="text-center text-sm">Already have an account? <a class="text-primary font-bold underline hover:text-primary-dark" href="{{ route('login') }}">Sign in now</a></div>
+                            <div class="flex items-center justify-center mt-8">
+                                <div class="text-center text-sm">Already have an account? <a class="text-primary font-bold underline hover:text-primary-dark" href="{{ route('login') }}">Sign in now</a></div>
+                            </div>
                         </div>
                     </template>
         

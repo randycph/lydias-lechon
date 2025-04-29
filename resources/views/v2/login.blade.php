@@ -12,10 +12,10 @@
                 </div>
         
                 <div class="">
-                    <button class="hover:bg-gray-50 border border-primary text-primary px-6 py-4 mt-4 w-full rounded-md">
-                        <img src="{{ asset('images/google.png') }}" alt="Google" class="w-6 h-6 inline-block">
-                        <span>Sign in with Google</span>
-                    </button>
+                        <a href="{{ route('google.login') }}" class="hover:bg-gray-50 border mx-auto border-primary text-primary px-6 py-4 rounded-md flex justify-center w-full">
+                            <img src="{{ asset('images/google.png') }}" alt="Google" class="w-6 h-6 inline-block">
+                            <span>Sign in with Google</span>
+                        </a>
         
                     <div class="flex text-sm items-center justify-center gap-4 mt-6 w-full">
                         <div class="border-t border-[#DFDFDF] w-1/6"></div>

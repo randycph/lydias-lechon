@@ -11,15 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (Schema::hasTable('product_addons')) {
-            return;
-        }
-
-        Schema::create('product_addons', function (Blueprint $table) {
-            $table->id();
-            $table->bigInteger('product_id');
-            $table->bigInteger('addon_product_id');
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('google_id')->nullable();
         });
     }
 
@@ -28,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_addons');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('google_id');
+        });
     }
 };
