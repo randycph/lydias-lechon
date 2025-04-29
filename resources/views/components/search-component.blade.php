@@ -4,29 +4,31 @@
     <div x-show="searchModal" x-transition.opacity class="fixed inset-0 bg-black/50 z-40" @click="searchModal = false"></div>
 
     <!-- Cart Drawer Content -->
-    <div
-    x-show="searchModal"
-    x-cloak
-    x-transition:enter="transition duration-300 ease-out"
-    x-transition:enter-start="opacity-0 scale-90"
-    x-transition:enter-end="opacity-100 scale-100"
-    x-transition:leave="transition duration-200 ease-in"
-    x-transition:leave-start="opacity-100 scale-100"
-    x-transition:leave-end="opacity-0 scale-90"
-    class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-[500px] lg:max-w-3xl h-max bg-white text-black z-50 flex flex-col shadow-lg rounded-lg"
-  >
-        <!-- Content -->
-        <div class="w-full relative">
+    <div x-show="searchModal" x-transition.opacity class="fixed inset-0 bg-black/50 z-40 overflow-y-auto py-10 px-4"
+        @click.self="searchModal = false">
+        <div x-show="searchModal" 
+        x-transition:enter="transition duration-300 ease-out"
+        x-transition:enter-start="opacity-0 scale-90"
+        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition duration-200 ease-in"
+        x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-90"
+            class="relative mx-auto bg-white text-black z-50 w-full max-w-[500px] lg:max-w-3xl rounded-lg shadow-lg">
+        <!-- Header (fixed) -->
+        <div class="relative px-5 pt-5 pb-10">
             <!-- Close Button -->
-            <button @click="searchModal = false" class="absolute top-4 right-4 text-2xl text-gray-800">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class=" px-2 py-2 flex items-center justify-center bg-white rounded-full w-10 h-10 shadow-lg">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                </svg>
-            </button>
+            <div>
+                <h2 class="text-xl lg:text-2xl font-bold mr-5">Search Lydia's Products and Contents</h2>
+                <button @click="searchModal = false" class="absolute top-4 right-4 text-2xl text-gray-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class=" px-2 py-2 flex items-center justify-center bg-white rounded-full w-10 h-10 shadow-lg">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
 
             <div class="flex flex-col mt-5" x-data="voiceSearch()" @voice-search-finished.window="">
                 
-                <form class="flex items-center px-4 lg:px-6 pt-16 w-full flex-col lg:flex-row gap-2" >   
+                <form @submit.prevent="submitSearch" class="flex items-center pt-5 w-full flex-col lg:flex-row gap-2" >   
                     <label for="voice-search" class="sr-only">Search</label>
                     <div class="relative w-full">
                         <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -49,59 +51,69 @@
                             </template>
                         </div>
                     </div>
-                    <button type="submit" class="flex w-full lg:w-auto justify-center items-center py-2.5 px-3 ms-2 text-sm font-medium text-white bg-primary rounded-lg border border-primary hover:bg-primary-dark focus:ring-4">
+                    <button type="submit" class="flex w-full lg:w-auto justify-center items-center py-3 px-3 ms-2 text-sm font-medium text-white bg-primary rounded-lg border border-primary hover:bg-primary-dark focus:ring-4">
                         <svg class="w-4 h-4 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
-                        </svg>Search
+                        </svg>
+                        <span>Search</span>
                     </button>
                 </form>
 
-                <div x-show="search" class="px-4 lg:px-6 mt-5">
+                <div x-show="isLoading" class="flex justify-center py-6">
+                    <svg class="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                    </svg>
+                </div>
+
+                <div x-show="search" class=" mt-5">
                     Your search for: <span x-text="search" class="font-semibold"></span>
                 </div>
 
-                <div x-show="errorMessage" class=" text-red-500 text-sm px-4 lg:px-6 mt-5" x-text="errorMessage"></div>
-
-                @php
-
-                $searches = [
-                    [
-                        'title' => 'Petite',
-                        'price' => '₱9,800',
-                        'image' => asset('images/petite.png'),
-                        'description' => 'Good for 8-10 persons. Add ₱2,800 for Boneless Lechon Stuffed with Seafood Paella'
-                    ],
-                    [
-                        'title' => 'COCHINILLO',
-                        'price' => '₱10,800',
-                        'image' => asset('images/chochinillo.png'),
-                        'description' => 'Good for 8-10 persons. FREE Mexican Flavored Rice'
-                    ],
-                    [
-                        'title' => 'De leche',
-                        'price' => '₱12,800',
-                        'image' => asset('images/deleche.png'),
-                        'description' => 'Good for 12-15 persons. Add ₱2,800 for Boneless Lechon Stuffed with Seafood Paella'
-                    ]
-                ];
-
-                @endphp
-
-                <ul role="list" class="divide-y divide-gray-100 w-full px-6 py-5">
-                    @foreach ($searches as $search)
-                    <li class="flex justify-between gap-x-6 py-5 hover:bg-gray-100 cursor-pointer rounded-md">
-                      <div class="flex min-w-0 gap-x-4">
-                        <img class="size-20 flex-none rounded-full bg-gray-50" src="{{ $search['image'] }}" alt="Search 1">
-                        <div class="min-w-0 flex-auto">
-                          <p class="lg:text-lg text-base font-semibold text-gray-900">{{ $search['title'] }}</p>
-                          <p class="truncate lg:text-base/5 text-sm text-gray-500">{{ $search['price'] }}</p>
-                          <p class="lg:text-sm text-xs text-gray-500">{{ $search['description'] }}</p>
+                <div x-show="!isLoading && Object.keys(results).length" class="w-full py-5">
+                    <template x-if="results['Product']">
+                        <div class="mb-5">
+                            <h2 class="font-bold text-lg mb-2">Products</h2>
+                            <template x-for="(item, index) in results['Product'].slice(0, productLimit)" :key="item.id">
+                                <div class="flex justify-between gap-x-6 py-3 hover:bg-gray-100 cursor-pointer rounded-md">
+                                    <div class="flex min-w-0 gap-x-4">
+                                        <img class="size-12 flex-none rounded-full bg-gray-50" :src="item.image || '{{ asset('images/no-image.jpg') }}'" alt="Product" onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}';">
+                                        <div class="min-w-0 flex-auto">
+                                            <p class="lg:text-lg text-base font-semibold text-gray-900" x-text="item.title || item.name"></p>
+                                            <p class="truncate lg:text-base/5 text-sm text-gray-500" x-text="item.price ? '₱' + item.price : ''"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                    
+                            <div class="flex justify-center mt-4" x-show="results['Product'].length > productLimit">
+                                <button @click="loadMoreProducts" class="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark">Load More Products</button>
+                            </div>
                         </div>
-                      </div>
-                    </li>
-                    @endforeach
-                  </ul>
-                  
+                    </template>
+
+                    <template x-if="results['Article']">
+                        <div class="mb-5">
+                            <h2 class="font-bold text-lg mb-2">Articles</h2>
+                            <template x-for="(item, index) in results['Article'].slice(0, articleLimit)" :key="item.id">
+                                <div class="flex justify-between gap-x-6 py-2 hover:bg-gray-100 cursor-pointer rounded-md">
+                                    <div class="flex min-w-0 gap-x-4">
+                                        <div class="min-w-0 flex-auto">
+                                            <p class="text-base font-semibold text-gray-900" x-text="item.title || item.name"></p>
+                                            <p class="lg:text-sm text-xs text-gray-500" x-text="item.teaser || ''"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                    
+                            <div class="flex justify-center mt-4" x-show="results['Article'].length > articleLimit">
+                                <button @click="loadMoreArticles" class="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark">Load More Articles</button>
+                            </div>
+                        </div>
+                    </template>
+
+                </div>
+                
             </div>
         </div>
     </div>

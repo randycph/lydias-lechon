@@ -151,6 +151,47 @@
         searchModal: false,
         toggleSearch() {
             this.searchModal = !this.searchModal;
+        },
+        search: '',
+        results: [],
+        isLoading: false,
+        errorMessage: '',
+        productLimit: 5,
+        articleLimit: 5,
+        async submitSearch() {
+            if (!this.search.trim()) {
+                this.errorMessage = 'Please enter a search term.';
+                return;
+            }
+            this.errorMessage = '';
+            this.isLoading = true;
+            this.results = [];
+            this.productLimit = 5;
+            this.articleLimit = 5;
+
+            try {
+                let response = await fetch('{{ route('global.search') }}?searchTerm=' + encodeURIComponent(this.search));
+                if (!response.ok) {
+                    let error = await response.json();
+                    this.errorMessage = error.error.searchTerm ? error.error.searchTerm[0] : 'Something went wrong.';
+                    this.isLoading = false;
+                    return;
+                }
+                let data = await response.json();
+                this.results = data;
+            } catch (error) {
+                this.errorMessage = 'Something went wrong. Please try again.';
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        loadMoreProducts() {
+            this.productLimit += 5;
+        },
+
+        loadMoreArticles() {
+            this.articleLimit += 5;
         }
     }"
     x-init="
