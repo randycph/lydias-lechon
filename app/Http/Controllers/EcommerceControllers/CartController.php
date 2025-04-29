@@ -853,15 +853,15 @@ class CartController extends Controller
       
         if (auth()->guest()) {
             //session()->forget('cart');  
-            // Mail::to($user)->send(new SalesCompleted($salesHeader));   
+            Mail::to($user)->send(new SalesCompleted($salesHeader));   
             $carted = array();            
             session(['cart' => $carted]);
         }
         else{
-            // Mail::to($user)->send(new SalesCompletedRegistered($salesHeader)); 
+            Mail::to($user)->send(new SalesCompletedRegistered($salesHeader)); 
             Cart::where('user_id', $user->id)->delete();
         }
-        // Mail::to(env('EMAIL_ADMIN'))->send(new SalesCompletedAdmin($salesHeader));
+        Mail::to(env('EMAIL_ADMIN'))->send(new SalesCompletedAdmin($salesHeader));
         $email_to_branch = $this->email_to_branch($salesHeader);
 
         if(strlen($salesHeader->customer_contact_number) > 1){
