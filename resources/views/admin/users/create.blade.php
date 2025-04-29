@@ -68,17 +68,29 @@
                     <div class="form-group">
                         <label class="d-block">First Name *</label>
                         <input type="text" name="fname" id="fname" value="{{ old('fname')}}" class="form-control @error('fname') is-invalid @enderror" required>
-                        <x-error-message inputName="fname" />
+                        @error('fname')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
                     </div>
                     <div class="form-group">
                         <label class="d-block">Last Name *</label>
                         <input type="text" name="lname" id="lname" value="{{ old('lname')}}" class="form-control @error('lname') is-invalid @enderror" required>
-                        <x-error-message inputName="lname" />
+                        @error('lname')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
                     </div>
                     <div class="form-group">
                         <label class="d-block">Email *</label>
                         <input type="email" name="email" id="email" value="{{ old('email')}}" class="form-control @error('email') is-invalid @enderror" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
-                        <x-error-message inputName="email" />
+                        @error('email')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
+                        @enderror
                     </div>
                     <div class="form-group">
                         <label class="d-block">Role *</label>

@@ -76,6 +76,22 @@ class UserController extends Controller
 //        if(User::where('name',$request->fname.' '.$request->lname)->exists()){
 //            return back()->with('duplicate', __('standard.users.duplicate_email'));
 //        } else {
+
+        $validated = $request->validate([
+            'fname' => [
+                'required',
+                'string',
+                'regex:/^[A-Za-z\s\-]+$/'
+            ],
+            'lname' => [
+                'required',
+                'string',
+                'regex:/^[A-Za-z\s\-]+$/'
+            ],
+            'email' => 'required|email|max:191|unique:users,email',
+            'role' => 'required|exists:role,id'
+        ]);
+
         $data = $request->all();
 
 
@@ -127,14 +143,20 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        //dd($request);
-        Validator::make($request->all(), [
-            'fname' => 'required|max:150',
-            'lname' => 'required|max:150',
+        $validated = $request->validate([
+            'fname' => [
+                'required',
+                'string',
+                'regex:/^[A-Za-z\s\-]+$/'
+            ],
+            'lname' => [
+                'required',
+                'string',
+                'regex:/^[A-Za-z\s\-]+$/'
+            ],
             'email' => 'required|email|max:191|unique:users,email,'.$user->id,
             'role' => 'required|exists:role,id'
-        ])->validate();
-
+        ]);
 
         $paytypes='';
         if(isset($request->payment_types)){
