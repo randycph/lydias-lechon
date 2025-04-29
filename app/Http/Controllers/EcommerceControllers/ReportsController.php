@@ -144,6 +144,56 @@ class ReportsController extends Controller
 
     }
 
+    public function customerSalesReport(Request $request)
+    {
+        $filters = [];
+
+        $qry = "SELECT 
+            h.customer_name,
+            u.email,
+            u.birthday,
+            u.contact_mobile,
+            COUNT(d.id) as total_products_purchased,
+            SUM(d.price) as total_amount_paid
+        FROM ecommerce_sales_headers h
+        LEFT JOIN ecommerce_sales_details d ON d.sales_header_id = h.id
+        LEFT JOIN products p ON p.id = d.product_id
+        LEFT JOIN job_orders jo ON jo.sales_detail_id = d.id
+        LEFT JOIN users u ON u.id = h.user_id
+        WHERE h.deleted_at IS NULL 
+        AND jo.deleted_at IS NULL
+        ";
+
+
+        // Apply filters
+        if ($request->has('agent') && $request->agent != '') {
+            $qry .= " AND h.agent = '".$request->agent."'";
+        }
+        if ($request->has('customer') && $request->customer != '') {
+            $qry .= " AND h.customer_name = '".$request->customer."'";
+        }
+        if ($request->has('order_source') && $request->order_source != '') {
+            $qry .= " AND h.order_source = '".$request->order_source."'";
+        }
+        if ($request->has('startdate') && $request->startdate != '') {
+            $start = date('Y-m-d', strtotime($request->startdate)) . " 00:00:00.000";
+            $end = date('Y-m-d', strtotime($request->enddate)) . " 23:59:59.999";
+            $qry .= " AND h.created_at BETWEEN '$start' AND '$end'";
+        }
+
+        if (!($request->has('startdate'))) {
+            $qry .= " AND h.created_at >= '2050-01-01 00:00:00.000'"; // same logic you use
+        }
+
+        $qry .= " GROUP BY h.customer_name
+                ORDER BY total_amount_paid DESC"; // optional: order highest paying customer first
+
+        $rs = DB::select($qry);
+
+        return view('admin.reports.customer_details', compact('rs'));
+    }
+
+
     public function forecaster(Request $request)
     {
         /*SELECT h.*,d.*,po.delivery_date as hcreated,h.id as hid,p.category_id,c.name as catname,h.agent,pb.name as pbname, h.delivery_status as delstat,

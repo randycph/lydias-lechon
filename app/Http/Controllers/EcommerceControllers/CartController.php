@@ -414,7 +414,7 @@ class CartController extends Controller
             }
 
             //misc items
-            if ($request->has('misc_cntr') && count($request->misc_cntr) > 0) {
+            if ($request->has('misc_cntr') && (is_array($request->misc_cntr) && count($request->misc_cntr) > 0)) {
                 foreach ($request->misc_cntr as $key => $misc) {
                     $miscProductId = $misc['misc_id'];
                     $miscQty = $misc['misc_qty'];
@@ -483,7 +483,7 @@ class CartController extends Controller
             session(['cart' => $cart]);
 
             //misc items
-            if ($request->has('misc_cntr') && count($request->misc_cntr) > 0) {
+            if ($request->has('misc_cntr') && (is_array($request->misc_cntr) && count($request->misc_cntr) > 0)) {
                 foreach ($request->misc_cntr as $misc) {
                     $miscProductId = $misc['misc_id'];
                     $miscQty = $misc['misc_qty'];
