@@ -109,21 +109,26 @@ $lists = [
                 this.product = null;
             },
             quantity: 1,
-            addons: [
-                { name: 'Pinakbet', price: 100, selected: false },
-                { name: 'Party Tray', price: 300, selected: false },
-                { name: 'Pancit', price: 80, selected: false },
-                { name: 'Dinuguan', price: 150, selected: false },
-                { name: 'Sisig', price: 120, selected: false },
-                { name: 'Coke', price: 50, selected: false },
-            ],
             get baseTotal() {
                 return this.product?.price * this.quantity || 0;
             },
-            get addonsTotal() {
-                return this.addons
+            addons: [],
+            updateAddons() {
+                if (!this.product?.addon_products) return;
+
+                this.addons = this.product.addon_products
                     .filter(a => a.selected)
-                    .reduce((sum, a) => sum + a.price, 0);
+                    .map(a => ({
+                        id: a.id,
+                        qty: 1
+                    }));
+            },
+            get addonsTotal() {
+                if (!this.product?.addon_products) return 0;
+
+                return this.product.addon_products
+                    .filter(a => a.selected)
+                    .reduce((sum, a) => sum + (a.price * this.quantity), 0);
             },
             get grandTotal() {
                 return this.baseTotal + this.addonsTotal;
@@ -303,7 +308,7 @@ $lists = [
                 </div>
                 
                 <div class="mt-4 border-t border-primary ">
-                    <button @click="show(@js($list))" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
+                    <button @click="show(@js($list)); console.log(@js($list))" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
                 </div>
             </div>
             @endforeach
@@ -461,7 +466,7 @@ $lists = [
 
 
         function add_to_cart(act,id){
-            if ($("#item"+id).val() === "") {
+            if ($("#item"+id).val() === "") {add_to_cart
                 alert("Please select the item's weight!");
             } else {
                 save_to_cart(act,id);

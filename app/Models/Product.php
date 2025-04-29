@@ -250,4 +250,14 @@ class Product extends Model
             ]);
         });
     }
+
+    public function addons()
+    {
+        return $this->hasMany(ProductAddon::class, 'product_id');
+    }
+
+    public function addonProducts()
+    {
+        return $this->belongsToMany(Product::class, 'product_addons', 'product_id', 'addon_product_id');
+    }
 }

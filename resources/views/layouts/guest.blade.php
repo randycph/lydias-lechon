@@ -57,17 +57,22 @@
             }, 3000);
         },
         
-        async add_to_cart(act,id, qty){
+        async add_to_cart(act,id, qty, addons){
             if (act && id) {
-                await this.save_to_cart(act,id, qty);
+                await this.save_to_cart(act,id, qty, addons);
             } else {
                 return false;
             }
         },
 
-        async save_to_cart(act, id, qty) {
+        async save_to_cart(act, id, qty, addons) {
 
             this.loading = true;
+
+            const add_ons = addons.map((addon) => ({
+                misc_id: addon.id,
+                misc_qty: addon.qty,
+            }));
 
             try {
                 let response = await fetch('{{ route('cart.add') }}', {
@@ -79,6 +84,7 @@
                     body: JSON.stringify({
                         ac_item: id,
                         ac_qty: qty,
+                        misc_cntr: add_ons
                     })
                 }).then((response) => {
                     return response;

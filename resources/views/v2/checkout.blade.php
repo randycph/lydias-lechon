@@ -8,7 +8,7 @@
     $deliveryFee = 0;
     if (count($carts) > 1) {
         foreach ($carts as $cart) {
-            $total += $cart['price'];
+            $total += $cart['price'] * $cart['qty'];
         }
     }
 @endphp

@@ -45,9 +45,17 @@ Route::group(['prefix' => 'v2'], function () {
     })->name('lechon-pricelist');
     Route::get('/lechon-menu', function () {
         $categories = ProductCategory::with(['products' => function ($query) {
-            $query->with(['photos' => function ($q) {
-                $q->limit(1);
-            }]);
+            $query->where('status', 'PUBLISHED')
+                ->with([
+                    'photos' => function ($q) {
+                        $q->limit(1);
+                    },
+                    'addonProducts' => function ($q) {
+                        $q->with(['photos' => function ($photoQuery) {
+                            $photoQuery->limit(1);
+                        }]);
+                    }
+                ]);
         }])
         ->where('status', 'PUBLISHED')
         ->get();
@@ -65,7 +73,6 @@ Route::group(['prefix' => 'v2'], function () {
         $branches = Branch::orderBy('name', 'asc')->get();
 
         $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
-
 
         return view('v2.checkout', compact('page', 'carts', 'branches', 'locations'));
     })->name('checkout');

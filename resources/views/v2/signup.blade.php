@@ -570,8 +570,8 @@
 <script>
 function registrationForm() {
     return {
-        step: 3,
-        accountType: 'organization',
+        step: 1,
+        accountType: 'individual',
         errors: {},
 
         // Collected data

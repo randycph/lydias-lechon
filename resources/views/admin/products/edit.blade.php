@@ -145,10 +145,20 @@
                         <input type="text" class="form-control @error('free') is-invalid @enderror" name="free" id=free" value="{{ old('free', $product->free) }}">
                         <x-error-message inputName="free" />
                     </div>
+                    
                     <div class="form-group">
-                        <label class="d-block">Upsell</label>
-                        <input type="text" class="form-control @error('upsell') is-invalid @enderror" name="upsell" id=upsell" value="{{ old('upsell', $product->upsell) }}">
-                        <x-error-message inputName="upsell" />
+                        <label class="d-block">Addons</label>
+                        <select id="addons-select" class="w-100" multiple name="addons[]">
+                            @foreach ($products as $prod)
+                                <option value="{{ $prod->id }}" data-image="{{ $prod->image }}"
+                                    {{ in_array($prod->id, $selectedAddons) ? 'selected' : '' }}>
+                                    {{ $prod->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <p class="tx-10">
+                            Note: The selected addons will appear in the product when adding to cart. You can add multiple addons to a single product.
+                        </p>
                     </div>
 
                     <div class="form-group">
@@ -416,6 +426,8 @@
 
     <script src="{{ asset('lib/jqueryui/jquery-ui.min.js') }}"></script>
 
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     {{--    Image validation--}}
     <script>
         let BANNER_WIDTH = "{{ env('PRODUCT_WIDTH') }}";
@@ -726,5 +738,31 @@
         {{--$('#name').change(function(){--}}
         {{--	get_page_slug();--}}
         {{--});--}}
+
+        $('#addons-select').select2({
+            templateResult: formatOption,
+            templateSelection: formatSelection,
+            placeholder: 'Select an add-on',
+            allowClear: true,
+        });
+
+        function formatOption(option) {
+            if (!option.id) return option.text;
+
+            var imageUrl = $(option.element).data('image') || '/images/no-image.jpg';
+
+            return $(`
+                <div style="display: flex; align-items: center;">
+                    <img src="${imageUrl}" onerror="this.onerror=null;this.src='/images/no-image.jpg';" style="width: 30px; height: 30px; border-radius: 50%; margin-right: 8px;" />
+                    <span>${option.text}</span>
+                </div>
+            `);
+        }
+
+        function formatSelection(option) {
+            return option.text; // no image on selected tag
+        }
+
+
     </script>
 @endsection

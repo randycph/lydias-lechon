@@ -16,6 +16,7 @@ use App\Models\ProductPhoto;
 use App\Models\ProductTag;
 use App\Models\Product;
 use App\Models\Page;
+use App\Models\ProductAddon;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Log;
 
@@ -180,11 +181,27 @@ class ProductController extends Controller
      */
     public function edit($id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::with('addonProducts')->findOrFail($id);
         $categories = ProductCategory::get();
-
-        return view('admin.products.edit',compact('product','categories'));
+    
+        $products = Product::where('id', '!=', $id)
+                    ->with(['photos' => function($query) {
+                        $query->where('is_primary', 1)->limit(1);
+                    }])
+                    ->where('status', 'PUBLISHED')
+                    ->where('for_sale', 1)
+                    ->limit(5)
+                    ->get();
+    
+        foreach ($products as $prod) {
+            $prod->image = asset('/storage/products/' . $prod->photos->first()?->path) ?? null; 
+        }
+    
+        $selectedAddons = $product->addonProducts->pluck('id')->toArray();
+    
+        return view('admin.products.edit', compact('product', 'categories', 'products', 'selectedAddons'));
     }
+    
 
     /**
      * Update the specified resource in storage.
@@ -236,6 +253,22 @@ class ProductController extends Controller
             'meta_description' => $request->seo_description,
             'created_by' => Auth::id()
         ]);
+
+        if ($request->has('addons') && count($request->addons) > 0) {
+            // First, delete existing addons (clear old ones)
+            ProductAddon::where('product_id', $product->id)->delete();
+    
+            // Then, insert new addons
+            foreach ($request->addons as $addonId) {
+                ProductAddon::create([
+                    'product_id' => $product->id,
+                    'addon_product_id' => $addonId,
+                ]);
+            }
+        } else {
+            // If no addons selected, clear all existing addons
+            ProductAddon::where('product_id', $product->id)->delete();
+        }
 
 //        if($colors <> $request->colors || $sizes <> $request->sizes){
 //            $this->update_tags($product->id,$request->tags);

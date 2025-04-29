@@ -414,38 +414,42 @@ class CartController extends Controller
             }
 
             //misc items
-            for($x =1; $x<=$request->misc_cntr;$x++){
-                if($request->has('misc_id'.$x)){
+            if ($request->has('misc_cntr') && count($request->misc_cntr) > 0) {
+                foreach ($request->misc_cntr as $key => $misc) {
+                    $miscProductId = $misc['misc_id'];
+                    $miscQty = $misc['misc_qty'];
+                    
+                    $prod = Product::with([
+                        'photos' => function ($q) {
+                            $q->limit(1);
+                        },
+                    ])->where('id', $miscProductId)->first();
+                
+                    $image = $prod->photos()->first();
+                    $image = !empty($image) ? asset('storage/products/'.$image->path ) : '';
 
-                    $product = Product::whereId($request->input('misc_id'.$x))->first();
-                    $cart = Cart::where('product_id', $request->input('misc_id'.$x))
+                    $cart = Cart::where('product_id', $miscProductId)
                         ->where('user_id', Auth::id())
                         ->first();
 
                     if (!empty($cart)) {
-                        $newQty = $cart->qty + $request->input('misc_qty'.$x);
                         $save = $cart->update([
-                            'qty' => $newQty,
-                            'price' => $product->price
+                            'qty' => $miscQty,
+                            'price' => $prod->price
                         ]);
                     } else {
                         $save = Cart::create([
-                            'product_id' => $request->input('misc_id'.$x),
+                            'product_id' => $miscProductId,
                             'user_id' => Auth::id(),
-                            'qty' => $request->input('misc_qty'.$x),
-                            'price' => $product->price,
-                            'photo' => $photo,
+                            'qty' => $miscQty,
+                            'price' => $prod->price,
+                            'photo' => $image,
                             'paella_price' => 0
                         ]);
                     }
-
                 }
             }
-
-
-        }
-        else
-        {
+        } else {
             $cart = session('cart', []);
             $not_exist = true;
 
@@ -475,46 +479,53 @@ class CartController extends Controller
 
                 array_push($cart, $order);
             }
-
+            
             session(['cart' => $cart]);
 
             //misc items
-            for($x =1; $x<=$request->misc_cntr;$x++){
-                if($request->has('misc_id'.$x)){
+            if ($request->has('misc_cntr') && count($request->misc_cntr) > 0) {
+                foreach ($request->misc_cntr as $misc) {
+                    $miscProductId = $misc['misc_id'];
+                    $miscQty = $misc['misc_qty'];
 
-                    $cart = session('cart', []);
-                    $not_exist = true;
-
+                    $prod = Product::with([
+                            'photos' => function ($q) {
+                                $q->limit(1);
+                            },
+                        ])->where('id', $miscProductId)->first();
+                    
+                    $image = $prod->photos()->first();
+                    $image = !empty($image) ? asset('storage/products/'.$image->path ) : '';
+            
+                    $miscExist = false;
+            
                     foreach ($cart as $key => $order) {
-                        if ($order->product_id == $request->input('misc_id'.$x)) {
-                            $cart[$key]->qty = $request->input('misc_qty'.$x);
-                            $cart[$key]->price = $product->price;
+                        if ($order->product_id == $miscProductId) {
+                            $cart[$key]->qty = $miscQty;
+                            $cart[$key]->price = $prod->price;
                             $cart[$key]->paella_price = 0;
-                            $cart[$key]->photo = $photo;
-                            $cart[$key]->product = $product;
-
-                            $not_exist = false;
+                            $cart[$key]->photo = $image;
+                            $cart[$key]->product = $prod;
+                            $miscExist = true;
                             break;
                         }
                     }
-
-                    if ($not_exist) {
+            
+                    if (!$miscExist) {
                         $order = new Cart();
-                        $order->product_id = $request->input('misc_id'.$x);
-                        $order->qty = $request->input('misc_qty'.$x);
-                        $order->price = $product->price;
+                        $order->product_id = $miscProductId;
+                        $order->qty = $miscQty;
+                        $order->price = $prod->price;
                         $order->paella_price = 0;
-                        $order->photo = $photo;
-                        $order->product = $product;
-
+                        $order->photo = $image;
+                        $order->product = $prod;
+            
                         array_push($cart, $order);
                     }
-
-                    session(['cart' => $cart]);
                 }
-
+            
+                session(['cart' => $cart]);
             }
-
         }
 
         if($request->action == 'buynow'){
@@ -639,14 +650,14 @@ class CartController extends Controller
             if (empty($user)) {
                 $user = $this->create_guest_account();
             }
-            $customer_name = $request->gfullname;
+            $customer_name = $request->name;
             $user->contact_mobile = $request->gcontact;
             $user->email = $request->gemail;
             $user->contact_mobile = $request->mobile;
             $carts = collect(session('cart', []));
         } else {
             $user = auth()->user();
-            $customer_name = $user->fullName;
+            $customer_name = $user->name;
             $carts = Cart::where('user_id',$user->id)->get();
         }
 
@@ -722,8 +733,6 @@ class CartController extends Controller
             'origin' => $origin,
             'forecast_date' => $forecast_date
         ]);
-
-        logger('salesHeader', [$salesHeader]);
 
         $salesHeader->update([
             'order_number' => sprintf('%07d', $salesHeader->id)
@@ -844,15 +853,15 @@ class CartController extends Controller
       
         if (auth()->guest()) {
             //session()->forget('cart');  
-            Mail::to($user)->send(new SalesCompleted($salesHeader));   
+            // Mail::to($user)->send(new SalesCompleted($salesHeader));   
             $carted = array();            
             session(['cart' => $carted]);
         }
         else{
-            Mail::to($user)->send(new SalesCompletedRegistered($salesHeader)); 
+            // Mail::to($user)->send(new SalesCompletedRegistered($salesHeader)); 
             Cart::where('user_id', $user->id)->delete();
         }
-        Mail::to(env('EMAIL_ADMIN'))->send(new SalesCompletedAdmin($salesHeader));
+        // Mail::to(env('EMAIL_ADMIN'))->send(new SalesCompletedAdmin($salesHeader));
         $email_to_branch = $this->email_to_branch($salesHeader);
 
         if(strlen($salesHeader->customer_contact_number) > 1){

@@ -148,6 +148,7 @@
                     </div> --}}
 
                     <div class="mt-2">
+                        <template x-if="product?.addon_products && product?.addon_products?.length > 0">
                         <div class="flex justify-between">
                             <div>
                                 <div class="font-bold">Often purchased together</div>
@@ -160,53 +161,19 @@
                                 </div>
                             </div>
                         </div>
-
-                        @php
-                        $addons = [
-                            [
-                            'image' => 'pinakbet.png',
-                            'name' => 'Pinakbet',
-                            'price' => '₱100.00',
-                            ],
-                            [
-                            'image' => 'party-tray.png',
-                            'name' => 'Party Tray',
-                            'price' => '300.00',
-                            ],
-                            [
-                            'image' => 'pancit.png',
-                            'name' => 'Pancit',
-                            'price' => '80.00',
-                            ],
-                            [
-                            'image' => 'dinuguan.png',
-                            'name' => 'Dinuguan',
-                            'price' => '150.00',
-                            ],
-                            [
-                            'image' => 'sisig.png',
-                            'name' => 'Sisig',
-                            'price' => '120.00',
-                            ],
-                            [
-                            'image' => 'coke.png',
-                            'name' => 'Coke',
-                            'price' => '50.00',
-                            ],
-                        ];
-                        @endphp
-
+                        </template>
                         <div>
                             <div class="swiper-addons relative mt-5 overflow-hidden">
                                 <div class="swiper-wrapper">
-                                    @foreach ($addons as $key => $addon)
+                                    <template x-for="(addon, idx) in product?.addon_products" :key="addon.id">
                                     <div class="swiper-slide !w-[120px]">
                                         <div class="rounded-xl border-gray-200 border w-[120px]">
                                             <div class="inline-flex items-center absolute top-0 right-0 p-1 z-20">
-                                                <label for="check{{$key}}" class="flex items-center cursor-pointer relative">
+                                                <label :for="'check' + idx" class="flex items-center cursor-pointer relative">
                                                     <input type="checkbox"
-                                                        x-model="addons[{{ $key }}].selected"
-                                                        :id="'check' + {{ $key }}"
+                                                        @change="updateAddons()"
+                                                        x-model="product.addon_products[idx].selected"
+                                                        :id="'check' + idx"
                                                         class="peer h-5 w-5 cursor-pointer transition-all appearance-none rounded-full shadow hover:shadow-md border border-slate-300 checked:bg-green-600 checked:border-green-600"
                                                     />
                                                     <span
@@ -221,12 +188,14 @@
                                                     </span>
                                                 </label>
                                             </div>
-                                            <img src="{{ asset('images/' . $addon['image']) }}"
-                                                alt="{{ $addon['name'] }}" class="object-cover z-10 w-full h-full hover:scale-125 transition duration-300">
+
+                                            <img :src="addon.photos?.length > 0 ? `/storage/products/${addon.photos[0].path}` : '/images/no-image.jpg'"
+                                                :alt="addon.name"
+                                                class="object-cover z-10 w-full h-full hover:scale-125 transition duration-300">
                                         </div>
-                                        <div class="text-xs text-center mt-2">{{ $addon['name'] }}</div>
+                                        <div class="text-xs text-center mt-2" x-text="addon.name"></div>
                                     </div>
-                                    @endforeach
+                                    </template>
                                 </div>
                             </div>
                         </div>
@@ -253,7 +222,8 @@
                                             <td class="py-2" x-text="format(baseTotal)"></td>
                                         </tr>
                                     
-                                        <template x-for="addon in addons.filter(a => a.selected)" :key="addon.name">
+                                        <!-- Addons -->
+                                        <template x-for="addon in product?.addon_products.filter(a => a.selected)" :key="addon.id">
                                             <tr class="border-b">
                                                 <td class="py-2" x-text="addon.name"></td>
                                                 <td class="py-2" x-text="format(addon.price)"></td>
@@ -273,7 +243,7 @@
                     </div>
 
                     <div class="mt-10">
-                        <button @click="added = true; add_to_cart('addcart', product.id, quantity)"
+                        <button @click="added = true; add_to_cart('addcart', product.id, quantity, addons)"
                             class="bg-primary primary-btn text-white w-full px-6 py-3 rounded-md font-semibold flex items-center justify-center gap-2 transition-all duration-300 ease-in-out custom-btn btn-primary">
                             <template x-if="!added">
                                 <span x-transition.opacity> Add to Cart </span>
