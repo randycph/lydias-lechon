@@ -215,10 +215,19 @@ Route::post('/signup-store', function(Request $request) {
             'email' => 'required|email|unique:users,email',
             'password' => 'required|confirmed|min:6',
             'account_type' => 'required|in:individual,organization',
-            'first_name' => 'required_if:account_type,individual',
-            'last_name' => 'required_if:account_type,individual',
+            'first_name' => [
+                'required_if:account_type,individual',
+                'regex:/^[A-Za-z\s\-]+$/'
+            ],
+            'last_name' => [
+                'required_if:account_type,individual',
+                'regex:/^[A-Za-z\s\-]+$/'
+            ],
             'birth_date' => 'required_if:account_type,individual|date',
-            'org_name' => 'required_if:account_type,organization',
+            'org_name' => [
+                'required_if:account_type,organization',
+                'regex:/^[A-Za-z\s\-]+$/'
+            ],
             'address_street' => 'required_if:country,Philippines|string',
             'address_city' => 'required_if:country,Philippines|string',
             'address_municipality' => 'required_if:country,Philippines|string',
@@ -297,8 +306,14 @@ Route::post('save-personal-information', function(Request $request) {
     }
 
     $validated = $request->validate([
-        'firstname' => 'required|string',
-        'lastname' => 'required|string',
+        'firstname' => [
+            'required',
+            'regex:/^[A-Za-z\s\-]+$/'
+        ],
+        'lastname' => [
+            'required',
+            'regex:/^[A-Za-z\s\-]+$/'
+        ],
         'birthday' => 'required|date',
         'contact_mobile' => 'required|string',
     ]);
@@ -353,8 +368,16 @@ Route::post('/signup-validate-fields', function(Request $request) {
         case 3:
             $rules = $request->input('account_type') === 'individual'
                 ? [
-                    'first_name' => 'required|string',
-                    'last_name' => 'required|string',
+                    'first_name' => [
+                        'required',
+                        'string',
+                        'regex:/^[A-Za-z\s\-]+$/'
+                    ],
+                    'last_name' => [
+                        'required',
+                        'string',
+                        'regex:/^[A-Za-z\s\-]+$/'
+                    ],
                     'birth_date' => 'required|date',
                     'country' => 'required|string',
                     'address_street' => 'required_if:country,Philippines|string',
@@ -366,8 +389,16 @@ Route::post('/signup-validate-fields', function(Request $request) {
                   ]
                 : [
                     'country' => 'required|string',
-                    'org_name' => 'required|string',
-                    'contact_person' => 'required|string',
+                    'org_name' => [
+                        'required',
+                        'string',
+                        'regex:/^[A-Za-z\s\-]+$/'
+                    ],
+                    'contact_person' => [
+                        'required',
+                        'string',
+                        'regex:/^[A-Za-z\s\-]+$/'
+                    ],
                     'address_street' => 'required_if:country,Philippines|string',
                     'address_city' => 'required_if:country,Philippines|string',
                     'address_municipality' => 'required_if:country,Philippines|string',

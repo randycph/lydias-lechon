@@ -570,7 +570,7 @@
 <script>
 function registrationForm() {
     return {
-        step: 1,
+        step: 3,
         accountType: 'individual',
         errors: {},
 
