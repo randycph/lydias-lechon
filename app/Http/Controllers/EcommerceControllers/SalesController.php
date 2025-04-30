@@ -506,10 +506,12 @@ class SalesController extends Controller
     public function bulkDelete(Request $request)
     {
         $ids = explode(',', $request->input('ids'));
-        
-        SalesHeader::whereIn('id', $ids)->delete();
-
-        return redirect()->back()->with('success', 'Selected sales have been deleted.');
+    
+        SalesHeader::whereIn('id', $ids)
+            ->where('isConfirm', '!=', 1)
+            ->delete();
+    
+        return redirect()->back()->with('success', 'Unconfirmed sales have been deleted.');
     }
 
 

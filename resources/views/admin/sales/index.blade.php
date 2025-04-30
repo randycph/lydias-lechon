@@ -227,7 +227,7 @@
                                 <tr style="height:30px; @if($sale->trashed()) background-color:#FFA07A; @endif">
                                     <td>
                                         <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input cb" id="cb{{ $sale->id }}">
+                                            <input type="checkbox" class="custom-control-input cb" id="cb{{ $sale->id }}" {{ $sale->isConfirm == 1 ? 'disabled' : '' }}>
                                             <label class="custom-control-label" for="cb{{ $sale->id }}"></label>
                                         </div>
                                     </td>
@@ -995,9 +995,21 @@
             $('#checkbox_all').prop('checked', $('.cb:checked').length === $('.cb').length);
         });
 
+        $(document).on('click', '.cb', function () {
+            const totalEnabled = $('.cb:enabled').length;
+            const totalChecked = $('.cb:enabled:checked').length;
+
+            $('#checkbox_all').prop('checked', totalEnabled === totalChecked);
+            toggleDeleteButton();
+        });
+        
         // When "select all" is clicked
         $('#checkbox_all').on('click', function() {
-            $('.cb').prop('checked', this.checked);
+            $('.cb').each(function() {
+                if (!$(this).is(':disabled')) {
+                    $(this).prop('checked', $('#checkbox_all').is(':checked'));
+                }
+            });
             toggleDeleteButton();
         });
 
