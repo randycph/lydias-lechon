@@ -221,8 +221,6 @@ class JoborderController extends Controller
 
     public function store(Request $request)
     {
-
-        //dd($request);
         $rdata = $request->all();
         if($request->totalcoupon > 0){
             $couponCode = $rdata['couponcode'];
@@ -238,12 +236,23 @@ class JoborderController extends Controller
         $today = getdate();
         $order_number = $today[0].substr($ran, 2,6);
 
-
         $bs = explode('|', $request->branch_source);
         $contact_pers = '';
         if($request->customer_type == 'cs-new'){
+            $validated = $request->validate([
+                'fname' => [
+                    'required',
+                    'regex:/^[A-Za-z\s\-]+$/'
+                ],
+                'lname' => [
+                    'required',
+                    'regex:/^[A-Za-z\s\-]+$/'
+                ],
+                'mobile' => 'required|string',
+            ]);
+
             $todayd = getdate();
-            $email_cs = $request->email ?? 'lydtmp_'.$todayd[0].substr(microtime(), 2,6).'@lydias.com';;
+            $email_cs = $request->email ?? 'lydtmp_'.$todayd[0].substr(microtime(), 2,6).'@lydias.com';
             $check_if_exist = User::where('email', '=', $email_cs)->first();
             if($check_if_exist === null){
                 $customer = User::create([
@@ -636,8 +645,9 @@ class JoborderController extends Controller
         $input = $request->all();
         
         //$details = SalesHeader::where('customer_name',$request->name)->orderBy('id','desc')->first();
-        $details = User::where('name',$request->name)->first();
-        logger($details);
+        $details = User::where('name', 'LIKE', '%'.$request->name.'%')
+                        ->orWhere('organization', 'LIKE', '%'.$request->name.'%')
+                        ->first();
         return view('admin.joborder.display-customer-details',compact('details'));
 
     }

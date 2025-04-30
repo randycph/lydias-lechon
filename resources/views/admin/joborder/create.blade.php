@@ -71,11 +71,11 @@
                 <hr>
                 <div class="form-group" id="customer_type_div" style="display:none;">
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="customer_type" id="cs-exist" value="cs-exist">
+                        <input class="form-check-input" type="radio" name="customer_type" id="cs-exist" value="cs-exist" {{ old('customer_type') == 'cs-exist' ? 'checked' : '' }}>
                         <label class="form-check-label" for="cs-exist">Existing Customer</label>
                     </div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="customer_type" id="cs-new" value="cs-new">
+                        <input class="form-check-input" type="radio" name="customer_type" id="cs-new" value="cs-new" {{ old('customer_type') == 'cs-new' ? 'checked' : '' }}>
                         <label class="form-check-label" for="cs-new">New Customer</label>
                     </div>
                 </div>
@@ -96,14 +96,23 @@
                     <div class="form-group">
                         <label>Last Name <span class="tx-danger">*</span></label>
                         <input type="text" name="lname" class="form-control" required="required">
+                        @error('lname')
+                            <div class="alert alert-danger">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="form-group">
                         <label>First Name <span class="tx-danger">*</span></label>
                         <input type="text" name="fname" class="form-control" required="required">
+                        @error('fname')
+                            <div class="alert alert-danger">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="form-group">
                         <label>E-mail Address </label>
                         <input type="email" name="email" class="form-control">
+                        @error('email')
+                            <div class="alert alert-danger">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="form-group">
                         <label>Birthdate </label>
@@ -463,6 +472,25 @@
 @endsection
 
 @section('customjs')
+    <script>
+        $(document).ready(function () {
+            // Trigger change manually on page load
+            const customerType = $('input[name="customer_type"]:checked').val();
+            handleCustomerTypeChange(customerType);
+
+            // Bind change event
+            $('input[name="customer_type"]').on('change', function () {
+                handleCustomerTypeChange($(this).val());
+            });
+
+            function handleCustomerTypeChange(value) {
+                if (value === 'cs-new') {
+                    $('.cnew_details').show();
+                }
+            }
+        });
+    </script>
+
     <script>
        
         function set_complete_address(){
