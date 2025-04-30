@@ -140,7 +140,11 @@
                                 <td style="width:16%">
                                     <input @if(isset($filter->dn_end_date)) type="date" value="{{$filter->dn_end_date}}" @else type="text" onfocus="(this.type='date')" @endif class="form-control" name="dn_end_date" placeholder="End Date (Date Needed)">
                                 </td>
-                                
+                                <td>
+                                    <button id="bulk-delete-btn" type="button" class="btn btn-danger d-none" data-toggle="modal" data-target="#confirmDeleteModal">
+                                        Delete Selected
+                                    </button>
+                                </td>
                             </tr>
                         </table>
                          </form>
@@ -168,7 +172,7 @@
                         <table class="table mg-b-0 table-light table-hover table-striped">
                             <thead>
                             <tr>
-                                <th style="width: 10%;display:none;">
+                                <th style="width: 10%;">
                                     <div class="custom-control custom-checkbox">
                                         <input type="checkbox" class="custom-control-input" id="checkbox_all">
                                         <label class="custom-control-label" for="checkbox_all"></label>
@@ -221,7 +225,7 @@
                                 $use = \App\EcommerceModel\SalesHeader::find($sale->id);
                                 @endphp
                                 <tr style="height:30px; @if($sale->trashed()) background-color:#FFA07A; @endif">
-                                    <td style="display:none;">
+                                    <td>
                                         <div class="custom-control custom-checkbox">
                                             <input type="checkbox" class="custom-control-input cb" id="cb{{ $sale->id }}">
                                             <label class="custom-control-label" for="cb{{ $sale->id }}"></label>
@@ -399,6 +403,30 @@
         <input type="text" id="status" name="status">
     </form>
 
+    <!-- Bulk delete Modal -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+        <form id="bulkDeleteForm" action="{{ route('sales.bulk-delete') }}" method="POST">
+            @csrf
+            @method('DELETE')
+            <input type="hidden" name="ids" id="selected_ids">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Deletion</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete the selected records?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                </div>
+            </div>
+        </form>
+        </div>
+    </div>
+  
 
     <div class="modal effect-scale" id="prompt-delete" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -951,9 +979,35 @@
             values: perPage
         });
 
-        /*** Handles the Select All Checkbox ***/
-        $("#checkbox_all").click(function(){
-            $('.cb').not(this).prop('checked', this.checked);
+        function toggleDeleteButton() {
+            if ($('.cb:checked').length > 0) {
+                $('#bulk-delete-btn').removeClass('d-none');
+            } else {
+                $('#bulk-delete-btn').addClass('d-none');
+            }
+        }
+
+        // Show/hide delete button on individual checkbox click
+        $(document).on('click', '.cb', function() {
+            toggleDeleteButton();
+
+            // Update header checkbox
+            $('#checkbox_all').prop('checked', $('.cb:checked').length === $('.cb').length);
+        });
+
+        // When "select all" is clicked
+        $('#checkbox_all').on('click', function() {
+            $('.cb').prop('checked', this.checked);
+            toggleDeleteButton();
+        });
+
+        // On modal open, collect selected IDs
+        $('#bulk-delete-btn').on('click', function () {
+            let ids = $('.cb:checked').map(function () {
+                return $(this).attr('id').replace('cb', '');
+            }).get();
+
+            $('#selected_ids').val(ids.join(','));
         });
 
         $('#prompt-change-status').on('show.bs.modal', function (e) {

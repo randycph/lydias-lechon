@@ -503,6 +503,16 @@ class SalesController extends Controller
 
     }
 
+    public function bulkDelete(Request $request)
+    {
+        $ids = explode(',', $request->input('ids'));
+        
+        SalesHeader::whereIn('id', $ids)->delete();
+
+        return redirect()->back()->with('success', 'Selected sales have been deleted.');
+    }
+
+
     public function additional_filters($model){
     
         if(isset($_GET['order_source_filter']) && strlen($_GET['order_source_filter']) > 1){
