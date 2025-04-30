@@ -14,12 +14,22 @@
                 </div>
 
                 @if (session('status'))
-                    <div class="my-4 text-sm text-green-600 font-semibold text-center">
-                        {{ session('status') }}vbbb
+                    <div class="my-4 text-green-600 font-semibold text-left">
+                        {{ session('status') }}
+                    </div>
+                @endif
+
+                @if ($errors->any())
+                    <div class="bg-red-100 text-red-600 p-4 rounded mb-4">
+                        <ul class="list-disc list-inside">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
                     </div>
                 @endif
         
-                <form class="" action="{{ route('ecommerce.send_reset_link_email') }}" method="POST">
+                <form class="" action="{{ route('password.send_reset_link_email') }}" method="POST">
                     @csrf
                     <div class="mt-5">
                         <div class="mb-5">
@@ -34,12 +44,6 @@
                         <button type="submit" class="text-white bg-primary text-center custom-btn btn-primary-dark focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-md w-full px-5 py-3.5 ">
                             Reset Password
                         </button>
-
-                        @if (session('error'))
-                            <div class="my-4 text-sm text-red-600 font-semibold text-center">
-                                {{ session('error') }}sfsdfsdfs
-                            </div>
-                        @endif
                     </div>
                 </form>
             </div>

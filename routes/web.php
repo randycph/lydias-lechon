@@ -3,7 +3,9 @@
 use App\EcommerceModel\Branch;
 use App\EcommerceModel\Cart;
 use App\Helpers\ListingHelper;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\GlobalSearchController;
 use App\Models\Article;
 use App\Models\ArticleCategory;
@@ -95,6 +97,12 @@ Route::group(['prefix' => 'v2'], function () {
         $page = 'forgot-password';
         return view('v2.forgot-password', compact('page'));
     })->name('forgot-password');
+
+    Route::post('/lydia-forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.send_reset_link_email');
+    Route::get('/lydia-reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/lydia-reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
+
+
     Route::get('/signup', function () {
         $page = 'signup';
         return view('v2.signup', compact('page'));

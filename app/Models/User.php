@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Sanctum\HasApiTokens;
+use App\Notifications\ResetPasswordLink;
 
 
 use App\Models\Role;
@@ -425,6 +426,11 @@ class User extends Authenticatable implements MustVerifyEmail
     
     public static function order_origin($origin){
         Cookie::queue('origin', $origin, 60);
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ResetPasswordLink($token));
     }
 
 }
