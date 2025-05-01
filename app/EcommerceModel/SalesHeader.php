@@ -3,6 +3,7 @@
 namespace App\EcommerceModel;
 
 use App\Models\ActivityLog;
+use App\Models\ProductDeliveryAddress;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -266,5 +267,10 @@ class SalesHeader extends Model
                 'reference' => $model->id
             ]);
         });
+    }
+
+    public function deliveryAddress()
+    {
+        return $this->hasMany(ProductDeliveryAddress::class, 'sales_header_id');
     }
 }

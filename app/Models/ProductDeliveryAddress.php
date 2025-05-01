@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\EcommerceModel\SalesHeader;
 use Illuminate\Database\Eloquent\Model;
 
 class ProductDeliveryAddress extends Model
@@ -25,4 +26,19 @@ class ProductDeliveryAddress extends Model
         'location',
         'branch'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    public function salesHeader()
+    {
+        return $this->belongsTo(SalesHeader::class, 'sales_header_id');
+    }
 }

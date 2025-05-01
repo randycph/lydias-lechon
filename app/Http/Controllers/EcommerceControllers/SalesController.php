@@ -511,7 +511,7 @@ class SalesController extends Controller
             ->where('isConfirm', '!=', 1)
             ->delete();
     
-        return redirect()->back()->with('success', 'Unconfirmed sales have been deleted.');
+        return redirect()->back()->with('success', 'Selected sales have been deleted.');
     }
 
 
@@ -636,7 +636,8 @@ class SalesController extends Controller
     public function update_sales_details($id)
     {
         $salesdetail = SalesDetail::where('sales_header_id',$id)->first();
-        $salesheader = SalesHeader::find($id);
+        $salesheader = SalesHeader::with('deliveryAddress')->find($id);
+
         $products = Product::orderBy('name')->get();
 
         $dateneeded = '';
