@@ -645,6 +645,7 @@ class CartController extends Controller
     }
 
     public function save_sales(Request $request) {
+        
         if (auth()->guest()) {
             $user = User::find(9999);
             if (empty($user)) {
@@ -652,7 +653,7 @@ class CartController extends Controller
             }
             $customer_name = $request->name;
             $user->contact_mobile = $request->gcontact;
-            $user->email = $request->gemail;
+            $user->email = $request->email;
             $user->contact_mobile = $request->mobile;
             $carts = collect(session('cart', []));
         } else {
@@ -737,36 +738,38 @@ class CartController extends Controller
         $salesHeader->update([
             'order_number' => sprintf('%07d', $salesHeader->id)
         ]);
-
-        if ($request->has('$request->deliveries') && count($request->deliveries) > 0) {
-            foreach ($request->deliveries as $key => $delivery) {
-                if ($delivery?->order?->product_id) {
-                    $single_address = $delivery->address;
-                    $single_name = $delivery->name;
-                    $single_phone = $delivery->phone;
-                    $single_qty = $delivery->qty;
-                    $single_order = $delivery->order->product_id;
-                    $single_location = $delivery->location;
-                    $single_delivery_fee = $delivery->delivery_fee;
-                    $single_date = $delivery->need_date;
-                    $single_time = $delivery->need_time;
-                    $single_note = $delivery->note;
-
-                    ProductDeliveryAddress::create([
-                        'sales_header_id' => $salesHeader->id,
-                        'address' => $single_address,
-                        'name' => $single_name,
-                        'phone' => $single_phone,
-                        'qty' => $single_qty,
-                        'order' => $single_order,
-                        'location' => $single_location,
-                        'delivery_fee' => $single_delivery_fee,
-                        'delivery_date' => $single_date,
-                        'delivery_time' => $single_time,
-                        'note' => $single_note,
-                        'product_id' => $single_order,
-                        'branch' => $request->delivery_branch,
-                    ]);
+        if ($request->has('deliveries')) {
+            $deliveries = json_decode($request->deliveries ?? '');
+            if ($deliveries && count($deliveries) > 0) {
+                foreach ($deliveries as $key => $delivery) {
+                    if ($delivery?->order?->product_id) {
+                        $single_address = $delivery->address;
+                        $single_name = $delivery->name;
+                        $single_phone = $delivery->phone;
+                        $single_qty = $delivery->qty;
+                        $single_order = $delivery->order->product_id;
+                        $single_location = $delivery->location;
+                        $single_delivery_fee = $delivery->delivery_fee;
+                        $single_date = $delivery->need_date;
+                        $single_time = $delivery->need_time;
+                        $single_note = $delivery->note;
+    
+                        ProductDeliveryAddress::create([
+                            'sales_header_id' => $salesHeader->id,
+                            'address' => $single_address,
+                            'name' => $single_name,
+                            'phone' => $single_phone,
+                            'qty' => $single_qty,
+                            'order' => $single_order,
+                            'location' => $single_location,
+                            'delivery_fee' => $single_delivery_fee,
+                            'delivery_date' => $single_date,
+                            'delivery_time' => $single_time,
+                            'note' => $single_note,
+                            'product_id' => $single_order,
+                            'branch' => $request->delivery_branch,
+                        ]);
+                    }
                 }
             }
         }
