@@ -106,39 +106,43 @@ Update Sales Details
   <div id="multipleAddressesWrapper"></div>
   
   <!-- Template (hidden) -->
-  <div id="addressSectionTemplate" class="address-section border-top pt-3 mt-3 d-none">
+<!-- Hidden template -->
+<div id="addressSectionTemplate" class="address-section border-top pt-3 mt-3 d-none">
     <div class="mb-3">
       <label class="form-label fw-bold">Street</label>
-      <input type="text" class="form-control" name="address_street[]" />
+      <input type="text" class="form-control" name="address_street" />
     </div>
-  
+
     <div class="mb-3">
       <label class="form-label fw-bold">Region</label>
-      <select class="form-select regionSelect" name="address_region[]">
+      <select class="form-control regionSelect" name="address_region">
         <option value="">Select Region</option>
       </select>
     </div>
-  
+
     <div class="mb-3">
       <label class="form-label fw-bold">Province</label>
-      <select class="form-select provinceSelect" name="address_municipality[]">
+      <select class="form-control provinceSelect" name="address_municipality">
         <option value="">Select Province</option>
       </select>
     </div>
-  
+
     <div class="mb-3">
       <label class="form-label fw-bold">City / Municipality</label>
-      <select class="form-select citySelect" name="address_city[]">
+      <select class="form-control citySelect" name="address_city">
         <option value="">Select City</option>
       </select>
     </div>
-  
+
     <div class="mb-3">
       <label class="form-label fw-bold">Barangay</label>
-      <select class="form-select barangaySelect" name="address_brgy[]">
+      <select class="form-control barangaySelect" name="address_brgy">
         <option value="">Select Barangay</option>
       </select>
     </div>
+
+    <!-- Remove button -->
+    <button type="button" class="btn btn-sm btn-danger remove-address">Remove</button>
   </div>
   
 
@@ -583,16 +587,9 @@ Update Sales Details
         $('.selectpicker').selectpicker();
     });
 
-
     $(document).ready(function () {
         let regions = [], provinces = [], cities = [], barangays = [];
 
-        // Toggle multiple address visibility
-        $('#allowMultiple').on('change', function () {
-            $('#addressSection').toggleClass('d-none', !this.checked);
-        });
-
-        // Load all data
         async function loadData() {
             [regions, provinces, cities, barangays] = await Promise.all([
                 $.getJSON('/addresses/region.json'),
@@ -600,95 +597,36 @@ Update Sales Details
                 $.getJSON('/addresses/city.json'),
                 $.getJSON('/addresses/barangay.json')
             ]);
-
-            // Populate region select
-            regions.forEach(region => {
-                $('#regionSelect').append(`<option value="${region.region_name}">${region.region_name}</option>`);
-            });
-
-            // Restore previous values if needed
-            $('#regionSelect').val(@json(old('address_region', auth()->user()?->address_region ?? ''))).trigger('change');
         }
 
-        // Filter provinces
-        $('#regionSelect').on('change', function () {
-            const selectedRegion = $(this).val();
-            const region = regions.find(r => r.region_name === selectedRegion);
-            const regionCode = region?.region_code;
-
-            const filteredProvinces = provinces.filter(p => p.region_code === regionCode);
-            $('#provinceSelect').empty().append(`<option value="">Select Province</option>`);
-            filteredProvinces.forEach(p => {
-                $('#provinceSelect').append(`<option value="${p.province_name}">${p.province_name}</option>`);
-            });
-
-            $('#provinceSelect').val('').trigger('change');
-            $('#citySelect').empty().append(`<option value="">Select City</option>`);
-            $('#barangaySelect').empty().append(`<option value="">Select Barangay</option>`);
-        });
-
-        // Filter cities
-        $('#provinceSelect').on('change', function () {
-            const selectedProvince = $(this).val();
-            const province = provinces.find(p => p.province_name === selectedProvince);
-            const provinceCode = province?.province_code;
-
-            const filteredCities = cities.filter(c => c.province_code === provinceCode);
-            $('#citySelect').empty().append(`<option value="">Select City</option>`);
-            filteredCities.forEach(c => {
-                $('#citySelect').append(`<option value="${c.city_name}">${c.city_name}</option>`);
-            });
-
-            $('#citySelect').val('').trigger('change');
-            $('#barangaySelect').empty().append(`<option value="">Select Barangay</option>`);
-        });
-
-        // Filter barangays
-        $('#citySelect').on('change', function () {
-            const selectedCity = $(this).val();
-            const city = cities.find(c => c.city_name === selectedCity);
-            const cityCode = city?.city_code;
-
-            const filteredBarangays = barangays.filter(b => b.city_code === cityCode);
-            $('#barangaySelect').empty().append(`<option value="">Select Barangay</option>`);
-            filteredBarangays.forEach(b => {
-                $('#barangaySelect').append(`<option value="${b.brgy_name}">${b.brgy_name}</option>`);
-            });
-        });
-
-        // Start
         loadData();
-        
+
         $('#allowMultiple').on('change', function () {
             const isChecked = this.checked;
 
-            $('#addressSection').toggleClass('d-none', !isChecked);
             $('#addMoreBtn').toggleClass('d-none', !isChecked);
-
-            // Always clear all address sets first
-            $('#multipleAddressesWrapper').empty();
+            $('#multipleAddressesWrapper').empty(); // reset
 
             if (isChecked) {
-                // Add 1 fresh address block
-                const $template = $('#addressSectionTemplate').clone().removeClass('d-none').removeAttr('id');
-
-                // Populate Region dropdown
-                regions.forEach(region => {
-                    $template.find('.regionSelect').append(
-                        `<option value="${region.region_name}">${region.region_name}</option>`
-                    );
-                });
-
-                $('#multipleAddressesWrapper').append($template);
+                addNewAddressBlock();
             }
         });
 
-
-
         $('#addMoreBtn').on('click', function () {
+            addNewAddressBlock();
+        });
+
+        function addNewAddressBlock() {
             const $template = $('#addressSectionTemplate').clone().removeClass('d-none').removeAttr('id');
 
-            // Populate Region dropdown
+            // Add required attributes and name for inputs/selects
+            $template.find('.address_street').attr({ name: 'address_street[]', required: true });
+            $template.find('.regionSelect').attr({ name: 'address_region[]', required: true });
+            $template.find('.provinceSelect').attr({ name: 'address_municipality[]', required: true });
+            $template.find('.citySelect').attr({ name: 'address_city[]', required: true });
+            $template.find('.barangaySelect').attr({ name: 'address_brgy[]', required: true });
+
+            // Populate region dropdown
             regions.forEach(region => {
                 $template.find('.regionSelect').append(
                     `<option value="${region.region_name}">${region.region_name}</option>`
@@ -696,9 +634,14 @@ Update Sales Details
             });
 
             $('#multipleAddressesWrapper').append($template);
+        }
+
+        // Remove address block
+        $(document).on('click', '.remove-address', function () {
+            $(this).closest('.address-section').remove();
         });
 
-        // Delegate dynamic events for region → province
+        // Dependent dropdowns
         $(document).on('change', '.regionSelect', function () {
             const $parent = $(this).closest('.address-section');
             const selectedRegion = $(this).val();
@@ -747,6 +690,7 @@ Update Sales Details
         });
 
     });
+
 
 </script>
 
