@@ -84,66 +84,66 @@ Update Sales Details
                                 </select>
 
 
-<!-- Allow Multiple Address Toggle -->
-<div class="form-check mb-3 mt-3">
-    <input class="form-check-input" type="checkbox" value="" id="allowMultiple" />
-    <label class="form-check-label" for="allowMultiple">
-      Allow multiple address
-    </label>
-  </div>
-  
-  <!-- First Static Address Section -->
-  <div id="addressSection" class="d-none">
-    <!-- Initial Address Inputs Here (Same as before) -->
-  </div>
-  
-  <!-- Add More Button -->
-  <button type="button" class="btn btn-outline-primary mt-3 d-none" id="addMoreBtn">
-    + Add More Address
-  </button>
-  
-  <!-- Dynamic Address Sections -->
-  <div id="multipleAddressesWrapper"></div>
-  
-  <!-- Template (hidden) -->
-<!-- Hidden template -->
-<div id="addressSectionTemplate" class="address-section border-top pt-3 mt-3 d-none">
-    <div class="mb-3">
-      <label class="form-label fw-bold">Street</label>
-      <input type="text" class="form-control" name="address_street" />
-    </div>
+                            <!-- Allow Multiple Address Toggle -->
+                            <div class="form-check mb-3 mt-3">
+                                <input class="form-check-input" type="checkbox" value="" id="allowMultiple" />
+                                <label class="form-check-label" for="allowMultiple">
+                                Allow multiple address
+                                </label>
+                            </div>
 
-    <div class="mb-3">
-      <label class="form-label fw-bold">Region</label>
-      <select class="form-control regionSelect" name="address_region">
-        <option value="">Select Region</option>
-      </select>
-    </div>
+                            <!-- Dynamic Address Sections -->
+                            <div id="multipleAddressesWrapper"></div>
 
-    <div class="mb-3">
-      <label class="form-label fw-bold">Province</label>
-      <select class="form-control provinceSelect" name="address_municipality">
-        <option value="">Select Province</option>
-      </select>
-    </div>
+                            <!-- Add More Button -->
+                            <button type="button" class="btn btn-outline-primary mt-3 d-none" id="addMoreBtn">
+                                + Add More Address
+                            </button>
 
-    <div class="mb-3">
-      <label class="form-label fw-bold">City / Municipality</label>
-      <select class="form-control citySelect" name="address_city">
-        <option value="">Select City</option>
-      </select>
-    </div>
+                            <!-- Hidden Template (NO name or required attributes) -->
+                            <div id="addressSectionTemplate" class="address-section d-none" aria-hidden="true">
+                                <fieldset disabled>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold address-label">Address</label>
+                                        <textarea rows="5" class="form-control address"></textarea>
+                                    </div>
 
-    <div class="mb-3">
-      <label class="form-label fw-bold">Barangay</label>
-      <select class="form-control barangaySelect" name="address_brgy">
-        <option value="">Select Barangay</option>
-      </select>
-    </div>
+                                    <div class="form-row">
+                                        <div class="col-md-8">
+                                            <div class="form-group">
+                                                <label class="d-block">Date & Time Needed <i class="text-danger">*</i></label>
+                                                <input type="text" class="form-control date-field" placeholder="Choose Date" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label class="d-block">&nbsp;</label>
+                                                <div class="input-group timepicker">
+                                                    <select class="form-control time-field ">
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
-    <!-- Remove button -->
-    <button type="button" class="btn btn-sm btn-danger remove-address">Remove</button>
-  </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold note-label">Note</label>
+                                        <textarea class="form-control note"></textarea>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold contact_person-label">Contact Person</label>
+                                        <input type="text" class="form-control contact_person"/>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold contact_tel-label">Contact Number</label>
+                                        <input type="text" class="form-control contact_tel"/>
+                                    </div>
+                                
+                                    <button type="button" class="btn btn-sm btn-danger remove-address">Remove</button>
+                                </fieldset>
+                            </div>
   
 
 
@@ -198,7 +198,7 @@ Update Sales Details
 
                             </div>
 
-                            <div class="form-row">
+                            <div class="form-row datetime_field">
                                 <div class="col-md-8">
                                     <div class="form-group">
                                         <label class="d-block">Date & Time Needed <i class="text-danger">*</i></label>
@@ -587,109 +587,99 @@ Update Sales Details
         $('.selectpicker').selectpicker();
     });
 
+    window.preloadedAddresses = @json($salesheader->deliveryAddress ?? []);
+    let skipInitialBlock = false;
+
     $(document).ready(function () {
-        let regions = [], provinces = [], cities = [], barangays = [];
-
-        async function loadData() {
-            [regions, provinces, cities, barangays] = await Promise.all([
-                $.getJSON('/addresses/region.json'),
-                $.getJSON('/addresses/province.json'),
-                $.getJSON('/addresses/city.json'),
-                $.getJSON('/addresses/barangay.json')
-            ]);
-        }
-
-        loadData();
-
         $('#allowMultiple').on('change', function () {
             const isChecked = this.checked;
-
             $('#addMoreBtn').toggleClass('d-none', !isChecked);
-            $('#multipleAddressesWrapper').empty(); // reset
+            $('#multipleAddressesWrapper').empty();
 
-            if (isChecked) {
+            if (isChecked && !skipInitialBlock) {
                 addNewAddressBlock();
             }
+
+            skipInitialBlock = false; // reset for future toggles
         });
+
 
         $('#addMoreBtn').on('click', function () {
             addNewAddressBlock();
         });
 
-        function addNewAddressBlock() {
-            const $template = $('#addressSectionTemplate').clone().removeClass('d-none').removeAttr('id');
+        // Add new address block
+        function addNewAddressBlock(data = {}) {
+            const $template = $('#addressSectionTemplate').clone().removeClass('d-none').removeAttr('id').removeAttr('aria-hidden');
+            const $fieldset = $template.find('fieldset').prop('disabled', false);
 
-            // Add required attributes and name for inputs/selects
-            $template.find('.address_street').attr({ name: 'address_street[]', required: true });
-            $template.find('.regionSelect').attr({ name: 'address_region[]', required: true });
-            $template.find('.provinceSelect').attr({ name: 'address_municipality[]', required: true });
-            $template.find('.citySelect').attr({ name: 'address_city[]', required: true });
-            $template.find('.barangaySelect').attr({ name: 'address_brgy[]', required: true });
+            $fieldset.find('.address').attr({ name: 'address[]', required: true }).val(data.address || '');
+            $fieldset.find('.note').attr({ name: 'note[]', required: true }).val(data.note || '');
+            $fieldset.find('.contact_person').attr({ name: 'contact_person[]', required: true }).val(data.contact_person || '');
+            $fieldset.find('.contact_tel').attr({ name: 'contact_tel[]', required: true }).val(data.contact_tel || '');
+            $fieldset.find('.date-field')
+                .attr({ name: 'dateneeded_date[]', required: true })
+                .val(data.date || '')
+                .datepicker({
+                    minDate: 0,
+                    dateFormat: 'yy-mm-dd'
+                });
 
-            // Populate region dropdown
-            regions.forEach(region => {
-                $template.find('.regionSelect').append(
-                    `<option value="${region.region_name}">${region.region_name}</option>`
-                );
+            const $timeSelect = $fieldset.find('.time-field').attr({ name: 'dateneeded_time[]', required: true });
+            const timeOptions = [
+                '05:00', '06:00', '07:00', '08:00', '09:00',
+                '10:00', '11:00', '12:00', '13:00', '14:00',
+                '15:00', '16:00', '17:00', '18:00', '19:00',
+                '20:00', '21:00'
+            ];
+            $timeSelect.append(`<option value="">Choose Time</option>`);
+            timeOptions.forEach(time => {
+                const label = moment(time, 'HH:mm').format('hh:mm A');
+                $timeSelect.append(`<option value="${time}" ${data.time === time ? 'selected' : ''}>${label}</option>`);
             });
 
             $('#multipleAddressesWrapper').append($template);
+            updateLabels();
         }
 
-        // Remove address block
+
+        // Remove block
         $(document).on('click', '.remove-address', function () {
             $(this).closest('.address-section').remove();
+            updateLabels();
         });
 
-        // Dependent dropdowns
-        $(document).on('change', '.regionSelect', function () {
-            const $parent = $(this).closest('.address-section');
-            const selectedRegion = $(this).val();
-            const region = regions.find(r => r.region_name === selectedRegion);
-            const regionCode = region?.region_code;
+        // Update Address 1, 2, 3...
+        function updateLabels() {
+            $('#multipleAddressesWrapper .address-section').each(function (index) {
+            $(this).find('.address-label').text(`Address ${index + 1}`);
+            });
+        }
 
-            const filteredProvinces = provinces.filter(p => p.region_code === regionCode);
-            const $provinceSelect = $parent.find('.provinceSelect');
-            $provinceSelect.empty().append(`<option value="">Select Province</option>`);
-            filteredProvinces.forEach(p => {
-                $provinceSelect.append(`<option value="${p.province_name}">${p.province_name}</option>`);
+        
+
+        // If deliveryAddress is preloaded, populate on page load
+        if (Array.isArray(window.preloadedAddresses) && window.preloadedAddresses.length > 0) {
+            skipInitialBlock = true; // prevent empty block
+            $('#allowMultiple').prop('checked', true).trigger('change');
+
+            window.preloadedAddresses.forEach(item => {
+                addNewAddressBlock({
+                    address: item.address,
+                    date: item.delivery_date,
+                    time: item.delivery_time,
+                    note: item.note,
+                    contact_tel: item.contact_tel,
+                    contact_person: item.contact_person
+                });
             });
 
-            $parent.find('.citySelect').empty().append(`<option value="">Select City</option>`);
-            $parent.find('.barangaySelect').empty().append(`<option value="">Select Barangay</option>`);
-        });
-
-        $(document).on('change', '.provinceSelect', function () {
-            const $parent = $(this).closest('.address-section');
-            const selectedProvince = $(this).val();
-            const province = provinces.find(p => p.province_name === selectedProvince);
-            const provinceCode = province?.province_code;
-
-            const filteredCities = cities.filter(c => c.province_code === provinceCode);
-            const $citySelect = $parent.find('.citySelect');
-            $citySelect.empty().append(`<option value="">Select City</option>`);
-            filteredCities.forEach(c => {
-                $citySelect.append(`<option value="${c.city_name}">${c.city_name}</option>`);
-            });
-
-            $parent.find('.barangaySelect').empty().append(`<option value="">Select Barangay</option>`);
-        });
-
-        $(document).on('change', '.citySelect', function () {
-            const $parent = $(this).closest('.address-section');
-            const selectedCity = $(this).val();
-            const city = cities.find(c => c.city_name === selectedCity);
-            const cityCode = city?.city_code;
-
-            const filteredBarangays = barangays.filter(b => b.city_code === cityCode);
-            const $barangaySelect = $parent.find('.barangaySelect');
-            $barangaySelect.empty().append(`<option value="">Select Barangay</option>`);
-            filteredBarangays.forEach(b => {
-                $barangaySelect.append(`<option value="${b.brgy_name}">${b.brgy_name}</option>`);
-            });
-        });
+            updateLabels();
+        }
 
     });
+
+
 
 
 </script>
