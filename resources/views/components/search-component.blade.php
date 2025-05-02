@@ -75,7 +75,7 @@
                         <div class="mb-5">
                             <h2 class="font-bold text-lg mb-2">Products</h2>
                             <template x-for="(item, index) in results['Product'].slice(0, productLimit)" :key="item.id">
-                                <div class="flex justify-between gap-x-6 py-3 hover:bg-gray-100 cursor-pointer rounded-md">
+                                <a :href="item.product_url" class="flex justify-between gap-x-6 py-3 hover:bg-gray-100 cursor-pointer rounded-md">
                                     <div class="flex min-w-0 gap-x-4">
                                         <img class="size-12 flex-none rounded-full bg-gray-50" :src="item.image || '{{ asset('images/no-image.jpg') }}'" alt="Product" onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}';">
                                         <div class="min-w-0 flex-auto">
@@ -83,7 +83,7 @@
                                             <p class="truncate lg:text-base/5 text-sm text-gray-500" x-text="item.price ? '₱' + item.price : ''"></p>
                                         </div>
                                     </div>
-                                </div>
+                                </a>
                             </template>
                     
                             <div class="flex justify-center mt-4" x-show="results['Product'].length > productLimit">
@@ -96,14 +96,14 @@
                         <div class="mb-5">
                             <h2 class="font-bold text-lg mb-2">Articles</h2>
                             <template x-for="(item, index) in results['Article'].slice(0, articleLimit)" :key="item.id">
-                                <div class="flex justify-between gap-x-6 py-2 hover:bg-gray-100 cursor-pointer rounded-md">
+                                <a :href="item.article_url" class="flex justify-between gap-x-6 py-2 hover:bg-gray-100 cursor-pointer rounded-md">
                                     <div class="flex min-w-0 gap-x-4">
                                         <div class="min-w-0 flex-auto">
                                             <p class="text-base font-semibold text-gray-900" x-text="item.title || item.name"></p>
                                             <p class="lg:text-sm text-xs text-gray-500" x-text="item.teaser || ''"></p>
                                         </div>
                                     </div>
-                                </div>
+                                </a>
                             </template>
                     
                             <div class="flex justify-center mt-4" x-show="results['Article'].length > articleLimit">

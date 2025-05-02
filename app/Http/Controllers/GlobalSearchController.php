@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ArticleCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class GlobalSearchController extends Controller
 {
@@ -49,6 +51,27 @@ class GlobalSearchController extends Controller
             });
         
             $modelResults = $query->get();
+
+            if ($modelName === 'Article' && $modelResults->isNotEmpty()) {
+                $modelResults = $modelResults->map(function ($article) {
+                    $category = ArticleCategory::find($article->category_id);
+                    $categorySlug = Str::slug($category->name ?? 'uncategorized');
+                    
+                    $article->article_url = route("article", [
+                        'category' => $categorySlug,
+                        'slug' => $article->slug,
+                    ]);
+                    return $article;
+                });
+            }
+
+            if ($modelName === 'Product' && $modelResults->isNotEmpty()) {
+                $modelResults = $modelResults->map(function ($product) {
+                    $slug = Str::slug($product->slug ?? $product->name, '-');
+                    $product->product_url = route('lechon-menu') . '?product=' . urlencode($slug);
+                    return $product;
+                });
+            }
         
             if ($modelResults->isNotEmpty()) {
                 $results[$modelName] = $modelResults;

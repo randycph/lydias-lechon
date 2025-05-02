@@ -33,6 +33,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 use App\EcommerceModel\Branch;
+use App\Models\ProductDeliveryAddress;
 use App\Models\UserBranch;
 
 class SalesController extends Controller
@@ -151,7 +152,7 @@ class SalesController extends Controller
             if($sales->customer_location <> 'Other'){
                 $del_fee = Deliverablecities::where('name',$sales->customer_location)->where('item_type',$rate_type)->first();
                
-                $delivery_amount = $del_fee->rate;
+                $delivery_amount = $del_fee?->rate ?? 0;
 
                 if($baka == 1 && $del_fee->outside_manila == 1){
                     $delivery_amount = 3000;
@@ -206,7 +207,7 @@ class SalesController extends Controller
     }
 
     public function update_dateneeded(Request $request){
-        //dd($request);
+        // dd($request->all());
         $sales = SalesHeader::whereId($request->update_dateneeded_id)->first();
     
         if(isset($request->delivery_branch)){
@@ -220,6 +221,28 @@ class SalesController extends Controller
         $update_date_needed = SalesDetail::where('sales_header_id',$request->update_dateneeded_id)->update([
             'delivery_date' => $request->update_dateneeded_date." ".$request->update_dateneeded_time
         ]);
+
+        // Insert new addresses
+        if ($request->filled('address')) {
+            ProductDeliveryAddress::where('sales_header_id', $request->update_dateneeded_id)->delete();
+
+            foreach ($request->address as $index => $addr) {
+                if (!empty($addr)) {
+                    ProductDeliveryAddress::create([
+                        'sales_header_id' => $request->update_dateneeded_id,
+                        'address' => $addr,
+                        'delivery_date' => $request->dateneeded_date[$index] ?? null,
+                        'delivery_time' => $request->dateneeded_time[$index] ?? null,
+                        'user_id' => $sales->user_id,
+                        'branch' => $request->delivery_branch,
+                        'location' => $request->update_dateneeded_d2d,
+                        'note' => $request->note[$index],
+                        'contact_person' => $request->contact_person[$index] ?? null,
+                        'contact_tel' => $request->contact_tel[$index] ?? null,
+                    ]);
+                }
+            }
+        }
 
         if($request->shipping_type == 'd2d'){
             $sales->update(['delivery_type' => 'Door to door delivery']);
