@@ -934,7 +934,8 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::post('/pantaga-or-display-store','EcommerceControllers\JoborderController@store_pantaga_or_display')->name('joborders.pantage-or-display-store');
     Route::get('/sales/update-payment/{id}','EcommerceControllers\JoborderController@staff_edit_payment')->name('staff-edit-payment');
     Route::post('/sales/update-payment','EcommerceControllers\JoborderController@staff_update_payment')->name('staff-update-payment');
-
+    Route::post('/import-job-orders', 'EcommerceControllers\JoborderController@import')->name('job-orders.import');
+    
     Route::post('/order-product-delete','EcommerceControllers\JoborderController@delete_product')->name('order-product-delete');
 
 

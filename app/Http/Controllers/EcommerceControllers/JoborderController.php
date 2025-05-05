@@ -15,6 +15,7 @@ use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\SalesDetail;
 use App\EcommerceModel\JobOrder;
 use App\EcommerceModel\Branch;
+use App\Imports\JobOrdersImport;
 use App\Models\Deliverablecities;
 use App\Models\User;
 use App\Models\Product;
@@ -23,6 +24,9 @@ use App\Models\UserBranch;
 use Illuminate\Support\Facades\Auth;
 use DateTime;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Validation\ValidationException;
+
 
 class JoborderController extends Controller
 {
@@ -221,6 +225,7 @@ class JoborderController extends Controller
 
     public function store(Request $request)
     {
+        dd($request->all());
         $rdata = $request->all();
         if($request->totalcoupon > 0){
             $couponCode = $rdata['couponcode'];
@@ -799,5 +804,22 @@ class JoborderController extends Controller
         return response()->json([
             'fee' => $rate
         ]);
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:csv,xlsx,xls',
+        ]);
+
+        try {
+            Excel::import(new JobOrdersImport, $request->file('file'));
+            return back()->with('success', 'Job Orders imported successfully.');
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            logger($e);
+            return back()->withErrors(['import_error' => $e->getMessage()])->withInput();
+        }
     }
 }

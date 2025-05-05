@@ -104,6 +104,7 @@
                                     <td>
                                         <input type="submit" class="btn-xs btn btn-success" value="Search">
                                         <a href="{{ route('joborders.index') }}" class="btn-xs btn btn-info">Reset</a>
+                                        <a href="javascript:;" data-toggle="modal" data-target="#prompt-import-joborder" class="btn btn-danger btn-xs delete-joborder">Import</a>
                                     </td>
                                 </tr>
                                 <tr>
@@ -348,6 +349,41 @@
             </div>
         </div>
     </div>
+
+    <div class="modal effect-scale" id="prompt-import-joborder" tabindex="-1" role="dialog" aria-labelledby="importjoborder" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="importjoborder">Import Job Orders</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{route('job-orders.import')}}" method="post" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        Upload the file to import job orders. Use this <a href="{{ asset('sample/joborder_import_sample.csv') }}" download>sample file</a>. 
+                        <input type="file" name="file" class="form-control" required>
+
+                        @if($errors->any())
+                            <div class="alert alert-danger mt-3">
+                                <ul class="mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                    
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-sm btn-danger">Import</button>
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 
@@ -381,4 +417,12 @@
         $('#jo_id').val($(this).data('id'));
     });
 </script>
+<script>
+    @if($errors->any())
+        $(document).ready(function () {
+            $('#prompt-import-joborder').modal('show');
+        });
+    @endif
+</script>
+
 @endsection
