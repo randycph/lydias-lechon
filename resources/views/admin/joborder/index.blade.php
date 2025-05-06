@@ -362,7 +362,7 @@
                 <form action="{{route('job-orders.import')}}" method="post" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
-                        Upload the file to import job orders. Use this <a href="{{ asset('sample/joborder_import_sample.csv') }}" download>sample file</a>. 
+                        Upload the file to import job orders. Use this <a href="{{ asset('sample_job_orders_import.xlsx') }}" download>sample file</a>. 
                         <input type="file" name="file" class="form-control" required>
 
                         @if($errors->any())
