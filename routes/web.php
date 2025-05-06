@@ -16,6 +16,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 Auth::routes(['verify' => true]);
@@ -63,6 +64,34 @@ Route::group(['prefix' => 'v2'], function () {
         }])
         ->where('status', 'PUBLISHED')
         ->get();
+
+        foreach ($categories as $category) {
+            foreach ($category->products as $product) {
+                if ($product->addonProducts->isEmpty()) {
+                    $addonProductIds = DB::table('ecommerce_sales_details')
+                        ->select('product_id', DB::raw('COUNT(id) as total'))
+                        ->whereIn('sales_header_id', function ($query) use ($product) {
+                            $query->select('sales_header_id')
+                                  ->from('ecommerce_sales_details')
+                                  ->where('product_id', $product->id);
+                        })
+                        ->where('product_id', '!=', $product->id)
+                        ->groupBy('product_id')
+                        ->orderByDesc('total')
+                        ->limit(5)
+                        ->pluck('product_id');
+        
+                    $fallbackAddons = Product::whereIn('id', $addonProductIds)
+                        ->with(['photos' => function ($q) {
+                            $q->limit(1);
+                        }])
+                        ->get();
+        
+                    $product->setRelation('addonProducts', $fallbackAddons);
+                }
+            }
+        }
+
         return view('v2.lechon-menu', compact('categories'));
     })->name('lechon-menu');
     Route::get('/checkout', function () {
