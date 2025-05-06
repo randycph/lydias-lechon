@@ -23,8 +23,6 @@ x-data="{
 
             this.carts = data.cart;
 
-            console.log(this.carts)
-
             this.cartCount = this.carts?.length ?? 0;
 
         } catch (error) {
