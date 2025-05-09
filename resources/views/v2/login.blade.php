@@ -29,7 +29,7 @@
                             <label for="email" class="block mb-2 font-bold text-gray-900 ">Email Address</label>
                             <input type="email" id="email" name="email" value="{{ old('email') }}"
                                 class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 @if ($errors->has('email')) border-red-500 @endif"
-                                placeholder="email@email.com" required />
+                                placeholder="" required />
                             @error('email')
                                 <p class="text-sm text-red-500 mt-1">{{ $message }}</p>
                             @enderror

@@ -2,6 +2,7 @@
 
 use App\EcommerceModel\Branch;
 use App\EcommerceModel\Cart;
+use App\EcommerceModel\SalesHeader;
 use App\Helpers\ListingHelper;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
@@ -156,7 +157,13 @@ Route::group(['prefix' => 'v2'], function () {
     })->name('my-cart');
     Route::get('/order-history', function () {
         $page = 'order-history';
-        return view('v2.order-history', compact('page'));
+
+        $sales = SalesHeader::where('user_id', auth()->id())
+                            ->with('items.product.photos')
+                            ->orderBy('created_at', 'desc')
+                            ->get();
+
+        return view('v2.order-history', compact('page', 'sales'));
     })->name('order-history');
     Route::get('/change-password', function () {
         $page = 'change-password';

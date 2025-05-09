@@ -56,53 +56,32 @@
                     <div class="font-bold text-lg mb-5">
                         Order History
                     </div>
-            
+                    
+                    @foreach ($sales as $sale)
                     <div class="rounded-lg border bg-white border-[#DFDFDF] shadow-md">
                         <div class="px-6 py-4 border-b border-[#DFDFDF] flex items-center justify-between">
-                            <h2 class="font-semibold">Order #12345678</h2>
-                            <div class="font-semibold text-tertiary uppercase">Unpaid</div>
+                            <h2 class="font-semibold">Order #{{ $sale->order_number }}</h2>
+                            <div class="font-semibold text-tertiary uppercase">{{ $sale->payment_status }}</div>
                         </div>
                         <div class="flex items-start font-bold flex-col gap-2  py-5 border-b border-[#DFDFDF]">
-                            @php
-                                $carts = [
-                                    [
-                                        'image' => 'checkout1.png',
-                                        'name' => 'Lechon-In-A-Box (2Kg)',
-                                        'price' => '₱2,800.00',
-                                        'qty' => 1
-                                    ],
-                                    [
-                                        'image' => 'checkout2.png',
-                                        'name' => 'Petite (Lechon Cebu)',
-                                        'price' => '₱9,800.00',
-                                        'qty' => 1
-                                    ],
-                                    [
-                                        'image' => 'checkout3.png',
-                                        'name' => 'Pancit con Lechon Medium (225G)',
-                                        'price' => '₱475.00',
-                                        'qty' => 1
-                                    ]
-                                ];
-                            @endphp
-            
+                                        
                             <div class="flex flex-col items-center gap-8 px-4 py-3 border-b border-[#DFDFDF] w-full">
-                                @foreach ($carts as $cart)
+                                @foreach ($sale->items as $cart)
                                     <div class="flex gap-4 items-start w-full relative">
                                         <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="w-20 h-20 min-w-20 min-h-20 object-cover overflow-hidden rounded-md bg-center">
-                                            <img src="{{ asset('images/'.$cart['image']) }}" alt="Checkout" class="w-20 h-20 object-cover">
+                                            <img src="{{ asset('storage/products/' . $cart->product->photos[0]->path) }}" alt="Checkout" class="w-20 h-20 object-cover">
                                         </div>
                                         <div class="flex flex-col">
-                                            <div class="font-bold">{{ $cart['name'] }}</div>
-                                            <div class="text-sm text-gray-600 font-medium">QTY: {{ $cart['qty'] }}</div>
+                                            <div class="font-bold">{{ $cart->product->name }}</div>
+                                            <div class="text-sm text-gray-600 font-medium">QTY: {{ $cart->qty }}</div>
                                         </div>
-                                        <div class="text-sm text-black font-bold text-right w-full absolute right-0 bottom-0">{{ $cart['price'] }}</div>
+                                        <div class="text-sm text-black font-bold text-right w-full absolute right-0 bottom-0">₱{{ number_format($cart['price'], 2) }}</div>
                                     </div>
                                 @endforeach
             
                                 <div class="flex items-center justify-between w-full">
-                                    <div class="text-sm text-black font-bold">{{ count($carts) }} items</div>
-                                    <div class="text-sm text-black font-bold">₱13,075.00</div>
+                                    <div class="text-sm text-black font-bold">{{ count($sale->items) }} items</div>
+                                    <div class="text-sm text-black font-bold">₱{{ number_format($cart->price * $cart->qty, 2) }}</div>
                                 </div>
                             </div>
             
@@ -127,123 +106,7 @@
                             
                         </div>
                     </div>
-            
-                    <div class="rounded-lg border bg-white border-[#DFDFDF] shadow-md mt-5">
-                        <div class="px-6 py-4 border-b border-[#DFDFDF] flex items-center justify-between">
-                            <h2 class="font-semibold">Order #12345678</h2>
-                            <div class="font-semibold text-primary uppercase">Completed</div>
-                        </div>
-                        <div class="flex items-start font-bold flex-col gap-2  py-5 border-b border-[#DFDFDF]">
-                            @php
-                                $carts = [
-                                    [
-                                        'image' => 'checkout1.png',
-                                        'name' => 'Lechon-In-A-Box (2Kg)',
-                                        'price' => '₱2,800.00',
-                                        'qty' => 1
-                                    ],
-                                    [
-                                        'image' => 'checkout2.png',
-                                        'name' => 'Petite (Lechon Cebu)',
-                                        'price' => '₱9,800.00',
-                                        'qty' => 1
-                                    ],
-                                    [
-                                        'image' => 'checkout3.png',
-                                        'name' => 'Pancit con Lechon Medium (225G)',
-                                        'price' => '₱475.00',
-                                        'qty' => 1
-                                    ]
-                                ];
-                            @endphp
-            
-                            <div class="flex flex-col items-center gap-8 px-4 py-3 border-b border-[#DFDFDF] w-full">
-                                @foreach ($carts as $cart)
-                                    <div class="flex gap-4 items-start w-full relative">
-                                        <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="w-20 h-20 min-w-20 min-h-20 object-cover overflow-hidden rounded-md bg-center">
-                                            <img src="{{ asset('images/'.$cart['image']) }}" alt="Checkout" class="w-20 h-20 object-cover">
-                                        </div>
-                                        <div class="flex flex-col">
-                                            <div class="font-bold">{{ $cart['name'] }}</div>
-                                            <div class="text-sm text-gray-600 font-medium">QTY: {{ $cart['qty'] }}</div>
-                                        </div>
-                                        <div class="text-sm text-black font-bold text-right w-full absolute right-0 bottom-0">{{ $cart['price'] }}</div>
-                                    </div>
-                                @endforeach
-            
-                                <div class="flex items-center justify-between w-full">
-                                    <div class="text-sm text-black font-bold">{{ count($carts) }} items</div>
-                                    <div class="text-sm text-black font-bold">₱13,075.00</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-            
-                    <div class="rounded-lg border bg-white border-[#DFDFDF] shadow-md mt-5">
-                        <div class="px-6 py-4 border-b border-[#DFDFDF] flex items-center justify-between">
-                            <h2 class="font-semibold">Order #12345678</h2>
-                            <div class="font-semibold text-blue uppercase">Payment Verified</div>
-                        </div>
-                        <div class="flex items-start font-bold flex-col gap-2  py-5 border-b border-[#DFDFDF]">
-                            @php
-                                $carts = [
-                                    [
-                                        'image' => 'checkout1.png',
-                                        'name' => 'Lechon-In-A-Box (2Kg)',
-                                        'price' => '₱2,800.00',
-                                        'qty' => 1
-                                    ],
-                                    [
-                                        'image' => 'checkout2.png',
-                                        'name' => 'Petite (Lechon Cebu)',
-                                        'price' => '₱9,800.00',
-                                        'qty' => 1
-                                    ],
-                                    [
-                                        'image' => 'checkout3.png',
-                                        'name' => 'Pancit con Lechon Medium (225G)',
-                                        'price' => '₱475.00',
-                                        'qty' => 1
-                                    ]
-                                ];
-                            @endphp
-            
-                            <div class="flex flex-col items-center gap-8 px-4 py-3 border-b border-[#DFDFDF] w-full">
-                                @foreach ($carts as $cart)
-                                    <div class="flex gap-4 items-start w-full relative">
-                                        <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="w-20 h-20 min-w-20 min-h-20 object-cover overflow-hidden rounded-md bg-center">
-                                            <img src="{{ asset('images/'.$cart['image']) }}" alt="Checkout" class="w-20 h-20 object-cover">
-                                        </div>
-                                        <div class="flex flex-col">
-                                            <div class="font-bold">{{ $cart['name'] }}</div>
-                                            <div class="text-sm text-gray-600 font-medium">QTY: {{ $cart['qty'] }}</div>
-                                        </div>
-                                        <div class="text-sm text-black font-bold text-right w-full absolute right-0 bottom-0">{{ $cart['price'] }}</div>
-                                    </div>
-                                @endforeach
-            
-                                <div class="flex items-center justify-between w-full">
-                                    <div class="text-sm text-black font-bold">{{ count($carts) }} items</div>
-                                    <div class="text-sm text-black font-bold">₱13,075.00</div>
-                                </div>
-                            </div>
-            
-                            <div class="w-full flex flex-col gap-2 px-4 mt-4 lg:flex-row justify-between">
-                                <div class="flex flex-col lg:flex-row gap-2 order-1 lg:order-2">
-                                    <button @click="trackOrderModal = true" type="button"
-                                        class="order-2 lg:order-1 text-primary custom-btn btn-primary-dark border hover:text-white border-primary bg-white hover:bg-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
-                                        Track Order
-                                    </button>
-                                </div>
-                                <div class="order-2 lg:order-1">
-                                    <button @click="cancelOrderModal = true" type="button"
-                                        class="text-white custom-btn btn-tertiary-dark bg-tertiary hover:bg-secondary font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
-                                        Cancel Order
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
             </div>
         </div>
