@@ -684,10 +684,10 @@ function registrationForm() {
 
         async loadData() {
             const [regions, provinces, cities, barangays] = await Promise.all([
-                fetch('/addresses/region.json').then(res => res.json()),
-                fetch('/addresses/province.json').then(res => res.json()),
-                fetch('/addresses/city.json').then(res => res.json()),
-                fetch('/addresses/barangay.json').then(res => res.json()),
+                fetch('{{asset("addresses/region.json")}}').then(res => res.json()),
+                fetch('{{asset("addresses/province.json")}}').then(res => res.json()),
+                fetch('{{asset("addresses/city.json")}}').then(res => res.json()),
+                fetch('{{asset("addresses/barangay.json")}}').then(res => res.json()),
             ]);
 
             this.regions = regions;
