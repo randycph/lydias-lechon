@@ -28,6 +28,11 @@ class GlobalSearchController extends Controller
                 'fields' => ['name', 'short_description', 'description'],
                 'status' => 'PUBLISHED',
             ],
+            'ProductCategory' => [
+                'class' => \App\Models\ProductCategory::class,
+                'fields' => ['name', 'description'],
+                'status' => 'PUBLISHED',
+            ],
             'Article' => [
                 'class' => \App\Models\Article::class,
                 'fields' => ['name', 'contents', 'teaser'],
@@ -65,11 +70,28 @@ class GlobalSearchController extends Controller
                 });
             }
 
+            if ($modelName === 'Product') {
+                $query->with(['photos' => function ($q) {
+                    $q->limit(1);
+                }]);
+            }
+
             if ($modelName === 'Product' && $modelResults->isNotEmpty()) {
                 $modelResults = $modelResults->map(function ($product) {
                     $slug = Str::slug($product->slug ?? $product->name, '-');
                     $product->product_url = route('lechon-menu') . '?product=' . urlencode($slug);
+                    $product->photo_url = $product->photos->first()?->path 
+                        ? asset('storage/products/' . $product->photos->first()->path) 
+                        : null;
                     return $product;
+                });
+            }
+
+            if ($modelName === 'ProductCategory' && $modelResults->isNotEmpty()) {
+                $modelResults = $modelResults->map(function ($category) {
+                    $slug = Str::slug($category->slug ?? $category->name, '-');
+                    $category->product_category_url = route('lechon-menu') . '?s=' . urlencode($slug);
+                    return $category;
                 });
             }
         
