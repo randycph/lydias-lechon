@@ -85,7 +85,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 lechons pb-10 container">
             @foreach ($products as $product)
             <div class="bg-white shadow-md rounded-lg  border-primary border lechon flex flex-col justify-between">
-                <img src="{{ asset('storage/products/' .  $product?->photos[0]?->path) }}" alt="{{ $product->name }}" class="px-4" onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'">
+                <img src="{{ asset('storage/products/' .  $product->photos?->first()?->path) }}" alt="{{ $product->name }}" class="px-4" onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'">
                 <div class="mt-4 px-4">
                     <h2 class="text-2xl lg:text-3xl font-cubao font-medium text-primary text-left">{{ $product->name }}</h2>
                     <div class="text-tertiary text-2xl lg:text-5xl font-semibold mt-2">₱{{ number_format($product->price, 2) }}</div>
