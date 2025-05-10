@@ -91,6 +91,7 @@ class GlobalSearchController extends Controller
                 $modelResults = $modelResults->map(function ($category) {
                     $slug = Str::slug($category->slug ?? $category->name, '-');
                     $category->product_category_url = route('lechon-menu') . '?s=' . urlencode($slug);
+                    $category->photo_url = $category->image ? asset('images/category/' . $category->image)  : null;
                     return $category;
                 });
             }

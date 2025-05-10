@@ -78,7 +78,7 @@
                             <template x-for="(item, index) in results['ProductCategory'].slice(0, 100)" :key="item.id">
                                 <a :href="item.product_category_url" class="flex justify-between gap-x-6 py-3 hover:bg-gray-100 cursor-pointer rounded-md">
                                     <div class="flex min-w-0 gap-x-4">
-                                        <img class="size-12 flex-none object-left object-cover rounded-full bg-gray-50" :src="item.image ? ('/images/category/' + item.image) : '{{ asset('images/no-image.jpg') }}'" alt="Product" onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}';">
+                                        <img class="size-12 flex-none object-left object-cover rounded-full bg-gray-50" :src="item.photo_url || '{{ asset('images/no-image.jpg') }}'" alt="Product" onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}';">
                                         <div class="min-w-0 flex-auto">
                                             <p class="lg:text-lg text-base font-semibold text-gray-900" x-text="item.title || item.name"></p>
                                             <p class="truncate lg:text-base/5 text-sm text-gray-500" x-text="item.price ? '₱' + item.price : ''"></p>
