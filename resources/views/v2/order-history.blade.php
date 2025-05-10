@@ -66,7 +66,15 @@
                         <div class="flex items-start font-bold flex-col gap-2  py-5 border-b border-[#DFDFDF]">
                                         
                             <div class="flex flex-col items-center gap-8 px-4 py-3 border-b border-[#DFDFDF] w-full">
+                                @php
+                                    $total = 0;
+                                @endphp
+                                
                                 @foreach ($sale->items as $cart)
+                                    @php
+                                        $itemTotal = $cart->price * $cart->qty;
+                                        $total += $itemTotal;
+                                    @endphp
                                     <div class="flex gap-4 items-start w-full relative">
                                         <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="w-20 h-20 min-w-20 min-h-20 object-cover overflow-hidden rounded-md bg-center">
                                             <img src="{{ asset('storage/products/' . $cart->product->photos[0]->path) }}" alt="Checkout" class="w-20 h-20 object-cover">
@@ -75,35 +83,45 @@
                                             <div class="font-bold">{{ $cart->product->name }}</div>
                                             <div class="text-sm text-gray-600 font-medium">QTY: {{ $cart->qty }}</div>
                                         </div>
-                                        <div class="text-sm text-black font-bold text-right w-full absolute right-0 bottom-0">₱{{ number_format($cart['price'], 2) }}</div>
+                                        <div class="text-sm text-black font-bold text-right w-full absolute right-0 bottom-0">₱{{ number_format($itemTotal, 2) }}</div>
                                     </div>
                                 @endforeach
             
-                                <div class="flex items-center justify-between w-full">
+                                <div class="flex items-center justify-between w-full mt-4">
                                     <div class="text-sm text-black font-bold">{{ count($sale->items) }} items</div>
-                                    <div class="text-sm text-black font-bold">₱{{ number_format($cart->price * $cart->qty, 2) }}</div>
+                                    <div class="text-sm text-black font-bold">₱{{ number_format($total, 2) }}</div>
                                 </div>
                             </div>
                             <div class="w-full flex flex-col gap-2 px-4 mt-4 lg:flex-row justify-between">
-                                @if (strtolower($sale->payment_status) != 'paid')
-                                    <div class="flex flex-col lg:flex-row gap-2 order-1 lg:order-2">
-                                        <button @click="paymentMethodModal = true" type="button"
-                                            class="order-1 lg:order-2 text-white bg-primary custom-btn btn-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
-                                            Pay Now
-                                        </button>
-                                        <button @click="trackOrderModal = true" type="button"
-                                            class="order-2 lg:order-1 custom-btn btn-primary-dark text-primary border hover:text-white border-primary bg-white hover:bg-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
-                                            Track Order
-                                        </button>
-                                    </div>
-                                    <div class="order-2 lg:order-1">
+    
+                                {{-- Left side: Cancel Order --}}
+                                <div class="lg:order-1 order-2 w-full lg:w-auto">
+                                    @if (strtolower($sale->payment_status) != 'paid')
                                         <button @click="cancelOrderModal = true" type="button"
                                             class="text-white custom-btn btn-tertiary-dark bg-tertiary hover:bg-secondary font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
                                             Cancel Order
                                         </button>
-                                    </div>
-                                @endif
+                                    @endif
+                                </div>
+                            
+                                {{-- Right side: Pay Now and Track Order --}}
+                                <div class="flex flex-col lg:flex-row gap-2 order-1 lg:order-2 justify-end w-full lg:w-auto">
+                                    @if (strtolower($sale->payment_status) == 'paid')
+                                        <button @click="trackOrderModal = true" type="button"
+                                            class="custom-btn btn-primary-dark text-primary border hover:text-white border-primary bg-white hover:bg-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
+                                            Track Order
+                                        </button>
+                                    @endif
+                                    @if (strtolower($sale->payment_status) != 'paid')
+                                    <button @click="paymentMethodModal = true" type="button"
+                                        class="text-white bg-primary custom-btn btn-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
+                                        Pay Now
+                                    </button>
+                                    @endif
+                                </div>
+                            
                             </div>
+                            
                         </div>
                     </div>
                     @endforeach
