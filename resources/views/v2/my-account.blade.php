@@ -21,7 +21,7 @@
                                 <label for="firstname" class="block mb-2 font-bold text-gray-900">First Name <span class="text-red-800">*</span> </label>
                                 <input type="text" id="firstname" name="firstname" value="{{ auth()->user()->firstname }}"
                                     class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                                    placeholder="Randy" required />
+                                    placeholder="" required />
                                 
                                 @error('firstname')
                                     <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
@@ -32,9 +32,20 @@
                                 <label for="lastname" class="block mb-2 font-bold text-gray-900">Last Name <span class="text-red-800">*</span> </label>
                                 <input type="text" id="lastname" name="lastname" value="{{ auth()->user()->lastname }}"
                                     class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                                    placeholder="Corpuz" required />
+                                    placeholder="" required />
 
                                 @error('lastname')
+                                    <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+                                @enderror
+
+                            </div>
+                            <div class="mb-5">
+                                <label for="email" class="block mb-2 font-bold text-gray-900">Email address <span class="text-red-800">*</span> </label>
+                                <input type="email" id="email" name="email" value="{{ auth()->user()->email }}"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                                    placeholder="" required />
+
+                                @error('email')
                                     <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
                                 @enderror
 
