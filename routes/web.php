@@ -19,9 +19,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-
-Auth::routes(['verify' => true]);
-
+use Illuminate\Support\Str;
 Route::group(['prefix' => 'v2'], function () {
     Route::get('/home', function () {
         $categories = ProductCategory::where('status', 'PUBLISHED')->get();
@@ -251,12 +249,15 @@ Route::group(['prefix' => 'v2'], function () {
     })->name('article');    
 });
 
+Auth::routes(['verify' => true]);
+
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
 Route::get('/search', [GlobalSearchController::class, 'search'])->name('global.search');
 
 Route::post('/signup-store', function(Request $request) {
+    // dd($request->all());
     try {
         $validated = $request->validate([
             'email' => 'required|email|unique:users,email',
@@ -273,6 +274,7 @@ Route::post('/signup-store', function(Request $request) {
             'birth_date' => 'required_if:account_type,individual|date',
             'org_name' => [
                 'required_if:account_type,organization',
+                'nullable',
                 'regex:/^[A-Za-z\s\-]+$/'
             ],
             'address_street' => 'required_if:country,Philippines|string',
@@ -280,10 +282,10 @@ Route::post('/signup-store', function(Request $request) {
             'address_municipality' => 'required_if:country,Philippines|string',
             'address_region' => 'required_if:country,Philippines|string',
             'address_brgy' => 'required_if:country,Philippines|string',
-            'international_address' => 'required_unless:country,Philippines|string',
+            'international_address' => 'nullable|required_unless:country,Philippines|string',
             'mobile' => 'required|string',
         ]);
-
+    
         if ($request->account_type == 'organization') {
             $user = User::create([
                 'name' => $request->org_name,
@@ -341,6 +343,7 @@ Route::post('/signup-store', function(Request $request) {
 
         return redirect()->route('login')->with('success', 'Registration successful!');
     } catch (\Throwable $th) {
+        dd($th);
         throw $th;
     }
 
@@ -363,6 +366,7 @@ Route::post('save-personal-information', function(Request $request) {
         ],
         'birthday' => 'required|date',
         'contact_mobile' => 'required|string',
+        'email' => 'required|email|max:191|unique:users,email,' . auth()->id(), 
     ]);
 
     $user = auth()->user();
@@ -1018,7 +1022,7 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
 #####################################################################################################################################################
 
 // Pages Frontend
-Route::get('/{any}', 'FrontController@page')->where('any', '.*');  //// REMOVE FRONT END 1
+// Route::get('/{any}', 'FrontController@page')->where('any', '.*');  //// REMOVE FRONT END 1
 
 //Route::get('/{slug}', 'FrontController@page');
 //Route::get('{all}','FrontController@page');
