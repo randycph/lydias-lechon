@@ -30,6 +30,8 @@ class GoogleController extends Controller
                 }
             } else {
                 $user = User::create([
+                    'firstname' => $googleUser->user['given_name'] ?? '',
+                    'lastname' => $googleUser->user['family_name'] ?? '',
                     'name' => $googleUser->getName(),
                     'email' => $googleUser->getEmail(),
                     'google_id' => $googleUser->getId(),
