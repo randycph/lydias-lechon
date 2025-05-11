@@ -40,7 +40,7 @@ class GoogleController extends Controller
     
             Auth::login($user);
     
-            return redirect()->intended('/my-account')->with('success', 'Login successful!');
+            return redirect()->route('my-account')->with('success', 'Login successful!');
     
         } catch (\Exception $e) {
             return redirect('/login')->withErrors(['error' => 'Google login failed. Please try again.']);
