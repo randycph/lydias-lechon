@@ -189,6 +189,7 @@ return [
 
     'aliases' => Facade::defaultAliases()->merge([
         'Setting' => App\Helpers\Webfocus\Setting::class,
+        'Socialite' => Laravel\Socialite\Facades\Socialite::class,
     ])->toArray(),
 
 ];
