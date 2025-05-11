@@ -339,9 +339,9 @@ Route::post('/signup-store', function(Request $request) {
             ]);
         }
 
-        // Auth::login($user);
+        Auth::login($user);
 
-        return redirect()->route('login')->with('success', 'Registration successful!');
+        return redirect()->route('my-account')->with('success', 'Account created successfully!');
     } catch (\Throwable $th) {
         dd($th);
         throw $th;
