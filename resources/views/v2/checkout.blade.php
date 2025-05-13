@@ -496,7 +496,7 @@
                             <div>
                                 <form
                                     x-data="{ isFormSubmitting: false }"
-                                    @submit="isFormSubmitting = true"
+                                    @submit="isFormSubmitting = true; setTimeout(() => { this.depositModal = true}, 3000)"
                                     action="{{ route('paymaya.pay') }}" method="POST" enctype="multipart/form-data" class="flex flex-col">
                                     @csrf
                                     <input type="hidden" name="sales_header_id" :value="paymentDetails.order_number">
