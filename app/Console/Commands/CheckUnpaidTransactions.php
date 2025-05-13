@@ -22,22 +22,20 @@ class CheckUnpaidTransactions extends Command
             ->whereDate('created_at', '>', $now->copy()->subDays(5))
             ->get();
 
-            logger($remind);
-
         foreach ($remind as $order) {
             Mail::to($order->user->email)->send(new \App\Mail\UnpaidReminderMail($order));
         }
 
-        // // Transactions unpaid for 5+ days — cancel them
-        // $cancel = SalesHeader::where('payment_status', 'UNPAID')
-        //     ->whereDate('created_at', '<=', $now->copy()->subDays(5))
-        //     ->get();
+        // Transactions unpaid for 5+ days — cancel them
+        $cancel = SalesHeader::where('payment_status', 'UNPAID')
+            ->whereDate('created_at', '<=', $now->copy()->subDays(5))
+            ->get();
 
-        // foreach ($cancel as $order) {
-        //     $order->update(['status' => 'CANCELLED']);
+        foreach ($cancel as $order) {
+            $order->update(['status' => 'CANCELLED']);
 
-        //     Mail::to($order->user->email)->send(new \App\Mail\OrderCancelledMail($order));
-        // }
+            Mail::to($order->user->email)->send(new \App\Mail\OrderCancelledMail($order));
+        }
 
         $this->info('Unpaid transaction reminders sent and expired orders cancelled.');
     }
