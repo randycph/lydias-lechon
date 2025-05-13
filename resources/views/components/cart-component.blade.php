@@ -68,6 +68,19 @@ x-data="{
         this.shippingMethod = method;
         document.cookie = `shipping_method=${method}; path=/; max-age=31536000;`;
     },
+    handleCheckout(auth) {
+        if (this.shippingMethod == '') {
+            alert('Please select a shipping method');
+            return;
+        }
+        if (this.isGuest || auth == 1) {
+            window.location.href = '{{ route('checkout') }}';
+        } else {
+            // Use Laravel session redirect
+            window.location.href = '{{ route('login') }}?redirect={{ urlencode(route('checkout')) }}';
+        }
+    },
+    isGuest: false,
 }"
 @fetch-cart.window="init()"
 >
@@ -186,8 +199,20 @@ x-data="{
                             </div>
                             
                             <div class="px-6 w-full flex">
-                                <a href="{{ route('checkout') }}" class="bg-primary custom-btn btn-primary-dark text-white text-center px-6 py-3 rounded-md mt-10 w-full">Checkout</a>
+                                <button 
+                                    @click="handleCheckout('{{ auth()->check() }}')" 
+                                    type="button"
+                                    class="bg-primary custom-btn btn-primary-dark text-white text-center px-6 py-3 rounded-md mt-10 w-full"
+                                >
+                                    Checkout
+                                </button>
                             </div>
+                            @if (!auth()->check())
+                            <div class="flex gap-1 justify-center items-center">
+                                <input type="checkbox" id="guest-checkout" x-model="isGuest" class="border border-gray-300 focus:ring-2 focus:ring-primary h-4 w-4 text-primary" />
+                                <label for="guest-checkout" class="text-sm text-gray-600">Check out as a Guest</label>
+                            </div>
+                            @endif
                         </div>
                     </div>
                 </template>

@@ -4,7 +4,7 @@
     </div>
     <div class="flex items-start font-bold gap-4 flex-col px-6 py-5 border-b border-[#DFDFDF]">
         <div class="">Hi, {{ auth()->check() && auth()->user()?->is_org ? auth()->user()->organization : auth()->user()?->name }}</div>
-        <div class="text-tertiary  underline"><a href="{{ route('account.logout') }}">Sign out</a></div>
+        <div class="text-tertiary  underline"><a href="{{ route('user-logout') }}">Sign out</a></div>
     </div>
     <div class="flex items-start font-bold flex-col gap-2  py-5 border-b border-[#DFDFDF]">
 

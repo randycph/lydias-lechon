@@ -29,6 +29,7 @@ use DateTime;
 
 use Carbon\Carbon;
 use Cookie;
+use Illuminate\Support\Str;
 
 
 class CartController extends Controller
@@ -652,7 +653,7 @@ class CartController extends Controller
                 $user = $this->create_guest_account();
             }
             $customer_name = $request->name;
-            $user->contact_mobile = $request->gcontact;
+            $user->contact_mobile = $request->mobile;
             $user->email = $request->email;
             $user->contact_mobile = $request->mobile;
             $carts = collect(session('cart', []));
@@ -708,7 +709,7 @@ class CartController extends Controller
         
         $salesHeader = SalesHeader::create([
             'user_id' => $user->id,
-            'email' => $user->email,
+            'email' => $user->email ?? $request->email,
             'order_number' => $requestId,
             'customer_name' => $customer_name,
             'customer_contact_number' => $customer_contact_number,
@@ -853,18 +854,16 @@ class CartController extends Controller
             //     ]);
             // }
         }
-      
         if (auth()->guest()) {
-            //session()->forget('cart');  
-            Mail::to($user)->send(new SalesCompleted($salesHeader));   
-            $carted = array();            
+            Mail::to($user->email ?? $request->email)->send(new SalesCompleted($salesHeader));   
+            $carted = array();
             session(['cart' => $carted]);
         }
         else{
-            Mail::to($user)->send(new SalesCompletedRegistered($salesHeader)); 
+            Mail::to($user->email ?? $request->email)->send(new SalesCompletedRegistered($salesHeader)); 
             Cart::where('user_id', $user->id)->delete();
         }
-        Mail::to(env('EMAIL_ADMIN'))->send(new SalesCompletedAdmin($salesHeader));
+        Mail::to(config('app.email'))->send(new SalesCompletedAdmin($salesHeader));
         $email_to_branch = $this->email_to_branch($salesHeader);
 
         if(strlen($salesHeader->customer_contact_number) > 1){
@@ -1157,7 +1156,7 @@ class CartController extends Controller
             'Guest',
             'wsiphproduction@gmail.com',
             'web',
-            str_random(10),
+            STR::random(10),
             1
         ];
 

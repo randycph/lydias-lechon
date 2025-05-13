@@ -25,6 +25,9 @@
         
                     <form method="POST" class="mt-5" action="{{ route('customer-front.customer_login') }}">
                         @csrf
+                        @if(request()->has('redirect'))
+                            <input type="hidden" name="redirect" value="{{ request()->get('redirect') }}">
+                        @endif
                         <div class="mb-5">
                             <label for="email" class="block mb-2 font-bold text-gray-900 ">Email Address</label>
                             <input type="email" id="email" name="email" value="{{ old('email') }}"
@@ -71,6 +74,16 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const redirectUrl = localStorage.getItem('redirect_after_login');
+        if (redirectUrl) {
+            localStorage.removeItem('redirect_after_login');
+            window.location.href = redirectUrl;
+        }
+    });
+</script>
     
 <x-footer-component />
 

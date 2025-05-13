@@ -554,6 +554,10 @@
                             </div>
                         </div>
                     </template>
+                    
+                    @if(request()->has('redirect'))
+                        <input type="hidden" name="redirect" value="{{ request()->get('redirect') }}">
+                    @endif
         
                 </form>
             </div>

@@ -135,8 +135,10 @@ Route::group(['prefix' => 'v2'], function () {
         $page = 'signup';
         return view('v2.signup', compact('page'));
     })->name('signup');
-    Route::get('/my-account', function () {
+    Route::get('/my-account', function (Request $request) {
         $page = 'my-account';
+
+        $request->session()->forget('redirect_after_login');
         
         if (!auth()->check()) {
             return redirect()->route('login');
@@ -248,6 +250,17 @@ Route::group(['prefix' => 'v2'], function () {
         return view('v2.article', compact('category', 'slug', 'article', 'next', 'previous', 'relatedNews'));
     })->name('article');    
 });
+// Logout
+Route::get('/user-logout', function (Request $request) {
+
+    $request->session()->forget('redirect_after_login');
+
+    $request->session()->invalidate();
+
+    $request->session()->regenerateToken();
+
+    return redirect()->route('index');
+})->name('user-logout');
 
 Auth::routes(['verify' => true]);
 
@@ -341,7 +354,8 @@ Route::post('/signup-store', function(Request $request) {
 
         Auth::login($user);
 
-        return redirect()->route('my-account')->with('success', 'Account created successfully!');
+        $redirectTo = $request->input('redirect') ?? route('my-account');
+        return redirect()->intended($redirectTo);
     } catch (\Throwable $th) {
         dd($th);
         throw $th;

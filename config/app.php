@@ -17,6 +17,7 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
+    'email' => env('EMAIL_ADMIN', 'orders@lydias-lechon.com'),
 
     /*
     |--------------------------------------------------------------------------

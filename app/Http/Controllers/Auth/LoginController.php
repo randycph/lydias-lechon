@@ -25,8 +25,10 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/index';
-
+    public function redirectTo()
+    {
+        return session('url.intended') ?? route('index');
+    }
     /**
      * Create a new controller instance.
      *

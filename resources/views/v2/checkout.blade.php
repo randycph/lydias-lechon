@@ -196,7 +196,7 @@
                                                     <div class="w-full lg:w-1/2">
                                                         <label class="font-bold block text-sm mb-1">Contact Person</label>
                                                         <input type="text" x-model="delivery.name"
-                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="Full Name" />
+                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" />
                                                     </div>
                                                     <div class="w-full lg:w-1/2">
                                                         <label class="font-bold block text-sm mb-1">Contact Number</label>
@@ -315,7 +315,7 @@
                                         class="text-red-700">*</span></label>
                                 <input type="text" id="delivery_address" name="delivery_address" value="{{ auth()->check() ? auth()->user()->address_street : '' }}"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                                    placeholder="" required />
+                                    placeholder="" />
                                 </div>
                             </template>
                         </div>
@@ -334,7 +334,7 @@
                                             class="text-red-700">*</span></label>
                                     <input type="text" id="name" name="name" value="{{ auth()->check() ? auth()->user()->name : '' }}"
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                                        placeholder="Randy ..." required />
+                                        placeholder="" required />
 
                                     @error('name')
                                         <div class="text-red-500 text-sm mt-1">
@@ -362,7 +362,7 @@
                                             class="text-red-700">*</span></label>
                                     <input type="email" id="email" name="email" value="{{ auth()->check() ? auth()->user()->email : '' }}"
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                                        placeholder="email@email.com" required />
+                                        placeholder="" required />
 
                                     @error('email')
                                         <div class="text-red-500 text-sm mt-1">

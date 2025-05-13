@@ -192,7 +192,8 @@ class CustomerFrontController extends Controller
 
             }
 
-            return redirect(route('my-account'));
+            $redirectTo = $request->input('redirect') ?? route('my-account');
+            return redirect()->intended($redirectTo);
         } else {
             // Auth::logout();
             return back()->with('error', __('auth.login.incorrect_input'))->withErrors(['email' => 'Invalid credentials.']);
