@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\EcommerceModel\Branch;
 use App\Helpers\ListingHelper;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 
 class BranchController extends Controller
 {
@@ -47,6 +47,7 @@ class BranchController extends Controller
             'hotline' => $request->hotline,
             'branch_type' => $request->branch_type,
             'pickup_branch' => (isset($request->pickup_branch) ? 1 : 0),
+            'delivery_branch' => (isset($request->delivery_branch) ? 1 : 0),
             'token' => $request->token,
             'user_id' => Auth::id()
         ]);
@@ -80,6 +81,7 @@ class BranchController extends Controller
             'hotline' => $request->hotline,
             'branch_type' => $request->branch_type,
             'pickup_branch' => (isset($request->pickup_branch) ? 1 : 0),
+            'delivery_branch' => (isset($request->delivery_branch) ? 1 : 0),
             'token' => $request->token,
             'user_id' => Auth::id()
         ]);

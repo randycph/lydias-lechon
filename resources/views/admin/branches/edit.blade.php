@@ -58,7 +58,11 @@
                         </div>
                         <div class="form-group mg-b-20">
                             <input type="checkbox" name="pickup_branch" id="pickup_branch" @if($branches->pickup_branch=='1') checked="checked" @endif>
-                            <label class="mg-b-5 tx-color-03">Pickup Branch</label>                                
+                            <label class="mg-b-5 tx-color-03" for="pickup_branch">Pickup Branch</label>                                
+                        </div>
+                        <div class="form-group mg-b-20">
+                            <input type="checkbox" name="delivery_branch" id="delivery_branch" @if($branches->delivery_branch=='1') checked="checked" @endif>
+                            <label class="mg-b-5 tx-color-03" for="delivery_branch">Delivery Branch</label>                                
                         </div>
                         <div class="form-group" style="display:none;">
                             <label class="d-block">Token *</label>

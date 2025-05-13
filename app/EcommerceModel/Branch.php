@@ -2,7 +2,7 @@
 
 namespace App\EcommerceModel;
 
-use App\ActivityLog;
+use App\Models\ActivityLog;
 use App\Models\BranchNumbers;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -12,7 +12,7 @@ class Branch extends Model
     use SoftDeletes;
 
     protected $table = 'branches';
-    protected $fillable = ['name', 'code', 'address', 'contact_nos', 'contact_person','email_address','user_id', 'created_by','token','last_sync','hotline', 'branch_type','pickup_branch'];
+    protected $fillable = ['name', 'code', 'address', 'contact_nos', 'contact_person','email_address','user_id', 'created_by','token','last_sync','hotline', 'branch_type','pickup_branch', 'delivery_branch'];
 
     // Need to change every model
     static $oldModel;
