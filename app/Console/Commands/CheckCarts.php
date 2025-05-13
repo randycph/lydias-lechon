@@ -35,12 +35,16 @@ class CheckCarts extends Command
             $oldestCart = $userCarts->sortBy('created_at')->first();
             $created = Carbon::parse($oldestCart->created_at);
             $diffInDays = $created->diffInDays($now);
+
+            logger()->info('User ID: ' . $diffInDays);
     
-            if ($diffInDays == 4) {
+            if ($diffInDays >= 2) {
                 // Send reminder email with all their cart items
                 Mail::to($user->email)->send(new CartReminderMail($userCarts));
                 $this->info('Reminder sent to ' . $user->email);
-            } elseif ($diffInDays > 5) {
+            } 
+            
+            if ($diffInDays >= 5) {
                 // Delete all their cart items
                 foreach ($userCarts as $cart) {
                     $cart->delete();
