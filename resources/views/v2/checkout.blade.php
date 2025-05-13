@@ -146,6 +146,8 @@
                                     Delivery
                                 </button>
                             </div>
+                            
+                            <template x-if="method === 'pickup'">
                             <div class="mt-4">	
                                 <label for="branches" class="font-bold">Select Branch <span
                                         class="text-red-700">*</span></label>
@@ -157,6 +159,7 @@
                                     @endforeach
                                 </select>
                             </div>
+                            </template>
                             
                             <template x-if="!allowMultiple">
                             <div class="mt-4">	
@@ -212,7 +215,11 @@
                                                         <select @change="delivery.order = JSON.parse($event.target.value); updateAvailableQty(delivery)" class="w-full border border-gray-300 p-2 rounded-md">
                                                             <option selected value="">Select Order</option>
                                                             <template x-for="order in getAvailableOrders()" :key="order.id">
-                                                                <option :value="JSON.stringify(order)" x-text="order.product.name"></option>
+                                                                <option 
+                                                                    :value="JSON.stringify(order)" 
+                                                                    :disabled="order.qty === 0"
+                                                                    x-text="order.product.name + (order.qty === 0 ? ' (Unavailable)' : '')"
+                                                                ></option>
                                                             </template>
                                                         </select>
                                                     </div>
@@ -638,10 +645,12 @@
 
                 if (this.errorMessage) {
                     this.hasErrorMessage = true;
+                    this.isSubmitting = false;
                     return;
                 }
-
+                
                 if (this.hasErrorMessage) {
+                    this.isSubmitting = false;
                     return;
                 }
 
@@ -684,10 +693,12 @@
 
                         this.isSubmitting = false;
                     } else {
+                        this.isSubmitting = false
                         alert('Error: ' + data.message);
-                    }
+                    };
                 })
                 .catch(async error => {
+                    this.isSubmitting = false;
                     let errText = await error.text();
                     console.error('Error:', errText);
                 });
@@ -811,26 +822,40 @@
                     return;
                 }
 
-                // Get total available qty from the selected product
-                let totalProductQty = delivery.order.qty;
+                const matchingOrder = this.orders.find(o => o.id === delivery.order.id);
+                const totalProductQty = matchingOrder ? matchingOrder.qty : 0;
 
-                // Calculate already assigned qty for this same product (excluding current delivery)
-                let alreadyAssignedQty = this.deliveries
+                // Sum qty already assigned (excluding current delivery)
+                const alreadyAssignedQty = this.deliveries
                     .filter(d => d !== delivery && d.order && d.order.id === delivery.order.id)
                     .reduce((sum, d) => sum + (parseInt(d.qty) || 0), 0);
 
-                // Compute remaining qty
-                let remainingQty = totalProductQty - alreadyAssignedQty;
+                // Only add currentQty back if it’s already set and for the correct product
+                const currentQty = (delivery.order && delivery.qty) ? parseInt(delivery.qty) : 0;
 
-                // Rebuild the available quantity options
-                delivery.availableQty = Array.from({ length: remainingQty }, (_, i) => i + 1);
+                const remainingQty = totalProductQty - alreadyAssignedQty;
+
+                //ensure we don't exceed the totalProductQty
+                const maxAvailable = totalProductQty - alreadyAssignedQty;
+
+                delivery.availableQty = Array.from({ length: maxAvailable }, (_, i) => i + 1);
+
+                console.log({
+                    totalProductQty,
+                    alreadyAssignedQty,
+                    currentQty,
+                    remainingQty,
+                    maxAvailable
+                });
+
+                if (currentQty > maxAvailable) {
+                    delivery.qty = '';
+                }
             },
 
             getAvailableOrders() {
-                // Create a shallow copy of orders
                 let availableOrders = JSON.parse(JSON.stringify(this.orders));
 
-                // Loop through each delivery and subtract assigned qty from the order
                 for (let delivery of this.deliveries) {
                     if (delivery.order) {
                         let matchingOrder = availableOrders.find(o => o.id === delivery.order.id);
@@ -840,8 +865,8 @@
                     }
                 }
 
-                // Only return orders that still have qty left
-                return availableOrders.filter(order => order.qty > 0);
+                // ✅ Return all orders (even if qty is 0)
+                return availableOrders;
             },
 
             canAddMoreDeliveries() {

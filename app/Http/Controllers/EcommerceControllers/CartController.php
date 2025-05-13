@@ -739,6 +739,7 @@ class CartController extends Controller
         $salesHeader->update([
             'order_number' => sprintf('%07d', $salesHeader->id)
         ]);
+        
         if ($request->has('deliveries')) {
             $deliveries = json_decode($request->deliveries ?? '');
             if ($deliveries && count($deliveries) > 0) {
@@ -854,13 +855,15 @@ class CartController extends Controller
             //     ]);
             // }
         }
+
+        $recipient = $user->email ?: $request->email;
+
         if (auth()->guest()) {
-            Mail::to($user->email ?? $request->email)->send(new SalesCompleted($salesHeader));   
+            Mail::to($recipient)->send(new SalesCompleted($salesHeader));   
             $carted = array();
             session(['cart' => $carted]);
-        }
-        else{
-            Mail::to($user->email ?? $request->email)->send(new SalesCompletedRegistered($salesHeader)); 
+        } else{
+            Mail::to($recipient)->send(new SalesCompletedRegistered($salesHeader)); 
             Cart::where('user_id', $user->id)->delete();
         }
         Mail::to(config('app.email'))->send(new SalesCompletedAdmin($salesHeader));
@@ -868,7 +871,7 @@ class CartController extends Controller
 
         if(strlen($salesHeader->customer_contact_number) > 1){
             $sms = new Sms();
-            $sms->send_sms($salesHeader->customer_contact_number, 'new_order', $salesHeader);
+            // $sms->send_sms($salesHeader->customer_contact_number, 'new_order', $salesHeader);
         }
 
         $merchantkey = '2amqVf04H9';
