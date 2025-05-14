@@ -3,7 +3,7 @@ import vue from '@vitejs/plugin-vue2'
 import laravel from 'laravel-vite-plugin'
 
 export default defineConfig({
-    base: '/lydias_v2/public/',
+    base: '/lydias_v2/build/',
     plugins: [
         laravel({
             input: [
