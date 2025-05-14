@@ -413,6 +413,10 @@ Route::post('save-delivery-address', function(Request $request) {
 
 })->name('save-delivery-address');
 
+Route::get('/admin/login', function() {
+    return view('auth.login');
+})->name('admin.login');
+
 Route::post('/signup-validate-fields', function(Request $request) {
     $step = $request->input('step');
 
