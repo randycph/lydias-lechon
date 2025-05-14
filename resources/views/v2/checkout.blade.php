@@ -6,7 +6,7 @@
 @php
     $total = 0;
     $deliveryFee = 0;
-    if (count($carts) > 1) {
+    if (count($carts) > 0) {
         foreach ($carts as $cart) {
             $total += $cart['price'] * $cart['qty'];
         }
@@ -26,8 +26,10 @@
             @submit.prevent="submitForm" class="pb-20 px-4">
             <div class="pt-20 pb-5 px-4">
                 <h1 class="text-4xl lg:text-7xl font-cubao font-medium text-primary text-center mt-10">Checkout</h1>
+                @if ($carts && count($carts) > 0)
                 <h3 class="font-medium lg:text-2xl text-center">You're almost there! Review your order details, choose your payment
                     method, and finalize your purchase to enjoy your Lydia's Lechon meal.</h3>
+                @endif
             </div>
 
             @if ($carts->isEmpty())
@@ -90,7 +92,7 @@
                         <div class="border-t border-gray-200 mt-2 pt-3 pb-1 gap-1 flex flex-col text-sm lg:text-base px-3">
                             <div class="flex justify-between">
                                 <span class="font-medium text-gray-800">Subtotal</span>
-                                <span class="font-medium">₱{{ number_format($total, 2) }}</span>
+                                <span class="font-medium" >₱{{ number_format($total, 2) }}</span>
                             </div>
                             <template x-if="deliveryFees.length == 0 && !allowMultiple">
                             <div class="flex justify-between lg:mt-2">
@@ -154,7 +156,7 @@
                                 <select id="branches" name="delivery_branch" @change="getDeliveryFee" x-ref="branch" required
                                     class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                     <option selected value="">Choose a branch</option>
-                                    @foreach ($branches as $branch)
+                                    @foreach ($pickupBranches as $branch)
                                         <option value="{{ $branch->name }}">{{ $branch->name }}</option>
                                     @endforeach
                                 </select>
@@ -409,24 +411,30 @@
                                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 "
                                                 placeholder="Select date">
                                         </div>
+                                        <div x-show="noNeededDate" class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
+                                            Please select a date.
+                                        </div>
                                     </div>
                                     <div class="my-2 w-full lg:w-1/2">
-                                        <label for="time"
-                                            class="block mb-2 text-sm font-bold text-gray-900">Select Time <span
-                                                class="text-red-700">*</span></label>
                                         <div class="relative">
-                                            <div
-                                                class="absolute inset-y-0 end-0 top-0 flex items-center pe-3.5 pointer-events-none">
-                                                <svg class="w-4 h-4 text-gray-500 " aria-hidden="true"
-                                                    xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path fill-rule="evenodd"
-                                                        d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z"
-                                                        clip-rule="evenodd" />
-                                                </svg>
-                                            </div>
-                                            <input @change="validateDateTime" x-model="need_time" type="time" id="time" name="need_time" value="{{ old('need_time') }}"
-                                                class="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                                             value="00:00" required />
+                                            <label for="need_time" class="block mb-2 text-sm font-bold text-gray-900">Select Time <span class="text-red-700">*</span></label>
+                                            <select 
+                                                id="need_time" 
+                                                name="need_time" 
+                                                x-model="need_time" 
+                                                @change="validateDateTime"
+                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                                            >
+                                                <option value="">Select Hour</option>
+                                                <template x-for="hour in 24" :key="hour">
+                                                    <option :value="(hour < 10 ? '0' + hour : hour) + ':00'" 
+                                                            x-text="(hour < 10 ? '0' + hour : hour) + ':00'">
+                                                    </option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                        <div x-show="noNeededTime" class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
+                                            Please select a time.
                                         </div>
                                     </div>
                                 </div>
@@ -618,6 +626,8 @@
             hasErrorMessage: false,
             isSubmitting: false,
             isPaymentLoading: false,
+            noNeededTime: false,
+            noNeededDate: false,
             submitCouponCode() {
                 if (this.couponCode != '') {
                     this.showMessage = true;
@@ -642,6 +652,20 @@
                 const formData = new FormData(this.formEl);
 
                 this.isSubmitting = true;
+                this.noNeededDate = false;
+                this.noNeededTime = false;
+
+                if (!this.need_time) {
+                    this.noNeededTime = true;
+                    this.isSubmitting = false;
+                    return;
+                }
+
+                if (!this.need_date) {
+                    this.noNeededDate = true;
+                    this.isSubmitting = false;
+                    return;
+                }
 
                 if (this.errorMessage) {
                     this.hasErrorMessage = true;
@@ -708,7 +732,7 @@
                 const location = this.$refs?.location?.value;
                 const branch = this.$refs?.branch?.value;
 
-                if (location && branch) {
+                if (location) {
 
                     try {
                         let response = await fetch('{{route('cart.front.get_shipping_fee')}}', {
@@ -719,7 +743,6 @@
                             },
                             body: JSON.stringify({
                                 location: location,
-                                branch: branch,
                             }),
                         }).then((response) => {
                             return response;
@@ -758,7 +781,7 @@
                 const branch = this.$refs.branch?.value;
                 const locations = this.deliveries.map(d => d.location).filter(Boolean);
 
-                if (!branch || locations.length === 0) return;
+                if (locations.length === 0) return;
 
                 try {
                     let response = await fetch('{{ route('cart.front.get_shipping_fee_for_multiple_address') }}', {
@@ -767,7 +790,7 @@
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         },
-                        body: JSON.stringify({ branch, locations }),
+                        body: JSON.stringify({ locations }),
                     });
 
                     if (!response.ok) throw new Error('Network error');
@@ -932,7 +955,24 @@
             },
 
             validateDateTime() {
-                if (!this.need_date || !this.need_time) return;
+
+                if (!this.need_time) {
+                    this.noNeededTime = true;
+                    return;
+                }
+
+                if (!this.need_date) {
+                    this.noNeededDate = true;
+                    return;
+                }
+
+                if (this.noNeededTime) {
+                    this.noNeededTime = false;
+                }
+
+                if (this.noNeededDate) {
+                    this.noNeededDate = false;
+                }
 
                 const selectedDateTime = new Date(`${this.need_date}T${this.need_time}`);
                 const now = new Date();
@@ -942,7 +982,7 @@
 
                 this.warningMessage = '';
 
-                if (diffInHours < 24) {
+                if (diffInHours <= 24) {
                     this.warningMessage = `⚠️ Warning! The date and time you've selected (${this.need_date} - ${this.formatTime(this.need_time)}) is less than 24 hours from now. Our standard processing time is at least 24 hours. However, you can still proceed by contacting our store directly at our <span class='underline text-blue-600 cursor-pointer' @click='openHotline = true'>Call Hotline</span> tab.`;
                     this.errorMessage = `⚠️ We are not able to accommodate your order base on your preferred date and time. Kindly refer to the warning message that appeared on your order screen or call our hotline at 89391221 / 89394665.  Thank you.`;
                 } else {

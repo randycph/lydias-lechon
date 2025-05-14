@@ -81,7 +81,6 @@
                                         <img class="size-12 flex-none object-left object-cover rounded-full bg-gray-50" :src="item.photo_url || '{{ asset('images/no-image.jpg') }}'" alt="Product" onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}';">
                                         <div class="min-w-0 flex-auto">
                                             <p class="lg:text-lg text-base font-semibold text-gray-900" x-text="item.title || item.name"></p>
-                                            <p class="truncate lg:text-base/5 text-sm text-gray-500" x-text="item.price ? '₱' + item.price : ''"></p>
                                         </div>
                                     </div>
                                 </a>
@@ -98,8 +97,8 @@
                                         <img class="size-12 flex-none object-left object-cover rounded-full bg-gray-50" :src="item.photo_url || '{{ asset('images/no-image.jpg') }}'" alt="Product" onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}';">
                                         <div class="min-w-0 flex-auto">
                                             <p class="lg:text-lg text-base font-semibold text-gray-900" x-text="item.title || item.name"></p>
-                                            <p class="truncate lg:text-base/5 text-sm text-gray-500" x-text="item.price ? '₱' + item.price : ''"></p>
-                                        </div>
+                                            <p class="truncate lg:text-base/5 text-sm text-gray-500"
+                                            x-text="item.price ? '₱' + parseFloat(item.price).toLocaleString('en-PH', { minimumFractionDigits: 2 }) : ''">                                        </div>
                                     </div>
                                 </a>
                             </template>

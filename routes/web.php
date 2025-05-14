@@ -102,12 +102,13 @@ Route::group(['prefix' => 'v2'], function () {
             $carts = collect(session('cart', [])); 
         }
 
-        $branches = Branch::orderBy('name', 'asc')->get();
+        $pickupBranches = Branch::orderBy('name', 'asc')->where('pickup_branch', 1)->get();
+
         $deliveryBranches = Branch::orderBy('name', 'asc')->where('delivery_branch', 1)->get();
 
         $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
 
-        return view('v2.checkout', compact('page', 'carts', 'branches', 'locations', 'deliveryBranches'));
+        return view('v2.checkout', compact('page', 'carts', 'pickupBranches', 'locations', 'deliveryBranches'));
     })->name('checkout');
     Route::get('/confirmation', function () {
         $page = 'confirmation';
