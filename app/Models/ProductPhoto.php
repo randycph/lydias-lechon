@@ -9,6 +9,7 @@ class ProductPhoto extends Model
 {
     public $table = 'product_photos';
     protected $fillable = [ 'product_id', 'name', 'description', 'status', 'is_primary', 'path', 'created_by' ];
+    protected $appends = ['url'];
 
     public function file_name()
     {
@@ -23,5 +24,10 @@ class ProductPhoto extends Model
     public function storage_path()
     {
         return asset('storage/products/'.$this->path);
+    }
+
+    public function getUrlAttribute()
+    {
+        return asset("storage/products/" . $this->path);
     }
 }
