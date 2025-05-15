@@ -55,7 +55,8 @@ Route::group(['prefix' => 'v2'], function () {
                         $q->limit(1);
                     },
                     'addonProducts' => function ($q) {
-                        $q->with(['photos' => function ($photoQuery) {
+                        $q->where('status', 'PUBLISHED')
+                        ->with(['photos' => function ($photoQuery) {
                             $photoQuery->limit(1);
                         }]);
                     }
