@@ -256,10 +256,10 @@ Route::group(['prefix' => 'v2'], function () {
 Route::get('/user-logout', function (Request $request) {
 
     $request->session()->forget('redirect_after_login');
-
     $request->session()->invalidate();
-
     $request->session()->regenerateToken();
+
+    Auth::logout();
 
     return redirect()->route('index');
 })->name('user-logout');
@@ -416,6 +416,19 @@ Route::post('save-delivery-address', function(Request $request) {
 Route::get('/admin/login', function() {
     return view('auth.login');
 })->name('admin.login');
+
+Route::post('/admin/login', function(Request $request) {
+    $credentials = $request->only('email', 'password');
+
+    if (Auth::attempt($credentials)) {
+        return redirect()->intended('admin/dashboard');
+    }
+
+    return redirect()->back()->withErrors([
+        'email' => 'The provided credentials do not match our records.',
+    ]);
+    
+})->name('admin.login-post');
 
 Route::post('/signup-validate-fields', function(Request $request) {
     $step = $request->input('step');

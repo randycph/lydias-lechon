@@ -16,7 +16,7 @@
         <div class="wd-100p">
             <h3 class="mg-b-3">Sign In</h3>
             <p class="tx-color-03 tx-14 mg-b-40">Welcome to {{ \App\Models\Setting::getWebsiteName() }} Admin Portal. Please sign in to continue.</p>
-            <form autocomplete="off" method="POST" action="{{ route('login') }}">
+            <form autocomplete="off" method="POST" action="{{ route('admin.login-post') }}">
                 @csrf
                 <div class="form-group {{ $errors->has('email') ? 'has-error' : '' }}">
                     <label for="email"><i class="tx-danger">*</i> Email</label>
