@@ -55,8 +55,7 @@ Route::group(['prefix' => 'v2'], function () {
                         $q->limit(1);
                     },
                     'addonProducts' => function ($q) {
-                        $q->where('status', 'PUBLISHED')
-                        ->with(['photos' => function ($photoQuery) {
+                        $q->with(['photos' => function ($photoQuery) {
                             $photoQuery->limit(1);
                         }]);
                     }
@@ -82,6 +81,7 @@ Route::group(['prefix' => 'v2'], function () {
                         ->pluck('product_id');
         
                     $fallbackAddons = Product::whereIn('id', $addonProductIds)
+                        ->where('status', 'PUBLISHED')
                         ->with(['photos' => function ($q) {
                             $q->limit(1);
                         }])
