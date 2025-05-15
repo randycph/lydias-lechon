@@ -25,6 +25,7 @@ class VerifyCsrfToken extends Middleware
         '*/paymaya-expired_wh',
         '*/paymaya-checkout_success',
         '*/paymaya-checkout_failure',
-        '*/paymaya-checkout_dropout'
+        '*/paymaya-checkout_dropout',
+        'admin/products/upload'
     ];
 }

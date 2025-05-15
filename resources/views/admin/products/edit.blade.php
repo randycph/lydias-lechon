@@ -603,6 +603,7 @@
             {
                 let data = new FormData();
                 data.append("banner", file);
+                data.append("_token", "{{ csrf_token() }}");
                 
                 $.ajax({
                     headers: {
