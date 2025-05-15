@@ -602,9 +602,12 @@
             function upload_image(file)
             {
                 let data = new FormData();
-                data.append("_token", "{{ csrf_token() }}");
                 data.append("banner", file);
+                
                 $.ajax({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: data,
                     type: "POST",
                     url: "{{ route('products.upload') }}",
