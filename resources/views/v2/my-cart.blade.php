@@ -39,7 +39,8 @@
         },
         init() {
             this.getCarts();
-            this.shippingMethod = document.cookie.split('; ').find(row => row.startsWith('shipping_method=')).split('=')[1] || 'pickup';
+            const cookie = document.cookie.split('; ').find(row => row.startsWith('shipping_method='));
+            this.shippingMethod = cookie ? cookie.split('=')[1] : 'pickup';
         },
         async removeCart(productid) {
             this.loading = true;
