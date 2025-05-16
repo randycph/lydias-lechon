@@ -121,7 +121,7 @@ x-data="{
                                     <div class="flex gap-4 items-center px-6">
                                         <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="w-20 h-20 object-cover rounded-md scale-110 bg-center">
                                             <template x-if="cart?.product?.photos.length > 0">
-                                                <img :src="'/storage/products/' + cart?.product?.photos[0]?.path" alt="Checkout" class="w-20 h-20 object-cover rounded-md scale-110" onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}';">
+                                                <img :src="cart?.product?.photos[0]?.url" alt="Checkout" class="w-20 h-20 object-cover rounded-md scale-110" onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}';">
                                             </template>
                                             <template x-if="cart?.product?.photos.length == 0">
                                                 <img src="{{ asset('images/no-image.jpg') }}" alt="placeholder">
