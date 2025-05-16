@@ -205,7 +205,7 @@
                                                     </div>
                                                     <div class="w-full lg:w-1/2">
                                                         <label class="font-bold block text-sm mb-1">Contact Number</label>
-                                                        <input type="text" x-model="delivery.phone"
+                                                        <input type="tel" x-mask="+99 999 999 9999" x-model="delivery.phone"
                                                             class="w-full border border-gray-300 p-2 rounded-md" placeholder="+63..." />
                                                     </div>
                                                 </div>
@@ -355,7 +355,7 @@
                                     <label for="mobile"
                                         class="block mb-2 text-sm font-bold text-gray-900">Mobile Number
                                         <span class="text-red-700">*</span></label>
-                                    <input type="tel" id="mobile" name="mobile" value="{{ auth()->check() ? auth()->user()->contact_mobile : '' }}"
+                                    <input type="tel" x-mask="+99 999 999 9999" id="mobile" name="mobile" value="{{ auth()->check() ? auth()->user()->contact_mobile : '' }}"
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                                         placeholder="+63" required />
 
