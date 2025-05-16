@@ -651,7 +651,8 @@
                 this.showMessage = false;
             },
             init() {
-                this.method = document.cookie?.split('; ')?.find(row => row.startsWith('shipping_method='))?.split('=')[1] || 'pickup';
+                const cookie = document.cookie.split('; ').find(row => row.startsWith('shipping_method='));
+                this.method = cookie ? cookie.split('=')[1] : 'pickup';
             },
 
             submitForm() {
