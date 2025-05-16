@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\GlobalSearchController;
+use App\Mail\WelcomeEmail;
 use App\Models\Article;
 use App\Models\ArticleCategory;
 use App\Models\Deliverablecities;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 Route::group(['prefix' => 'v2'], function () {
     Route::get('/home', function () {
@@ -287,18 +289,18 @@ Route::post('/signup-store', function(Request $request) {
                 'required_if:account_type,individual',
                 'regex:/^[A-Za-z\s\-]+$/'
             ],
-            'birth_date' => 'required_if:account_type,individual|date',
+            'birth_date' => 'nullable|date',
             'org_name' => [
                 'required_if:account_type,organization',
                 'nullable',
                 'regex:/^[A-Za-z\s\-]+$/'
             ],
-            'address_street' => 'required_if:country,Philippines|string',
-            'address_city' => 'required_if:country,Philippines|string',
-            'address_municipality' => 'required_if:country,Philippines|string',
-            'address_region' => 'required_if:country,Philippines|string',
-            'address_brgy' => 'required_if:country,Philippines|string',
-            'international_address' => 'nullable|required_unless:country,Philippines|string',
+            'address_street' => 'required_if:country,Philippines|nullable|string',
+            'address_city' => 'required_if:country,Philippines|nullable|string',
+            'address_municipality' => 'required_if:country,Philippines|nullable|string',
+            'address_region' => 'required_if:country,Philippines|nullable|string',
+            'address_brgy' => 'required_if:country,Philippines|nullable|string',
+            'international_address' => 'nullable|required_unless:country,Philippines|nullable|string',
             'mobile' => 'required|string',
         ]);
     
@@ -356,6 +358,8 @@ Route::post('/signup-store', function(Request $request) {
         }
 
         Auth::login($user);
+        
+        Mail::to($user->email)->send(new WelcomeEmail($user));
 
         $redirectTo = $request->input('redirect') ?? route('my-account');
         return redirect()->intended($redirectTo);
@@ -372,6 +376,10 @@ Route::post('save-personal-information', function(Request $request) {
         return redirect()->route('login');
     }
 
+    if ($request->has('contact_mobile') && $request->input('contact_mobile') == '+63 ') {
+        $request['contact_mobile'] = null;
+    }
+
     $validated = $request->validate([
         'firstname' => [
             'required',
@@ -381,8 +389,11 @@ Route::post('save-personal-information', function(Request $request) {
             'required',
             'regex:/^[A-Za-z\s\-]+$/'
         ],
-        'birthday' => 'required|date',
-        'contact_mobile' => 'required|string',
+        'birthday' => 'nullable|date',
+        'contact_mobile' => [
+            'required',
+            'regex:/^\+\d{2} \d{3} \d{3} \d{4}$/'
+        ],
         'email' => 'required|email|max:191|unique:users,email,' . auth()->id(), 
     ]);
 
@@ -463,7 +474,7 @@ Route::post('/signup-validate-fields', function(Request $request) {
                         'string',
                         'regex:/^[A-Za-z\s\-]+$/'
                     ],
-                    'birth_date' => 'required|date',
+                    'birth_date' => 'nullable|date',
                     'country' => 'required|string',
                     'address_street' => 'required_if:country,Philippines|string',
                     'address_city' => 'required_if:country,Philippines|string',
@@ -495,7 +506,10 @@ Route::post('/signup-validate-fields', function(Request $request) {
 
         case 4:
             $rules = [
-                'mobile' => 'required|string',
+                'mobile' => [
+                    'required',
+                    'regex:/^\+\d{2} \d{3} \d{3} \d{4}$/'
+                ]
             ];
             break;
     }

@@ -1,5 +1,9 @@
 @extends('layouts.guest', ['page' => $page])
 
+@section('alpine.plugins')
+<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/mask@3.x.x/dist/cdn.min.js"></script>
+@endsection
+
 @section('content')
 
 <div class="bg-cream">
@@ -230,6 +234,7 @@
                                                 <option value="Philippines">Philippines</option>
                                                 <option value="USA">USA</option>
                                                 <option value="Canada">Canada</option>
+                                                <option value="Others">Other Countries</option>
                                             </select>
                                             <template x-if="errors.country">
                                                 <p class="text-sm text-red-500 mt-1" x-text="errors.country[0]"></p>
@@ -495,7 +500,7 @@
                             <div>
                                 <div class="mb-5">
                                     <label for="mobile" class="block mb-2 font-bold text-gray-900">Mobile Number </label>
-                                    <input type="tel" id="mobile" x-model="mobile" value="{{ old('mobile') }}" name="mobile"
+                                    <input type="tel" x-mask="+99 999 999 9999" id="mobile" x-model="mobile" value="{{ old('mobile') }}" name="mobile"
                                         class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                         placeholder="" required />
                                     <template x-if="errors.mobile">
@@ -504,7 +509,7 @@
                                 </div>
                                 <div class="mb-5">
                                     <label for="tel" class="block mb-2 font-bold text-gray-900">Telephone Number</label>
-                                    <input type="tel" id="tel" x-model="tel" value="{{ old('tel') }}" name="tel"
+                                    <input type="tel" x-mask="+99 999 999 9999" id="tel" x-model="tel" value="{{ old('tel') }}" name="tel"
                                         class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                         placeholder="" />
                                     <template x-if="errors.tel">

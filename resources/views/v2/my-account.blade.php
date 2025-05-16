@@ -1,5 +1,9 @@
 @extends('layouts.guest', ['page' => $page])
 
+@section('alpine.plugins')
+<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/mask@3.x.x/dist/cdn.min.js"></script>
+@endsection
+
 @section('content')
 
 <div x-data="{ step: 1, accountType: 'individual' }" class="bg-cream">
@@ -52,7 +56,7 @@
                             </div>
                             <div class="w-full flex flex-col lg:flex-row gap-5 mb-5">
                                 <div class="w-full lg:w-1/2">
-                                    <label for="date" class="block mb-2 text-sm font-bold text-gray-900">Birth Date <span class="text-red-700">*</span></label>
+                                    <label for="date" class="block mb-2 text-sm font-bold text-gray-900">Birth Date</label>
                                     <div class="relative">
                                         <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                         <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -69,7 +73,7 @@
                                 </div>
                                 <div class="w-full lg:w-1/2">
                                     <label for="contact" class="block mb-2 font-bold text-gray-900">Contact Number <span class="text-red-800">*</span> </label>
-                                    <input type="text" id="contact_mobile" name="contact_mobile" value="{{ auth()->user()->contact_mobile }}"
+                                    <input x-mask="+99 999 999 9999" type="text" id="contact_mobile" name="contact_mobile" value="{{ auth()->user()->contact_mobile }}"
                                         class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                         placeholder="" required />
 
@@ -188,6 +192,7 @@
 <x-footer-component />
 
 <script>
+
 function addressSelector() {
     return {
         regions: [],
