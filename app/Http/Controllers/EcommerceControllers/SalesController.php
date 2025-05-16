@@ -35,6 +35,7 @@ use Illuminate\Support\Facades\Storage;
 use App\EcommerceModel\Branch;
 use App\Models\ProductDeliveryAddress;
 use App\Models\UserBranch;
+use Carbon\Carbon;
 
 class SalesController extends Controller
 {
@@ -670,7 +671,7 @@ class SalesController extends Controller
         if(!empty($salesdetail)){
             $date_only = date('Y-m-d',strtotime($salesdetail->delivery_date));
             $time_only = date('H:i',strtotime($salesdetail->delivery_date));
-            $dateneeded = date('Y-m-d H:i A',strtotime($salesdetail->delivery_date));
+            $dateneeded = Carbon::parse($salesdetail->delivery_date)->addDays(2)->format('Y-m-d h:i A');
         }
 
         if($salesheader->delivery_type == 'Door to door delivery'){
