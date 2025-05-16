@@ -216,7 +216,7 @@
                                                         <label class="font-bold block text-sm mb-1">Order</label>
                                                         <select @change="delivery.order = JSON.parse($event.target.value); updateAvailableQty(delivery)" class="w-full border border-gray-300 p-2 rounded-md">
                                                             <option selected value="">Select Order</option>
-                                                            <template x-for="order in getAvailableOrders()" :key="order.id">
+                                                            <template x-for="(order, index) in getAvailableOrders()" :key="index">
                                                                 <option 
                                                                     :value="JSON.stringify(order)" 
                                                                     :disabled="order.qty === 0"
