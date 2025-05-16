@@ -860,7 +860,7 @@ class CartController extends Controller
 
         if (auth()->guest()) {
             try {
-                Mail::to($recipient)->send(new SalesCompleted($salesHeader));   
+                // Mail::to($recipient)->send(new SalesCompleted($salesHeader));   
             } catch (\Throwable $th) {
                 //throw $th;
             }
@@ -868,14 +868,14 @@ class CartController extends Controller
             session(['cart' => $carted]);
         } else{
             try {
-                Mail::to($recipient)->send(new SalesCompletedRegistered($salesHeader)); 
+                // Mail::to($recipient)->send(new SalesCompletedRegistered($salesHeader)); 
             } catch (\Throwable $th) {
                 //throw $th;
             }
             Cart::where('user_id', $user->id)->delete();
         }
         try {
-            Mail::to(config('app.email'))->send(new SalesCompletedAdmin($salesHeader));
+            // Mail::to(config('app.email'))->send(new SalesCompletedAdmin($salesHeader));
         } catch (\Throwable $th) {
             //throw $th;
         }
