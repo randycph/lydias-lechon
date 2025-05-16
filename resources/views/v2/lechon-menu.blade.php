@@ -16,6 +16,7 @@
             show(product) {
                 this.product = product;
                 this.lechonCart = true;
+                this.quantity = 1,
                 console.log(product);
             },
             close() {

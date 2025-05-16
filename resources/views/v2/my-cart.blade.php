@@ -103,16 +103,10 @@
                                                 <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="w-20 h-20 object-cover rounded-md scale-110 bg-center">
                                                     <template x-if="cart?.product?.photos?.length > 0">
                                                         <img 
-                                                            :src="'/storage/products/' + cart.product.photos[0].path" 
+                                                            :src="cart.product.photos[0].url" 
                                                             alt="Checkout" 
                                                             class="w-20 h-20 object-cover rounded-md scale-110" 
                                                             onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}';">
-                                                    </template>
-                                                    <template x-if="!(cart?.product?.photos?.length > 0)">
-                                                        <img 
-                                                            src="{{ asset('images/no-image.jpg') }}" 
-                                                            alt="No image" 
-                                                            class="w-20 h-20 object-cover rounded-md scale-110">
                                                     </template>
                                                     
                                                 </div>
@@ -121,7 +115,7 @@
                                                     <div class="text-sm text-gray-600" x-text="new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cart?.product?.price * (cart?.qty || 1))"></div>
                 
                                                     <!-- Quantity Selector -->
-                                                    <div x-data="{ quantity: cart?.qty }" class="flex items-center space-x-1">
+                                                    <div x-data="{ quantity: 1 }" class="flex items-center space-x-1">
                                                         <!-- Minus Button -->
                                                         <button @click="if(quantity > 1) quantity--; updateCartQty('addcart', cart?.product?.id, quantity)" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
                                                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
