@@ -132,7 +132,7 @@
                         </div>
     
                         <div class="my-3 px-4 " x-data="{ 
-                            method: document.cookie.split('; ').find(row => row.startsWith('shipping_method=')).split('=')[1] || 'pickup', 
+                            method: document.cookie?.split('; ').find(row => row.startsWith('shipping_method='))?.split('=')[1] || 'pickup', 
                         }">
                             <div class="font-bold my-2">Choose Pickup or Delivery</div>
                             <div class="flex items-center gap-4 mt-2">
@@ -600,7 +600,7 @@
                 saved_items: ''
             },
             paymentMode: '',
-            currentDate: new Date().toISOString().split('T')[0],
+            currentDate: new Date()?.toISOString()?.split('T')[0],
             method: 'pickup',
             depositModal: false,
             orders: @json($carts) || [],
@@ -613,8 +613,8 @@
                     qty: 1, 
                     location: '', 
                     order: '', 
-                    need_date: new Date().toISOString().split('T')[0], 
-                    need_time: new Date().toTimeString().slice(0,5), 
+                    need_date: new Date()?.toISOString()?.split('T')[0], 
+                    need_time: new Date()?.toTimeString()?.slice(0,5), 
                     note: '', 
                     delivery_fee: 0 
                 }
@@ -651,10 +651,7 @@
                 this.showMessage = false;
             },
             init() {
-                this.method = document.cookie
-                    .split('; ')
-                    .find(row => row.startsWith('shipping_method='))
-                    ?.split('=')[1] || 'pickup';
+                this.method = document.cookie?.split('; ')?.find(row => row.startsWith('shipping_method='))?.split('=')[1] || 'pickup';
             },
 
             submitForm() {
@@ -934,8 +931,8 @@
                     qty: 1,
                     location: '',
                     order: '',
-                    need_date: new Date().toISOString().split('T')[0],
-                    need_time: new Date().toTimeString().slice(0,5),
+                    need_date: new Date().toISOString()?.split('T')[0],
+                    need_time: new Date().toTimeString()?.slice(0,5),
                     note: '',
                     delivery_fee: 0,
                 });
@@ -958,7 +955,7 @@
             },
 
             formatTime(timeStr) {
-                const [hours, minutes] = timeStr.split(':');
+                const [hours, minutes] = timeStr?.split(':');
                 const hoursNum = parseInt(hours, 10);
                 const isPM = hoursNum >= 12;
                 const adjustedHours = hoursNum % 12 || 12;
