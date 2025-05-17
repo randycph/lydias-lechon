@@ -6,7 +6,7 @@
 
 @section('content')
 
-<div x-data="{ step: 1, accountType: 'individual' }" class="bg-cream">
+<div x-data="{ step: 1, accountType: 'individual', country: '{{ old('country', auth()->user()->country ?? '') }}' }" class="bg-cream">
     <div class="py-20 px-4 container">
         <div class="flex gap-6 lg:flex-row flex-col mt-10">
             <div class="w-full lg:w-1/4">
@@ -20,7 +20,7 @@
                     </div>
                     <form method="POST" action="{{ route('save-personal-information') }}" class="flex items-start font-bold flex-col gap-2  py-5 border-b border-[#DFDFDF]">
                         @csrf
-                        <div class="px-6 w-full text-sm">
+                        <div class="px-6 w-full">
                             <div class="mb-5">
                                 <label for="firstname" class="block mb-2 font-bold text-gray-900">First Name <span class="text-red-800">*</span> </label>
                                 <input type="text" id="firstname" name="firstname" value="{{ auth()->user()->firstname }}"
@@ -56,7 +56,7 @@
                             </div>
                             <div class="w-full flex flex-col lg:flex-row gap-5 mb-5">
                                 <div class="w-full lg:w-1/2">
-                                    <label for="date" class="block mb-2 text-sm font-bold text-gray-900">Birth Date</label>
+                                    <label for="date" class="block mb-2 font-bold text-gray-900">Birth Date</label>
                                     <div class="relative">
                                         <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                                         <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -64,7 +64,7 @@
                                         </svg>
                                         </div>
                                         <input name="birthday" value="{{ auth()->user()->birthday }}"
-                                            id="default-datepicker" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
+                                            id="default-datepicker" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
                                     </div>
 
                                     @error('birthday')
@@ -100,12 +100,38 @@
                     </div>
                     <form method="POST" action="{{ route('save-delivery-address') }}" class="flex items-start font-bold flex-col gap-2  py-5 border-b border-[#DFDFDF]">
                         @csrf
-                        <div class="px-6 w-full text-sm">
+
+                        <div class="px-6 w-full mb-4">
+                            <label for="country" class="block mb-2 font-bold text-gray-900">Country</label>
+                            <select name="country" x-model="country" id="country" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                <option selected value="">Select</option>
+                                <option value="Philippines">Philippines</option>
+                                <option value="USA">USA</option>
+                                <option value="Canada">Canada</option>
+                                <option value="Others">Other Countries</option>
+                            </select>
+                            @error('country')
+                                <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div x-show="country !== 'Philippines'" x-cloak class="px-6 w-full">
+                            <label for="international_address" class="block mb-2 font-bold text-gray-900">Complete Address <span class="text-red-800">*</span></label>
+                            <textarea id="international_address" name="international_address" rows="4"
+                                class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                                placeholder="Enter your complete address">{{ old('international_address', auth()->user()->international_address) }}</textarea>
+                            
+                            @error('international_address')
+                                <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="px-6 w-full"  x-show="country === 'Philippines'" x-cloak>
                             <div class="mb-5">
-                                <label for="address_street" class="block mb-2 font-bold text-gray-900">Address <span class="text-red-800">*</span> </label>
-                                <input type="text" id="address_street" name="address_street" value="{{ auth()->user()->address_street }}"
-                                    class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                                    placeholder="" required />
+                                <label for="address_street" class="block mb-2 font-bold text-gray-900">Street Address <span class="text-red-800">*</span> </label>
+                                <input class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" type="text" id="address_street" name="address_street" value="{{ auth()->user()->address_street }}"
+                                    x-bind:required="country === 'Philippines'"
+                                    placeholder="" />
                             </div>
                             <div 
                                 x-init="loadData()"

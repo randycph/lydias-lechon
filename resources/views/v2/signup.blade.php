@@ -260,7 +260,7 @@
                                             class="space-y-4">
 
                                             <div>
-                                                <label for="address_street" class="block mb-2 font-bold text-gray-900">Address </label>
+                                                <label for="address_street" class="block mb-2 font-bold text-gray-900">Street Address </label>
                                                 <input type="text" id="address_street" x-model="address_street" value="{{ old('address_street') }}" name="address_street"
                                                     class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                                     placeholder="" required />

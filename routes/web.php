@@ -295,6 +295,7 @@ Route::post('/signup-store', function(Request $request) {
                 'nullable',
                 'regex:/^[A-Za-z\s\-]+$/'
             ],
+            'country' => 'required|string',
             'address_street' => 'required_if:country,Philippines|nullable|string',
             'address_city' => 'required_if:country,Philippines|nullable|string',
             'address_municipality' => 'required_if:country,Philippines|nullable|string',
@@ -303,6 +304,18 @@ Route::post('/signup-store', function(Request $request) {
             'international_address' => 'nullable|required_unless:country,Philippines|nullable|string',
             'mobile' => 'required|string',
         ]);
+
+        if ($request->has('country') && $request->input('country') == 'Philippines') {
+            $request['international_address'] = null;
+        }
+
+        if ($request->has('country') && $request->input('country') != 'Philippines') {
+            $request['address_street'] = null;
+            $request['address_city'] = null;
+            $request['address_municipality'] = null;
+            $request['address_region'] = null;
+            $request['address_brgy'] = null;
+        }
     
         if ($request->account_type == 'organization') {
             $user = User::create([
@@ -314,6 +327,7 @@ Route::post('/signup-store', function(Request $request) {
                 'organization' => $request->org_name,
                 'address_street' => $request->address,
                 'address_municipality' => $request->address_municipality,
+                'country' => $request->country,
                 'address_city' => $request->address_city,
                 'address_region' => $request->address_region,
                 'address_brgy' => $request->address_brgy,
@@ -338,6 +352,7 @@ Route::post('/signup-store', function(Request $request) {
                 'password' => Hash::make($request->password),
                 'email' => $request->email,
                 'birthday' => $request->birth_date,
+                'country' => $request->country,
                 'address_street' => $request->address,
                 'address_municipality' => $request->address_municipality,
                 'address_city' => $request->address_city,
@@ -410,12 +425,26 @@ Route::post('save-delivery-address', function(Request $request) {
         return redirect()->route('login');
     }
 
+    if ($request->has('country') && $request->input('country') == 'Philippines') {
+        $request['international_address'] = null;
+    }
+
+    if ($request->has('country') && $request->input('country') != 'Philippines') {
+        $request['address_street'] = null;
+        $request['address_city'] = null;
+        $request['address_municipality'] = null;
+        $request['address_region'] = null;
+        $request['address_brgy'] = null;
+    }
+
     $validated = $request->validate([
-        'address_street' => 'required|string',
-        'address_municipality' => 'required|string',
-        'address_city' => 'required|string',
-        'address_brgy' => 'required|string',
-        'address_region' => 'required|string',
+        'country' => 'required|string',
+        'international_address' => 'required_unless:country,Philippines|nullable|string',
+        'address_street' => 'required_if:country,Philippines|nullable|string',
+        'address_municipality' => 'required_if:country,Philippines|nullable|string',
+        'address_city' => 'required_if:country,Philippines|nullable|string',
+        'address_brgy' => 'required_if:country,Philippines|nullable|string',
+        'address_region' => 'required_if:country,Philippines|nullable|string',
     ]);
 
     $user = auth()->user();
