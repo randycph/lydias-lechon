@@ -165,12 +165,10 @@
                 console.error('There was a problem with the fetch operation:', error);
             }
         },
-        handleQtyChange(cart, diff) {
-            const newQty = cart.qty + diff;
-
+        handleQtyChange(productId, currentQty, diff) {
+            const newQty = currentQty + diff;
             if (newQty < 1) return;
-
-            this.updateCartQty('addcart', cart.product.id, newQty);
+            this.updateCartQty('addcart', productId, newQty);
         },
         added: false,
         searchModal: false,

@@ -115,7 +115,7 @@ x-data="{
         
                         <div class="mt-4 flex flex-col gap-4">
         
-                            <template x-for="(cart, index) in carts" :key="index">
+                            <template x-for="(cart, index) in carts" :key="cart.id">
                                 <div class="flex justify-between items-center gap-4 hover:bg-gray-100 py-2" >
                                     <div class="flex gap-4 items-center px-6">
                                         <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="w-20 h-20 object-cover rounded-md scale-110 bg-center">
@@ -133,7 +133,7 @@ x-data="{
                                             <!-- Quantity Selector -->
                                             <div class="flex items-center space-x-1">
                                                 <!-- Minus Button -->
-                                                <button @click="if(cart.qty > 1) handleQtyChange(cart, -1)" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
+                                                <button @click="handleQtyChange(cart.product.id, cart.qty, -1)" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
                                                         <path fill-rule="evenodd" d="M4 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H4.75A.75.75 0 0 1 4 10Z" clip-rule="evenodd" />
                                                     </svg>
@@ -143,7 +143,7 @@ x-data="{
                                                 <span class="w-8 text-center font-bold text-green-600" x-text="cart.qty"></span>
         
                                                 <!-- Plus Button -->
-                                                <button @click="handleQtyChange(cart, 1)" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
+                                                <button @click="handleQtyChange(cart.product.id, cart.qty, 1)" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
                                                         <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
                                                     </svg>
