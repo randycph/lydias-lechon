@@ -5,6 +5,7 @@ x-data="{
     carts: [],
     async getCarts() {
         try {
+            this.carts = [];
             let response = await fetch('{{route('cart.get')}}', {
                 method: 'POST',
                 headers: {
@@ -130,19 +131,19 @@ x-data="{
                                             <div class="text-sm text-gray-600" x-text="new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cart?.product?.price * (cart?.qty || 1))"></div>
         
                                             <!-- Quantity Selector -->
-                                            <div x-data="{ quantity: cart?.qty }" class="flex items-center space-x-1">
+                                            <div class="flex items-center space-x-1">
                                                 <!-- Minus Button -->
-                                                <button @click="if(quantity > 1) quantity--; updateCartQty('addcart', cart?.product?.id, quantity)" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
+                                                <button @click="if(cart.qty > 1) handleQtyChange(cart, -1)" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
                                                         <path fill-rule="evenodd" d="M4 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H4.75A.75.75 0 0 1 4 10Z" clip-rule="evenodd" />
                                                     </svg>
                                                 </button>
         
                                                 <!-- Quantity Display (Fix: Use `x-text`) -->
-                                                <span class="w-8 text-center font-bold text-green-600" x-text="quantity"></span>
+                                                <span class="w-8 text-center font-bold text-green-600" x-text="cart.qty"></span>
         
                                                 <!-- Plus Button -->
-                                                <button @click="quantity++; updateCartQty('addcart', cart?.product?.id, quantity)" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
+                                                <button @click="handleQtyChange(cart, 1)" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
                                                         <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
                                                     </svg>

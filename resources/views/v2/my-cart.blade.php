@@ -11,6 +11,7 @@
         carts: [],
         async getCarts() {
             try {
+                this.carts = [];
                 let response = await fetch('{{ route('cart.get') }}', {
                     method: 'POST',
                     headers: {

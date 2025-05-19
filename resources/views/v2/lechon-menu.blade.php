@@ -15,6 +15,7 @@
             product: null,
             show(product) {
                 this.product = product;
+                this.addons = [];
                 this.lechonCart = true;
                 this.quantity = 1,
                 console.log(product);

@@ -245,7 +245,7 @@ class CartController extends Controller
                 ->first();
 
             if (!empty($cart)) {
-                $newQty = $cart->qty + $request->ac_qty;
+                $newQty = $request->ac_qty;
                 $save = $cart->update([
                     'qty' => $newQty,
                     'price' => $product->price,
@@ -273,7 +273,7 @@ class CartController extends Controller
                         ->first();
 
                     if (!empty($cart)) {
-                        $newQty = $cart->qty + $request->input('misc_qty'.$x);
+                        $newQty = $request->input('misc_qty'.$x);
                         $save = $cart->update([
                             'qty' => $newQty,
                             'price' => $product->price
@@ -648,7 +648,7 @@ class CartController extends Controller
     }
 
     public function save_sales(Request $request) {
-        
+
         if (auth()->guest()) {
             $user = User::find(9999);
             if (empty($user)) {

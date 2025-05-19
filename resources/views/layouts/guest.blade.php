@@ -99,6 +99,7 @@
                 $dispatch('update-cart');
 
                 this.addedToCart = true;
+
                 setTimeout(() => {
                     this.addedToCart = false;
                 }, 3000);
@@ -118,6 +119,8 @@
         async updateCartQty(act, id, qty) {
 
             this.loading = true;
+
+            console.log(act, id, qty);
 
             try {
                 let response = await fetch('{{ route('cart.qty.update') }}', {
@@ -140,12 +143,34 @@
 
                 let data = await response.json();
 
-                $dispatch('update-cart');
+                let cartRes = await fetch('{{route('cart.get')}}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    }
+                }).then((response) => {
+                    return response;
+                }).catch((error) => {
+                    
+                });
+
+                const cartData = await cartRes.json();
+                this.carts = cartData.cart;
+
+                {{-- $dispatch('update-cart'); --}}
                 
                 this.loading = false;
             } catch (error) {
                 console.error('There was a problem with the fetch operation:', error);
             }
+        },
+        handleQtyChange(cart, diff) {
+            const newQty = cart.qty + diff;
+
+            if (newQty < 1) return;
+
+            this.updateCartQty('addcart', cart.product.id, newQty);
         },
         added: false,
         searchModal: false,
