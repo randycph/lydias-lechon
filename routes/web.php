@@ -8,6 +8,9 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\GlobalSearchController;
+use App\Mail\SalesCompleted;
+use App\Mail\SalesCompletedAdmin;
+use App\Mail\SalesCompletedRegistered;
 use App\Mail\WelcomeEmail;
 use App\Models\Article;
 use App\Models\ArticleCategory;
@@ -1106,4 +1109,35 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
 
 Route::get('/test', function(){
     phpinfo();
+});
+
+
+Route::get('/test-email-1', function(){
+    $salesHeader = SalesHeader::first();
+
+    Mail::to('evilryok@gmail.com')->send(new SalesCompleted($salesHeader));
+
+    return response()->json([
+        'message' => 'Email sent successfully!'
+    ]);
+});
+
+Route::get('/test-email-2', function(){
+    $salesHeader = SalesHeader::first();
+
+    Mail::to('evilryok@gmail.com')->send(new SalesCompletedRegistered($salesHeader));
+
+    return response()->json([
+        'message' => 'Email sent successfully!'
+    ]);
+});
+
+Route::get('/test-email-3', function(){
+    $salesHeader = SalesHeader::first();
+
+    Mail::to(config('app.email'))->send(new SalesCompletedAdmin($salesHeader));
+
+    return response()->json([
+        'message' => 'Email sent successfully!'
+    ]);
 });
