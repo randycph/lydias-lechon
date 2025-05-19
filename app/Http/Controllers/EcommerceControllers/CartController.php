@@ -241,19 +241,18 @@ class CartController extends Controller
         $paella_cost = ($request->ac_paella == '1' ? ($product->paella_price * $request->ac_qty) : 0);
         if (auth()->check()) {
 
-            $cart = Cart::where('product_id', $request->ac_item)
-                ->where('user_id', Auth::id())
-                ->first();
-
             if (!empty($cart)) {
                 $newQty = $request->ac_qty;
-                $save = $cart->update([
-                    'qty' => $newQty,
-                    'price' => $product->price,
-                    'paella_price' => $paella_cost
-                ]);
+
+                Cart::where('product_id', $request->ac_item)
+                    ->where('user_id', Auth::id())
+                    ->update([
+                        'qty' => $newQty,
+                        'price' => $product->price,
+                        'paella_price' => $paella_cost
+                    ]);
             } else {
-                $save = Cart::create([
+                Cart::create([
                     'product_id' => $request->ac_item,
                     'user_id' => Auth::id(),
                     'qty' => $request->ac_qty,
@@ -1352,12 +1351,10 @@ class CartController extends Controller
     public function removeCart(Request $request)
     {
         if (auth()->check()) {
-            $cart = Cart::where('product_id', $request->product_remove_id)
-                ->where('user_id', Auth::id())
-                ->first();
-
             if ($cart) {
-                $cart->delete();
+                Cart::where('product_id', $request->product_remove_id)
+                    ->where('user_id', Auth::id())
+                    ->delete();
             }
         } else {
             $cart = session('cart', []);
