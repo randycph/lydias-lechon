@@ -434,11 +434,13 @@ class CartController extends Controller
                         ->first();
 
                     if (!empty($cart)) {
+                        logger($miscQty);
                         $save = $cart->update([
                             'qty' => $miscQty,
                             'price' => $prod->price
                         ]);
                     } else {
+                        logger('11111');
                         $save = Cart::create([
                             'product_id' => $miscProductId,
                             'user_id' => Auth::id(),
@@ -670,7 +672,7 @@ class CartController extends Controller
         if($request->shipping_type == 'pickup'){
             $delivery_type='Store Pickup';
             $outlet = $request->delivery_branch;
-            $customer_delivery_adress = $request->delivery_branch;            
+            $customer_delivery_adress = $request?->delivery_branch ?? $request->delivery_address;            
             $customer_contact_number = $user->contact_mobile;
             $customer_location = '';
             $contact_person = $customer_name;

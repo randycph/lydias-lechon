@@ -31,8 +31,6 @@ x-data="{
     },
     init() {
         this.getCarts();
-        const cookie = document.cookie.split('; ').find(row => row.startsWith('shipping_method='));
-        this.shippingMethod = cookie ? cookie.split('=')[1] : 'pickup';
     },
     async removeCart(productid) {
         this.loading = true;
@@ -67,7 +65,7 @@ x-data="{
     shippingMethod: 'pickup',
     chooseShippingMethod(method) {
         this.shippingMethod = method;
-        document.cookie = `shipping_method=${method}; path=/; max-age=31536000;`;
+        document.cookie = 'shipping_method=' + method + '; path=/; max-age=31536000';
     },
     handleCheckout(auth) {
         if (this.shippingMethod == '') {
@@ -168,14 +166,14 @@ x-data="{
                                     <button 
                                         class="px-6 py-3 rounded-md w-full transition"
                                         :class="shippingMethod === 'pickup' ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-700'"
-                                        @click="shippingMethod = 'pickup'; chooseShippingMethod('pickup')">
+                                        @click="chooseShippingMethod('pickup')">
                                         Pickup
                                     </button>
                             
                                     <button 
                                         class="px-6 py-3 rounded-md w-full transition"
                                         :class="shippingMethod === 'delivery' ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-700'"
-                                        @click="shippingMethod = 'delivery'; chooseShippingMethod('delivery')">
+                                        @click="chooseShippingMethod('delivery')">
                                         Delivery
                                     </button>
                                 </div>
