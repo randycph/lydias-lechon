@@ -115,7 +115,7 @@ x-data="{
         
                         <div class="mt-4 flex flex-col gap-4">
         
-                            <template x-for="(cart, index) in carts" :key="cart.id">
+                            <template x-for="(cart, index) in carts" :key="index">
                                 <div class="flex justify-between items-center gap-4 hover:bg-gray-100 py-2" >
                                     <div class="flex gap-4 items-center px-6">
                                         <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="w-20 h-20 object-cover rounded-md scale-110 bg-center">
