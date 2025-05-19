@@ -1113,31 +1113,43 @@ Route::get('/test', function(){
 
 
 Route::get('/test-email-1', function(){
-    $salesHeader = SalesHeader::first();
+    try {
+        $salesHeader = SalesHeader::first();
 
-    Mail::to('evilryok@gmail.com')->send(new SalesCompleted($salesHeader));
+        Mail::to('evilryok@gmail.com')->send(new SalesCompleted($salesHeader));
 
-    return response()->json([
-        'message' => 'Email sent successfully!'
-    ]);
+        return response()->json([
+            'message' => 'Email sent successfully!'
+        ]);
+    } catch (\Throwable $th) {
+        throw $th;
+    }
 });
 
 Route::get('/test-email-2', function(){
-    $salesHeader = SalesHeader::first();
+    try {
+        $salesHeader = SalesHeader::first();
 
-    Mail::to('evilryok@gmail.com')->send(new SalesCompletedRegistered($salesHeader));
+        Mail::to('evilryok@gmail.com')->send(new SalesCompletedRegistered($salesHeader));
 
-    return response()->json([
-        'message' => 'Email sent successfully!'
-    ]);
+        return response()->json([
+            'message' => 'Email sent successfully!'
+        ]);
+    } catch (\Throwable $th) {
+        throw $th;
+    }
 });
 
 Route::get('/test-email-3', function(){
-    $salesHeader = SalesHeader::first();
+    try {
+        $salesHeader = SalesHeader::first();
 
-    Mail::to(config('app.email'))->send(new SalesCompletedAdmin($salesHeader));
+        Mail::to(config('app.email'))->send(new SalesCompletedAdmin($salesHeader));
 
-    return response()->json([
-        'message' => 'Email sent successfully!'
-    ]);
+        return response()->json([
+            'message' => 'Email sent successfully!'
+        ]);
+    } catch (\Throwable $th) {
+        throw $th;
+    }
 });
