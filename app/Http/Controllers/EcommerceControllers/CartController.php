@@ -294,9 +294,7 @@ class CartController extends Controller
             }
 
 
-        }
-        else
-        {
+        } else {
             $cart = session('cart', []);
             $not_exist = true;
 
