@@ -853,7 +853,6 @@
             },
 
             updateAvailableQty(delivery) {
-                console.log(delivery)
                 if (!delivery.order) {
                     delivery.availableQty = [];
                     return;
@@ -862,23 +861,27 @@
                 const totalProductQty = delivery.order.qty;
                 const currentQty = parseInt(delivery.qty) || 0;
 
-                // Subtract current delivery's qty from total assigned to avoid double-counting
+                // ✅ Exclude the current delivery from the sum
                 const alreadyAssignedQty = this.deliveries
-                    .filter(d => d.order && d.order.id === delivery.order.id && d !== delivery)
+                    .filter(d => d !== delivery && d.order && d.order.id === delivery.order.id)
                     .reduce((sum, d) => sum + (parseInt(d.qty) || 0), 0);
 
                 const remainingQty = totalProductQty - alreadyAssignedQty;
-                const maxAvailable = Math.min(totalProductQty, remainingQty); // no +currentQty here
 
+                // ✅ maxAvailable must include currentQty if already selected
+                const maxAvailable = Math.min(totalProductQty, remainingQty + currentQty);
+
+                // Generate the dropdown options (from 1 to maxAvailable)
                 delivery.availableQty = Array.from({ length: maxAvailable }, (_, i) => i + 1);
 
-                // Reset qty if it's now over max
+                // Prevent invalid selection
                 if (currentQty > maxAvailable) {
                     delivery.qty = '';
                 }
 
                 console.log({ totalProductQty, alreadyAssignedQty, currentQty, remainingQty, maxAvailable });
             },
+
 
             getAvailableOrders() {
                 let availableOrders = JSON.parse(JSON.stringify(this.orders));
