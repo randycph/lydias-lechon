@@ -235,6 +235,7 @@ class CartController extends Controller
     public function updateQty(Request $request)
     {
         $product = Product::with('photos')->whereId($request->ac_item)->first();
+        $mainProduct = $product;
         $photos = $product->photos()->where('is_primary', 1)->first();
         $photo = !empty($photos) ? asset('storage/products/'.$photos->path ) : '';
         $paella_cost = ($request->ac_paella == '1' ? ($product->paella_price * $request->ac_qty) : 0);
@@ -246,20 +247,23 @@ class CartController extends Controller
 
             if (!empty($cart)) {
                 $newQty = $request->ac_qty;
-                $save = $cart->update([
-                    'qty' => $newQty,
-                    'price' => $product->price,
-                    'paella_price' => $paella_cost
-                ]);
+
+                Cart::where('product_id', $request->ac_item)
+                    ->where('user_id', Auth::id())
+                    ->update([
+                        'qty' => $newQty,
+                        'price' => $product->price,
+                        'paella_price' => $paella_cost
+                    ]);
             } else {
-                $save = Cart::create([
+                Cart::create([
                     'product_id' => $request->ac_item,
                     'user_id' => Auth::id(),
                     'qty' => $request->ac_qty,
-                    'price' => $product->price,
+                    'price' => $mainProduct->price,
                     'paella_price' => $paella_cost,
                     'photo' => $photo,
-                    'product' => $product,
+                    'product' => $mainProduct,
                 ]);
             }
 
@@ -267,7 +271,7 @@ class CartController extends Controller
             for($x =1; $x<=$request->misc_cntr;$x++){
                 if($request->has('misc_id'.$x)){
 
-                    $product = Product::whereId($request->input('misc_id'.$x))->first();
+                    $miscProduct = Product::whereId($request->input('misc_id'.$x))->first();
                     $cart = Cart::where('product_id', $request->input('misc_id'.$x))
                         ->where('user_id', Auth::id())
                         ->first();
@@ -276,16 +280,16 @@ class CartController extends Controller
                         $newQty = $request->input('misc_qty'.$x);
                         $save = $cart->update([
                             'qty' => $newQty,
-                            'price' => $product->price
+                            'price' => $miscProduct->price
                         ]);
                     } else {
                         $save = Cart::create([
                             'product_id' => $request->input('misc_id'.$x),
                             'user_id' => Auth::id(),
                             'qty' => $request->input('misc_qty'.$x),
-                            'price' => $product->price,
+                            'price' => $miscProduct->price,
                             'photo' => $photo,
-                            'product' => $product,
+                            'product' => $miscProduct,
                             'paella_price' => 0
                         ]);
                     }
@@ -294,9 +298,7 @@ class CartController extends Controller
             }
 
 
-        }
-        else
-        {
+        } else {
             $cart = session('cart', []);
             $not_exist = true;
 
@@ -862,7 +864,7 @@ class CartController extends Controller
 
         if (auth()->guest()) {
             try {
-                // Mail::to($recipient)->send(new SalesCompleted($salesHeader));   
+                Mail::to($recipient)->send(new SalesCompleted($salesHeader));   
             } catch (\Throwable $th) {
                 //throw $th;
             }
@@ -870,14 +872,14 @@ class CartController extends Controller
             session(['cart' => $carted]);
         } else{
             try {
-                // Mail::to($recipient)->send(new SalesCompletedRegistered($salesHeader)); 
+                Mail::to($recipient)->send(new SalesCompletedRegistered($salesHeader)); 
             } catch (\Throwable $th) {
                 //throw $th;
             }
             Cart::where('user_id', $user->id)->delete();
         }
         try {
-            // Mail::to(config('app.email'))->send(new SalesCompletedAdmin($salesHeader));
+            Mail::to(config('app.email'))->send(new SalesCompletedAdmin($salesHeader));
         } catch (\Throwable $th) {
             //throw $th;
         }
@@ -1353,12 +1355,14 @@ class CartController extends Controller
     public function removeCart(Request $request)
     {
         if (auth()->check()) {
-            $cart = Cart::where('product_id', $request->product_remove_id)
-                ->where('user_id', Auth::id())
+            $cart = Cart::where('user_id', Auth::id())
+                ->where('product_id', $request->product_remove_id)
                 ->first();
-
+                
             if ($cart) {
-                $cart->delete();
+                Cart::where('product_id', $request->product_remove_id)
+                    ->where('user_id', Auth::id())
+                    ->delete();
             }
         } else {
             $cart = session('cart', []);

@@ -526,7 +526,7 @@
                                     <input type="hidden" name="sales_header_id" :value="paymentDetails.order_number">
                         
                                     <div class="pb-4">
-                                        <img src="http://172.16.11.50/images/payment/pay-maya.jpg">
+                                        <img src="{{ asset('images/payment/pay-maya.jpg') }}">
                                     </div>
 
                                     <!-- GCash / PayMaya -->
@@ -541,7 +541,7 @@
                                     <div x-show="paymentMode === 'GCash'" class="text-center">
                                         <p class="font-semibold">GCash</p>
                                         <p class="text-sm">Scan the QR Code below</p>
-                                        <img src="http://172.16.11.50/images/gcash.png" alt="GCash QR" class="mx-auto mt-2 w-40 h-40 object-contain">
+                                        <img src="{{ asset('images/gcash.png') }}" alt="GCash QR" class="mx-auto mt-2 w-40 h-40 object-contain">
                                     </div>
 
                                     <input type="hidden" id="payment_dt" name="payment_dt">
@@ -851,40 +851,31 @@
             },
 
             updateAvailableQty(delivery) {
+                console.log(delivery)
                 if (!delivery.order) {
                     delivery.availableQty = [];
                     return;
                 }
 
-                const matchingOrder = this.orders.find(o => o.id === delivery.order.id);
-                const totalProductQty = matchingOrder ? matchingOrder.qty : 0;
+                const totalProductQty = delivery.order.qty;
+                const currentQty = parseInt(delivery.qty) || 0;
 
-                // Sum qty already assigned (excluding current delivery)
+                // Subtract current delivery's qty from total assigned to avoid double-counting
                 const alreadyAssignedQty = this.deliveries
-                    .filter(d => d !== delivery && d.order && d.order.id === delivery.order.id)
+                    .filter(d => d.order && d.order.id === delivery.order.id && d !== delivery)
                     .reduce((sum, d) => sum + (parseInt(d.qty) || 0), 0);
 
-                // Only add currentQty back if it’s already set and for the correct product
-                const currentQty = (delivery.order && delivery.qty) ? parseInt(delivery.qty) : 0;
-
                 const remainingQty = totalProductQty - alreadyAssignedQty;
-
-                //ensure we don't exceed the totalProductQty
-                const maxAvailable = totalProductQty - alreadyAssignedQty;
+                const maxAvailable = Math.min(totalProductQty, remainingQty); // no +currentQty here
 
                 delivery.availableQty = Array.from({ length: maxAvailable }, (_, i) => i + 1);
 
-                console.log({
-                    totalProductQty,
-                    alreadyAssignedQty,
-                    currentQty,
-                    remainingQty,
-                    maxAvailable
-                });
-
+                // Reset qty if it's now over max
                 if (currentQty > maxAvailable) {
                     delivery.qty = '';
                 }
+
+                console.log({ totalProductQty, alreadyAssignedQty, currentQty, remainingQty, maxAvailable });
             },
 
             getAvailableOrders() {

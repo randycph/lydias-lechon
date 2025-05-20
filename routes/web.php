@@ -377,7 +377,7 @@ Route::post('/signup-store', function(Request $request) {
 
         Auth::login($user);
         
-        // Mail::to($user->email)->send(new WelcomeEmail($user));
+        Mail::to($user->email)->send(new WelcomeEmail($user));
 
         $redirectTo = $request->input('redirect') ?? route('my-account');
         return redirect()->intended($redirectTo);
@@ -1115,31 +1115,52 @@ Route::get('/test', function(){
 
 
 Route::get('/test-email-1', function(){
-    $salesHeader = SalesHeader::first();
+    try {
+        $salesHeader = SalesHeader::first();
 
-    Mail::to('evilryok@gmail.com')->send(new SalesCompleted($salesHeader));
+        Mail::to('evilryok@gmail.com')->send(new SalesCompleted($salesHeader));
 
-    return response()->json([
-        'message' => 'Email sent successfully!'
-    ]);
+        return response()->json([
+            'message' => 'Email sent successfully!'
+        ]);
+    } catch (\Throwable $th) {
+        throw $th;
+    }
 });
 
 Route::get('/test-email-2', function(){
-    $salesHeader = SalesHeader::first();
+    try {
+        $salesHeader = SalesHeader::first();
 
-    Mail::to('evilryok@gmail.com')->send(new SalesCompletedRegistered($salesHeader));
+        Mail::to('evilryok@gmail.com')->send(new SalesCompletedRegistered($salesHeader));
 
-    return response()->json([
-        'message' => 'Email sent successfully!'
-    ]);
+        return response()->json([
+            'message' => 'Email sent successfully!'
+        ]);
+    } catch (\Throwable $th) {
+        throw $th;
+    }
 });
 
 Route::get('/test-email-3', function(){
-    $salesHeader = SalesHeader::first();
+    try {
+        $salesHeader = SalesHeader::first();
 
-    Mail::to(config('app.email'))->send(new SalesCompletedAdmin($salesHeader));
+        Mail::to(config('app.email'))->send(new SalesCompletedAdmin($salesHeader));
 
-    return response()->json([
-        'message' => 'Email sent successfully!'
-    ]);
+        return response()->json([
+            'message' => 'Email sent successfully!'
+        ]);
+    } catch (\Throwable $th) {
+        throw $th;
+    }
+});
+
+Route::get('/test-email', function () {
+    Mail::raw('This is a test email from Gmail SMTP via App Password', function ($message) {
+        $message->to('evilryok@gmail.com')
+                ->subject('Gmail SMTP Test');
+    });
+
+    return 'Email sent!';
 });

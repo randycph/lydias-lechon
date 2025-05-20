@@ -106,7 +106,7 @@ x-data="{
                     </svg>
                 </button>
             </div>
-            <div x-show="!loading" x-transition.opacity>
+            <div x-transition.opacity>
                 <template x-if="carts?.length > 0"> 
                     <div>
                         <div class="bg-tertiary text-white py-2 text-center w-full mt-2">
@@ -133,7 +133,7 @@ x-data="{
                                             <!-- Quantity Selector -->
                                             <div class="flex items-center space-x-1">
                                                 <!-- Minus Button -->
-                                                <button @click="if(cart.qty > 1) handleQtyChange(cart, -1)" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
+                                                <button @click="handleQtyChange(cart.product.id, cart.qty, -1)" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
                                                         <path fill-rule="evenodd" d="M4 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H4.75A.75.75 0 0 1 4 10Z" clip-rule="evenodd" />
                                                     </svg>
@@ -143,7 +143,7 @@ x-data="{
                                                 <span class="w-8 text-center font-bold text-green-600" x-text="cart.qty"></span>
         
                                                 <!-- Plus Button -->
-                                                <button @click="handleQtyChange(cart, 1)" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
+                                                <button @click="handleQtyChange(cart.product.id, cart.qty, 1)" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
                                                         <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
                                                     </svg>
@@ -217,9 +217,9 @@ x-data="{
                     </div>
                 </template>
             </div>
-            <div x-show="loading" class="animate-pulse mt-4 ">
+            {{-- <div x-show="loading" class="animate-pulse mt-4 ">
                 <x-cart-loading-component />
-            </div>
+            </div> --}}
         </div>
         <template x-if="carts?.length == 0">
             <div class="mt-6 px-6 flex items-center justify-center flex-col h-full">
