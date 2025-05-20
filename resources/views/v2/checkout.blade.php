@@ -850,42 +850,44 @@
                 // this.allowMultiple = multipleItems || multipleQty;
             },
 
-            updateAvailableQty(delivery) {
-                if (!delivery.order) {
-                    delivery.availableQty = [];
-                    return;
-                }
+updateAvailableQty(delivery) {
+    if (!delivery.order) {
+        delivery.availableQty = [];
+        return;
+    }
 
-                const matchingOrder = this.orders.find(o => o.id === delivery.order.id);
-                const totalProductQty = matchingOrder ? matchingOrder.qty : 0;
+    // Match using product_id, not id (since id is always 0)
+    const matchingOrder = this.orders.find(o => o.product_id === delivery.order.product_id);
+    const totalProductQty = matchingOrder ? parseInt(matchingOrder.qty) : 0;
 
-                // Sum qty already assigned (excluding current delivery)
-                const alreadyAssignedQty = this.deliveries
-                    .filter(d => d !== delivery && d.order && d.order.id === delivery.order.id)
-                    .reduce((sum, d) => sum + (parseInt(d.qty) || 0), 0);
+    // Sum assigned quantities for this product, excluding current delivery
+    const alreadyAssignedQty = this.deliveries
+        .filter(d => d !== delivery && d.order && d.order.product_id === delivery.order.product_id)
+        .reduce((sum, d) => sum + (parseInt(d.qty) || 0), 0);
 
-                // Only add currentQty back if it’s already set and for the correct product
-                const currentQty = (delivery.order && delivery.qty) ? parseInt(delivery.qty) : 0;
+    const currentQty = parseInt(delivery.qty) || 0;
 
-                const remainingQty = totalProductQty - alreadyAssignedQty;
+    const remainingQty = totalProductQty - alreadyAssignedQty;
 
-                //ensure we don't exceed the totalProductQty
-                const maxAvailable = totalProductQty - alreadyAssignedQty;
+    // Prevent negative values and ensure quantity at least includes current if still valid
+    const maxAvailable = Math.max(0, remainingQty + (currentQty > 0 ? 1 : 0));
 
-                delivery.availableQty = Array.from({ length: maxAvailable }, (_, i) => i + 1);
+    delivery.availableQty = Array.from({ length: maxAvailable }, (_, i) => i + 1);
 
-                console.log({
-                    totalProductQty,
-                    alreadyAssignedQty,
-                    currentQty,
-                    remainingQty,
-                    maxAvailable
-                });
+    // Reset qty if user had previously picked a value now not in range
+    if (currentQty > maxAvailable) {
+        delivery.qty = '';
+    }
 
-                if (currentQty > maxAvailable) {
-                    delivery.qty = '';
-                }
-            },
+    console.log({
+        totalProductQty,
+        alreadyAssignedQty,
+        currentQty,
+        remainingQty,
+        maxAvailable
+    });
+},
+
 
 getAvailableOrders() {
     const availableOrders = this.orders.map(o => ({ ...o }));
