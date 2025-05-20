@@ -970,6 +970,8 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::get('/admin/report/sales-per-category', 'EcommerceControllers\ReportsController@sales_category')->name('admin.report.sales_category');
     Route::get('/admin/report/dispatcher', 'EcommerceControllers\ReportsController@dispatcher')->name('admin.report.dispatcher');
 
+    Route::get('/admin/report/delivery-per-production-location', 'EcommerceControllers\ReportsController@delivery_per_production_location')->name('admin.report.delivery_per_production_location');
+
 
     //
 
