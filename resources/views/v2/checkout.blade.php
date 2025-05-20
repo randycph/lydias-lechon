@@ -131,18 +131,20 @@
                             <h2 class="text-lg lg:text-3xl font-semibold text-left">Delivery Information</h2>
                         </div>
     
-                        <div class="my-3 px-4 ">
+                        <div class="my-3 px-4 " x-data="{ 
+                            method: document.cookie?.split('; ').find(row => row.startsWith('shipping_method='))?.split('=')[1] || 'pickup', 
+                        }">
                             <div class="font-bold my-2">Choose Pickup or Delivery</div>
                             <div class="flex items-center gap-4 mt-2">
-                                <button type="button" class="px-6 py-3 rounded-md w-full transition border-2"
+                                <button class="px-6 py-3 rounded-md w-full transition border-2"
                                     :class="method === 'pickup' ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-700'"
-                                    @click="changeMethod('pickup')">
+                                    @click="method = 'pickup'">
                                     Pickup
                                 </button>
     
-                                <button type="button" class="px-6 py-3 rounded-md w-full transition border-2"
+                                <button class="px-6 py-3 rounded-md w-full transition border-2"
                                     :class="method === 'delivery' ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-700'"
-                                    @click="changeMethod('delivery')">
+                                    @click="method = 'delivery'">
                                     Delivery
                                 </button>
                             </div>
@@ -526,7 +528,7 @@
                                     <input type="hidden" name="sales_header_id" :value="paymentDetails.order_number">
                         
                                     <div class="pb-4">
-                                        <img src="{{ asset('images/payment/pay-maya.jpg') }}">
+                                        <img src="http://172.16.11.50/images/payment/pay-maya.jpg">
                                     </div>
 
                                     <!-- GCash / PayMaya -->
@@ -541,7 +543,7 @@
                                     <div x-show="paymentMode === 'GCash'" class="text-center">
                                         <p class="font-semibold">GCash</p>
                                         <p class="text-sm">Scan the QR Code below</p>
-                                        <img src="{{ asset('images/gcash.png') }}" alt="GCash QR" class="mx-auto mt-2 w-40 h-40 object-contain">
+                                        <img src="http://172.16.11.50/images/gcash.png" alt="GCash QR" class="mx-auto mt-2 w-40 h-40 object-contain">
                                     </div>
 
                                     <input type="hidden" id="payment_dt" name="payment_dt">
@@ -648,10 +650,9 @@
                 this.couponCode = '';
                 this.showMessage = false;
             },
-
-            changeMethod(method) {
-                this.method = method;
-                document.cookie = `shipping_method=${method}; path=/;`;
+            init() {
+                const cookie = document.cookie.split('; ').find(row => row.startsWith('shipping_method='));
+                this.method = cookie ? cookie.split('=')[1] : 'pickup';
             },
 
             submitForm() {
@@ -838,11 +839,6 @@
 
             init() {
                 this.checkMultipleDeliveries();
-                
-                const cookie = document.cookie.split('; ').find(row => row.startsWith('shipping_method='));
-                this.method = cookie ? cookie.split('=')[1] : 'pickup';
-
-                console.log('orders', this.orders)
             },
 
             checkMultipleDeliveries() {
@@ -852,7 +848,7 @@
                 // this.allowMultiple = multipleItems || multipleQty;
             },
 
-updateAvailableQty(delivery) {
+            updateAvailableQty(delivery) {
                 if (!delivery.order) {
                     delivery.availableQty = [];
                     return;
