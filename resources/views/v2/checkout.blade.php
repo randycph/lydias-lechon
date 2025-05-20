@@ -131,20 +131,18 @@
                             <h2 class="text-lg lg:text-3xl font-semibold text-left">Delivery Information</h2>
                         </div>
     
-                        <div class="my-3 px-4 " x-data="{ 
-                            method: document.cookie?.split('; ').find(row => row.startsWith('shipping_method='))?.split('=')[1] || 'pickup', 
-                        }">
+                        <div class="my-3 px-4 ">
                             <div class="font-bold my-2">Choose Pickup or Delivery</div>
                             <div class="flex items-center gap-4 mt-2">
-                                <button class="px-6 py-3 rounded-md w-full transition border-2"
+                                <button type="button" class="px-6 py-3 rounded-md w-full transition border-2"
                                     :class="method === 'pickup' ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-700'"
-                                    @click="method = 'pickup'">
+                                    @click="changeMethod('pickup')">
                                     Pickup
                                 </button>
     
-                                <button class="px-6 py-3 rounded-md w-full transition border-2"
+                                <button type="button" class="px-6 py-3 rounded-md w-full transition border-2"
                                     :class="method === 'delivery' ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-700'"
-                                    @click="method = 'delivery'">
+                                    @click="changeMethod('delivery')">
                                     Delivery
                                 </button>
                             </div>
@@ -219,8 +217,8 @@
                                                             <template x-for="(order, index) in getAvailableOrders()" :key="index">
                                                                 <option 
                                                                     :value="JSON.stringify(order)" 
-                                                                    :disabled="order.qty === 0"
-                                                                    x-text="order.product.name + (order.qty === 0 ? ' (Unavailable)' : '')"
+                                                                    :disabled="order.qty <= 0"
+                                                                    x-text="order.product.name + (order.qty <= 0 ? ' (Fully Assigned)' : '')"
                                                                 ></option>
                                                             </template>
                                                         </select>
@@ -650,9 +648,10 @@
                 this.couponCode = '';
                 this.showMessage = false;
             },
-            init() {
-                const cookie = document.cookie.split('; ').find(row => row.startsWith('shipping_method='));
-                this.method = cookie ? cookie.split('=')[1] : 'pickup';
+
+            changeMethod(method) {
+                this.method = method;
+                document.cookie = `shipping_method=${method}; path=/;`;
             },
 
             submitForm() {
@@ -839,6 +838,9 @@
 
             init() {
                 this.checkMultipleDeliveries();
+                
+                const cookie = document.cookie.split('; ').find(row => row.startsWith('shipping_method='));
+                this.method = cookie ? cookie.split('=')[1] : 'pickup';
             },
 
             checkMultipleDeliveries() {
@@ -885,21 +887,21 @@
                 }
             },
 
-            getAvailableOrders() {
-                let availableOrders = JSON.parse(JSON.stringify(this.orders));
+getAvailableOrders() {
+    const availableOrders = this.orders.map(o => ({ ...o }));
 
-                for (let delivery of this.deliveries) {
-                    if (delivery.order) {
-                        let matchingOrder = availableOrders.find(o => o.id === delivery.order.id);
-                        if (matchingOrder) {
-                            matchingOrder.qty -= (parseInt(delivery.qty) || 0);
-                        }
-                    }
-                }
+    for (const delivery of this.deliveries) {
+        if (delivery.order) {
+            const match = availableOrders.find(o => o.product_id === delivery.order.product_id);
+            if (match) {
+                match.qty -= parseInt(delivery.qty) || 0;
+            }
+        }
+    }
 
-                // ✅ Return all orders (even if qty is 0)
-                return availableOrders;
-            },
+    // ⚠️ Don't filter here — return all, just track disabled in template
+    return availableOrders;
+},
 
             canAddMoreDeliveries() {
                 // Get total qty across all products
