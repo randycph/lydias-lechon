@@ -1159,4 +1159,34 @@ class ReportsController extends Controller
 
     }
 
+    public function audit_trail_per_user(Request $request){
+        $rs = [];
+        return view('admin.reports.audit_trail_per_user',compact('rs'));
+    }
+
+    public function audit_trail_per_sales(Request $request){
+        $rs = [];
+        return view('admin.reports.audit_trail_per_sales',compact('rs'));
+    }
+
+    public function audit_trail_per_external(Request $request){
+        $rs = [];
+        return view('admin.reports.audit_trail_per_external',compact('rs'));
+    }
+
+    public function forecast_report_per_product_type(Request $request){
+        $rs = [];
+        return view('admin.reports.forecast_report_per_product_type',compact('rs'));
+    }
+
+    public function pickup_orders_per_branch(Request $request){
+        $rs = [];
+        return view('admin.reports.pickup_orders_per_branch',compact('rs'));
+    }
+
+    public function commissary_production(Request $request){
+        $rs = [];
+        return view('admin.reports.commissary_production',compact('rs'));
+    }
+
 }
