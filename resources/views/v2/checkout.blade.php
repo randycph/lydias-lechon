@@ -851,7 +851,7 @@
             },
 
             updateAvailableQty(delivery) {
-                console.log(deliver)
+                console.log(delivery)
                 if (!delivery.order) {
                     delivery.availableQty = [];
                     return;
