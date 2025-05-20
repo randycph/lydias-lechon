@@ -526,7 +526,7 @@
                                     <input type="hidden" name="sales_header_id" :value="paymentDetails.order_number">
                         
                                     <div class="pb-4">
-                                        <img src="http://172.16.11.50/images/payment/pay-maya.jpg">
+                                        <img src="{{ asset('images/payment/pay-maya.jpg') }}">
                                     </div>
 
                                     <!-- GCash / PayMaya -->
@@ -541,7 +541,7 @@
                                     <div x-show="paymentMode === 'GCash'" class="text-center">
                                         <p class="font-semibold">GCash</p>
                                         <p class="text-sm">Scan the QR Code below</p>
-                                        <img src="http://172.16.11.50/images/gcash.png" alt="GCash QR" class="mx-auto mt-2 w-40 h-40 object-contain">
+                                        <img src="{{ asset('images/gcash.png') }}" alt="GCash QR" class="mx-auto mt-2 w-40 h-40 object-contain">
                                     </div>
 
                                     <input type="hidden" id="payment_dt" name="payment_dt">
