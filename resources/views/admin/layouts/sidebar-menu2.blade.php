@@ -94,6 +94,7 @@
                 <li><a target="_blank" href="{{route('admin.report.top_products')}}">Most Saleable Products</a></li>
                 <li><a target="_blank" href="{{route('admin.report.top_agents')}}">Top Agents Report</a></li>
                 <li><a target="_blank" href="{{route('admin.report.guest_orders')}}">Guest Logins Report</a></li>
+                <li><a target="_blank" href="{{route('admin.report.delivery_per_production_location')}}">Delivery per Production Location</a></li>
              
             </ul>
         </li>

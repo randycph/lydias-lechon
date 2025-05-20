@@ -1114,4 +1114,49 @@ class ReportsController extends Controller
 
     }
 
+    public function delivery_per_production_location(Request $request)
+    {
+
+        $rs = '';
+        $qry = "SELECT pb.name as prod_branch,jo.jo_number as jnum,h.*,d.*,h.created_at as hcreated,h.id as hid,p.category_id,c.name as catname,d.id as did, h.delivery_status as delstat
+            FROM `ecommerce_sales_details` d
+            left join ecommerce_sales_headers h on h.id=d.sales_header_id
+            left join products p on p.id=d.product_id
+            left join product_categories c on c.id=p.category_id
+            left join job_orders jo on jo.sales_detail_id = d.id
+            left join production_orders po on po.joborder_id = jo.id
+            left join production_branches pb on pb.id = po.branch_id
+         where h.id>0 and h.deleted_at is null ";
+        // conditions
+            if(isset($_GET['pb']) && $_GET['pb']<>''){
+                $qry.= " and po.branch_id=".$_GET['pb']."";
+            }
+            if(isset($_GET['customer']) && $_GET['customer']<>''){
+                $qry.= " and h.customer_name='".$_GET['customer']."'";
+            }
+            if(isset($_GET['product']) && $_GET['product']<>''){
+                $qry.= " and d.product_name='".$_GET['product']."'";
+            }
+            if(isset($_GET['category']) && $_GET['category']<>''){
+                $qry.= " and p.category_id='".$_GET['category']."'";
+            }
+            if(isset($_GET['order_source']) && $_GET['order_source']<>''){
+                $qry.= " and h.order_source='".$_GET['order_source']."'";
+            }
+
+
+            if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
+                $qry.= " and po.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))."' and po.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))."'";
+            }
+            else{
+                $qry.= " and po.delivery_date >='".date('Y-m-d 00:00:00')."' and po.delivery_date <='".date('Y-m-d 23:59:59')."'";
+            }
+        // end conditions
+           //dd($qry);
+        $rs = DB::select($qry);
+
+        return view('admin.reports.delivery_per_production_location',compact('rs'));
+
+    }
+
 }
