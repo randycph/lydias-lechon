@@ -856,35 +856,25 @@
                     return;
                 }
 
-                const matchingOrder = this.orders.find(o => o.id === delivery.order.id);
-                const totalProductQty = matchingOrder ? matchingOrder.qty : 0;
+                const totalProductQty = delivery.order.qty;
+                const currentQty = parseInt(delivery.qty) || 0;
 
-                // Sum qty already assigned (excluding current delivery)
+                // Subtract current delivery's qty from total assigned to avoid double-counting
                 const alreadyAssignedQty = this.deliveries
-                    .filter(d => d !== delivery && d.order && d.order.id === delivery.order.id)
+                    .filter(d => d.order && d.order.id === delivery.order.id && d !== delivery)
                     .reduce((sum, d) => sum + (parseInt(d.qty) || 0), 0);
 
-                // Only add currentQty back if it’s already set and for the correct product
-                const currentQty = (delivery.order && delivery.qty) ? parseInt(delivery.qty) : 0;
-
                 const remainingQty = totalProductQty - alreadyAssignedQty;
-
-                //ensure we don't exceed the totalProductQty
-                const maxAvailable = totalProductQty - alreadyAssignedQty;
+                const maxAvailable = Math.min(totalProductQty, remainingQty); // no +currentQty here
 
                 delivery.availableQty = Array.from({ length: maxAvailable }, (_, i) => i + 1);
 
-                console.log({
-                    totalProductQty,
-                    alreadyAssignedQty,
-                    currentQty,
-                    remainingQty,
-                    maxAvailable
-                });
-
+                // Reset qty if it's now over max
                 if (currentQty > maxAvailable) {
                     delivery.qty = '';
                 }
+
+                console.log({ totalProductQty, alreadyAssignedQty, currentQty, remainingQty, maxAvailable });
             },
 
             getAvailableOrders() {
