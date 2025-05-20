@@ -841,6 +841,8 @@
                 
                 const cookie = document.cookie.split('; ').find(row => row.startsWith('shipping_method='));
                 this.method = cookie ? cookie.split('=')[1] : 'pickup';
+
+                console.log('orders', this.orders)
             },
 
             checkMultipleDeliveries() {
@@ -880,6 +882,8 @@
 
             getAvailableOrders() {
                 let availableOrders = JSON.parse(JSON.stringify(this.orders));
+
+                console.log('availableOrders', availableOrders)
 
                 for (let delivery of this.deliveries) {
                     if (delivery.order) {
