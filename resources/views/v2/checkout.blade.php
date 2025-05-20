@@ -217,8 +217,8 @@
                                                             <template x-for="(order, index) in getAvailableOrders()" :key="index">
                                                                 <option 
                                                                     :value="JSON.stringify(order)" 
-                                                                    :disabled="order.qty === 0"
-                                                                    x-text="order.product.name + (order.qty === 0 ? ' (Unavailable)' : '')"
+                                                                    :disabled="order.qty <= 0"
+                                                                    x-text="order.product.name + (order.qty <= 0 ? ' (Fully Assigned)' : '')"
                                                                 ></option>
                                                             </template>
                                                         </select>
@@ -850,49 +850,60 @@
                 // this.allowMultiple = multipleItems || multipleQty;
             },
 
-            updateAvailableQty(delivery) {
-                console.log(delivery)
-                if (!delivery.order) {
-                    delivery.availableQty = [];
-                    return;
-                }
+updateAvailableQty(delivery) {
+    if (!delivery.order) {
+        delivery.availableQty = [];
+        return;
+    }
 
-                const totalProductQty = delivery.order.qty;
-                const currentQty = parseInt(delivery.qty) || 0;
+    // Match using product_id, not id (since id is always 0)
+    const matchingOrder = this.orders.find(o => o.product_id === delivery.order.product_id);
+    const totalProductQty = matchingOrder ? parseInt(matchingOrder.qty) : 0;
 
-                // Subtract current delivery's qty from total assigned to avoid double-counting
-                const alreadyAssignedQty = this.deliveries
-                    .filter(d => d.order && d.order.id === delivery.order.id && d !== delivery)
-                    .reduce((sum, d) => sum + (parseInt(d.qty) || 0), 0);
+    // Sum assigned quantities for this product, excluding current delivery
+    const alreadyAssignedQty = this.deliveries
+        .filter(d => d !== delivery && d.order && d.order.product_id === delivery.order.product_id)
+        .reduce((sum, d) => sum + (parseInt(d.qty) || 0), 0);
 
-                const remainingQty = totalProductQty - alreadyAssignedQty;
-                const maxAvailable = Math.min(totalProductQty, remainingQty); // no +currentQty here
+    const currentQty = parseInt(delivery.qty) || 0;
 
-                delivery.availableQty = Array.from({ length: maxAvailable }, (_, i) => i + 1);
+    const remainingQty = totalProductQty - alreadyAssignedQty;
 
-                // Reset qty if it's now over max
-                if (currentQty > maxAvailable) {
-                    delivery.qty = '';
-                }
+    // Prevent negative values and ensure quantity at least includes current if still valid
+    const maxAvailable = Math.max(0, remainingQty + (currentQty > 0 ? 1 : 0));
 
-                console.log({ totalProductQty, alreadyAssignedQty, currentQty, remainingQty, maxAvailable });
-            },
+    delivery.availableQty = Array.from({ length: maxAvailable }, (_, i) => i + 1);
 
-            getAvailableOrders() {
-                let availableOrders = JSON.parse(JSON.stringify(this.orders));
+    // Reset qty if user had previously picked a value now not in range
+    if (currentQty > maxAvailable) {
+        delivery.qty = '';
+    }
 
-                for (let delivery of this.deliveries) {
-                    if (delivery.order) {
-                        let matchingOrder = availableOrders.find(o => o.id === delivery.order.id);
-                        if (matchingOrder) {
-                            matchingOrder.qty -= (parseInt(delivery.qty) || 0);
-                        }
-                    }
-                }
+    console.log({
+        totalProductQty,
+        alreadyAssignedQty,
+        currentQty,
+        remainingQty,
+        maxAvailable
+    });
+},
 
-                // ✅ Return all orders (even if qty is 0)
-                return availableOrders;
-            },
+
+getAvailableOrders() {
+    const availableOrders = this.orders.map(o => ({ ...o }));
+
+    for (const delivery of this.deliveries) {
+        if (delivery.order) {
+            const match = availableOrders.find(o => o.product_id === delivery.order.product_id);
+            if (match) {
+                match.qty -= parseInt(delivery.qty) || 0;
+            }
+        }
+    }
+
+    // ⚠️ Don't filter here — return all, just track disabled in template
+    return availableOrders;
+},
 
             canAddMoreDeliveries() {
                 // Get total qty across all products
