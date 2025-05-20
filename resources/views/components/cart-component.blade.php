@@ -106,7 +106,7 @@ x-data="{
                     </svg>
                 </button>
             </div>
-            <div x-show="!loading" x-transition.opacity>
+            <div x-transition.opacity>
                 <template x-if="carts?.length > 0"> 
                     <div>
                         <div class="bg-tertiary text-white py-2 text-center w-full mt-2">
@@ -217,9 +217,9 @@ x-data="{
                     </div>
                 </template>
             </div>
-            <div x-show="loading" class="animate-pulse mt-4 ">
+            {{-- <div x-show="loading" class="animate-pulse mt-4 ">
                 <x-cart-loading-component />
-            </div>
+            </div> --}}
         </div>
         <template x-if="carts?.length == 0">
             <div class="mt-6 px-6 flex items-center justify-center flex-col h-full">
