@@ -377,7 +377,7 @@ Route::post('/signup-store', function(Request $request) {
 
         Auth::login($user);
         
-        // Mail::to($user->email)->send(new WelcomeEmail($user));
+        Mail::to($user->email)->send(new WelcomeEmail($user));
 
         $redirectTo = $request->input('redirect') ?? route('my-account');
         return redirect()->intended($redirectTo);
@@ -1152,4 +1152,13 @@ Route::get('/test-email-3', function(){
     } catch (\Throwable $th) {
         throw $th;
     }
+});
+
+Route::get('/test-email', function () {
+    Mail::raw('This is a test email from Gmail SMTP via App Password', function ($message) {
+        $message->to('evilryok@gmail.com')
+                ->subject('Gmail SMTP Test');
+    });
+
+    return 'Email sent!';
 });
