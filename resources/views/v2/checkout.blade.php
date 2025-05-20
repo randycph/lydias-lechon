@@ -856,25 +856,23 @@ updateAvailableQty(delivery) {
         return;
     }
 
-    // Match using product_id, not id (since id is always 0)
-    const matchingOrder = this.orders.find(o => o.product_id === delivery.order.product_id);
+    const productId = delivery.order.product_id;
+    const matchingOrder = this.orders.find(o => o.product_id === productId);
     const totalProductQty = matchingOrder ? parseInt(matchingOrder.qty) : 0;
 
-    // Sum assigned quantities for this product, excluding current delivery
+    // Total assigned to same product, excluding current delivery
     const alreadyAssignedQty = this.deliveries
-        .filter(d => d !== delivery && d.order && d.order.product_id === delivery.order.product_id)
+        .filter(d => d !== delivery && d.order && d.order.product_id === productId)
         .reduce((sum, d) => sum + (parseInt(d.qty) || 0), 0);
-
-    const currentQty = parseInt(delivery.qty) || 0;
 
     const remainingQty = totalProductQty - alreadyAssignedQty;
 
-    // Prevent negative values and ensure quantity at least includes current if still valid
-    const maxAvailable = Math.max(0, remainingQty + (currentQty > 0 ? 1 : 0));
+    // Show dropdown from 1 to remainingQty only (don't add +1)
+    const maxAvailable = Math.max(0, remainingQty);
 
     delivery.availableQty = Array.from({ length: maxAvailable }, (_, i) => i + 1);
 
-    // Reset qty if user had previously picked a value now not in range
+    const currentQty = parseInt(delivery.qty) || 0;
     if (currentQty > maxAvailable) {
         delivery.qty = '';
     }
@@ -887,6 +885,7 @@ updateAvailableQty(delivery) {
         maxAvailable
     });
 },
+
 
 
 getAvailableOrders() {
