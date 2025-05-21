@@ -850,59 +850,59 @@
                 // this.allowMultiple = multipleItems || multipleQty;
             },
 
-updateAvailableQty(delivery) {
-    if (!delivery.order) {
-        delivery.availableQty = [];
-        return;
-    }
+            updateAvailableQty(delivery) {
+                if (!delivery.order) {
+                    delivery.availableQty = [];
+                    return;
+                }
 
-    const productId = delivery.order.product_id;
-    const matchingOrder = this.orders.find(o => o.product_id === productId);
-    const totalProductQty = matchingOrder ? parseInt(matchingOrder.qty) : 0;
+                const productId = delivery.order.product_id;
+                const matchingOrder = this.orders.find(o => o.product_id === productId);
+                const totalProductQty = matchingOrder ? parseInt(matchingOrder.qty) : 0;
 
-    // Total assigned to same product, excluding current delivery
-    const alreadyAssignedQty = this.deliveries
-        .filter(d => d !== delivery && d.order && d.order.product_id === productId)
-        .reduce((sum, d) => sum + (parseInt(d.qty) || 0), 0);
+                // Total assigned to same product, excluding current delivery
+                const alreadyAssignedQty = this.deliveries
+                    .filter(d => d !== delivery && d.order && d.order.product_id === productId)
+                    .reduce((sum, d) => sum + (parseInt(d.qty) || 0), 0);
 
-    const remainingQty = totalProductQty - alreadyAssignedQty;
+                const remainingQty = totalProductQty - alreadyAssignedQty;
 
-    // Show dropdown from 1 to remainingQty only (don't add +1)
-    const maxAvailable = Math.max(0, remainingQty);
+                // Show dropdown from 1 to remainingQty only (don't add +1)
+                const maxAvailable = Math.max(0, remainingQty);
 
-    delivery.availableQty = Array.from({ length: maxAvailable }, (_, i) => i + 1);
+                delivery.availableQty = Array.from({ length: maxAvailable }, (_, i) => i + 1);
 
-    const currentQty = parseInt(delivery.qty) || 0;
-    if (currentQty > maxAvailable) {
-        delivery.qty = '';
-    }
+                const currentQty = parseInt(delivery.qty) || 0;
+                if (currentQty > maxAvailable) {
+                    delivery.qty = '';
+                }
 
-    console.log({
-        totalProductQty,
-        alreadyAssignedQty,
-        currentQty,
-        remainingQty,
-        maxAvailable
-    });
-},
+                console.log({
+                    totalProductQty,
+                    alreadyAssignedQty,
+                    currentQty,
+                    remainingQty,
+                    maxAvailable
+                });
+            },
 
 
 
-getAvailableOrders() {
-    const availableOrders = this.orders.map(o => ({ ...o }));
+            getAvailableOrders() {
+                const availableOrders = this.orders.map(o => ({ ...o }));
 
-    for (const delivery of this.deliveries) {
-        if (delivery.order) {
-            const match = availableOrders.find(o => o.product_id === delivery.order.product_id);
-            if (match) {
-                match.qty -= parseInt(delivery.qty) || 0;
-            }
-        }
-    }
+                for (const delivery of this.deliveries) {
+                    if (delivery.order) {
+                        const match = availableOrders.find(o => o.product_id === delivery.order.product_id);
+                        if (match) {
+                            match.qty -= parseInt(delivery.qty) || 0;
+                        }
+                    }
+                }
 
-    // ⚠️ Don't filter here — return all, just track disabled in template
-    return availableOrders;
-},
+                // ⚠️ Don't filter here — return all, just track disabled in template
+                return availableOrders;
+            },
 
             canAddMoreDeliveries() {
                 // Get total qty across all products

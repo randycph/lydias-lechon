@@ -150,7 +150,11 @@ class EcommerceFrontController extends Controller
 
         if ($is_updated) {
             auth()->logout();
-            \Mail::to($user->email)->send(new UpdatePasswordMail(Setting::info(), $user));
+            try {
+                \Mail::to($user->email)->send(new UpdatePasswordMail(Setting::info(), $user));
+            } catch (\Exception $th) {
+                //throw $th;
+            }
             return redirect('login')->with('success', 'Password successfully changed. To login again, please use your new password!');
         } else {
             return back()->with('error', __('standard.settings.account.update_password_failed'));

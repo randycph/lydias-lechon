@@ -865,7 +865,7 @@ class CartController extends Controller
         if (auth()->guest()) {
             try {
                 Mail::to($recipient)->send(new SalesCompleted($salesHeader));   
-            } catch (\Throwable $th) {
+            } catch (\Exception $th) {
                 //throw $th;
             }
             $carted = array();
@@ -873,14 +873,14 @@ class CartController extends Controller
         } else{
             try {
                 Mail::to($recipient)->send(new SalesCompletedRegistered($salesHeader)); 
-            } catch (\Throwable $th) {
+            } catch (\Exception $th) {
                 //throw $th;
             }
             Cart::where('user_id', $user->id)->delete();
         }
         try {
             Mail::to(config('app.email'))->send(new SalesCompletedAdmin($salesHeader));
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             //throw $th;
         }
         $email_to_branch = $this->email_to_branch($salesHeader);
@@ -925,7 +925,11 @@ class CartController extends Controller
         $branch = Branch::where('name',$salesHeader->outlet)->first();
         if(!empty($branch)){
             if(strlen($branch->email_address) > 2){
-                $email_act = Mail::to(env($branch->email_address))->send(new SalesCompletedAdmin($salesHeader));
+                try {
+                    $email_act = Mail::to(env($branch->email_address))->send(new SalesCompletedAdmin($salesHeader));
+                } catch (\Exception $th) {
+                    //throw $th;
+                }
             }
         }
         return true;

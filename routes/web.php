@@ -286,10 +286,12 @@ Route::post('/signup-store', function(Request $request) {
             'account_type' => 'required|in:individual,organization',
             'first_name' => [
                 'required_if:account_type,individual',
+                'nullable',
                 'regex:/^[A-Za-z\s\-]+$/'
             ],
             'last_name' => [
                 'required_if:account_type,individual',
+                'nullable',
                 'regex:/^[A-Za-z\s\-]+$/'
             ],
             'birth_date' => 'nullable|date',
@@ -377,12 +379,15 @@ Route::post('/signup-store', function(Request $request) {
 
         Auth::login($user);
         
-        Mail::to($user->email)->send(new WelcomeEmail($user));
+        try {
+            Mail::to($user->email)->send(new WelcomeEmail($user));
+        } catch (\Exception $th) {
+            //throw $th;
+        }
 
         $redirectTo = $request->input('redirect') ?? route('my-account');
         return redirect()->intended($redirectTo);
     } catch (\Throwable $th) {
-        dd($th);
         throw $th;
     }
 
