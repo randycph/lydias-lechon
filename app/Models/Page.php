@@ -122,7 +122,7 @@ class Page extends Model
     }
 
     public static function convert_to_slug($url, $parentPage = 0){
-        $url = str_slug($url, '-');
+        $url = \Str::slug($url, '-');
 
         $parentPage = Page::find($parentPage);
         if($parentPage) {

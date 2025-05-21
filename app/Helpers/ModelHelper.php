@@ -8,7 +8,7 @@ use Illuminate\Support\Arr;
 class ModelHelper
 {
     public static function convert_to_slug($model, $url, $parentPage = 0){
-        $url = str_slug($url, '-');
+        $url = \Str::slug($url, '-');
 
         $parentPage = $model::find($parentPage);
         if($parentPage) {
