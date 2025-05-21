@@ -165,6 +165,7 @@ class PaymayaController extends Controller
 
     public function pay(Request $request){        
         
+        // dd($request->all());
         $sales = SalesHeader::find($request->sales_header_id); 
         $payment = SalesPayment::create([
             'sales_header_id' => $request->sales_header_id,
@@ -175,6 +176,7 @@ class PaymayaController extends Controller
             'receipt_number'  => '',
             'created_by' => $sales->user_id
         ]);
+
 
         $checkoutId = $this->get_checkoutId($request, $payment);
 
@@ -249,7 +251,7 @@ class PaymayaController extends Controller
                             "serviceCharge": 0,
                             "shippingFee": '.$sale->delivery_fee_amount.',
                             "tax": 0,
-                            "subtotal": '.($amount - $sale->delivery_fee_amount).'
+                            "subtotal": '.((float) $amount - (float) $sale->delivery_fee_amount).'
                         }
                     },
                     "buyer": {
