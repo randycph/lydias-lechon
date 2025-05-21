@@ -862,10 +862,9 @@ class CartController extends Controller
         }
 
         $recipient = $user->email ?: $request->email;
-
         if (auth()->guest()) {
             try {
-                Mail::to($recipient)->send(new SalesCompleted($salesHeader));   
+                Mail::to($recipient)->send(new SalesCompleted($salesHeader));
             } catch (\Exception $th) {
                 //throw $th;
             }
