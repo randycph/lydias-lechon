@@ -863,6 +863,8 @@ class CartController extends Controller
             // }
         }
 
+        $salesHeader->refresh();
+
         $recipient = $user->email ?: $request->email;
         if (auth()->guest()) {
             try {
