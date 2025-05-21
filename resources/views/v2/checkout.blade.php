@@ -104,7 +104,7 @@
                                 <div class="flex flex-col gap-1 mt-2">
                                     <template x-for="(item, i) in deliveryFees" :key="i">
                                         <div class="flex justify-between text-gray-500 text-sm">
-                                            <span x-text="'• ' + item.location"></span>
+                                            <span x-text="'Delivery Fee (' + item.location + ')'"></span>
                                             <span x-text="'₱' + item.fee.toLocaleString()"></span>
                                         </div>
                                     </template>
