@@ -651,7 +651,7 @@ class CartController extends Controller
 
     public function save_sales(Request $request) {
 
-        dd($request->all());
+        // dd($request->all());
         if (auth()->guest()) {
             $user = User::find(9999);
             if (empty($user)) {
