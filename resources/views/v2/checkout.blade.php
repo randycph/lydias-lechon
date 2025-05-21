@@ -240,6 +240,10 @@
                                                     </div>
                                                 </div>
 
+                                                <div x-show="qtyValidationMessage" class="text-red-600 bg-red-100 border border-red-300 rounded p-3 mt-3">
+                                                    <p x-text="qtyValidationMessage"></p>
+                                                </div>
+
                                                 <input type="hidden" x-model="delivery.delivery_fee" />
                                                 
                                                 <div class="w-full flex gap-4">
@@ -348,9 +352,9 @@
                             <div class="mt-3">
                                 <div class="my-2">
                                     <label for="name"
-                                        class="block mb-2 text-sm font-bold text-gray-900">Full Name <span
+                                        class="block mb-2 text-sm font-bold text-gray-900">Name<span
                                             class="text-red-700">*</span></label>
-                                    <input type="text" id="name" name="name" value="{{ auth()->check() ? auth()->user()->name : '' }}"
+                                    <input type="text" id="name" name="name" value="{{ auth()->check() ? (auth()->user()->is_org == 1 ? auth()->user()->contact_person : auth()->user()->name) : '' }}"
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                                         placeholder="" required />
 
@@ -652,6 +656,10 @@
             changeMethod(method) {
                 this.method = method;
                 document.cookie = `shipping_method=${method}; path=/;`;
+
+                if (this.method == 'pickup') {
+                    this.allowMultiple = false;
+                }
             },
 
             submitForm() {
@@ -663,13 +671,13 @@
                 this.noNeededDate = false;
                 this.noNeededTime = false;
 
-                if (!this.need_time) {
+                if (!this.need_time && this.method === 'pickup') {
                     this.noNeededTime = true;
                     this.isSubmitting = false;
                     return;
                 }
 
-                if (!this.need_date) {
+                if (!this.need_date && this.method === 'pickup') {
                     this.noNeededDate = true;
                     this.isSubmitting = false;
                     return;
@@ -684,6 +692,13 @@
                 if (this.hasErrorMessage) {
                     this.isSubmitting = false;
                     return;
+                }
+
+                if (this.method === 'delivery' && this.allowMultiple) {
+                    if (!this.validateAllQtyUsed()) {
+                        this.isSubmitting = false;
+                        return;
+                    }
                 }
 
                 // Add dynamic fields
@@ -886,7 +901,36 @@
                 });
             },
 
+            validateAllQtyUsed() {
+                const expectedTotals = {};
+                const assignedTotals = {};
 
+                this.orders.forEach(order => {
+                    expectedTotals[order.product_id] = parseInt(order.qty);
+                });
+
+                this.deliveries.forEach(delivery => {
+                    if (delivery.order && delivery.qty) {
+                        const productId = delivery.order.product_id;
+                        assignedTotals[productId] = (assignedTotals[productId] || 0) + parseInt(delivery.qty);
+                    }
+                });
+
+                for (const productId in expectedTotals) {
+                    const expected = expectedTotals[productId];
+                    const assigned = assignedTotals[productId] || 0;
+
+                    if (assigned !== expected) {
+                        this.qtyValidationMessage = '⚠️ Please assign all available quantities before proceeding.';
+                        return false;
+                    }
+                }
+
+                this.qtyValidationMessage = '';
+                return true;
+            },
+
+            qtyValidationMessage: '',
 
             getAvailableOrders() {
                 const availableOrders = this.orders.map(o => ({ ...o }));
@@ -900,7 +944,6 @@
                     }
                 }
 
-                // ⚠️ Don't filter here — return all, just track disabled in template
                 return availableOrders;
             },
 
@@ -940,6 +983,8 @@
                     note: '',
                     delivery_fee: 0,
                 });
+
+                this.qtyValidationMessage = '';
             },
 
             validateDeliveryDateTime(delivery) {
