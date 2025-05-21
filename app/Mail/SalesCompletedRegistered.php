@@ -2,7 +2,6 @@
 
 namespace App\Mail;
 
-use App\EcommerceModel\SalesHeader;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
@@ -29,9 +28,7 @@ class SalesCompletedRegistered extends Mailable
      */
     public function build()
     {
-        // $h = SalesHeader::find($this->sh->id);
-
-        return $this->view('mail.sales-completed-registered', ['h' => $this->h])
+        return $this->view('mail.sales-completed-registered')
             ->subject('Sales Transaction');
     }
 }

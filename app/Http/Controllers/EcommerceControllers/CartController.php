@@ -744,6 +744,8 @@ class CartController extends Controller
         $salesHeader->update([
             'order_number' => sprintf('%07d', $salesHeader->id)
         ]);
+
+        $salesHeader->refresh();
         
         if ($request->has('deliveries')) {
             $deliveries = json_decode($request->deliveries ?? '');
