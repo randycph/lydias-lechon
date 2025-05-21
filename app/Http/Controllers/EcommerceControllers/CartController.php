@@ -741,11 +741,11 @@ class CartController extends Controller
             'forecast_date' => $forecast_date
         ]);
 
-        $salesHeader->update([
-            'order_number' => sprintf('%07d', $salesHeader->id)
-        ]);
+        $formattedOrderNumber = sprintf('%07d', $salesHeader->id);
+        $salesHeader->update(['order_number' => $formattedOrderNumber]);
+        $salesHeader->order_number = $formattedOrderNumber;
+        $salesHeader->save();
 
-        $salesHeader->refresh();
         
         if ($request->has('deliveries')) {
             $deliveries = json_decode($request->deliveries ?? '');
