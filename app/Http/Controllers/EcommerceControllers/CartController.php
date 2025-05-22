@@ -650,7 +650,7 @@ class CartController extends Controller
     }
 
     public function save_sales(Request $request) {
-        
+
         // dd($request->all());
         if (auth()->guest()) {
             $user = User::find(9999);
@@ -667,8 +667,6 @@ class CartController extends Controller
             $customer_name = $user->name;
             $carts = Cart::where('user_id',$user->id)->get();
         }
-
-        $saleId = null;
 
         //dd($request);
         $dn = explode(" - ", $request->need_date . ' - ' . $request->need_time);
@@ -743,10 +741,6 @@ class CartController extends Controller
             'forecast_date' => $forecast_date
         ]);
 
-        $saleId = $salesHeader->id;
-
-        logger('saleId1', [$saleId]);
-
         $formattedOrderNumber = sprintf('%07d', $salesHeader->id);
         $salesHeader->update(['order_number' => $formattedOrderNumber]);
         $salesHeader->order_number = $formattedOrderNumber;
@@ -819,8 +813,6 @@ class CartController extends Controller
                     }
                 }
             }
-
-            logger('saleId2', [$saleId]);
             
             $product = $cart->product;
             $gross_amount = ($product->price * $cart->qty) + ($cart->paella_price * $cart->qty);
@@ -871,8 +863,6 @@ class CartController extends Controller
             // }
         }
 
-        logger('saleId3', [$saleId]);
-
         $recipient = $user->email ?: $request->email;
         if (auth()->guest()) {
             try {
@@ -912,12 +902,8 @@ class CartController extends Controller
 
         //$payment = $this->ipay($salesHeader,$deposit,$sign);
 
-        logger('saleId4', [$saleId]);
-
-        $sh = SalesHeader::find($saleId);
-
         logger('sales_header_id', [$salesHeader->id]);
-        logger('order_number', [$sh->order_number]);
+        logger('order_number', [$salesHeader->order_number]);
         logger('customer_contact_number', [$salesHeader->customer_contact_number]);
         logger('amount', [$deposit]);
         logger('signature', [$sign]);
