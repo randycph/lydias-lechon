@@ -22,6 +22,7 @@ use App\Models\User;
 use App\Models\Logs;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -99,13 +100,13 @@ class UserController extends Controller
                 'firstname'      => $request->fname,
                 'lastname'       => $request->lname,
                 'name'           => $request->fname.' '.$request->lname,
-                'password'       => \STR::random(32),
+                'password'       => Str::random(32),
                 'email'          => $request->email,
                 'role_id'        => $request->role,
                 'user_type'      => 'cms',
                 'is_active'      => 1,
                 'user_id'        => Auth::id(),
-                'remember_token' => \STR::random(10),
+                'remember_token' => Str::random(10),
                 'address_street'  => ' ',
                 'address_municipality' => ' ',
                 'address_city' => ' ',

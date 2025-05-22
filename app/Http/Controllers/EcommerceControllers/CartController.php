@@ -650,7 +650,7 @@ class CartController extends Controller
     }
 
     public function save_sales(Request $request) {
-
+        
         // dd($request->all());
         if (auth()->guest()) {
             $user = User::find(9999);
@@ -667,6 +667,8 @@ class CartController extends Controller
             $customer_name = $user->name;
             $carts = Cart::where('user_id',$user->id)->get();
         }
+
+        $saleId = null;
 
         //dd($request);
         $dn = explode(" - ", $request->need_date . ' - ' . $request->need_time);
@@ -740,6 +742,8 @@ class CartController extends Controller
             'origin' => $origin,
             'forecast_date' => $forecast_date
         ]);
+
+        $saleId = $salesHeader->id;
 
         $formattedOrderNumber = sprintf('%07d', $salesHeader->id);
         $salesHeader->update(['order_number' => $formattedOrderNumber]);
@@ -902,8 +906,10 @@ class CartController extends Controller
 
         //$payment = $this->ipay($salesHeader,$deposit,$sign);
 
+        $sh = SalesHeader::find($saleId);
+
         logger('sales_header_id', [$salesHeader->id]);
-        logger('order_number', [$salesHeader->order_number]);
+        logger('order_number', [$sh->order_number]);
         logger('customer_contact_number', [$salesHeader->customer_contact_number]);
         logger('amount', [$deposit]);
         logger('signature', [$sign]);
