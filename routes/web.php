@@ -307,7 +307,12 @@ Route::post('/signup-store', function(Request $request) {
             'address_region' => 'required_if:country,Philippines|nullable|string',
             'address_brgy' => 'required_if:country,Philippines|nullable|string',
             'international_address' => 'nullable|required_unless:country,Philippines|nullable|string',
-            'mobile' => 'required|string',
+            'mobile' => [
+                'required',
+                'regex:/^(09|\+639)\d{9}$/'
+            ],
+        ], [
+            'contact_mobile.regex' => 'The mobile number must start with 09 or +639 and be followed by 9 digits.',
         ]);
 
         if ($request->has('country') && $request->input('country') == 'Philippines') {
@@ -399,10 +404,6 @@ Route::post('save-personal-information', function(Request $request) {
         return redirect()->route('login');
     }
 
-    // if ($request->has('contact_mobile') && $request->input('contact_mobile') == '+63 ') {
-    //     $request['contact_mobile'] = null;
-    // }
-
     $validated = $request->validate([
         'firstname' => [
             'required',
@@ -415,8 +416,11 @@ Route::post('save-personal-information', function(Request $request) {
         'birthday' => 'nullable|date',
         'contact_mobile' => [
             'required',
+            'regex:/^(09|\+639)\d{9}$/'
         ],
         'email' => 'required|email|max:191|unique:users,email,' . auth()->id(), 
+    ], [
+        'contact_mobile.regex' => 'The mobile number must start with 09 or +639 and be followed by 9 digits.',
     ]);
 
     $user = auth()->user();
@@ -544,13 +548,15 @@ Route::post('/signup-validate-fields', function(Request $request) {
             $rules = [
                 'mobile' => [
                     'required',
-                    'regex:/^\+\d{2} \d{3} \d{3} \d{4}$/'
+                    'regex:/^(09|\+639)\d{9}$/'
                 ]
             ];
             break;
     }
 
-    $validator = Validator::make($request->all(), $rules);
+    $validator = Validator::make($request->all(), $rules, [
+        'contact_mobile.regex' => 'The mobile number must start with 09 or +639 and be followed by 9 digits.',
+    ]);
 
     if ($validator->fails()) {
         return response()->json([

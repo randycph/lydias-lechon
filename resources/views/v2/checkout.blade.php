@@ -359,11 +359,9 @@
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                                         placeholder="" required />
 
-                                    @error('name')
-                                        <div class="text-red-500 text-sm mt-1">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
+                                    <template x-if="nameValidationMessage">
+                                        <p class="text-red-500 text-xs italic mt-2" x-text="nameValidationMessage"></p>
+                                    </template>
                                 </div>
                                 <div class="my-2">
                                     <label for="mobile"
@@ -373,11 +371,9 @@
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                                         required />
 
-                                    @error('mobile')
-                                        <div class="text-red-500 text-sm mt-1">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
+                                    <template x-if="mobileValidationMessage">
+                                        <p class="text-red-500 text-xs italic mt-2" x-text="mobileValidationMessage"></p>
+                                    </template>
                                 </div>
                                 <div class="my-2">
                                     <label for="email"
@@ -387,11 +383,9 @@
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                                         placeholder="" required />
 
-                                    @error('email')
-                                        <div class="text-red-500 text-sm mt-1">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
+                                    <template x-if="emailValidationMessage">
+                                        <p class="text-red-500 text-xs italic mt-2" x-text="emailValidationMessage"></p>
+                                    </template>
                                 </div>
                                 <div class="my-2">
                                     <label for="agent"
@@ -666,6 +660,10 @@
                 }
             },
 
+            mobileValidationMessage: '',
+            nameValidationMessage: '',
+            emailValidationMessage: '',
+
             submitForm() {
                 this.formEl = document.getElementById('checkoutForm');
 
@@ -752,6 +750,20 @@
                     this.isSubmitting = false;
                     let errText = await error.text();
                     console.error('Error:', errText);
+
+                    let errorMessage = JSON.parse(errText);
+
+                    if (errorMessage.errors && errorMessage.errors.mobile) {
+                        this.mobileValidationMessage = errorMessage.errors.mobile[0];
+                    }
+
+                    if (errorMessage.errors && errorMessage.errors.name) {
+                        this.nameValidationMessage = errorMessage.errors.name[0];
+                    }
+
+                    if (errorMessage.errors && errorMessage.errors.email) {
+                        this.emailValidationMessage = errorMessage.errors.email[0];
+                    }
                 });
             },
 

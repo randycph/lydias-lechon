@@ -651,6 +651,17 @@ class CartController extends Controller
 
     public function save_sales(Request $request) {
 
+        $request->validate([
+            'mobile' => [
+                'required',
+                'regex:/^(09|\+639)\d{9}$/'
+            ],
+            'name' => 'required',
+            'email' => 'required|email',
+        ], [
+            'mobile.regex' => 'The mobile number must start with 09 or +639 and be followed by 9 digits.',
+        ]);
+
         // dd($request->all());
         if (auth()->guest()) {
             $user = User::find(9999);
