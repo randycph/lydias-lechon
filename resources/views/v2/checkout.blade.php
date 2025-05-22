@@ -94,7 +94,7 @@
                                 <span class="font-medium text-gray-800">Subtotal</span>
                                 <span class="font-medium" >₱{{ number_format($total, 2) }}</span>
                             </div>
-                            <template x-if="deliveryFees.length == 0 && !allowMultiple">
+                            <template x-if="deliveryFees.length == 0 && !allowMultiple && method == 'delivery'">
                             <div class="flex justify-between lg:mt-2">
                                 <span class="font-medium text-gray-800">Delivery Fee</span>
                                 <span class="font-medium" x-text="deliveryFee > 0 ? '₱' + deliveryFee : 'Free'"></span>
@@ -788,6 +788,9 @@
             },
 
             computeTotal() {
+                if (this.method == 'pickup') {
+                    this.deliveryFee = 0;
+                }
                 let total = parseFloat(this.orderAmount) + parseFloat(this.deliveryFee);
                 this.totalAmount = total;
                 this.deposit = this.totalAmount.toFixed(2);
