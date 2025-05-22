@@ -8,8 +8,8 @@ use App\Http\Controllers\Controller;
 use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\SalesDetail;
 use App\EcommerceModel\SalesPayment;
-use Auth;
-Use Redirect;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 
 class PaymayatestController extends Controller
 {
@@ -178,13 +178,15 @@ class PaymayatestController extends Controller
 
         $checkoutId = $this->get_checkoutId($request, $payment);
 
-      
+        if ($checkoutId && isset($checkoutId['checkoutId'])) {
+            SalesPayment::where('id', $payment->id)->update([
+                'receipt_number' => $checkoutId['checkoutId']
+            ]);
 
-        $update_payment = $payment->update([
-            'receipt_number' => $checkoutId['checkoutId']
-        ]);
-        
-        return Redirect::to($checkoutId['redirectUrl']);
+            return Redirect::to($checkoutId['redirectUrl']);
+        }
+
+        return response()->json(['error' => 'Unable to create checkout'], 500);
     }
 
     public function paydata($id,$amount,$checkoutId){
@@ -211,6 +213,8 @@ class PaymayatestController extends Controller
         }
 
         $first_responseData = json_decode($response, TRUE);
+
+        logger($first_responseData);
 
         return $first_responseData;
     }
