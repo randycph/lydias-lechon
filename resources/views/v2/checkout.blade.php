@@ -275,9 +275,10 @@
                                                             >
                                                                 <option value="">Select Hour</option>
                                                                 <template x-for="hour in 24" :key="hour">
-                                                                    <option :value="(hour < 10 ? '0' + hour : hour) + ':00'" 
-                                                                            x-text="(hour < 10 ? '0' + hour : hour) + ':00'">
-                                                                    </option>
+                                                                    <option 
+                                                                        :value="(hour < 10 ? '0' + hour : hour) + ':00'" 
+                                                                        x-text="formatAMPM(hour)"
+                                                                    ></option>
                                                                 </template>
                                                             </select>
                                                         
@@ -440,9 +441,10 @@
                                             >
                                                 <option value="">Select Hour</option>
                                                 <template x-for="hour in 24" :key="hour">
-                                                    <option :value="(hour < 10 ? '0' + hour : hour) + ':00'" 
-                                                            x-text="(hour < 10 ? '0' + hour : hour) + ':00'">
-                                                    </option>
+                                                    <option 
+                                                        :value="(hour < 10 ? '0' + hour : hour) + ':00'" 
+                                                        x-text="formatAMPM(hour)"
+                                                    ></option>
                                                 </template>
                                             </select>
                                         </div>
@@ -1055,6 +1057,13 @@
 
             async submit() {
                 this.isSubmitting = true;
+            },
+
+            formatAMPM(hour) {
+                const h = parseInt(hour);
+                const suffix = h >= 12 ? 'PM' : 'AM';
+                const standardHour = h % 12 === 0 ? 12 : h % 12;
+                return (standardHour < 10 ? '0' + standardHour : standardHour) + ':00 ' + suffix;
             }
         }
     }
