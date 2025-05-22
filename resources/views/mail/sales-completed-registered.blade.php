@@ -656,7 +656,7 @@ Media Item
                                                       <table class="twelve columns" style="margin-bottom: 10px">
                                                             <tr>
                                                                   <td class="panel">
-                                                                        <a href="{{env('APP_URL')}}/account/sales}">
+                                                                        <a href="{{env('APP_URL')}}/account/sales">
                                                                         {{env('APP_URL')}}/account/sales</a>
                                                                   </td>
                                                                   <td class="expander">
