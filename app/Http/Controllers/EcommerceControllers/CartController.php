@@ -722,7 +722,7 @@ class CartController extends Controller
             'customer_delivery_adress' => $customer_delivery_adress,
             'delivery_tracking_number' => '',
             'delivery_type' => $delivery_type,
-            'delivery_fee_amount' => $request->delivery_fee,
+            'delivery_fee_amount' => $request->shipping_type == 'pickup' ? 0 : $request->delivery_fee,
             'order_source' => 'Web',
             'gross_amount' => $totalPrice,
             'tax_amount' => 0,
