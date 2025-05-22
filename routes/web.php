@@ -399,9 +399,9 @@ Route::post('save-personal-information', function(Request $request) {
         return redirect()->route('login');
     }
 
-    if ($request->has('contact_mobile') && $request->input('contact_mobile') == '+63 ') {
-        $request['contact_mobile'] = null;
-    }
+    // if ($request->has('contact_mobile') && $request->input('contact_mobile') == '+63 ') {
+    //     $request['contact_mobile'] = null;
+    // }
 
     $validated = $request->validate([
         'firstname' => [
@@ -415,7 +415,6 @@ Route::post('save-personal-information', function(Request $request) {
         'birthday' => 'nullable|date',
         'contact_mobile' => [
             'required',
-            'regex:/^\+\d{2} \d{3} \d{3} \d{4}$/'
         ],
         'email' => 'required|email|max:191|unique:users,email,' . auth()->id(), 
     ]);

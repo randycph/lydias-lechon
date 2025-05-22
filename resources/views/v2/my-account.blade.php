@@ -73,7 +73,7 @@
                                 </div>
                                 <div class="w-full lg:w-1/2">
                                     <label for="contact" class="block mb-2 font-bold text-gray-900">Contact Number <span class="text-red-800">*</span> </label>
-                                    <input x-mask="+99 999 999 9999" type="text" id="contact_mobile" name="contact_mobile" value="{{ auth()->user()->contact_mobile }}"
+                                    <input type="text" id="contact_mobile" name="contact_mobile" value="{{ auth()->user()->contact_mobile }}"
                                         class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                         placeholder="" required />
 
