@@ -216,99 +216,98 @@ class PaymayatestController extends Controller
         return $first_responseData;
     }
 
-    public function postdata($id,$amount, $payment){
+    public function postdata($id, $amount, $payment)
+    {
         $sale = SalesHeader::find($id);
 
-        $items = '';
+        $items = [];
 
-        foreach($sale->items as $i){
-            $items .= '"name": "'.$i->product_name.'",
-                            "quantity": '.$i->qty.',
-                            "code": "'.$i->product_id.'",
-                            "description": "",
-                            "amount": {
-                                "value": '.$i->gross_amount.',
-                                "details": {
-                                    "discount": 0,
-                                    "serviceCharge": 0,
-                                    "shippingFee": 0,
-                                    "tax": 0,
-                                    "subtotal": '.$i->gross_amount.'
-                                }
-                            },';
+        foreach ($sale->items as $i) {
+            $items[] = [
+                "name" => $i->product_name,
+                "quantity" => (int) $i->qty,
+                "code" => (string) $i->product_id,
+                "description" => "",
+                "amount" => [
+                    "value" => round($i->gross_amount, 2),
+                    "details" => [
+                        "discount" => 0,
+                        "serviceCharge" => 0,
+                        "shippingFee" => 0,
+                        "tax" => 0,
+                        "subtotal" => round($i->gross_amount, 2)
+                    ]
+                ],
+                "totalAmount" => [
+                    "value" => round($sale->gross_amount, 2),
+                    "details" => [
+                        "discount" => round($sale->discount_amount, 2),
+                        "serviceCharge" => 0,
+                        "shippingFee" => round($sale->delivery_fee_amount, 2),
+                        "tax" => 0,
+                        "subtotal" => round($sale->gross_amount, 2)
+                    ]
+                ]
+            ];
         }
 
-        $postData = '{
-                    "totalAmount": {
-                        "value": '.$amount.',
-                        "currency": "PHP",
-                        "details": {
-                            "discount": 0,
-                            "serviceCharge": 0,
-                            "shippingFee": '.$sale->delivery_fee_amount.',
-                            "tax": 0,
-                            "subtotal": '.($amount - $sale->delivery_fee_amount).'
-                        }
-                    },
-                    "buyer": {
-                        "firstName": "'.$sale->customer_name.'",
-                        "middleName": " ",
-                        "lastName": " ",
-                        "birthday": "",
-                        "customerSince": "",
-                        "sex": "",
-                        "contact": {
-                            "phone": "'.$sale->customer_contact_number.'",
-                            "email": "'.$sale->email.'"
-                        },
-                        "shippingAddress": {
-                            "firstName": "'.$sale->customer_name.'",
-                            "middleName": " ",
-                            "lastName": " ",
-                            "phone": "'.$sale->customer_contact_number.'",
-                            "email": "'.$sale->email.'",
-                            "line1": "'.str_replace(array("\r", "\n","'"), ' ', $sale->customer_delivery_adress).'",
-                            "line2": " ",
-                            "city": " ",
-                            "state": " ",
-                            "zipCode": " ",
-                            "countryCode": "PH",
-                            "shippingType": "ST"
-                        },
-                        "billingAddress": {
-                            "line1": "'.str_replace(array("\r", "\n","'"), ' ', $sale->customer_delivery_adress).'",
-                            "line2": " ",
-                            "city": " ",
-                            "state": " ",
-                            "zipCode": " ",
-                            "countryCode": "PH"
-                        }
-                    },
-                    "items": [
-                        {
-                            '.$items.'
-                            "totalAmount": {
-                                "value": '.$sale->gross_amount.',
-                                "details": {
-                                    "discount": '.$sale->discount_amount.',
-                                    "serviceCharge": 0,
-                                    "shippingFee": '.$sale->delivery_fee_amount.',
-                                    "tax": 0,
-                                    "subtotal": '.$sale->gross_amount.'
-                                }
-                            }
-                        }
-                    ],
-                    "redirectUrl": {
-                        "success": "'.route('paymaya-success').'?id='.$payment->id.'",
-                        "failure": "'.route('paymaya-failure').'?id='.$payment->id.'",
-                        "cancel": "'.route('paymaya-cancel').'?id='.$payment->id.'"
-                    },
-                    "requestReferenceNumber": "'.$sale->order_number.'",
-                    "metadata": {}
-                }
-            ';
-            logger($postData);
-        return $postData;
+        $postData = [
+            "totalAmount" => [
+                "value" => round($amount, 2),
+                "currency" => "PHP",
+                "details" => [
+                    "discount" => 0,
+                    "serviceCharge" => 0,
+                    "shippingFee" => round($sale->delivery_fee_amount, 2),
+                    "tax" => 0,
+                    "subtotal" => round($amount - $sale->delivery_fee_amount, 2)
+                ]
+            ],
+            "buyer" => [
+                "firstName" => $sale->customer_name,
+                "middleName" => " ",
+                "lastName" => " ",
+                "birthday" => "",
+                "customerSince" => "",
+                "sex" => "",
+                "contact" => [
+                    "phone" => $sale->customer_contact_number,
+                    "email" => $sale->email
+                ],
+                "shippingAddress" => [
+                    "firstName" => $sale->customer_name,
+                    "middleName" => " ",
+                    "lastName" => " ",
+                    "phone" => $sale->customer_contact_number,
+                    "email" => $sale->email,
+                    "line1" => str_replace(["\r", "\n", "'"], ' ', $sale->customer_delivery_adress),
+                    "line2" => " ",
+                    "city" => " ",
+                    "state" => " ",
+                    "zipCode" => " ",
+                    "countryCode" => "PH",
+                    "shippingType" => "ST"
+                ],
+                "billingAddress" => [
+                    "line1" => str_replace(["\r", "\n", "'"], ' ', $sale->customer_delivery_adress),
+                    "line2" => " ",
+                    "city" => " ",
+                    "state" => " ",
+                    "zipCode" => " ",
+                    "countryCode" => "PH"
+                ]
+            ],
+            "items" => $items,
+            "redirectUrl" => [
+                "success" => route('paymaya-success') . '?id=' . $payment->id,
+                "failure" => route('paymaya-failure') . '?id=' . $payment->id,
+                "cancel" => route('paymaya-cancel') . '?id=' . $payment->id,
+            ],
+            "requestReferenceNumber" => $sale->order_number,
+            "metadata" => (object)[]
+        ];
+
+        logger(json_encode($postData, JSON_PRETTY_PRINT)); // Optional for debugging
+        return json_encode($postData);
     }
 }
