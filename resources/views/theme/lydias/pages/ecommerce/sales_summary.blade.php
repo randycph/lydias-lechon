@@ -84,7 +84,7 @@
                         <ul class="list-unstyled lh-7">
                             <li class="d-flex justify-content-between">
                                 <span>Order Date</span>
-                                <span>{{ date('F d, Y H:i A', strtotime($sales->created_at))}}</span>
+                                <span>{{ \Carbon\Carbon::parse($sales->created_at)->format('F d, Y g:i A') }}</span>
                             </li>                                                   
                             <li class="d-flex justify-content-between">
                                 <span>Payment Status</span>
