@@ -614,7 +614,7 @@ Route::get('/ipaysig',  'EcommerceControllers\CartController@payment');
 //Route::get('/ttt',  function(){
     //return view('theme.lydias.ttt');
 //});
-//Route::post('/pay-using-paymaya-test','EcommerceControllers\PaymayatestController@pay')->name('paymaya.paytest');
+Route::post('/pay-using-paymaya-test','EcommerceControllers\PaymayatestController@pay')->name('paymaya.paytest');
 Route::view('/unauthorized-access', 'unauthorized-access');
 Route::get('/sync-web', 'SyncController@receive');
 
