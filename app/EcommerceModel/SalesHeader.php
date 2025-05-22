@@ -7,12 +7,15 @@ use App\Models\ProductDeliveryAddress;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class SalesHeader extends Model
 {
     use SoftDeletes;
+    
+    protected $primaryKey = 'id';
+    public $incrementing = true;
+    protected $keyType = 'int';
 
     protected $table = 'ecommerce_sales_headers';
     protected $fillable = ['user_id', 'order_number', 'response_code', 'customer_name', 'customer_contact_number', 'customer_address', 'customer_delivery_adress', 'delivery_tracking_number', 'delivery_fee_amount',

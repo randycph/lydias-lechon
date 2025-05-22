@@ -745,6 +745,8 @@ class CartController extends Controller
 
         $saleId = $salesHeader->id;
 
+        logger('saleId1', [$saleId]);
+
         $formattedOrderNumber = sprintf('%07d', $salesHeader->id);
         $salesHeader->update(['order_number' => $formattedOrderNumber]);
         $salesHeader->order_number = $formattedOrderNumber;
@@ -817,6 +819,8 @@ class CartController extends Controller
                     }
                 }
             }
+
+            logger('saleId2', [$saleId]);
             
             $product = $cart->product;
             $gross_amount = ($product->price * $cart->qty) + ($cart->paella_price * $cart->qty);
@@ -867,6 +871,8 @@ class CartController extends Controller
             // }
         }
 
+        logger('saleId3', [$saleId]);
+
         $recipient = $user->email ?: $request->email;
         if (auth()->guest()) {
             try {
@@ -905,6 +911,8 @@ class CartController extends Controller
         $sign = $this->generateSignature($merchantkey,$merchantcode,$refno,$amount,$currency);
 
         //$payment = $this->ipay($salesHeader,$deposit,$sign);
+
+        logger('saleId4', [$saleId]);
 
         $sh = SalesHeader::find($saleId);
 
