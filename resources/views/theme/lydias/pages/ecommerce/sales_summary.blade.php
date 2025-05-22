@@ -56,7 +56,26 @@
                         <p class="mg-b-3 tx-semibold">{{$sales->customer_name}}</p>                  
                         <p class="mg-b-3">Tel No: {{$sales->customer_contact_number}}</p>
                         <p class="mg-b-3">Email: {{$sales->email}}</p>
-                        <p class="mg-b-3">{{$sales->delivery_type}}: {{$sales->customer_delivery_adress}}</p>                        
+                        <p class="mg-b-3">{{$sales->delivery_type}}: 
+                            @if ($sales->delivery_type == 'Door to door delivery')
+                                @if ($sales?->deliveryAddress && count($sales?->deliveryAddress) > 0)
+                                <ul>
+                                @foreach ($sales->deliveryAddress as $k => $address)
+                                <li>
+                                    Address {{ $k + 1 }}: {{ $address->address }}<br>
+                                    Contact person: {{ $address->contact_person }}<br>
+                                    Contact number: {{ $address->contact_tel }}<br>
+                                    Delivery fee: ₱{{ number_format($address->delivery_fee, 2) }}<br>
+                                    Location: {{ $address->location }}<br>
+                                    Delivery Date and time: {{ date('F d, Y H:i A', strtotime($address->delivery_date . ' ' . $address->delivery_time)) }}<br>
+                                </li>
+                                @endforeach
+                                </ul>
+                                @endif
+                            @else
+                                {{$sales->customer_delivery_adress}}
+                            @endif
+                        </p>                        
                         <p class="mg-b-3">Instruction: {{$sales->instruction}}</p>
                     </div>
                     <!-- col -->

@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Mail;
 use Response;
 use Storage;
 use App\EcommerceModel\GiftCertificate;
+use App\EcommerceModel\SalesHeader;
 use App\Helpers\Shortcode;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -133,7 +134,7 @@ class FrontController extends Controller
 
     public function show_sales_summary($id)
     {
-        $sales = \App\EcommerceModel\SalesHeader::where('id',$id)->first();
+        $sales = SalesHeader::where('id',$id)->with('deliveryAddress')->first();
         $gc = GiftCertificate::where('sales_header_id',$id)->get();
         $salesPayments = \App\EcommerceModel\SalesPayment::where('sales_header_id',$id)->get();
         $salesDetails = \App\EcommerceModel\SalesDetail::where('sales_header_id',$id)->get();
@@ -151,7 +152,7 @@ class FrontController extends Controller
     {
         $id = base64_decode($id);
         
-        $sales = \App\EcommerceModel\SalesHeader::where('id',$id)->first();          
+        $sales = SalesHeader::where('id',$id)->with('deliveryAddress')->first();          
         
         $gc = GiftCertificate::where('sales_header_id',$id)->get();
         $salesPayments = \App\EcommerceModel\SalesPayment::where('sales_header_id',$id)->get();
