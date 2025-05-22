@@ -194,24 +194,23 @@ class PaymayatestController extends Controller
 
     public function get_checkoutId($request, $payment){
 
-        $data = $this->postdata($request->sales_header_id, $request->amount, $payment);
-       // return $this->pk();
-        $context = stream_context_create(array(
-            'http' => array(
+        $context = stream_context_create([
+            'http' => [
                 'method' => 'POST',
-                'header' => "Authorization: Basic ".$this->pk()."\r\n".
+                'header' => "Authorization: Basic " . $this->pk() . "\r\n" .
                             "Content-Type: application/json\r\n",
-                'content' => $data
-            )
-        ));
+                'content' => $this->postdata($request->sales_header_id, $request->amount, $payment),
+                'ignore_errors' => true
+            ]
+        ]);
 
-        $first_response = file_get_contents($this->paymaya_url(), FALSE, $context);
+        $response = file_get_contents($this->paymaya_url(), false, $context);
 
-        if($first_response === FALSE){
-            die('Error');
+        if ($response === FALSE) {
+            dd("Error", $http_response_header);
         }
 
-        $first_responseData = json_decode($first_response, TRUE);
+        $first_responseData = json_decode($response, TRUE);
 
         return $first_responseData;
     }
