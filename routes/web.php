@@ -1108,6 +1108,15 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::post('/shareable-links/single-delete', 'EcommerceControllers\ShareableLinkController@single_delete')->name('shareable-link.single.delete');
     Route::post('/shareable-links/multiple-delete','EcommerceControllers\ShareableLinkController@multiple_delete')->name('shareable-link.multiple.delete');
     ///
+
+
+    // Coupon
+    Route::resource('/coupons','EcommerceControllers\CouponController');
+    Route::get('/coupon/{id}/{status}', 'EcommerceControllers\CouponController@update_status')->name('coupon.change-status');
+    Route::post('/coupon-single-delete', 'EcommerceControllers\CouponController@single_delete')->name('coupon.single.delete');
+    Route::get('/coupon-restore/{id}', 'EcommerceControllers\CouponController@restore')->name('coupon.restore');
+    Route::post('/coupon-multiple-change-status','EcommerceControllers\CouponController@multiple_change_status')->name('coupon.multiple.change.status');
+    Route::post('/coupon-multiple-delete','EcommerceControllers\CouponController@multiple_delete')->name('coupon.multiple.delete');
 });
 ##### END ADMIN ROUTE #####
 #####################################################################################################################################################
