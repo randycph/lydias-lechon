@@ -48,7 +48,7 @@
     </style>
 </head>
 
-<body> 
+<body style="overflow:auto"> 
     <div class="content content-fixed">
         <div class="container pd-x-0 pd-lg-x-10 pd-xl-x-0">
             <div class="text-center">
