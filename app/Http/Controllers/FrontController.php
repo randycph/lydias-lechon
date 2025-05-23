@@ -150,7 +150,13 @@ class FrontController extends Controller
 
     public function show_sales_summary_guest($id)
     {
-        $id = base64_decode($id);
+        $undecodeId = $id;
+
+        if (ctype_digit($id)) {
+            $id = $undecodeId;
+        } else {
+            $id = base64_decode($id);
+        }
         
         $sales = SalesHeader::where('id',$id)->with('deliveryAddress')->first();          
         
