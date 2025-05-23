@@ -102,4 +102,9 @@ class ProductCategory extends Model
     {
         return $this->products()->where('is_featured', 1)->get();
     }
+
+    public function  published_products()
+    {
+        return $this->hasMany(Product::class, 'category_id')->where('status','PUBLISHED');
+    }
 }
