@@ -134,6 +134,12 @@ class FrontController extends Controller
 
     public function show_sales_summary($id)
     {
+        $undecodeId = $id;
+
+        if (ctype_digit($id)) {
+            $id = $undecodeId;
+        }
+
         $sales = SalesHeader::where('id',$id)->with('deliveryAddress')->first();
         $gc = GiftCertificate::where('sales_header_id',$id)->get();
         $salesPayments = \App\EcommerceModel\SalesPayment::where('sales_header_id',$id)->get();
