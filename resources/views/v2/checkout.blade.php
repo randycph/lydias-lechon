@@ -821,12 +821,13 @@
 
             async getDeliveryFeeForMultipleDelivery() {
                 const branch = this.$refs.branch?.value;
+                
                 const locations = this.deliveries.map(d => d.location).filter(Boolean);
 
                 if (locations.length === 0) return;
 
                 try {
-                    let response = await fetch('{{ route('cart.front.get_shipping_fee_for_multiple_address') }}', {
+                    let response = await fetch('{{ route('cart.front.get_shipping_fee_for_multiple_address_new') }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -861,9 +862,12 @@
                     }
 
 
+                    this.deliveryFees = data.fees;
+
+                    this.deliveryFee = data.fee;
 
                     // Update total fee
-                    this.deliveryFee = this.deliveryFees.reduce((acc, item) => acc + item.fee, 0);
+                    // this.deliveryFee = this.deliveryFees.reduce((acc, item) => acc + item.fee, 0);
 
                 } catch (e) {
                     console.error(e);

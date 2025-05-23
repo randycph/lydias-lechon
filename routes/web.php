@@ -663,6 +663,7 @@ Route::get('/menu', 'Product\Front\MenuFrontController@list')->name('menu.front.
 //End Product
 Route::post('get_shipping_fee', 'EcommerceControllers\CartController@get_shipping_fee')->name('cart.front.get_shipping_fee');
 Route::post('get_shipping_fee_for_multiple_address', 'EcommerceControllers\CartController@get_shipping_fee_for_multiple_address')->name('cart.front.get_shipping_fee_for_multiple_address');
+Route::post('get_shipping_fee_for_multiple_address_new', 'EcommerceControllers\CartController@get_shipping_fee_for_multiple_address_new')->name('cart.front.get_shipping_fee_for_multiple_address_new');
 
 ##### START CUSTOMER ROUTE #####
 Route::get('/customer-sign-up', 'EcommerceControllers\CustomerFrontController@sign_up')->name('customer-front.sign-up');

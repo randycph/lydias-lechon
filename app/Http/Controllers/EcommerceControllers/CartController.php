@@ -1201,6 +1201,47 @@ class CartController extends Controller
         return User::find(9999);
     }
 
+    public function get_shipping_fee_for_multiple_address_new(Request $request)
+    {
+        $locations = $request->input('locations');
+        $totalFee = 0;
+        $fees = [];
+
+        $carts = Auth::check()
+            ? Cart::where('user_id', Auth::id())->get()
+            : collect(session('cart', []));
+
+        $check_customer = Auth::check() && \App\Models\DeliveryFeePromo::check_customer(Auth::id()) ? 1 : 0;
+
+        // Handle single location
+        if (is_string($locations)) {
+            $fee = $this->calculateRate($locations, $carts, $check_customer);
+            $fees[] = [
+                'location' => $locations,
+                'fee' => $fee
+            ];
+            $totalFee = $fee;
+        }
+
+        // Handle multiple locations
+        if (is_array($locations)) {
+            foreach ($locations as $loc) {
+                $fee = $this->calculateRate($loc, $carts, $check_customer);
+                $fees[] = [
+                    'location' => $loc,
+                    'fee' => $fee
+                ];
+                $totalFee += $fee;
+            }
+        }
+
+        return response()->json([
+            'fees' => $fees,
+            'fee' => $totalFee
+        ]);
+    }
+
+
     public function get_shipping_fee_for_multiple_address(Request $request)
     {
         $locations = $request->input('locations');
