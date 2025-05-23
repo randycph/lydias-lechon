@@ -2,7 +2,7 @@
 
 namespace App\EcommerceModel;
 
-use App\ActivityLog;
+use App\Models\ActivityLog;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 

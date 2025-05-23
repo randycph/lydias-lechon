@@ -656,7 +656,7 @@ Media Item
                                                       <table class="twelve columns" style="margin-bottom: 10px">
                                                             <tr>
                                                                   <td class="panel">
-                                                                        <a href="{{env('APP_URL')}}/account/sales}">
+                                                                        <a href="{{env('APP_URL')}}/account/sales">
                                                                         {{env('APP_URL')}}/account/sales</a>
                                                                   </td>
                                                                   <td class="expander">
@@ -705,7 +705,7 @@ Media Item
                                                                               </tr>
                                                                               @empty
                                                                               @endforelse
-                                                                              @if($h->delivery_fee_amount > 0)
+                                                                              @if($h->delivery_fee_amount > 0 && $h->delivery_type == 'Door to door delivery')
                                                                               <tr>
                                                                                     <td class="tx-left " colspan="6" style="font-size:11px;">Delivery Fee</td>
                                                                                     <td class="tx-right " style="font-size:11px;">{{number_format($h->delivery_fee_amount, 2)}}</td>

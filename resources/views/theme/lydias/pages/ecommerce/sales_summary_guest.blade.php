@@ -86,7 +86,26 @@
                     <h6 class="tx-15 mg-b-10">{{$sales->customer_name}}</h6>
                     <p class="mg-b-0 tx-15">Contact No: {{$sales->customer_contact_number}}</p>
                     <p class="mg-b-0 tx-15">Email: {{$sales->email}}</p>
-                    <p class="mg-b-0 tx-15">{{$sales->delivery_type}}: {{$sales->customer_delivery_adress}}</p>
+                    <p class="mg-b-0 tx-15">{{$sales->delivery_type}}: 
+                        @if ($sales->delivery_type == 'Door to door delivery')
+                            @if ($sales?->deliveryAddress && count($sales?->deliveryAddress) > 0)
+                            <ul>
+                            @foreach ($sales->deliveryAddress as $k => $address)
+                            <li>
+                                Address {{ $k + 1 }}: {{ $address->address }}<br>
+                                Contact person: {{ $address->contact_person }}<br>
+                                Contact number: {{ $address->contact_tel }}<br>
+                                Delivery fee: ₱{{ number_format($address->delivery_fee, 2) }}<br>
+                                Location: {{ $address->location }}<br>
+                                Delivery Date and time: {{ date('F d, Y H:i A', strtotime($address->delivery_date . ' ' . $address->delivery_time)) }}<br>
+                            </li>
+                            @endforeach
+                            </ul>
+                            @endif
+                        @else
+                            {{$sales->customer_delivery_adress}}
+                        @endif
+                    </p>
                     <p class="mg-b-0 tx-15">Instruction: {{$sales->instruction}}</p>
                 </div>
 
@@ -95,7 +114,7 @@
                     <ul class="list-unstyled lh-7">
                         <li class="d-flex justify-content-between tx-15">
                             <span>Order Date</span>
-                            <span>{{ date('F d, Y H:i A', strtotime($sales->created_at))}}</span>
+                            <span>{{ \Carbon\Carbon::parse($sales->created_at)->format('F d, Y g:i A') }}</span>
                         </li>
                         <li class="d-flex justify-content-between tx-15">
                             <span>Payment Status</span>

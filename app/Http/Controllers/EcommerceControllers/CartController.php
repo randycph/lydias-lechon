@@ -651,6 +651,18 @@ class CartController extends Controller
 
     public function save_sales(Request $request) {
 
+        $request->validate([
+            'mobile' => [
+                'required',
+                'regex:/^(09|\+639)\d{9}$/'
+            ],
+            'name' => 'required',
+            'email' => 'required|email',
+        ], [
+            'mobile.regex' => 'The mobile number must start with 09 or +639 and be followed by 9 digits.',
+        ]);
+
+        // dd($request->all());
         if (auth()->guest()) {
             $user = User::find(9999);
             if (empty($user)) {
@@ -721,7 +733,7 @@ class CartController extends Controller
             'customer_delivery_adress' => $customer_delivery_adress,
             'delivery_tracking_number' => '',
             'delivery_type' => $delivery_type,
-            'delivery_fee_amount' => $request->delivery_fee,
+            'delivery_fee_amount' => $request->shipping_type == 'pickup' ? 0 : $request->delivery_fee,
             'order_source' => 'Web',
             'gross_amount' => $totalPrice,
             'tax_amount' => 0,
@@ -740,9 +752,11 @@ class CartController extends Controller
             'forecast_date' => $forecast_date
         ]);
 
-        $salesHeader->update([
-            'order_number' => sprintf('%07d', $salesHeader->id)
-        ]);
+        $formattedOrderNumber = sprintf('%07d', $salesHeader->id);
+        $salesHeader->update(['order_number' => $formattedOrderNumber]);
+        $salesHeader->order_number = $formattedOrderNumber;
+        $salesHeader->save();
+
         
         if ($request->has('deliveries')) {
             $deliveries = json_decode($request->deliveries ?? '');
@@ -763,8 +777,8 @@ class CartController extends Controller
                         ProductDeliveryAddress::create([
                             'sales_header_id' => $salesHeader->id,
                             'address' => $single_address,
-                            'name' => $single_name,
-                            'phone' => $single_phone,
+                            'contact_person' => $single_name,
+                            'contact_tel' => $single_phone,
                             'qty' => $single_qty,
                             'order' => $single_order,
                             'location' => $single_location,
@@ -861,11 +875,10 @@ class CartController extends Controller
         }
 
         $recipient = $user->email ?: $request->email;
-
         if (auth()->guest()) {
             try {
-                Mail::to($recipient)->send(new SalesCompleted($salesHeader));   
-            } catch (\Throwable $th) {
+                Mail::to($recipient)->send(new SalesCompleted($salesHeader));
+            } catch (\Exception $th) {
                 //throw $th;
             }
             $carted = array();
@@ -873,14 +886,14 @@ class CartController extends Controller
         } else{
             try {
                 Mail::to($recipient)->send(new SalesCompletedRegistered($salesHeader)); 
-            } catch (\Throwable $th) {
+            } catch (\Exception $th) {
                 //throw $th;
             }
             Cart::where('user_id', $user->id)->delete();
         }
         try {
             Mail::to(config('app.email'))->send(new SalesCompletedAdmin($salesHeader));
-        } catch (\Throwable $th) {
+        } catch (\Exception $th) {
             //throw $th;
         }
         $email_to_branch = $this->email_to_branch($salesHeader);
@@ -925,7 +938,11 @@ class CartController extends Controller
         $branch = Branch::where('name',$salesHeader->outlet)->first();
         if(!empty($branch)){
             if(strlen($branch->email_address) > 2){
-                $email_act = Mail::to(env($branch->email_address))->send(new SalesCompletedAdmin($salesHeader));
+                try {
+                    $email_act = Mail::to(env($branch->email_address))->send(new SalesCompletedAdmin($salesHeader));
+                } catch (\Exception $th) {
+                    //throw $th;
+                }
             }
         }
         return true;

@@ -237,7 +237,9 @@ class PaymayatestController extends Controller
                                 }
                             },';
         }
-
+        $amount = (float) $amount;
+        $deliveryFee = (float) $sale->delivery_fee_amount ?? 0;
+        $subtotal = $amount - $deliveryFee;
         $postData = '{
                     "totalAmount": {
                         "value": '.$amount.',
@@ -245,9 +247,9 @@ class PaymayatestController extends Controller
                         "details": {
                             "discount": 0,
                             "serviceCharge": 0,
-                            "shippingFee": '.$sale->delivery_fee_amount.',
+                            "shippingFee": '.$deliveryFee.',
                             "tax": 0,
-                            "subtotal": '.($amount - $sale->delivery_fee_amount).'
+                            "subtotal": '.$subtotal.'
                         }
                     },
                     "buyer": {

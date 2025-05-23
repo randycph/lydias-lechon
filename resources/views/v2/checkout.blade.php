@@ -94,7 +94,7 @@
                                 <span class="font-medium text-gray-800">Subtotal</span>
                                 <span class="font-medium" >₱{{ number_format($total, 2) }}</span>
                             </div>
-                            <template x-if="deliveryFees.length == 0 && !allowMultiple">
+                            <template x-if="deliveryFees.length == 0 && !allowMultiple && method == 'delivery'">
                             <div class="flex justify-between lg:mt-2">
                                 <span class="font-medium text-gray-800">Delivery Fee</span>
                                 <span class="font-medium" x-text="deliveryFee > 0 ? '₱' + deliveryFee : 'Free'"></span>
@@ -104,7 +104,7 @@
                                 <div class="flex flex-col gap-1 mt-2">
                                     <template x-for="(item, i) in deliveryFees" :key="i">
                                         <div class="flex justify-between text-gray-500 text-sm">
-                                            <span x-text="'• ' + item.location"></span>
+                                            <span x-text="'Delivery Fee (' + item.location + ')'"></span>
                                             <span x-text="'₱' + item.fee.toLocaleString()"></span>
                                         </div>
                                     </template>
@@ -240,6 +240,10 @@
                                                     </div>
                                                 </div>
 
+                                                <div x-show="qtyValidationMessage" class="text-red-600 bg-red-100 border border-red-300 rounded p-3 mt-3">
+                                                    <p x-text="qtyValidationMessage"></p>
+                                                </div>
+
                                                 <input type="hidden" x-model="delivery.delivery_fee" />
                                                 
                                                 <div class="w-full flex gap-4">
@@ -271,9 +275,10 @@
                                                             >
                                                                 <option value="">Select Hour</option>
                                                                 <template x-for="hour in 24" :key="hour">
-                                                                    <option :value="(hour < 10 ? '0' + hour : hour) + ':00'" 
-                                                                            x-text="(hour < 10 ? '0' + hour : hour) + ':00'">
-                                                                    </option>
+                                                                    <option 
+                                                                        :value="(hour < 10 ? '0' + hour : hour) + ':00'" 
+                                                                        x-text="formatAMPM(hour)"
+                                                                    ></option>
                                                                 </template>
                                                             </select>
                                                         
@@ -348,31 +353,27 @@
                             <div class="mt-3">
                                 <div class="my-2">
                                     <label for="name"
-                                        class="block mb-2 text-sm font-bold text-gray-900">Full Name <span
+                                        class="block mb-2 text-sm font-bold text-gray-900">Name<span
                                             class="text-red-700">*</span></label>
-                                    <input type="text" id="name" name="name" value="{{ auth()->check() ? auth()->user()->name : '' }}"
+                                    <input type="text" id="name" name="name" value="{{ auth()->check() ? (auth()->user()->is_org == 1 ? auth()->user()->contact_person : auth()->user()->name) : '' }}"
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                                         placeholder="" required />
 
-                                    @error('name')
-                                        <div class="text-red-500 text-sm mt-1">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
+                                    <template x-if="nameValidationMessage">
+                                        <p class="text-red-500 text-xs italic mt-2" x-text="nameValidationMessage"></p>
+                                    </template>
                                 </div>
                                 <div class="my-2">
                                     <label for="mobile"
                                         class="block mb-2 text-sm font-bold text-gray-900">Mobile Number
                                         <span class="text-red-700">*</span></label>
-                                    <input type="tel" x-mask="+99 999 999 9999" id="mobile" name="mobile" value="{{ auth()->check() ? auth()->user()->contact_mobile : '' }}"
+                                    <input type="tel" id="mobile" name="mobile" value="{{ auth()->check() ? auth()->user()->contact_mobile : '' }}"
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                                        placeholder="+63" required />
+                                        required />
 
-                                    @error('mobile')
-                                        <div class="text-red-500 text-sm mt-1">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
+                                    <template x-if="mobileValidationMessage">
+                                        <p class="text-red-500 text-xs italic mt-2" x-text="mobileValidationMessage"></p>
+                                    </template>
                                 </div>
                                 <div class="my-2">
                                     <label for="email"
@@ -382,11 +383,9 @@
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                                         placeholder="" required />
 
-                                    @error('email')
-                                        <div class="text-red-500 text-sm mt-1">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
+                                    <template x-if="emailValidationMessage">
+                                        <p class="text-red-500 text-xs italic mt-2" x-text="emailValidationMessage"></p>
+                                    </template>
                                 </div>
                                 <div class="my-2">
                                     <label for="agent"
@@ -436,9 +435,10 @@
                                             >
                                                 <option value="">Select Hour</option>
                                                 <template x-for="hour in 24" :key="hour">
-                                                    <option :value="(hour < 10 ? '0' + hour : hour) + ':00'" 
-                                                            x-text="(hour < 10 ? '0' + hour : hour) + ':00'">
-                                                    </option>
+                                                    <option 
+                                                        :value="(hour < 10 ? '0' + hour : hour) + ':00'" 
+                                                        x-text="formatAMPM(hour)"
+                                                    ></option>
                                                 </template>
                                             </select>
                                         </div>
@@ -521,7 +521,9 @@
                                 <form
                                     x-data="{ isFormSubmitting: false }"
                                     @submit="isFormSubmitting = true; setTimeout(() => { this.depositModal = true}, 3000)"
-                                    action="{{ route('paymaya.pay') }}" method="POST" enctype="multipart/form-data" class="flex flex-col">
+                                    action="{{ route('paymaya.paytest') }}" method="POST" enctype="multipart/form-data" class="flex flex-col">
+                                    
+                                    {{-- action="{{ route('paymaya.pay') }}" method="POST" enctype="multipart/form-data" class="flex flex-col"> --}}
                                     @csrf
                                     <input type="hidden" name="sales_header_id" :value="paymentDetails.order_number">
                         
@@ -554,7 +556,7 @@
                                             <span class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 border-e-0 rounded-s-md dark:bg-gray-600 dark:text-gray-400 dark:border-gray-600">
                                                 ₱
                                             </span>
-                                            <input required name="amount" :value="paymentDetails.amount"  x-mask:dynamic="$money($input)" type="text" id="money" class="rounded-none rounded-e-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full border-gray-300 p-2.5  " placeholder="">
+                                            <input required name="amount" :value="paymentDetails.amount" type="text" id="money" class="rounded-none rounded-e-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full border-gray-300 p-2.5  " placeholder="">
                                         </div>
                                     </div>
                         
@@ -652,7 +654,15 @@
             changeMethod(method) {
                 this.method = method;
                 document.cookie = `shipping_method=${method}; path=/;`;
+
+                if (this.method == 'pickup') {
+                    this.allowMultiple = false;
+                }
             },
+
+            mobileValidationMessage: '',
+            nameValidationMessage: '',
+            emailValidationMessage: '',
 
             submitForm() {
                 this.formEl = document.getElementById('checkoutForm');
@@ -663,13 +673,13 @@
                 this.noNeededDate = false;
                 this.noNeededTime = false;
 
-                if (!this.need_time) {
+                if (!this.need_time && this.method === 'pickup') {
                     this.noNeededTime = true;
                     this.isSubmitting = false;
                     return;
                 }
 
-                if (!this.need_date) {
+                if (!this.need_date && this.method === 'pickup') {
                     this.noNeededDate = true;
                     this.isSubmitting = false;
                     return;
@@ -684,6 +694,13 @@
                 if (this.hasErrorMessage) {
                     this.isSubmitting = false;
                     return;
+                }
+
+                if (this.method === 'delivery' && this.allowMultiple) {
+                    if (!this.validateAllQtyUsed()) {
+                        this.isSubmitting = false;
+                        return;
+                    }
                 }
 
                 // Add dynamic fields
@@ -733,6 +750,20 @@
                     this.isSubmitting = false;
                     let errText = await error.text();
                     console.error('Error:', errText);
+
+                    let errorMessage = JSON.parse(errText);
+
+                    if (errorMessage.errors && errorMessage.errors.mobile) {
+                        this.mobileValidationMessage = errorMessage.errors.mobile[0];
+                    }
+
+                    if (errorMessage.errors && errorMessage.errors.name) {
+                        this.nameValidationMessage = errorMessage.errors.name[0];
+                    }
+
+                    if (errorMessage.errors && errorMessage.errors.email) {
+                        this.emailValidationMessage = errorMessage.errors.email[0];
+                    }
                 });
             },
 
@@ -771,6 +802,9 @@
             },
 
             computeTotal() {
+                if (this.method == 'pickup') {
+                    this.deliveryFee = 0;
+                }
                 let total = parseFloat(this.orderAmount) + parseFloat(this.deliveryFee);
                 this.totalAmount = total;
                 this.deposit = this.totalAmount.toFixed(2);
@@ -850,59 +884,87 @@
                 // this.allowMultiple = multipleItems || multipleQty;
             },
 
-updateAvailableQty(delivery) {
-    if (!delivery.order) {
-        delivery.availableQty = [];
-        return;
-    }
+            updateAvailableQty(delivery) {
+                if (!delivery.order) {
+                    delivery.availableQty = [];
+                    return;
+                }
 
-    const productId = delivery.order.product_id;
-    const matchingOrder = this.orders.find(o => o.product_id === productId);
-    const totalProductQty = matchingOrder ? parseInt(matchingOrder.qty) : 0;
+                const productId = delivery.order.product_id;
+                const matchingOrder = this.orders.find(o => o.product_id === productId);
+                const totalProductQty = matchingOrder ? parseInt(matchingOrder.qty) : 0;
 
-    // Total assigned to same product, excluding current delivery
-    const alreadyAssignedQty = this.deliveries
-        .filter(d => d !== delivery && d.order && d.order.product_id === productId)
-        .reduce((sum, d) => sum + (parseInt(d.qty) || 0), 0);
+                // Total assigned to same product, excluding current delivery
+                const alreadyAssignedQty = this.deliveries
+                    .filter(d => d !== delivery && d.order && d.order.product_id === productId)
+                    .reduce((sum, d) => sum + (parseInt(d.qty) || 0), 0);
 
-    const remainingQty = totalProductQty - alreadyAssignedQty;
+                const remainingQty = totalProductQty - alreadyAssignedQty;
 
-    // Show dropdown from 1 to remainingQty only (don't add +1)
-    const maxAvailable = Math.max(0, remainingQty);
+                // Show dropdown from 1 to remainingQty only (don't add +1)
+                const maxAvailable = Math.max(0, remainingQty);
 
-    delivery.availableQty = Array.from({ length: maxAvailable }, (_, i) => i + 1);
+                delivery.availableQty = Array.from({ length: maxAvailable }, (_, i) => i + 1);
 
-    const currentQty = parseInt(delivery.qty) || 0;
-    if (currentQty > maxAvailable) {
-        delivery.qty = '';
-    }
+                const currentQty = parseInt(delivery.qty) || 0;
+                if (currentQty > maxAvailable) {
+                    delivery.qty = '';
+                }
 
-    console.log({
-        totalProductQty,
-        alreadyAssignedQty,
-        currentQty,
-        remainingQty,
-        maxAvailable
-    });
-},
+                console.log({
+                    totalProductQty,
+                    alreadyAssignedQty,
+                    currentQty,
+                    remainingQty,
+                    maxAvailable
+                });
+            },
 
+            validateAllQtyUsed() {
+                const expectedTotals = {};
+                const assignedTotals = {};
 
+                this.orders.forEach(order => {
+                    expectedTotals[order.product_id] = parseInt(order.qty);
+                });
 
-getAvailableOrders() {
-    const availableOrders = this.orders.map(o => ({ ...o }));
+                this.deliveries.forEach(delivery => {
+                    if (delivery.order && delivery.qty) {
+                        const productId = delivery.order.product_id;
+                        assignedTotals[productId] = (assignedTotals[productId] || 0) + parseInt(delivery.qty);
+                    }
+                });
 
-    for (const delivery of this.deliveries) {
-        if (delivery.order) {
-            const match = availableOrders.find(o => o.product_id === delivery.order.product_id);
-            if (match) {
-                match.qty -= parseInt(delivery.qty) || 0;
-            }
-        }
-    }
+                for (const productId in expectedTotals) {
+                    const expected = expectedTotals[productId];
+                    const assigned = assignedTotals[productId] || 0;
 
-    // ⚠️ Don't filter here — return all, just track disabled in template
-    return availableOrders;
-},
+                    if (assigned !== expected) {
+                        this.qtyValidationMessage = '⚠️ Please assign all available quantities before proceeding.';
+                        return false;
+                    }
+                }
+
+                this.qtyValidationMessage = '';
+                return true;
+            },
+
+            qtyValidationMessage: '',
+
+            getAvailableOrders() {
+                const availableOrders = this.orders.map(o => ({ ...o }));
+
+                for (const delivery of this.deliveries) {
+                    if (delivery.order) {
+                        const match = availableOrders.find(o => o.product_id === delivery.order.product_id);
+                        if (match) {
+                            match.qty -= parseInt(delivery.qty) || 0;
+                        }
+                    }
+                }
+
+                return availableOrders;
+            },
 
             canAddMoreDeliveries() {
                 // Get total qty across all products
@@ -940,6 +1002,8 @@ getAvailableOrders() {
                     note: '',
                     delivery_fee: 0,
                 });
+
+                this.qtyValidationMessage = '';
             },
 
             validateDeliveryDateTime(delivery) {
@@ -1005,6 +1069,13 @@ getAvailableOrders() {
 
             async submit() {
                 this.isSubmitting = true;
+            },
+
+            formatAMPM(hour) {
+                const h = parseInt(hour);
+                const suffix = h >= 12 ? 'PM' : 'AM';
+                const standardHour = h % 12 === 0 ? 12 : h % 12;
+                return (standardHour < 10 ? '0' + standardHour : standardHour) + ':00 ' + suffix;
             }
         }
     }

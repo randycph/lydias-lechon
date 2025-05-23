@@ -15,25 +15,25 @@ class PaymayaController extends Controller
 {
 
     public function pk(){
-        //return base64_encode('pk-eo4sL393CWU5KmveJUaW8V730TTei2zY8zE4dHJDxkF');  // test
+        return base64_encode('pk-eo4sL393CWU5KmveJUaW8V730TTei2zY8zE4dHJDxkF');  // test
         //return base64_encode('pk-bzhgBQYUAtCvLa0PEPQiWGHeqrDLCEAnNKi7LhJLECY'); // beta
-        return base64_encode('pk-2oMK4D8wMUbKXay0VjLHk84OiKIuTfA2YsrdSH9o844');
+        // return base64_encode('pk-2oMK4D8wMUbKXay0VjLHk84OiKIuTfA2YsrdSH9o844');
             
             
     }
 
     public function sk(){
-        //return base64_encode('sk-KfmfLJXFdV5t1inYN8lIOwSrueC1G27SCAklBqYCdrU'); //test
+        return base64_encode('sk-KfmfLJXFdV5t1inYN8lIOwSrueC1G27SCAklBqYCdrU'); //test
         //return base64_encode('sk-XU2KylKnROUoiOkxzZ4hSEGDssFqIqDtsKhjW2i6mlV');  //beta
-        return base64_encode('sk-iLyM468U8VeXEOywY2ALFyxjuQCWDGS7bWagzCDccJG');  
+        // return base64_encode('sk-iLyM468U8VeXEOywY2ALFyxjuQCWDGS7bWagzCDccJG');  
     
     }
 
     public function paymaya_url(){
-        //return 'https://pg-sandbox.paymaya.com/checkout/v1/checkouts'; // test
+        return 'https://pg-sandbox.paymaya.com/checkout/v1/checkouts'; // test
         //return 'https://pg.paymaya.com/checkout/v1/checkouts/';
       
-        return 'https://pg.paymaya.com/checkout/v1/checkouts';
+        // return 'https://pg.paymaya.com/checkout/v1/checkouts';
     }
 
   
@@ -165,6 +165,7 @@ class PaymayaController extends Controller
 
     public function pay(Request $request){        
         
+        // dd($request->all());
         $sales = SalesHeader::find($request->sales_header_id); 
         $payment = SalesPayment::create([
             'sales_header_id' => $request->sales_header_id,
@@ -175,6 +176,7 @@ class PaymayaController extends Controller
             'receipt_number'  => '',
             'created_by' => $sales->user_id
         ]);
+
 
         $checkoutId = $this->get_checkoutId($request, $payment);
 
@@ -249,7 +251,7 @@ class PaymayaController extends Controller
                             "serviceCharge": 0,
                             "shippingFee": '.$sale->delivery_fee_amount.',
                             "tax": 0,
-                            "subtotal": '.($amount - $sale->delivery_fee_amount).'
+                            "subtotal": '.((float) $amount - (float) $sale->delivery_fee_amount).'
                         }
                     },
                     "buyer": {

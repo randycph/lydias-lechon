@@ -33,7 +33,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         if(strpos(url()->current(), "storage") === FALSE && strpos(url()->current(), "theme") === FALSE){
-            // $insert_logs = \App\ActivityLog::create([
+            // $insert_logs = \App\Models\ActivityLog::create([
             //     'created_by' => \Auth::id() ?? 'guest',
             //     'activity_type' => 'visit',
             //     'dashboard_activity' => 'visit page',
