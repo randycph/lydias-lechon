@@ -167,7 +167,15 @@ Route::group(['prefix' => 'v2'], function () {
         $page = 'order-history';
 
         $sales = SalesHeader::where('user_id', auth()->id())
-                            ->with('items.product.photos')
+                            ->with([
+                                'items.product.photos',
+                                'payments' => function ($query) {
+                                    $query->where('status', 'PAID');
+                                },
+                                'deliveryStatus' => function ($query) {
+                                    $query->orderBy('created_at', 'asc');
+                                },
+                            ])
                             ->orderBy('created_at', 'desc')
                             ->get();
 

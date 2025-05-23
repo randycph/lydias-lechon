@@ -60,6 +60,11 @@ class SalesHeader extends Model
         return $cntr;
     }
 
+    public function deliveryStatus()
+    {
+        return $this->hasMany(DeliveryStatus::class, 'order_id');
+    }
+
     public function getPaymentadminstatusAttribute()
     {
        $amount = $this->gross_amount;

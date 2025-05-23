@@ -704,7 +704,7 @@ class SalesController extends Controller
 
     public function delivery_status(Request $request)
     {
-        //dd($request);
+        // dd($request->all());
         $update = SalesHeader::whereId($request->del_id)->update([
             'delivery_status' => $request->delivery_status
         ]);
