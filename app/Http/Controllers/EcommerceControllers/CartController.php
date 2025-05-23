@@ -777,8 +777,8 @@ class CartController extends Controller
                         ProductDeliveryAddress::create([
                             'sales_header_id' => $salesHeader->id,
                             'address' => $single_address,
-                            'name' => $single_name,
-                            'phone' => $single_phone,
+                            'contact_person' => $single_name,
+                            'contact_tel' => $single_phone,
                             'qty' => $single_qty,
                             'order' => $single_order,
                             'location' => $single_location,
