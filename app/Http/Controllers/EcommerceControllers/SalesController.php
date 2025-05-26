@@ -33,6 +33,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 use App\EcommerceModel\Branch;
+use App\Models\ActivityLog;
 use App\Models\ProductDeliveryAddress;
 use App\Models\UserBranch;
 use Carbon\Carbon;
@@ -398,6 +399,18 @@ class SalesController extends Controller
     public function confirm(Request $request){
         $this->confirm_order($request->confirm_order_id, $request->confirm_order_remarks, Auth::user()->name);
 
+        ActivityLog::create([
+            'created_by' => auth()->id(),
+            'activity_type' => 'confirm',
+            'dashboard_activity' => 'confirm Sales Transaction',
+            'activity_desc' => 'confirmed Sales Transaction with Order Number: '.$request->confirm_order_id.' with remarks: '.$request->confirm_order_remarks,
+            'activity_date' => date("Y-m-d H:i:s"),
+            'db_table' => 'ecommerce_sales_headers',
+            'old_value' => '',
+            'new_value' => $request->confirm_order_remarks,
+            'reference' => $request->confirm_order_id
+        ]);
+
         return back()->with('success','Order has been confirmed!');
     }
 
@@ -592,6 +605,19 @@ class SalesController extends Controller
     public function destroy(Request $request)
     {
         $sale = SalesHeader::findOrFail($request->id_delete);
+
+        ActivityLog::create([
+            'created_by' => auth()->id(),
+            'activity_type' => 'delete',
+            'dashboard_activity' => 'delete Sales Transaction',
+            'activity_desc' => 'deleted Sales Transaction with Order Number: '.$sale->order_number,
+            'activity_date' => date("Y-m-d H:i:s"),
+            'db_table' => 'ecommerce_sales_headers',
+            'old_value' => '',
+            'new_value' => '',
+            'reference' => $sale->id
+        ]);
+
         $sale->delete();
 
         return back()->with('success','Successfully deleted transaction');
@@ -683,6 +709,17 @@ class SalesController extends Controller
 
         $branches_store = Branch::orderBy('name','asc')->get();
       
+        ActivityLog::create([
+            'created_by' => auth()->id(),
+            'activity_type' => 'update',
+            'dashboard_activity' => 'update Sales Details',
+            'activity_desc' => 'updated Sales Details with Order Number: '.$salesheader->order_number,
+            'activity_date' => date("Y-m-d H:i:s"),
+            'db_table' => 'ecommerce_sales_details',
+            'old_value' => '',
+            'new_value' => '',
+            'reference' => $salesdetail->id
+        ]);
 
         return view('admin.sales.update_sales_detail',compact('salesheader','dateneeded','date_only','time_only','locationed','products','branches_store'));
 
@@ -729,6 +766,18 @@ class SalesController extends Controller
         }
 
         //$this->sms_update_order_status($order->customer_contact_number,$order);
+
+        ActivityLog::create([
+            'created_by' => auth()->id(),
+            'activity_type' => 'update',
+            'dashboard_activity' => 'created new delivery',
+            'activity_desc' => 'created new delivery status of order #'.$order->order_number.' to '.$request->delivery_status,
+            'activity_date' => date("Y-m-d H:i:s"),
+            'db_table' => 'ecommerce_delivery_status',
+            'old_value' => '',
+            'new_value' => $request->delivery_status,
+            'reference' => $update_delivery_table->id
+        ]);
 
         return back()->with('success','Successfully updated delivery status!');
 
@@ -794,6 +843,18 @@ class SalesController extends Controller
         if( $balance <= 0 ){
             $this->confirm_order($sales->id, 'Auto confirm after payment completion', Auth::user()->name);
         }
+
+        ActivityLog::create([
+            'created_by' => auth()->id(),
+            'activity_type' => 'insert',
+            'dashboard_activity' => 'Added new payment',
+            'activity_desc' => 'added new payment for order #'.$sales->order_number.' with amount of '.$request->amount,
+            'activity_date' => date("Y-m-d H:i:s"),
+            'db_table' => 'ecommerce_sales_payments',
+            'old_value' => '',
+            'new_value' => '',
+            'reference' => $payment->id
+        ]);
 
         $sms = new Sms();
         $sms->send_sms($sales->customer_contact_number, 'payment_new', $payment);
