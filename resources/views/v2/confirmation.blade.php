@@ -52,6 +52,12 @@
                             @endif
                         </div>
                     </div>
+                    <div class="flex items-center text-sm justify-between px-4 py-3 border-b border-gray-200">
+                        <div>Instruction</div>
+                        <div class="text-right">
+                            <div>{{ $sales->instruction }}</div>
+                        </div>
+                    </div>
                     @if ($sales->delivery_type == 'Door to door delivery')
                     <div class="flex items-center text-sm justify-between px-4 py-3 border-b border-gray-200">
                         <div>Delivery Address</div>
@@ -66,6 +72,7 @@
                                     <strong>Delivery fee</strong>: ₱{{ number_format($address->delivery_fee, 2) }}<br>
                                     <strong>Location</strong>: {{ $address->location }}<br>
                                     <strong>Delivery Date and time</strong>: {{ date('F d, Y H:i A', strtotime($address->delivery_date . ' ' . $address->delivery_time)) }}<br>
+                                    <strong>Note</strong>: {{ $address->note }}<br>
                                 </li>
                                 @endforeach
                                 </ul>
