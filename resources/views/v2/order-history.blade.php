@@ -17,6 +17,25 @@
                     <div class="font-bold text-lg mb-5">
                         Order History
                     </div>
+
+                    @if (request()->query('payment_successful'))
+                    <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
+                        <span class="font-medium">Success!</span> Your payment was successfully processed. Thank you.
+                    </div>
+                    @endif
+
+                    @if (request()->query('order_cancelled'))
+                    <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
+                        <span class="font-medium">Important</span> The payment transaction you processed was unsuccessful.
+                        <p class="mb-0">If you wish to continue with your order, please click on the corresponding Pay icon <i class="fa fa-credit-card"></i> of Order#: <i style="font-weight:bold;">{{$_GET['order_no']}}</i></p>
+                    </div>
+                    @endif
+
+                    @if(Session::has('success_cancelled'))
+                    <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
+                        <span class="font-medium">Order Cancelled!</span> Your order has been successfully cancelled.
+                    </div>
+                    @endif
                     
                     @if (count($sales) > 0)
                     @foreach ($sales as $index => $sale)
@@ -45,7 +64,7 @@
                                     @endphp
                                     <div class="flex gap-4 items-start w-full relative">
                                         <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="w-20 h-20 min-w-20 min-h-20 object-cover overflow-hidden rounded-md bg-center">
-                                            <img src="{{ asset('storage/products/' . $cart->product->photos[0]->path) }}" alt="Checkout" class="w-20 h-20 object-cover">
+                                            <img onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'" src="{{ asset('storage/products/' . $cart->product->photos[0]->path) }}" alt="Checkout" class="w-20 h-20 object-cover">
                                         </div>
                                         <div class="flex flex-col">
                                             <div class="font-bold">{{ $cart->product->name }}</div>
@@ -120,7 +139,7 @@
                                             Track Order
                                         </button>
                                     @endif
-                                    <a href="{{ route('profile.show_sales_summary', ['id' => $sale->id ])}}" type="button"
+                                    <a href="{{ route('confirmation', ['id' => $sale->id ])}}" type="button"
                                         class="text-white bg-slate-500 custom-btn btn-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
                                         View
                                     </a>

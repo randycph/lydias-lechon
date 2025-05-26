@@ -2,7 +2,11 @@
 
 use App\EcommerceModel\Branch;
 use App\EcommerceModel\Cart;
+use App\EcommerceModel\DeliveryStatus;
+use App\EcommerceModel\GiftCertificate;
+use App\EcommerceModel\SalesDetail;
 use App\EcommerceModel\SalesHeader;
+use App\EcommerceModel\SalesPayment;
 use App\Helpers\ListingHelper;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
@@ -116,9 +120,32 @@ Route::group(['prefix' => 'v2'], function () {
 
         return view('v2.checkout', compact('page', 'carts', 'pickupBranches', 'locations', 'deliveryBranches'));
     })->name('checkout');
-    Route::get('/confirmation', function () {
+    Route::get('/sales-summary/{id}', function ($id) {
         $page = 'confirmation';
-        return view('v2.confirmation', compact('page'));
+
+        $undecodeId = $id;
+
+        if (ctype_digit($id)) {
+            $id = $undecodeId;
+        }
+
+        $sales = SalesHeader::where('id',$id)->with('deliveryAddress')->first();
+        $gc = GiftCertificate::where('sales_header_id',$id)->get();
+        $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
+        $salesDetails = SalesDetail::with('product.photos')->where('sales_header_id',$id)->get();
+        $totalPayment = SalesPayment::where('sales_header_id',$id)->sum('amount');
+        $deliveries = DeliveryStatus::where('order_id',$id)->get();
+        $totalNet = SalesHeader::where('id',$id)->sum('net_amount');
+        if($totalNet <= $totalPayment) {
+            $status = 'PAID';
+        } else {
+            $status = 'UNPAID';
+            if($totalPayment > 0){
+                $status = 'PARTIAL';
+            }
+        }
+
+        return view('v2.confirmation', compact('page', 'sales', 'salesPayments', 'salesDetails', 'status', 'deliveries', 'gc', 'totalPayment', 'totalNet'));
     })->name('confirmation');
     Route::get('/login', function () {
         $page = 'login';

@@ -644,7 +644,7 @@ Media Item
                                                             <table class="btn green">
                                                                   <tbody><tr>
                                                                         <td>
-                                                                              <a href="{{env('APP_URL')}}/guest/view/{{$h->HashOrderNumber}}">Click here to view and manage this order</a>
+                                                                              <a href="{{ route('confirmation', ['id' => $h->HashOrderNumber]) }}">Click here to view and manage this order</a>
                                                                         </td>
                                                                   </tr>
                                                             </tbody>

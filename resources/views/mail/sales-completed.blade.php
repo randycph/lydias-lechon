@@ -645,7 +645,7 @@ Media Item
                                                             <table class="btn green">
                                                                   <tbody><tr>
                                                                         <td>
-                                                                              <a href="{{env('APP_URL')}}/guest/view/{{$h->HashOrderNumber}}">Click here to view and manage this order</a>
+                                                                              <a href="{{ route('confirmation', ['id' => $h->HashOrderNumber]) }}">Click here to view and manage this order</a>
                                                                         </td>
                                                                   </tr>
                                                             </tbody>
@@ -657,8 +657,8 @@ Media Item
                                                       <table class="twelve columns" style="margin-bottom: 10px">
                                                             <tr>
                                                                   <td class="panel">
-                                                                        <a href="{{env('APP_URL')}}/guest/view/{{$h->order_number}}">
-                                                                              {{env('APP_URL')}}/guest/view/{{$h->order_number}}</a>
+                                                                        <a href="{{ route('confirmation', ['id' => $h->HashOrderNumber]) }}">
+                                                                              {{ route('confirmation', ['id' => $h->HashOrderNumber]) }}</a>
                                                                         </td>
                                                                         <td class="expander">
                                                                         </td>

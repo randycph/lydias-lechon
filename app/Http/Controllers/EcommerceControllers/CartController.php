@@ -1044,8 +1044,8 @@ class CartController extends Controller
             'trans_id' => $_GET['TransId'],
             'err_desc' => $_GET['ErrDesc']
         ]);
-
-        return Redirect::to(env('APP_URL')."/account/sales?order_cancelled=1&order_no=".$_GET['RefNo']);
+        
+        return Redirect::to(route('order-history')."?order_cancelled=1&order_no=".$_GET['RefNo']);
     }
 
     public function generateSignature()

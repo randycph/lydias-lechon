@@ -332,7 +332,7 @@
                                                                 <a class="dropdown-item" href="javascript:void(0);" onclick="show_delivery_history({{$sale->id}})" title="Order History" data-id="{{$sale->id}}">Show Order Status History</a>
                                                             
                                                             @if (substr(strtolower($use->user->email), 0, 8) == 'lydtemp_')
-                                                                <a class="dropdown-item" href="{{route('profile.show_sales_summary_guest',$use->HashOrderNumber)}}" target="_blank" title="View Guest Sales Summary" >Guest Sales Summary</a>
+                                                                <a class="dropdown-item" href="{{route('confirmation',$use->HashOrderNumber)}}" target="_blank" title="View Guest Sales Summary" >Guest Sales Summary</a>
                                                             @endif
 
 

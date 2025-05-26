@@ -78,9 +78,9 @@ class PaymayaController extends Controller
         $tag = $this->check_paymaya($_GET['id']);   
         $order = SalesPayment::find($_GET['id']);
         if(Auth::guest())
-            return redirect()->route('profile.show_sales_summary_guest',['id' => $order->sales->HashOrderNumber, 'payment_successful' => 'yes', 'order_no' => $order->sales->order_number]);
+            return redirect()->route('confirmation',['id' => $order->sales->HashOrderNumber, 'payment_successful' => 'yes', 'order_no' => $order->sales->order_number]);
         else
-            return redirect()->route('profile.sales',['payment_successful' => 'yes', 'order_no' => $order->sales->order_number]);
+            return redirect()->route('order-history',['payment_successful' => 'yes', 'order_no' => $order->sales->order_number]);
     }
 
     public function failure(){
@@ -91,9 +91,9 @@ class PaymayaController extends Controller
      
         $order = SalesPayment::whereId($_GET['id'])->withTrashed()->first();
         if(Auth::guest())
-            return redirect()->route('profile.show_sales_summary_guest',['id' => $order->sales->HashOrderNumber, 'order_cancelled' => 'cancelled', 'order_no' => $order->sales->order_number]);
+            return redirect()->route('confirmation',['id' => $order->sales->HashOrderNumber, 'order_cancelled' => 'cancelled', 'order_no' => $order->sales->order_number]);
         else
-            return redirect()->route('profile.sales',['order_cancelled' => 'cancelled', 'order_no' => $order->sales->order_number]);
+            return redirect()->route('order-history',['order_cancelled' => 'cancelled', 'order_no' => $order->sales->order_number]);
     }
     public function cancel(){
         $update = SalesPayment::whereId($_GET['id'])->update([
@@ -103,9 +103,9 @@ class PaymayaController extends Controller
         
         $order = SalesPayment::whereId($_GET['id'])->withTrashed()->first();
         if(Auth::guest())
-            return redirect()->route('profile.show_sales_summary_guest',['id' => $order->sales->HashOrderNumber, 'order_cancelled' => 'cancelled', 'order_no' => $order->sales->order_number]);
+            return redirect()->route('confirmation',['id' => $order->sales->HashOrderNumber, 'order_cancelled' => 'cancelled', 'order_no' => $order->sales->order_number]);
         else
-            return redirect()->route('profile.sales',['order_cancelled' => 'cancelled', 'order_no' => $order->sales->order_number]);
+            return redirect()->route('order-history',['order_cancelled' => 'cancelled', 'order_no' => $order->sales->order_number]);
     }
 
     public function success_wh(Request $request){      
