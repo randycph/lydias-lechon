@@ -1,5 +1,14 @@
 {{-- Marketing popup --}}
-<div >
+<div x
+    x-data="{
+        marketingPopup: false,
+        showWithDelay(delay) {
+            setTimeout(() => {
+                this.marketingPopup = true;
+            }, delay * 1000);
+        }
+    }"
+    x-init="showWithDelay({{ $delay }})">
     <!-- Drawer Overlay -->
     <div x-show="marketingPopup" x-transition.opacity class="fixed inset-0 bg-black/50 z-40" @click="marketingPopup = false"></div>
 

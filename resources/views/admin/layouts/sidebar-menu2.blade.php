@@ -237,6 +237,14 @@
         </li>
     @endif
 
+    <li class="nav-item with-sub @if (request()->routeIs('popup-message*')) active show @endif">
+        <a href="" class="nav-link"><i data-feather="users"></i> <span>Popup Message</span></a>
+        <ul>
+            <li @if (\Route::current()->getName() == 'popup-message.index' || \Route::current()->getName() == 'popup-message.edit') class="active" @endif><a href="{{ route('popup-message.index') }}">Manage Popup Message</a></li>
+            <li @if (\Route::current()->getName() == 'popup-message.create') class="active" @endif><a href="{{ route('popup-message.create') }}">Create a Popup Message</a></li>
+        </ul>
+    </li>
+
     @if (auth()->user()->has_access_to_module('products') || auth()->user()->has_access_to_module('product_category') ||
         auth()->user()->has_access_to_module('production_branch') || auth()->user()->has_access_to_module('gift_certificate') ||
         auth()->user()->has_access_to_module('delivery_rate') || auth()->user()->has_access_to_module('branch') ||

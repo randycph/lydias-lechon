@@ -124,9 +124,11 @@ Route::group(['prefix' => 'v2'], function () {
         $page = 'confirmation';
 
         $undecodeId = $id;
-
+        
         if (ctype_digit($id)) {
             $id = $undecodeId;
+        } else {
+            $id = base64_decode($id);
         }
 
         $sales = SalesHeader::where('id',$id)->with('deliveryAddress')->first();
@@ -834,6 +836,14 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::post('/admin/albums/{album}/restore', 'Banner\AlbumController@restore')->name('albums.restore');
     Route::post('/admin/albums/banners/{album}', 'Banner\AlbumController@get_album_details')->name('albums.banners');
     //
+
+    // Popup message
+    Route::resource('/admin/popup-message', 'PopupMessageController');
+    Route::get('/admin/popup-message/{id}/{status}', 'PopupMessageController@update_status')->name('popup-message.change-status');
+    Route::post('/admin/popup-message-single-delete', 'PopupMessageController@single_delete')->name('popup-message.single.delete');
+    Route::get('/admin/popup-message-restore/{id}', 'PopupMessageController@restore')->name('popup-message.restore');
+    Route::post('/admin/popup-message-multiple-change-status','PopupMessageController@multiple_change_status')->name('popup-message.multiple.change.status');
+    Route::post('/admin/popup-message-multiple-delete','PopupMessageController@multiple_delete')->name('popup-message.multiple.delete');
 
     Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']], function () {
         '\vendor\UniSharp\LaravelFilemanager\Lfm::routes()'; 
