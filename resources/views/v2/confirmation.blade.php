@@ -55,7 +55,7 @@
                     <div class="flex items-center text-sm justify-between px-4 py-3 border-b border-gray-200">
                         <div>Instruction</div>
                         <div class="text-right">
-                            <div>{{ $sales->instruction }}</div>
+                            <div>{{ $sales->instruction ?? 'NA' }}</div>
                         </div>
                     </div>
                     @if ($sales->delivery_type == 'Door to door delivery')
