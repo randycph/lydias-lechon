@@ -432,6 +432,18 @@ class SalesController extends Controller
         ]);
         //logger(SalesHeader::whereId($request->delfee_sales_id)->first());
 
+        ActivityLog::create([
+            'created_by' => auth()->id(),
+            'activity_type' => 'insert',
+            'dashboard_activity' => 'Added delivery fee',
+            'activity_desc' => 'added delivery fee of '.$request->delfee.' to Sales Transaction with Order Number: '.$request->delfee_sales_id,
+            'activity_date' => date("Y-m-d H:i:s"),
+            'db_table' => 'ecommerce_sales_headers',
+            'old_value' => '',
+            'new_value' => $request->delfee,
+            'reference' => $request->delfee_sales_id
+        ]);
+
         return back()->with('success','Delivery Fee has been updated');
     }
 
