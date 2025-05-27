@@ -34,11 +34,11 @@
             </button>
 
             <div class="flex flex-col lg:flex-row">
-                <div class="order-1 lg:order-2 overflow-hidden">
+                <div class="md:w-1/2 w-full order-1 lg:order-2 overflow-hidden">
                     <img class="h-[300px] w-full object-cover object-top lg:h-full" src="{{ asset('images/marketing-img.png') }}" alt="{{ $popupMessage->title }}">
                 </div>
     
-                <div class="order-2 lg:order-1 py-10 px-5">
+                <div class="md:w-1/2 w-full order-2 lg:order-1 py-10 px-5">
                     <div class="font-cubao text-3xl text-left text-primary px-6">
                         {{ $popupMessage->title }}
                     </div>
