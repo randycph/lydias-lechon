@@ -161,21 +161,6 @@
                             </div>
                             </template>
                             
-                            <template x-if="!allowMultiple">
-                            <div class="mt-4">	
-                                <label for="locations" class="font-bold">Select Location <span
-                                        class="text-red-700">*</span></label>
-                                <select id="locations" name="location" @change="getDeliveryFee" x-ref="location" required
-                                    class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                                    <option selected value="">Choose a location</option>
-                                    @foreach ($locations as $location)
-                                        <option value="{{ $location->name }}">{{ $location->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            </template>
-
-                            
                             <div x-show="method === 'delivery'" class="space-y-4">
                         
                             <div class="flex items-center me-4 my-4">
@@ -556,7 +541,7 @@
                                             <span class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 border-e-0 rounded-s-md dark:bg-gray-600 dark:text-gray-400 dark:border-gray-600">
                                                 ₱
                                             </span>
-                                            <input required name="amount" :value="paymentDetails.amount" type="text" id="money" class="rounded-none rounded-e-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full border-gray-300 p-2.5  " placeholder="">
+                                            <input readonly required name="amount" :value="paymentDetails.amount" type="text" id="money" class="rounded-none rounded-e-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full border-gray-300 p-2.5  " placeholder="">
                                         </div>
                                     </div>
                         
