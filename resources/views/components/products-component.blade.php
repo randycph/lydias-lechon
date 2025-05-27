@@ -9,44 +9,12 @@
             <button class="custom-btn btn-primary-dark text-white bg-primary mx-auto rounded-md px-6 py-3 mt-3 font-medium">View Menu</button>
         </div>
     </div>
-    @php
-        $products = [
-            [
-                'title' => 'Shop Whole Lechon',
-                'image' => 'product1.png',
-            ],
-            [
-                'title' => 'Shop Lechon-In-A-Box',
-                'image' => 'product2.png',
-            ],
-            [
-                'title' => 'Shop Lydia’s Family Box',
-                'image' => 'product3.png',
-            ],
-            [
-                'title' => 'Shop Party Trays',
-                'image' => 'product4.png',
-            ],
-            [
-                'title' => 'Shop Lechon Espesyal',
-                'image' => 'product5.png',
-            ],
-            [
-                'title' => 'Shop Bento Box',
-                'image' => 'product6.png',
-            ],
-            [
-                'title' => 'Shop Pampagana',
-                'image' => 'product7.png',
-            ],
-        ];
-    @endphp
     <div class="products grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
         @if(!empty($categories))
         @foreach ($categories as $category)
             <div class="product pb-12 px-4">
                 <a href="{{ route('lechon-menu') }}?s={{ $category->slug }}" class="cursor-pointer relative bg-orange-500 rounded-md w-full h-[300px] p-2 flex justify-center clip-bottom items-center">
-                    <img src="{{ asset('images/category/'.$category['image']) }}" alt="Shop {{ $category->name }}" class="scale-110 md:scale-125 top-0 left-0 px-10 overflow-hidden hover:scale-150 transition-all duration-300 ease-in-out">
+                    <img onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'" src="{{ asset('images/category/'.$category['image']) }}" alt="Shop {{ $category->name }}" class="scale-110 md:scale-125 top-0 left-0 px-10 overflow-hidden hover:scale-150 transition-all duration-300 ease-in-out">
                 </a>
                 <div class="flex justify-between mt-4">
                     <div class="font-bold">{{ $category->name }}</div>

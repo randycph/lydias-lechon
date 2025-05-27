@@ -161,21 +161,6 @@
                             </div>
                             </template>
                             
-                            <template x-if="!allowMultiple">
-                            <div class="mt-4">	
-                                <label for="locations" class="font-bold">Select Location <span
-                                        class="text-red-700">*</span></label>
-                                <select id="locations" name="location" @change="getDeliveryFee" x-ref="location" required
-                                    class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                                    <option selected value="">Choose a location</option>
-                                    @foreach ($locations as $location)
-                                        <option value="{{ $location->name }}">{{ $location->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            </template>
-
-                            
                             <div x-show="method === 'delivery'" class="space-y-4">
                         
                             <div class="flex items-center me-4 my-4">
@@ -256,6 +241,7 @@
                                                             </svg>
                                                             </div>
                                                             <input 
+                                                                :min="new Date().toISOString().split('T')[0]"
                                                                 @change="validateDeliveryDateTime(delivery)"
                                                                 x-model="delivery.need_date" name="need_date" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
                                                         </div>
@@ -269,19 +255,25 @@
                                                                 </svg>
                                                             </div>
                                                             <select 
-                                                                type="time" id="time" x-model="delivery.need_time" name="need_time"
+                                                                name="need_time" 
+                                                                id="need_time"
+                                                                x-model="delivery.need_time" 
                                                                 @change="validateDeliveryDateTime(delivery)"
                                                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                                             >
                                                                 <option value="">Select Hour</option>
-                                                                <template x-for="hour in 24" :key="hour">
-                                                                    <option 
-                                                                        :value="(hour < 10 ? '0' + hour : hour) + ':00'" 
-                                                                        x-text="formatAMPM(hour)"
-                                                                    ></option>
+                                                                <template x-for="hour in allHours" :key="hour">
+                                                                    <template x-if="!isTimeDisabledForDelivery(hour)(delivery)">
+                                                                        <option 
+                                                                            :value="(hour < 10 ? '0' + hour : hour) + ':00'" 
+                                                                            x-text="formatAMPM(hour)">
+                                                                        </option>
+                                                                    </template>
                                                                 </template>
                                                             </select>
-                                                        
+                                                        </div>
+                                                        <div x-show="noNeededTime" class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
+                                                            Please select a time.
                                                         </div>
                                                     </div>
                                                 </div>
@@ -336,9 +328,12 @@
                                     <label for="delivery_address"
                                     class="block mb-2 font-bold text-gray-900">Delivery Address <span
                                         class="text-red-700">*</span></label>
-                                <input type="text" id="delivery_address" name="delivery_address" value="{{ auth()->check() ? auth()->user()->address_street : '' }}"
-                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                                    placeholder="" />
+                                    <input type="text" id="delivery_address" name="delivery_address" x-model="delivery_address" value="{{ auth()->check() ? auth()->user()->address_street : '' }}"
+                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                                        placeholder="" />
+                                    <div x-show="noDeliveryAddress" class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
+                                        Please add delivery address
+                                    </div>
                                 </div>
                             </template>
                         </div>
@@ -415,7 +410,8 @@
                                                         d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
                                                 </svg>
                                             </div>
-                                            <input @change="validateDateTime" x-model="need_date" type="date" name="need_date" value="{{ old('need_date') }}"
+                                            <input 
+                                                :min="new Date().toISOString().split('T')[0]" @change="validateDateTime" x-model="need_date" type="date" name="need_date" value="{{ old('need_date') }}"
                                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 "
                                                 placeholder="Select date">
                                         </div>
@@ -434,11 +430,13 @@
                                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                             >
                                                 <option value="">Select Hour</option>
-                                                <template x-for="hour in 24" :key="hour">
-                                                    <option 
-                                                        :value="(hour < 10 ? '0' + hour : hour) + ':00'" 
-                                                        x-text="formatAMPM(hour)"
-                                                    ></option>
+                                                <template x-for="hour in allHours" :key="hour">
+                                                    <template x-if="!isTimeDisabled(hour)">
+                                                        <option 
+                                                            :value="(hour < 10 ? '0' + hour : hour) + ':00'" 
+                                                            x-text="formatAMPM(hour)"
+                                                        ></option>
+                                                    </template>
                                                 </template>
                                             </select>
                                         </div>
@@ -556,7 +554,7 @@
                                             <span class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 border-e-0 rounded-s-md dark:bg-gray-600 dark:text-gray-400 dark:border-gray-600">
                                                 ₱
                                             </span>
-                                            <input required name="amount" :value="paymentDetails.amount" type="text" id="money" class="rounded-none rounded-e-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full border-gray-300 p-2.5  " placeholder="">
+                                            <input readonly required name="amount" :value="paymentDetails.amount" type="text" id="money" class="rounded-none rounded-e-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full border-gray-300 p-2.5  " placeholder="">
                                         </div>
                                     </div>
                         
@@ -586,7 +584,10 @@
 
 
 <x-footer-component />
-
+<script>
+    window.disabledPickupDates = @json($disabledPickupDates);
+    window.disabledDeliveryDates = @json($disabledDeliveryDates);
+</script>
 <script>
     function checkoutForm() {
         return {
@@ -599,6 +600,8 @@
                 signature: '',
                 saved_items: ''
             },
+            disabledDeliveryDates: window.disabledDeliveryDates,
+            disabledPickupDates: window.disabledPickupDates,
             paymentMode: '',
             currentDate: new Date()?.toISOString()?.split('T')[0],
             method: 'pickup',
@@ -614,7 +617,7 @@
                     location: '', 
                     order: '', 
                     need_date: new Date()?.toISOString()?.split('T')[0], 
-                    need_time: new Date()?.toTimeString()?.slice(0,5), 
+                    need_time: '', 
                     note: '', 
                     delivery_fee: 0 
                 }
@@ -632,6 +635,7 @@
             showMessage: false,
             need_date: '',
             need_time: '',
+            allHours: [...Array(24).keys()],
             warningMessage: '',
             errorMessage: '',
             hasErrorMessage: false,
@@ -663,6 +667,8 @@
             mobileValidationMessage: '',
             nameValidationMessage: '',
             emailValidationMessage: '',
+            noDeliveryAddress: false,
+            delivery_address: '',
 
             submitForm() {
                 this.formEl = document.getElementById('checkoutForm');
@@ -672,9 +678,16 @@
                 this.isSubmitting = true;
                 this.noNeededDate = false;
                 this.noNeededTime = false;
-
-                if (!this.need_time && this.method === 'pickup') {
+                this.noDeliveryAddress = false;
+                
+                if ((!this.need_time && this.method === 'pickup') || (!this.need_time && this.method === 'delivery' && !this.allowMultiple)) {
                     this.noNeededTime = true;
+                    this.isSubmitting = false;
+                    return;
+                }
+
+                if (!this.delivery_address && this.method === 'delivery' && !this.allowMultiple) {
+                    this.noDeliveryAddress = true;
                     this.isSubmitting = false;
                     return;
                 }
@@ -697,6 +710,12 @@
                 }
 
                 if (this.method === 'delivery' && this.allowMultiple) {
+                    if (!this.validateAllDeliveryFields()) {
+                        this.noNeededTime = true;
+                        this.isSubmitting = false;
+                        return;
+                    }
+
                     if (!this.validateAllQtyUsed()) {
                         this.isSubmitting = false;
                         return;
@@ -765,6 +784,16 @@
                         this.emailValidationMessage = errorMessage.errors.email[0];
                     }
                 });
+            },
+
+            validateAllDeliveryFields() {
+                return this.deliveries.every(delivery => 
+                    delivery.need_time &&
+                    delivery.need_date &&
+                    delivery.location &&
+                    delivery.qty &&
+                    delivery.order
+                );
             },
 
             async getDeliveryFee() {
@@ -1076,10 +1105,24 @@
             },
 
             formatAMPM(hour) {
-                const h = parseInt(hour);
-                const suffix = h >= 12 ? 'PM' : 'AM';
-                const standardHour = h % 12 === 0 ? 12 : h % 12;
-                return (standardHour < 10 ? '0' + standardHour : standardHour) + ':00 ' + suffix;
+                const h = hour % 12 || 12;
+                const suffix = hour < 12 ? 'AM' : 'PM';
+                return `${h}:00 ${suffix}`;
+            },
+
+            isTimeDisabled(hour) {
+                if (!this.need_date) return false;
+                let timeString = (hour < 10 ? '0' + hour : hour) + ':00';
+                let combined = `${this.need_date} ${timeString}`;
+                return this.disabledPickupDates.includes(combined);
+            },
+
+            isTimeDisabledForDelivery(hour) {
+                return (delivery) => {
+                    if (!delivery.need_date) return false;
+                    const timeStr = (hour < 10 ? '0' + hour : hour) + ':00';
+                    return this.disabledDeliveryDates.includes(`${delivery.need_date} ${timeStr}`);
+                };
             }
         }
     }

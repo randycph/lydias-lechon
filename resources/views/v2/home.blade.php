@@ -2,16 +2,14 @@
 
 @section('content')
 
-    <x-marketing-popup-component />
-
     {{-- Hero Section --}}
     <div class="pt-20 pb-16 flex flex-col items-center text-center relative h-screen overflow-hidden" style="background-image: url('{{ asset('/images/hero-bg.png') }}'); background-size: contain; background-position: center;">
         <div class="relative w-full h-full">
             <div class="container flex md:justify-center justify-start items-start text-primary px-3 font-cubao z-20 pt-10">
                 <h1 class="text-8xl md:text-9xl font-light text-left md:text-center mx-auto w-full md:w-[80%]">EVERYDAY LECHON HAPPINESS</h1>
             </div>
-            <img @click="marketingPopup = true" src="{{ asset('images/hero-lechon.png') }}" alt="Lydias Lechon" class="hidden md:block">    
-            <img @click="marketingPopup = true" src="{{ asset('/images/lechon-chopped.png') }}" alt="Lechon" class="block md:hidden w-full h-full object-cover absolute -bottom-30 left-0 z-10 ">
+            <img src="{{ asset('images/hero-lechon.png') }}" alt="Lydias Lechon" class="hidden md:block">    
+            <img src="{{ asset('/images/lechon-chopped.png') }}" alt="Lechon" class="block md:hidden w-full h-full object-cover absolute -bottom-30 left-0 z-10 ">
         </div>
     </div>
 
@@ -31,7 +29,7 @@
             'icon' => 'block2.svg'
         ],
         [
-            'title' => '55 YEARS OF TRADITION',
+            'title' => '60 YEARS OF TRADITION',
             'description' => 'Mastering lechon roasting for decades.',
             'icon' => 'block3.svg'
         ],

@@ -21,6 +21,7 @@ use App\Models\ArticleCategory;
 use App\Models\Deliverablecities;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -48,11 +49,44 @@ Route::group(['prefix' => 'v2'], function () {
         return view('v2.our-stores');
     })->name('our-stores');
     Route::get('/lechon-pricelist', function () {
-        $products = Product::with(['photos' => function ($query) {
-            $query->limit(1);
-        }])
+        $products = Product::with([
+                    'photos' => function ($q) {
+                        $q->limit(1);
+                    },
+                    'addonProducts' => function ($q) {
+                        $q->with(['photos' => function ($photoQuery) {
+                            $photoQuery->limit(1);
+                        }]);
+                    }
+                ])
         ->where('category_id', 1)
         ->where('status', 'PUBLISHED')->get();
+
+        foreach ($products as $product) {
+            if ($product->addonProducts->isEmpty()) {
+                $addonProductIds = DB::table('ecommerce_sales_details')
+                    ->select('product_id', DB::raw('COUNT(id) as total'))
+                    ->whereIn('sales_header_id', function ($query) use ($product) {
+                        $query->select('sales_header_id')
+                                ->from('ecommerce_sales_details')
+                                ->where('product_id', $product->id);
+                    })
+                    ->where('product_id', '!=', $product->id)
+                    ->groupBy('product_id')
+                    ->orderByDesc('total')
+                    ->limit(5)
+                    ->pluck('product_id');
+    
+                $fallbackAddons = Product::whereIn('id', $addonProductIds)
+                    ->where('status', 'PUBLISHED')
+                    ->with(['photos' => function ($q) {
+                        $q->limit(1);
+                    }])
+                    ->get();
+    
+                $product->setRelation('addonProducts', $fallbackAddons);
+            }
+        }
 
         return view('v2.lechon-pricelist', compact('products'));
     })->name('lechon-pricelist');
@@ -118,15 +152,22 @@ Route::group(['prefix' => 'v2'], function () {
 
         $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
 
-        return view('v2.checkout', compact('page', 'carts', 'pickupBranches', 'locations', 'deliveryBranches'));
+        $setting = Setting::first();
+
+        $disabledPickupDates = explode(',', $setting->disable_pickup_dates ?? '');
+        $disabledDeliveryDates = explode(',', $setting->disable_delivery_dates ?? '');
+
+        return view('v2.checkout', compact('page', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates'));
     })->name('checkout');
     Route::get('/sales-summary/{id}', function ($id) {
         $page = 'confirmation';
 
         $undecodeId = $id;
-
+        
         if (ctype_digit($id)) {
             $id = $undecodeId;
+        } else {
+            $id = base64_decode($id);
         }
 
         $sales = SalesHeader::where('id',$id)->with('deliveryAddress')->first();
@@ -834,6 +875,14 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::post('/admin/albums/{album}/restore', 'Banner\AlbumController@restore')->name('albums.restore');
     Route::post('/admin/albums/banners/{album}', 'Banner\AlbumController@get_album_details')->name('albums.banners');
     //
+
+    // Popup message
+    Route::resource('/admin/popup-message', 'PopupMessageController');
+    Route::get('/admin/popup-message/{id}/{status}', 'PopupMessageController@update_status')->name('popup-message.change-status');
+    Route::post('/admin/popup-message-single-delete', 'PopupMessageController@single_delete')->name('popup-message.single.delete');
+    Route::get('/admin/popup-message-restore/{id}', 'PopupMessageController@restore')->name('popup-message.restore');
+    Route::post('/admin/popup-message-multiple-change-status','PopupMessageController@multiple_change_status')->name('popup-message.multiple.change.status');
+    Route::post('/admin/popup-message-multiple-delete','PopupMessageController@multiple_delete')->name('popup-message.multiple.delete');
 
     Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']], function () {
         '\vendor\UniSharp\LaravelFilemanager\Lfm::routes()'; 

@@ -250,6 +250,8 @@
         $watch('searchModal', lockBody);
     "
     >
+
+    <x-marketing-popup-component />
     
     <x-navigation-component :page="$page ?? ''" />
 

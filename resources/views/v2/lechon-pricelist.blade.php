@@ -24,14 +24,7 @@
                 this.product = null;
             },
             quantity: 1,
-            addons: [
-                { name: 'Pinakbet', price: 100, selected: false },
-                { name: 'Party Tray', price: 300, selected: false },
-                { name: 'Pancit', price: 80, selected: false },
-                { name: 'Dinuguan', price: 150, selected: false },
-                { name: 'Sisig', price: 120, selected: false },
-                { name: 'Coke', price: 50, selected: false },
-            ],
+            addons: [],
             get baseTotal() {
                 return this.product?.price * this.quantity || 0;
             },
