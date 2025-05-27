@@ -87,7 +87,7 @@
 				<div class="form-group">
 					<label class="d-block">Page URL to show popup *</label>
 					<input type="text" name="url" class="form-control @error('url') is-invalid @enderror" value="{{ old('url') }}">
-					<p class="tx-11 mg-t-4">Available are the following home, our-story, our-stores, lechon-pricelist, lechon-menu</p>
+					<p class="tx-11 mg-t-4">Available are the following index, our-story, our-stores, lechon-pricelist, lechon-menu. Can only accept one.</p>
 				</div>
 				<div class="form-group">
 					<label class="d-block">Start to show in seconds*</label>
