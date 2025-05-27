@@ -21,6 +21,7 @@ use App\Models\ArticleCategory;
 use App\Models\Deliverablecities;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -118,7 +119,12 @@ Route::group(['prefix' => 'v2'], function () {
 
         $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
 
-        return view('v2.checkout', compact('page', 'carts', 'pickupBranches', 'locations', 'deliveryBranches'));
+        $setting = Setting::first();
+
+        $disabledPickupDates = explode(',', $setting->disable_pickup_dates ?? []);
+        $disabledDeliveryDates = explode(',', $setting->disable_delivery_dates ?? []);
+
+        return view('v2.checkout', compact('page', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates'));
     })->name('checkout');
     Route::get('/sales-summary/{id}', function ($id) {
         $page = 'confirmation';
