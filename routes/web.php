@@ -121,8 +121,8 @@ Route::group(['prefix' => 'v2'], function () {
 
         $setting = Setting::first();
 
-        $disabledPickupDates = explode(',', $setting->disable_pickup_dates ?? []);
-        $disabledDeliveryDates = explode(',', $setting->disable_delivery_dates ?? []);
+        $disabledPickupDates = explode(',', $setting->disable_pickup_dates ?? '');
+        $disabledDeliveryDates = explode(',', $setting->disable_delivery_dates ?? '');
 
         return view('v2.checkout', compact('page', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates'));
     })->name('checkout');
