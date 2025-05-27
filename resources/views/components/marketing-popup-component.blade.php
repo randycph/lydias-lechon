@@ -35,19 +35,19 @@
 
             <div class="flex flex-col lg:flex-row">
                 <div class="order-1 lg:order-2 overflow-hidden">
-                    <img class="h-[300px] w-full object-cover object-top lg:h-full" src="{{ asset('images/marketing-img.png') }}" alt="Sign Up and Save 10% + Free Shipping on Your First Order!">
+                    <img class="h-[300px] w-full object-cover object-top lg:h-full" src="{{ asset('images/marketing-img.png') }}" alt="{{ $popupMessage->title }}">
                 </div>
     
                 <div class="order-2 lg:order-1 py-10 px-5">
                     <div class="font-cubao text-3xl text-left text-primary px-6">
-                        Sign Up and Save 10% + Free Shipping on Your First Order!
+                        {{ $popupMessage->title }}
                     </div>
         
-                    <div class="font-medium px-6 text-left mt-5">Join us today and enjoy an exclusive 10% discount on your first purchase, plus free shipping! Sign up now to unlock these great perks and start shopping with savings.</div>
+                    <div class="font-medium px-6 text-left mt-5">{{ $popupMessage->message }}</div>
         
                     <div class="w-full px-6 mt-5">
-                        <button class="bg-primary custom-btn btn-primary-dark text-white rounded-md  w-full px-6 py-4 mt-3 font-medium uppercase">Sign Up Now</button>
-                        <button class="bg-white border  custom-btn btn-primary-dark border-primary w-full text-primary rounded-md px-6 py-4 mt-3 font-medium uppercase">No, Thanks</button>
+                        <a href="{{ $popupMessage->button_text_url }}" class="bg-primary flex justify-center w-full text-center custom-btn btn-primary-dark text-white rounded-md px-6 py-4 mt-3 font-medium uppercase">{{ $popupMessage->button_text }}</a>
+                        <button @click="marketingPopup = false" class="bg-white border  custom-btn btn-primary-dark border-primary w-full text-primary rounded-md px-6 py-4 mt-3 font-medium uppercase">{{ $popupMessage->close_button_text }}</button>
                     </div>
                 </div>
             </div>

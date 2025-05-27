@@ -29,7 +29,7 @@
             'icon' => 'block2.svg'
         ],
         [
-            'title' => '55 YEARS OF TRADITION',
+            'title' => '60 YEARS OF TRADITION',
             'description' => 'Mastering lechon roasting for decades.',
             'icon' => 'block3.svg'
         ],
