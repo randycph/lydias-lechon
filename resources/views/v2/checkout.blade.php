@@ -328,9 +328,12 @@
                                     <label for="delivery_address"
                                     class="block mb-2 font-bold text-gray-900">Delivery Address <span
                                         class="text-red-700">*</span></label>
-                                <input type="text" id="delivery_address" name="delivery_address" value="{{ auth()->check() ? auth()->user()->address_street : '' }}"
-                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                                    placeholder="" />
+                                    <input type="text" id="delivery_address" name="delivery_address" x-model="delivery_address" value="{{ auth()->check() ? auth()->user()->address_street : '' }}"
+                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                                        placeholder="" />
+                                    <div x-show="noDeliveryAddress" class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
+                                        Please add delivery address
+                                    </div>
                                 </div>
                             </template>
                         </div>
@@ -664,6 +667,8 @@
             mobileValidationMessage: '',
             nameValidationMessage: '',
             emailValidationMessage: '',
+            noDeliveryAddress: false,
+            delivery_address: '',
 
             submitForm() {
                 this.formEl = document.getElementById('checkoutForm');
@@ -673,9 +678,16 @@
                 this.isSubmitting = true;
                 this.noNeededDate = false;
                 this.noNeededTime = false;
+                this.noDeliveryAddress = false;
                 
                 if ((!this.need_time && this.method === 'pickup') || (!this.need_time && this.method === 'delivery' && !this.allowMultiple)) {
                     this.noNeededTime = true;
+                    this.isSubmitting = false;
+                    return;
+                }
+
+                if (!this.delivery_address && this.method === 'delivery' && !this.allowMultiple) {
+                    this.noDeliveryAddress = true;
                     this.isSubmitting = false;
                     return;
                 }
