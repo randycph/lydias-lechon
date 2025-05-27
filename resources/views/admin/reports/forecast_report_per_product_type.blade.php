@@ -1,8 +1,58 @@
 @extends('admin.layouts.report')
 
-@section('pagetitle')
+@php
+    $datetxt='';
+    $dstart='';
+    $old_value = '';
+    if(isset($_GET['startdate']) && strlen($_GET['startdate']) > 0){
+        $dstart = $_GET['startdate'];
+    }
+    $dend='';
+    if(isset($_GET['enddate']) && strlen($_GET['enddate']) > 0){
+        $dend = $_GET['enddate'];
+    }
+    if(strlen($dstart)>0){
+        if($dstart == $dend)
+            $datetxt = '<br>'.date('M d, Y (l)',strtotime($dstart));                                    
+        else
+            $datetxt = '<br>'.date('M d, Y (l)',strtotime($dstart))." - ".date('M d, Y (l)',strtotime($dend));
+    }
+    $dbranch = '';
+    if(isset($_GET['receiver']) && strlen($_GET['receiver']) > 0){
+        $br = \App\EcommerceModel\Branch::whereId($_GET['receiver'])->first();
+        $dbranch = "<br>".$br['name'];
+    }
 
-@endsection
+    
+    $total_lechon_order = 0;
+    $total_lechon_overall = 0;
+    $total_misc = 0;
+    $ex_array = ['Pantaga','Display','Alpha Size','Belly Pantaga'];
+    foreach(collect($results) as $j){
+        if($j->is_misc == 0 && $j->production_item == 1){
+
+                                         
+            if($j->isConfirm == 1){
+
+                if(!in_array($j->jo_category,$ex_array) ){
+                    $total_lechon_order += $j->qty;
+                }
+                         
+                    $total_lechon_overall += $j->qty;
+            }
+            
+        }
+        if($j->is_misc == 1){
+                                        
+            if($j->isConfirm == 1){
+
+                $total_misc += $j->qty;
+
+            }
+        }
+    }
+   
+@endphp
 
 @section('pagecss')
     <!-- vendor css -->
@@ -21,67 +71,117 @@
 
     <link href="{{ asset('lib/ion-rangeslider/css/ion.rangeSlider.min.css') }}" rel="stylesheet">
     <style>
-        .row-selected {
-            background-color: #92b7da !important;
-        }
         @page {
           size: auto;
+        }
+        .bords{
+            border: 2px solid red;
         }
     </style>
 @endsection
 
+@section('pagetitle')
+    Forecaster Report per Product Type
+@endsection
+
 @section('content')
 
-
+         
         <div class="container-fluid">
-            <div class="text-center mg-b-20"><img height="100px" src="{{ asset('images/lydias1965.png') }}" alt="">
-            <h4 class="mg-b-0 tx-spacing--1">Forecast Report per Product Type</h4></div>
-          
+            <div class="text-center mg-b-20">
+                <img height="100px" src="{{ asset('images/lydias1965.png') }}" alt="">
+                <h4 class="mg-b-0 tx-spacing--1">Forecaster Report per Product Type</h4>
+                {!! $datetxt !!} {!!$dbranch!!}
+            </div>
+            <input type="hidden" id="datetxt" value="{!! $datetxt !!}">
+            <input type="hidden" id="dbranch" value="{!! $dbranch !!}">
 
             <div class="row-sm">
                 <div class="col-md-12">
-                    <form action="{{route('admin.report.delivery_per_production_location')}}" method="get">
+                    <form action="{{route('admin.report.forecast_report_per_product_type')}}" method="get">
                       
                         @csrf
                         <div class="row row-sm">
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="tx-13">Production Branch</label>
+                                    <label class="tx-13">Product Type</label>
                                     <select name="pb" id="pb" class="form-control">
-                                        <option value="">- Select Production -</option>
-                                        @forelse(\App\EcommerceModel\ProductionBranch::orderBy('name')->get() as $cus)
-                                            <option value="{{$cus->id}}">{{$cus->name}}</option>
-                                        @empty
-                                        @endforelse                                       
-                                        @if(isset($_GET['pb']) && strlen($_GET['pb'])>0)                                        
-                                            @php 
-                                                $bb = \App\EcommerceModel\ProductionBranch::whereId($_GET['pb'])->first();
-                                               
-                                            @endphp
-                                            <option value="{{$_GET['pb']}}" selected="selected">{{ $bb->name }}</option>
-                                        @endif
+                                        <option value="">- Product Type -</option>
+                                            <option value="1" @if(isset($_GET['pb']) && $_GET['pb'] ==1) selected="selected" @endif>Miscellaneous</option>
+                                            <option value="0" @if(isset($_GET['pb']) && $_GET['pb'] ==0) selected="selected" @endif>Whole Lechon</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="tx-13">Start Date</label>
-                                    <input type="date" class="form-control input-sm" name="startdate"  autocomplete="off" value="@isset($_GET['startdate']){{ $_GET['startdate'] }}@endisset">
+                                    <label class="tx-13">Start Date (Date Needed)</label>
+                                    <input type="date" class="form-control input-sm" name="startdate" autocomplete="off" value="@isset($_GET['startdate']){{ $_GET['startdate'] }}@endisset">
                                 </div>
                             </div>
+                           
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="tx-13">End Date</label>
-                                    <input type="date" class="form-control input-sm" name="enddate"  autocomplete="off" value="@isset($_GET['enddate']){{ $_GET['enddate'] }}@endisset">
+                                    <label class="tx-13">End (Date Needed)</label>
+                                    <input type="date" class="form-control input-sm" name="enddate" autocomplete="off" value="@isset($_GET['enddate']){{ $_GET['enddate'] }}@endisset">
                                 </div>
                             </div>
-                            <div class="col-md-3 filter-action mg-r-5">
-                                <a href="#" onclick="$('#adv').toggle();" class="btn btn-sm btn-success mg-t-7 mg-r-5">Advance Filter</a>
-                                <button type="submit" class="btn btn-sm btn-primary mg-t-7 mg-r-5">Generate</button>
-                                <a href="{{route('admin.report.sales')}}" class="btn btn-sm btn-info mg-t-7 mg-r-5">Reset</a>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label class="tx-13">Receiver Branch</label>
+                                    <select name="receiver" id="receiver" class="form-control">
+                                        <option value="">- Select Receiver -</option>
+                                        @forelse(\App\EcommerceModel\Branch::orderBy('name')->get() as $cus)
+                                            <option @isset($_GET['receiver']) @if(app('request')->input('receiver') == $cus->id) selected @endif @endif value="{{$cus->id}}">{{$cus->name}}</option>
+                                        @empty
+                                        @endforelse
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 filter-action mg-r-5">
+                                <a href="#" onclick="$('#adv').toggle();" class="btn btn-success mg-t-7 mg-r-5 btn-sm">Advance Filter</a>
+                                <button type="submit" class="btn btn-primary mg-t-7 mg-r-5 btn-sm">Generate</button>
+                                <a href="{{route('admin.report.forecaster')}}" class="btn btn-info mg-t-7 mg-r-5 btn-sm">Reset</a>
                             </div>
                         </div>
                         <div class="row" id="adv" style="display:none;">
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label class="tx-13">Time Needed</label>
+                                    <select name="start_time" id="start_time" class="form-control">      
+                                        <option value="">- Select Time -</option>
+                                        <option value="07:00:00">07:00 AM</option>                                         
+                                        <option value="12:00:00">12:00 NOON</option>                                        
+                                        <option value="14:00:00">02:00 PM</option>
+                                        <option value="17:00:00">05:00 PM</option>                             
+                                        <option value="00:00:00">12:00 AM</option>
+                                        <option value="01:00:00">01:00 AM</option>
+                                        <option value="02:00:00">02:00 AM</option>
+                                        <option value="03:00:00">03:00 AM</option>
+                                        <option value="04:00:00">04:00 AM</option>
+                                        <option value="05:00:00">05:00 AM</option>
+                                        <option value="06:00:00">06:00 AM</option>
+                                        <option value="08:00:00">08:00 AM</option>
+                                        <option value="09:00:00">09:00 AM</option>
+                                        <option value="10:00:00">10:00 AM</option>
+                                        <option value="11:00:00">11:00 AM</option>
+                                        <option value="13:00:00">01:00 PM</option>
+                                        <option value="15:00:00">03:00 PM</option>
+                                        <option value="16:00:00">04:00 PM</option>
+                                        <option value="18:00:00">06:00 PM</option>
+                                        <option value="19:00:00">07:00 PM</option>
+                                        <option value="20:00:00">08:00 PM</option>
+                                        <option value="21:00:00">09:00 PM</option>
+                                        <option value="22:00:00">10:00 PM</option>
+                                        <option value="23:00:00">11:00 PM</option>
+                                        @isset($_GET['start_time'])
+                                            <option value="{{$_GET['start_time']}}" selected="selected">{{ $_GET['start_time'] }}</option>
+                                        @endisset
+                                    </select>
+                                </div>
+                            </div>
+                            
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13">Customer</label>
@@ -97,7 +197,7 @@
                                         @endisset
                                     </select>
                                 </div>
-                            </div>
+                            </div>                            
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13">Product</label>
@@ -113,8 +213,26 @@
                                     </select>
                                 </div>
                             </div>
-                       
-                         
+                            
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label class="tx-13">Production Branch</label>
+                                    <select name="production_branch" id="production_branch" class="form-control">
+                                        <option value="">- Select Branch -</option>
+                                        @forelse(\App\EcommerceModel\ProductionBranch::orderBy('name')->get() as $cus)
+                                            <option value="{{$cus->id}}">{{$cus->name}}</option>
+                                        @empty
+                                        @endforelse
+
+                                        @if(isset($_GET['production_branch']) && strlen($_GET['production_branch'])>0)                                            
+                                            @php 
+                                                $bb = \App\EcommerceModel\ProductionBranch::whereId($_GET['production_branch'])->first(); 
+                                            @endphp
+                                            <option value="{{$_GET['production_branch']}}" selected="selected">{{ $bb->name }}</option>
+                                        @endif
+                                    </select>
+                                </div>
+                            </div>                       
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13">Order Source</label>
@@ -130,20 +248,34 @@
                                     </select>
                                 </div>
                             </div>
+                            
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label class="tx-13">Order Type</label>
+                                    <select name="order_type" id="order_type" class="form-control">
+                                        <option value="">- Select Item Type -</option>
+                                        <option value="Whole">Whole</option>
+                                        <option value="Reserved">Reserved</option>                                                                           
+                                        <option value="Additional">Additional</option>                                                                           
+                                        @isset($_GET['order_type'])
+                                            <option value="{{$_GET['order_type']}}" selected="selected">{{ $_GET['order_type'] }}</option>
+                                        @endisset
+                                    </select>
+                                </div>
+                            </div>
+
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13">Item Type</label>
-                                    <select name="item_type" id="item_type" class="form-control">
-                                        <option value="">- Select Source -</option>
-                                            <option value="Miscellaneous">Miscellaneous</option>
-                                            <option value="Order">Lechon from Order</option>
-                                            <option value="Pantaga">Pantaga</option>
-                                            <option value="Belly Pantaga">Belly Pantaga</option>
-                                            <option value="Display">Display</option>
-                                            <option value="Alpha Size">Alpha Size</option>
-                                        @isset($_GET['item_type'])
-                                            <option value="{{$_GET['item_type']}}" selected="selected">{{ ($_GET['item_type'] == 'Order') ? 'Lechon from Order': $_GET['item_type'] }}</option>
-                                        @endisset
+                                    <select name="item_type[]" id="item_type" class="form-control" multiple="multiple">
+                                        <option value="">- Select Item Type -</option>
+                                        <option @if(isset($_GET['item_type']) && in_array("Miscellaneous",$_GET['item_type'])) selected="selected" @endif value="Miscellaneous">Miscellaneous</option>
+                                        <option @if(isset($_GET['item_type']) && in_array("WRA",$_GET['item_type'])) selected="selected" @endif value="WRA">WRA</option>
+                                        <option @if(isset($_GET['item_type']) && in_array("Belly Pantaga",$_GET['item_type'])) selected="selected" @endif value="Belly Pantaga">Belly Pantaga</option>
+                                        <option @if(isset($_GET['item_type']) && in_array("Pantaga",$_GET['item_type'])) selected="selected" @endif value="Pantaga">Pantaga</option>
+                                        <option @if(isset($_GET['item_type']) && in_array("Display",$_GET['item_type'])) selected="selected" @endif value="Display">Display</option>
+                                        <option @if(isset($_GET['item_type']) && in_array("Alpha Size",$_GET['item_type'])) selected="selected" @endif value="Alpha Size">Alpha Size</option>                                                                           
+                                        
                                     </select>
                                 </div>
                             </div>
@@ -153,16 +285,16 @@
                     </form>
                 </div>
             </div>
+           
 
             @if(isset($rs))
                 <div class="row row-sm">
                     <!-- Start Filters -->
                     <div class="col-md-12">
-                        <!-- <table id="example" class="display nowrap" style="width:100%;font: normal 13px/150% Arial, sans-serif, Helvetica;"> -->
                         <table  id="example" border="1" class="display nowrap" style="width:100%;font: bold 13px/150% Arial, sans-serif, Helvetica;">
                             <thead>
                             <tr> 
-                                <th>Production Branch</th>
+                                   
                                 <th>Qty</th> 
                                 <th>Product</th>  
                                 <th>Customer Address</th> 
@@ -177,7 +309,7 @@
                                 <th>Production Time</th>
                                 <th>Delivery Type</th>  
                                 <th>JO#</th>
-                                
+                                <th>Production Branch</th>
                                 <th>Status</th>                                
                                 <th>Agent</th>  
                                 <th>Order#</th>
@@ -200,51 +332,74 @@
                             </tr>
                             </thead>
                             <tbody>
-                         
-                            @forelse($rs as $r)                           
-             
+                            @php 
+                                //$results = $results->sortBy('delivery_date');
+                                $results = $results->sort(
+                                                function ($a, $b) {
+                                                    return strcmp($a->timeneeded, $b->timeneeded)
+                                                        ?: strcmp($a->dateneeded, $b->dateneeded)
+                                                        ?: strcmp($a->customer_name, $b->customer_name)
+                                                        ?: strcmp($a->order_number, $b->order_number);
+                                                }
+                                            );
+                                $results = $results->values()->all();
+                                
+                            @endphp
+                            @forelse($results as $r)                           
+                                @if($r->trantype == 'sales')
 
                                     @php
-                                        $address = '';
+                                        $address = trim($r->address_street)."<br>".trim($r->address_municipality).",<br>".trim($r->address_city).", ".trim($r->address_region);
                                         $cntsales = collect($rs)->where('order_number',$r->order_number)->count();
                                         $isAllowed = 0;
-                                        $cntsales = 1;
+                                     
                                         
                                         if($r->isConfirm == 1){
                                                 $isAllowed = 1;
                                         }
 
                                         $itemType = '';
-                                      
+                                        $itemcode = 0;
+                                        if($r->is_misc == 1){
+                                            $itemcode = 1;
+                                            $itemType = 'Miscellaneous';
+                                        }
+                                        if(in_array($r->prodid,$wra_array)){
+                                            $itemcode = 0;
+                                            $itemType = 'WRA';
+                                        }
                                         
                                     @endphp
-                               
+                                    @if($isAllowed == 1)
+                                    @if($_GET['pb'] == $itemcode)
                                     <tr style="text-align: left">
-                                        <td class="bord">{{$r->prod_branch}}</td>
-                                        <td class="bord">{{number_format($r->qty,2)}}</td>
-                                        <td class="bord">{{$r->product_name}} @if($r->paella_price > 0) Boneless @endif</td>
+                                        
+                                        <td class="">{{number_format($r->qty,2)}}</td>
+                                        <td class="">{{$r->product_name}} @if($r->paella_price > 0) Boneless @endif</td>
 
-                                
-                                        <td class="bord" rowspan="{{$cntsales}}" valign="top">@if(strlen($address)>15){!!$address!!}@endif</td>   
-                                      
+                                        @if($old_value <> $r->order_number)
+                                            <td class="" rowspan="1" valign="top">@if(strlen($address)>15){!!$address!!}@endif</td>   
+                                        @else        
+                                            <td class="" >&nbsp;</td>   
+                                        @endif  
 
-                                        <td class="bord">{{number_format($r->price,2)}}</td>
-                               
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">
+                                        <td class="">{{number_format($r->price,2)}}</td>
+                                        @if($old_value <> $r->order_number)
+                                            <td class="" rowspan="1" valign="top">
                                                 @php
                                                     $payment = \App\EcommerceModel\SalesPayment::where('sales_header_id',$r->hid)->get();
                                                 @endphp
                                                 <table>
                                                     @forelse($payment as $pp)
                                                     <tr>
-                                                        <td class="bord">{{$pp->payment_type}}</td>
-                                                        <td class="bord">{{number_format($pp->amount,2)}}</td>
+                                                        <td class="">{{$pp->payment_type}}</td>
+                                                        <td class="">{{number_format($pp->amount,2)}}</td>
                                                     </tr>
                                                     @empty
                                                     @endforelse
                                                 </table>
                                             </td> 
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">
+                                            <td class="" rowspan="1" valign="top">
                                                 @php
                                                     $text_array = explode(" ", $r->customer_delivery_adress);
                                                     $chunks = array_chunk($text_array, 3);
@@ -253,7 +408,7 @@
                                                     }
                                                 @endphp
                                             </td>                                      
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">
+                                            <td class="" rowspan="1" valign="top">
                                                 @php
                                                     $text_array = explode(" ", $r->customer_name);
                                                     $chunks = array_chunk($text_array, 3);
@@ -263,9 +418,9 @@
                                                 @endphp
                                            
                                             </td>   
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">{{date('m-d-Y',strtotime($r->delivery_date))}}</td>
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">@if(date('h:i A',strtotime($r->delivery_date)) == '12:00 PM') 12:00 NOON @else {{date('h:i A',strtotime($r->delivery_date))}} @endif</td>
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">
+                                            <td class="" rowspan="1" valign="top">{{date('m-d-Y',strtotime($r->delivery_date))}}</td>
+                                            <td class="" rowspan="1" valign="top">@if(date('h:i A',strtotime($r->delivery_date)) == '12:00 PM') 12:00 NOON @else {{date('h:i A',strtotime($r->delivery_date))}} @endif</td>
+                                            <td class="" rowspan="1" valign="top">
                                                 @php
                                                     $text_array = explode(" ", $r->instruction);
                                                     $chunks = array_chunk($text_array, 3);
@@ -274,82 +429,206 @@
                                                     }
                                                 @endphp
                                             </td> 
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">@if(date('Y-m-d',strtotime($r->delivery_date)) <> '1970-01-01'){{date('m-d-Y',strtotime($r->delivery_date))}} @endif</td>
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">@if(date('Y-m-d',strtotime($r->delivery_date)) <> '1970-01-01'){{date('h:i A',strtotime($r->delivery_date))}} @endif</td>
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">{{$r->delivery_type}}</td>   
-                                   
+                                            <td class="" rowspan="1" valign="top">@if(date('Y-m-d',strtotime($r->deldate)) <> '1970-01-01'){{date('m-d-Y',strtotime($r->deldate))}} @endif</td>
+                                            <td class="" rowspan="1" valign="top">@if(date('Y-m-d',strtotime($r->deldate)) <> '1970-01-01'){{date('h:i A',strtotime($r->deldate))}} @endif</td>
+                                            <td class="" rowspan="1" valign="top">{{$r->delivery_type}}</td>   
+                                        @else 
+                                            <td class="" >&nbsp;</td>  
+                                            <td class="" >&nbsp;</td>         
+                                            <td class="" >&nbsp;</td>   
+                                            <td class="" >&nbsp;</td>  
+                                            <td class="" >&nbsp;</td>         
+                                            <td class="" >&nbsp;</td>   
+                                            <td class="" >&nbsp;</td>  
+                                            <td class="" >&nbsp;</td>         
+                                            <td class="" >&nbsp;</td>   
+                                        @endif  
                                         
                                           
                                         
-                                        <td class="bord">{{$r->jnum}}</td>
-                                        
+                                        <td class="">{{$r->jo_number}}</td>
+                                        <td class="">{{$r->pbname}}</td>
 
-                                       
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">{{$r->delstat}}</td>
+                                        @if($old_value <> $r->order_number)
+                                            <td class="" rowspan="1" valign="top">{{$r->delstat}}</td>
                                             
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">{{$r->agent}}</td>                                    
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top"><a target="_blank" href="{{ route('sales-transaction.view',$r->hid) }}">{{$r->order_number}}</a></td> 
+                                            <td class="" rowspan="1" valign="top">{{$r->agent}}</td>                                    
+                                            <td class="" rowspan="1" valign="top"><a target="_blank" href="{{ route('sales-transaction.view',$r->hid) }}">{{$r->order_number}}</a></td> 
                                             
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">{{$r->customer_name}}</td>
+                                            <td class="" rowspan="1" valign="top">{{$r->customer_name}}</td>
                                                                                                                           
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">{{$r->customer_contact_number}}</td>
+                                            <td class="" rowspan="1" valign="top">{{$r->customer_contact_number}}</td>
                                             
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">&nbsp;</td>
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">{{number_format($r->delivery_fee_amount,2)}}</td>
-                                 
+                                            <td class="" rowspan="1" valign="top">&nbsp;</td>
+                                            <td class="" rowspan="1" valign="top">{{number_format($r->delivery_fee_amount,2)}}</td>
+                                        @else
+                                            <td class="" >&nbsp;</td>  
+                                            <td class="" >&nbsp;</td>         
+                                            <td class="" >&nbsp;</td>   
+                                            <td class="" >&nbsp;</td>  
+                                            <td class="" >&nbsp;</td>         
+                                            <td class="" >&nbsp;</td> 
+                                            <td class="" >&nbsp;</td> 
+                                        @endif
 
                                         
-                                        <td class="bord">{{number_format(($r->price * $r->qty),2)}}</td>
+                                        <td class="">{{number_format(($r->price * $r->qty),2)}}</td>
 
-                                        
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">&nbsp;</td>
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">
+                                        @if($old_value <> $r->order_number)
+                                            <td class="" rowspan="1" valign="top">&nbsp;</td>
+                                            <td class="" rowspan="1" valign="top">
                                                {{$r->order_source}}
                                             </td>
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">
-                                               
+                                            <td class="" rowspan="1" valign="top">
+                                               {{$r->receiver}}
                                             </td>
-                                      
+                                        @else
+                                            <td class="" >&nbsp;</td>  
+                                            <td class="" >&nbsp;</td>         
+                                            <td class="" >&nbsp;</td> 
+                                        @endif
 
-                                        <td class="bord">
+                                        <td class="">
                                            {{$r->catname}}
                                         </td>
 
-                                      
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">
-                                       
+                                        @if($old_value <> $r->order_number)
+                                            <td class="" rowspan="1" valign="top">
+                                               {{$r->username}}
                                             </td>
-                                       
-                                        <td class="bord">
-                                           {{$r->order_type}}
+                                        @else
+                                            <td class="" >&nbsp;</td>   
+                                        @endif
+                                        <td class="">
+                                           {{$r->hordertype}}
                                         </td>
-                                        <td class="bord">
+                                        <td class="">
                                            {{$itemType}}
                                         </td>
                                         
-                                        
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">{{ $r->forecast_date }}</td>
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">{{ $r->delivery_branch }}</td>   
-                                        
-                                       
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">@if(date('m-d-Y',strtotime($r->hcreated)) <> '1970-01-01'){{date('Y-m-d',strtotime($r->hcreated))}} @endif</td>
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">@if(date('m-d-Y',strtotime($r->hcreated)) <> '1970-01-01'){{date('h:i A',strtotime($r->hcreated))}} @endif</td>
-                                       
+                                        @if($old_value <> $r->order_number)
+                                            <td class="" rowspan="1" valign="top">{{ $r->forecast_dt }}</td>
+                                            <td class="" rowspan="1" valign="top">{{ $r->del_branch }}</td>   
+                                        @else        
+                                            <td class="" >&nbsp;</td>   
+                                            <td class="" >&nbsp;</td>   
+                                        @endif
+                                        @if($old_value <> $r->order_number)
+                                            <td class="" rowspan="1" valign="top">@if(date('m-d-Y',strtotime($r->created)) <> '1970-01-01'){{date('Y-m-d',strtotime($r->created))}} @endif</td>
+                                            <td class="" rowspan="1" valign="top">@if(date('m-d-Y',strtotime($r->created)) <> '1970-01-01'){{date('h:i A',strtotime($r->created))}} @endif</td>
+                                        @else
+                                            <td class="" >&nbsp;</td>   
+                                            <td class="" >&nbsp;</td>
+                                        @endif
                                         
                                     </tr>
-                                   
+                                    @endif
+                                    @endif
+                                    @php if($isAllowed == 1) { $old_value=$r->order_number; } @endphp
 
-                                
+                                @elseif($r->trantype == 'jo')
 
+
+
+
+                                    @php
+                                        $address = trim($r->address_street)."<br>".trim($r->address_municipality).",<br>".trim($r->address_city).", ".trim($r->address_region);
+                                        $cnt = collect($jo)->where('jo_number',$r->jo_number)->count();
+
+
+                                        $itemcode = 0;
+                                        if($r->is_misc == 1){
+                                            $itemcode = 1;
+                                            $itemType = 'Miscellaneous';
+                                        }
+                                        if(in_array($r->prodid,$wra_array)){
+                                            $itemcode = 0;
+                                            $itemType = 'WRA';
+                                        }
+
+                                        $itemType = $r->product_name; // added due to new request 08312022
+                                    @endphp
+                                    @if($_GET['pb'] == $itemcode)
+
+                                    <tr style="text-align: left">                                    
+                                        <td class="">{{number_format($r->qty,2)}}</td>
+                                        <td class="">{{$r->jo_category}}</td>
+                                        <td class="">@if(strlen($address)>15){!!$address!!} @endif</td>
+                                        <td class="">{{number_format($r->price,2)}}</td>
+                                        
+                                        <td class="">
+                                           &nbsp;
+                                        </td>
+                                        <td class="">{{$r->customer_delivery_adress}}</td> 
+                                     
+                                            <td class="" rowspan="{{$cnt}}">{{ (strlen($r->customer_name) < 2 ) ? $r->customer_delivery_adress:$r->customer_name}}</td>  
+                                     
+                                                                          
+                                        <td class="">{{date('m-d-Y',strtotime($r->delivery_date))}}</td>
+                                        <td class="">
+                                            @if(date('h:i A',strtotime($r->delivery_date)) == '12:00 PM') 12:00 NOON @else {{date('h:i A',strtotime($r->delivery_date))}} @endif
+                                        </td>
+                                        <th>{{$r->instruction}}</th>
+                                        <td class="">@if(date('m-d-Y',strtotime($r->deldate)) <> '1970-01-01'){{date('m-d-Y',strtotime($r->deldate))}} @endif</td>
+                                        <td class="">@if(date('m-d-Y',strtotime($r->deldate)) <> '1970-01-01'){{date('h:i A',strtotime($r->deldate))}} @endif</td>
+                                        <td class="">&nbsp;</td>   
+                                         
+                                        <td class="">{{$r->jo_number}}</td> 
+                                        <td class="">{{$r->pbname}}</td>
+                                        <td class="">&nbsp;</td>
+                                        <td class="">&nbsp;</td> 
+                                        <td class="">&nbsp;</td>                                                                                               
+                                        <th>&nbsp;</th>
+                                        <th>&nbsp;</th>
+                                        <th>&nbsp;</th>
+                                        <td class="">0</td>
+                                        <td class="">0</td>
+                                        
+                                        <td class="">
+                                           &nbsp;
+                                        </td>
+                                        <td class="">
+                                           Forecaster
+                                        </td>
+                                        <td class="">
+                                           {{$r->receiver}}
+                                        </td>
+                                        <td class="">
+                                           {{$r->catname}}
+                                        </td>
+                                        <td class="">
+                                           {{$r->username}}
+                                        </td>
+                                        <td class="">
+                                           {{$r->hordertype}}
+                                        </td>
+                                        <td class="">
+                                           {{$itemType}}
+                                        </td>
+                                        
+                                            <td class="">{{ $r->forecast_dt }}</td>
+                                            <td class="">{{ $r->del_branch }}</td>   
+                                        
+                                        <td class="">@if(date('Y-m-d',strtotime($r->created)) <> '1970-01-01'){{date('Y-m-d',strtotime($r->created))}} @endif</td>
+                                         <td class="">@if(date('Y-m-d',strtotime($r->created)) <> '1970-01-01'){{date('h:i A',strtotime($r->created))}} @endif</td>
+                                        
+                                    </tr>
+                                    @endif
+                                    @php $old_value=$r->jo_number; @endphp
+
+                                @endif
                             @empty
                             @endforelse
-                        
+                            @forelse($jo as $r)
+                                
+                            @empty
+                            @endforelse
 
                             </tbody>
 
                         </table>
                     </div>
-                 
+                    <!-- End Filters -->
                 </div>
             @endif
 
@@ -381,15 +660,54 @@
     });
 
     $(document).ready(function() {
-        $('#example').DataTable( {
+        $('#example').DataTable( {            
             dom: 'Bfrtip',
-            pageLength: 20,
+            pageLength: 28,
+            // aaSorting: [[ 8, "asc" ]],
+            // bPaginate: false,
+            aaSorting: [],
+            bSort: false,
+            asStripeClasses: [],
             buttons: [
                 {
                     extend: 'print',
                     exportOptions: {
-                        columns: ':visible'
-                    }
+                        columns: ':visible',
+                        stripHtml: false
+                    },
+                    customize: function ( win ) {
+                        $(win.document.body)
+                            .css( 'font-size', '12pt' )
+                            .css( 'font-weight', 'bold' )
+                            .prepend('Forecast Report' );
+
+                        $(win.document.body).find( 'h1' )
+                            .css( 'font-weight', 'bold' )
+                            .css( 'font-size', '14pt' );
+     
+                        $(win.document.body).find( 'table' )
+                            .css( 'font-weight', 'bold' )
+                            .addClass( 'compact' )
+                            .css( 'font-size', 'inherit' );
+
+                        var tds =  $(win.document.body).find( 'td' );
+                        for (var i = 0; i<tds.length; i++) {
+
+                          // If it currently has the ColumnHeader class...
+                          //if (tds[i].className == 'bord') {
+                            // Set a new width
+                            tds[i].style.border = '1px solid green';
+                          //}
+                        }
+
+                        // $(win.document.getElementsByClassName('bord'))
+                        //     .addClass( 'bords' );
+
+                        // $(win.document.getElementsByClassName('wala'))
+                        //     .css('border','1px solid black');
+                        // $(win.document.body).find( 'td' )
+                        //     .css('border','1px solid black');
+                    }                    
                 },
                 {
                     extend: 'copy',
@@ -399,12 +717,14 @@
                 },
                 {
                     extend: 'csv',
+                    title: '{{date('Ymd')}}',
                     exportOptions: {
                         columns: ':visible'
                     }
                 },
                 {
                     extend: 'excel',
+                    title: '{{date('Ymd')}}',
                     exportOptions: {
                         columns: ':visible'
                     }
@@ -413,16 +733,20 @@
                     extend: 'pdf',
                     orientation: 'landscape',
                     pageSize: 'LEGAL',
+                    title: '{{date('Ymd')}}',
                     exportOptions: {
                         columns: ':visible'
                     }
                 },
                 'colvis'
             ],
-            columnDefs: [ {
-                targets: [3,4,5,7,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33],
-                visible: false
-            },{ type: 'time-uni', targets: [2] } ]
+            columnDefs: [ 
+                {
+                    targets: [2,4,5,7,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,30,31,32,33],
+                    visible: false
+                },
+                { type: 'time-uni', targets: [8,11] }
+             ]
         } );
     } );
 </script>
