@@ -32,6 +32,9 @@
         line-height: 1.2;
     }
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 @endsection
 
 @section('content')
@@ -380,26 +383,25 @@
                                             <label>Disable Pickup</label>
                                         </div>
                                     </div>
+
+
+
+
+
+
+
                                     <div class="form-group" id="disable_pickup_dates_div" @if($web->disable_order <> 1) style="display:none;" @endif>
                                         <div id="title" class="parsley-input">
                                             <label>Disable Pickup Dates</label>
-                                            <select name="disable_pickup_dates[]" multiple="multiple" id="disable_pickup_dates" class="form-control select2" style="width:100%">
-                                                @php
-                                                    $starte = strtotime(date('Y-m-d'));
-                                                    $ende = strtotime(date('Y-m-d',strtotime("+60 days")));
-                                                    //$ende = strtotime('2022-12-31');
-                                                    $def = explode(",",$web->disable_pickup_dates);
-                                                    while($starte != $ende){ 
-                                                        $issel = "";
-                                                        if(in_array(date('Y-m-d',$starte), $def)){
-                                                            $issel = "selected='selected'";
-                                                        }
-                                                        echo "<option ".$issel." value='".date('Y-m-d',$starte)."'>".date('Y-m-d',$starte)."</option>";
-                                                        $starte += 86400;
-                                                    }
-                                                @endphp
-                                         
-                                            </select>
+
+                                            <input type="text" id="single-date" placeholder="Select a date" class="mb-2 form-control" />
+
+                                            <!-- Time Picker -->
+                                            <select id="multiple-times" multiple style="width: 100%;" class="mb-2 select2 form-control" placeholder="Select time"></select>
+
+                                            <!-- Final Select2 -->
+                                            <label for="disable_pickup_dates">Disable Pickup Dates</label>
+                                            <select name="disable_pickup_dates[]" multiple="multiple" id="disable_pickup_dates" class="form-control select2" style="width:100%"></select>
                                         </div>
                                     </div>   
                                 </div>      
@@ -412,23 +414,15 @@
                                     </div>   
                                     <div class="form-group" id="disable_delivery_dates_div" @if($web->disable_delivery <> 1) style="display:none;" @endif>
                                         <div id="title" class="parsley-input">
-                                            <label>Disable Delivery Dates</label>
+                                            <label>Disable Delivery Dates</label> <br>
+
+                                            <input type="text" id="single-date-delivery" placeholder="Select a date" class="mb-2 form-control" />
+
+                                            <!-- Time Picker -->
+                                            <select id="multiple-times-delivery" multiple style="width: 100%;" class="mb-2 select2 form-control" placeholder="Select time"></select>
+
+                                            <!-- Final Select2 -->
                                             <select name="disable_delivery_dates[]" multiple="multiple" id="disable_delivery_dates" class="form-control select2" style="width:100%">
-                                                @php
-                                                    $starte = strtotime(date('Y-m-d'));
-                                                    $ende = strtotime(date('Y-m-d',strtotime("+60 days")));
-                                                    //$ende = strtotime('2022-12-31');
-                                                    $def = explode(",",$web->disable_delivery_dates);
-                                                    while($starte != $ende){  
-                                                    $issel = "";
-                                                        if(in_array(date('Y-m-d',$starte), $def)){
-                                                            $issel = "selected='selected'";
-                                                        }                                                      
-                                                        echo "<option ".$issel." value='".date('Y-m-d',$starte)."'>".date('Y-m-d',$starte)."</option>";
-                                                        $starte += 86400;
-                                                    }
-                                                @endphp
-                                         
                                             </select>
                                         </div>
                                     </div>
@@ -557,6 +551,118 @@
 @endsection
 
 @section('customjs')
+<script>
+    $(document).ready(function () {
+        let selectedDate = null;
+
+        // Initialize final Select2 list
+        const $disableDates = $('#disable_pickup_dates').select2({
+            tags: true,
+            placeholder: "Disable Pickup Dates",
+            width: '100%'
+        });
+
+        // Initialize time picker select
+        const $timeSelect = $('#multiple-times').select2({
+            tags: true,
+            placeholder: "Select time",
+            width: '100%'
+        });
+
+        // Populate time options
+        const timeSlots = ["05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00"];
+        timeSlots.forEach(time => {
+            const option = new Option(time, time, false, false);
+            $timeSelect.append(option);
+        });
+
+        // Initialize Flatpickr for date selection
+        flatpickr("#single-date", {
+                dateFormat: "Y-m-d",
+                minDate: "today",
+                onChange: function (selectedDates, dateStr) {
+                selectedDate = dateStr;
+                $timeSelect.val(null).trigger('change');
+            }
+        });
+
+        // Handle time selection
+        $timeSelect.on('select2:select', function (e) {
+            const selectedTime = e.params.data.id;
+
+            if (!selectedDate) {
+                alert("Please select a date first.");
+                $timeSelect.val($timeSelect.val().filter(val => val !== selectedTime)).trigger('change');
+                return;
+            }
+
+            const dateTime = `${selectedDate} ${selectedTime}`;
+
+            // Avoid duplicates
+            if ($('#disable_pickup_dates option[value="' + dateTime + '"]').length === 0) {
+                const newOption = new Option(dateTime, dateTime, true, true);
+                $disableDates.append(newOption).trigger('change');
+            }
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        let selectedDate = null;
+
+        // Initialize final Select2 list
+        const $disableDates = $('#disable_delivery_dates').select2({
+            tags: true,
+            placeholder: "Disable Delivery Dates",
+            width: '100%'
+        });
+
+        // Initialize time picker select
+        const $timeSelect = $('#multiple-times-delivery').select2({
+            tags: true,
+            placeholder: "Select time",
+            width: '100%'
+        });
+
+        // Populate time options
+        const timeSlots = ["05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00"];
+        timeSlots.forEach(time => {
+            const option = new Option(time, time, false, false);
+            $timeSelect.append(option);
+        });
+
+        // Initialize Flatpickr for date selection
+        flatpickr("#single-date-delivery", {
+                dateFormat: "Y-m-d",
+                minDate: "today",
+                onChange: function (selectedDates, dateStr) {
+                selectedDate = dateStr;
+                $timeSelect.val(null).trigger('change');
+            }
+        });
+
+        // Handle time selection
+        $timeSelect.on('select2:select', function (e) {
+            const selectedTime = e.params.data.id;
+
+            if (!selectedDate) {
+                alert("Please select a date first.");
+                $timeSelect.val($timeSelect.val().filter(val => val !== selectedTime)).trigger('change');
+                return;
+            }
+
+            const dateTime = `${selectedDate} ${selectedTime}`;
+
+            // Avoid duplicates
+            if ($('#disable_pickup_dates option[value="' + dateTime + '"]').length === 0) {
+                const newOption = new Option(dateTime, dateTime, true, true);
+                $disableDates.append(newOption).trigger('change');
+            }
+        });
+    });
+</script>
+
+
     <script>
         $(function(){
             'use strict'
@@ -565,6 +671,38 @@
                 placeholder: 'Choose one',
                 searchInputPlaceholder: 'Search options'
             });
+
+            const $select = $('#disable_pickup_dates').select2({
+                placeholder: 'Choose one',
+                searchInputPlaceholder: 'Search options'
+            });
+
+            const savedPickupDates = "{{ $web->disable_pickup_dates }}";
+
+            if (savedPickupDates) {
+                savedPickupDates.split(',').forEach(date => {
+                    date = date.trim();
+
+                    const newOption = new Option(date, date, true, true);
+                    $select.append(newOption).trigger('change');
+                });
+            }
+
+            const $select2 = $('#disable_delivery_dates').select2({
+                placeholder: 'Choose one',
+                searchInputPlaceholder: 'Search options'
+            });
+
+            const savedDeliveryDates = "{{ $web->disable_delivery_dates }}";
+
+            if (savedDeliveryDates) {
+                savedDeliveryDates.split(',').forEach(date => {
+                    date = date.trim();
+
+                    const newOption = new Option(date, date, true, true);
+                    $select2.append(newOption).trigger('change');
+                });
+            }
         });
 
         $('#disable_order').change(function() {
@@ -622,6 +760,7 @@
             theme: "classic"
         });
     </script>   
+
     <script>
         (function ($) {
             $(function () {
