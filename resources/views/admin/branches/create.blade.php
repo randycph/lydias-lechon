@@ -109,6 +109,12 @@
                                 @enderror
                                 <small id="category_slug"></small>
                             </div>
+                            <div class="form-group mg-b-20">
+                                <label class="mg-b-5 tx-color-03">Commissary</label>
+                                <input type="text" class="form-control @error('commissary') is-invalid @enderror" name="commissary" id="category_title" >
+                                @error('commissary')
+                                @enderror
+                            </div>
                         </div>
                     </div>
                     <button type="submit" class="btn btn-sm btn-primary btn-uppercase">Save Branch</button>

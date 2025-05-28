@@ -49,7 +49,8 @@ class BranchController extends Controller
             'pickup_branch' => (isset($request->pickup_branch) ? 1 : 0),
             'delivery_branch' => (isset($request->delivery_branch) ? 1 : 0),
             'token' => $request->token,
-            'user_id' => Auth::id()
+            'user_id' => Auth::id(),
+            'commissary' => $request->commissary
         ]);
         return redirect()->route('branch.index')->with('success','Successfully saved new branch!');
         //return back()->with('success','Successfully saved new branch!');
@@ -70,7 +71,6 @@ class BranchController extends Controller
 
     public function update(Request $request, $id)
     {
-        logger($request);
         $save = Branch::findOrFail($id)->update([
             'name' => $request->name,
             'code' => $request->code,
@@ -83,7 +83,8 @@ class BranchController extends Controller
             'pickup_branch' => (isset($request->pickup_branch) ? 1 : 0),
             'delivery_branch' => (isset($request->delivery_branch) ? 1 : 0),
             'token' => $request->token,
-            'user_id' => Auth::id()
+            'user_id' => Auth::id(),
+            'commissary' => $request->commissary
         ]);
 
         return redirect()->route('branch.index')->with('success','Successfully updated branch!');

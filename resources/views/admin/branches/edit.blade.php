@@ -100,6 +100,12 @@
                             @error('email_address')
                             @enderror
                         </div>
+                        <div class="form-group">
+                            <label class="d-block">Commissary</label>
+                            <input name="commissary" id="commissary" value="{{ old('name',$branches->commissary) }}" type="text" class="form-control @error('commissary') is-invalid @enderror" maxlength="225">
+                            @error('commissary')
+                            @enderror
+                        </div>
                     </div>
                     <div class="col-lg-12 mg-t-30">
                         <input class="btn btn-primary btn-sm btn-uppercase" type="submit" value="Update Branch">
