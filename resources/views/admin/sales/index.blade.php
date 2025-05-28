@@ -328,7 +328,13 @@
                                                             @if (auth()->user()->has_access_to_route('sales-transaction.quick_update'))
                                                                 <a class="dropdown-item" href="javascript:void(0);" onclick="change_delivery_status({{$sale->id}}, {{$is_allowed_delivered}})" title="Update Order Status" data-id="{{$sale->id}}">Update Order Status</a>
                                                             @endif
+                                                                @if ($sale->delivery_type == 'Door to door delivery' && ($sale->deliveryAddress && count($sale->deliveryAddress) > 0))
+                                                                <div class="printReceipt" data-addresses="{{ json_encode($sale->deliveryAddress) }}" data-saleid="{{ $sale->id }}">
+                                                                    <button class="dropdown-item">Print Delivery Receipt</button>
+                                                                </div>
+                                                                @else
                                                                 <a class="dropdown-item" href="{{route('admin.report.delivery_report',$sale->id)}}" target="_blank" >Print Delivery Receipt</a>
+                                                                @endif
                                                                 <a class="dropdown-item" href="javascript:void(0);" onclick="show_delivery_history({{$sale->id}})" title="Order History" data-id="{{$sale->id}}">Show Order Status History</a>
                                                             
                                                             @if (substr(strtolower($use->user->email), 0, 8) == 'lydtemp_')
@@ -555,6 +561,42 @@
                         <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal effect-scale" id="prompt-print-receipt-delivery" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">Print Receipt</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div id="dd_form" method="POST" action="">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="preint-receipt-delivert-select">Status</label>
+                            <select id="preint-receipt-delivert-select" class="form-control mg-b-5" name="address"  data-width="100%" required="required">
+                                <option value="">- Select -</option>
+                            </select>
+
+                            <p>Select the address to print the delivery receipt.</p>
+                        </div>
+                    </div>
+                    <input type="hidden" id="sale_id">
+                    <div class="modal-footer">
+                        <button type="button" 
+                                class="btn btn-sm btn-primary" 
+                                id="printDeliveryBtn" 
+                                data-url-template="{{ url('admin/report/delivery_report') }}/:id/multiple/:address">
+                            Print
+                        </button>
+
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1122,8 +1164,57 @@
         }
 
 
+        $('.printReceipt').on('click', function () {
+            const addresses = $(this).data('addresses');
+            const $select = $('#preint-receipt-delivert-select');
+            const sale_id = $(this).data('saleid');
 
+            // Clear 
+            $select.find('option:not(:first)').remove();
 
+            // Populate new options
+            if (Array.isArray(addresses)) {
+                addresses.forEach((item, index) => {
+                    const label = `Address ${index + 1}: ${item.address} (${item.location})`;
+                    const option = new Option(label, item.id);
+                    $select.append(option);
+                });
+            }
+
+            $select.trigger('change.select2');
+
+            $('#sale_id').val(sale_id);
+
+            // Show modal
+            $('#prompt-print-receipt-delivery').modal('show');
+        });
+
+        $('#printDeliveryBtn').on('click', function (e) {
+            e.preventDefault();
+
+            const $select = $('#preint-receipt-delivert-select');
+            const selectedOption = $select.find('option:selected');
+
+            const id = selectedOption.val();
+            const address = selectedOption.text();
+            const baseUrl = $(this).data('url-template');
+            const saleid = $('#sale_id').val();
+
+            if (!id || id === "") {
+                alert("Please select an address.");
+                return;
+            }
+
+            const encodedAddress = encodeURIComponent(id);
+
+            // Construct the full URL
+            const fullUrl = baseUrl
+                .replace(':id', saleid)
+                .replace(':address', encodedAddress);
+
+            // Open in new tab
+            window.open(fullUrl, '_blank');
+        });
 
 
     </script>

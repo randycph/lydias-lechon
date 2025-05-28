@@ -18,7 +18,7 @@ use App\EcommerceModel\Branch;
 use App\Models\ProductCategory;
 use App\Models\Permission;
 use App\Models\Product;
-
+use App\Models\ProductDeliveryAddress;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -441,6 +441,34 @@ class ReportsController extends Controller
         return view('admin.reports.sales_payment',compact('rs'));
 
     }
+    public function delivery_report_multiple($id, $address)
+    {
+        if (!$id) {
+            return redirect()->back()->with('error', 'Invalid Sales ID');
+        }
+
+        $sales = SalesHeader::whereId($id)->first();
+
+        $deliveryAddress = ProductDeliveryAddress::with('product')->where('id', $address)->where('sales_header_id', $sales->id)->first();
+
+        if (!$deliveryAddress) {
+            return;
+        }
+
+        $salesPayments = \App\EcommerceModel\SalesPayment::where('sales_header_id',$id)->get();
+        $salesDetails = \App\EcommerceModel\SalesDetail::where('sales_header_id',$id)->where('product_id', $deliveryAddress->product_id)->get();
+        $totalPayment = \App\EcommerceModel\SalesPayment::where('sales_header_id',$id)->sum('amount');
+        $deliveries = \App\EcommerceModel\DeliveryStatus::where('order_id',$id)->get();
+        $totalNet = \App\EcommerceModel\SalesHeader::where('id',$id)->sum('net_amount');
+        if($totalNet <= $totalPayment) {
+            $status = 'PAID';
+        } else {
+            $status = 'UNPAID';
+        }
+
+        return view('admin.sales.delivery_receipt_multiple_delivery',compact('sales','salesPayments','salesDetails','status','deliveries','deliveryAddress'));
+    }
+
     public function delivery_report($id)
     {
         $sales = SalesHeader::whereId($id)->first();

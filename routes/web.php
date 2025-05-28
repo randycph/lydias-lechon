@@ -1045,6 +1045,7 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
   
     Route::get('/admin/report/job-order', 'EcommerceControllers\ReportsController@joborder')->name('admin.report.joborder');
     Route::get('/admin/report/delivery_report/{id}', 'EcommerceControllers\ReportsController@delivery_report')->name('admin.report.delivery_report');
+    Route::get('/admin/report/delivery_report/{id}/multiple/{address}', 'EcommerceControllers\ReportsController@delivery_report_multiple')->name('admin.report.delivery_report_multiple');
     Route::get('/admin/report/leftover', 'EcommerceControllers\ReportsController@leftover')->name('admin.report.leftover');
     Route::get('/admin/report/production-order','EcommerceControllers\ReportsController@productionorders')->name('admin.report.production-order');
 
