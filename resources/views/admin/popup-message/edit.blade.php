@@ -88,7 +88,7 @@
 				<div class="form-group">
 					<label class="d-block">Page URL to show popup *</label>
 					<input type="text" name="url" class="form-control @error('url') is-invalid @enderror" value="{{ old('url', $popup_message->url) }}">
-					<p class="tx-11 mg-t-4">Available are the following index, our-story, our-stores, lechon-pricelist, lechon-menu. Can only accept one.</p>
+					<p class="tx-11 mg-t-4">Add full URL without no additional queries and no forward slash at the end.</p>
 				</div>
 				<div class="form-group">
 					<label class="d-block">Start to show in seconds*</label>
