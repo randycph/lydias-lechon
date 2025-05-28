@@ -254,7 +254,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function assign_role()
     {
-        return $this->belongsTo(ModelsRole::class,'role_id', 'id');
+        return $this->belongsTo(Role::class,'role_id', 'id');
     }
 
     public function has_access_to_module($module)
@@ -349,7 +349,7 @@ class User extends Authenticatable implements MustVerifyEmail
     // }
 
     public function is_a_cms_user() {
-        return $this->user_type == 'cms' && $this->role_id == 1;
+        return $this->user_type == 'cms' && ($this->role_id == 1 || $this->role_id == 15);
     }
 
     public function is_a_member_user() {
@@ -431,6 +431,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new ResetPasswordLink($token));
+    }
+
+    public function name()
+    {
+        return $this->name;
     }
 
 }

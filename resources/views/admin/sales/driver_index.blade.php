@@ -38,36 +38,15 @@
                     <div class="d-md-flex bd-highlight">
                         <form id="filterForm">
                         <table width="100%">
-                            <tr>
-                                
-                                <td style="width:10%">
-                                    <select name="order_source_filter" id="order_source_filter" class="form-control">
-                                        <option value="">Source</option>
-                                        @foreach(\App\EcommerceModel\Branch::orderBy('name','asc')->get() as $b)
-                                            <option value="{{$b->name}}">{{$b->name}}</option>
-                                        @endforeach
-                                        <option value="Web">Web</option>
-                                        @if(isset($_GET['order_source_filter']) && strlen($_GET['order_source_filter']) > 1)
-                                            <option value="{{$_GET['order_source_filter']}}" selected="selected">{{$_GET['order_source_filter']}}</option>
-                                        @endif
-                                    </select>
-                                </td>
-                                <td style="width:11%">
-                                    <select class="form-control" name="order_status">
-                                        <option value="">Order Status</option>
-                                        <option value="0" @if(isset($filter->order_status) && $filter->order_status == '0') selected="selected" @endif>Unconfirm</option>
-                                        <option value="1" @if(isset($filter->order_status) && $filter->order_status == '1') selected="selected" @endif>Confirmed</option>
-                                        <option value="2" @if(isset($filter->order_status) && $filter->order_status == '2') selected="selected" @endif>Open Date</option>
-                                    </select>
-                                </td>                                
-                                <td style="width:14%">
+                            <tr>                              
+                                <td style="width:18%">
                                     <input @if(isset($filter->start_date)) type="date" value="{{$filter->start_date}}" @else type="text" onfocus="(this.type='date')" @endif class="form-control" name="start_date" placeholder="Start Date (Order)">
                                 </td>
-                                <td style="width:14%">
+                                <td style="width:18%">
                                     <input @if(isset($filter->end_date)) type="date" value="{{$filter->end_date}}" @else type="text" onfocus="(this.type='date')" @endif class="form-control" name="end_date" placeholder="End Date (Order)">
                                 </td>
                                 
-                                <td style="width:20%"><input name="search" type="search" id="search" class="form-control"  placeholder="Order, Customer" value="{{ $filter->search }}">
+                                <td style="width:28%"><input name="search" type="search" id="search" class="form-control"  placeholder="Order, Customer" value="{{ $filter->search }}">
                                 </td>                                
                                 <td align="left" style="width:10%">
                                     <div class="bd-highlight">
@@ -123,11 +102,11 @@
                                 </td>
                                 <td>
                                     <input type="submit" class="btn-xs btn btn-success" value="Search">
-                                    <a href="{{ route('sales-transaction.index') }}" class="btn-xs btn btn-info">Reset</a>
+                                    <a href="{{ route('sales-transaction.driver_sales_transaction') }}" class="btn-xs btn btn-info">Reset</a>
                                 </td>
                             </tr>
                             <tr>
-                                <td style="width:11%">
+                                <td style="width:15%">
                                     <select class="form-control" name="delivery_type">
                                         <option value="">Delivery Type</option>
                                         <option value="Store Pickup" @if(isset($filter->delivery_type) && $filter->delivery_type == 'Store Pickup') selected="selected" @endif>Store Pickup</option>
@@ -186,22 +165,20 @@
                                 <th>Delivery Type</th>
                                 <th>Order Status</th>
                                 <th style="display:none;">Payment Type</th>
-                                <th>Payment Status</th>
-                                <th>is Confirmed</th>
                                 <th>Amount</th>
-                                <th>Balance</th>
+                                <th>Type</th>
                                 <th>Action</th>
                             </tr>
                             </thead>
                             <tbody>
                             @forelse($sales as $sale)
                                 @php
-                                    $date_needed = $sale->items->first();
+                                    $date_needed = $sale['date_needed'];
                                     $dateneeded = '';
                                     $payment_types = '';
                                     $locationed = '';
                                     if(!empty($date_needed)){
-                                        $dateneeded = date('Y-m-d H:i A',strtotime($date_needed->delivery_date));
+                                        $dateneeded = date('Y-m-d H:i A',strtotime($date_needed));
                                     }
                                     if(!empty($sale->payments)){
                                         $ptype = $sale->payments->unique('payment_type');
@@ -209,11 +186,11 @@
                                             $payment_types .= $p->payment_type.",";
                                         }
                                     }
-                                    if($sale->delivery_type == 'Door to door delivery'){
-                                        $locationed = $sale->customer_location;
+                                    if($sale['delivery_type'] == 'Door to door delivery'){
+                                        $locationed = $sale['customer_location'] ?? 'N/A';
                                     }
-                                    if($sale->delivery_type == 'Store Pickup'){
-                                        $locationed = $sale->outlet;
+                                    if($sale['delivery_type'] == 'Store Pickup'){
+                                        $locationed = $sale['outlet'] ?? 'N/A';
                                     }
 
                                     $is_allowed_delivered = 1;
@@ -222,132 +199,86 @@
                                     }
                                 @endphp
                                 @php
-                                $use = \App\EcommerceModel\SalesHeader::find($sale->id);
+                                if ($sale['type'] == 'job') {
+                                    $use = \App\EcommerceModel\JobOrder::find($sale['id']);
+                                } else {
+                                    $use = \App\EcommerceModel\SalesHeader::find($sale['id']);
+                                }
                                 @endphp
-                                <tr style="height:30px; @if($sale->trashed()) background-color:#FFA07A; @endif">
+                                <tr style="height:30px; @if($sale['trashed']) background-color:#FFA07A; @endif {{ $sale['isConfirm'] == 1 ? 'disabled' : '' }}">
                                     <td>
                                         <div class="custom-control custom-checkbox">
-                                            <input type="checkbox" class="custom-control-input cb" id="cb{{ $sale->id }}" {{ $sale->isConfirm == 1 ? 'disabled' : '' }}>
-                                            <label class="custom-control-label" for="cb{{ $sale->id }}"></label>
+                                            <input type="checkbox" class="custom-control-input cb" 
+                                                data-id="{{ $sale['id'] }}" 
+                                                data-type="{{ $sale['type'] }}" 
+                                                id="cb{{ $sale['type'] }}_{{ $sale['id'] }}">
+                                            <label class="custom-control-label" for="cb{{ $sale['type'] }}_{{ $sale['id'] }}"></label>
                                         </div>
                                     </td>
-                                    <th> <strong @if($sale->trashed()) style="text-decoration:line-through;" @endif> <a title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale->id) }}">{{$sale->order_number }}</a><br></strong></th>
-                                    <td>{{ $sale->customer_name }}</td>
-                                    <td>{{ $sale->order_source }}</td>
-                                    <td>{{ date('Y-m-d H:i A',strtotime($sale->created_at)) }}</td>
-                                    <td>@if($sale->delivery_status <> 'Open Date'){{ $dateneeded }}@endif</td>
-                                    <td>{{ $sale->delivery_type }}</td>
-                                    <td><a href="{{route('admin.report.delivery_report',$sale->id)}}" target="_blank">{{$sale->delivery_status}}</a></td>
-                                    <td style="display:none;">{{ rtrim($payment_types,",") }}</td>
-                                    <td>{{ $sale->Paymentadminstatus }} <a href="#" title="Pending payments" onclick="show_added_payments('{{$sale->id}}');"><span class="badge badge-info">{{$sale->Paymentspendingtotal}}</span></a></td>
-                                    <td align="center">
-                                        @if($sale->isConfirm==1)
-                                            <i data-feather="check-square"></i>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @if(\App\EcommerceModel\SalesPayment::check_if_has_added_payments($sale->id) == 1)
-                                            <a href="javascript:;" onclick="show_added_payments('{{$sale->id}}');">{{ number_format($sale->gross_amount,2) }}</a>
+                                    <th> <strong @if($sale['trashed']) style="text-decoration:line-through;" @endif> 
+                                        @if ($sale['type'] == 'job')
+                                            {{$sale['order_number'] }}
                                         @else
-                                            {{ number_format($sale->gross_amount,2) }}
+                                            <a title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale['id']) }}">{{$sale['order_number'] }}</a>
+                                        @endif
+                                        <br></strong>
+                                    </th>
+                                    <td>{{ $sale['customer_name'] }}</td>
+                                    <td>{{ $sale['order_source'] }}</td>
+                                    <td>{{ date('Y-m-d H:i A',strtotime($sale['created_at'])) }}</td>
+                                    <td>@if($sale['delivery_status'] <> 'Open Date'){{ $dateneeded }}@endif</td>
+                                    <td>{{ $sale['delivery_type'] }}</td>
+                                    <td>
+                                        @if ($sale['type'] == 'job')
+                                            {{ $sale['delivery_status'] }}
+                                        @else
+                                            <a href="{{route('admin.report.delivery_report',$sale['id'])}}" target="_blank">{{$sale['delivery_status']}}</a>
                                         @endif
                                     </td>
-                                     <td>{{ number_format((\App\EcommerceModel\SalesHeader::balance($sale->id)),2) }}</td>
+                                    <td style="display:none;">{{ rtrim($payment_types,",") }}</td>
+                                    <td>
+                                        {{ number_format($sale['gross_amount'],2) }}
+                                    </td>
+                                     <td>{{ $sale['type'] == 'job' ? 'Job Order' : 'Sales' }}</td>
                                     <td width="10%">
                                         <!-- 10102 -->
                                          @php $forecasters = [3,13]; $forecasters = [13]; @endphp
                                         @if(!in_array(auth()->user()->role_id, $forecasters) || auth()->user()->id == 10102)                                    
                                             <nav class="nav table-options">
-                                                @if($sale->trashed())
+                                                @if($sale['trashed'])
                                                     @if (auth()->user()->has_access_to_route('sales-transaction.restore'))
                                                         <nav class="nav table-options">
-                                                            <a class="nav-link" href="{{route('sales-transaction.restore', $sale->id)}}" title="Restore this Sales Transaction"><i data-feather="rotate-ccw"></i></a>
+                                                            <a class="nav-link" href="{{route('sales-transaction.restore', $sale['id'])}}" title="Restore this Sales Transaction"><i data-feather="rotate-ccw"></i></a>
                                                         </nav>
                                                     @endif
                                                 @else
-
-
-                                                    <div class="nav-item dropdown">
-                                                        <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                            <i data-feather="eye"></i>
-                                                        </a>
-                                                        <div class="dropdown-menu dropdown-menu-right">
-
-                                                                <a class="dropdown-item" title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale->id) }}">View Sales Summary</a>
-                                                            @if($sale->isConfirm != 1)
-                                                                @if(auth()->user()->role_id == 2 || auth()->user()->role_id == 1)
-                                                                <a class="dropdown-item"  href="javascript:void(0);" onclick="confirm_order({{$sale->id}},'{{ number_format((\App\EcommerceModel\SalesHeader::balance($sale->id)),2) }}');" title="Confirm Order" >Confirm Order</a>
-                                                                @endif
-                                                            @endif
-                                                            
-                                                            <a class="dropdown-item"  href="{{ route('sales.update_details',$sale->id) }}" title="Update Sales Details & Items" >Update Sales Details</a>
-                                                            
-                                                            @if($dateneeded > date('Y-m-d H:i:s'))
-                                                                <a class="dropdown-item text-danger" href="javascript:void(0)" onclick="delete_sales({{$sale->id}},'{{$sale->order_number}}')" title="Delete Transaction">Delete</a>
-                                                            @endif
-                                                        </div>
-                                                    </div>
-                                                    <div class="nav-item dropdown">
-                                                        <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                            <i data-feather="credit-card"></i>
-                                                        </a>
-                                                        <div class="dropdown-menu dropdown-menu-right">
-                                                            @if($sale->status == 'UNPAID')
-                                                                <a class="dropdown-item" data-toggle="modal" data-target="#prompt-change-status" title="Update Sales Transaction" data-id="{{$sale->id}}" data-status="PAID">Paid</a>
-
-                                                            @endif
-
-                                                                <a class="dropdown-item" style="display: none;" target="_blank" href="{{ route('sales-transaction.view_payment',$sale->id) }}" title="Show payment" data-id="{{$sale->id}}">Sales Payment</a>
-
-                                                                @if(\App\EcommerceModel\SalesPayment::check_if_has_remaining_unpaid($sale->gross_amount,$sale->id) == 1)
-                                                                    <a class="dropdown-item" href="javascript:;" onclick="addPayment('{{$sale->id}}','{{\App\EcommerceModel\SalesPayment::get_remaining_unpaid($sale->gross_amount,$sale->id)}}');">Add Payment</a>
-                                                                @endif
-
-                                                                @if($dateneeded > date('Y-m-d H:i:s'))
-                                                                    @if(auth()->user()->role_id == 2 || auth()->user()->role_id == 1 || auth()->user()->role_id == 3)
-                                                                        <a class="dropdown-item" href="javascript:;" onclick="addDelFee({{$sale->id}},'{{$sale->order_number}}',{{$sale->delivery_fee_amount}});">Update Delivery Fee</a>
-                                                                    @endif
-                                                                @endif
-
-                                                                <a class="dropdown-item" href="javascript:;" onclick="show_added_payments('{{$sale->id}}')">View Payments</a>
-
-
-                                                                @if($sale->payment_type == 'xxxxxx')
-                                                                <a class="dropdown-item" href="{{route('staff-edit-payment',$sale->id)}}">Update Sales Payment</a>
-                                                                @endif
-
-
-
-                                                        </div>
-                                                    </div>
                                                     <div class="nav-item dropdown">
                                                         <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                             <i data-feather="truck"></i>
                                                         </a>
                                                         <div class="dropdown-menu dropdown-menu-right">
-                                                            @if (auth()->user()->has_access_to_route('sales-transaction.quick_update'))
-                                                                <a class="dropdown-item" href="javascript:void(0);" onclick="change_delivery_status({{$sale->id}}, {{$is_allowed_delivered}})" title="Update Order Status" data-id="{{$sale->id}}">Update Order Status</a>
-                                                            @endif
-                                                                @if ($sale->delivery_type == 'Door to door delivery' && ($sale->deliveryAddress && count($sale->deliveryAddress) > 0))
-                                                                <div class="printReceipt" data-addresses="{{ json_encode($sale->deliveryAddress) }}" data-saleid="{{ $sale->id }}">
+                                                                <a class="dropdown-item" href="javascript:void(0);" onclick="change_delivery_status({{$sale['id']}}, {{$is_allowed_delivered}})" title="Update Order Status" data-id="{{$sale['id']}}">Update Order Status</a>
+                                                                @if ($sale['delivery_type'] == 'Door to door delivery' && ($sale['delivery_address'] && count($sale['delivery_address']) > 0))
+                                                                <div class="printReceipt" data-addresses="{{ json_encode($sale['delivery_address']) }}" data-saleid="{{ $sale['id'] }}">
                                                                     <button class="dropdown-item">Print Delivery Receipt</button>
                                                                 </div>
                                                                 @else
-                                                                <a class="dropdown-item" href="{{route('admin.report.delivery_report',$sale->id)}}" target="_blank" >Print Delivery Receipt</a>
+                                                                @if ($sale['type'] == 'sales')
+                                                                <a class="dropdown-item" href="{{route('admin.report.delivery_report',$sale['id'])}}" target="_blank" >Print Delivery Receipt</a>
                                                                 @endif
-                                                                <a class="dropdown-item" href="javascript:void(0);" onclick="show_delivery_history({{$sale->id}})" title="Order History" data-id="{{$sale->id}}">Show Order Status History</a>
+                                                                @endif
+                                                                <a class="dropdown-item" href="javascript:void(0);" onclick="show_delivery_history({{$sale['id']}}, '{{$sale['type']}}')" title="Order History" data-id="{{$sale['id']}}">Show Order Status History</a>
                                                             
                                                             @if (substr(strtolower($use->user->email), 0, 8) == 'lydtemp_')
-                                                                <a class="dropdown-item" href="{{route('confirmation',$use->HashOrderNumber)}}" target="_blank" title="View Guest Sales Summary" >Guest Sales Summary</a>
+                                                                <a class="dropdown-item" href="{{route('confirmation', $use['HashOrderNumber'] ?? null)}}" target="_blank" title="View Guest Sales Summary" >Guest Sales Summary</a>
                                                             @endif
 
 
                                                             @if (auth()->user()->has_access_to_route('sales-transaction.destroy'))
-                                                                <a class="dropdown-item text-danger" href="javascript:void(0)" onclick="delete_sales({{$sale->id}},'{{$sale->order_number}}')" title="Delete Transaction">Delete</a>
+                                                                <a class="dropdown-item text-danger" href="javascript:void(0)" onclick="delete_sales({{$sale['id']}},'{{$sale['order_number']}}')" title="Delete Transaction">Delete</a>
                                                             @endif
                                                         </div>
                                                     </div>
-
                                                 @endif
                                             </nav>
                                         @else
@@ -359,8 +290,8 @@
                                                         </a>
                                                         <div class="dropdown-menu dropdown-menu-right">
 
-                                                                <a class="dropdown-item" title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale->id) }}">View Sales Summary</a>
-                                                                 <a class="dropdown-item" href="javascript:;" onclick="show_added_payments('{{$sale->id}}')">View Payments</a>
+                                                                <a class="dropdown-item" title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale['id']) }}">View Sales Summary</a>
+                                                                 <a class="dropdown-item" href="javascript:;" onclick="show_added_payments('{{$sale['id']}}')">View Payments</a>
 
 
                                                            
@@ -412,10 +343,10 @@
     <!-- Bulk delete Modal -->
     <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
-        <form id="bulkDeleteForm" action="{{ route('sales.bulk-delete') }}" method="POST">
+        <form id="bulkDeleteForm" action="{{ route('sales.bulk-delete-mixed') }}" method="POST">
             @csrf
             @method('DELETE')
-            <input type="hidden" name="ids" id="selected_ids">
+            <input type="hidden" name="records" id="selected_ids">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Confirm Deletion</h5>
@@ -551,7 +482,7 @@
                             <select name="delivered_by" id="delivered_by" class="form-control">
                                 <option value="">- Select -</option>
                                 @foreach(\App\Models\User::where('role_id', 15)->get() as $driver)
-                                    <option value="{{$driver->name}}">{{$driver->name}}</option>
+                                    <option value="{{$driver->name}}" {{ $driver->name == auth()->user()->name ? 'selected' : '' }}>{{$driver->name}}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -1000,11 +931,11 @@
             });
         }
 
-        function show_delivery_history(id){
+        function show_delivery_history(id,type){
             $.ajax({
                 type: "GET",
                 url: "{{ route('display.delivery-history') }}",
-                data: { id : id },
+                data: { id : id, type : type },
                 success: function( response ) {
                     $('#delivery_history_tbl').html(response);
                     $('#prompt-show-delivery-history').modal('show');
@@ -1062,11 +993,14 @@
 
         // On modal open, collect selected IDs
         $('#bulk-delete-btn').on('click', function () {
-            let ids = $('.cb:checked').map(function () {
-                return $(this).attr('id').replace('cb', '');
+            const selected = $('.cb:checked').map(function () {
+                return {
+                    id: $(this).data('id'),
+                    type: $(this).data('type')
+                };
             }).get();
 
-            $('#selected_ids').val(ids.join(','));
+            $('#selected_ids').val(JSON.stringify(selected));
         });
 
         $('#prompt-change-status').on('show.bs.modal', function (e) {
@@ -1108,7 +1042,7 @@
 
         $('#delivery_status').change(function(){
             if($(this).val() == 'In Transit'){
-                $('#delivered_by_div').show();
+                $('#delivered_by_div').show()
             }
             else{
                 $('#delivered_by_div').hide();

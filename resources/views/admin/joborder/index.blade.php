@@ -216,6 +216,7 @@
                                     <th style="width:10%;">Source</th> 
                                     <th style="width:10%;">Category</th>
                                     <th style="width:10%;">Date Needed</th>
+                                    <th style="width:10%;">Status</th>
                                     <th style="width:10%;">Action</th>
                                 </tr>
                             </thead>
@@ -234,8 +235,11 @@
                                     
                                     <td style="width:10%;">{{ $jo->jo_category }}</td>
                                     <td>{{ date('F d, Y h:i A',strtotime($jo->date_needed)) }}</td>
+                                    <td>{{ $jo->delivery_status }}</td>
                                     <td style="width:10%;" class="text-right">
                                         <div class="btn-group pd-10" role="group" aria-label="Basic example">
+                                            <button type="button" class="btn btn-info btn-xs" onclick="change_delivery_status({{$jo->id}})" title="Update Order Status" data-id="{{$jo->id}}">Status</button>
+
                                             <button type="button" class="btn btn-secondary btn-xs" data-toggle="collapse" data-target="#sales-details_{{$jo->id}}" class="accordion-toggle">Details</button>
                                             @if($jo->date_needed > date('Y-m-d H:i:s') && $jo->sales_detail_id == 0)
                                                 <a href="{{route('joborders.edit-pantaga-or-display',$jo->id)}}" class="btn btn-success btn-xs">Edit</a>
@@ -350,6 +354,60 @@
         </div>
     </div>
 
+    <div class="modal effect-scale" id="prompt-change-delivery-status" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">Order Status</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="dd_form" method="POST" action="{{route('sales-transaction.delivery_status')}}">
+                    @csrf
+                    @method('POST')
+                    <input type="hidden" name="type" value="joborder">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="delivery_status">Status</label>
+                            <select id="delivery_status" class="form-control mg-b-5" name="delivery_status"  data-width="100%" required="required">
+                                <option value="">- Select -</option>
+                                <option value="Open Date">Open Date</option>
+                                <option value="Scheduled for Processing">Scheduled for Processing</option>
+                                <option value="Processing">Processing</option>
+                                <option value="Ready For delivery">Ready For delivery</option>
+                                <option value="In Transit">In Transit</option>
+                                <option value="Delivered">Delivered</option>
+                                <option value="Returned">Returned</option>
+                            </select>
+                            <p class="tx-10 text-danger" id="error">
+                                <x-error-message inputName="delivery_status" />
+                            </p>
+                        </div>
+                        <div class="form-group" style="display:none;" id="delivered_by_div">
+                            <label for="delivered_by">Delivered by:</label>
+                            <select name="delivered_by" id="delivered_by" class="form-control">
+                                <option value="">- Select -</option>
+                                @foreach(\App\Models\User::where('role_id', 15)->get() as $driver)
+                                    <option value="{{$driver->name}}" {{ $driver->name == auth()->user()->name ? 'selected' : '' }}>{{$driver->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="delivery_status">Remarks</label>
+                            <textarea name="del_remarks" required="required" class="form-control" id="del_remarks" cols="30" rows="4"></textarea>
+                        </div>
+                    </div>
+                    <input type="hidden" id="del_id" name="del_id" value="">
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="modal effect-scale" id="prompt-import-joborder" tabindex="-1" role="dialog" aria-labelledby="importjoborder" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -416,6 +474,20 @@
     $(document).on('click','.delete-joborder',function(){
         $('#jo_id').val($(this).data('id'));
     });
+
+    function change_delivery_status(id){
+        $('#prompt-change-delivery-status').modal('show');
+        $('#del_id').val(id);
+    }
+
+    $('#delivery_status').change(function(){
+        if($(this).val() == 'In Transit'){
+            $('#delivered_by_div').show();
+        }
+        else{
+            $('#delivered_by_div').hide();
+        }
+    })
 </script>
 <script>
     @if($errors->any())

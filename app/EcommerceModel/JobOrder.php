@@ -45,6 +45,10 @@ class JobOrder extends Model
         return $this->hasMany(DeliveryStatus::class,'order_id');
     }
 
+    public function deliveryStatuses()
+    {
+        return $this->hasMany(DeliveryStatus::class, 'job_order_id', 'id');
+    }
 
 
     // Need to change every model

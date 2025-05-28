@@ -2,13 +2,14 @@
 
 namespace App\EcommerceModel;
 use App\Models\User;
+use App\EcommerceModel\JobOrder;
 use Illuminate\Database\Eloquent\Model;
 
 class DeliveryStatus extends Model
 {
 
     protected $table = 'ecommerce_delivery_status';
-    protected $fillable = ['order_id', 'user_id', 'status', 'remarks','delivered_by'];
+    protected $fillable = ['order_id', 'user_id', 'status', 'remarks','delivered_by', 'type', 'job_order_id'];
 
 
     public function getDeliveryAddressAttribute()
@@ -19,6 +20,11 @@ class DeliveryStatus extends Model
     public function sales()
 	{
 	    return $this->belongsTo('App\EcommerceModel\SalesHeader','order_id');
+	}
+
+    public function jobOrders()
+	{
+	    return $this->belongsTo(JobOrder::class, 'job_order_id');
 	}
 
     public function user()
