@@ -308,7 +308,11 @@
                                             completedAt() {
                                                 const entry = deliveryStatuses.find(s => s.status === key);
                                                 return entry ? formatDate(entry.created_at) : '';
-                                            }
+                                            },
+                                            driverName() {
+                                                const entry = deliveryStatuses.find(s => s.status === 'In Transit');
+                                                return entry ? entry.delivered_by : 'No assigned driver';
+                                            },
                                         }">
                                             <!-- ICON -->
                                             <span
@@ -327,6 +331,9 @@
 
                                             <!-- SUBTITLE -->
                                             <p class="text-sm" :class="isCompleted() ? 'text-[#717171]' : 'text-[#ACACAC]'" x-text="statusMap[key].subtitle"></p>
+                                            <template x-if="statusMap[key].title == 'In Transit' && isCompleted()">
+                                                <p class="text-sm text-[#ACACAC]">Driver: <span x-text="driverName()"></span></p>
+                                            </template>
                                         </li>
                                     </template>
                                 </ol>
