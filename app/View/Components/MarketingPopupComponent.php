@@ -23,10 +23,10 @@ class MarketingPopupComponent extends Component
      * Get the view / contents that represent the component.
      */
     public function render(): View|Closure|string
-    {
-        $routeName = Route::currentRouteName();
+    {   
+        $url = request()->url();
         $popupMessage = PopupMessage::where('is_active', 1)
-            ->where('url', $routeName)
+            ->where('url', $url)
             ->first();
 
         if (!$popupMessage) {
