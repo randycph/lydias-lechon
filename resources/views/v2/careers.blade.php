@@ -77,17 +77,6 @@
                                     <div class="text-red-500 mt-1">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="mb-5">
-                                <label for="message" class="block mb-2 font-bold text-gray-900">Message </label>
-                                <textarea id="message"
-                                    name="message"
-                                    rows="5"
-                                    class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                                    placeholder=""> </textarea>
-                                @error('message')
-                                    <div class="text-red-500 mt-1">{{ $message }}</div>
-                                @enderror
-                            </div>
     
                             <div class="mb-5">
                                 <label for="resume" class="block mb-2 font-bold text-gray-900">Upload your CV <span class="text-red-800">*</span></label>

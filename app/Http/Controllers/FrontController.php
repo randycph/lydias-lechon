@@ -142,7 +142,6 @@ public function contact_us(Request $request)
                 'email' => 'required|email|max:255',
                 'contact' => 'required|string|max:255',
                 'resume' => 'required|file|mimes:pdf,doc,docx|max:5120', // 5MB max
-                'message' => 'nullable',
             ]);
 
             $emailReceiver = 'wsiprod.demo@gmail.com';
