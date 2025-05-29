@@ -192,125 +192,123 @@ class PaymayatestController extends Controller
 
     }
 
-    public function get_checkoutId($request, $payment){
-
+    public function get_checkoutId($request, $payment)
+    {
         $data = $this->postdata($request->sales_header_id, $request->amount, $payment);
-       // return $this->pk();
-        $context = stream_context_create(array(
-            'http' => array(
-                'method' => 'POST',
-                'header' => "Authorization: Basic ".$this->pk()."\r\n".
+
+        $context = stream_context_create([
+            'http' => [
+                'method'  => 'POST',
+                'header'  => "Authorization: Basic " . $this->pk() . "\r\n" .
                             "Content-Type: application/json\r\n",
-                'content' => $data
-            )
-        ));
+                'content' => $data,
+                'ignore_errors' => true, // capture errors too
+            ]
+        ]);
 
-        $first_response = file_get_contents($this->paymaya_url(), FALSE, $context);
+        $response = file_get_contents($this->paymaya_url(), false, $context);
 
-        if($first_response === FALSE){
-            die('Error');
+        if ($response === false || strpos($http_response_header[0], '200') === false) {
+            logger('PAYMAYA 400 DEBUG HEADERS:', $http_response_header);
+            logger('PAYMAYA 400 DEBUG RESPONSE:', [$response]);
+            dd('PayMaya Error', $http_response_header, $response);
         }
 
-        $first_responseData = json_decode($first_response, TRUE);
-
-        return $first_responseData;
+        return json_decode($response, true);
     }
 
     public function postdata($id,$amount, $payment){
         $sale = SalesHeader::find($id);
 
-        $items = '';
+        $items = [];
 
-        foreach($sale->items as $i){
-            $items .= '"name": "'.$i->product_name.'",
-                            "quantity": '.$i->qty.',
-                            "code": "'.$i->product_id.'",
-                            "description": "",
-                            "amount": {
-                                "value": '.$i->gross_amount.',
-                                "details": {
-                                    "discount": 0,
-                                    "serviceCharge": 0,
-                                    "shippingFee": 0,
-                                    "tax": 0,
-                                    "subtotal": '.$i->gross_amount.'
-                                }
-                            },';
+        foreach ($sale->items as $i) {
+            $items[] = [
+                "name" => $i->product_name,
+                "quantity" => (int) $i->qty,
+                "code" => (string) $i->product_id,
+                "description" => "",
+                "amount" => [
+                    "value" => (float) $i->gross_amount,
+                    "details" => [
+                        "discount" => 0,
+                        "serviceCharge" => 0,
+                        "shippingFee" => 0,
+                        "tax" => 0,
+                        "subtotal" => (float) $i->gross_amount,
+                    ]
+                ],
+                "totalAmount" => [
+                    "value" => (float) $i->gross_amount,
+                    "details" => [
+                        "discount" => 0,
+                        "serviceCharge" => 0,
+                        "shippingFee" => 0,
+                        "tax" => 0,
+                        "subtotal" => (float) $i->gross_amount,
+                    ]
+                ]
+            ];
         }
         $amount = (float) $amount;
         $deliveryFee = (float) $sale->delivery_fee_amount ?? 0;
         $subtotal = $amount - $deliveryFee;
-        $postData = '{
-                    "totalAmount": {
-                        "value": '.$amount.',
-                        "currency": "PHP",
-                        "details": {
-                            "discount": 0,
-                            "serviceCharge": 0,
-                            "shippingFee": '.$deliveryFee.',
-                            "tax": 0,
-                            "subtotal": '.$subtotal.'
-                        }
-                    },
-                    "buyer": {
-                        "firstName": "'.$sale->customer_name.'",
-                        "middleName": " ",
-                        "lastName": " ",
-                        "birthday": "",
-                        "customerSince": "",
-                        "sex": "",
-                        "contact": {
-                            "phone": "'.$sale->customer_contact_number.'",
-                            "email": "'.$sale->email.'"
-                        },
-                        "shippingAddress": {
-                            "firstName": "'.$sale->customer_name.'",
-                            "middleName": " ",
-                            "lastName": " ",
-                            "phone": "'.$sale->customer_contact_number.'",
-                            "email": "'.$sale->email.'",
-                            "line1": "'.str_replace(array("\r", "\n","'"), ' ', $sale->customer_delivery_adress).'",
-                            "line2": " ",
-                            "city": " ",
-                            "state": " ",
-                            "zipCode": " ",
-                            "countryCode": "PH",
-                            "shippingType": "ST"
-                        },
-                        "billingAddress": {
-                            "line1": "'.str_replace(array("\r", "\n","'"), ' ', $sale->customer_delivery_adress).'",
-                            "line2": " ",
-                            "city": " ",
-                            "state": " ",
-                            "zipCode": " ",
-                            "countryCode": "PH"
-                        }
-                    },
-                    "items": [
-                        {
-                            '.$items.'
-                            "totalAmount": {
-                                "value": '.$sale->gross_amount.',
-                                "details": {
-                                    "discount": '.$sale->discount_amount.',
-                                    "serviceCharge": 0,
-                                    "shippingFee": '.$sale->delivery_fee_amount.',
-                                    "tax": 0,
-                                    "subtotal": '.$sale->gross_amount.'
-                                }
-                            }
-                        }
-                    ],
-                    "redirectUrl": {
-                        "success": "'.route('paymaya-success').'?id='.$payment->id.'",
-                        "failure": "'.route('paymaya-failure').'?id='.$payment->id.'",
-                        "cancel": "'.route('paymaya-cancel').'?id='.$payment->id.'"
-                    },
-                    "requestReferenceNumber": "'.$sale->order_number.'",
-                    "metadata": {}
-                }
-            ';
-            logger($postData);
-        return $postData;
+        $postData = [
+            "totalAmount" => [
+                "value" => (float) $amount,
+                "currency" => "PHP",
+                "details" => [
+                    "discount" => 0,
+                    "serviceCharge" => 0,
+                    "shippingFee" => $deliveryFee,
+                    "tax" => 0,
+                    "subtotal" => $subtotal
+                ]
+            ],
+            "buyer" => [
+                "firstName" => $sale->customer_name,
+                "middleName" => null,
+                "lastName" => null,
+                "birthday" => "",
+                "customerSince" => "",
+                "sex" => "",
+                "contact" => [
+                    "phone" => $sale->customer_contact_number,
+                    "email" => $sale->email
+                ],
+                "shippingAddress" => [
+                    "firstName" => $sale->customer_name,
+                    "middleName" => null,
+                    "lastName" => null,
+                    "phone" => $sale->customer_contact_number,
+                    "email" => $sale->email,
+                    "line1" => trim(str_replace(["\r", "\n", "'"], ' ', $sale->customer_delivery_adress)),
+                    "line2" => null,
+                    "city" => "Metro Manila",
+                    "state" => "NCR",
+                    "zipCode" => "1700",
+                    "countryCode" => "PH",
+                    "shippingType" => "ST"
+                ],
+                "billingAddress" => [
+                    "line1" => trim(str_replace(["\r", "\n", "'"], ' ', $sale->customer_delivery_adress)),
+                    "line2" => null,
+                    "city" => "Metro Manila",
+                    "state" => "NCR",
+                    "zipCode" => "1700",
+                    "countryCode" => "PH"
+                ]
+            ],
+            "items" => $items,
+            "redirectUrl" => [
+                "success" => route('paymaya-success').'?id='.$payment->id,
+                "failure" => route('paymaya-failure').'?id='.$payment->id,
+                "cancel" => route('paymaya-cancel').'?id='.$payment->id
+            ],
+            "requestReferenceNumber" => $sale->order_number,
+            "metadata" => new \stdClass()
+        ];
+
+        return json_encode($postData);
     }
 }
