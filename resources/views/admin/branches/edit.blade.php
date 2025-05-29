@@ -145,7 +145,7 @@
                                         <tr>
                                             <td><input type="text" name="branches[{{ $i }}][type]" class="form-control my-2" value="{{ $number->type }}" required></td>
                                             <td><input type="text" name="branches[{{ $i }}][number]" class="form-control my-2" value="{{ $number->number }}" required></td>
-                                            <td><input type="text" name="branches[{{ $i }}][name]" class="form-control my-2" value="{{ $number->name }}" required></td>
+                                            <td><input type="text" name="branches[{{ $i }}][name]" class="form-control my-2" value="{{ $number->name }}"></td>
                                             <td><button type="button" class="btn btn-sm btn-danger removeBranchRow">Delete</button></td>
                                         </tr>
                                         @endforeach
