@@ -16,7 +16,9 @@
             product: null,
             show(product) {
                 this.product = product;
+                this.addons = [];
                 this.lechonCart = true;
+                this.quantity = 1,
                 console.log(product);
             },
             close() {
@@ -25,6 +27,16 @@
             },
             quantity: 1,
             addons: [],
+            updateAddons() {
+                if (!this.product?.addon_products) return;
+
+                this.addons = this.product.addon_products
+                    .filter(a => a.selected)
+                    .map(a => ({
+                        id: a.id,
+                        qty: 1
+                    }));
+            },
             get baseTotal() {
                 return this.product?.price * this.quantity || 0;
             },
