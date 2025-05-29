@@ -30,7 +30,7 @@
             </div>
 
 
-            <form autocomplete="off" action="{{ route('branch.update', $branches->id) }}" method="post">
+            <form autocomplete="off" action="{{ route('branch.update', $branches->id) }}" method="post" id="branchForm">
                 <div class="row row-sm">
                     @method('PUT')
                     @csrf
@@ -55,6 +55,10 @@
                                 <option value="Mall Based Foodcourtk" @if($branches->branch_type=='Mall Based Foodcourt') selected="selected" @endif>Mall Based Foodcourt</option>
                                 <option value="Kiosk" @if($branches->branch_type=='Kiosk') selected="selected" @endif>Kiosk</option>
                             </select>
+                        </div>
+                        <div class="form-group mg-b-20">
+                            <input type="checkbox" name="is_head_office" id="is_head_office" @if($branches->is_head_office=='1') checked="checked" @endif>
+                            <label class="mg-b-5 tx-color-03" for="is_head_office">Is Head Office?</label>                                
                         </div>
                         <div class="form-group mg-b-20">
                             <input type="checkbox" name="pickup_branch" id="pickup_branch" @if($branches->pickup_branch=='1') checked="checked" @endif>
@@ -106,7 +110,69 @@
                             @error('commissary')
                             @enderror
                         </div>
+                        <div class="form-group">
+                            <label class="d-block">Direction Link</label>
+                            <input name="direction_link" id="direction_link" value="{{ old('name',$branches->direction_link) }}" type="text" class="form-control @error('direction_link') is-invalid @enderror" maxlength="225">
+                            @error('direction_link')
+                            @enderror
+                        </div>
+                        <div class="form-group">
+                            <label class="d-block">Google Map Link</label>
+                            <input name="google_map_link" id="google_map_link" value="{{ old('name',$branches->google_map_link) }}" type="text" class="form-control @error('google_map_link') is-invalid @enderror" maxlength="225">
+                            @error('google_map_link')
+                            @enderror
+                        </div>
                     </div>
+
+                    <div class="col-lg-12">
+                        <div class="card mt-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <strong>Branch Numbers</strong>
+                                <button type="button" class="btn btn-sm btn-primary" id="addBranchRow">+ Add</button>
+                            </div>
+                            <div class="card-body p-0">
+                                <table class="table mb-0" id="branchNumbersTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Number</th>
+                                            <th>Name</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="branchNumbersTableBody">
+                                        @foreach($branches->numbers as $i => $number)
+                                        <tr>
+                                            <td><input type="text" name="branches[{{ $i }}][type]" class="form-control my-2" value="{{ $number->type }}" required></td>
+                                            <td><input type="text" name="branches[{{ $i }}][number]" class="form-control my-2" value="{{ $number->number }}" required></td>
+                                            <td><input type="text" name="branches[{{ $i }}][name]" class="form-control my-2" value="{{ $number->name }}" required></td>
+                                            <td><button type="button" class="btn btn-sm btn-danger removeBranchRow">Delete</button></td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <script type="text/template" id="branchRowTemplate">
+                            <tr class="">
+                                <td>
+                                    <select name="branches[][type]" class="form-control my-2" required>
+                                        <option value="Mobile">Mobile</option>
+                                        <option value="Phone">Phone</option>
+                                        <option value="Fax">Fax</option>
+                                        <option value="Email">Email</option>
+                                        <option value="Hotline">Hotline</option>
+                                    </select>
+                                </td>
+                                <td><input type="text" name="branches[][number]" class="form-control my-2" required placeholder="09171584569 or +639158123600"></td>
+                                <td><input type="text" name="branches[][name]" class="form-control my-2" placeholder="Globe"></td>
+                                <td><button type="button" class="btn btn-sm btn-danger removeBranchRow">Delete</button></td>
+                            </tr>
+                        </script>
+                    </div>
+
+
                     <div class="col-lg-12 mg-t-30">
                         <input class="btn btn-primary btn-sm btn-uppercase" type="submit" value="Update Branch">
                         <a href="{{ route('branch.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
@@ -114,9 +180,6 @@
                 </div>
             </form>
         </div>
-
-
-
 @endsection
 
 @section('pagejs')
@@ -125,6 +188,58 @@
     <script src="{{ asset('lib/ion-rangeslider/js/ion.rangeSlider.min.js') }}"></script>
 
     <script src="{{ asset('js/listing.js') }}"></script>
+
+    <script>
+        $(document).ready(function () {
+            let branchRowIndex = {{ $branches->numbers->count() }};
+
+            $('#addBranchRow').click(function () {
+                const row = `
+                    <tr>
+                        <td>
+                            <select name="branches[${branchRowIndex}][type]" class="form-control my-2" required>
+                                <option value="Mobile">Mobile</option>
+                                <option value="Phone">Phone</option>
+                                <option value="Fax">Fax</option>
+                                <option value="Email">Email</option>
+                                <option value="Hotline">Hotline</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="text" name="branches[${branchRowIndex}][number]" class="form-control my-2" required placeholder="09171584569 or +639158123600">
+                        </td>
+                        <td>
+                            <input type="text" name="branches[${branchRowIndex}][name]" class="form-control my-2" placeholder="Globe">
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-danger removeBranchRow">Delete</button>
+                        </td>
+                    </tr>
+                `;
+                $('#branchNumbersTableBody').append(row);
+                branchRowIndex++;
+            });
+
+            $(document).on('click', '.removeBranchRow', function () {
+                $(this).closest('tr').remove();
+            });
+
+            $('#branchForm').submit(function (e) {
+                $.ajax({
+                    url: '{{ route("branch.update", $branches->id) }}',
+                    method: 'POST',
+                    data: $(this).serialize(),
+                    success: function (res) {
+                        //
+                    },
+                    error: function (err) {
+                        console.error(err);
+                        alert('Something went wrong.');
+                    }
+                });
+            });
+        });
+    </script>
     <script>
         $(document).ready(function () {
             //called when key is pressed in textbox

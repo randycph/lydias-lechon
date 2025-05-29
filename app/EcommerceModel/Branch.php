@@ -12,7 +12,7 @@ class Branch extends Model
     use SoftDeletes;
 
     protected $table = 'branches';
-    protected $fillable = ['name', 'code', 'address', 'contact_nos', 'contact_person','email_address','user_id', 'created_by','token','last_sync','hotline', 'branch_type','pickup_branch', 'delivery_branch', 'commissary'];
+    protected $fillable = ['name', 'code', 'address', 'is_head_office', 'google_map_link', 'direction_link', 'contact_nos', 'contact_person','email_address','user_id', 'created_by','token','last_sync','hotline', 'branch_type','pickup_branch', 'delivery_branch', 'commissary'];
 
     // Need to change every model
     static $oldModel;

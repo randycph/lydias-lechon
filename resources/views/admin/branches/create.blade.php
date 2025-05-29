@@ -61,6 +61,10 @@
                                 </select>
                             </div>
                             <div class="form-group mg-b-20">
+                                <input type="checkbox" name="is_head_office" id="is_head_office">
+                                <label class="mg-b-5 tx-color-03" for="is_head_office">Is Head Office?</label>                                
+                            </div>
+                            <div class="form-group mg-b-20">
                                 <input type="checkbox" name="pickup_branch" id="pickup_branch">
                                 <label class="mg-b-5 tx-color-03" for="pickup_branch">Pickup Branch</label>                                
                             </div>
@@ -115,7 +119,61 @@
                                 @error('commissary')
                                 @enderror
                             </div>
+                            <div class="form-group mg-b-20">
+                                <label class="mg-b-5 tx-color-03">Direction Link</label>
+                                <input type="text" class="form-control @error('direction_link') is-invalid @enderror" name="direction_link" id="category_title" >
+                                @error('direction_link')
+                                @enderror
+                            </div>
+                            <div class="form-group mg-b-20">
+                                <label class="mg-b-5 tx-color-03">Google Map Link</label>
+                                <input type="text" class="form-control @error('google_map_link') is-invalid @enderror" name="google_map_link" id="category_title" >
+                                @error('google_map_link')
+                                @enderror
+                            </div>
                         </div>
+                        
+                        <div class="col-lg-12">
+                            <div class="card mt-4">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <strong>Branch Numbers</strong>
+                                    <button type="button" class="btn btn-sm btn-primary" id="addBranchRow">+ Add</button>
+                                </div>
+                                <div class="card-body p-0">
+                                    <table class="table mb-0" id="branchNumbersTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Type</th>
+                                                <th>Number</th>
+                                                <th>Name</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="branchNumbersTableBody">
+                                            
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <script type="text/template" id="branchRowTemplate">
+                                <tr class="">
+                                    <td>
+                                        <select name="branches[][type]" class="form-control my-2" required>
+                                            <option value="Mobile">Mobile</option>
+                                            <option value="Phone">Phone</option>
+                                            <option value="Fax">Fax</option>
+                                            <option value="Email">Email</option>
+                                            <option value="Hotline">Hotline</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="text" name="branches[][number]" class="form-control my-2" required placeholder="09171584569 or +639158123600"></td>
+                                    <td><input type="text" name="branches[][name]" class="form-control my-2" placeholder="Globe"></td>
+                                    <td><button type="button" class="btn btn-sm btn-danger removeBranchRow">Delete</button></td>
+                                </tr>
+                            </script>
+                        </div>
+
                     </div>
                     <button type="submit" class="btn btn-sm btn-primary btn-uppercase">Save Branch</button>
                     <a href="{{ route('branch.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
@@ -136,6 +194,44 @@
 @endsection
 
 @section('customjs')
+    <script>
+        $(document).ready(function () {
+            let branchRowIndex = 0;
+
+            $('#addBranchRow').click(function () {
+                const row = `
+                    <tr>
+                        <td>
+                            <select name="branches[${branchRowIndex}][type]" class="form-control my-2" required>
+                                <option value="Mobile">Mobile</option>
+                                <option value="Phone">Phone</option>
+                                <option value="Fax">Fax</option>
+                                <option value="Email">Email</option>
+                                <option value="Hotline">Hotline</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="text" name="branches[${branchRowIndex}][number]" class="form-control my-2" required placeholder="09171584569 or +639158123600">
+                        </td>
+                        <td>
+                            <input type="text" name="branches[${branchRowIndex}][name]" class="form-control my-2" placeholder="Globe">
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-danger removeBranchRow">Delete</button>
+                        </td>
+                    </tr>
+                `;
+                $('#branchNumbersTableBody').append(row);
+                branchRowIndex++;
+            });
+
+
+            $(document).on('click', '.removeBranchRow', function () {
+                $(this).closest('tr').remove();
+            });
+        });
+    </script>
+
     <script>
 
         $(".js-range-slider").ionRangeSlider({

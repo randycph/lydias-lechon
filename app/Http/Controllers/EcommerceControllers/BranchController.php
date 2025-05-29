@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\EcommerceModel\Branch;
 use App\Helpers\ListingHelper;
+use App\Models\BranchNumbers;
 use Illuminate\Support\Facades\Auth;
 
 class BranchController extends Controller
@@ -37,7 +38,7 @@ class BranchController extends Controller
 
     public function store(Request $request)
     {
-        $save = Branch::create([
+        $branch = Branch::create([
             'name' => $request->name,
             'code' => $request->code,
             'address' => $request->address,
@@ -50,10 +51,25 @@ class BranchController extends Controller
             'delivery_branch' => (isset($request->delivery_branch) ? 1 : 0),
             'token' => $request->token,
             'user_id' => Auth::id(),
-            'commissary' => $request->commissary
+            'commissary' => $request->commissary,
+            'direction_link' => $request->direction_link ?? '',
+            'google_map_link' => $request->google_map_link ?? '',
+            'is_head_office' => $request->has('is_head_office') ? 1 : 0,
         ]);
+
+        if ($request->has('branches')) {
+            foreach ($request->branches as $b) {
+                if (!empty($b['type']) && !empty($b['number'])) {
+                    $branch->numbers()->create([
+                        'type' => $b['type'],
+                        'number' => $b['number'],
+                        'name' => $b['name'] ?? '',
+                    ]);
+                }
+            }
+        }
+
         return redirect()->route('branch.index')->with('success','Successfully saved new branch!');
-        //return back()->with('success','Successfully saved new branch!');
     }
 
     public function show($id)
@@ -64,14 +80,16 @@ class BranchController extends Controller
 
     public function edit($id)
     {
-        $branches = Branch::findOrFail($id);
+        $branches = Branch::with('numbers')->findOrFail($id);
         return view('admin.branches.edit',compact('branches'));
     }
 
 
     public function update(Request $request, $id)
     {
-        $save = Branch::findOrFail($id)->update([
+        $branch = Branch::findOrFail($id);
+
+        Branch::findOrFail($id)->update([
             'name' => $request->name,
             'code' => $request->code,
             'address' => $request->address,
@@ -84,8 +102,25 @@ class BranchController extends Controller
             'delivery_branch' => (isset($request->delivery_branch) ? 1 : 0),
             'token' => $request->token,
             'user_id' => Auth::id(),
-            'commissary' => $request->commissary
+            'commissary' => $request->commissary,
+            'direction_link' => $request->direction_link ?? '',
+            'google_map_link' => $request->google_map_link ?? '',
+            'is_head_office' => $request->has('is_head_office') ? 1 : 0,
         ]);
+
+        $branch->numbers()->delete();
+
+        if ($request->has('branches')) {
+            foreach ($request->branches as $b) {
+                if (!empty($b['type']) && !empty($b['number'])) {
+                    $branch->numbers()->create([
+                        'type' => $b['type'],
+                        'number' => $b['number'],
+                        'name' => $b['name'] ?? '',
+                    ]);
+                }
+            }
+        }
 
         return redirect()->route('branch.index')->with('success','Successfully updated branch!');
     }
