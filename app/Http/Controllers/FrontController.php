@@ -134,21 +134,32 @@ public function contact_us(Request $request)
 
     public function applicant(Request $request, Page $page)
     {
-        $emailReceiver = 'wsiprod.demo@gmail.com';
-        $applicant = $request->all();
-        $resume = $request->resume;
-//        $applicant['resume'] = null;
 
-//        if ($request->hasFile('resume')) {
-//            $fileName = $request->resume;
-//
-//            $path = Storage::disk('public')->putFileAs('resume', $request->resume , $fileName);
-//            $applicant['resume'] = Storage::disk('public')->url($path);
-//        }
+        try {
+            $request->validate([
+                'g-recaptcha-response' => ['required', new \App\Rules\RecaptchaRule()],
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+                'contact' => 'required|string|max:255',
+                'resume' => 'required|file|mimes:pdf,doc,docx|max:5120', // 5MB max
+                'message' => 'nullable',
+            ]);
 
-        Mail::to($emailReceiver)->send(new CareerMail(Setting::info(), $applicant, $resume));
+            $emailReceiver = 'wsiprod.demo@gmail.com';
+            $applicant = $request->all();
+            $resume = $request->resume;
 
-        return redirect()->back()->with('application-success','Your application has been sent!');
+            Mail::to($emailReceiver)->send(new CareerMail(Setting::info(), $applicant, $resume));
+
+            return redirect()->to(url()->previous())->with('success', 'Your application has been sent!');
+        } catch (ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->errors())
+                ->withInput()
+                ->with('error', true);
+        } catch (\Exception $e) {
+            return redirect()->to(url()->previous())->withInput()->with('error', 'Something went wrong. Please try again later.');
+        }
     }
 
     public function show_sales_summary($id)

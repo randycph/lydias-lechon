@@ -27,37 +27,89 @@
             
                 <div class="bg-white p-6 lg:px-20 lg:py-16 order-2 lg:order-1 w-full lg:w-1/2">
                     <h3 class="text-primary text-2xl lg:text-3xl font-cubao font-medium uppercase mb-4">Apply Now</h3>
-                    <form class="space-y-4">
+
+                    @if(session('success'))
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                            <strong class="font-bold">Success!</strong>
+                            <span class="block sm:inline">{{ session('success') }}</span>
+                        </div>
+                    @endif
+
+                    @if(session('error') || $errors->any())
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                            <strong class="font-bold">Error!</strong>
+                            <span class="block sm:inline">
+                                {{ session('error') ?? 'Please correct the errors below and try again.' }}
+                            </span>
+                        </div>
+                    @endif
+
+                    <form role="form" class="space-y-4"  action="{{ route('applicant') }}" method="POST" enctype="multipart/form-data">
+                        @csrf
                         <div>
                             <div class="mb-5">
                                 <label for="name" class="block mb-2 font-bold text-gray-900">Full Name <span class="text-red-800">*</span> </label>
                                 <input type="tel" id="name"
+                                    name="name"
                                     class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                     placeholder="" required />
+                                @error('name')
+                                    <div class="text-red-500 mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="mb-5">
                                 <label for="email" class="block mb-2 font-bold text-gray-900">Email Address <span class="text-red-800">*</span></label>
                                 <input type="email" id="email"
+                                    name="email"
                                     class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                     placeholder="" />
+                                @error('email')
+                                    <div class="text-red-500 mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="mb-5">
                                 <label for="tel" class="block mb-2 font-bold text-gray-900">Contact Number <span class="text-red-800">*</span></label>
                                 <input type="tel" id="tel"
+                                    name="contact"
                                     class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                     placeholder="" />
+                                @error('contact')
+                                    <div class="text-red-500 mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="mb-5">
+                                <label for="message" class="block mb-2 font-bold text-gray-900">Message </label>
+                                <textarea id="message"
+                                    name="message"
+                                    rows="5"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                                    placeholder=""> </textarea>
+                                @error('message')
+                                    <div class="text-red-500 mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
     
                             <div class="mb-5">
-                                <label for="file" class="block mb-2 font-bold text-gray-900">Upload your CV <span class="text-red-800">*</span></label>
+                                <label for="resume" class="block mb-2 font-bold text-gray-900">Upload your CV <span class="text-red-800">*</span></label>
                                 <div class="flex">
-                                    <input type="text" class="flex-1 border border-gray-300 rounded-l px-4 py-2.5 focus:outline-none" readonly>
+                                    <input type="file" name="resume" id="resume" accept="application/pdf" class="flex-1 border border-gray-300 rounded-l px-4 py-2.5 focus:outline-none" readonly>
                                     <label class="bg-tertiary hover:bg-secondary text-white px-4 py-2 cursor-pointer flex items-center rounded-r">
                                         Choose File
                                         <input type="file" class="hidden">
                                     </label>
                                 </div>
+
+                                @error('resume')
+                                    <div class="text-red-500 mt-1">{{ $message }}</div>
+                                @enderror
                             </div>
+                            
+                            <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+                            <div class="g-recaptcha" data-sitekey="6LcQlLoZAAAAACFNGgNr2u7TXJrxCZyWA2Xk1QQ4"></div>
+
+                            @error('g-recaptcha-response')
+                                <div class="text-red-500 mt-1">{{ $message }}</div>
+                            @enderror
                         </div>
             
                         <button type="submit"
