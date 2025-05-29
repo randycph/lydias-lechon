@@ -47,7 +47,7 @@
         openCart: false, 
         marketingPopup: false, 
         openHotline: false,
-        openContactUs: false,
+        openContactUs: {{ (session('form_success') || session('form_error') || session('contact_form_has_error')) ? 'true' : 'false' }},
         addedToCart: false,
         lechonCart: false,
         addToCart() {

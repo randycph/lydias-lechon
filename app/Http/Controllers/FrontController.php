@@ -26,7 +26,9 @@ use Illuminate\Http\Request;
 use App\Http\Requests\PagePost;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class FrontController extends Controller
 {
@@ -91,8 +93,17 @@ class FrontController extends Controller
         return view('theme.'.config('app.frontend_template').'.page', compact('footer', 'page', 'parentPage','breadcrumb'));
     }
 
-    public function contact_us(ContactUsRequest $request)
-    {
+public function contact_us(Request $request)
+{
+    try {
+        $request->validate([
+            'g-recaptcha-response' => ['required', new \App\Rules\RecaptchaRule()],
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'contact' => 'required|string|max:255',
+            'message' => 'required|string|max:5000',
+        ]);
+
         $client = $request->all();
 
         Mail::to($client['email'])->send(new InquiryMail(Setting::info(), $client));
@@ -101,8 +112,16 @@ class FrontController extends Controller
 
         Mail::to(Setting::info()->email)->send(new InquiryAdminMail(Setting::info(), $client, $admin));
 
-        return redirect()->back()->with('success','Email sent!');
+        return redirect()->to(url()->previous())->with('form_success', 'Email sent!');
+    } catch (ValidationException $e) {
+        return redirect()->back()
+            ->withErrors($e->errors())
+            ->withInput()
+            ->with('contact_form_has_error', true);
+    } catch (\Exception $e) {
+        return redirect()->to(url()->previous())->withInput()->with('form_error', 'Something went wrong. Please try again later.');
     }
+}
 
     // ==========================
 
