@@ -29,6 +29,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 Route::group(['prefix' => 'v2'], function () {
     Route::get('/home', function () {
@@ -417,7 +418,7 @@ Route::post('/signup-store', function(Request $request) {
                 'password' => Hash::make($request->password),
                 'email' => $request->email,
                 'organization' => $request->org_name,
-                'address_street' => $request->address,
+                'address_street' => $request->address_street,
                 'address_municipality' => $request->address_municipality,
                 'country' => $request->country,
                 'address_city' => $request->address_city,
@@ -445,7 +446,7 @@ Route::post('/signup-store', function(Request $request) {
                 'email' => $request->email,
                 'birthday' => $request->birth_date,
                 'country' => $request->country,
-                'address_street' => $request->address,
+                'address_street' => $request->address_street,
                 'address_municipality' => $request->address_municipality,
                 'address_city' => $request->address_city,
                 'address_region' => $request->address_region,
