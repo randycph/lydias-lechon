@@ -8,7 +8,7 @@
     @php
         $approval_code = '';
         if($payment->status == 'PAID'){
-            $payment_approval = \App\Approvals::where('reference_id',$payment->sales_header_id)->where('approval_type','Payment')->first();
+        $payment_approval = \App\Models\Approvals::where('reference_id',$payment->sales_header_id)->where('approval_type','Payment')->first();
             if($payment_approval){
                 $approval_code = '<br>('.$payment_approval->approval_code.')';
             }
