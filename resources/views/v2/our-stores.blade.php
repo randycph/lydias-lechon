@@ -57,6 +57,7 @@ x-data="{
 
 <div class="bg-cream">
     <div class="px-4 pt-16 container ">
+        @if ($headOffices && count($headOffices) > 0)
         <h2 class="text-3xl lg:text-7xl font-cubao font-medium text-primary text-center">Head Office</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-10">
@@ -157,6 +158,7 @@ x-data="{
                 @endforeach
             @endif
         </div>
+        @endif
 
         @if ($outlets && count($outlets) > 0)
 
