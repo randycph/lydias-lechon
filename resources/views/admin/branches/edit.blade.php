@@ -143,7 +143,15 @@
                                     <tbody id="branchNumbersTableBody">
                                         @foreach($branches->numbers as $i => $number)
                                         <tr>
-                                            <td><input type="text" name="branches[{{ $i }}][type]" class="form-control my-2" value="{{ $number->type }}" required></td>
+                                            <td>
+                                                <select name="branches[{{ $i }}][type]" class="form-control my-2" required>
+                                                    <option value="Mobile" @if($number->type=='Mobile') selected="selected" @endif>Mobile</option>
+                                                    <option value="Phone" @if($number->type=='Phone') selected="selected" @endif>Phone</option>
+                                                    <option value="Fax" @if($number->type=='Fax') selected="selected" @endif>Fax</option>
+                                                    <option value="Email" @if($number->type=='Email') selected="selected" @endif>Email</option>
+                                                    <option value="Hotline" @if($number->type=='Hotline') selected="selected" @endif>Hotline</option>
+                                                </select>
+                                            </td>
                                             <td><input type="text" name="branches[{{ $i }}][number]" class="form-control my-2" value="{{ $number->number }}" required></td>
                                             <td><input type="text" name="branches[{{ $i }}][name]" class="form-control my-2" value="{{ $number->name }}"></td>
                                             <td><button type="button" class="btn btn-sm btn-danger removeBranchRow">Delete</button></td>
@@ -165,7 +173,8 @@
                                         <option value="Hotline">Hotline</option>
                                     </select>
                                 </td>
-                                <td><input type="text" name="branches[][number]" class="form-control my-2" required placeholder="09171584569 or +639158123600"></td>
+                                <td>
+                                    <input type="text" name="branches[][number]" class="form-control my-2" required placeholder="09171584569 or +639158123600"></td>
                                 <td><input type="text" name="branches[][name]" class="form-control my-2" placeholder="Globe"></td>
                                 <td><button type="button" class="btn btn-sm btn-danger removeBranchRow">Delete</button></td>
                             </tr>

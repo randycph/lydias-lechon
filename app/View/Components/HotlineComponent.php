@@ -2,6 +2,7 @@
 
 namespace App\View\Components;
 
+use App\EcommerceModel\Branch;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
@@ -21,6 +22,12 @@ class HotlineComponent extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.hotline-component');
+        $headOffices = Branch::where('is_head_office', 1)->get();
+        $branches = Branch::with('numbers')->where('is_head_office', 0)->get();
+
+        return view('components.hotline-component', [
+            'branches' => $branches,
+            'headOffices' => $headOffices,
+        ]);
     }
 }

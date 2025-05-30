@@ -60,7 +60,8 @@ class BranchController extends Controller
         if ($request->has('branches')) {
             foreach ($request->branches as $b) {
                 if (!empty($b['type']) && !empty($b['number'])) {
-                    $branch->numbers()->create([
+                    BranchNumbers::create([
+                        'branch_id' => $branch->id,
                         'type' => $b['type'],
                         'number' => $b['number'],
                         'name' => $b['name'] ?? '',
@@ -89,7 +90,7 @@ class BranchController extends Controller
     {
         $branch = Branch::findOrFail($id);
 
-        Branch::findOrFail($id)->update([
+        $branch->update([
             'name' => $request->name,
             'code' => $request->code,
             'address' => $request->address,
@@ -113,7 +114,8 @@ class BranchController extends Controller
         if ($request->has('branches')) {
             foreach ($request->branches as $b) {
                 if (!empty($b['type']) && !empty($b['number'])) {
-                    $branch->numbers()->create([
+                    BranchNumbers::create([
+                        'branch_id' => $branch->id,
                         'type' => $b['type'],
                         'number' => $b['number'],
                         'name' => $b['name'] ?? '',

@@ -46,7 +46,13 @@ Route::group(['prefix' => 'v2'], function () {
         return view('v2.our-story');
     })->name('our-story');
     Route::get('/our-stores', function () {
-        return view('v2.our-stores');
+        $headOffices = Branch::where('is_head_office', 1)->get();
+        $branches = Branch::with('numbers')->where('is_head_office', 0)->get();
+        $outlets = Branch::where('branch_type', 'Restaurant')->where('is_head_office', 0)->get();
+        $malls = Branch::where('branch_type', 'Mall Based Foodcourtk')->where('is_head_office', 0)->get();
+        $kiosks = Branch::where('branch_type', 'Kiosk')->where('is_head_office', 0)->get();
+
+        return view('v2.our-stores', compact('headOffices', 'branches', 'outlets', 'malls', 'kiosks'));
     })->name('our-stores');
     Route::get('/lechon-pricelist', function () {
         $products = Product::with([
