@@ -70,10 +70,11 @@
                             </div>
                             <div class="flex flex-col">
                                 <div class="font-bold">{{ $cart['name'] ?? $cart?->product?->name }}</div>
+                                <div class="text-sm  text-gray-600 font-medium">Price: ₱{{ number_format($cart['price'], 2) }}</div>
                                 <div class="text-sm  text-gray-600 font-medium">QTY: {{ $cart['qty'] }}</div>
                             </div>
                             <div class="text-sm lg:text-base text-black font-bold text-right w-full absolute right-0 bottom-0">
-                                ₱{{ number_format($cart['price'], 2) }}
+                                ₱{{ number_format($cart['price'] * $cart['qty'], 2) }}
                             </div>
                         </div>
                         @endforeach
