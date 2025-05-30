@@ -18,7 +18,7 @@
 
     <div class="flex flex-col gap-5 px-8 lg:px-10 py-12 lg:py-20 max-w-4xl mx-auto">
         <p>
-            Over 50 years ago, Lydia’s Lechon began as a small stall in Baclaran, serving what would become the most iconic roast lechon in Manila. From humble beginnings to over 20 stores today, our mission has stayed true: <strong>to bring joy, tradition, and the best-tasting lechon to every Filipino home.</strong>
+            Over 60 years ago, Lydia’s Lechon began as a small stall in Baclaran, serving what would become the most iconic roast lechon in Manila. From humble beginnings to over 20 stores today, our mission has stayed true: <strong>to bring joy, tradition, and the best-tasting lechon to every Filipino home.</strong>
         </p>
         <p>
             Our lechon is more than just food—it’s a symbol of celebration. Whether it’s a birthday, fiesta, or simple family dinner, Lydia’s Lechon has been the centerpiece of countless special moments for generations.
