@@ -34,7 +34,7 @@ class ForecasterController extends Controller
 
     public function show_deliveries(Request $request)
     {
-        $params = Input::all();
+        $params = $request->all();
 
         return $this->index($params);
     }
