@@ -51,13 +51,13 @@
                             <div class="flex flex-col items-center gap-8 px-4 py-3 border-b border-[#DFDFDF] w-full">
                                 @php
                                     $total = 0;
+                                    $fee = $sale->delivery_type == 'Door to door delivery' ? $sale->delivery_fee_amount : 0;
                                 @endphp
                                 
                                 @foreach ($sale->items as $cart)
                                     @php
                                         $itemTotal = $cart->price * $cart->qty;
-                                        $fee = $sale->delivery_type == 'Door to door delivery' ? $sale->delivery_fee_amount : 0;
-                                        $total += $itemTotal + $fee;
+                                        $total += $itemTotal;
 
                                         $amountPaid = ($sale->payments && count($sale->payments) > 0) ? $sale->payments->sum('amount') : 0;
                                         $balance = $total - $amountPaid;
@@ -74,6 +74,10 @@
                                         <div class="text-sm text-black font-bold text-right w-full absolute right-0 bottom-0">₱{{ number_format($itemTotal, 2) }}</div>
                                     </div>
                                 @endforeach
+
+                                @php
+                                    $total += $fee;
+                                @endphp
             
                                 <div class="flex items-center justify-between w-full mt-4">
                                     <div class="text-sm text-black font-bold">{{ count($sale->items) }} items</div>

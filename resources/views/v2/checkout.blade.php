@@ -82,12 +82,12 @@
     
                     <!-- Coupon Code Section -->
                     <div class="bg-white rounded-md mt-2 text-sm">
-                        <div class="flex items-center border mx-3 border-gray-200 rounded-md overflow-hidden">
+                        {{-- <div class="flex items-center border mx-3 border-gray-200 rounded-md overflow-hidden">
                             <input x-model="couponCode" type="text" placeholder="Have a coupon code?"
                                 class="w-full p-3 outline-none border-none text-gray-700">
                             <button @click="submitCouponCode" type="button" class="bg-primary hover:bg-primary-dark text-white px-6 py-3 text-sm">Apply</button>
                         </div>
-                        <div x-show="showMessage" class="text-[#28A745] mx-5 py-2">Voucher code successfully applied.</div>
+                        <div x-show="showMessage" class="text-[#28A745] mx-5 py-2">Voucher code successfully applied.</div> --}}
     
                         <!-- Subtotal Section -->
                         <div class="border-t border-gray-200 mt-2 pt-3 pb-1 gap-1 flex flex-col text-sm lg:text-base px-3">
