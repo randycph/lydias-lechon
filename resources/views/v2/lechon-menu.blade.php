@@ -17,7 +17,7 @@
                 this.product = product;
                 this.addons = [];
                 this.lechonCart = true;
-                this.quantity = 1,
+                this.quantity = 1
             },
             close() {
                 this.lechonCart = false;
