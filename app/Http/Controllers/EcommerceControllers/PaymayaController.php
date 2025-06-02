@@ -257,7 +257,7 @@ class PaymayaController extends Controller
 
         if ($sale && $sale->discount_amount > 0) {
             $discount = $sale->discount_amount;
-            $amount = (float) $amount - (float) $sale->discount_amount;
+            $amount = (float) $amount;
             $discount = (float) $sale->discount_amount;
         }
 
@@ -273,7 +273,7 @@ class PaymayaController extends Controller
                     "serviceCharge" => 0,
                     "shippingFee" => $deliveryFee,
                     "tax" => 0,
-                    "subtotal" => $subtotal + $discount
+                    "subtotal" => $subtotal
                 ]
             ],
             "buyer" => [

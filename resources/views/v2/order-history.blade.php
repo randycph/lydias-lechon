@@ -56,7 +56,7 @@
                                 
                                 @foreach ($sale->items as $cart)
                                     @php
-                                        $itemTotal = $cart->price * $cart->qty;
+                                        $itemTotal = $cart->net_amount;
                                         $total += $itemTotal;
 
                                         $amountPaid = ($sale->payments && count($sale->payments) > 0) ? $sale->payments->sum('amount') : 0;
