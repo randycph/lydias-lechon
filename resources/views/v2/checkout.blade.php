@@ -330,7 +330,7 @@
                                     </div>
                                 </div>
                             </template>
-                            <template x-if="!allowMultiple">
+                            <template x-if="!allowMultiple && method === 'delivery'">
                                 <div>
                                     <div class="w-full">
                                         <label for="delivery_address"

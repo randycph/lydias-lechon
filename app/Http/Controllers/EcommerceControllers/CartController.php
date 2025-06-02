@@ -708,9 +708,9 @@ class CartController extends Controller
         $totalPrice = $request->total_amount;
         $discount = 0;
         if ($request->coupon && $request->discount_amount) {
-            $totalPrice = $totalPrice - $request->discount_amount;
-            $discount = $request->discount_amount;
-            $deposit = $deposit - $request->discount_amount;
+            $totalPrice = (float) $totalPrice - (float) $request->discount_amount;
+            $discount = (float) $request->discount_amount;
+            $deposit = (float) $deposit - (float) $request->discount_amount;
         }
         $ran = microtime();
         $today = getdate();
