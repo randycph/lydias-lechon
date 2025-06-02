@@ -176,6 +176,14 @@
                         </div>
                     </div>
                     @endif
+                    @if ($sales->discount_amount > 0)
+                    <div class="flex items-center text-sm justify-between px-4 py-3 border-b border-gray-200">
+                        <div>Discount</div>
+                        <div class="text-right text-red-500 italic">
+                            <div>-₱{{ number_format($sales->discount_amount, 2) }}</div>
+                        </div>
+                    </div>
+                    @endif
                     {{-- <div class="flex items-center text-sm justify-between px-4 py-3 border-b border-gray-200">
                         <div>Coupon (lydiaslechon25)</div>
                         <div class="text-right">
@@ -185,7 +193,7 @@
                     <div class="flex items-center text-sm justify-between px-4 py-4 border-b border-gray-200">
                         <div>Total</div>
                         <div class="text-right font-bold">
-                            <div>₱{{ number_format($sales->gross_amount, 2) }}</div>
+                            <div>₱{{ number_format($sales->net_amount, 2) }}</div>
                         </div>
                     </div>
                 </div>
@@ -237,7 +245,7 @@
                                 {{ $details->no_of_pax }}
                             </td>
                             <td class="px-6 py-4">
-                                {{ date('F d, Y H:i A',strtotime($details->delivery_date)) }}
+                                {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
                             </td>
                             <td class="px-6 py-4">
                                 {{ number_format($details->qty, 0) }}

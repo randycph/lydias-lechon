@@ -65,20 +65,29 @@
 				<div class="form-group">
 					<label class="d-block">Name *</label>
 					<input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name',$coupon->name) }}">
-					@hasError(['inputName' => 'name'])
-                    @endhasError
+					@error('name')
+						<span class="invalid-feedback" role="alert">
+							<strong>{{ $message }}</strong>
+						</span>
+					@enderror
 				</div>
 				<div class="form-group">
 					<label class="d-block">Description *</label>
 					<textarea name="description" rows="3" class="form-control @error('description') is-invalid @enderror">{{ old('description',$coupon->description) }}</textarea>
-					@hasError(['inputName' => 'description'])
-                    @endhasError
+					@error('description')
+						<span class="invalid-feedback" role="alert">
+							<strong>{{ $message }}</strong>
+						</span>
+					@enderror
 				</div>
 				<div class="form-group">
 					<label class="d-block">Terms and Conditions *</label>
 					<textarea name="terms_and_conditions" rows="3" class="form-control @error('terms_and_conditions') is-invalid @enderror">{{ old('terms_and_conditions',$coupon->terms_and_conditions) }}</textarea>
-					@hasError(['inputName' => 'terms_and_conditions'])
-                    @endhasError
+					@error('terms_and_conditions')
+						<span class="invalid-feedback" role="alert">
+							<strong>{{ $message }}</strong>
+						</span>
+					@enderror
 				</div>
 				<div class="form-group">
 					<label class="d-block">Distribution Type</label>
@@ -101,8 +110,11 @@
 					<div class="mb-3" id="coupon-code" style="display: @if(old('coupon_activation') == 'manual' || $coupon->activation_type == 'manual') block @else none @endif;">
 						<label class="d-block">Coupon Code</label>
 						<input type="text" name="code" class="form-control @error('code') is-invalid @enderror" value="{{ old('code',$coupon->coupon_code) }}">
-						@hasError(['inputName' => 'code'])
-                    	@endhasError
+						@error('code')
+							<span class="invalid-feedback" role="alert">
+								<strong>{{ $message }}</strong>
+							</span>
+						@enderror
 					</div>
 				</div>
 				<div class="form-group">
@@ -133,8 +145,11 @@
 								<option @if($coupon->scope_customer_id == $customer->id) selected @endif value="{{$customer->id}}">{{ $customer->name }}</option>
 							@endforeach
 						</select>
-						@hasError(['inputName' => 'customer'])
-                    	@endhasError
+						@error('customer')
+							<span class="invalid-feedback" role="alert">
+								<strong>{{ $message }}</strong>
+							</span>
+						@enderror
 					</div>
 				</div>
 				<div class="form-group">
@@ -145,8 +160,11 @@
 						<option @if(isset($coupon->percentage)) selected @endif value="discount-percentage-optn">Discount Percentage</option>
 						<option @if(isset($coupon->free_product_id)) selected @endif value="free-product-optn">Free Product/Gift</option>
 					</select>
-					@hasError(['inputName' => 'reward'])
-                    @endhasError
+					@error('reward')
+						<span class="invalid-feedback" role="alert">
+							<strong>{{ $message }}</strong>
+						</span>
+					@enderror
 				</div>
 
 				@php
@@ -166,8 +184,11 @@
 								<option @if(in_array($location->name,$arr_loc)) selected @endif value="{{$location->name}}">{{ $location->name }}</option>
 							@endforeach
 						</select>
-						@hasError(['inputName' => 'location'])
-                    	@endhasError
+						@error('location')
+							<span class="invalid-feedback" role="alert">
+								<strong>{{ $message }}</strong>
+							</span>
+						@enderror
 
 						<br><br>
 						<label class="d-block">Discount Type</label>
@@ -188,23 +209,31 @@
 
 						<label class="mg-t-10" id="discount_amount_label" style="display: @if($coupon->location_discount_type == 'full') none @else block @endif;">Shipping Fee Discount Amount</label>
 						<input type="number" name="shipping_fee_discount_amount" class="form-control @error('shipping_fee_discount_amount') is-invalid @enderror" id="discount_amount_input" value="{{ $coupon->location_discount_amount }}" style="display: @if($coupon->location_discount_type == 'full') none @else block @endif;">
-						@hasError(['inputName' => 'shipping_fee_discount_amount'])
-                    	@endhasError
-
+						@error('shipping_fee_discount_amount')
+							<span class="invalid-feedback" role="alert">
+								<strong>{{ $message }}</strong>
+							</span>
+						@enderror
 					</div>
 
 					<div class="mb-3 reward-option" id="discount-amount-optn" style="display:@if(isset($coupon->amount)) block @else none @endif">
 						<label class="d-block">Discount Amount</label>
 						<input name="discount_amount" type="number" class="form-control @error('discount_amount') is-invalid @enderror" value="{{ $coupon->amount }}" placeholder="Php">
-						@hasError(['inputName' => 'discount_amount'])
-                    	@endhasError
+						@error('discount_amount')
+							<span class="invalid-feedback" role="alert">
+								<strong>{{ $message }}</strong>
+							</span>
+						@enderror
 					</div>
 
 					<div class="mb-3 reward-option" id="discount-percentage-optn" style="display:@if(isset($coupon->percentage)) block @else none @endif">
 						<label class="d-block">Discount Percentage</label>
 						<input name="discount_percentage" type="number" class="form-control @error('discount_percentage') is-invalid @enderror" value="{{ $coupon->percentage }}" placeholder="%">
-						@hasError(['inputName' => 'discount_percentage'])
-                    	@endhasError
+						@error('discount_percentage')
+							<span class="invalid-feedback" role="alert">
+								<strong>{{ $message }}</strong>
+							</span>
+						@enderror
 					</div>
 
 					<div id="div_product_amount" style="display: @if(isset($coupon->amount) || isset($coupon->percentage)) block @else none @endif;">
@@ -262,8 +291,11 @@
 								<option @if($coupon->free_product_id == $product->id) selected @endif value="{{$product->id}}">{{ $product->name }}</option>
 							@endforeach
 						</select>
-						@hasError(['inputName' => 'free_product_id'])
-                    	@endhasError
+						@error('free_product_id')
+							<span class="invalid-feedback" role="alert">
+								<strong>{{ $message }}</strong>
+							</span>
+						@enderror
 					</div>
 					<hr>
 				</div>

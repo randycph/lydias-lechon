@@ -217,7 +217,7 @@ class PaymayatestController extends Controller
         return json_decode($response, true);
     }
 
-    public function postdata($id,$amount, $payment){
+    public function postdata($id, $amount, $payment){
         $sale = SalesHeader::find($id);
 
         $items = [];
@@ -250,6 +250,17 @@ class PaymayatestController extends Controller
                 ]
             ];
         }
+
+        $salesHeader = SalesHeader::whereId($id)->with(['items'])->first();
+
+        $discount = 0;
+
+        if ($salesHeader && $salesHeader->discount_amount > 0) {
+            $discount = $salesHeader->discount_amount;
+            $amount = (float) $amount - (float) $salesHeader->discount_amount;
+            $discount = (float) $salesHeader->discount_amount;
+        }
+
         $amount = (float) $amount;
         $deliveryFee = (float) $sale->delivery_fee_amount ?? 0;
         $subtotal = $amount - $deliveryFee;
@@ -258,11 +269,11 @@ class PaymayatestController extends Controller
                 "value" => (float) $amount,
                 "currency" => "PHP",
                 "details" => [
-                    "discount" => 0,
+                    "discount" => $discount,
                     "serviceCharge" => 0,
                     "shippingFee" => $deliveryFee,
                     "tax" => 0,
-                    "subtotal" => $subtotal
+                    "subtotal" => $subtotal + $discount
                 ]
             ],
             "buyer" => [

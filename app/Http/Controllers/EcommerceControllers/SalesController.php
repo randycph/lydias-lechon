@@ -1100,138 +1100,138 @@ class SalesController extends Controller
         if(auth()->user()->role_id == 15){
             $userName = Auth::user()->name;
 
-// Step 1: SalesHeader
-$salesHeaders = SalesHeader::with(['user', 'items', 'deliveryAddress', 'deliveryStatuses'])
-    ->whereHas('deliveryStatuses', function ($q) use ($userName) {
-        $q->where('delivered_by', $userName);
-    })
-    ->get()
-    ->map(function ($sale) {
-        return [
-            'type' => 'sales',
-            'id' => $sale->id,
-            'delivery_status' => optional($sale->deliveryStatuses->last())->status,
-            'status' => $sale->status,
-            'customer_name' => $sale->customer_name,
-            'date_needed' => optional($sale->items->first())->delivery_date,
-            'qty' => optional($sale->items->first())->qty,
-            'product_id' => optional($sale->items->first())->product_id,
-            'price' => optional($sale->items->first())->price,
-            'delivery_type' => $sale->delivery_type,
-            'trashed' => $sale->trashed() ? true : false,
-            'order_number' => $sale->order_number,
-            'created_at' => $sale->created_at,
-            'order_source' => $sale->order_source,
-            'isConfirm' => $sale->isConfirm,
-            'gross_amount' => $sale->gross_amount,
-            'delivery_address' => $sale->deliveryAddress,
-        ];
-    });
+        // Step 1: SalesHeader
+        $salesHeaders = SalesHeader::with(['user', 'items', 'deliveryAddress', 'deliveryStatuses'])
+            ->whereHas('deliveryStatuses', function ($q) use ($userName) {
+                $q->where('delivered_by', $userName);
+            })
+            ->get()
+            ->map(function ($sale) {
+                return [
+                    'type' => 'sales',
+                    'id' => $sale->id,
+                    'delivery_status' => optional($sale->deliveryStatuses->last())->status,
+                    'status' => $sale->status,
+                    'customer_name' => $sale->customer_name,
+                    'date_needed' => optional($sale->items->first())->delivery_date,
+                    'qty' => optional($sale->items->first())->qty,
+                    'product_id' => optional($sale->items->first())->product_id,
+                    'price' => optional($sale->items->first())->price,
+                    'delivery_type' => $sale->delivery_type,
+                    'trashed' => $sale->trashed() ? true : false,
+                    'order_number' => $sale->order_number,
+                    'created_at' => $sale->created_at,
+                    'order_source' => $sale->order_source,
+                    'isConfirm' => $sale->isConfirm,
+                    'gross_amount' => $sale->gross_amount,
+                    'delivery_address' => $sale->deliveryAddress,
+                ];
+            });
 
-// Step 2: JobOrders
-$jobOrderIds = DeliveryStatus::where('delivered_by', $userName)
-    ->whereNotNull('job_order_id')
-    ->distinct()
-    ->pluck('job_order_id');
+        // Step 2: JobOrders
+        $jobOrderIds = DeliveryStatus::where('delivered_by', $userName)
+            ->whereNotNull('job_order_id')
+            ->distinct()
+            ->pluck('job_order_id');
 
-$jobOrders = JobOrder::with('deliveryStatuses')
-    ->whereIn('id', $jobOrderIds)
-    ->get()
-    ->map(function ($job) {
-        return [
-            'type' => 'job',
-            'id' => $job->id,
-            'delivery_status' => optional($job->deliveryStatuses->last())->status,
-            'status' => $job->status,
-            'customer_name' => $job->customer_name,
-            'date_needed' => $job->date_needed,
-            'qty' => $job->qty,
-            'product_id' => $job->product_id,
-            'price' => $job->price,
-            'delivery_type' => $job->delivery_method,
-            'trashed' => $job->trashed() ? true : false,
-            'order_number' => $job->jo_number,
-            'created_at' => $job->created_at,
-            'order_source' => 'NA',
-            'isConfirm' => null,
-            'gross_amount' => ($job->price * $job->qty) + ($job->paella_price * $job->paella_qty),
-            'delivery_address' => [],
-        ];
-    });
+        $jobOrders = JobOrder::with('deliveryStatuses')
+            ->whereIn('id', $jobOrderIds)
+            ->get()
+            ->map(function ($job) {
+                return [
+                    'type' => 'job',
+                    'id' => $job->id,
+                    'delivery_status' => optional($job->deliveryStatuses->last())->status,
+                    'status' => $job->status,
+                    'customer_name' => $job->customer_name,
+                    'date_needed' => $job->date_needed,
+                    'qty' => $job->qty,
+                    'product_id' => $job->product_id,
+                    'price' => $job->price,
+                    'delivery_type' => $job->delivery_method,
+                    'trashed' => $job->trashed() ? true : false,
+                    'order_number' => $job->jo_number,
+                    'created_at' => $job->created_at,
+                    'order_source' => 'NA',
+                    'isConfirm' => null,
+                    'gross_amount' => ($job->price * $job->qty) + ($job->paella_price * $job->paella_qty),
+                    'delivery_address' => [],
+                ];
+            });
 
-// Step 3: Merge collections
-$merged = $salesHeaders->merge($jobOrders);
+        // Step 3: Merge collections
+        $merged = $salesHeaders->merge($jobOrders);
 
-// Step 4: Apply filters
-$search      = request()->get('search');
-$deliveryType = request()->get('delivery_type');
-$startDate   = request()->get('start_date');
-$endDate     = request()->get('end_date');
-$orderBy     = request()->get('orderBy', 'date_needed');
-$sortBy      = request()->get('sortBy', 'desc');
-$dateneededStart  = request()->get('dn_start_date');
-$dateneededEnd = request()->get('dn_end_date');
-$perPage     = 20;
+        // Step 4: Apply filters
+        $search      = request()->get('search');
+        $deliveryType = request()->get('delivery_type');
+        $startDate   = request()->get('start_date');
+        $endDate     = request()->get('end_date');
+        $orderBy     = request()->get('orderBy', 'date_needed');
+        $sortBy      = request()->get('sortBy', 'desc');
+        $dateneededStart  = request()->get('dn_start_date');
+        $dateneededEnd = request()->get('dn_end_date');
+        $perPage     = 20;
 
-// Apply search
-if ($search) {
-    $merged = $merged->filter(function ($item) use ($search) {
-        return Str::contains($item['order_number'], $search);
-    });
-}
+        // Apply search
+        if ($search) {
+            $merged = $merged->filter(function ($item) use ($search) {
+                return Str::contains($item['order_number'], $search);
+            });
+        }
 
-// Apply delivery_type filter
-if ($deliveryType) {
-    $merged = $merged->where('delivery_type', $deliveryType);
-}
+        // Apply delivery_type filter
+        if ($deliveryType) {
+            $merged = $merged->where('delivery_type', $deliveryType);
+        }
 
-// Apply date range filter
-if ($startDate) {
-    $start = Carbon::parse($startDate)->startOfDay();
-    $merged = $merged->filter(fn ($item) =>
-        Carbon::parse($item['created_at'])->gte($start)
-    );
-}
+        // Apply date range filter
+        if ($startDate) {
+            $start = Carbon::parse($startDate)->startOfDay();
+            $merged = $merged->filter(fn ($item) =>
+                Carbon::parse($item['created_at'])->gte($start)
+            );
+        }
 
-if ($endDate) {
-    $end = Carbon::parse($endDate)->addDay()->startOfDay();
-    $merged = $merged->filter(fn ($item) =>
-        Carbon::parse($item['created_at'])->lt($end)
-    );
-}
+        if ($endDate) {
+            $end = Carbon::parse($endDate)->addDay()->startOfDay();
+            $merged = $merged->filter(fn ($item) =>
+                Carbon::parse($item['created_at'])->lt($end)
+            );
+        }
 
-// Apply date needed range filter
-if ($dateneededStart) {
-    $start = Carbon::parse($dateneededStart)->startOfDay();
-    $merged = $merged->filter(fn ($item) =>
-        Carbon::parse($item['date_needed'])->gte($start)
-    );
-}
+        // Apply date needed range filter
+        if ($dateneededStart) {
+            $start = Carbon::parse($dateneededStart)->startOfDay();
+            $merged = $merged->filter(fn ($item) =>
+                Carbon::parse($item['date_needed'])->gte($start)
+            );
+        }
 
-if ($dateneededEnd) {
-    $end = Carbon::parse($dateneededEnd)->addDay()->startOfDay();
-    $merged = $merged->filter(fn ($item) =>
-        Carbon::parse($item['date_needed'])->lt($end)
-    );
-}
+        if ($dateneededEnd) {
+            $end = Carbon::parse($dateneededEnd)->addDay()->startOfDay();
+            $merged = $merged->filter(fn ($item) =>
+                Carbon::parse($item['date_needed'])->lt($end)
+            );
+        }
 
-// Sort by requested column
-$merged = $sortBy === 'desc'
-    ? $merged->sortByDesc($orderBy)
-    : $merged->sortBy($orderBy);
+        // Sort by requested column
+        $merged = $sortBy === 'desc'
+            ? $merged->sortByDesc($orderBy)
+            : $merged->sortBy($orderBy);
 
-// Paginate manually
-$page = request()->get('page', 1);
-$paginated = new \Illuminate\Pagination\LengthAwarePaginator(
-    $merged->forPage($page, $perPage)->values(),
-    $merged->count(),
-    $perPage,
-    $page,
-    ['path' => request()->url(), 'query' => request()->query()]
-);
+        // Paginate manually
+        $page = request()->get('page', 1);
+        $paginated = new \Illuminate\Pagination\LengthAwarePaginator(
+            $merged->forPage($page, $perPage)->values(),
+            $merged->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
 
-// Return paginated to view
-$sales = $paginated;
+        // Return paginated to view
+        $sales = $paginated;
         }
 
         // dd($model);

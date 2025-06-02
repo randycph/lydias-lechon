@@ -97,7 +97,7 @@
                                 Contact number: {{ $address->contact_tel }}<br>
                                 Delivery fee: ₱{{ number_format($address->delivery_fee, 2) }}<br>
                                 Location: {{ $address->location }}<br>
-                                Delivery Date and time: {{ date('F d, Y H:i A', strtotime($address->delivery_date . ' ' . $address->delivery_time)) }}<br>
+                                Delivery Date and time: {{ \Carbon\Carbon::parse(strtotime($address->delivery_date . ' ' . $address->delivery_time)))->format('F d, Y g:i A') }}<br>
                             </li>
                             @endforeach
                             </ul>

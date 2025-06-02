@@ -67,10 +67,10 @@
                                     Contact number: {{ $address->contact_tel }}<br>
                                     Delivery fee: ₱{{ number_format($address->delivery_fee, 2) }}<br>
                                     Location: {{ $address->location }}<br>
-                                    Delivery Date and time: {{ date('F d, Y H:i A', strtotime($address->delivery_date . ' ' . $address->delivery_time)) }}<br>
+                                    Delivery Date and time: {{ \Carbon\Carbon::parse(strtotime($address->delivery_date . ' ' . $address->delivery_time)))->format('F d, Y g:i A') }}<br>
                                 </li>
                                 @endforeach
-                                </ul>
+                                </ul>Y-m-d H:i A
                                 @endif
                             @else
                                 {{$sales->customer_delivery_adress}}
@@ -137,6 +137,12 @@
                                 <tr>
                                     <td class="tx-left " colspan="7">Delivery Fee</td>
                                     <td class="tx-right ">{{number_format($sales->delivery_fee_amount, 2)}}</td>
+                                </tr>
+                            @endif
+                            @if ($sales->discount_amount > 0)
+                                <tr>
+                                    <td class="tx-left " colspan="7">Discount</td>
+                                    <td class="tx-right ">{{number_format($sales->discount_amount, 2)}}</td>
                                 </tr>
                             @endif
                             @forelse($gc as $g)

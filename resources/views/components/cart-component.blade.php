@@ -182,11 +182,11 @@ x-data="{
         
                             <!-- Coupon Code Section -->
                             <div class="bg-cream rounded-md mt-10 px-6">
-                                <div class="flex items-center border border-gray-200 rounded-md overflow-hidden">
+                                {{-- <div class="flex items-center border border-gray-200 rounded-md overflow-hidden">
                                     <input type="text" placeholder="Have a coupon code?" 
                                         class="w-full p-3 outline-none border-none text-gray-700">
                                     <button class="bg-primary hover:bg-primary-dark text-white px-6 py-3">Apply</button>
-                                </div>
+                                </div> --}}
         
                                 <!-- Subtotal Section -->
                                 <div class="border-t border-gray-200 mt-4 pt-4">

@@ -252,6 +252,15 @@ class PaymayaController extends Controller
                 ]
             ];
         }
+
+        $discount = 0;
+
+        if ($sale && $sale->discount_amount > 0) {
+            $discount = $sale->discount_amount;
+            $amount = (float) $amount - (float) $sale->discount_amount;
+            $discount = (float) $sale->discount_amount;
+        }
+
         $amount = (float) $amount;
         $deliveryFee = (float) $sale->delivery_fee_amount ?? 0;
         $subtotal = $amount - $deliveryFee;
@@ -260,11 +269,11 @@ class PaymayaController extends Controller
                 "value" => (float) $amount,
                 "currency" => "PHP",
                 "details" => [
-                    "discount" => 0,
+                    "discount" => $discount,
                     "serviceCharge" => 0,
                     "shippingFee" => $deliveryFee,
                     "tax" => 0,
-                    "subtotal" => $subtotal
+                    "subtotal" => $subtotal + $discount
                 ]
             ],
             "buyer" => [

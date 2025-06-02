@@ -197,6 +197,9 @@
                                     if($dateneeded > date('Y-m-d H:i:s')){
                                         $is_allowed_delivered = 1;
                                     }
+                                    if ($dateneeded != '') {
+                                        $dateneeded = \Carbon\Carbon::parse($date_needed)->format('Y-m-d H:i A');
+                                    }
                                 @endphp
                                 @php
                                 if ($sale['type'] == 'job') {
@@ -225,7 +228,7 @@
                                     </th>
                                     <td>{{ $sale['customer_name'] }}</td>
                                     <td>{{ $sale['order_source'] }}</td>
-                                    <td>{{ date('Y-m-d H:i A',strtotime($sale['created_at'])) }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($sale['created_at'])->format('Y-m-d H:i A') }}</td>
                                     <td>@if($sale['delivery_status'] <> 'Open Date'){{ $dateneeded }}@endif</td>
                                     <td>{{ $sale['delivery_type'] }}</td>
                                     <td>

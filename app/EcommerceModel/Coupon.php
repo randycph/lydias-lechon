@@ -119,4 +119,10 @@ class Coupon extends Model
 
         return $coupons;
     }
+
+    public function couponCarts()
+    {
+        return $this->hasMany(CouponCart::class);
+    }
+
 }

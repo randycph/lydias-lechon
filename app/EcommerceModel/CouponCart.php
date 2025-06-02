@@ -27,4 +27,14 @@ class CouponCart extends Model
 
     	return $count;
     }
+
+    public function coupon()
+    {
+        return $this->belongsTo(Coupon::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'customer_id');
+    }
 }

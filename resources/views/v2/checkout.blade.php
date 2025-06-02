@@ -82,12 +82,18 @@
     
                     <!-- Coupon Code Section -->
                     <div class="bg-white rounded-md mt-2 text-sm">
-                        {{-- <div class="flex items-center border mx-3 border-gray-200 rounded-md overflow-hidden">
-                            <input x-model="couponCode" type="text" placeholder="Have a coupon code?"
+                        <div class="flex items-center border mx-3 border-gray-200 rounded-md overflow-hidden">
+                            <input @input="couponCode = $event.target.value.toUpperCase()" x-model="couponCode" type="text" placeholder="Have a coupon code?"
                                 class="w-full p-3 outline-none border-none text-gray-700">
                             <button @click="submitCouponCode" type="button" class="bg-primary hover:bg-primary-dark text-white px-6 py-3 text-sm">Apply</button>
                         </div>
-                        <div x-show="showMessage" class="text-[#28A745] mx-5 py-2">Voucher code successfully applied.</div> --}}
+                        <div x-show="couponMessage" class="mx-5 py-2 text-sm"
+                            :class="{
+                                'text-green-600': couponMessageType === 'success',
+                                'text-red-600': couponMessageType === 'error'
+                            }"
+                            x-text="couponMessage">
+                        </div>
     
                         <!-- Subtotal Section -->
                         <div class="border-t border-gray-200 mt-2 pt-3 pb-1 gap-1 flex flex-col text-sm lg:text-base px-3">
@@ -112,8 +118,8 @@
                                 </div>
                             </template>
                             <div class="flex justify-between lg:mt-2" x-show="showMessage">
-                                <span class="font-medium text-red-700 italic">Coupon (<span x-text="couponCode"></span>) <span class="text-xs underline cursor-pointer" @click="removeCoupon">Remove Coupon</span></span>
-                                <span class="font-medium italic text-red-700">- ₱250.00</span>
+                                <span class="font-medium text-red-700 italic">Coupon (<span x-text="coupon?.code"></span>) <span class="text-xs underline cursor-pointer" @click="removeCoupon">Remove Coupon</span></span>
+                                <span class="font-medium italic text-red-700" x-text="'- ₱' + discountAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })""></span>
                             </div>
                         </div>
     
@@ -325,15 +331,29 @@
                                 </div>
                             </template>
                             <template x-if="!allowMultiple">
-                                <div class="">
-                                    <label for="delivery_address"
-                                    class="block mb-2 font-bold text-gray-900">Delivery Address <span
-                                        class="text-red-700">*</span></label>
-                                    <input type="text" id="delivery_address" name="delivery_address" x-model="delivery_address" value="{{ auth()->check() ? auth()->user()->address_street : '' }}"
-                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                                        placeholder="" />
-                                    <div x-show="noDeliveryAddress" class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
-                                        Please add delivery address
+                                <div>
+                                    <div class="w-full">
+                                        <label for="delivery_address"
+                                        class="block mb-2 font-bold text-gray-900">Delivery Address <span
+                                            class="text-red-700">*</span></label>
+                                        <input type="text" id="delivery_address" name="delivery_address" x-model="delivery_address" value="{{ auth()->check() ? auth()->user()->address_street : '' }}"
+                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                                            placeholder="" />
+                                        <div x-show="noDeliveryAddress" class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
+                                            Please add delivery address
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-4">	
+                                        <label for="locations" class="font-bold">Select Location <span
+                                                class="text-red-700">*</span></label>
+                                        <select id="locations" name="location" @change="getDeliveryFee" x-ref="location" required
+                                            class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                            <option selected value="">Choose a location</option>
+                                            @foreach ($locations as $location)
+                                                <option value="{{ $location->name }}">{{ $location->name }}</option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                 </div>
                             </template>
@@ -624,7 +644,6 @@
                 }
             ],
             allowMultiple: false,
-            couponCode: '',
             formEl: null,
             deliveryFee: 0,
             orderAmount: {{ $total }},
@@ -642,17 +661,68 @@
             hasErrorMessage: false,
             isSubmitting: false,
             isPaymentLoading: false,
+            coupon: null,
             noNeededTime: false,
             noNeededDate: false,
-            submitCouponCode() {
-                if (this.couponCode != '') {
-                    this.showMessage = true;
-                } else {
+            couponMessage: '',
+            couponMessageType: '',
+            async submitCouponCode() {
+                this.couponMessage = '';
+                this.couponMessageType = '';
+
+                const res = await fetch('{{ route('add-manual-coupon') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                    body: JSON.stringify({
+                        couponcode: this.couponCode,
+                    }),
+                });
+
+                const result = await res.json();
+
+                if (!result.success) {
+                    if (result.status === 'not_exist') {
+                        this.couponMessage = 'Coupon not found.';
+                    } else if (result.status === 'expired') {
+                        this.couponMessage = 'This coupon is already expired.';
+                    } else if (result.status === 'not_allowed') {
+                        this.couponMessage = 'You are not allowed to use this coupon.';
+                    } else if (result.status === 'limit_reached') {
+                        this.couponMessage = 'Coupon usage limit has been reached.';
+                    } else if (result.status === 'customer_limit_reached') {
+                        this.couponMessage = 'You have already used this coupon the maximum allowed times.';
+                    }
+
+                    this.couponMessageType = 'error';
+                    this.coupon = null;
+                    this.discountAmount = 0;
                     this.showMessage = false;
+                    return;
                 }
+
+                this.coupon = result.coupon;
+
+                // Calculate discount
+                if (this.coupon.discount_type === 'amount') {
+                    this.discountAmount = parseFloat(this.coupon.discount);
+                } else if (this.coupon.discount_type === 'percent') {
+                    this.discountAmount = (this.orderAmount * parseFloat(this.coupon.discount)) / 100;
+                }
+
+                this.discountAmount = Math.min(this.discountAmount, this.orderAmount);
+
+                this.showMessage = true;
+                this.couponMessage = 'Voucher code successfully applied.';
+                this.couponMessageType = 'success';
             },
+
             removeCoupon() {
                 this.couponCode = '';
+                this.coupon = null;
+                this.discountAmount = 0;
                 this.showMessage = false;
             },
 
@@ -725,7 +795,8 @@
 
                 // Add dynamic fields
                 formData.append('shipping_type', this.method);
-                formData.append('coupon', this.couponCode);
+                formData.append('coupon', this.coupon ? this.coupon?.code : null);
+                formData.append('discount_amount', this.coupon ? this.coupon.discount : null);
                 formData.append('delivery_fee', this.deliveryFee);
                 formData.append('order_amount', this.orderAmount);
                 formData.append('deposit', this.deposit);
@@ -802,7 +873,6 @@
                 const branch = this.$refs?.branch?.value;
 
                 if (location) {
-
                     try {
                         let response = await fetch('{{route('cart.front.get_shipping_fee')}}', {
                             method: 'POST',
@@ -831,6 +901,8 @@
                 }
             },
 
+            discountAmount: 0,
+
             computeTotal() {
                 if (this.method == 'pickup') {
                     this.deliveryFee = 0;
@@ -838,6 +910,10 @@
                 let total = parseFloat(this.orderAmount) + parseFloat(this.deliveryFee);
                 this.totalAmount = total;
                 this.deposit = this.totalAmount.toFixed(2);
+
+                if (this.coupon) {
+                    total -= this.discountAmount;
+                }
 
                 this.$nextTick(() => {
                     let input = this.$root.querySelector('input[name="deposit"]');

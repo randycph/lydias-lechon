@@ -706,6 +706,12 @@ class CartController extends Controller
             $outlet = '';
         }
         $totalPrice = $request->total_amount;
+        $discount = 0;
+        if ($request->coupon && $request->discount_amount) {
+            $totalPrice = $totalPrice - $request->discount_amount;
+            $discount = $request->discount_amount;
+            $deposit = $deposit - $request->discount_amount;
+        }
         $ran = microtime();
         $today = getdate();
         $requestId = $today[0].substr($ran, 2,6);
@@ -735,10 +741,10 @@ class CartController extends Controller
             'delivery_type' => $delivery_type,
             'delivery_fee_amount' => $request->shipping_type == 'pickup' ? 0 : $request->delivery_fee,
             'order_source' => 'Web',
-            'gross_amount' => $totalPrice,
+            'gross_amount' => $request->total_amount,
             'tax_amount' => 0,
             'net_amount' => $totalPrice,
-            'discount_amount' => 0,
+            'discount_amount' => $discount,
             'payment_status' => 'UNPAID',
             'delivery_status' => '',
             'status' => 'active',
