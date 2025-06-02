@@ -85,7 +85,7 @@
                                 </div>
             
                                 <div class="flex items-center justify-between w-full mt-4">
-                                    <div class="text-sm text-slate-500 font-bold">{{ \Carbon\Carbon::parse($sale->created_at)->format('m/d/Y h:i A') }}</div> 
+                                    <div class="text-sm text-slate-500 font-bold">{{ \Carbon\Carbon::parse($sale->created_at)->format('m/d/Y g:i A') }}</div> 
                                     <button class="text-sm text-primary uppercase font-bold flex gap-1 hover:underline" @click="viewMore{{ $index }} = !viewMore{{ $index }}; $event.stopPropagation()">
                                         VIEW ALL DETAILS
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">

@@ -53,7 +53,7 @@
                                     Delivery Date and time: {{ \Carbon\Carbon::parse(strtotime($address->delivery_date . ' ' . $address->delivery_time))->format('F d, Y g:i A') }}<br>
                                 </li>
                                 @endforeach
-                                </ul>Y-m-d H:i A
+                                </ul>
                                 @endif
                             @else
                                 {{$sales->customer_delivery_adress}}

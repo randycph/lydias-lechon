@@ -71,7 +71,7 @@
                                     <strong>Contact number</strong>: {{ $address->contact_tel }}<br>
                                     <strong>Delivery fee</strong>: ₱{{ number_format($address->delivery_fee, 2) }}<br>
                                     <strong>Location</strong>: {{ $address->location }}<br>
-                                    <strong>Delivery Date and time</strong>: {{ date('F d, Y H:i A', strtotime($address->delivery_date . ' ' . $address->delivery_time)) }}<br>
+                                    <strong>Delivery Date and time</strong>: {{ date('F d, Y g:i A', strtotime($address->delivery_date . ' ' . $address->delivery_time)) }}<br>
                                     <strong>Note</strong>: {{ $address->note }}<br>
                                 </li>
                                 @endforeach
