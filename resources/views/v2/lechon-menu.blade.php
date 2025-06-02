@@ -18,7 +18,6 @@
                 this.addons = [];
                 this.lechonCart = true;
                 this.quantity = 1,
-                console.log(product);
             },
             close() {
                 this.lechonCart = false;
