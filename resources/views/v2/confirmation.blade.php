@@ -76,6 +76,8 @@
                                 </li>
                                 @endforeach
                                 </ul>
+                            @else
+                                {{ $sales->customer_delivery_adress ?? 'NA' }}
                             @endif
                         </div>
                     </div>
