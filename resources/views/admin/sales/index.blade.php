@@ -238,7 +238,27 @@
                                     <td>{{ $sale->customer_name }}</td>
                                     <td>{{ $sale->order_source }}</td>
                                     <td>{{ \Carbon\Carbon::parse($sale->created_at)->format('Y-m-d H:i A') }}</td>
-                                    <td>@if($sale->delivery_status <> 'Open Date'){{ $dateneeded }}@endif</td>
+                                    <td>
+                                        @if($sale->delivery_status <> 'Open Date')
+                                            
+                                            
+                                            @if ($sale->deliveryAddress && count($sale->deliveryAddress) > 0)
+                                                @php
+                                                    // show $sale->deliveryAddress separated by commas
+                                                    $dateneeded = '';
+                                                    foreach ($sale->deliveryAddress as $address) {
+                                                        if ($dateneeded != '') {
+                                                            $dateneeded .= ', ';
+                                                        }
+                                                        $dateneeded .= \Carbon\Carbon::parse($address->delivery_date)->format('Y-m-d H:i A');
+                                                    }
+                                                @endphp
+                                                    {{ $dateneeded }}
+                                            @else
+                                                {{ $dateneeded }}
+                                            @endif
+                                        @endif
+                                    </td>
                                     <td>{{ $sale->delivery_type }}</td>
                                     <td><a href="{{route('admin.report.delivery_report',$sale->id)}}" target="_blank">{{$sale->delivery_status}}</a></td>
                                     <td style="display:none;">{{ rtrim($payment_types,",") }}</td>
