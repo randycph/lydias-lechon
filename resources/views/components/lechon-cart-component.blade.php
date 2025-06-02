@@ -228,7 +228,7 @@
                                                 <td class="py-2" x-text="addon.name"></td>
                                                 <td class="py-2" x-text="format(addon.price)"></td>
                                                 <td class="py-2">1</td>
-                                                <td class="py-2" x-text="format(addon.price * quantity)"></td>
+                                                <td class="py-2" x-text="format(addon.price * 1)"></td>
                                             </tr>
                                         </template>
                                     </tbody>
