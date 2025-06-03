@@ -189,7 +189,7 @@
                                                 </label>
                                             </div>
 
-                                            <img :src="addon.photos?.length > 0 ? `${addon.photos[0].url}` : '/images/no-image.jpg'"
+                                            <img onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'" :src="addon.photos?.length > 0 ? `${addon.photos[0].url}` : '/images/no-image.jpg'"
                                                 :alt="addon.name"
                                                 class="object-cover z-10 w-full h-full hover:scale-125 transition duration-300">
                                         </div>

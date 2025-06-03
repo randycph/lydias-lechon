@@ -232,10 +232,10 @@
 
                                     <td>
                                         @if($sale['delivery_status'] <> 'Open Date')
-                                            @if ($sale['deliveryAddress'] && count($sale['deliveryAddress']) > 0)
+                                            @if (isset($sale['delivery_address']) && count($sale['delivery_address']) > 0)
                                                 @php
                                                     $dateneeded = '';
-                                                    foreach ($sale['deliveryAddress'] as $address) {
+                                                    foreach ($sale['delivery_address'] as $address) {
                                                         if ($dateneeded != '') {
                                                             $dateneeded .= ', ';
                                                         }
