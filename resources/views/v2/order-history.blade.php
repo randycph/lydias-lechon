@@ -59,8 +59,7 @@
                                         $itemTotal = $cart->net_amount;
                                         $total += $itemTotal;
 
-                                        $amountPaid = ($sale->payments && count($sale->payments) > 0) ? $sale->payments->sum('amount') : 0;
-                                        $balance = $total - $amountPaid;
+                                        
                                     @endphp
                                     <div class="flex gap-4 items-start w-full relative">
                                         <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="w-20 h-20 min-w-20 min-h-20 object-cover overflow-hidden rounded-md bg-center">
@@ -76,12 +75,16 @@
                                 @endforeach
 
                                 @php
+                                    $amountPaid = ($sale->payments && count($sale->payments) > 0) ? $sale->payments->sum('amount') : 0;
+                                    $cartTotal = $total;
                                     $total += $fee;
+                                    $discount = $sale->discount_amount ? $sale->discount_amount : 0;
+                                    $balance = $total - $amountPaid - $discount;
                                 @endphp
             
                                 <div class="flex items-center justify-between w-full mt-4">
                                     <div class="text-sm text-black font-bold">{{ count($sale->items) }} items</div>
-                                    <div class="text-sm text-black font-bold">₱{{ number_format($total, 2) }}</div>
+                                    <div class="text-sm text-black font-bold">₱{{ number_format($cartTotal, 2) }}</div>
                                 </div>
             
                                 <div class="flex items-center justify-between w-full mt-4">
@@ -106,6 +109,12 @@
                                             <div class="text-sm text-black font-bold">Sub total</div>
                                             <div class="text-sm text-black font-bold">₱{{ number_format($total, 2) }}</div>
                                         </div>
+                                        @if ($sale->discount_amount && $sale->discount_amount > 0)
+                                        <div class="flex items-center justify-between w-full">
+                                            <div class="text-sm text-black font-bold">Discount</div>
+                                            <div class="text-sm text-red-600 font-bold italic">- ₱{{ number_format($sale->discount_amount, 2) }}</div>
+                                        </div>
+                                        @endif
                                         @if ($sale->payments && count($sale->payments) > 0)
                                         <div class="flex items-center justify-between w-full">
                                             <div class="text-sm text-black font-bold">Amount Paid</div>

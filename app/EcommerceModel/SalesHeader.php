@@ -286,4 +286,9 @@ class SalesHeader extends Model
     {
         return $this->hasMany(DeliveryStatus::class, 'order_id', 'id');
     }
+
+    public function couponUsed()
+    {
+        return $this->hasMany(CouponCart::class, 'sales_header_id');
+    }
 }
