@@ -88,7 +88,7 @@
                                 <input id="remember" type="checkbox" name="remember" value="1"
                                     class="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-3 focus:ring-blue-300" />
                             </div>
-                            <label for="remember" class="ms-2 text-sm font-medium dark:text-gray-300">Remember me</label>
+                            <label for="remember" class="ms-2 text-sm font-medium">Remember me</label>
                         </div>
                         <button type="submit" class="text-white bg-primary text-center custom-btn btn-primary-dark focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-md w-full px-5 py-3.5 ">
                             Sign in

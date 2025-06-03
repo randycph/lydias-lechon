@@ -204,7 +204,7 @@ class CustomerFrontController extends Controller
     {
         Auth::logout();
 
-        return redirect(route('customer-front.login'));
+        return redirect(route('home'));
     }
 
     public function forgot_password(Request $request) {

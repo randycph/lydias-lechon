@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 
 class AuthenticatedMiddleware
 {
@@ -19,7 +19,7 @@ class AuthenticatedMiddleware
         if(Auth::check()){
             return $next($request);
         } else {
-            return redirect(url(route('customer-front.login')));
+            return redirect(url(route('admin.login')));
 
 //            $currentUrl = url()->current();
 //            if(strpos($currentUrl, 'admin') !== false) {

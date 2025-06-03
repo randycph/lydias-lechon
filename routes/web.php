@@ -11,6 +11,7 @@ use App\Helpers\ListingHelper;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\GlobalSearchController;
 use App\Mail\SalesCompleted;
 use App\Mail\SalesCompletedAdmin;
@@ -31,522 +32,42 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-Route::group(['prefix' => 'v2'], function () {
-    Route::get('/home', function () {
-        $categories = ProductCategory::where('status', 'PUBLISHED')->get();
-        $blogs = Article::with('category')
-            ->where('is_blog', 1)
-            ->where('status', 'Published')
-            ->where('category_id', '>', 0)
-            ->latest()
-            ->limit(10)
-            ->get();
-        return view('v2.home', compact('categories', 'blogs'));
-    })->name('index');
-    Route::get('/our-story', function () {
-        return view('v2.our-story');
-    })->name('our-story');
-    Route::get('/our-stores', function () {
-        $headOffices = Branch::where('is_head_office', 1)->get();
-        $branches = Branch::with('numbers')->where('is_head_office', 0)->get();
-        $outlets = Branch::where('branch_type', 'Restaurant')->where('is_head_office', 0)->get();
-        $malls = Branch::where('branch_type', 'Mall Based Foodcourtk')->where('is_head_office', 0)->get();
-        $kiosks = Branch::where('branch_type', 'Kiosk')->where('is_head_office', 0)->get();
 
-        return view('v2.our-stores', compact('headOffices', 'branches', 'outlets', 'malls', 'kiosks'));
-    })->name('our-stores');
-    Route::get('/lechon-pricelist', function () {
-        $products = Product::with([
-                    'photos' => function ($q) {
-                        $q->limit(1);
-                    },
-                    'addonProducts' => function ($q) {
-                        $q->with(['photos' => function ($photoQuery) {
-                            $photoQuery->limit(1);
-                        }]);
-                    }
-                ])
-        ->where('category_id', 1)
-        ->where('status', 'PUBLISHED')->get();
+// Auth::routes(['verify' => true]);
 
-        foreach ($products as $product) {
-            if ($product->addonProducts->isEmpty()) {
-                $addonProductIds = DB::table('ecommerce_sales_details')
-                    ->select('product_id', DB::raw('COUNT(id) as total'))
-                    ->whereIn('sales_header_id', function ($query) use ($product) {
-                        $query->select('sales_header_id')
-                                ->from('ecommerce_sales_details')
-                                ->where('product_id', $product->id);
-                    })
-                    ->where('product_id', '!=', $product->id)
-                    ->groupBy('product_id')
-                    ->orderByDesc('total')
-                    ->limit(5)
-                    ->pluck('product_id');
-    
-                $fallbackAddons = Product::whereIn('id', $addonProductIds)
-                    ->where('status', 'PUBLISHED')
-                    ->with(['photos' => function ($q) {
-                        $q->limit(1);
-                    }])
-                    ->get();
-    
-                $product->setRelation('addonProducts', $fallbackAddons);
-            }
-        }
+Route::get('/', [FrontendController::class, 'index'])->name('home');
+Route::get('/home', [FrontendController::class, 'home'])->name('index');
+Route::get('/our-story', [FrontendController::class, 'our_story'])->name('our-story');
+Route::get('/our-stores', [FrontendController::class, 'our_stores'])->name('our-stores');
+Route::get('/lechon-pricelist', [FrontendController::class, 'lechon_pricelist'])->name('lechon-pricelist');
+Route::get('/lechon-menu', [FrontendController::class, 'lechon_menu'])->name('lechon-menu');
+Route::get('/checkout', [FrontendController::class, 'checkout'])->name('checkout');
+Route::get('/sales-summary/{id}', [FrontendController::class, 'confirmation'])->name('confirmation');
+Route::get('/login', [FrontendController::class, 'login'])->name('login');
+Route::post('/logout', [FrontendController::class, 'logout'])->name('logout');
+Route::get('/forgot-password', [FrontendController::class, 'forgot_password'])->name('forgot-password');
 
-        return view('v2.lechon-pricelist', compact('products'));
-    })->name('lechon-pricelist');
-    Route::get('/lechon-menu', function () {
-        $categories = ProductCategory::with(['products' => function ($query) {
-            $query->where('status', 'PUBLISHED')
-                ->with([
-                    'photos' => function ($q) {
-                        $q->limit(1);
-                    },
-                    'addonProducts' => function ($q) {
-                        $q->with(['photos' => function ($photoQuery) {
-                            $photoQuery->limit(1);
-                        }]);
-                    }
-                ]);
-        }])
-        ->where('status', 'PUBLISHED')
-        ->get();
+Route::post('/lydia-forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.send_reset_link_email');
+Route::get('/lydia-reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('/lydia-reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
+Route::get('/signup', [FrontendController::class, 'signup'])->name('signup');
+Route::get('/my-account', [FrontendController::class, 'my_account'])->name('my-account');
+Route::get('/my-cart', [FrontendController::class, 'my_cart'])->name('my-cart');
+Route::get('/order-history', [FrontendController::class, 'order_history'])->name('order-history');
+Route::get('/change-password', [FrontendController::class, 'change_password'])->name('change-password');
+Route::get('/careers', [FrontendController::class, 'carrers'])->name('careers.v2');
+Route::get('/blogs', [FrontendController::class, 'blogs'])->name('blogs');
+Route::get('/blogs/{category}', [FrontendController::class, 'blogCategory'])->name('blogs-category');
+Route::get('blog/{category}/{slug}', [FrontendController::class, 'article'])->name('article');    
 
-        foreach ($categories as $category) {
-            foreach ($category->products as $product) {
-                if ($product->addonProducts->isEmpty()) {
-                    $addonProductIds = DB::table('ecommerce_sales_details')
-                        ->select('product_id', DB::raw('COUNT(id) as total'))
-                        ->whereIn('sales_header_id', function ($query) use ($product) {
-                            $query->select('sales_header_id')
-                                  ->from('ecommerce_sales_details')
-                                  ->where('product_id', $product->id);
-                        })
-                        ->where('product_id', '!=', $product->id)
-                        ->groupBy('product_id')
-                        ->orderByDesc('total')
-                        ->limit(5)
-                        ->pluck('product_id');
-        
-                    $fallbackAddons = Product::whereIn('id', $addonProductIds)
-                        ->where('status', 'PUBLISHED')
-                        ->with(['photos' => function ($q) {
-                            $q->limit(1);
-                        }])
-                        ->get();
-        
-                    $product->setRelation('addonProducts', $fallbackAddons);
-                }
-            }
-        }
-
-        return view('v2.lechon-menu', compact('categories'));
-    })->name('lechon-menu');
-    Route::get('/checkout', function () {
-        $page = 'checkout';
-
-        if (auth()->check()) {
-            $carts = Cart::where('user_id', Auth::id())->with('product.photos')->get();
-        } else {
-            $carts = collect(session('cart', [])); 
-        }
-
-        $pickupBranches = Branch::orderBy('name', 'asc')->where('pickup_branch', 1)->get();
-
-        $deliveryBranches = Branch::orderBy('name', 'asc')->where('delivery_branch', 1)->get();
-
-        $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
-
-        $setting = Setting::first();
-
-        $disabledPickupDates = explode(',', $setting->disable_pickup_dates ?? '');
-        $disabledDeliveryDates = explode(',', $setting->disable_delivery_dates ?? '');
-
-        return view('v2.checkout', compact('page', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates'));
-    })->name('checkout');
-    Route::get('/sales-summary/{id}', function ($id) {
-        $page = 'confirmation';
-
-        $undecodeId = $id;
-        
-        if (ctype_digit($id)) {
-            $id = $undecodeId;
-        } else {
-            $id = base64_decode($id);
-        }
-
-        $sales = SalesHeader::where('id',$id)->with('deliveryAddress')->first();
-        $gc = GiftCertificate::where('sales_header_id',$id)->get();
-        $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
-        $salesDetails = SalesDetail::with('product.photos')->where('sales_header_id',$id)->get();
-        $totalPayment = SalesPayment::where('sales_header_id',$id)->sum('amount');
-        $deliveries = DeliveryStatus::where('order_id',$id)->get();
-        $totalNet = SalesHeader::where('id',$id)->sum('net_amount');
-        if($totalNet <= $totalPayment) {
-            $status = 'PAID';
-        } else {
-            $status = 'UNPAID';
-            if($totalPayment > 0){
-                $status = 'PARTIAL';
-            }
-        }
-
-        return view('v2.confirmation', compact('page', 'sales', 'salesPayments', 'salesDetails', 'status', 'deliveries', 'gc', 'totalPayment', 'totalNet'));
-    })->name('confirmation');
-    Route::get('/login', function () {
-        $page = 'login';
-
-        if (auth()->check()) {
-            return redirect()->route('my-account');
-        }
-
-        return view('v2.login', compact('page'));
-    })->name('login');
-    Route::get('/forgot-password', function () {
-        $page = 'forgot-password';
-        return view('v2.forgot-password', compact('page'));
-    })->name('forgot-password');
-
-    Route::post('/lydia-forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.send_reset_link_email');
-    Route::get('/lydia-reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
-    Route::post('/lydia-reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
-
-
-    Route::get('/signup', function () {
-        $page = 'signup';
-        return view('v2.signup', compact('page'));
-    })->name('signup');
-    Route::get('/my-account', function (Request $request) {
-        $page = 'my-account';
-
-        $request->session()->forget('redirect_after_login');
-        
-        if (!auth()->check()) {
-            return redirect()->route('login');
-        }
-
-        return view('v2.my-account', compact('page'));
-    })->name('my-account');
-    Route::get('/my-cart', function () {
-        $page = 'my-cart';
-        
-        if (!auth()->check()) {
-            return redirect()->route('login');
-        }
-
-        return view('v2.my-cart', compact('page'));
-    })->name('my-cart');
-    Route::get('/order-history', function () {
-        $page = 'order-history';
-
-        $sales = SalesHeader::where('user_id', auth()->id())
-                            ->with([
-                                'items.product.photos',
-                                'payments' => function ($query) {
-                                    $query->where('status', 'PAID');
-                                },
-                                'deliveryStatus' => function ($query) {
-                                    $query->orderBy('created_at', 'asc');
-                                },
-                            ])
-                            ->orderBy('created_at', 'desc')
-                            ->get();
-
-        return view('v2.order-history', compact('page', 'sales'));
-    })->name('order-history');
-    Route::get('/change-password', function () {
-        $page = 'change-password';
-
-        if (!auth()->check()) {
-            return redirect()->route('login');
-        }
-
-        return view('v2.change-password', compact('page'));
-    })->name('change-password');
-    Route::get('/careers', function () {
-        return view('v2.careers');
-    })->name('careers.v2');
-    Route::get('/blogs', function () {
-        $featuredArticle = Article::with('category')
-                                ->where('is_featured', 1)
-                                ->where('category_id', '>', 0)
-                                ->where('status', 'Published')
-                                ->latest()
-                                ->first();
-        $featuredArticle->image_url = empty($featuredArticle->image_url) ? $featuredArticle->thumbnail_url : $featuredArticle->image_url;
-
-        $categories = ArticleCategory::get();
-        $blogs = Article::with('category')
-                        ->where('is_blog', 1)
-                        ->where('status', 'Published')
-                        ->where('category_id', '>', 0)
-                        ->latest()
-                        ->paginate(4);
-        return view('v2.blogs', compact('featuredArticle', 'categories', 'blogs'));
-    })->name('blogs');
-    Route::get('/blogs/{category}', function () {
-        $featuredArticle = Article::with('category')
-                                ->where('is_featured', 1)
-                                ->where('category_id', '>', 0)
-                                ->where('status', 'Published')
-                                ->latest()
-                                ->first();
-        $featuredArticle->image_url = empty($featuredArticle->image_url) ? $featuredArticle->thumbnail_url : $featuredArticle->image_url;
-
-        $categories = ArticleCategory::get();
-
-        $category = ArticleCategory::where('slug', request()->category)->first();
-
-        if (!$category) {
-            abort(404);
-        }
-
-        $blogs = Article::with('category')
-                        ->where('category_id', $category->id)
-                        ->where('is_blog', 1)
-                        ->where('status', 'Published')
-                        ->where('category_id', '>', 0)
-                        ->latest()
-                        ->paginate(4);
-        return view('v2.blogs-category', compact('featuredArticle', 'categories', 'blogs', 'category'));
-    })->name('blogs-category');
-    Route::get('{category}/{slug}', function ($category, $slug) {
-        $article = Article::with('category')
-            ->where('slug', $slug)
-            ->where('status', 'Published')
-            ->firstOrFail();
-    
-        // Get next article (newer)
-        $next = Article::where('status', 'Published')
-            ->where('id', '>', $article->id)
-            ->orderBy('id', 'asc')
-            ->first();
-    
-        // Get previous article (older)
-        $previous = Article::where('status', 'Published')
-            ->where('id', '<', $article->id)
-            ->orderBy('id', 'desc')
-            ->first();
-
-        $relatedNews = Article::with('category')
-            ->where('category_id', $article->category_id)
-            ->where('status', 'Published')
-            ->where('id', '!=', $article->id)
-            ->latest()
-            ->limit(4)
-            ->get();
-    
-        return view('v2.article', compact('category', 'slug', 'article', 'next', 'previous', 'relatedNews'));
-    })->name('article');    
-});
-// Logout
-Route::get('/user-logout', function (Request $request) {
-
-    $request->session()->forget('redirect_after_login');
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
-
-    Auth::logout();
-
-    return redirect()->route('index');
-})->name('user-logout');
-
-Auth::routes(['verify' => true]);
-
+Route::get('/user-logout', [FrontendController::class, 'userLogout'])->name('user-logout');
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
-
 Route::get('/search', [GlobalSearchController::class, 'search'])->name('global.search');
 
-Route::post('/signup-store', function(Request $request) {
-    // dd($request->all());
-    try {
-        $validated = $request->validate([
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|confirmed|min:6',
-            'account_type' => 'required|in:individual,organization',
-            'first_name' => [
-                'required_if:account_type,individual',
-                'nullable',
-                'regex:/^[A-Za-z\s\-]+$/'
-            ],
-            'last_name' => [
-                'required_if:account_type,individual',
-                'nullable',
-                'regex:/^[A-Za-z\s\-]+$/'
-            ],
-            'birth_date' => 'nullable|date',
-            'org_name' => [
-                'required_if:account_type,organization',
-                'nullable',
-                'regex:/^[A-Za-z\s\-]+$/'
-            ],
-            'country' => 'required|string',
-            'address_street' => 'required_if:country,Philippines|nullable|string',
-            'address_city' => 'required_if:country,Philippines|nullable|string',
-            'address_municipality' => 'required_if:country,Philippines|nullable|string',
-            'address_region' => 'required_if:country,Philippines|nullable|string',
-            'address_brgy' => 'required_if:country,Philippines|nullable|string',
-            'international_address' => 'nullable|required_unless:country,Philippines|nullable|string',
-            'mobile' => [
-                'required',
-                'regex:/^(09|\+639)\d{9}$/'
-            ],
-        ], [
-            'contact_mobile.regex' => 'The mobile number must start with 09 or +639 and be followed by 9 digits.',
-        ]);
-
-        if ($request->has('country') && $request->input('country') == 'Philippines') {
-            $request['international_address'] = null;
-        }
-
-        if ($request->has('country') && $request->input('country') != 'Philippines') {
-            $request['address_street'] = null;
-            $request['address_city'] = null;
-            $request['address_municipality'] = null;
-            $request['address_region'] = null;
-            $request['address_brgy'] = null;
-        }
-    
-        if ($request->account_type == 'organization') {
-            $user = User::create([
-                'name' => $request->org_name,
-                'firstname' => $request->org_name,
-                'lastname' => $request->org_name,
-                'password' => Hash::make($request->password),
-                'email' => $request->email,
-                'organization' => $request->org_name,
-                'address_street' => $request->address_street,
-                'address_municipality' => $request->address_municipality,
-                'country' => $request->country,
-                'address_city' => $request->address_city,
-                'address_region' => $request->address_region,
-                'address_brgy' => $request->address_brgy,
-                'international_address' => $request->international_address,
-                'contact_person' => $request->contact_person,
-                'organization' => $request->organization,
-                'contact_tel' => $request->tel,
-                'contact_mobile' => $request->mobile,
-                'contact_fax' => $request->fax,
-                'registration_source' => 'web',
-                'agent_code' => $request->agent_code,
-                'remember_token' => Str::random(10),
-                'is_active' => 1,
-                'is_org' => $request->input('account_type') === 'organization' ? 1 : 0,
-                'is_subscribe' => $request->is_subscribe ?? 0
-            ]);
-        } elseif ($request->account_type == 'individual') {
-            $user = User::create([
-                'name' => $request->first_name . ' ' . $request->last_name,
-                'firstname' => $request->first_name,
-                'lastname' => $request->last_name,
-                'password' => Hash::make($request->password),
-                'email' => $request->email,
-                'birthday' => $request->birth_date,
-                'country' => $request->country,
-                'address_street' => $request->address_street,
-                'address_municipality' => $request->address_municipality,
-                'address_city' => $request->address_city,
-                'address_region' => $request->address_region,
-                'address_brgy' => $request->address_brgy,
-                'international_address' => $request->international_address,
-                'contact_person' => null,
-                'organization' => null,
-                'contact_tel' => $request->tel,
-                'contact_mobile' => $request->mobile,
-                'contact_fax' => $request->fax,
-                'registration_source' => 'web',
-                'agent_code' => $request->agent_code,
-                'remember_token' => Str::random(10),
-                'is_active' => 1,
-                'is_subscribe' => $request->is_subscribe ?? 0
-            ]);
-        }
-
-        Auth::login($user);
-        
-        try {
-            Mail::to($user->email)->send(new WelcomeEmail($user));
-        } catch (\Exception $th) {
-            //throw $th;
-        }
-
-        $redirectTo = $request->input('redirect') ?? route('my-account');
-        return redirect()->intended($redirectTo);
-    } catch (\Throwable $th) {
-        throw $th;
-    }
-
-})->name('signup.store');
-
-Route::post('save-personal-information', function(Request $request) {
-
-    if (!auth()->check()) {
-        return redirect()->route('login');
-    }
-
-    $validated = $request->validate([
-        'firstname' => [
-            'required',
-            'regex:/^[A-Za-z\s\-]+$/'
-        ],
-        'lastname' => [
-            'required',
-            'regex:/^[A-Za-z\s\-]+$/'
-        ],
-        'birthday' => 'nullable|date',
-        'contact_mobile' => [
-            'required',
-            'regex:/^(09|\+639)\d{9}$/'
-        ],
-        'email' => 'required|email|max:191|unique:users,email,' . auth()->id(), 
-    ], [
-        'contact_mobile.regex' => 'The mobile number must start with 09 or +639 and be followed by 9 digits.',
-    ]);
-
-    $user = auth()->user();
-    $user->update($validated);
-
-    return redirect(route('my-account'))->with('success', 'Personal information updated successfully!');
-
-})->name('save-personal-information');
-
-Route::post('save-delivery-address', function(Request $request) {
-
-    if (!auth()->check()) {
-        return redirect()->route('login');
-    }
-
-    if ($request->has('country') && $request->input('country') == 'Philippines') {
-        $request['international_address'] = null;
-    }
-
-    if ($request->has('country') && $request->input('country') != 'Philippines') {
-        $request['address_street'] = null;
-        $request['address_city'] = null;
-        $request['address_municipality'] = null;
-        $request['address_region'] = null;
-        $request['address_brgy'] = null;
-    }
-
-    $validated = $request->validate([
-        'country' => 'required|string',
-        'international_address' => 'required_unless:country,Philippines|nullable|string',
-        'address_street' => 'required_if:country,Philippines|nullable|string',
-        'address_municipality' => 'required_if:country,Philippines|nullable|string',
-        'address_city' => 'required_if:country,Philippines|nullable|string',
-        'address_brgy' => 'required_if:country,Philippines|nullable|string',
-        'address_region' => 'required_if:country,Philippines|nullable|string',
-    ]);
-
-    $user = auth()->user();
-    $user->update($validated);
-
-    return redirect(route('my-account'))->with('success', 'Delivery address updated successfully!');
-
-})->name('save-delivery-address');
+Route::post('/signup-store', [FrontendController::class, 'signupStore'])->name('signup.store');
+Route::post('save-personal-information', [FrontendController::class, 'savePersonalInformation'])->name('save-personal-information');
+Route::post('save-delivery-address', [FrontendController::class, 'saveDeliveryAddress'])->name('save-delivery-address');
 
 Route::get('/admin/login', function() {
     return view('auth.login');
@@ -565,136 +86,13 @@ Route::post('/admin/login', function(Request $request) {
     
 })->name('admin.login-post');
 
-Route::post('/signup-validate-fields', function(Request $request) {
-    $step = $request->input('step');
-
-    $rules = [];
-
-    switch ($step) {
-        case 1:
-            $rules = [
-                'email' => 'required|email|max:191|unique:users,email',
-                'password' => 'required|min:6|confirmed',
-            ];
-            break;
-
-        case 2:
-            $rules = [
-                'account_type' => 'required|in:individual,organization',
-            ];
-            break;
-
-        case 3:
-            $rules = $request->input('account_type') === 'individual'
-                ? [
-                    'first_name' => [
-                        'required',
-                        'string',
-                        'regex:/^[A-Za-z\s\-]+$/'
-                    ],
-                    'last_name' => [
-                        'required',
-                        'string',
-                        'regex:/^[A-Za-z\s\-]+$/'
-                    ],
-                    'birth_date' => 'nullable|date',
-                    'country' => 'required|string',
-                    'address_street' => 'required_if:country,Philippines|string',
-                    'address_city' => 'required_if:country,Philippines|string',
-                    'address_municipality' => 'required_if:country,Philippines|string',
-                    'address_region' => 'required_if:country,Philippines|string',
-                    'address_brgy' => 'required_if:country,Philippines|string',
-                    'international_address' => 'required_unless:country,Philippines|string',
-                  ]
-                : [
-                    'country' => 'required|string',
-                    'org_name' => [
-                        'required',
-                        'string',
-                        'regex:/^[A-Za-z\s\-]+$/'
-                    ],
-                    'contact_person' => [
-                        'required',
-                        'string',
-                        'regex:/^[A-Za-z\s\-]+$/'
-                    ],
-                    'address_street' => 'required_if:country,Philippines|string',
-                    'address_city' => 'required_if:country,Philippines|string',
-                    'address_municipality' => 'required_if:country,Philippines|string',
-                    'address_region' => 'required_if:country,Philippines|string',
-                    'address_brgy' => 'required_if:country,Philippines|string',
-                    'international_address' => 'required_unless:country,Philippines|string',
-                ];
-            break;
-
-        case 4:
-            $rules = [
-                'mobile' => [
-                    'required',
-                    'regex:/^(09|\+639)\d{9}$/'
-                ]
-            ];
-            break;
-    }
-
-    $validator = Validator::make($request->all(), $rules, [
-        'contact_mobile.regex' => 'The mobile number must start with 09 or +639 and be followed by 9 digits.',
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json([
-            'success' => false,
-            'errors' => $validator->errors(),
-        ], 422);
-    }
-
-
-    return response()->json(['success' => true]);
-})->name('signup.validate-fields');
-
-Route::get('/articles/load-more', function(Request $request) {
-    $page = $request->input('page', 1);
-    $limit = $request->input('limit', 4);
-
-    $articles = Article::with('category')
-        ->where('is_blog', 1)
-        ->where('status', 'Published')
-        ->where('category_id', '>', 0)
-        ->latest()
-        ->paginate($limit, ['*'], 'page', $page);
-
-    $html = view('v2.partials.articles', compact('articles'))->render();
-
-    return response()->json([
-        'html' => $html,
-        'hasMore' => $articles->hasMorePages()
-    ]);
-})->name('articles.load-more');
-
-Route::get('/articles-category/load-more', function(Request $request) {
-    $page = $request->input('page', 1);
-    $limit = $request->input('limit', 4);
-    $category = $request->input('category');
-    $category = ArticleCategory::where('slug', $category)->first();
-
-    $articles = Article::with('category')
-        ->where('category_id', $category->id)
-        ->where('is_blog', 1)
-        ->where('status', 'Published')
-        ->where('category_id', '>', 0)
-        ->latest()
-        ->paginate($limit, ['*'], 'page', $page);
-
-    $html = view('v2.partials.articles', compact('articles'))->render();
-
-    return response()->json([
-        'html' => $html,
-        'hasMore' => $articles->hasMorePages()
-    ]);
-})->name('articles-category.load-more');
+Route::post('/signup-validate-fields', [FrontendController::class, 'signupValidateFields'])->name('signup.validate-fields');
+Route::get('/articles/load-more', [FrontendController::class, 'articleLoadMore'])->name('articles.load-more');
+Route::get('/articles-category/load-more', [FrontendController::class, 'articleCategoryLoadMore'])->name('articles-category.load-more');
 
 Route::any('/ipay_response',  'ipayController@receive_data')->name('ipay.response');
 Route::get('/ipaysig',  'EcommerceControllers\CartController@payment');
+
 // Route::get('/page-test',  function(){
 //     return view('theme.lydias.pages.page-tester');
 // });
@@ -708,7 +106,6 @@ Route::get('/sync-web', 'SyncController@receive');
 
 //Route::post('/cms/checklogin', 'Auth\LoginController@checklogin');
 Route::get('/account-logout', 'Auth\LoginController@logout')->name('account.logout');
-Route::get('/', 'FrontController@home')->name('home');
 
 //Route::view('/password/email','auth.passwords.email');
 
@@ -752,12 +149,12 @@ Route::post('get_shipping_fee_for_multiple_address_new', 'EcommerceControllers\C
 Route::get('/customer-sign-up', 'EcommerceControllers\CustomerFrontController@sign_up')->name('customer-front.sign-up');
 Route::post('/customer-sign-up', 'EcommerceControllers\CustomerFrontController@customer_sign_up')->name('customer-front.customer-sign-up');
 
-Route::get('/login', 'EcommerceControllers\CustomerFrontController@login')->name('customer-front.login');
+// Route::get('/login', 'EcommerceControllers\CustomerFrontController@login')->name('customer-front.login');
 Route::post('/login', 'EcommerceControllers\CustomerFrontController@customer_login')->name('customer-front.customer_login');
 
-Route::get('/forgot-password', 'EcommerceControllers\CustomerFrontController@forgot_password')->name('customer-front.forgot_password');
+// Route::get('/forgot-password', 'EcommerceControllers\CustomerFrontController@forgot_password')->name('customer-front.forgot_password');
 Route::post('/forgot-password', 'EcommerceControllers\CustomerFrontController@customer_forgot_password')->name('customer-front.customer_forgot_password');
-Route::get('/logout', 'EcommerceControllers\CustomerFrontController@logout')->name('customer-front.logout');
+// Route::get('/logout', 'EcommerceControllers\CustomerFrontController@logout')->name('customer-front.logout');
 
 Route::get('/register-guest', 'EcommerceControllers\CustomerFrontController@register_guest')->name('customer-front.register_guest');
 ##### END CUSTOMER ROUTE #####
@@ -779,7 +176,7 @@ Route::get('/news/{slug}/print', 'News\ArticleFrontController@news_print')->name
 Route::post('/news/{slug}/share', 'News\ArticleFrontController@news_share')->name('news.front.share');
 
 //Careers Frontend
-Route::get('/careers', 'FrontController@careers')->name('careers');
+// Route::get('/careers', 'FrontController@careers')->name('careers');
 Route::post('/careers-application', 'FrontController@applicant')->name('applicant');
 
 Route::get('/privacy-policy/', 'FrontController@privacy_policy')->name('privacy-policy');
@@ -820,7 +217,7 @@ Route::group(['middleware' => ['authenticated']], function () {
     
     Route::get('account/sales', 'EcommerceControllers\SalesController@sales_list')->name('profile.sales');
     Route::post('account/sales/cancel', 'EcommerceControllers\MyAccountController@cancel_order')->name('my-account.cancel_order');
-    Route::get('sales-summary/{id}', 'FrontController@show_sales_summary')->name('profile.show_sales_summary');
+    // Route::get('sales-summary/{id}', 'FrontController@show_sales_summary')->name('profile.show_sales_summary');
 
     //// My Account
     Route::get('/account/manage', 'EcommerceControllers\MyAccountController@manage_account')->name('my-account.manage-account');
@@ -840,7 +237,7 @@ Route::group(['middleware' => ['authenticated']], function () {
 
     Route::get('checkout-completed', 'EcommerceControllers\CheckoutController@payment_completed')->name('cart.front.checkout_completed');
     //shopping cart
-    Route::get('checkout', 'EcommerceControllers\CheckoutController@checkout')->name('cart.front.checkout');
+    // Route::get('checkout', 'EcommerceControllers\CheckoutController@checkout')->name('cart.front.checkout');
 
     Route::get('payment-process', 'EcommerceControllers\CheckoutController@transmit_data_to_payment_gateway')->name('cart.front.payment-process');
     Route::post('payment-notification', 'EcommerceControllers\CheckoutController@receive_data_from_payment_gateway')->name('cart.payment-notification');
@@ -877,7 +274,7 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     // Albums
     Route::resource('/admin/albums', 'Banner\AlbumController');
     Route::post('/admin/albums/upload', 'Banner\AlbumController@upload')->name('albums.upload');
-    Route::delete('/admin/albums/upload', 'Banner\AlbumController@upload')->name('albums.upload');
+    Route::delete('/admin/albums/upload', 'Banner\AlbumController@upload')->name('albums.upload.delete');
     Route::delete('/admin/many/album', 'Banner\AlbumController@destroy_many')->name('albums.destroy_many');
     Route::put('/admin/albums/quick/{album}', 'Banner\AlbumController@quick_update')->name('albums.quick_update');
     Route::post('/admin/albums/{album}/restore', 'Banner\AlbumController@restore')->name('albums.restore');
@@ -967,7 +364,7 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::group(['middleware' => ['adminOnly']], function () {
         //if (env('APP_DEBUG') == "true") {
             // Permission Routes
-            Route::resource('/admin/permission', 'Settings\PermissionController');
+            Route::resource('/admin/permission', 'Settings\PermissionController')->except(['destroy']);
             Route::get('/admin/permission-search/', 'Settings\PermissionController@search')->name('permission.search');
             Route::post('/permission/destroy', 'Settings\PermissionController@destroy')->name('permission.destroy');
             Route::get('/permission/restore/{id}', 'Settings\PermissionController@restore')->name('permission.restore');
@@ -1288,3 +685,4 @@ Route::get('/test-email', function () {
 
     return 'Email sent!';
 });
+
