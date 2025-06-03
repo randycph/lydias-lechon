@@ -1,10 +1,10 @@
 <div x-data="shareModal()" x-init="setSocialShareLinks()"  >
     <!-- Drawer Overlay -->
-    <div x-show="lechonCart" x-transition.opacity class="fixed inset-0 bg-black/50 z-40" @click="lechonCart = false">
+    <div x-show="lechonCart" x-transition.opacity class="fixed inset-0 bg-black/50 z-40" @click="lechonCart = false; close()">
     </div>
 
     <!-- Cart Drawer Content -->
-    <div x-show="lechonCart" x-transition:enter="transition-transform transform duration-300"
+    <div @click.away="close" x-show="lechonCart" x-transition:enter="transition-transform transform duration-300"
         x-transition:enter-start="translate-y-full" x-transition:enter-end="translate-y-0"
         x-transition:leave="transition-transform transform duration-300" x-transition:leave-start="translate-y-0"
         x-transition:leave-end="translate-y-full"
@@ -13,7 +13,7 @@
         <!-- Cart Content -->
         <div class="">
             <div class="flex justify-end items-center px-3">
-                <button @click="lechonCart = false" class="self-end text-2xl text-gray-800">
+                <button @click="lechonCart = false; close()" class="self-end text-2xl text-gray-800">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                         stroke="currentColor" class="size-7">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -243,7 +243,7 @@
                     </div>
 
                     <div class="mt-10">
-                        <button @click="added = true; add_to_cart('addcart', product.id, quantity, addons)"
+                        <button @click="added = true; add_to_cart('addcart', product.id, quantity, addons);"
                             class="bg-primary primary-btn text-white w-full px-6 py-3 rounded-md font-semibold flex items-center justify-center gap-2 transition-all duration-300 ease-in-out custom-btn btn-primary">
                             <template x-if="!added">
                                 <span x-transition.opacity> Add to Cart </span>

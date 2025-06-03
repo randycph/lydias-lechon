@@ -39,12 +39,31 @@
                         <p class="mg-b-3 tx-semibold">@if($sales->user_id == 9999) {{$sales->customer_name}} @else {{$sales->user->FullName}} @endif</p>                  
                         <p class="mg-b-3">Mobile No: {{$sales->customer_contact_number}} @if(!empty($sales->user->contact_tel)) | Tel no: {{$sales->user->contact_tel}} @endif</p>
                         <p class="mg-b-3">Email: {{$sales->email}}</p>
-                        <p class="mg-b-3">@if($sales->delivery_type == 'Store Pickup') Store Branch: @else Door to door delivery: @endif {{$sales->customer_delivery_adress}}</p>
-
-                        @if($sales->delivery_type == 'Door to door delivery')  <p class="mg-b-3"> Delivery Location: {{$sales->customer_location}} </p> @endif
+                        <p class="mg-b-3">{{$sales->delivery_type}}: 
+                            @if ($sales->delivery_type == 'Door to door delivery')
+                                @if ($sales?->deliveryAddress && count($sales?->deliveryAddress) > 0)
+                                <ul>
+                                @foreach ($sales->deliveryAddress as $k => $address)
+                                <li>
+                                    Address {{ $k + 1 }}: {{ $address->address }}<br>
+                                    Contact person: {{ $address->contact_person }}<br>
+                                    Contact number: {{ $address->contact_tel }}<br>
+                                    Delivery fee: ₱{{ number_format($address->delivery_fee, 2) }}<br>
+                                    Location: {{ $address->location }}<br>
+                                    Delivery Date and time: {{ \Carbon\Carbon::parse(strtotime($address->delivery_date . ' ' . $address->delivery_time))->format('F d, Y g:i A') }}<br>
+                                </li>
+                                @endforeach
+                                </ul>
+                                @endif
+                            @else
+                                {{$sales->customer_delivery_adress}}
+                            @endif
+                        </p>                
 
                         <p class="mg-b-3">Contact Person: {{$sales->contact_person ?? $sales->customer_name}}</p>     
+                        @if ($sales->instruction)
                         <p class="mg-b-3">Instruction: {{$sales->instruction}}</p>
+                        @endif
                     </div>
                     <!-- col -->
                     <div class="col-sm-6 col-lg-4">
@@ -52,7 +71,7 @@
                         <ul class="list-unstyled lh-7">
                             <li class="d-flex justify-content-between">
                                 <span>Order Date</span>
-                                <span>{{ date('F d, Y H:i A', strtotime($sales->created_at))}}</span>
+                                <span>{{ date('F d, Y g:i A', strtotime($sales->created_at))}}</span>
                             </li>                                                   
                             <li class="d-flex justify-content-between">
                                 <span>Payment Status</span>
@@ -95,7 +114,7 @@
                                     @if(date('H:i A',strtotime($details->delivery_date)) == '12:00 PM')
                                         {{date('F d, Y',strtotime($details->delivery_date))}} 12:00 NOON
                                     @else
-                                        {{date('F d, Y H:i A',strtotime($details->delivery_date))}}
+                                        {{date('F d, Y g:i A',strtotime($details->delivery_date))}}
                                     @endif
                                     
                                 </td>

@@ -24,6 +24,7 @@ use App\Helpers\Shortcode;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Requests\PagePost;
+use App\Models\ProductCategory;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Log;
@@ -35,7 +36,17 @@ class FrontController extends Controller
 
     public function home()
     {
-        return $this->page('home');
+        // return $this->page('home');
+
+        $categories = ProductCategory::where('status', 'PUBLISHED')->get();
+        $blogs = Article::with('category')
+            ->where('is_blog', 1)
+            ->where('status', 'Published')
+            ->where('category_id', '>', 0)
+            ->latest()
+            ->limit(10)
+            ->get();
+        return view('v2.home', compact('categories', 'blogs'));
     }
 
     public function privacy_policy(){

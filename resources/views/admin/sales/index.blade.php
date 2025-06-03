@@ -167,7 +167,7 @@
 
             <!-- Start Pages -->
             <div class="col-md-12">
-                <div class="table-list mg-b-10">
+                <div class="table-list mg-b-10" style="overflow: auto">
                     <div class="table-responsive-lg">
                         <table class="table mg-b-0 table-light table-hover table-striped">
                             <thead>
@@ -238,7 +238,26 @@
                                     <td>{{ $sale->customer_name }}</td>
                                     <td>{{ $sale->order_source }}</td>
                                     <td>{{ \Carbon\Carbon::parse($sale->created_at)->format('Y-m-d H:i A') }}</td>
-                                    <td>@if($sale->delivery_status <> 'Open Date'){{ $dateneeded }}@endif</td>
+                                    <td>
+                                        @if($sale->delivery_status <> 'Open Date')
+                                            
+                                            
+                                            @if ($sale->deliveryAddress && count($sale->deliveryAddress) > 0)
+                                                @php
+                                                    $dateneeded = '';
+                                                    foreach ($sale->deliveryAddress as $address) {
+                                                        if ($dateneeded != '') {
+                                                            $dateneeded .= ', ';
+                                                        }
+                                                        $dateneeded .= \Carbon\Carbon::parse($address->delivery_date)->format('Y-m-d H:i A');
+                                                    }
+                                                @endphp
+                                                    {{ $dateneeded }}
+                                            @else
+                                                {{ $dateneeded }}
+                                            @endif
+                                        @endif
+                                    </td>
                                     <td>{{ $sale->delivery_type }}</td>
                                     <td><a href="{{route('admin.report.delivery_report',$sale->id)}}" target="_blank">{{$sale->delivery_status}}</a></td>
                                     <td style="display:none;">{{ rtrim($payment_types,",") }}</td>
@@ -336,7 +355,7 @@
                                                                     <button class="dropdown-item">Print Delivery Receipt</button>
                                                                 </div>
                                                                 @else
-                                                                <a class="dropdown-item" href="{{route('admin.report.delivery_report',$sale->id)}}" target="_blank" >Print Delivery Receipt</a>
+                                                                <a class="dropdown-item" href="{{route('sales.print',$sale->HashOrderNumber)}}" target="_blank" >Print Delivery Receipt</a>
                                                                 @endif
                                                                 <a class="dropdown-item" href="javascript:void(0);" onclick="show_delivery_history({{$sale->id}})" title="Order History" data-id="{{$sale->id}}">Show Order Status History</a>
                                                             
@@ -577,7 +596,7 @@
         <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalCenterTitle">Print Receipt</h5>
+                    <h5 class="modal-title" id="exampleModalCenterTitle">View Receipt</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -599,7 +618,7 @@
                                 class="btn btn-sm btn-primary" 
                                 id="printDeliveryBtn" 
                                 data-url-template="{{ url('admin/report/delivery_report') }}/:id/multiple/:address">
-                            Print
+                            View
                         </button>
 
                         <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>

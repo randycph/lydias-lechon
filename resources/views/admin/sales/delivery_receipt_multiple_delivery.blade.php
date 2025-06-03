@@ -1,308 +1,220 @@
-@extends('admin.layouts.app')
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-@section('pagetitle')
-    Order Manager
-@endsection
+    <!-- Meta -->
+    <meta name="description" content="">
+    <meta name="author">
 
-@section('pagecss')
-    <link href="{{ asset('lib/ion-rangeslider/css/ion.rangeSlider.min.css') }}" rel="stylesheet">
+    <!-- CSRF Token -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{{ config('app.name', 'CMS') }}</title>
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('storage').'/icons/'.Setting::getFaviconLogo()->website_favicon }}">
+
+
+    <link href="{{ asset('theme/lydias/plugins/bootstrap/css/bootstrap.css') }}" rel="stylesheet" type="text/css" media="screen" />
+    <link href="{{ asset('theme/lydias/plugins/font-awesome/css/all.min.css') }}" rel="stylesheet" type="text/css" media="screen" />
+    
+    <link rel="stylesheet" href="{{ asset('css/dashforge.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/dashforge.profile.css') }}">
+
+
+
     <style>
-        p{
-            font-size:18px !important;
-        }
+        .payment-options {}
+        .payment-options .payment-options-opt {position:relative;}
+        .payment-options .payment-options-opt .form-check-input {left:55%;bottom:24px;}
+        .payment-options .payment-options-opt .payment-options-img {height:8rem;}
+        .payment-options .payment-options-opt p {padding-bottom:12px;}
 
-        table td
-        {
-            font-size:18px !important;
-        }
+        .nav-tabs .nav-link {border-right:1px solid gainsboro;}
+        .nav-tabs .nav-link:last-child {border-right:none;}
+        .nav-tabs .nav-link h6 {color:#333;}
+        .nav-tabs .nav-link.active {border:thin solid #333;}
 
-        table th
-        {
-            font-size:18px !important;
-        }
-
-        .row-selected {
-            background-color: #92b7da !important;
-        }
-
-        @page {
-          size: auto;
+        @media screen and (max-width:900px) {
+            .payment-options .payment-options-opt h6 {height:3em;}
         }
 
     </style>
-@endsection
+</head>
+ <!-- onload="setTimeout(function() {window.print();}, 1000);" -->
+<body> 
+    <div class="content content-fixed">
+        <div class="container pd-x-0 pd-lg-x-10 pd-xl-x-0">
+            <div class="text-center">
+                <img style="height:100px;" src="{{asset('images/lydias-lechon-logo-small.jpg')}}" alt="">
+                <h4><strong>Sales Transaction Summary</strong></h4>
+                <h5>Order #: {{$sales->order_number}}</h5>
+            </div>
+        </div>
+    </div>
 
-@section('content')
 
-    <div class="content ht-100v pd-0">
-            <div class="container pd-x-0">
-                 <div class="text-center mg-t-20"><img height="100px" src="http://lydias-lechon.com/images/lydias1965.png" alt=""></div>
-                <div class="d-sm-flex align-items-center justify-content-between mg-b-20 mg-lg-b-25 mg-xl-b-30">
-                    <div>
-                        
-                        
-                        <h4> <br>Delivery Report</h4>
-                        <h5>Order #: {{$sales->order_number}}</h5>
-                    </div>
-                    
+    <div class="content tx-13">
+        <div class="container pd-x-0 pd-lg-x-10 pd-xl-x-0">
+            <div class="row">
+                <div class="col-sm-6 col-lg-6 mg-t-20">
+                    <label class="tx-sans tx-uppercase tx-16 tx-bold">Customer Details</label>
+                    <h6 class="tx-15 mg-b-10">@if($sales->user_id == 9999) {{$sales->customer_name}} @else {{$sales->user->FullName}} @endif</h6>
+                    <p class="mg-b-0 tx-15">Contact No: {{$sales->customer_contact_number}} @if(!empty($sales->user->contact_tel)) | Tel no: {{$sales->user->contact_tel}} @endif</p>
+                    <p class="mg-b-0 tx-15">Email: {{$sales->email}}</p>
                 </div>
 
-                <div class="row row-sm">
-                    <div class="col-sm-6 col-lg-8">
-                        <label class="tx-sans tx-uppercase tx-10 tx-medium tx-spacing-1 tx-color-03">Customer Details</label>
-                        <p class="mg-b-3 tx-semibold">{{$sales->customer_name}}</p>                  
-                        <p class="mg-b-3">Tel No: {{$sales->customer_contact_number}}</p>
-                        <p class="mg-b-3">Email: {{$sales->email}}</p>
-                        <p class="mg-b-3">{{$sales->delivery_type}}: 
-                            {{ $deliveryAddress->address }}
-                        </p>                        
-                        <p class="mg-b-3">Date needed: {{\Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('F d, Y H:i A')}}</p>
-                        <p class="mg-b-3">Instruction: {{$deliveryAddress->note}}</p>
-                        <p class="mg-b-3">Location: {{$deliveryAddress->location}}</p>
-                    </div>
-                    <!-- col -->
-                    <div class="col-sm-6 col-lg-4">
-                        <label class="tx-sans tx-uppercase tx-10 tx-medium tx-spacing-1 tx-color-03">Order Details</label>
-                        <ul class="list-unstyled lh-7">
-                            <li class="d-flex justify-content-between">
-                                <span>Order Date</span>
-                                <span>{{ date('F d, Y H:i A', strtotime($sales->created_at))}}</span>
-                            </li>                                                   
-                            <li class="d-flex justify-content-between">
-                                <span>Payment Status</span>
+                <div class="col-sm-6 col-lg-6 mg-t-20">
+                    <label class="tx-sans tx-uppercase tx-16 tx-bold">Order Details</label>
+                    <ul class="list-unstyled lh-7">
+                        <li class="d-flex justify-content-between tx-15">
+                            <span>Order Date</span>
+                            <span>{{ date('F d, Y g:i A', strtotime($sales->created_at))}}</span>
+                        </li>
+                        <li class="d-flex justify-content-between tx-15">
+                            <span>Payment Status</span>
+                            @if($sales->PaymentStatus == 'UNPAID')
+                                <span class="tx-danger tx-semibold tx-uppercase">NOT PAID</span>
+                            @else
                                 <span class="tx-success tx-semibold tx-uppercase">{{$sales->PaymentStatus}}</span>
-                            </li>
-                            @php
-                                $isCod = 0;
-                                $sumCod = 0;
-                                foreach($salesPayments as $sp){
-                                    if($sp->payment_type == 'COD' && $sp->status=='PENDING'){
-                                        $isCod=1;
-                                        $sumCod+=$sp->amount;
-                                    }
-                                }
-                            @endphp
-                            @if($isCod == 1)
-                                <li class="d-flex justify-content-between">
-                                    <span>Mode of Payment</span>
-                                    <span class="tx-success tx-semibold tx-uppercase">COD (&#8369; {{number_format($sumCod,2)}})</span>
-                                </li>
                             @endif
-                            <li class="d-flex justify-content-between">
-                                <span>Delivery Status</span>
-                                <span class="tx-success tx-semibold tx-uppercase">{{$sales->delivery_status}}</span>
-                            </li>
-                            <hr>
-                        </ul>
-                    </div>
-                    <!-- col -->
+                        </li>
+                        <li class="d-flex justify-content-between tx-15">
+                            <span>Delivery Status</span>
+                            <span>{{$sales->delivery_status}}</span>
+                        </li>
+                    </ul>
+                </div>
 
-                    <div class="table-responsive mg-t-20">
-                        <label class="tx-sans tx-uppercase tx-10 tx-medium tx-spacing-1 tx-color-03">Order Details</label>
-                        <table class="table table-invoice bd-b">
-                            
-                            <thead>
-                            <tr>
-                                <th class="wd-10p">Product Code</th>
-                                <th class="wd-30p">Product Name</th>                                
-                                <th class="tx-center">No. of Pax</th>
-                                <th class="tx-center">Date Needed</th>
-                                <th class="tx-center">Quantity</th>
-                                <th class="tx-center">Paella</th>
-                                <th class="tx-right">Price</th>
-                                <th class="tx-right">Total</th>
-                            </tr>
-                            </thead>
-                            <tbody>
+                <div class="col-sm-12 col-lg-12 mg-t-10">
+                    <p class="mg-b-0 tx-15">Contact Person: {{$sales->contact_person ?? $sales->customer_name}}</p>
+                    <p class="mg-b-0 tx-15">Delivery Type: {{$sales->delivery_type}}</p>
+                    <p class="mg-b-3 tx-15">
+                        Delivery Address: {{ $deliveryAddress->address }}
+                    </p>                        
+                    <p class="mg-b-3 tx-15">Date needed: {{\Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('F d, Y g:i A')}}</p>
+                    <p class="mg-b-3 tx-15">Instruction: {{$deliveryAddress->note ?? $sales->instruction}}</p>
+                    <p class="mg-b-3 tx-15">Location: {{$deliveryAddress->location}}</p>
+                </div>
+            </div>
 
-                            @forelse($salesDetails as $details)
-                            <tr>
-                                <td class="tx-nowrap">{{$details->product->code}}</td>
-                                <td class="tx-nowrap">{{$details->product_name}} @if($details->paella_price > 0) with paella @endif</td>
-                                <th class="tx-center">{{$details->no_of_pax}}</th>                                
-                                <td class="tx-nowrap">{{date('F d, Y H:i A',strtotime($details->delivery_date))}}</td>
-                                <td class="tx-center">{{number_format($details->qty, 0)}}</td>
-                                <td class="tx-right">{{number_format(($details->paella_price),2)}}</td>
-                                <td class="tx-right">{{number_format($details->price, 2)}}</td>
-                                <td class="tx-right">{{number_format($details->gross_amount, 2)}}</td>                               
-                            </tr>
-                            @empty
-                                <tr>
-                                    <td class="tx-center " colspan="5">No transaction found.</td>
-                                </tr>
-                            @endforelse
-                            @if($sales->delivery_fee_amount > 0)
-                                <tr>
-                                    <td class="tx-left " colspan="7">Delivery Fee</td>
-                                    <td class="tx-right ">{{number_format($deliveryAddress->delivery_fee, 2)}}</td>
-                                </tr>
-                            @endif
-                            @if($salesDetails->sum('gross_amount') > 0)
-                                <tr style="font-weight:bold;">
-                                    <td class="tx-left" colspan="7">Total</td>
-                                    <td class="tx-right">{{number_format($details->product->price, 2)}}</td> 
-                                </tr>
-                            @endif
-                            </tbody>
-                        </table>
-                    </div>
+            <!-- Order Details -->
+            <div class="table-responsive mg-t-40">
+                <table class="table table-bordered bd-b tx-15">
+                    <thead>
+                        <tr>
+                            <th class="wd-28p">Product Name</th>        
+                            <th class="wd-15p tx-center">Date Needed</th>
+                            <th class="tx-center">Quantity</th>
+                            <th class="tx-center">Price</th>
+                            <th class="tx-right">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="tx-nowrap">{{$deliveryAddress->product->name}}</td>                
+                            <td class="tx-nowrap tx-center">{{date('F d, Y g:i A',strtotime($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time))}}</td>
+                            <td class="tx-center">{{number_format($deliveryAddress->qty, 0)}}</td>
+                            <td class="tx-center">₱{{number_format($deliveryAddress->product->price, 2)}}</td>
+                            <td class="tx-right">₱{{number_format($deliveryAddress->product->price * $deliveryAddress->qty, 2)}}</td>                               
+                        </tr>
 
-                    <div class="table-responsive mg-t-20">
-                        <label class="tx-sans tx-uppercase tx-10 tx-medium tx-spacing-1 tx-color-03">Payments</label>
-                        <table class="table table-invoice bd-b">
-                            
-                            <thead>
+                        @if($deliveryAddress->delivery_fee > 0)
                             <tr>
-                                <th class="tx-left">Payment Type</th>
-                                <th class="tx-center">Receipt No</th>
-                                <th class="tx-center">Date</th>
-                                <th class="tx-center">Status</th>
-                                <th class="tx-right">Amount</th>                                
+                                <td class="tx-left " colspan="4">Delivery Fee</td>
+                                <td class="tx-right ">₱{{number_format($deliveryAddress->delivery_fee, 2)}}</td>
                             </tr>
-                            </thead>
-                            <tbody>
-                           
-                            @forelse($salesPayments as $payment)                            
+                        @endif
+
+                        @forelse($gc as $g)
+                            <tr style="font-weight:bold;">
+                                <td class="tx-left" colspan="4">Gift Certificate: {{$g->code}}</td>
+                                <td class="tx-right">₱{{number_format($g->amount, 2)}}</td> 
+                            </tr>
+                        @empty
+                        @endforelse
+                        @if($salesDetails->sum('gross_amount') > 0)
+                            <tr style="font-weight:bold;">
+                                <td colspan="4">&nbsp;</td>
+                                <td class="tx-right">Total: ₱{{number_format(($deliveryAddress->product->price * $deliveryAddress->qty) + $deliveryAddress->delivery_fee, 2)}}</td> 
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Payments -->
+            @if($salesPayments->count())
+            <div class="table-responsive mg-t-40">
+                <h5>Payment Details</h5>
+                <table class="table table-bordered bd-b tx-15">
+                    <thead>
+                        <tr>
+                            <th class="tx-left">Payment Type</th>
+                            <th class="tx-center">Receipt No</th>
+                            <th class="tx-center">Date</th>
+                            <th class="tx-center">Status</th>
+                            <th class="tx-right">Amount</th>                                
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($salesPayments as $payment)                            
                             <tr>
                                 <td class="tx-left">{{$payment->payment_type}}</td>
                                 <td class="tx-center">{{$payment->receipt_number}}</td>
                                 <td class="tx-center">{{ date('F d, Y', strtotime($payment->payment_date))}}</td>
-                                <td class="tx-center">{{$payment->status}}</td>
+                                <td class="tx-center">@if($payment->status=='PENDING' && ($payment->payment_type=='IPAY' || $payment->payment_type=='Paymaya' )) Subject for Confirmation @else {{$payment->status}} @endif</td>
                                 <td class="tx-right">{{number_format($payment->amount, 2)}}</td>
                                
                             </tr>
-                            @empty
-                                <tr>
-                                    <td class="tx-center " colspan="6">No payment found.</td>
-                                </tr>
-                            @endforelse
-                            @if($salesPayments->sum('amount') > 0)
-                                <tr style="font-weight:bold;">
-                                    <td class="tx-left" colspan="4">Total</td>
-                                    <td class="tx-right">{{number_format($salesPayments->sum('amount'), 2)}}</td> 
-                                </tr>
-                            @endif
-
-                            @php
-                                $total_balance = $sales->gross_amount - $salesPayments->sum('amount');
-                            @endphp
-                            @if($total_balance > 0)
-                                <tr style="font-style:italic;">
-                                    <td class="tx-left" colspan="4"><br>Balance</td>
-                                    <td class="tx-right"><br>{{number_format($total_balance, 2)}}</td> 
-                                </tr>
-                            @endif
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="table-responsive mg-t-20">
-                        <label class="tx-sans tx-uppercase tx-10 tx-medium tx-spacing-1 tx-color-03">Delivery History</label>
-                        <table class="table table-invoice bd-b">
-                            
-                            <thead>
+                        @empty
                             <tr>
-                                <th class="tx-left">Date</th>
-                                <th class="tx-center">Status</th>
-                                <th class="tx-center">Remarks</th>
-                                <th class="tx-center">Delivered By</th>                              
+                                <td class="tx-center " colspan="6">No payment found.</td>
                             </tr>
-                            </thead>
-                            <tbody>
-                           
-                            @forelse($deliveries as $delivery)                            
+                        @endforelse
+
+                        @if($salesPayments->sum('amount') > 0)
+                            <tr style="font-weight:bold;">
+                                <td colspan="4">&nbsp;</td>
+                                <td align="right">Total : {{number_format($salesPayments->sum('amount'), 2)}}</td> 
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+            @endif
+
+            <!-- Delivery History -->
+            @if($deliveries->count()))
+            <div class="table-responsive mg-t-40">
+                <h5>Delivery History</h5>
+                <table class="table table-bordered bd-b tx-15">
+                    <thead>
+                        <tr>
+                            <th class="tx-left">Date</th>
+                            <th class="tx-center">Status</th>
+                            <th class="tx-center">Remarks</th>
+                            <th class="tx-center">Delivered By</th>                              
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($deliveries as $delivery)                            
                             <tr>
                                 <td class="tx-left">{{$delivery->created_at}}</td>
                                 <td class="tx-center">{{$delivery->status}}</td>
                                 <td class="tx-center">{{$delivery->remarks}}</td>
-                                <td class="tx-center">{{$delivery->delivered_by}}</td>
-                               
+                                <td class="tx-center">{{$delivery->delivered_by}}</td> 
                             </tr>
-                            @empty
-                                <tr>
-                                    <td class="tx-center " colspan="6">No delivery transaction found.</td>
-                                </tr>
-                            @endforelse
-                           
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="table-responsive mg-t-20">
-                        <label class="tx-sans tx-uppercase tx-10 tx-medium tx-spacing-1 tx-color-03">Acknowledgement Receipt</label>
-                        <p class="tx-center">RECEIVED THE ABOVE IN GOOD ORDER AND CONDITION</p>
-                        <table width="100%">                            
+                        @empty
                             <tr>
-                                <td>Received by:</td>
-                                <td>Received date and time:</td>
-                                <td>Delivered by:</td>
+                                <td class="tx-center " colspan="6">No deliveries found.</td>
                             </tr>
-                            <tr>
-                                <td><br></td>
-                            </tr>
-                            <tr>
-                                <td>____________________</td>
-                                <td>____________________</td>
-                                <td>____________________</td>
-                            </tr>
-                        </table>
-                    </div>
-
-                   
-                   
-                    <!-- col -->
-                  
-
-                </div>
-                <!-- row -->
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
-            <!-- container -->
+            @endif
         </div>
-@endsection
-
-@section('pagejs')
-    <script src="{{ asset('lib/bselect/dist/js/bootstrap-select.js') }}"></script>
-    <script src="{{ asset('lib/bselect/dist/js/i18n/defaults-en_US.js') }}"></script>
-    <script src="{{ asset('lib/ion-rangeslider/js/ion.rangeSlider.min.js') }}"></script>
-
-    <script>
-        {{--let searchType = "{{ $searchType }}";--}}
-    </script>
-
-{{--    <script src="{{ asset('js/listing.js') }}"></script>--}}
-@endsection
-
-@section('customjs')
-<script>
-    function post_form(id,status,pages){
-
-        $('#posting_form').attr('action',id);
-        $('#pages').val(pages);
-        $('#status').val(status);
-        $('#posting_form').submit();
-    }
-
-    {{--function cancel_product(id,status){--}}
-    {{--    $('#prompt-cancel-product').modal('show');--}}
-    {{--    $('#btnCancelProduct').on('click', function() {--}}
-    {{--        //let sales = $('#delivery_status').val();--}}
-    {{--        post_form("{{route('sales-transaction.cancel_product')}}",status,id)--}}
-    {{--        //console.log(status);--}}
-    {{--    });--}}
-    {{--}--}}
-
-    $('#prompt-cancel-product').on('show.bs.modal', function (e) {
-        //get data-id attribute of the clicked element
-        let sales = e.relatedTarget;
-        let salesId = $(sales).data('id');
-        let salesStatus = $(sales).data('status');
-        let formAction = "{{ route('sales-transaction.cancel_product', 0) }}".split('/');
-        formAction.pop();
-        let editFormAction = formAction.join('/') + "/" + salesId;
-        $('#editForm').attr('action', editFormAction);
-        $('#id').val(salesId);
-        $('#editStatus').val(salesStatus);
-
-    });
-</script>
-@endsection
+    </div>
+</body>
+</html>

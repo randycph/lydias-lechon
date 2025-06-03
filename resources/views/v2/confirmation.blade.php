@@ -71,11 +71,13 @@
                                     <strong>Contact number</strong>: {{ $address->contact_tel }}<br>
                                     <strong>Delivery fee</strong>: ₱{{ number_format($address->delivery_fee, 2) }}<br>
                                     <strong>Location</strong>: {{ $address->location }}<br>
-                                    <strong>Delivery Date and time</strong>: {{ date('F d, Y H:i A', strtotime($address->delivery_date . ' ' . $address->delivery_time)) }}<br>
+                                    <strong>Delivery Date and time</strong>: {{ date('F d, Y g:i A', strtotime($address->delivery_date . ' ' . $address->delivery_time)) }}<br>
                                     <strong>Note</strong>: {{ $address->note }}<br>
                                 </li>
                                 @endforeach
                                 </ul>
+                            @else
+                                {{ $sales->customer_delivery_adress ?? 'NA' }}
                             @endif
                         </div>
                     </div>
@@ -203,8 +205,8 @@
                 <div class="mb-2 text-lg font-semibold text-slate-600">
                     Order Summary
                 </div>
-                <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                    <thead class=" text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <table class="w-full text-sm text-left rtl:text-right text-gray-500">
+                    <thead class=" text-gray-700 uppercase bg-gray-50">
                         <tr>
                             <th scope="col" class="px-6 py-3">
                                 Product Code
@@ -235,7 +237,7 @@
                     <tbody>
                         @forelse($salesDetails as $details)
                         <tr class="bg-white border-b border-gray-200">
-                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                                 {{ $details->product->code }}
                             </th>
                             <td class="px-6 py-4">
@@ -294,8 +296,8 @@
                 <div class="mb-2 text-lg font-semibold text-slate-600">
                     Payments
                 </div>
-                <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                    <thead class=" text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <table class="w-full text-sm text-left rtl:text-right text-gray-500">
+                    <thead class=" text-gray-700 uppercase bg-gray-50">
                         <tr>
                             <th scope="col" class="px-6 py-3">
                                 Payment Type
@@ -317,7 +319,7 @@
                     <tbody>
                         @forelse($salesPayments as $payment)
                         <tr class="bg-white border-b border-gray-200">
-                            <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                                 {{ $payment->payment_type }}
                             </td>
                             <td class="px-6 py-4">
@@ -355,8 +357,8 @@
                 <div class="mb-2 text-lg font-semibold text-slate-600">
                     Delivery History
                 </div>
-                <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                    <thead class=" text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <table class="w-full text-sm text-left rtl:text-right text-gray-500">
+                    <thead class=" text-gray-700 uppercase bg-gray-50">
                         <tr>
                             <th scope="col" class="px-6 py-3">
                                 Date
@@ -375,7 +377,7 @@
                     <tbody>
                         @forelse($deliveries as $delivery)  
                         <tr class="bg-white border-b border-gray-200">
-                            <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                            <td scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
                                 {{ $delivery->created_at }}
                             </td>
                             <td class="px-6 py-4">

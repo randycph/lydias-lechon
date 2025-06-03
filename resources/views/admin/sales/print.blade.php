@@ -87,10 +87,36 @@
                 </div>
 
                 <div class="col-sm-12 col-lg-12 mg-t-10">
-                    <p class="mg-b-0 tx-15">Delivery Type: {{$sales->delivery_type}}</p>
+                    <p class="mg-b-0 tx-15">Delivery Type: 
+                        {{$sales->delivery_type}}
+                        <br>
+                        @if ($sales->delivery_type == 'Door to door delivery')
+                            @if ($sales?->deliveryAddress && count($sales?->deliveryAddress) > 0)
+                            <ul>
+                            @foreach ($sales->deliveryAddress as $k => $address)
+                            <li class="tx-15">
+                                Address {{ $k + 1 }}: {{ $address->address }}<br>
+                                Contact person: {{ $address->contact_person }}<br>
+                                Contact number: {{ $address->contact_tel }}<br>
+                                Delivery fee: ₱{{ number_format($address->delivery_fee, 2) }}<br>
+                                Location: {{ $address->location }}<br>
+                                Delivery Date and time: {{ \Carbon\Carbon::parse(strtotime($address->delivery_date . ' ' . $address->delivery_time))->format('F d, Y g:i A') }}<br>
+                                @if ( $address->note)
+                                Instruction: {{ $address->note }}<br>
+                                @endif
+                            </li>
+                            @endforeach
+                            </ul>
+                            @endif
+                        @else
+                           Delivery/Pickup Address: {{$sales->customer_delivery_adress}}
+                        @endif
+                    </p>   
+
                     <p class="mg-b-0 tx-15">Contact Person: {{$sales->contact_person ?? $sales->customer_name}}</p>
-                    <p class="mg-b-0 tx-15">Delivery/Pickup Address: {{$sales->customer_delivery_adress}}</p>
+                    @if ($sales->instruction)
                     <p class="mg-b-0 tx-15">Instruction: {{$sales->instruction}}</p>
+                    @endif
                 </div>
             </div>
 

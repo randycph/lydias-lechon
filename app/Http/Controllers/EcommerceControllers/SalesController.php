@@ -692,7 +692,7 @@ class SalesController extends Controller
 
     public function show($id)
     {
-        $sales = SalesHeader::where('id',$id)->first();
+        $sales = SalesHeader::with('deliveryAddress')->where('id',$id)->first();
         $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
         $gc = GiftCertificate::where('sales_header_id',$id)->get();
         $salesDetails = SalesDetail::where('sales_header_id',$id)->get();

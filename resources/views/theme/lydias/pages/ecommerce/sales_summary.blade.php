@@ -70,7 +70,7 @@
                                     Delivery Date and time: {{ \Carbon\Carbon::parse(strtotime($address->delivery_date . ' ' . $address->delivery_time)))->format('F d, Y g:i A') }}<br>
                                 </li>
                                 @endforeach
-                                </ul>Y-m-d H:i A
+                                </ul>
                                 @endif
                             @else
                                 {{$sales->customer_delivery_adress}}
@@ -122,7 +122,7 @@
                                 <td class="tx-nowrap">{{$details->product->code}}</td>
                                 <td class="tx-nowrap">{{$details->product_name}} @if($details->paella_price > 0) with paella @endif</td>
                                 <th class="tx-center">{{$details->no_of_pax}}</th>                                
-                                <td class="tx-nowrap">{{date('F d, Y H:i A',strtotime($details->delivery_date))}}</td>
+                                <td class="tx-nowrap">{{date('F d, Y g:i A',strtotime($details->delivery_date))}}</td>
                                 <td class="tx-center">{{number_format($details->qty, 0)}}</td>
                                 <td class="tx-right">{{number_format(($details->paella_price),2)}}</td>
                                 <td class="tx-right">{{number_format($details->price, 2)}}</td>
