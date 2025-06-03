@@ -445,11 +445,14 @@ class ReportsController extends Controller
     }
     public function delivery_report_multiple($id, $address)
     {
-        if (!$id) {
-            return redirect()->back()->with('error', 'Invalid Sales ID');
+        if (!is_numeric($id)) {
+            $id = base64_decode($id);
         }
-
-        $sales = SalesHeader::whereId($id)->first();
+        
+        $sales = SalesHeader::where('id',$id)->first();
+        $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
+        $salesDetails  = SalesDetail::where('sales_header_id',$id)->get();
+        $deliveries    = DeliveryStatus::where('order_id',$id)->get();
 
         $deliveryAddress = ProductDeliveryAddress::with('product')->where('id', $address)->where('sales_header_id', $sales->id)->first();
 
@@ -457,18 +460,9 @@ class ReportsController extends Controller
             return;
         }
 
-        $salesPayments = \App\EcommerceModel\SalesPayment::where('sales_header_id',$id)->get();
-        $salesDetails = \App\EcommerceModel\SalesDetail::where('sales_header_id',$id)->where('product_id', $deliveryAddress->product_id)->get();
-        $totalPayment = \App\EcommerceModel\SalesPayment::where('sales_header_id',$id)->sum('amount');
-        $deliveries = \App\EcommerceModel\DeliveryStatus::where('order_id',$id)->get();
-        $totalNet = \App\EcommerceModel\SalesHeader::where('id',$id)->sum('net_amount');
-        if($totalNet <= $totalPayment) {
-            $status = 'PAID';
-        } else {
-            $status = 'UNPAID';
-        }
+        $gc = GiftCertificate::where('sales_header_id',$id)->get();
 
-        return view('admin.sales.delivery_receipt_multiple_delivery',compact('sales','salesPayments','salesDetails','status','deliveries','deliveryAddress'));
+        return view('admin.sales.delivery_receipt_multiple_delivery',compact('sales','salesPayments','salesDetails','deliveries','deliveryAddress','gc'));
     }
 
     public function delivery_report($id)

@@ -61,7 +61,9 @@
                         </p>                
 
                         <p class="mg-b-3">Contact Person: {{$sales->contact_person ?? $sales->customer_name}}</p>     
+                        @if ($sales->instruction)
                         <p class="mg-b-3">Instruction: {{$sales->instruction}}</p>
+                        @endif
                     </div>
                     <!-- col -->
                     <div class="col-sm-6 col-lg-4">

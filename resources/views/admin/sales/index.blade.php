@@ -167,7 +167,7 @@
 
             <!-- Start Pages -->
             <div class="col-md-12">
-                <div class="table-list mg-b-10">
+                <div class="table-list mg-b-10" style="overflow: auto">
                     <div class="table-responsive-lg">
                         <table class="table mg-b-0 table-light table-hover table-striped">
                             <thead>
@@ -355,7 +355,7 @@
                                                                     <button class="dropdown-item">Print Delivery Receipt</button>
                                                                 </div>
                                                                 @else
-                                                                <a class="dropdown-item" href="{{route('admin.report.delivery_report',$sale->id)}}" target="_blank" >Print Delivery Receipt</a>
+                                                                <a class="dropdown-item" href="{{route('sales.print',$sale->HashOrderNumber)}}" target="_blank" >Print Delivery Receipt</a>
                                                                 @endif
                                                                 <a class="dropdown-item" href="javascript:void(0);" onclick="show_delivery_history({{$sale->id}})" title="Order History" data-id="{{$sale->id}}">Show Order Status History</a>
                                                             
