@@ -77,6 +77,13 @@ Route::post('/admin/login', function(Request $request) {
     $credentials = $request->only('email', 'password');
 
     if (Auth::attempt($credentials)) {
+
+        $user = Auth::user();
+
+        if ($user->role_id == 15 ) {
+            return redirect()->route('sales-transaction.driver_sales_transaction');
+        }
+
         return redirect()->intended('admin/dashboard');
     }
 
