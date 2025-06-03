@@ -263,7 +263,7 @@ class PaymayatestController extends Controller
 
         $amount = (float) $amount;
         $deliveryFee = (float) $sale->delivery_fee_amount ?? 0;
-        $subtotal = $amount - $deliveryFee;
+        $subtotal = $amount;
         $postData = [
             "totalAmount" => [
                 "value" => (float) $amount,
