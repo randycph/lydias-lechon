@@ -39,92 +39,23 @@
                         <form id="filterForm">
                         <table width="100%">
                             <tr>                              
-                                <td style="width:18%">
-                                    <input @if(isset($filter->start_date)) type="date" value="{{$filter->start_date}}" @else type="text" onfocus="(this.type='date')" @endif class="form-control" name="start_date" placeholder="Start Date (Order)">
+                                <td style="width:25%">
+                                    <input @if(isset($filter->dn_start_date)) type="date" value="{{$filter->dn_start_date}}" @else type="text" onfocus="(this.type='date')" @endif class="form-control" name="dn_start_date" placeholder="Start Date (Date Needed)">
                                 </td>
-                                <td style="width:18%">
-                                    <input @if(isset($filter->end_date)) type="date" value="{{$filter->end_date}}" @else type="text" onfocus="(this.type='date')" @endif class="form-control" name="end_date" placeholder="End Date (Order)">
+                                <td style="width:25%">
+                                    <input @if(isset($filter->dn_end_date)) type="date" value="{{$filter->dn_end_date}}" @else type="text" onfocus="(this.type='date')" @endif class="form-control" name="dn_end_date" placeholder="End Date (Date Needed)">
                                 </td>
                                 
-                                <td style="width:28%"><input name="search" type="search" id="search" class="form-control"  placeholder="Order, Customer" value="{{ $filter->search }}">
-                                </td>                                
-                                <td align="left" style="width:10%">
-                                    <div class="bd-highlight">
-                                        <div class="dropdown d-inline">
-                                            <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                {{__('common.filters')}}
-                                            </button>
-                                            <div class="dropdown-menu">
-                                                
-                                                    <div class="form-group">
-                                                        <label for="exampleDropdownFormEmail1">{{__('common.sort_by')}}</label>
-                                                        <div class="custom-control custom-radio">
-                                                            <input type="radio" id="orderBy1" name="orderBy" class="custom-control-input" value="order_number" @if ($filter->orderBy == 'order_number') checked @endif>
-                                                            <label class="custom-control-label" for="orderBy1">Order Number</label>
-                                                        </div>
-                                                        <div class="custom-control custom-radio">
-                                                            <input type="radio" id="orderBy2" name="orderBy" class="custom-control-input" value="customer_name" @if ($filter->orderBy == 'customer_name') checked @endif>
-                                                            <label class="custom-control-label" for="orderBy2">Customer Name</label>
-                                                        </div>
-                                                        <div class="custom-control custom-radio">
-                                                            <input type="radio" id="orderBy3" name="orderBy" class="custom-control-input" value="date_needed" @if ($filter->orderBy == 'date_needed') checked @endif>
-                                                            <label class="custom-control-label" for="orderBy3">Date Needed</label>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group">
-                                                        <label for="exampleDropdownFormEmail1">{{__('common.sort_order')}}</label>
-                                                        <div class="custom-control custom-radio">
-                                                            <input type="radio" id="sortByAsc" name="sortBy" class="custom-control-input" value="asc" @if ($filter->sortBy == 'asc') checked @endif>
-                                                            <label class="custom-control-label" for="sortByAsc">{{__('common.ascending')}}</label>
-                                                        </div>
-
-                                                        <div class="custom-control custom-radio">
-                                                            <input type="radio" id="sortByDesc" name="sortBy" class="custom-control-input" value="desc"  @if ($filter->sortBy == 'desc') checked @endif>
-                                                            <label class="custom-control-label" for="sortByDesc">{{__('common.descending')}}</label>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div class="form-group">
-                                                        <div class="custom-control custom-checkbox">
-                                                            <input type="checkbox" id="showDeleted" name="showDeleted" class="custom-control-input" @if ($filter->showDeleted) checked @endif>
-                                                            <label class="custom-control-label" for="showDeleted">{{__('common.show_deleted')}}</label>
-                                                        </div>
-                                                    </div>
-                                                    <div class="form-group mg-b-40">
-                                                        <label class="d-block">{{__('common.item_displayed')}}</label>
-                                                        <input id="displaySize" type="text" class="js-range-slider" name="perPage" value="{{ $filter->perPage }}"/>
-                                                    </div>
-                                                    <button style="display:none;" id="filter" type="button" class="btn btn-sm btn-primary">{{__('common.apply_filters')}}</button>
-                                               
-                                            </div>
-                                        </div>
-                                    </div>
+                                <td style="width:40%"><input name="search" type="search" id="search" class="form-control"  placeholder="Order, Customer" value="{{ $filter->search }}">
                                 </td>
+                                <td><input type="submit" class="btn-xs btn btn-success" value="Search"></td>                                
+                              
                                 <td>
-                                    <input type="submit" class="btn-xs btn btn-success" value="Search">
+                                    
                                     <a href="{{ route('sales-transaction.driver_sales_transaction') }}" class="btn-xs btn btn-info">Reset</a>
                                 </td>
                             </tr>
-                            <tr>
-                                <td style="width:15%">
-                                    <select class="form-control" name="delivery_type">
-                                        <option value="">Delivery Type</option>
-                                        <option value="Store Pickup" @if(isset($filter->delivery_type) && $filter->delivery_type == 'Store Pickup') selected="selected" @endif>Store Pickup</option>
-                                        <option value="Door to door delivery" @if(isset($filter->delivery_type) && $filter->delivery_type == 'Door to door delivery') selected="selected" @endif>Door to door delivery</option>
-                                    </select>
-                                </td>   
-                                <td style="width:16%">
-                                    <input @if(isset($filter->dn_start_date)) type="date" value="{{$filter->dn_start_date}}" @else type="text" onfocus="(this.type='date')" @endif class="form-control" name="dn_start_date" placeholder="Start Date (Date Needed)">
-                                </td>
-                                <td style="width:16%">
-                                    <input @if(isset($filter->dn_end_date)) type="date" value="{{$filter->dn_end_date}}" @else type="text" onfocus="(this.type='date')" @endif class="form-control" name="dn_end_date" placeholder="End Date (Date Needed)">
-                                </td>
-                                <td>
-                                    <button id="bulk-delete-btn" type="button" class="btn btn-danger d-none" data-toggle="modal" data-target="#confirmDeleteModal">
-                                        Delete Selected
-                                    </button>
-                                </td>
-                            </tr>
+                           
                         </table>
                          </form>
                         
