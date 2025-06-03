@@ -349,7 +349,7 @@ class User extends Authenticatable implements MustVerifyEmail
     // }
 
     public function is_a_cms_user() {
-        return $this->user_type == 'cms' && ($this->role_id == 1 || $this->role_id == 15);
+        return $this->user_type == 'cms' && ($this->role_id == 1 || $this->role_id == config('auth.driver_role_id'));
     }
 
     public function is_a_member_user() {

@@ -80,7 +80,7 @@ Route::post('/admin/login', function(Request $request) {
 
         $user = Auth::user();
 
-        if ($user->role_id == 15 ) {
+        if ($user->role_id == config('auth.driver_role_id') ) {
             return redirect()->route('sales-transaction.driver_sales_transaction');
         }
 

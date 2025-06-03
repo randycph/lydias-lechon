@@ -112,4 +112,5 @@ return [
 
     'password_timeout' => 10800,
 
+    'driver_role_id' => env('DRIVER_ROLE_ID', 15),
 ];

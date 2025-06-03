@@ -487,7 +487,7 @@ class SalesController extends Controller
 
     public function index()
     {
-        if (auth()->user()->role_id == 15) {
+        if (auth()->user()->role_id == config('auth.driver_role_id')) {
             return redirect()->route('sales-transaction.driver_sales_transaction');
         } 
 
@@ -1097,7 +1097,7 @@ class SalesController extends Controller
                 ],
             ];
         }
-        if(auth()->user()->role_id == 15){
+        if(auth()->user()->role_id == config('auth.driver_role_id')){
             $userName = Auth::user()->name;
 
         // Step 1: SalesHeader
