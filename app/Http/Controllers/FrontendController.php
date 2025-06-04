@@ -198,7 +198,7 @@ class FrontendController extends Controller
             $id = base64_decode($id);
         }
 
-        $sales = SalesHeader::where('id',$id)->with('deliveryAddress')->first();
+        $sales = SalesHeader::where('id',$id)->with('deliveryAddress', 'items')->first();
         $gc = GiftCertificate::where('sales_header_id',$id)->get();
         $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
         $salesDetails = SalesDetail::with('product.photos')->where('sales_header_id',$id)->get();

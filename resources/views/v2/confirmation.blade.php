@@ -86,8 +86,7 @@
                     <div class="flex items-center text-sm justify-between px-4 py-3 border-b border-gray-200">
                         <div>Date and Time Needed</div>
                         <div class="text-right">
-                            <div>10/14/2024</div>
-                            <div>3:00 PM</div>
+                            <div>{{ \Carbon\Carbon::parse($sales?->items?->first()?->delivery_date)->format('F d, Y g:i A') }}</div>
                         </div>
                     </div>
                     @endif
