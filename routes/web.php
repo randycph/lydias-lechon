@@ -73,6 +73,9 @@ Route::post('/signup-store', [FrontendController::class, 'signupStore'])->name('
 Route::post('save-personal-information', [FrontendController::class, 'savePersonalInformation'])->name('save-personal-information');
 Route::post('save-delivery-address', [FrontendController::class, 'saveDeliveryAddress'])->name('save-delivery-address');
 
+Route::get('/privacy-policy', [FrontendController::class, 'privacyPolicy'])->name('privacy-policy');
+Route::get('/terms-of-service', [FrontendController::class, 'termsOfService'])->name('terms-of-service');
+
 Route::get('/admin/login', function() {
     return view('auth.login');
 })->name('admin.login');
@@ -189,8 +192,6 @@ Route::post('/news/{slug}/share', 'News\ArticleFrontController@news_share')->nam
 //Careers Frontend
 // Route::get('/careers', 'FrontController@careers')->name('careers');
 Route::post('/careers-application', 'FrontController@applicant')->name('applicant');
-
-Route::get('/privacy-policy/', 'FrontController@privacy_policy')->name('privacy-policy');
 
 //Contact Us Post
 Route::post('/contact-us', 'FrontController@contact_us')->name('contact-us');

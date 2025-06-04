@@ -307,6 +307,17 @@ class FrontendController extends Controller
         return view('v2.careers');
     }
 
+    public function privacyPolicy()
+    {
+        return view('v2.privacy-policy');
+    }
+
+    public function termsOfService()
+    {
+        return view('v2.terms-of-use');
+    }
+
+
     public function blogs()
     {
         $featuredArticle = Article::with('category')
