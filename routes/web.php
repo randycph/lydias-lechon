@@ -66,6 +66,7 @@ Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 Route::get('auth/facebook', [FacebookController::class, 'redirectoFacebook'])->name('facebook.login');
 Route::get('auth/facebook/callback', [FacebookController::class, 'handleFacebookCallback']);
+Route::get('auth/facebook/delete', [FacebookController::class, 'handleFacebookDelete']);
 Route::get('/search', [GlobalSearchController::class, 'search'])->name('global.search');
 
 Route::post('/signup-store', [FrontendController::class, 'signupStore'])->name('signup.store');
