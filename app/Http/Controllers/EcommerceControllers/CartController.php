@@ -9,6 +9,7 @@ use App\Mail\SalesCompletedRegistered;
 use Illuminate\Support\Facades\Mail;
 use App\EcommerceModel\SalesPayment;
 use App\EcommerceModel\Branch;
+use App\EcommerceModel\Coupon;
 use App\EcommerceModel\CouponCart;
 use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\SalesDetail;
@@ -760,13 +761,20 @@ class CartController extends Controller
         ]);
 
         if ($request->coupon && $request->discount_amount) {
-            CouponCart::create([
-                'coupon_id' => $request->coupon?->id,
-                'customer_id' => $user->id,
-                'total_usage' => 1,
-                'status' =>  0,
-                'sales_header_id' => $salesHeader->id
-            ]);
+            $couponCode = Coupon::whereRaw('LOWER(coupon_code) = ?', [strtolower($request->coupon)])
+                ->where('activation_type', 'manual')
+                ->where('status', 1)
+                ->first();
+
+            if ($couponCode) {
+                CouponCart::create([
+                    'coupon_id' => $couponCode?->id,
+                    'customer_id' => $user->id,
+                    'total_usage' => 1,
+                    'status' =>  0,
+                    'sales_header_id' => $salesHeader->id
+                ]);
+            }
         }
 
         $formattedOrderNumber = sprintf('%07d', $salesHeader->id);
