@@ -528,7 +528,7 @@
                             <div class="flex gap-2 items-center">
                                 <div class="text-2xl font-bold">Amount to pay</div>
                             </div>
-                            <button @click="depositModal = false" class="self-end text-2xl text-gray-800">
+                            <button @click="closeDepositModal()" class="self-end text-2xl text-gray-800">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                                 </svg>
@@ -631,6 +631,10 @@
             currentDate: new Date()?.toISOString()?.split('T')[0],
             method: 'pickup',
             depositModal: false,
+            closeDepositModal() {
+                this.depositModal = false;
+                window.location.href = '/sales-summary/' + this.paymentDetails.sales_header_id;
+            },
             orders: @json($carts) || [],
             totalQty: 1,
             deliveries: [
