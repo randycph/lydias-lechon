@@ -49,4 +49,9 @@ public function redirectoFacebook()
             return redirect('/login')->withErrors(['error' => 'Google login failed. Please try again.']);
         }
     }
+
+    public function handleFacebookDelete()
+    {
+        return redirect()->route('my-account')->withErrors(['error' => 'Facebook login is not supported for account deletion.']);
+    }
 }
