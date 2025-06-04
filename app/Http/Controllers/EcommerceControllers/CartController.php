@@ -9,6 +9,7 @@ use App\Mail\SalesCompletedRegistered;
 use Illuminate\Support\Facades\Mail;
 use App\EcommerceModel\SalesPayment;
 use App\EcommerceModel\Branch;
+use App\EcommerceModel\CouponCart;
 use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\SalesDetail;
 use App\Helpers\Webfocus\Setting;
@@ -757,6 +758,16 @@ class CartController extends Controller
             'origin' => $origin,
             'forecast_date' => $forecast_date
         ]);
+
+        if ($request->coupon && $request->discount_amount) {
+            CouponCart::create([
+                'coupon_id' => $request->coupon?->id,
+                'customer_id' => $user->id,
+                'total_usage' => 1,
+                'status' =>  0,
+                'sales_header_id' => $salesHeader->id
+            ]);
+        }
 
         $formattedOrderNumber = sprintf('%07d', $salesHeader->id);
         $salesHeader->update(['order_number' => $formattedOrderNumber]);

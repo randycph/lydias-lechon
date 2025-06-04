@@ -732,8 +732,9 @@ class CheckoutController extends Controller
         }
 
         // Check if coupon was already applied
-        $totalUsed = CouponCart::where('coupon_id', $coupon->id)->sum('total_usage');
+        $totalUsed = CouponCart::where('coupon_id', $coupon->id)->where('status', 1)->sum('total_usage');
         $customerUsed = CouponCart::where('coupon_id', $coupon->id)
+            ->where('status', 1)
             ->where('customer_id', Auth::id())
             ->sum('total_usage');
 

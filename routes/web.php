@@ -11,6 +11,7 @@ use App\Helpers\ListingHelper;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\FacebookController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\GlobalSearchController;
 use App\Mail\SalesCompleted;
@@ -63,6 +64,8 @@ Route::get('blog/{category}/{slug}', [FrontendController::class, 'article'])->na
 Route::get('/user-logout', [FrontendController::class, 'userLogout'])->name('user-logout');
 Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
 Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
+Route::get('auth/facebook', [FacebookController::class, 'redirectoFacebook'])->name('facebook.login');
+Route::get('auth/facebook/callback', [FacebookController::class, 'handleFacebookCallback']);
 Route::get('/search', [GlobalSearchController::class, 'search'])->name('global.search');
 
 Route::post('/signup-store', [FrontendController::class, 'signupStore'])->name('signup.store');
