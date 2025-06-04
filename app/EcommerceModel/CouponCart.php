@@ -4,11 +4,12 @@ namespace App\EcommerceModel;
 
 use Illuminate\Database\Eloquent\Model;
 use App\EcommerceModel\Coupon;
+use App\Models\User;
 
 class CouponCart extends Model
 {
 	protected $table = 'coupon_cart';
-    protected $fillable = [ 'coupon_id','product_id','customer_id','total_usage'];
+    protected $fillable = [ 'coupon_id','product_id','customer_id','total_usage', 'status', 'sales_header_id'];
     public $timestamps = true;
 
     public function details()
@@ -36,5 +37,15 @@ class CouponCart extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'customer_id');
+    }
+
+    public function sales_header()
+    {
+        return $this->belongsTo(SalesHeader::class, 'sales_header_id');
+    }
+
+    public function getCouponCodeAttribute()
+    {
+        return $this->coupon ? $this->coupon->code : null;
     }
 }
