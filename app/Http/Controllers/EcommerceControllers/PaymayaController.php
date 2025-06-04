@@ -224,6 +224,8 @@ class PaymayaController extends Controller
 
         $items = [];
 
+        $productsAmount = 0;
+
         foreach ($sale->items as $i) {
             $items[] = [
                 "name" => $i->product_name,
@@ -251,6 +253,8 @@ class PaymayaController extends Controller
                     ]
                 ]
             ];
+
+            $productsAmount += (float) $i->gross_amount;
         }
 
         $discount = 0;
@@ -263,7 +267,6 @@ class PaymayaController extends Controller
 
         $amount = (float) $amount;
         $deliveryFee = (float) $sale->delivery_fee_amount ?? 0;
-        $subtotal = $amount;
         $postData = [
             "totalAmount" => [
                 "value" => (float) $amount,
@@ -273,7 +276,7 @@ class PaymayaController extends Controller
                     "serviceCharge" => 0,
                     "shippingFee" => $deliveryFee,
                     "tax" => 0,
-                    "subtotal" => $subtotal
+                    "subtotal" => $productsAmount
                 ]
             ],
             "buyer" => [

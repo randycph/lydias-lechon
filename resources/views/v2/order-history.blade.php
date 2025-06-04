@@ -19,20 +19,20 @@
                     </div>
 
                     @if (request()->query('payment_successful'))
-                    <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
+                    <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50" role="alert">
                         <span class="font-medium">Success!</span> Your payment was successfully processed. Thank you.
                     </div>
                     @endif
 
                     @if (request()->query('order_cancelled'))
-                    <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400" role="alert">
+                    <div class="p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50" role="alert">
                         <span class="font-medium">Important</span> The payment transaction you processed was unsuccessful.
                         <p class="mb-0">If you wish to continue with your order, please click on the corresponding Pay icon <i class="fa fa-credit-card"></i> of Order#: <i style="font-weight:bold;">{{$_GET['order_no']}}</i></p>
                     </div>
                     @endif
 
                     @if(Session::has('success_cancelled'))
-                    <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
+                    <div class="p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50" role="alert">
                         <span class="font-medium">Order Cancelled!</span> Your order has been successfully cancelled.
                     </div>
                     @endif

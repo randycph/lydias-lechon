@@ -222,6 +222,8 @@ class PaymayatestController extends Controller
 
         $items = [];
 
+        $productsAmount = 0;
+
         foreach ($sale->items as $i) {
             $items[] = [
                 "name" => $i->product_name,
@@ -249,6 +251,8 @@ class PaymayatestController extends Controller
                     ]
                 ]
             ];
+
+            $productsAmount += (float) $i->gross_amount;
         }
 
         $salesHeader = SalesHeader::whereId($id)->with(['items'])->first();
@@ -263,7 +267,6 @@ class PaymayatestController extends Controller
 
         $amount = (float) $amount;
         $deliveryFee = (float) $sale->delivery_fee_amount ?? 0;
-        $subtotal = $amount;
         $postData = [
             "totalAmount" => [
                 "value" => (float) $amount,
@@ -273,7 +276,7 @@ class PaymayatestController extends Controller
                     "serviceCharge" => 0,
                     "shippingFee" => $deliveryFee,
                     "tax" => 0,
-                    "subtotal" => $subtotal
+                    "subtotal" => $productsAmount
                 ]
             ],
             "buyer" => [
