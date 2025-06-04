@@ -763,7 +763,7 @@ class CartController extends Controller
         if ($request->coupon && $request->discount_amount) {
             $couponCode = Coupon::whereRaw('LOWER(coupon_code) = ?', [strtolower($request->coupon)])
                 ->where('activation_type', 'manual')
-                ->where('status', 1)
+                ->where('status', 'ACTIVE')
                 ->first();
 
             if ($couponCode) {

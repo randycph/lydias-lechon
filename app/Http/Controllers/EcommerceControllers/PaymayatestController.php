@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\EcommerceControllers;
 
+use App\EcommerceModel\CouponCart;
 use App\Models\Permission;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -66,6 +67,11 @@ class PaymayatestController extends Controller
                 'status' => 'PAID'
             ]);
 
+            if ($sales->sales->discount_amount && $sales->sales->discount_amount > 0) {
+                CouponCart::where('sales_header_id', $sales->sales->id)->update([
+                    'status' => 1
+                ]);
+            }
             return true;
         }
 
