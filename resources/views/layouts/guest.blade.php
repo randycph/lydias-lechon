@@ -293,44 +293,43 @@
                 init() {
                     // Check if browser supports SpeechRecognition
                     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                    if (!SpeechRecognition) {
-                        alert('Your browser does not support voice recognition.');
-                        return;
+                    if (SpeechRecognition) {
+                        this.recognition = new SpeechRecognition();
+                        this.recognition.lang = 'en-US';
+                        this.recognition.interimResults = false;
+                        this.recognition.maxAlternatives = 1;
+            
+                        this.recognition.onresult = (event) => {
+                            console.log(event)
+                            const transcript = event.results[0][0].transcript;
+                            this.query = transcript;
+                            this.isListening = false;
+            
+                            // OPTIONAL: Trigger search immediately
+                            this.$nextTick(() => {
+                                this.$dispatch('voice-search-finished', { query: this.query });
+                            });
+
+                            this.search = this.query;
+                        };
+            
+                        this.recognition.onerror = (event) => {
+                            console.log(event.error)
+                            this.errorMessage = `Speech recognition error: ${event.error}`;
+                            this.isListening = false;
+                        };
+            
+                        this.recognition.onend = () => {
+                            // Keep it listening-like for just a moment
+                            setTimeout(() => {
+                                if (!this.query) {
+                                    this.isListening = false;
+                                }
+                            }, 500);
+                        };
                     }
         
-                    this.recognition = new SpeechRecognition();
-                    this.recognition.lang = 'en-US';
-                    this.recognition.interimResults = false;
-                    this.recognition.maxAlternatives = 1;
-        
-                    this.recognition.onresult = (event) => {
-                        console.log(event)
-                        const transcript = event.results[0][0].transcript;
-                        this.query = transcript;
-                        this.isListening = false;
-        
-                        // OPTIONAL: Trigger search immediately
-                        this.$nextTick(() => {
-                            this.$dispatch('voice-search-finished', { query: this.query });
-                        });
-
-                        this.search = this.query;
-                    };
-        
-                    this.recognition.onerror = (event) => {
-                        console.log(event.error)
-                        this.errorMessage = `Speech recognition error: ${event.error}`;
-                        this.isListening = false;
-                    };
-        
-                    this.recognition.onend = () => {
-                        // Keep it listening-like for just a moment
-                        setTimeout(() => {
-                            if (!this.query) {
-                                this.isListening = false;
-                            }
-                        }, 500);
-                    };
+ 
                 },
         
                 startListening() {
