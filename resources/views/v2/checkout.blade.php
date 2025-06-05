@@ -204,35 +204,37 @@
                                                     </div>
                                                 </div>
                                                 
-                                                <!-- Order Dropdown -->
-                                                <div class="w-full flex gap-4">
-                                                    <div class="w-full">
-                                                        <label class="font-bold block text-sm mb-1">Order</label>
-                                                        <select @change="delivery.order = JSON.parse($event.target.value); updateAvailableQty(delivery)" class="w-full border border-gray-300 p-2 rounded-md">
-                                                            <option selected value="">Select Order</option>
-                                                            <template x-for="(order, index) in getAvailableOrders()" :key="index">
-                                                                <option 
-                                                                    :value="JSON.stringify(order)" 
-                                                                    :disabled="order.qty <= 0"
-                                                                    x-text="order.product.name + (order.qty <= 0 ? ' (Fully Assigned)' : '')"
-                                                                ></option>
-                                                            </template>
-                                                        </select>
-                                                    </div>
-                                                </div>
+                                                <div class="w-full">
+                                                    <label class="font-bold block text-sm mb-1">Orders</label>
+                                                    <div class="flex flex-col gap-2">
+                                                        <template x-for="(order, index2) in getAvailableOrders()" :key="index2">
+                                                            <div class="flex items-center gap-2 mb-2">
+                                                                <!-- Product checkbox -->
+                                                                <input
+                                                                    type="checkbox"
+                                                                    :id="'order-' + order.id + '-' + index + '-' + index2"
+                                                                    :value="order"
+                                                                    @change="toggleOrderSelection(delivery, order)"
+                                                                    :checked="isOrderChecked(delivery, order)"
+                                                                    :disabled="getRemainingQty(order.product_id) <= 0 && !isOrderChecked(delivery, order)"
+                                                                />
+                                                                <label :for="'order-' + order.id + '-' + index + '-' + index2" class="flex-1">
+                                                                    <span x-text="order.product.name + (getRemainingQty(order.product_id) <= 0 && !isOrderChecked(delivery, order) ? ' (Fully Assigned)' : '')"></span>
+                                                                </label>
 
-                                                <!-- Quantity Dropdown -->
-                                                <div class="w-full flex gap-4">
-                                                    <div class="w-full">
-                                                        <label class="font-bold block text-sm mb-1">Quantity</label>
-                                                        <select x-model="delivery.qty" class="w-full border border-gray-300 p-2 rounded-md">
-                                                            <option selected value="">Select Quantity</option>
-                                                            <template x-if="delivery.order">
-                                                                <template x-for="i in delivery.availableQty">
-                                                                    <option :value="i" x-text="i"></option>
-                                                                </template>
-                                                            </template>
-                                                        </select>
+                                                                <!-- Quantity dropdown -->
+                                                                <select
+                                                                    class="border rounded px-2 py-1"
+                                                                    :disabled="!isOrderChecked(delivery, order)"
+                                                                    x-model="getSelectedQty(delivery, order)"
+                                                                    @change="updateSelectedQty(delivery, order, $event.target.value)">
+                                                                    <option value="">Qty</option>
+                                                                    <template x-for="i in getRemainingQty(order.product_id) + getPreviouslySelectedQty(delivery, order)">
+                                                                        <option :value="i" x-text="i"></option>
+                                                                    </template>
+                                                                </select>
+                                                            </div>
+                                                        </template>
                                                     </div>
                                                 </div>
 
@@ -1002,6 +1004,91 @@
                 // this.allowMultiple = multipleItems || multipleQty;
             },
 
+            // Check if a product is selected for this delivery
+            isOrderChecked(delivery, order) {
+                return delivery.orders?.some(o => o.product_id === order.product_id);
+            },
+
+            // Get selected quantity for dropdown binding
+            getSelectedQty(delivery, order) {
+                const found = delivery.orders?.find(o => o.product_id === order.product_id);
+                return found ? found.qty : '';
+            },
+
+            // When quantity is changed
+            updateSelectedQty(delivery, order, qty) {
+                qty = parseInt(qty) || 0;
+                const found = delivery.orders.find(o => o.product_id === order.product_id);
+                if (found) {
+                    found.qty = qty;
+                }
+            },
+
+            // When checkbox is toggled
+            toggleOrderSelection(delivery, order) {
+                if (!delivery.orders) delivery.orders = [];
+                const idx = delivery.orders.findIndex(o => o.product_id === order.product_id);
+
+                if (idx !== -1) {
+                    // Uncheck
+                    delivery.orders.splice(idx, 1);
+                } else {
+                    // Check (but don't assign qty yet)
+                    delivery.orders.push({
+                    product_id: order.product_id,
+                    qty: '',
+                    product: order.product,
+                    });
+                }
+            },
+
+            // Get remaining qty for a product globally (used across all deliveries)
+            getRemainingQty(productId) {
+                const order = this.orders.find(o => o.product_id === productId);
+                const total = order ? parseInt(order.qty) : 0;
+
+                const used = this.deliveries.reduce((sum, d) => {
+                    return sum + (d.orders?.reduce((inner, o) => {
+                    return o.product_id === productId ? inner + (parseInt(o.qty) || 0) : inner;
+                    }, 0) || 0);
+                }, 0);
+
+                return Math.max(total - used, 0);
+            },
+
+            // Get previously selected qty in *this delivery* to allow it again in dropdown
+            getPreviouslySelectedQty(delivery, order) {
+                const match = delivery.orders?.find(o => o.product_id === order.product_id);
+                return match ? parseInt(match.qty) || 0 : 0;
+            },
+
+            getOrderQtyBinding(delivery, order) {
+                const selected = delivery.orders?.find(o => o.product_id === order.product_id);
+                return selected ? selected.qty : '';
+            },
+
+            updateSelectedQty(delivery, order, newQty) {
+                if (!delivery.orders) delivery.orders = [];
+
+                const index = delivery.orders.findIndex(o => o.product_id === order.product_id);
+                if (index !== -1) {
+                    delivery.orders[index].qty = parseInt(newQty) || 0;
+                } else {
+                    delivery.orders.push({
+                        product_id: order.product_id,
+                        qty: parseInt(newQty) || 0,
+                        product: order.product
+                    });
+                }
+
+                this.refreshAllAvailableQty();
+            },
+
+            refreshAllAvailableQty() {
+                // re-trigger a render
+                this.orders = this.orders.map(o => ({ ...o }));
+            },
+
             updateAvailableQty(delivery) {
                 if (!delivery.order) {
                     delivery.availableQty = [];
@@ -1070,13 +1157,16 @@
             qtyValidationMessage: '',
 
             getAvailableOrders() {
-                const availableOrders = this.orders.map(o => ({ ...o }));
+                const availableOrders = this.orders.map(o => ({ ...o })); // Clone to avoid mutating
 
                 for (const delivery of this.deliveries) {
-                    if (delivery.order) {
-                        const match = availableOrders.find(o => o.product_id === delivery.order.product_id);
-                        if (match) {
-                            match.qty -= parseInt(delivery.qty) || 0;
+                    if (Array.isArray(delivery.orders)) {
+                        for (const selected of delivery.orders) {
+                            const match = availableOrders.find(o => o.product_id === selected.product_id);
+                            if (match) {
+                                match.qty -= parseInt(selected.qty) || 0;
+                                if (match.qty < 0) match.qty = 0;
+                            }
                         }
                     }
                 }
@@ -1097,13 +1187,22 @@
             validateBeforeAddDelivery() {
                 const lastDelivery = this.deliveries[this.deliveries.length - 1];
 
-                if (!lastDelivery || !lastDelivery.order || !lastDelivery.qty) {
-                    alert('Please select a product and quantity before adding another new delivery address.');
+                if (!lastDelivery) return;
+
+                // Check if at least one product with quantity is selected
+                const hasValidProduct = Array.isArray(lastDelivery.orders) &&
+                    lastDelivery.orders.length > 0 &&
+                    lastDelivery.orders.every(o => o.product_id && o.qty && o.qty > 0);
+
+                if (!hasValidProduct) {
+                    alert('Please select at least one product and quantity before adding another delivery address.');
                     return;
                 }
 
-                if (!lastDelivery || !lastDelivery.address || !lastDelivery.name || !lastDelivery.phone || !lastDelivery.location || !lastDelivery.need_date || !lastDelivery.need_time) {
-                    alert('Please fill in all required fields before adding another new delivery address.');
+                // Check required address fields
+                const { address, name, phone, location, need_date, need_time } = lastDelivery;
+                if (!address || !name || !phone || !location || !need_date || !need_time) {
+                    alert('Please fill in all required fields before adding another delivery address.');
                     return;
                 }
 
@@ -1112,9 +1211,8 @@
                     address: '',
                     name: '',
                     phone: '',
-                    qty: 1,
+                    orders: [],
                     location: '',
-                    order: '',
                     need_date: new Date().toISOString()?.split('T')[0],
                     need_time: new Date().toTimeString()?.slice(0,5),
                     note: '',
