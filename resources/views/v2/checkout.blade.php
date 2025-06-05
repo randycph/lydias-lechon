@@ -320,7 +320,7 @@
                                             </div>
                         
                                             <div class="text-right mt-3">
-                                                <button type="button" @click="deliveries.splice(index, 1)"
+                                                <button type="button" @click="removeDelivery(index)"
                                                     x-show="deliveries.length > 1"
                                                     class="text-red-600 text-sm underline">Remove</button>
                                             </div>
@@ -1333,7 +1333,15 @@ validateAllQtyUsed() {
                     const timeStr = (hour < 10 ? '0' + hour : hour) + ':00';
                     return this.disabledDeliveryDates.includes(`${delivery.need_date} ${timeStr}`);
                 };
-            }
+            },
+
+            removeDelivery(index) {
+                const removed = this.deliveries.splice(index, 1)[0];
+
+                if (removed?.location) {
+                    this.deliveryFees = this.deliveryFees.filter(f => f.location !== removed.location);
+                }
+            },
         }
     }
 </script>
