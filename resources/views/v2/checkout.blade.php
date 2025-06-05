@@ -1175,13 +1175,24 @@
             },
 
             canAddMoreDeliveries() {
-                // Get total qty across all products
-                let totalAvailableQty = this.orders.reduce((sum, order) => sum + order.qty, 0);
+                // Loop through each product
+                for (const order of this.orders) {
+                    const totalQty = parseInt(order.qty) || 0;
 
-                // Get total qty already assigned to deliveries
-                let assignedQty = this.deliveries.reduce((sum, delivery) => sum + (parseInt(delivery.qty) || 0), 0);
+                    // Calculate how much has been used already for this product
+                    const usedQty = this.deliveries.reduce((sum, delivery) => {
+                        const match = delivery.orders?.find(o => o.product_id === order.product_id);
+                        return sum + (match ? parseInt(match.qty) || 0 : 0);
+                    }, 0);
 
-                return assignedQty < totalAvailableQty;
+                    // If there's still remaining quantity, allow adding delivery
+                    if (usedQty < totalQty) {
+                        return true;
+                    }
+                }
+
+                // All products are fully assigned
+                return false;
             },
 
             validateBeforeAddDelivery() {
