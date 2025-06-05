@@ -273,6 +273,10 @@ class FrontendController extends Controller
 
     public function order_history()
     {
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
         $page = 'order-history';
 
         $sales = SalesHeader::where('user_id', Auth::id())

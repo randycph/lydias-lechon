@@ -101,6 +101,23 @@
                                 Delivery fee: ₱{{ number_format($address->delivery_fee, 2) }}<br>
                                 Location: {{ $address->location }}<br>
                                 Delivery Date and time: {{ \Carbon\Carbon::parse(strtotime($address->delivery_date . ' ' . $address->delivery_time))->format('F d, Y g:i A') }}<br>
+                                Order/s:
+                                    @if ($address->products)
+                                        @php
+                                            $products = json_decode($address->products);
+                                        @endphp
+
+                                        @if(is_array($products) || is_object($products))
+                                            <ul>
+                                                @foreach ($products as $product)
+                                                    <li>
+                                                        {{ $product->product->name ?? 'Unknown Product' }} x {{ $product->qty }}
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
+                                    @endif
+                                <br>
                                 @if ( $address->note)
                                 Instruction: {{ $address->note }}<br>
                                 @endif

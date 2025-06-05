@@ -111,33 +111,53 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td class="tx-nowrap">{{$deliveryAddress->product->name}}</td>                
-                            <td class="tx-nowrap tx-center">{{date('F d, Y g:i A',strtotime($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time))}}</td>
-                            <td class="tx-center">{{number_format($deliveryAddress->qty, 0)}}</td>
-                            <td class="tx-center">₱{{number_format($deliveryAddress->product->price, 2)}}</td>
-                            <td class="tx-right">₱{{number_format($deliveryAddress->product->price * $deliveryAddress->qty, 2)}}</td>                               
-                        </tr>
+                        @if ($deliveryAddress->products)
+                            @php
+                                $products = json_decode($deliveryAddress->products);
+                            @endphp
 
-                        @if($deliveryAddress->delivery_fee > 0)
+                            @if(is_array($products) || is_object($products))
+                            @php $total = 0; @endphp
+                            @foreach ($products as $product)
+                                @php
+                                    $lineTotal = ($product->product->price ?? 0) * ($product->qty ?? 0);
+                                    $total += $lineTotal;
+                                @endphp
                             <tr>
-                                <td class="tx-left " colspan="4">Delivery Fee</td>
-                                <td class="tx-right ">₱{{number_format($deliveryAddress->delivery_fee, 2)}}</td>
+                                <td class="tx-nowrap">
+                                    {{ $product->product->name ?? 'Unknown Product' }}
+                                </td>                
+                                <td class="tx-nowrap tx-center">{{date('F d, Y g:i A',strtotime($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time))}}</td>
+                                <td class="tx-center">{{number_format($product->qty, 0)}}</td>
+                                <td class="tx-center">₱{{number_format($product->product->price, 2)}}</td>
+                                <td class="tx-right">
+                                    ₱{{number_format($product->product->price * $product->qty, 2)}}
+                                </td>
                             </tr>
-                        @endif
+                            @endforeach
+                            @endif
 
-                        @forelse($gc as $g)
-                            <tr style="font-weight:bold;">
-                                <td class="tx-left" colspan="4">Gift Certificate: {{$g->code}}</td>
-                                <td class="tx-right">₱{{number_format($g->amount, 2)}}</td> 
-                            </tr>
-                        @empty
-                        @endforelse
-                        @if($salesDetails->sum('gross_amount') > 0)
-                            <tr style="font-weight:bold;">
-                                <td colspan="4">&nbsp;</td>
-                                <td class="tx-right">Total: ₱{{number_format(($deliveryAddress->product->price * $deliveryAddress->qty) + $deliveryAddress->delivery_fee, 2)}}</td> 
-                            </tr>
+                            @if($deliveryAddress->delivery_fee > 0)
+                                <tr>
+                                    <td class="tx-left " colspan="4">Delivery Fee</td>
+                                    <td class="tx-right ">₱{{number_format($deliveryAddress->delivery_fee, 2)}}</td>
+                                </tr>
+                            @endif
+
+                            @forelse($gc as $g)
+                                <tr style="font-weight:bold;">
+                                    <td class="tx-left" colspan="4">Gift Certificate: {{$g->code}}</td>
+                                    <td class="tx-right">₱{{number_format($g->amount, 2)}}</td> 
+                                </tr>
+                            @empty
+                            @endforelse
+                            @if($salesDetails->sum('gross_amount') > 0)
+                                <tr style="font-weight:bold;">
+                                    <td colspan="4">&nbsp;</td>
+                                    <td class="tx-right">
+                                        Total: ₱{{ number_format($total + $deliveryAddress->delivery_fee, 2) }}
+                                </tr>
+                            @endif
                         @endif
                     </tbody>
                 </table>
