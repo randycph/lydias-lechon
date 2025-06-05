@@ -33,7 +33,7 @@
                     @if ($sales->delivery_type == 'Door to door delivery')
                     <div class="flex items-center text-sm  justify-between px-4 py-3 border-b border-gray-200">
                         <div>Delivery Status</div>
-                        <div class="font-bold text-primary">{{ $sales->delivery_status }}</div>
+                        <div class="font-bold text-primary">{{ $sales->delivery_status ?? 'NA' }}</div>
                     </div>
                     @endif
                     <div class="flex items-center text-sm justify-between px-4 py-3 border-b border-gray-200">
@@ -72,9 +72,23 @@
                                     <strong>Delivery fee</strong>: ₱{{ number_format($address->delivery_fee, 2) }}<br>
                                     <strong>Location</strong>: {{ $address->location }}<br>
                                     <strong>Delivery Date and time</strong>: {{ date('F d, Y g:i A', strtotime($address->delivery_date . ' ' . $address->delivery_time)) }}<br>
-                                    <strong>Product</strong>: {{ $address?->product?->name }}<br>
-                                    <strong>Quantity</strong>: {{ $address->qty }}<br>
+                                    <strong>Order/s</strong>: 
+                                        @if ($address->products)
+                                            @php
+                                                $products = json_decode($address->products);
+                                            @endphp
 
+                                            @if(is_array($products) || is_object($products))
+                                                <ul>
+                                                    @foreach ($products as $product)
+                                                        <li>
+                                                            {{ $product->product->name ?? 'Unknown Product' }} x {{ $product->qty }}
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            @endif
+                                        @endif
+                                    <br>
                                     @if ($address->note)
                                     <strong>Note</strong>: {{ $address->note ?? 'NA' }}<br>
                                     @endif

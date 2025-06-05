@@ -792,12 +792,14 @@
 
                 if (this.method === 'delivery' && this.allowMultiple) {
                     if (!this.validateAllDeliveryFields()) {
+                        console.log('1111')
                         this.noNeededTime = true;
                         this.isSubmitting = false;
                         return;
                     }
 
                     if (!this.validateAllQtyUsed()) {
+                        console.log('2222')
                         this.isSubmitting = false;
                         return;
                     }
@@ -869,13 +871,18 @@
             },
 
             validateAllDeliveryFields() {
-                return this.deliveries.every(delivery => 
-                    delivery.need_time &&
-                    delivery.need_date &&
-                    delivery.location &&
-                    delivery.qty &&
-                    delivery.order
-                );
+                return this.deliveries.every(delivery => {
+                    const hasValidProducts = Array.isArray(delivery.orders) &&
+                        delivery.orders.length > 0 &&
+                        delivery.orders.every(o => o.product_id && o.qty && o.qty > 0);
+
+                    return (
+                        delivery.need_time &&
+                        delivery.need_date &&
+                        delivery.location &&
+                        hasValidProducts
+                    );
+                });
             },
 
             async getDeliveryFee() {
@@ -1125,34 +1132,43 @@
                 });
             },
 
-            validateAllQtyUsed() {
-                const expectedTotals = {};
-                const assignedTotals = {};
+validateAllQtyUsed() {
+    const expectedTotals = {};
+    const assignedTotals = {};
 
-                this.orders.forEach(order => {
-                    expectedTotals[order.product_id] = parseInt(order.qty);
-                });
+    // Build the expected total quantity for each product
+    this.orders.forEach(order => {
+        expectedTotals[order.product_id] = parseInt(order.qty) || 0;
+    });
 
-                this.deliveries.forEach(delivery => {
-                    if (delivery.order && delivery.qty) {
-                        const productId = delivery.order.product_id;
-                        assignedTotals[productId] = (assignedTotals[productId] || 0) + parseInt(delivery.qty);
-                    }
-                });
+    // Sum up assigned quantities from all deliveries
+    this.deliveries.forEach(delivery => {
+        if (Array.isArray(delivery.orders)) {
+            delivery.orders.forEach(o => {
+                if (!o.product_id || !o.qty) return;
 
-                for (const productId in expectedTotals) {
-                    const expected = expectedTotals[productId];
-                    const assigned = assignedTotals[productId] || 0;
+                const productId = o.product_id;
+                assignedTotals[productId] = (assignedTotals[productId] || 0) + parseInt(o.qty);
+            });
+        }
+    });
 
-                    if (assigned !== expected) {
-                        this.qtyValidationMessage = '⚠️ Please assign all available quantities before proceeding.';
-                        return false;
-                    }
-                }
+    // Compare expected vs assigned
+    for (const productId in expectedTotals) {
+        const expected = expectedTotals[productId];
+        const assigned = assignedTotals[productId] || 0;
 
-                this.qtyValidationMessage = '';
-                return true;
-            },
+        if (assigned !== expected) {
+            this.qtyValidationMessage = '⚠️ Please assign all available quantities before proceeding.';
+            return false;
+        }
+    }
+
+    // All quantities match
+    this.qtyValidationMessage = '';
+    return true;
+}
+,
 
             qtyValidationMessage: '',
 

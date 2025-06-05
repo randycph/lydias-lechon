@@ -782,37 +782,24 @@ class CartController extends Controller
         $salesHeader->order_number = $formattedOrderNumber;
         $salesHeader->save();
 
-        
         if ($request->has('deliveries')) {
             $deliveries = json_decode($request->deliveries ?? '');
             if ($deliveries && count($deliveries) > 0) {
-                foreach ($deliveries as $key => $delivery) {
-                    if ($delivery?->order?->product_id) {
-                        $single_address = $delivery->address;
-                        $single_name = $delivery->name;
-                        $single_phone = $delivery->phone;
-                        $single_qty = $delivery->qty;
-                        $single_order = $delivery->order->product_id;
-                        $single_location = $delivery->location;
-                        $single_delivery_fee = $delivery->delivery_fee;
-                        $single_date = $delivery->need_date;
-                        $single_time = $delivery->need_time;
-                        $single_note = $delivery->note;
-    
+                foreach ($deliveries as $delivery) {
+                    if (!empty($delivery->orders)) {
                         ProductDeliveryAddress::create([
                             'sales_header_id' => $salesHeader->id,
-                            'address' => $single_address,
-                            'contact_person' => $single_name,
-                            'contact_tel' => $single_phone,
-                            'qty' => $single_qty,
-                            'order' => $single_order,
-                            'location' => $single_location,
-                            'delivery_fee' => $single_delivery_fee,
-                            'delivery_date' => $single_date,
-                            'delivery_time' => $single_time,
-                            'note' => $single_note,
-                            'product_id' => $single_order,
+                            'address' => $delivery->address,
+                            'contact_person' => $delivery->name,
+                            'contact_tel' => $delivery->phone,
+                            'qty' => array_sum(array_column($delivery->orders, 'qty')),
+                            'location' => $delivery->location,
+                            'delivery_fee' => $delivery->delivery_fee,
+                            'delivery_date' => $delivery->need_date,
+                            'delivery_time' => $delivery->need_time,
+                            'note' => $delivery->note,
                             'branch' => $request->delivery_branch,
+                            'products' => json_encode($delivery->orders),
                         ]);
                     }
                 }

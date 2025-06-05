@@ -25,7 +25,8 @@ class ProductDeliveryAddress extends Model
         'delivery_fee',
         'location',
         'branch',
-        'note'
+        'note',
+        'products'
     ];
 
     public function user()
