@@ -63,7 +63,7 @@
                         <div>Delivery Address</div>
                         <div class="text-right">
                             @if ($sales?->deliveryAddress && count($sales?->deliveryAddress) > 0)
-                                <ul class="list-decimal pl-5 flex flex-col gap-2">
+                                <ul class="list-decimal pl-5 flex flex-col gap-6">
                                 @foreach ($sales->deliveryAddress as $k => $address)
                                 <li>
                                     <strong>Address</strong> {{ $k + 1 }}: {{ $address->address }}<br>
@@ -72,7 +72,12 @@
                                     <strong>Delivery fee</strong>: ₱{{ number_format($address->delivery_fee, 2) }}<br>
                                     <strong>Location</strong>: {{ $address->location }}<br>
                                     <strong>Delivery Date and time</strong>: {{ date('F d, Y g:i A', strtotime($address->delivery_date . ' ' . $address->delivery_time)) }}<br>
-                                    <strong>Note</strong>: {{ $address->note }}<br>
+                                    <strong>Product</strong>: {{ $address?->product?->name }}<br>
+                                    <strong>Quantity</strong>: {{ $address->qty }}<br>
+
+                                    @if ($address->note)
+                                    <strong>Note</strong>: {{ $address->note ?? 'NA' }}<br>
+                                    @endif
                                 </li>
                                 @endforeach
                                 </ul>
@@ -117,6 +122,11 @@
                         foreach ($salesDetails as $detail) {
                             $total += $detail['price'] * $detail['qty'];
                         }
+                    }
+                    $colspan = 6;
+
+                    if ($sales->delivery_type != 'Door to door delivery') {
+                        $colspan = 7;
                     }
                 @endphp
                     
@@ -216,9 +226,11 @@
                             <th scope="col" class="px-6 py-3">
                                 No. of Pax
                             </th>
+                            @if ($sales->delivery_type != 'Door to door delivery')
                             <th scope="col" class="px-6 py-3">
                                 Date Needed
                             </th>
+                            @endif
                             <th scope="col" class="px-6 py-3">
                                 Quantity
                             </th>
@@ -245,9 +257,11 @@
                             <td class="px-6 py-4">
                                 {{ $details->no_of_pax }}
                             </td>
+                            @if ($sales->delivery_type != 'Door to door delivery')
                             <td class="px-6 py-4">
                                 {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
                             </td>
+                            @endif
                             <td class="px-6 py-4">
                                 {{ number_format($details->qty, 0) }}
                             </td>
@@ -270,20 +284,20 @@
                     <tfoot>
                         @if($sales->delivery_fee_amount > 0)
                         <tr class="bg-white ">
-                            <td colspan="7" class="px-6 py-4 font-bold text-right">Delivery Fee</td>
+                            <td colspan="{{ $colspan }}" class="px-6 py-4 font-bold text-right">Delivery Fee</td>
                             <td class="px-6 py-4 font-bold">₱{{ number_format($sales->delivery_fee_amount, 2) }}</td>
                         </tr>
                         @endif
                         @forelse($gc as $g)
                         <tr class="bg-white ">
-                            <td colspan="7" class="px-6 py-4 font-bold text-right">Gift Certificate: {{$g->code}}</td>
+                            <td colspan="{{ $colspan }}" class="px-6 py-4 font-bold text-right">Gift Certificate: {{$g->code}}</td>
                             <td class="px-6 py-4 font-bold">₱{{ number_format($g->amount, 2) }}</td>
                         </tr>
                         @empty
                         @endforelse
                         @if($salesDetails->sum('gross_amount') > 0)
                         <tr class="bg-white border-b border-gray-200">
-                            <td colspan="7" class="px-6 py-4 font-bold text-right">Total</td>
+                            <td colspan="{{ $colspan }}" class="px-6 py-4 font-bold text-right">Total</td>
                             <td class="px-6 py-4 font-bold">₱{{ number_format($sales->gross_amount, 2) }}</td>
                         </tr>
                         @endif
