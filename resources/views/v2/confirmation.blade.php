@@ -124,10 +124,6 @@
                         }
                     }
                     $colspan = 6;
-
-                    if ($sales->delivery_type != 'Door to door delivery') {
-                        $colspan = 7;
-                    }
                 @endphp
                     
                 <div class="rounded-lg border bg-white border-gray-200 shadow-md mt-10 w-full lg:w-1/2">
@@ -226,11 +222,6 @@
                             <th scope="col" class="px-6 py-3">
                                 No. of Pax
                             </th>
-                            @if ($sales->delivery_type != 'Door to door delivery')
-                            <th scope="col" class="px-6 py-3">
-                                Date Needed
-                            </th>
-                            @endif
                             <th scope="col" class="px-6 py-3">
                                 Quantity
                             </th>
@@ -257,11 +248,6 @@
                             <td class="px-6 py-4">
                                 {{ $details->no_of_pax }}
                             </td>
-                            @if ($sales->delivery_type != 'Door to door delivery')
-                            <td class="px-6 py-4">
-                                {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
-                            </td>
-                            @endif
                             <td class="px-6 py-4">
                                 {{ number_format($details->qty, 0) }}
                             </td>
