@@ -199,7 +199,7 @@
                                                     </div>
                                                     <div class="w-full lg:w-1/2">
                                                         <label class="font-bold block text-sm mb-1">Contact Number</label>
-                                                        <input type="tel" x-mask="+99 999 999 9999" x-model="delivery.phone"
+                                                        <input type="tel" x-model="delivery.phone"
                                                             class="w-full border border-gray-300 p-2 rounded-md" placeholder="+63..." />
                                                     </div>
                                                 </div>
@@ -854,7 +854,7 @@
                     let errText = await error.text();
                     console.error('Error:', errText);
 
-                    let errorMessage = JSON.parse(errText);
+                    let errorMessage = JSON.parse(errText);+6391
 
                     if (errorMessage.errors && errorMessage.errors.mobile) {
                         this.mobileValidationMessage = errorMessage.errors.mobile[0];
