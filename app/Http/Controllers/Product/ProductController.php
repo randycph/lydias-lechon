@@ -281,7 +281,9 @@ class ProductController extends Controller
 
         $this->update_photos($this->get_product_photos($photos));
 
-        $this->remove_photos_from_product(request('remove_photos'));
+        if ($request->has('remove_photos') && count(request('remove_photos')) > 0) {
+            $this->remove_photos_from_product(request('remove_photos'));
+        }
 
         $newPhotos = $this->get_new_photos($photos);
 
@@ -457,13 +459,16 @@ class ProductController extends Controller
 
     public function remove_photos_from_product($photos)
     {
-        ProductPhoto::find($photos ?? [])->each(function ($photo, $key) {
-            $imagePath = $this->get_banner_path_in_storage($photo->image_path);
-            Storage::disk('public')->delete($imagePath);
-            $photo->update(['user_id' => auth()->id()]);
-            $photo->delete();
+        foreach ($photos as $key => $photo) {
+            $image = ProductPhoto::find($photo);
 
-        });
+            if ($image) {
+                $imagePath = $this->get_banner_path_in_storage($image->path);
+                Storage::disk('public')->delete($imagePath);
+                $image->update(['user_id' => auth()->id()]);
+                $image->delete();
+            }
+        }
     }
 
     public function upload_file_to_temporary_storage($file)
