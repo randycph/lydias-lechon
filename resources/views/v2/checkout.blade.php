@@ -200,7 +200,7 @@
                                                     <div class="w-full lg:w-1/2">
                                                         <label class="font-bold block text-sm mb-1">Contact Number</label>
                                                         <input type="tel" x-model="delivery.phone"
-                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="+63..." />
+                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" />
                                                     </div>
                                                 </div>
                                                 
@@ -211,6 +211,7 @@
                                                             <div class="flex items-center gap-2 mb-2">
                                                                 <!-- Product checkbox -->
                                                                 <input
+                                                                    :class="getRemainingQty(order.product_id) <= 0 && !isOrderChecked(delivery, order) ? 'invisible' : ''"
                                                                     type="checkbox"
                                                                     :id="'order-' + order.id + '-' + index + '-' + index2"
                                                                     :value="order"
@@ -648,7 +649,7 @@
                     location: '', 
                     order: '', 
                     need_date: new Date()?.toISOString()?.split('T')[0], 
-                    need_time: '', 
+                    need_time: '13:00',
                     note: '', 
                     delivery_fee: 0 
                 }
@@ -743,6 +744,9 @@
                 if (this.method == 'pickup') {
                     this.allowMultiple = false;
                 }
+
+                this.noNeededTime = false;
+                this.noNeededDate = false;
             },
 
             mobileValidationMessage: '',
@@ -792,14 +796,12 @@
 
                 if (this.method === 'delivery' && this.allowMultiple) {
                     if (!this.validateAllDeliveryFields()) {
-                        console.log('1111')
                         this.noNeededTime = true;
                         this.isSubmitting = false;
                         return;
                     }
 
                     if (!this.validateAllQtyUsed()) {
-                        console.log('2222')
                         this.isSubmitting = false;
                         return;
                     }
@@ -1042,9 +1044,9 @@
                 } else {
                     // Check (but don't assign qty yet)
                     delivery.orders.push({
-                    product_id: order.product_id,
-                    qty: '',
-                    product: order.product,
+                        product_id: order.product_id,
+                        qty: 1,
+                        product: order.product,
                     });
                 }
             },
@@ -1241,7 +1243,7 @@ validateAllQtyUsed() {
                     orders: [],
                     location: '',
                     need_date: new Date().toISOString()?.split('T')[0],
-                    need_time: new Date().toTimeString()?.slice(0,5),
+                    need_time: '13:00',
                     note: '',
                     delivery_fee: 0,
                 });
