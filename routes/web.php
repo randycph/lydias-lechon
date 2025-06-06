@@ -168,7 +168,7 @@ Route::post('/login', 'EcommerceControllers\CustomerFrontController@customer_log
 
 // Route::get('/forgot-password', 'EcommerceControllers\CustomerFrontController@forgot_password')->name('customer-front.forgot_password');
 Route::post('/forgot-password', 'EcommerceControllers\CustomerFrontController@customer_forgot_password')->name('customer-front.customer_forgot_password');
-Route::get('/logouts', 'EcommerceControllers\CustomerFrontController@logout')->name('customer-front.logout');
+// Route::get('/logout', 'EcommerceControllers\CustomerFrontController@logout')->name('customer-front.logout');
 
 Route::get('/register-guest', 'EcommerceControllers\CustomerFrontController@register_guest')->name('customer-front.register_guest');
 ##### END CUSTOMER ROUTE #####
