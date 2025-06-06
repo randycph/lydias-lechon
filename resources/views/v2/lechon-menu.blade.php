@@ -43,7 +43,7 @@
 
                 return this.product.addon_products
                     .filter(a => a.selected)
-                    .reduce((sum, a) => sum + (a.price * this.quantity), 0);
+                    .reduce((sum, a) => sum + (a.price * 1), 0);
             },
             get grandTotal() {
                 return this.baseTotal + this.addonsTotal;

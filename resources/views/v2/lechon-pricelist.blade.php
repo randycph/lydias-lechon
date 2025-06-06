@@ -41,9 +41,11 @@
                 return this.product?.price * this.quantity || 0;
             },
             get addonsTotal() {
-                return this.addons
+                if (!this.product?.addon_products) return 0;
+
+                return this.product.addon_products
                     .filter(a => a.selected)
-                    .reduce((sum, a) => sum + a.price, 0);
+                    .reduce((sum, a) => sum + (a.price * 1), 0);
             },
             get grandTotal() {
                 return this.baseTotal + this.addonsTotal;
