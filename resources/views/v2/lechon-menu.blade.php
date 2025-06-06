@@ -13,11 +13,36 @@
                 }
             },
             product: null,
-            show(product) {
+            async show(product) {
                 this.product = product;
                 this.addons = [];
                 this.lechonCart = true;
-                this.quantity = 1
+
+                await this.getCarts();
+
+                const cartItem = this.carts?.find(item => item.product_id === product.id);
+
+                if (cartItem) {
+                    this.quantity = cartItem.qty;
+                } else {
+                    this.quantity = 1;
+                }
+            },
+            async getCarts() {
+                let cartRes = await fetch('{{route('cart.get')}}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    }
+                }).then((response) => {
+                    return response;
+                }).catch((error) => {
+                    
+                });
+
+                const cartData = await cartRes.json();
+                this.carts = cartData.cart;
             },
             close() {
                 this.lechonCart = false;
@@ -69,7 +94,6 @@
             (() => {
                 const params = new URLSearchParams(window.location.search);
         
-                // 🔍 Log product param if exists
                 const query = params.get('product');
                 if (query) {
                     console.log('query:', query);
