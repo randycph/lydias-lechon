@@ -177,7 +177,7 @@ Manage Customer
                                             </nav>
                                         @else
                                             <nav class="nav table-options">
-                                                <a class="nav-link" target="_blank" href="{{ route('lechon-menu') }}?product={{$product->slug}}" title="View Product Profile"><i data-feather="eye"></i></a>
+                                                <a class="nav-link" target="_blank" href="{{ route('product.front.show', $product->slug) }}" title="View Product Profile"><i data-feather="eye"></i></a>
                                                 @if (auth()->user()->has_access_to_route('products.edit'))
                                                     <a class="nav-link" href="{{ route('products.edit',$product->id) }}" title="Edit Product"><i data-feather="edit"></i></a>
                                                 @endif

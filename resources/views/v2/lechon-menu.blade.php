@@ -135,19 +135,31 @@
                         }
                     ">
                     <div class="p-2 flex flex-col justify-between h-full">
-                        <div  class="object-cover overflow-hidden m-2 rounded-md lg:rounded-lg bg-center">
+                        <div class="object-cover overflow-hidden m-2 rounded-md lg:rounded-lg bg-center">
                             @if ($list->photos->count() > 0)
-                                    @foreach($list->photos as $photo)
-                                        @if ($photo->path)
-                                            <img onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}';" src="{{ asset('storage/products/' . $photo->path) }}" alt="{{ $list->name }}" class="px-4 scale-110">
-                                        @else
-                                            <img src="{{ asset('images/no-image.jpg') }}" alt="{{ $list->name }}" class="px-4 scale-110">
-                                        @endif
-                                    @endforeach
+                                @php
+                                    $lastPhoto = $list->photos->last();
+                                @endphp
+                                @if ($lastPhoto && $lastPhoto->path)
+                                    <img 
+                                        onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}';" 
+                                        src="{{ asset('storage/products/' . $lastPhoto->path) }}" 
+                                        alt="{{ $list->name }}" 
+                                        class="px-4 scale-110">
                                 @else
-                                <img src="{{ asset('images/no-image.jpg') }}" alt="{{ $list->name }}" class="px-4 scale-110">
+                                    <img 
+                                        src="{{ asset('images/no-image.jpg') }}" 
+                                        alt="{{ $list->name }}" 
+                                        class="px-4 scale-110">
+                                @endif
+                            @else
+                                <img 
+                                    src="{{ asset('images/no-image.jpg') }}" 
+                                    alt="{{ $list->name }}" 
+                                    class="px-4 scale-110">
                             @endif
                         </div>
+
                         <div class="mt-4 px-2">
                             <div class="text-primary text-base lg:text-2xl font-bold mt-2">₱{{ number_format($list->price, 2) }}</div>
                             <h2 class="text-left text-sm lg:text-xl mt-1 uppercase">{{ $list->name }}</h2>

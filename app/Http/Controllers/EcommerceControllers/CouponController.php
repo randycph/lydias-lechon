@@ -16,6 +16,7 @@ use App\Models\Deliverablecities;
 
 use Carbon\Carbon;
 use Auth;
+use Illuminate\Support\Facades\DB;
 
 class CouponController extends Controller
 {
@@ -448,5 +449,86 @@ class CouponController extends Controller
 
         return back()->with('success', __('standard.coupons.multiple_delete_success'));
     }
+
+    public function sales_list(Request $request)
+    {
+        
+        $qry= "SELECT h.*,d.*,h.created_at as hcreated,h.id as hid,p.category_id,c.name as catname,p.brand,p.code,pay.payment_date as pdate,p.brand FROM `ecommerce_sales_details` d 
+            left join ecommerce_sales_headers h on h.id=d.sales_header_id 
+            left join ecommerce_sales_payments pay on pay.sales_header_id=d.sales_header_id
+            left join products p on p.id=d.product_id 
+            left join product_categories c on c.id=p.category_id
+            where h.id>0 and h.status<>'CANCELLED' and h.delivery_status<>'CANCELLED'
+            ";
+       
+        // else{
+        //     $qry = "SELECT h.*,d.*,h.created_at as hcreated,h.id as hid,p.category_id,c.name as catname,p.brand,p.code FROM `ecommerce_sales_details` d left join ecommerce_sales_headers h on h.id=d.sales_header_id left join products p on p.id=d.product_id left join product_categories c on c.id=p.category_id where h.id>0 and h.status<>'CANCELLED' and h.delivery_status<>'CANCELLED'";
+        // }
+
+        if(isset($_GET['brand']) && $_GET['brand']<>''){
+            $qry.= " and p.brand='".$_GET['brand']."'";
+        }
+        if(isset($_GET['customer']) && $_GET['customer']<>''){
+            $qry.= " and h.customer_name='".$_GET['customer']."'";
+        }
+        if(isset($_GET['product']) && $_GET['product']<>''){
+            $qry.= " and d.product_id='".$_GET['product']."'";
+        }
+        if(isset($_GET['category']) && $_GET['category']<>''){
+            $qry.= " and p.category_id='".$_GET['category']."'";
+        }
+        if(isset($_GET['payment_status']) && $_GET['payment_status']<>''){
+            $qry.= " and h.payment_status='".$_GET['payment_status']."'";
+        }
+        if(isset($_GET['del_status']) && $_GET['del_status']<>''){
+            $qry.= " and h.delivery_status='".$_GET['del_status']."'";
+        }
+      
+        if(isset($_GET['start']) && strlen($_GET['start'])>=1){
+             $qry.= " and h.created_at >='".$_GET['start']." 00:00:00.000' and h.created_at <='".$_GET['end']." 23:59:59.999'";
+            
+        }
+
+        
+        //dd($qry);
+
+        $rs = DB::select($qry. " ORDER BY h.id desc");
+
+        return view('admin.reports.sales.list',compact('rs'));
+
+    }
+
+    public function coupon_list(Request $request)
+    {
+        $params = [];
+        $qry = "
+            SELECT 
+                h.order_number, 
+                h.net_amount, 
+                h.customer_name, 
+                c.name, 
+                cs.coupon_code, 
+                cs.customer_id 
+            FROM coupon_sales cs
+            LEFT JOIN ecommerce_sales_headers h ON h.id = cs.sales_header_id
+            LEFT JOIN coupons c ON c.id = cs.coupon_id
+            WHERE cs.id > 0
+        ";
+
+        if (!empty($request->coupon_code)) {
+            $qry .= " AND cs.coupon_code = :coupon_code";
+            $params['coupon_code'] = $request->coupon_code;
+        }
+
+        if (!empty($request->customer)) {
+            $qry .= " AND cs.customer_id = :customer";
+            $params['customer'] = $request->customer;
+        }
+
+        $rs = DB::select($qry, $params);
+
+        return view('admin.reports.coupon.list', compact('rs'));
+    }
+
 
 }

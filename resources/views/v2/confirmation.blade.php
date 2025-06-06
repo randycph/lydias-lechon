@@ -159,7 +159,11 @@
                                 x-transition.duration.300ms>
                                 
                                 <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="w-20 h-20 min-w-20 min-h-20 object-cover overflow-hidden rounded-md bg-center">
-                                    <img onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'" src="{{ $details->product->photos[0]->url }}" alt="Checkout" class="w-20 h-20 object-cover">
+                                    <img 
+                                        onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'" 
+                                        src="{{ $details?->product?->photos->last()?->path ? asset('storage/products/' . $details?->product?->photos->last()->path) : asset('images/no-image.jpg') }}" 
+                                        alt="{{ $details['name'] ?? $details?->product?->name }}"
+                                        class="w-20 h-20 object-cover">
                                 </div>
                                 
                                 <div class="flex flex-col">

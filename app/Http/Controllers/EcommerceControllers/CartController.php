@@ -11,6 +11,7 @@ use App\EcommerceModel\SalesPayment;
 use App\EcommerceModel\Branch;
 use App\EcommerceModel\Coupon;
 use App\EcommerceModel\CouponCart;
+use App\EcommerceModel\CouponSale;
 use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\SalesDetail;
 use App\Helpers\Webfocus\Setting;
@@ -760,6 +761,8 @@ class CartController extends Controller
             'forecast_date' => $forecast_date
         ]);
 
+        $couponCode = null;
+
         if ($request->coupon && $request->discount_amount) {
             $couponCode = Coupon::whereRaw('LOWER(coupon_code) = ?', [strtolower($request->coupon)])
                 ->where('activation_type', 'manual')
@@ -843,6 +846,17 @@ class CartController extends Controller
             $grand_gross += $gross_amount;
             $grand_tax += $tax_amount;
 
+            if ($request->coupon && $request->discount_amount) {
+                if ($couponCode) {
+                    CouponSale::create([
+                        'customer_id' => $user->id,
+                        'coupon_id' => $couponCode?->id,
+                        'coupon_code' => $couponCode->coupon_code,
+                        'product_id' => $product->id,
+                        'sales_header_id' => $salesHeader->id,
+                    ]);
+                }
+            }
 
             $data['price'] = $product->price;
             $data['tax'] = $data['price'] - ($data['price']/1.12);

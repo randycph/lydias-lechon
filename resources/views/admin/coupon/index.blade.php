@@ -146,8 +146,8 @@
 	                                    <td>{{ $coupon->start_date }} {{ $coupon->start_time }}</td>
 	                                    <td>{{ $coupon->end_date }} {{ $coupon->end_time }}</td>
 	                                    <td class="text-center">
-                                            @if(\App\EcommerceModel\Coupon::coupon_total_usage($coupon->id) > 0)
-                                                <a target="_blank" href="{{ route('report.coupon.list') }}?coupon_code={{$coupon->coupon_code}}">{{ \App\EcommerceModel\Coupon::coupon_total_usage($coupon->id) }}</a>
+                                            @if( $coupon->couponCarts()->where('status', 1)->sum('total_usage') > 0)
+                                                <a target="_blank" href="{{ route('report.coupon.list') }}?coupon_code={{$coupon->coupon_code}}">{{  $coupon->couponCarts()->where('status', 1)->sum('total_usage') }}</a>
                                             @else
                                                 0
                                             @endif

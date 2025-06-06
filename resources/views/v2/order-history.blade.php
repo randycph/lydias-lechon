@@ -63,7 +63,11 @@
                                     @endphp
                                     <div class="flex gap-4 items-start w-full relative">
                                         <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="w-20 h-20 min-w-20 min-h-20 object-cover overflow-hidden rounded-md bg-center">
-                                            <img onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'" src="{{ asset('storage/products/' . $cart->product->photos[0]->path) }}" alt="Checkout" class="w-20 h-20 object-cover">
+                                            <img 
+                                                onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'" 
+                                                src="{{ $cart?->product?->photos->last()?->path ? asset('storage/products/' . $cart?->product?->photos->last()->path) : asset('images/no-image.jpg') }}" 
+                                                alt="{{ $cart['name'] ?? $cart?->product?->name }}"
+                                                class="w-20 h-20 object-cover">
                                         </div>
                                         <div class="flex flex-col">
                                             <div class="font-bold">{{ $cart->product->name }}</div>

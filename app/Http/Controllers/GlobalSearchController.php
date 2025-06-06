@@ -71,17 +71,15 @@ class GlobalSearchController extends Controller
             }
 
             if ($modelName === 'Product') {
-                $query->with(['photos' => function ($q) {
-                    $q->limit(1);
-                }]);
+                $query->with(['photos']);
             }
 
             if ($modelName === 'Product' && $modelResults->isNotEmpty()) {
                 $modelResults = $modelResults->map(function ($product) {
                     $slug = Str::slug($product->slug ?? $product->name, '-');
                     $product->product_url = route('lechon-menu') . '?product=' . urlencode($slug);
-                    $product->photo_url = $product->photos->first()?->path 
-                        ? asset('storage/products/' . $product->photos->first()->path) 
+                    $product->photo_url = $product->photos->last()?->path 
+                        ? asset('storage/products/' . $product->photos->last()->path) 
                         : null;
                     return $product;
                 });

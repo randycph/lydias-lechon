@@ -168,7 +168,7 @@ Route::post('/login', 'EcommerceControllers\CustomerFrontController@customer_log
 
 // Route::get('/forgot-password', 'EcommerceControllers\CustomerFrontController@forgot_password')->name('customer-front.forgot_password');
 Route::post('/forgot-password', 'EcommerceControllers\CustomerFrontController@customer_forgot_password')->name('customer-front.customer_forgot_password');
-// Route::get('/logout', 'EcommerceControllers\CustomerFrontController@logout')->name('customer-front.logout');
+Route::get('/logouts', 'EcommerceControllers\CustomerFrontController@logout')->name('customer-front.logout');
 
 Route::get('/register-guest', 'EcommerceControllers\CustomerFrontController@register_guest')->name('customer-front.register_guest');
 ##### END CUSTOMER ROUTE #####
@@ -632,6 +632,11 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::get('/coupon-restore/{id}', 'EcommerceControllers\CouponController@restore')->name('coupon.restore');
     Route::post('/coupon-multiple-change-status','EcommerceControllers\CouponController@multiple_change_status')->name('coupon.multiple.change.status');
     Route::post('/coupon-multiple-delete','EcommerceControllers\CouponController@multiple_delete')->name('coupon.multiple.delete');
+
+    Route::get('/report/coupon_list', 'EcommerceControllers\CouponController@coupon_list')->name('report.coupon.list');
+    Route::get('/report/sales_list', 'EcommerceControllers\CouponController@sales_list')->name('report.sales.list');
+
+
 });
 ##### END ADMIN ROUTE #####
 #####################################################################################################################################################

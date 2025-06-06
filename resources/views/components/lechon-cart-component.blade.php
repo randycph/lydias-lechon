@@ -29,18 +29,14 @@
                     <div
                         class="object-cover rounded-lg  mx-auto bg-center relative">
                         
-                        <div class="swiper-cart-image relative mt-5 overflow-hidden">
+                        <div class="relative mt-5 overflow-hidden">
                             <div class="swiper-wrapper">
-                                <template x-for="(photo, idx) in product?.photos" :key="idx">
-                                    <div class="swiper-slide">
-                                        <img 
-                                            x-show="photo?.path"
-                                            :src="`${photo.url}`"
-                                            alt="Product Image"
-                                            class="object-cover w-full rounded-md"
-                                            onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'"
-                                        >
-                                    </div>
+                                <template x-if="product?.photos?.length > 0">
+                                    <img 
+                                        :src="`${product.photos[product.photos.length - 1]?.url}`"
+                                        alt="Product Image"
+                                        class="object-cover w-full rounded-md"
+                                        onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'">
                                 </template>
                             </div>
                         </div>
@@ -189,9 +185,12 @@
                                                 </label>
                                             </div>
 
-                                            <img onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'" :src="addon.photos?.length > 0 ? `${addon.photos[0].url}` : '/images/no-image.jpg'"
+                                            <img 
+                                                onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'" 
+                                                :src="addon.photos?.length > 0 ? `${addon.photos[addon.photos.length - 1].url}` : '/images/no-image.jpg'"
                                                 :alt="addon.name"
                                                 class="object-cover z-10 w-full h-full hover:scale-125 transition duration-300">
+
                                         </div>
                                         <div class="text-xs text-center mt-2" x-text="addon.name"></div>
                                     </div>

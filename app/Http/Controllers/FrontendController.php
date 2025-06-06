@@ -72,13 +72,9 @@ class FrontendController extends Controller
     public function lechon_pricelist()
     {
         $products = Product::with([
-            'photos' => function ($q) {
-                $q->limit(1);
-            },
+            'photos',
             'addonProducts' => function ($q) {
-                $q->with(['photos' => function ($photoQuery) {
-                    $photoQuery->limit(1);
-                }]);
+                $q->with(['photos']);
             }
         ])
         ->where('category_id', 1)
@@ -101,9 +97,7 @@ class FrontendController extends Controller
 
                 $fallbackAddons = Product::whereIn('id', $addonProductIds)
                     ->where('status', 'PUBLISHED')
-                    ->with(['photos' => function ($q) {
-                        $q->limit(1);
-                    }])
+                    ->with(['photos'])
                     ->get();
 
                 $product->setRelation('addonProducts', $fallbackAddons);
@@ -118,13 +112,9 @@ class FrontendController extends Controller
         $categories = ProductCategory::with(['products' => function ($query) {
             $query->where('status', 'PUBLISHED')
                 ->with([
-                    'photos' => function ($q) {
-                        $q->limit(1);
-                    },
+                    'photos',
                     'addonProducts' => function ($q) {
-                        $q->with(['photos' => function ($photoQuery) {
-                            $photoQuery->limit(1);
-                        }]);
+                        $q->with(['photos']);
                     }
                 ]);
         }])
@@ -149,9 +139,7 @@ class FrontendController extends Controller
         
                     $fallbackAddons = Product::whereIn('id', $addonProductIds)
                         ->where('status', 'PUBLISHED')
-                        ->with(['photos' => function ($q) {
-                            $q->limit(1);
-                        }])
+                        ->with(['photos'])
                         ->get();
         
                     $product->setRelation('addonProducts', $fallbackAddons);
