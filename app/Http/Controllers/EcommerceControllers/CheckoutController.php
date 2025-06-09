@@ -777,7 +777,7 @@ class CheckoutController extends Controller
                 'location' => $coupon->location,
                 'reward' => $coupon->reward,
                 'free_shipping' => $coupon->reward == 'free-shipping-optn',
-                'free_shipping_discount_amount' => ($coupon->reward == 'free-shipping-optn' && $coupon->location_discount_type == 'partial') ? $coupon->location_discount_amount : 100
+                'free_shipping_discount_amount' => ($coupon->reward == 'free-shipping-optn' && $coupon->location_discount_type == 'partial') ? $coupon->location_discount_amount : ($coupon->reward == 'free-shipping-optn' ? 100 : 0),
             ]
         ]);
     }

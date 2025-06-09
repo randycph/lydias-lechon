@@ -775,6 +775,9 @@
 
                 this.noNeededTime = false;
                 this.noNeededDate = false;
+
+                this.couponMessage = '';
+                this.removeCoupon()
             },
 
             mobileValidationMessage: '',
