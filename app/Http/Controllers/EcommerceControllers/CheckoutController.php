@@ -774,6 +774,10 @@ class CheckoutController extends Controller
                 'customer_limit' => $coupon->customer_limit,
                 'customer_usage_used' => $customerUsed,
                 'status' => 'valid',
+                'location' => $coupon->location,
+                'reward' => $coupon->reward,
+                'free_shipping' => $coupon->reward == 'free-shipping-optn',
+                'free_shipping_discount_amount' => ($coupon->reward == 'free-shipping-optn' && $coupon->location_discount_type == 'partial') ? $coupon->location_discount_amount : 100
             ]
         ]);
     }

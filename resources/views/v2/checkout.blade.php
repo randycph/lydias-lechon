@@ -106,29 +106,44 @@
                                 <span class="font-medium" >₱{{ number_format($total, 2) }}</span>
                             </div>
                             <template x-if="deliveryFees.length == 0 && !allowMultiple && method == 'delivery'">
-                            <div class="flex justify-between lg:mt-2">
-                                <span class="font-medium text-gray-800">Delivery Fee</span>
-                                <span class="font-medium" x-text="deliveryFee > 0 ? '₱' + deliveryFee : 'Free'"></span>
-                            </div>
+                                <div>
+                                    <div class="flex justify-between lg:mt-2">
+                                        <span class="font-medium text-gray-800">Delivery Fee</span>
+                                        <span class="font-medium" x-text="deliveryFee > 0 ? '₱' + deliveryFee : 'Free'"></span>
+                                    </div>
+                                </div>
                             </template>
                             <template x-if="deliveryFees.length > 0">
                                 <div class="flex flex-col gap-1 mt-2">
                                     <template x-for="(item, i) in deliveryFees" :key="i">
                                         <div class="flex justify-between text-gray-500 text-sm">
                                             <span x-text="'Delivery Fee (' + item.location + ')'"></span>
-                                            <span x-text="'₱' + item.fee.toLocaleString()"></span>
+                                            <span x-text="'₱' + item.fee.toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
                                         </div>
                                     </template>
                                 </div>
                             </template>
-                            <div class="flex justify-between lg:mt-2" x-show="showMessage">
-                                <span class="font-medium text-red-700 italic flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 text-green-600 mr-1">
-                                        <path fill-rule="evenodd" d="M4.5 2A2.5 2.5 0 0 0 2 4.5v2.879a2.5 2.5 0 0 0 .732 1.767l4.5 4.5a2.5 2.5 0 0 0 3.536 0l2.878-2.878a2.5 2.5 0 0 0 0-3.536l-4.5-4.5A2.5 2.5 0 0 0 7.38 2H4.5ZM5 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
-                                    </svg>
-                                    Coupon (<span x-text="coupon?.code"></span>) <span class="text-xs ml-1 underline cursor-pointer" @click="removeCoupon">Remove Coupon</span></span>
-                                <span class="font-medium italic text-red-700" x-text="'- ₱' + discountAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })""></span>
-                            </div>
+
+                        <div class="flex justify-between lg:mt-2" x-show="showMessage">
+                            <span class="font-medium text-red-700 italic flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 text-green-600 mr-1">
+                                    <path fill-rule="evenodd" d="M4.5 2A2.5 2.5 0 0 0 2 4.5v2.879a2.5 2.5 0 0 0 .732 1.767l4.5 4.5a2.5 2.5 0 0 0 3.536 0l2.878-2.878a2.5 2.5 0 0 0 0-3.536l-4.5-4.5A2.5 2.5 0 0 0 7.38 2H4.5ZM5 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
+                                </svg>
+                                Coupon (<span x-text="coupon?.code"></span>) 
+                                <span class="text-xs ml-1 underline cursor-pointer" @click="removeCoupon">Remove Coupon</span>
+                            </span>
+
+                            <!-- Show discount amount, with label depending on freeShipping -->
+                            <span class="font-medium italic text-red-700">
+                                <template x-if="freeShipping">
+                                    <span x-text="'- ₱' + (deliveryFee * (freeShippingDiscountAmount / 100)).toLocaleString(undefined, { minimumFractionDigits: 2 }) + ' (Shipping Discount)'"></span>
+                                </template>
+                                <template x-if="!freeShipping">
+                                    <span x-text="'- ₱' + discountAmount.toLocaleString(undefined, { minimumFractionDigits: 2 }) + ' (Order Discount)'"></span>
+                                </template>
+                            </span>
+                        </div>
+
                         </div>
     
                         <div class="border-t border-gray-200 mt-2 py-4 gap-1 flex flex-col text-sm lg:text-base px-3">
@@ -727,12 +742,21 @@
                     this.discountAmount = (this.orderAmount * parseFloat(this.coupon.discount)) / 100;
                 }
 
+                // Handle free shipping
+                if (this.coupon.free_shipping) {
+                    this.freeShipping = true;
+                    this.freeShippingDiscountAmount = parseFloat(this.coupon.free_shipping_discount_amount);
+                }
+
                 this.discountAmount = Math.min(this.discountAmount, this.orderAmount);
 
                 this.showMessage = true;
                 this.couponMessage = 'Voucher code successfully applied.';
                 this.couponMessageType = 'success';
             },
+
+            freeShipping: false,
+            freeShippingDiscountAmount: 0,
 
             removeCoupon() {
                 this.couponCode = '';
@@ -930,21 +954,37 @@
                 if (this.method == 'pickup') {
                     this.deliveryFee = 0;
                 }
-                let total = parseFloat(this.orderAmount) + parseFloat(this.deliveryFee);
-                this.totalAmount = total;
-                this.deposit = this.totalAmount.toFixed(2);
 
-                if (this.coupon) {
+                let deliveryFeeFinal = this.deliveryFee;
+
+                // If free shipping applies
+                if (this.coupon && this.freeShipping) {
+                    if (this.freeShippingDiscountAmount === 100) {
+                        deliveryFeeFinal = 0;
+                    } else {
+                        deliveryFeeFinal = this.deliveryFee * (1 - this.freeShippingDiscountAmount / 100);
+                    }
+                }
+
+                let total = parseFloat(this.orderAmount) + parseFloat(deliveryFeeFinal);
+
+                // Apply coupon discount (if not free shipping type)
+                if (this.coupon && this.discountAmount > 0) {
                     total -= this.discountAmount;
                 }
 
+                // Update your component state
+                this.totalAmount = total;
+                this.deposit = this.totalAmount.toFixed(2);
+
+                // Trigger any input update (if needed)
                 this.$nextTick(() => {
                     let input = this.$root.querySelector('input[name="deposit"]');
                     if (input) {
                         input.dispatchEvent(new Event('input'));
                     }
                 });
-                
+
                 return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(total);
             },
 

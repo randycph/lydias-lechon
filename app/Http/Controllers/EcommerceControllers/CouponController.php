@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers\EcommerceControllers;
+
+use App\EcommerceModel\Branch;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
@@ -178,7 +180,7 @@ class CouponController extends Controller
         $categories =  ProductCategory::has('published_products')->where('status','PUBLISHED')->get();
       
         $customers = User::where('role_id',6)->where('is_active',1)->get();
-        $locations = Deliverablecities::all();
+        $locations = Branch::where('delivery_branch', 1)->get();
         $free_products = Product::where('category_id',28)->get();
 
         return view('admin.coupon.edit',compact('coupon','products','categories','customers','locations','free_products'));
@@ -260,6 +262,7 @@ class CouponController extends Controller
             'location' => $loc,
             'location_discount_type' => $loc_discount_type,
             'location_discount_amount' => $loc_discount_amount,
+            'reward' => $request->reward,
             'amount' => $request->reward == 'discount-amount-optn' ? $request->discount_amount : NULL,
             'percentage' => $request->reward == 'discount-percentage-optn' ? $request->discount_percentage : NULL,
             'free_product_id' => $request->free_product_id,
