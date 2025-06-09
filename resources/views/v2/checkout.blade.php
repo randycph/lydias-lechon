@@ -815,8 +815,8 @@
                 formData.append('shipping_type', this.method);
                 formData.append('coupon', this.coupon ? this.coupon?.code : null);
                 formData.append('discount_amount', this.coupon ? this.coupon.discount : null);
-                formData.append('delivery_fee', this.deliveryFee);
                 formData.append('order_amount', this.orderAmount);
+                formData.append('delivery_fee', this.deliveryFee);
                 formData.append('deposit', this.deposit);
                 formData.append('total_amount', this.totalAmount);
 
@@ -1138,43 +1138,42 @@
                 });
             },
 
-validateAllQtyUsed() {
-    const expectedTotals = {};
-    const assignedTotals = {};
+            validateAllQtyUsed() {
+                const expectedTotals = {};
+                const assignedTotals = {};
 
-    // Build the expected total quantity for each product
-    this.orders.forEach(order => {
-        expectedTotals[order.product_id] = parseInt(order.qty) || 0;
-    });
+                // Build the expected total quantity for each product
+                this.orders.forEach(order => {
+                    expectedTotals[order.product_id] = parseInt(order.qty) || 0;
+                });
 
-    // Sum up assigned quantities from all deliveries
-    this.deliveries.forEach(delivery => {
-        if (Array.isArray(delivery.orders)) {
-            delivery.orders.forEach(o => {
-                if (!o.product_id || !o.qty) return;
+                // Sum up assigned quantities from all deliveries
+                this.deliveries.forEach(delivery => {
+                    if (Array.isArray(delivery.orders)) {
+                        delivery.orders.forEach(o => {
+                            if (!o.product_id || !o.qty) return;
 
-                const productId = o.product_id;
-                assignedTotals[productId] = (assignedTotals[productId] || 0) + parseInt(o.qty);
-            });
-        }
-    });
+                            const productId = o.product_id;
+                            assignedTotals[productId] = (assignedTotals[productId] || 0) + parseInt(o.qty);
+                        });
+                    }
+                });
 
-    // Compare expected vs assigned
-    for (const productId in expectedTotals) {
-        const expected = expectedTotals[productId];
-        const assigned = assignedTotals[productId] || 0;
+                // Compare expected vs assigned
+                for (const productId in expectedTotals) {
+                    const expected = expectedTotals[productId];
+                    const assigned = assignedTotals[productId] || 0;
 
-        if (assigned !== expected) {
-            this.qtyValidationMessage = '⚠️ Please assign all available quantities before proceeding.';
-            return false;
-        }
-    }
+                    if (assigned !== expected) {
+                        this.qtyValidationMessage = '⚠️ Please assign all available quantities before proceeding.';
+                        return false;
+                    }
+                }
 
-    // All quantities match
-    this.qtyValidationMessage = '';
-    return true;
-}
-,
+                // All quantities match
+                this.qtyValidationMessage = '';
+                return true;
+            },
 
             qtyValidationMessage: '',
 
@@ -1346,7 +1345,12 @@ validateAllQtyUsed() {
 
                 if (removed?.location) {
                     this.deliveryFees = this.deliveryFees.filter(f => f.location !== removed.location);
+
+                    // update delivery fee and total amount
+                    this.deliveryFee = this.deliveryFees.reduce((acc, item) => acc + item.fee, 0);
                 }
+
+                this.computeTotal();
             },
         }
     }
