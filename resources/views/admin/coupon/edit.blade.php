@@ -330,12 +330,12 @@
 						<div class="row mt-3">
 							<div class="col-6">
 								<label class="d-block">Start Date *</label>
-								<input name="startdate" type="text" id="dateFrom" class="form-control" placeholder="From" autocomplete="off" value="{{ old('startdate',$coupon->start_date) }}">
+								<input name="startdate" type="date" id="dateFrom" class="form-control" placeholder="From" autocomplete="off" value="{{ old('startdate',$coupon->start_date) }}">
 								<small id="spanDatefrom" style="display: none;" class="text-danger"></small>
 							</div>
 							<div class="col-6">
 								<label class="d-block">End Date</label>
-								<input name="enddate" type="text" id="dateTo" class="form-control" placeholder="To" autocomplete="off" value="{{ old('enddate',$coupon->end_date) }}">
+								<input name="enddate" type="date" id="dateTo" class="form-control" placeholder="To" autocomplete="off" value="{{ old('enddate',$coupon->end_date) }}">
 							</div>
 						</div>
 
