@@ -120,8 +120,8 @@
             <div class="swiper swiper-menus relative">
                 <div class="swiper-wrapper">
                     @foreach ($categories as $category)
-                    <div @click="goToAnchor('{{ $category->slug }}')" class="swiper-slide !flex items-center justify-center p-4 flex-col !w-[140px] h-[140px]">
-                        <div class="bg-secondary p-2 rounded-lg items-center w-[140px] h-[140px] flex flex-col justify-center overflow-hidden">
+                    <div @click="goToAnchor('{{ $category->slug }}')" class="swiper-slide !flex items-center justify-center p-4 flex-col h-[140px]">
+                        <div class="bg-secondary p-2 rounded-lg items-center !w-[140px]  h-[140px] flex flex-col justify-center overflow-hidden">
                             <img src="{{ asset('images/category/'.$category['image']) }}" alt="Shop {{ $category->name }}" class="cursor-pointer hover:scale-125 transition duration-300">
                         </div>
                         <div class="font-semibold text-center mt-2">{{ $category->name }}</div>

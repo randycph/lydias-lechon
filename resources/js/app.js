@@ -104,11 +104,21 @@ document.addEventListener("DOMContentLoaded", function () {
             slidesPerView: 2,
             centeredSlides: false,
 
-            spaceBetween: 15,
+            spaceBetween: 30,
+            watchOverflow: true,
             
             breakpoints: {
-                768: {
+                480: {
                     slidesPerView: 3,
+                },
+                768: {
+                    slidesPerView: 6,
+                },
+                1024: {
+                    slidesPerView: 7,
+                },
+                1280: {
+                    slidesPerView: 8,
                 },
             },
 
