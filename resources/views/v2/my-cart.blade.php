@@ -158,15 +158,6 @@
                                             }
                                         }
                                     }">
-                                        <div class="flex justify-end">
-                                            <div class="flex items-center border border-gray-200 rounded-md overflow-hidden w-max">
-                                                <input x-model="couponCode" type="text" placeholder="Have a coupon code?" 
-                                                    class="w-full p-3 outline-none border-none text-gray-700">
-                                                <button @click="submitCouponCode" class="bg-primary hover:bg-primary-dark text-white px-6 py-3">Apply</button>
-                                            </div>
-                                        </div>
-                                        <div x-show="showMessage" class="text-[#28A745] mx-5 py-2 text-left w-full px-6 flex justify-end">Voucher code successfully applied.</div>
-                
                                         <!-- Subtotal Section -->
                                         <div class="border-t border-gray-200 mt-4 pt-4">
                                             <div class="flex justify-between">
