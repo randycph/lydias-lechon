@@ -168,7 +168,7 @@
                                 
                                 <div class="flex flex-col">
                                     <div class="font-bold">{{ $details['product_name'] }}</div>
-                                    <div class="text-sm text-gray-600 font-medium">QTY: {{ $details['qty'] }}</div>
+                                    <div class="text-sm text-gray-600 font-medium">QTY: {{ number_format($details['qty'], 0)}}</div>
                                 </div>
                                 
                                 <div class="text-sm text-black font-bold text-right w-full absolute right-0 bottom-0">₱{{ number_format(($details->price * $details->qty), 2) }}</div>
