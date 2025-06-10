@@ -20,6 +20,7 @@ use App\Models\Logs;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
 
 class CustomerController extends Controller
 {
@@ -105,12 +106,12 @@ class CustomerController extends Controller
                 'firstname'             => $fname,
                 'lastname'              => $lname,
                 'name'                  => $fname.' '.$lname,
-                'password'              => \STR::random(32),
+                'password'              => Str::random(32),
                 'email'                 => $email,
                 'role_id'               => 6,
                 'is_active'             => 1,
                 'user_id'               => NULL,
-                'remember_token'        => \STR::random(10),
+                'remember_token'        => Str::random(10),
                 'is_org'                => $request->is_org,
                 'user_type'             => 'customer',
                 'birthday'              => $request->birthday,
