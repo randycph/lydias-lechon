@@ -1160,7 +1160,7 @@ class SalesController extends Controller
             });
 
         // Step 3: Merge collections
-        $merged = $salesHeaders?->merge($jobOrders);
+        $merged = collect()->merge($salesHeaders)->merge($jobOrders);
 
         // Step 4: Apply filters
         $search      = request()->get('search');
