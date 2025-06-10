@@ -9,8 +9,8 @@ use App\Http\Controllers\Controller;
 use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\SalesDetail;
 use App\EcommerceModel\SalesPayment;
-use Auth;
-Use Redirect;
+use Illuminate\Support\Facades\Auth;
+Use Illuminate\Support\Facades\Redirect;
 
 class PaymayaController extends Controller
 {
@@ -174,6 +174,11 @@ class PaymayaController extends Controller
         
         // dd($request->all());
         $sales = SalesHeader::find($request->sales_header_id); 
+
+        if ($sales && $sales->items && count($sales->items) == 0) {
+            return Redirect::back()->withErrors(['error' => 'No items found in the sales order.']);
+        }
+
         $payment = SalesPayment::create([
             'sales_header_id' => $request->sales_header_id,
             'payment_type' => 'Paymaya',
@@ -184,10 +189,7 @@ class PaymayaController extends Controller
             'created_by' => $sales->user_id
         ]);
 
-
         $checkoutId = $this->get_checkoutId($request, $payment);
-
-      
 
         $update_payment = $payment->update([
             'receipt_number' => $checkoutId['checkoutId']
