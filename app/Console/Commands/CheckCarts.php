@@ -35,8 +35,6 @@ class CheckCarts extends Command
             $oldestCart = $userCarts->sortBy('created_at')->first();
             $created = Carbon::parse($oldestCart->created_at);
             $diffInDays = $created->diffInDays($now);
-
-            logger()->info('User ID: ' . $diffInDays);
     
             if ($diffInDays >= 2) {
                 // Send reminder email with all their cart items
