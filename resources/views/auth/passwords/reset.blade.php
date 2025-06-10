@@ -71,7 +71,7 @@
 
                     <div class="row mb-0">
                         <div class="col-md-6 offset-md-4">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="text-white bg-primary text-center custom-btn btn-primary-dark focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-md w-full px-5 py-3.5">
                                 {{ __('Reset Password') }}
                             </button>
                         </div>
