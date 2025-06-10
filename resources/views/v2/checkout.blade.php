@@ -1372,7 +1372,12 @@
                 if (!this.need_date) return false;
                 let timeString = (hour < 10 ? '0' + hour : hour) + ':00';
                 let combined = `${this.need_date} ${timeString}`;
-                return this.disabledPickupDates.includes(combined);
+
+                if (this.method === 'pickup') {
+                    return this.disabledPickupDates.includes(combined);
+                } else {
+                    return this.disabledDeliveryDates.includes(combined);
+                }
             },
 
             isTimeDisabledForDelivery(hour) {
@@ -1395,6 +1400,26 @@
 
                 this.computeTotal();
             },
+
+            async checkDateTimeNeeded() {
+                let response = await fetch('{{ route('cart.check_dateneeded') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                    body: JSON.stringify({
+                        need_date: this.need_date,
+                        need_time: this.need_time,
+                        method: this.method,
+                        allow_multiple: this.allowMultiple,
+                    }),
+                });
+
+                if (!response.ok) throw new Error('Network error');
+
+                const data = await response.json();
+            }
         }
     }
 </script>
