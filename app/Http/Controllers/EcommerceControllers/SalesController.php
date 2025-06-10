@@ -745,12 +745,12 @@ class SalesController extends Controller
             'created_by' => auth()->id(),
             'activity_type' => 'update',
             'dashboard_activity' => 'update Sales Details',
-            'activity_desc' => 'updated Sales Details with Order Number: '.$salesheader->order_number,
+            'activity_desc' => 'updated Sales Details with Order Number: '.$salesheader?->order_number,
             'activity_date' => date("Y-m-d H:i:s"),
             'db_table' => 'ecommerce_sales_details',
             'old_value' => '',
             'new_value' => '',
-            'reference' => $salesdetail->id
+            'reference' => $salesdetail?->id
         ]);
 
         return view('admin.sales.update_sales_detail',compact('salesheader','dateneeded','date_only','time_only','locationed','products','branches_store'));
