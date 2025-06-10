@@ -53,7 +53,7 @@
                                     $total = 0;
                                     $fee = $sale->delivery_type == 'Door to door delivery' ? $sale->delivery_fee_amount : 0;
                                 @endphp
-                                
+                                @if ($sale->items->count() > 0)
                                 @foreach ($sale->items as $cart)
                                     @php
                                         $itemTotal = $cart->net_amount;
@@ -77,6 +77,9 @@
                                         <div class="text-sm text-black font-bold text-right w-full absolute right-0 bottom-0">₱{{ number_format($itemTotal, 2) }}</div>
                                     </div>
                                 @endforeach
+                                @else
+                                    <div class="text-sm text-gray-600">No items in this order.</div>
+                                @endif
 
                                 @php
                                     $amountPaid = ($sale->payments && count($sale->payments) > 0) ? $sale->payments->sum('amount') : 0;
@@ -137,6 +140,7 @@
                                     </div>
                                 </template>
                             </div>
+                            @if ($sale->items->count() > 0)
                             <div class="w-full flex flex-col gap-2 px-4 mt-4 lg:flex-row justify-between">
     
                                 {{-- Left side: Cancel Order --}}
@@ -170,6 +174,7 @@
                                 </div>
                             
                             </div>
+                            @endif
                             
                         </div>
                     </div>

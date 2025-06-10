@@ -16,6 +16,8 @@
                     <a href="{{ route('order-history') }}" class="text-center">View Order History</a>
                 </div>
             </div>
+
+            @if (count($salesDetails) > 0)
     
             <div class="flex flex-col lg:flex-row gap-4 w-full justify-start px-4">
                 <div class="rounded-lg border bg-white border-gray-200 shadow-md mt-10 w-full lg:w-1/2">
@@ -414,6 +416,14 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+            @endif
+            @else
+            <div class="flex items-center justify-center mt-10">
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold text-gray-700">No Order Details Found</h2>
+                    <p class="text-gray-500">It seems like there are no order details available for this transaction.</p>
+                </div>
             </div>
             @endif
         </div>
