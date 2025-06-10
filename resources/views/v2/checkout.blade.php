@@ -274,7 +274,7 @@
                                                             </svg>
                                                             </div>
                                                             <input 
-                                                                :min="new Date().toISOString().split('T')[0]"
+                                                                :min="minDate()"
                                                                 @change="validateDeliveryDateTime(delivery)"
                                                                 x-model="delivery.need_date" name="need_date" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
                                                         </div>
@@ -458,7 +458,8 @@
                                                 </svg>
                                             </div>
                                             <input 
-                                                :min="new Date().toISOString().split('T')[0]" @change="validateDateTime" x-model="need_date" type="date" name="need_date" value="{{ old('need_date') }}"
+                                                :min="minDate()" @change="validateDateTime" 
+                                                x-model="need_date" type="date" name="need_date" value="{{ old('need_date') }}"
                                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 "
                                                 placeholder="Select date">
                                         </div>
@@ -638,6 +639,16 @@
 <script>
     function checkoutForm() {
         return {
+            today: new Date(),
+            minDate() {
+                if ({{ $haslechon ? 'true' : 'false' }}) {
+                    const tomorrow = new Date(this.today);
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    return tomorrow.toISOString().split('T')[0];
+                } else {
+                    return this.today.toISOString().split('T')[0];
+                }
+            },
             paymentDetails: {
                 sales_header_id: '',
                 order_number: '',
@@ -667,7 +678,7 @@
                     qty: 1, 
                     location: '', 
                     order: '', 
-                    need_date: new Date()?.toISOString()?.split('T')[0], 
+                    need_date: '',
                     need_time: '13:00',
                     note: '', 
                     delivery_fee: 0 
@@ -1288,7 +1299,7 @@
                     phone: '',
                     orders: [],
                     location: '',
-                    need_date: new Date().toISOString()?.split('T')[0],
+                    need_date: this.minDate(),
                     need_time: '13:00',
                     note: '',
                     delivery_fee: 0,

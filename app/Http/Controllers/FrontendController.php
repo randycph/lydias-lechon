@@ -171,7 +171,11 @@ class FrontendController extends Controller
         $disabledPickupDates = explode(',', $setting->disable_pickup_dates ?? '');
         $disabledDeliveryDates = explode(',', $setting->disable_delivery_dates ?? '');
 
-        return view('v2.checkout', compact('page', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates'));
+        $haslechon  = $carts->contains(function ($cart) {
+            return $cart->product->category_id == 1;
+        });
+
+        return view('v2.checkout', compact('page', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon'));
     }
 
     public function confirmation($id)
