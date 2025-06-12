@@ -194,7 +194,7 @@
                             <div x-show="method === 'delivery'" class="space-y-4">
                         
                             <div class="flex items-center me-4 my-4">
-                                <input x-model="allowMultiple" checked id="multiple-address" type="checkbox" value="" class="w-5 h-5 text-primary bg-gray-100 border-gray-300 rounded-sm focus:ring-primary-dark focus:ring-2">
+                                <input @change="onChangeMultipleAddress()" x-model="allowMultiple" checked id="multiple-address" type="checkbox" value="" class="w-5 h-5 text-primary bg-gray-100 border-gray-300 rounded-sm focus:ring-primary-dark focus:ring-2">
                                 <label for="multiple-address" class="ms-2 text-base font-medium text-gray-900">Allow multiple delivery address</label>
                             </div>
 
@@ -689,6 +689,25 @@
                 }
             ],
             allowMultiple: false,
+            onChangeMultipleAddress() {
+                if (!this.allowMultiple) {
+                    this.deliveries = [{ 
+                        address: '', 
+                        name: '',
+                        phone: '', 
+                        qty: 1, 
+                        location: '', 
+                        order: '', 
+                        need_date: '',
+                        need_time: '13:00',
+                        note: '', 
+                        delivery_fee: 0 
+                    }];
+
+                    this.deliveryFees = [];
+                    this.deliveryFee = 0;
+                }
+            },
             formEl: null,
             deliveryFee: 0,
             orderAmount: {{ $total }},
