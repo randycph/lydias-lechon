@@ -175,7 +175,11 @@ class FrontendController extends Controller
             return $cart->product->category_id == 1;
         });
 
-        return view('v2.checkout', compact('page', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon'));
+        $hasbaka = $carts->contains(function ($cart) {
+            return $cart->product->slug == 'lechon-baka';
+        });
+
+        return view('v2.checkout', compact('page', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka'));
     }
 
     public function confirmation($id)

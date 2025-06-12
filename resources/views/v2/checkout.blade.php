@@ -641,7 +641,11 @@
         return {
             today: new Date(),
             minDate() {
-                if ({{ $haslechon ? 'true' : 'false' }}) {
+                if ({{ $hasbaka ? 'true' : 'false' }}) {
+                    const day = new Date(this.today);
+                    day.setDate(day.getDate() + 3);
+                    return day.toISOString().split('T')[0];
+                } else if ({{ $haslechon ? 'true' : 'false' }}) {
                     const tomorrow = new Date(this.today);
                     tomorrow.setDate(tomorrow.getDate() + 1);
                     return tomorrow.toISOString().split('T')[0];
