@@ -661,7 +661,7 @@ class CartController extends Controller
                 'regex:/^(09|\+639)\d{9}$/'
             ],
             'name' => 'required',
-            'email' => 'required|email',
+            'email' => 'required|email:rfc,dns'
         ], [
             'mobile.regex' => 'The mobile number must start with 09 or +639 and be followed by 9 digits.',
         ]);

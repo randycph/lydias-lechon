@@ -411,7 +411,7 @@ class FrontendController extends Controller
     {
         try {
             $validated = $request->validate([
-                'email' => 'required|email|unique:users,email',
+                'email' => 'required|email:rfc,dns|unique:users,email',
                 'password' => 'required|confirmed|min:6',
                 'account_type' => 'required|in:individual,organization',
                 'first_name' => [
@@ -548,7 +548,7 @@ class FrontendController extends Controller
                 'required',
                 'regex:/^(09|\+639)\d{9}$/'
             ],
-            'email' => 'required|email|max:191|unique:users,email,' . Auth::id(), 
+            'email' => 'required|email:rfc,dns|max:191|unique:users,email,' . Auth::id(), 
         ], [
             'contact_mobile.regex' => 'The mobile number must start with 09 or +639 and be followed by 9 digits.',
         ]);
@@ -602,7 +602,7 @@ class FrontendController extends Controller
         switch ($step) {
             case 1:
                 $rules = [
-                    'email' => 'required|email|max:191|unique:users,email',
+                    'email' => 'required|email:rfc,dns|max:191|unique:users,email',
                     'password' => 'required|min:6|confirmed',
                 ];
                 break;
