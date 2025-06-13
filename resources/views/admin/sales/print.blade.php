@@ -124,6 +124,8 @@
                             </li>
                             @endforeach
                             </ul>
+                            @else
+                                {{$sales->customer_delivery_adress}}
                             @endif
                         @else
                            Delivery/Pickup Address: {{$sales->customer_delivery_adress}}

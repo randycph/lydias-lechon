@@ -71,13 +71,15 @@
                                 </li>
                                 @endforeach
                                 </ul>
+                                @else
+                                    {{ $sales->customer_delivery_adress }}
                                 @endif
                             @else
                                 {{$sales->customer_delivery_adress}}
                             @endif
                         </p>                
 
-                        <p class="mg-b-3">Contact Person: {{$sales->contact_person ?? $sales->customer_name}}</p>     
+                        <p class="mg-b-3">Contact Person: {{$sales->contact_person ?? $sales->customer_name}}</p>
                         @if ($sales->instruction)
                         <p class="mg-b-3">Instruction: {{$sales->instruction}}</p>
                         @endif
@@ -232,7 +234,7 @@
                                 </tr>
                             @endif
                             @php
-                                $total_balance = $sales->gross_amount - $paidTotal;
+                                $total_balance = $sales->net_amount - $paidTotal;
                             @endphp
                             @if($total_balance > 0)
                                 <tr style="font-style:italic;">
