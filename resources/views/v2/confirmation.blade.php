@@ -288,6 +288,10 @@
                         @endforelse
                     </tbody>
                     <tfoot>
+                        <tr class="bg-white ">
+                            <td colspan="{{ $colspan }}" class="px-6 py-4 font-bold text-right">Sub total</td>
+                            <td class="px-6 py-4 font-bold">₱{{ number_format($sales->gross_amount, 2) }}</td>
+                        </tr>
                         @if($sales->delivery_fee_amount > 0)
                         <tr class="bg-white ">
                             <td colspan="{{ $colspan }}" class="px-6 py-4 font-bold text-right">Delivery Fee</td>
@@ -304,7 +308,7 @@
                         @if($salesDetails->sum('gross_amount') > 0)
                         <tr class="bg-white border-b border-gray-200">
                             <td colspan="{{ $colspan }}" class="px-6 py-4 font-bold text-right">Total</td>
-                            <td class="px-6 py-4 font-bold">₱{{ number_format($sales->gross_amount, 2) }}</td>
+                            <td class="px-6 py-4 font-bold">₱{{ number_format($sales->gross_amount + $sales->delivery_fee_amount, 2) }}</td>
                         </tr>
                         @endif
                     </tfoot>
