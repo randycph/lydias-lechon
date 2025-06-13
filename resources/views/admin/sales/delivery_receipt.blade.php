@@ -86,6 +86,8 @@
                                 </li>
                                 @endforeach
                                 </ul>
+                                @else
+                                    {{$sales->customer_delivery_adress}}
                                 @endif
                             @else
                                 {{$sales->customer_delivery_adress}}
