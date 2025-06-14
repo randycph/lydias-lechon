@@ -2,8 +2,8 @@
 
 @section('pagecss')
 	<link href="{{ asset('lib/bselect/dist/css/bootstrap-select.css') }}" rel="stylesheet">
-	<link href="{{ asset('lib/clockpicker/bootstrap-clockpicker.min.css') }}" rel="stylesheet">
-	<link href="{{ asset('lib/select2/css/select2.min.css') }}" rel="stylesheet">
+	{{-- <link href="{{ asset('lib/clockpicker/bootstrap-clockpicker.min.css') }}" rel="stylesheet"> --}}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 	<style>
 		.select2 {width:100% !important;}
 
@@ -502,8 +502,8 @@
 	<script src="{{ asset('lib/bselect/dist/js/bootstrap-select.js') }}"></script>
 	<script src="{{ asset('lib/bselect/dist/js/i18n/defaults-en_US.js') }}"></script>
 	<script src="{{ asset('lib/jqueryui/jquery-ui.min.js') }}"></script>
-	<script src="{{ asset('lib/clockpicker/bootstrap-clockpicker.min.js') }}"></script>
-	<script src="{{ asset('lib/select2/js/select2.min.js') }}"></script>
+	{{-- <script src="{{ asset('lib/clockpicker/bootstrap-clockpicker.min.js') }}"></script> --}}
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 @endsection
 
 
@@ -779,7 +779,7 @@
         }
     });
 
-	$('.datetime').clockpicker();
+	// $('.datetime').clockpicker();
 
 	$('.singlecalendar').datepicker({
 		dateFormat: 'yy-mm-dd'

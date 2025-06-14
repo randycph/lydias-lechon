@@ -482,7 +482,8 @@ class FrontendController extends Controller
                     'remember_token' => Str::random(10),
                     'is_active' => 1,
                     'is_org' => $request->input('account_type') === 'organization' ? 1 : 0,
-                    'is_subscribe' => $request->is_subscribe ?? 0
+                    'is_subscribe' => $request->is_subscribe ?? 0,
+                    'role_id' => 6
                 ]);
             } elseif ($request->account_type == 'individual') {
                 $user = User::create([
@@ -508,7 +509,8 @@ class FrontendController extends Controller
                     'agent_code' => $request->agent_code,
                     'remember_token' => Str::random(10),
                     'is_active' => 1,
-                    'is_subscribe' => $request->is_subscribe ?? 0
+                    'is_subscribe' => $request->is_subscribe ?? 0,
+                    'role_id' => 6
                 ]);
             }
 

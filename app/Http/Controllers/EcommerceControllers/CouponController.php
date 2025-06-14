@@ -184,7 +184,10 @@ class CouponController extends Controller
         $locations = Branch::where('delivery_branch', 1)->get();
         $free_products = Product::where('category_id',28)->get();
 
-        return view('admin.coupon.edit',compact('coupon','products','categories','customers','locations','free_products'));
+        $selectedCustomers = explode('|', $coupon->scope_customer_id ?? '');
+        $selectedCustomers = array_filter($selectedCustomers, function($value) { return !is_null($value) && $value !== ''; });
+
+        return view('admin.coupon.edit',compact('coupon','products','categories','customers','locations','free_products', 'selectedCustomers'));
     }
 
     /**
@@ -196,6 +199,7 @@ class CouponController extends Controller
      */
     public function update(Request $request, Coupon $coupon)
     {
+        // dd($request->all());
         Validator::make($request->all(), [
             'name' => 'required|max:150|unique:coupons,name,' . $coupon->id,
             'description' => 'required',
@@ -253,7 +257,7 @@ class CouponController extends Controller
         }
 
         Coupon::find($coupon->id)->update([
-            'coupon_code' => $request->coupon_activation == 'manual' ? $request->code : Coupon::generate_unique_code(),
+            'coupon_code' => $request->coupon_activation == 'manual' ? $request->code : ($request->name ?? Coupon::generate_unique_code()),
             'name' => $request->name,
             'description' => $request->description,
             'terms_and_conditions' => $request->terms_and_conditions,
@@ -582,6 +586,7 @@ class CouponController extends Controller
         // Check if customer is allowed
         if ($coupon->customer_scope === 'specific') {
             $allowedIds = explode('|', $coupon->scope_customer_id ?? '');
+            $allowedIds = array_filter($allowedIds, function($value) { return !is_null($value) && $value !== ''; });
             if (!in_array(Auth::id(), $allowedIds)) {
                 return response()->json([
                     'success' => false,
@@ -641,4 +646,75 @@ class CouponController extends Controller
             ]
         ]);
     }
+
+    public function get_auto_coupons(Request $request)
+    {
+        $now = Carbon::now();
+
+        $eligibleCoupons = Coupon::where('activation_type', 'auto')
+            ->where('status', 'ACTIVE')
+            ->whereRaw("CONCAT(start_date, ' ', start_time) <= ?", [$now])
+            ->whereRaw("CONCAT(end_date, ' ', end_time) >= ?", [$now])
+            ->where(function($q) {
+                $q->whereNull('customer_scope')
+                ->orWhere('customer_scope', 'all')
+                ->orWhere(function ($subq) {
+                    $subq->where('customer_scope', 'specific')
+                        ->whereRaw("FIND_IN_SET(?, scope_customer_id)", [Auth::id()]);
+                });
+            })
+            ->get();
+
+        $result = [];
+
+        foreach ($eligibleCoupons as $coupon) {
+            // Check usage limits
+            $totalUsed = CouponCart::where('coupon_id', $coupon->id)->where('status', 1)->sum('total_usage');
+            $customerUsed = CouponCart::where('coupon_id', $coupon->id)
+                ->where('status', 1)
+                ->where('customer_id', Auth::id())
+                ->sum('total_usage');
+
+            if ($coupon->usage_limit !== null && $totalUsed >= $coupon->usage_limit) {
+                continue;
+            }
+
+            if ($coupon->customer_limit !== null && $customerUsed >= $coupon->customer_limit) {
+                continue;
+            }
+
+            // Add eligible coupon to result
+            $result[] = [
+                'id' => $coupon->id,
+                'code' => $coupon->coupon_code,
+                'name' => $coupon->name,
+                'description' => $coupon->description,
+                'terms' => $coupon->terms_and_conditions,
+                'type' => $coupon->amount_discount_type == 1 ? 'amount' : 'product',
+                'discount_type' => $coupon->percentage > 0 ? 'percent' : 'amount',
+                'discount' => $coupon->percentage > 0 ? $coupon->percentage : $coupon->amount,
+                'applies_to' => $coupon->free_product_id ? 'free_product' : ($coupon->purchase_product_id ? 'product' : 'cart'),
+                'purchase_product_id' => $coupon->purchase_product_id,
+                'free_product_id' => $coupon->free_product_id,
+                'combination_allowed' => $coupon->combination == 1,
+                'total_usage_limit' => $coupon->usage_limit,
+                'total_usage_used' => $totalUsed,
+                'customer_limit' => $coupon->customer_limit,
+                'customer_usage_used' => $customerUsed,
+                'status' => 'valid',
+                'location' => $coupon->location,
+                'reward' => $coupon->reward,
+                'free_shipping' => $coupon->reward == 'free-shipping-optn',
+                'free_shipping_discount_amount' => $coupon->reward == 'free-shipping-optn'
+                    ? ($coupon->location_discount_type == 'partial' ? $coupon->location_discount_amount : 100)
+                    : 0,
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'coupons' => $result
+        ]);
+    }
+
 }

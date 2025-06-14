@@ -2,8 +2,8 @@
 
 @section('pagecss')
 	<link href="{{ asset('lib/bselect/dist/css/bootstrap-select.css') }}" rel="stylesheet">
-	<link href="{{ asset('lib/clockpicker/bootstrap-clockpicker.min.css') }}" rel="stylesheet">
-	<link href="{{ asset('lib/select2/css/select2.min.css') }}" rel="stylesheet">
+	{{-- <link href="{{ asset('lib/clockpicker/jquery-clockpicker.min.css') }}" rel="stylesheet"> --}}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 	<style>
 		.select2 {width:100% !important;}
 
@@ -139,10 +139,10 @@
 				<div class="form-group">
 					<div class="mb-3 reward-option" id="customer-optn" style="display:@if($coupon->customer_scope == 'specific') block @else none @endif">
 						<label class="d-block">Customer Name *</label>
-						<select class="form-control select2" name="customer[]" multiple="multiple">
+						<select class="select2" name="customer[]" multiple="multiple">
 							<option label="Choose one"></option>
 							@foreach($customers as $customer)
-								<option @if($coupon->scope_customer_id == $customer->id) selected @endif value="{{$customer->id}}">{{ $customer->name }}</option>
+								<option @if(in_array($customer->id, $selectedCustomers)) selected @endif value="{{$customer->id}}">{{ $customer->name }}</option>
 							@endforeach
 						</select>
 						@error('customer')
@@ -579,8 +579,8 @@
 	<script src="{{ asset('lib/bselect/dist/js/bootstrap-select.js') }}"></script>
 	<script src="{{ asset('lib/bselect/dist/js/i18n/defaults-en_US.js') }}"></script>
 	<script src="{{ asset('lib/jqueryui/jquery-ui.min.js') }}"></script>
-	<script src="{{ asset('lib/clockpicker/bootstrap-clockpicker.min.js') }}"></script>
-	<script src="{{ asset('lib/select2/js/select2.min.js') }}"></script>
+	{{-- <script src="{{ asset('lib/clockpicker/jquery-clockpicker.min.js') }}"></script> --}}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 @endsection
 
 
@@ -826,7 +826,7 @@
         }
     });
 
-	$('.datetime').clockpicker();
+	// $('.datetime').clockpicker();
 
 	$('.singlecalendar').datepicker({
 		dateFormat: 'yy-mm-dd'
@@ -976,6 +976,7 @@
 
 $(function() {
 	$('.selectpicker').selectpicker();
+	$('.select2').select2();
 });
 </script>
 @endsection

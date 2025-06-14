@@ -208,6 +208,7 @@ Route::post('cart/batch_update','EcommerceControllers\CartController@batch_updat
 Route::post('cart-remove-product','EcommerceControllers\CartController@remove_product')->name('cart.remove_product');
 
 Route::post('/add-manual-coupon','EcommerceControllers\CouponController@add_manual_coupon')->name('add-manual-coupon');
+Route::get('/add-auto-coupon','EcommerceControllers\CouponController@get_auto_coupons')->name('get-auto-coupons');
 Route::get('checkout-as-guest', 'EcommerceControllers\CheckoutController@checkout_as_guest')->name('cart.front.checkout-as-guest');
 Route::post('/temp_save','EcommerceControllers\CartController@save_sales')->name('cart.temp_sales');
 Route::get('guest/view/{id}', 'FrontController@show_sales_summary_guest')->name('profile.show_sales_summary_guest');

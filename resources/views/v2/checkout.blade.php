@@ -1087,6 +1087,43 @@
                 }
             },
 
+            async loadAutoCoupons() {
+                const res = await fetch('{{ route('get-auto-coupons') }}', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                });
+
+                const result = await res.json();
+
+                if (result.success && result.coupons.length > 0) {
+                    result.coupons.forEach(autoCoupon => {
+                        // Apply combination logic (same as submitCouponCode)
+                        // Case 1: New coupon is non-combinable, and there are already applied coupons → skip
+                        if (autoCoupon.combination_allowed === false && this.coupons.length > 0) {
+                            return;
+                        }
+
+                        // Case 2: New coupon is combinable, but existing coupons include non-combinable → skip
+                        if (autoCoupon.combination_allowed === true) {
+                            const nonCombinableCoupon = this.coupons.find(c => c.combination_allowed === false);
+                            if (nonCombinableCoupon) {
+                                return;
+                            }
+                        }
+
+                        // Prevent duplicate (if called multiple times)
+                        if (!this.coupons.find(c => c.code === autoCoupon.code)) {
+                            this.coupons.push(autoCoupon);
+                        }
+                    });
+
+                    this.recomputeCouponTotals();
+                }
+            },
+
             discountAmount: 0,
 
             // computeTotal() {
@@ -1187,6 +1224,8 @@
                 
                 const cookie = document.cookie.split('; ').find(row => row.startsWith('shipping_method='));
                 this.method = cookie ? cookie.split('=')[1] : 'pickup';
+
+                this.loadAutoCoupons();
             },
 
             checkMultipleDeliveries() {
