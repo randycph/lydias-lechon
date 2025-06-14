@@ -182,7 +182,7 @@ class CouponController extends Controller
       
         $customers = User::where('role_id',6)->where('is_active',1)->get();
         $locations = Branch::where('delivery_branch', 1)->get();
-        $free_products = Product::where('category_id',28)->get();
+        $free_products = Product::get();
 
         $selectedCustomers = explode('|', $coupon->scope_customer_id ?? '');
         $selectedCustomers = array_filter($selectedCustomers, function($value) { return !is_null($value) && $value !== ''; });

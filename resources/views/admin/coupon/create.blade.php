@@ -199,7 +199,7 @@
 									<label class="custom-control-label" for="discount-total-amount">Total Amount</label>
 								</div>
 							</div>
-							<div class="col-6">
+							<div class="col-6 d-none">
 								<div class="custom-control custom-radio">
 									<input @if(old('amount_discount') == 2) checked @endif type="radio" id="discount-product-price" name="amount_discount" class="custom-control-input" value="2" onclick="product_discount_amount(2)">
 									<label class="custom-control-label" for="discount-product-price">Product Price</label>
@@ -240,7 +240,7 @@
 
 					<div class="mb-3 reward-option" id="free-product-optn" style="display:@if($errors->any() && old('reward') == 'free-product-optn') block @else none @endif">
 						<label class="d-block">Free Product *</label>
-						<select class="form-control select2" name="free_product_id" style="min-height: 32px;">
+						<select class="form-control select2" name="free_product_id" style="min-height: 32px;" multiple="multiple">
 							<option label="Choose one"></option>
 							@foreach($free_products as $product)
 								<option @if(old('free_product_id') == $product->id) selected @endif value="{{$product->id}}">{{ $product->name }}</option>
