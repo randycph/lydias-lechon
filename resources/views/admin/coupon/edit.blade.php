@@ -321,8 +321,6 @@
 					</div>
 					<div class="col-md-3">
 						<div class="custom-control custom-radio">
-							<input type="radio" id="coupon-custom" name="coupon_time[]" class="custom-control-input" onclick="ShowHideDiv()" value="custom" @if(is_array(old('coupon_time')) && in_array('custom', old('coupon_time')) || isset($coupon->event_name)) checked @endif>
-							<label class="custom-control-label" for="coupon-custom">Custom</label>
 						</div>
 					</div>
 
@@ -351,7 +349,7 @@
 						</div>
 					</div>
 
-					<div class="col-12" id="coupon-custom-form" style="display:@if(is_array(old('coupon_time')) && in_array('custom', old('coupon_time')) || isset($coupon->event_name)) block @else none @endif;">
+					<div class="col-12 d-none" id="coupon-custom-form" style="display:@if(is_array(old('coupon_time')) && in_array('custom', old('coupon_time')) || isset($coupon->event_name)) block @else none @endif;">
 						<div class="row mt-3">
 							<div class="col-md-6">
 								<label class="d-block">Event Name *</label>
@@ -360,7 +358,7 @@
 							</div>
 							<div class="col-md-6">
 								<label class="d-block">Date *</label>
-								<input name="eventdate" id="eventdate" type="text" class="form-control singlecalendar" placeholder="Choose date" autocomplete="off" value="{{ old('eventdate',$coupon->event_date) }}">
+								<input name="eventdate" id="eventdate" type="date" class="form-control singlecalendar" placeholder="Choose date" autocomplete="off" value="{{ old('eventdate',$coupon->event_date) }}">
 								<small class="text-danger" style="display: none;" id="spanEventDate"></small>
 							</div>
 							<div class="col-12 mt-3">
@@ -378,7 +376,7 @@
 
 
 
-				<div class="form-group">
+				<div class="form-group d-none">
 					<div class="custom-control custom-checkbox">
 						<input type="checkbox" class="custom-control-input" id="coupon-purchase" onclick="myFunction()" name="coupon_setting[]" value="purchase" @if(isset($coupon->purchase_product_id) || isset($coupon->purchase_product_cat_id) || isset($coupon->purchase_product_brand) || isset($coupon->purchase_amount) || isset($coupon->purchase_qty)) checked @endif>
 						<label class="custom-control-label" for="coupon-purchase">Purchase 
@@ -880,9 +878,10 @@
 		couponDateTimeForm.style.display = couponDateTime.checked ? "block" : "none";
 
 		var couponCustom = document.getElementById("coupon-custom");
-		var couponCustomForm = document.getElementById("coupon-custom-form");
-		couponCustomForm.style.display = couponCustom.checked ? "block" : "none";
-
+		if (couponCustom) {
+			var couponCustomForm = document.getElementById("coupon-custom-form");
+			couponCustomForm.style.display = couponCustom.checked ? "block" : "none";
+		}
 
 		var scopeSpecific = document.getElementById("coupon-scope-specific");
 		var customerOption = document.getElementById("customer-optn");

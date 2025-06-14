@@ -124,7 +124,34 @@
                                 </div>
                             </template>
 
-                        <div class="flex justify-between lg:mt-2" x-show="showMessage">
+                        <template x-if="coupons.length > 0">
+                            <template x-for="(item, i) in coupons" :key="i">
+                                <div class="flex justify-between lg:mt-2">
+                                    <span class="font-medium text-red-700 italic flex items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 text-green-600 mr-1">
+                                            <path fill-rule="evenodd" d="M4.5 2A2.5 2.5 0 0 0 2 4.5v2.879a2.5 2.5 0 0 0 .732 1.767l4.5 4.5a2.5 2.5 0 0 0 3.536 0l2.878-2.878a2.5 2.5 0 0 0 0-3.536l-4.5-4.5A2.5 2.5 0 0 0 7.38 2H4.5ZM5 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
+                                        </svg>
+                                        Coupon (<span x-text="item.code"></span>) 
+                                        <span class="text-xs ml-1 underline cursor-pointer" @click="removeCoupon(i)">Remove Coupon</span>
+                                    </span>
+
+                                    <span class="font-medium italic text-red-700">
+                                        <template x-if="item.free_shipping">
+                                            <span x-text="'- ₱' + (item.free_shipping_discount_amount == 100 ? deliveryFee : (deliveryFee * item.free_shipping_discount_amount / 100)).toLocaleString(undefined, { minimumFractionDigits: 2 }) + ' (Shipping Discount)'"></span>
+                                        </template>
+                                        <template x-if="!item.free_shipping">
+                                            <span x-text="'- ₱' + (
+                                                item.discount_type === 'amount' 
+                                                    ? parseFloat(item.discount) 
+                                                    : (orderAmount * parseFloat(item.discount) / 100)
+                                            ).toLocaleString(undefined, { minimumFractionDigits: 2 }) + ' (Order Discount)'"></span>
+                                        </template>
+                                    </span>
+                                </div>
+                            </template>
+                        </template>
+                            
+                        {{-- <div class="flex justify-between lg:mt-2" x-show="showMessage">
                             <span class="font-medium text-red-700 italic flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 text-green-600 mr-1">
                                     <path fill-rule="evenodd" d="M4.5 2A2.5 2.5 0 0 0 2 4.5v2.879a2.5 2.5 0 0 0 .732 1.767l4.5 4.5a2.5 2.5 0 0 0 3.536 0l2.878-2.878a2.5 2.5 0 0 0 0-3.536l-4.5-4.5A2.5 2.5 0 0 0 7.38 2H4.5ZM5 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
@@ -142,7 +169,7 @@
                                     <span x-text="'- ₱' + discountAmount.toLocaleString(undefined, { minimumFractionDigits: 2 }) + ' (Order Discount)'"></span>
                                 </template>
                             </span>
-                        </div>
+                        </div> --}}
 
                         </div>
     
@@ -715,7 +742,6 @@
             deposit: '',
             rawDeposit: '',
             deliveryFees: [],
-            couponCode: '',
             showMessage: false,
             need_date: '',
             need_time: '',
@@ -725,11 +751,15 @@
             hasErrorMessage: false,
             isSubmitting: false,
             isPaymentLoading: false,
-            coupon: null,
             noNeededTime: false,
             noNeededDate: false,
+            coupon: null,
+            coupons: [],
+            couponCode: '',
             couponMessage: '',
             couponMessageType: '',
+            totalDiscountAmount: 0,
+            shippingDiscountAmount: 0,
             async submitCouponCode() {
                 this.couponMessage = '';
                 this.couponMessageType = '';
@@ -758,46 +788,118 @@
                         this.couponMessage = 'Coupon usage limit has been reached.';
                     } else if (result.status === 'customer_limit_reached') {
                         this.couponMessage = 'You have already used this coupon the maximum allowed times.';
+                    } else if (result.status === 'not_started') {
+                        this.couponMessage = 'This coupon is not active yet. Please try again later.';
                     }
 
                     this.couponMessageType = 'error';
-                    this.coupon = null;
-                    this.discountAmount = 0;
-                    this.showMessage = false;
                     return;
                 }
 
-                this.coupon = result.coupon;
-
-                // Calculate discount
-                if (this.coupon.discount_type === 'amount') {
-                    this.discountAmount = parseFloat(this.coupon.discount);
-                } else if (this.coupon.discount_type === 'percent') {
-                    this.discountAmount = (this.orderAmount * parseFloat(this.coupon.discount)) / 100;
+                // Prevent duplicate coupon code
+                if (this.coupons.find(c => c.code === result.coupon.code)) {
+                    this.couponMessage = 'This coupon is already applied.';
+                    this.couponMessageType = 'error';
+                    return;
                 }
 
-                // Handle free shipping
-                if (this.coupon.free_shipping) {
-                    this.freeShipping = true;
-                    this.freeShippingDiscountAmount = parseFloat(this.coupon.free_shipping_discount_amount);
+                // Combination logic check:
+
+                // Case 1: New coupon is non-combinable, and there are already applied coupons → reject
+                if (result.coupon.combination_allowed === false && this.coupons.length > 0) {
+                    this.couponMessage = 'This coupon cannot be combined with other coupons.';
+                    this.couponMessageType = 'error';
+                    return;
                 }
 
-                this.discountAmount = Math.min(this.discountAmount, this.orderAmount);
+                // Case 2: New coupon is combinable, but an existing coupon is non-combinable → reject
+                if (result.coupon.combination_allowed === true) {
+                    const nonCombinableCoupon = this.coupons.find(c => c.combination_allowed === false);
+                    if (nonCombinableCoupon) {
+                        this.couponMessage = 'A coupon that does not allow combination has already been applied.';
+                        this.couponMessageType = 'error';
+                        return;
+                    }
+                }
 
-                this.showMessage = true;
+                // Add coupon to coupons array
+                this.coupons.push(result.coupon);
+
+                // Recompute totals
+                this.recomputeCouponTotals();
+
                 this.couponMessage = 'Voucher code successfully applied.';
                 this.couponMessageType = 'success';
+
+                // Clear input after success
+                this.couponCode = '';
+            },
+
+            recomputeCouponTotals() {
+                this.totalDiscountAmount = 0;
+                this.shippingDiscountAmount = 0;
+
+                this.coupons.forEach(coupon => {
+                    if (coupon.free_shipping) {
+                        if (coupon.free_shipping_discount_amount === 100) {
+                            this.shippingDiscountAmount += this.deliveryFee;
+                        } else {
+                            this.shippingDiscountAmount += this.deliveryFee * (coupon.free_shipping_discount_amount / 100);
+                        }
+                    } else {
+                        if (coupon.discount_type === 'amount') {
+                            this.totalDiscountAmount += parseFloat(coupon.discount);
+                        } else if (coupon.discount_type === 'percent') {
+                            this.totalDiscountAmount += (this.orderAmount * parseFloat(coupon.discount)) / 100;
+                        }
+                    }
+                });
+
+                // Safety cap
+                this.totalDiscountAmount = Math.min(this.totalDiscountAmount, this.orderAmount);
+            },
+
+
+            computeTotal() {
+                if (this.method == 'pickup') {
+                    this.deliveryFee = 0;
+                }
+
+                let deliveryFeeFinal = this.deliveryFee - this.shippingDiscountAmount;
+                deliveryFeeFinal = Math.max(deliveryFeeFinal, 0); // no negative fee
+
+                let total = parseFloat(this.orderAmount) + parseFloat(deliveryFeeFinal);
+
+                // Subtract all coupon discounts
+                total -= this.totalDiscountAmount;
+
+                this.totalAmount = total;
+                this.deposit = this.totalAmount.toFixed(2);
+
+                this.$nextTick(() => {
+                    let input = this.$root.querySelector('input[name="deposit"]');
+                    if (input) {
+                        input.dispatchEvent(new Event('input'));
+                    }
+                });
+
+                return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(total);
             },
 
             freeShipping: false,
             freeShippingDiscountAmount: 0,
 
-            removeCoupon() {
-                this.couponCode = '';
-                this.coupon = null;
-                this.discountAmount = 0;
-                this.showMessage = false;
+            removeCoupon(index) {
+                this.coupons.splice(index, 1);
+                this.recomputeCouponTotals();
             },
+
+            // removeCoupon() {
+            //     this.couponCode = '';
+            //     this.coupon = null;
+            //     this.discountAmount = 0;
+            //     this.showMessage = false;
+            // },
 
             changeMethod(method) {
                 this.method = method;
@@ -987,43 +1089,43 @@
 
             discountAmount: 0,
 
-            computeTotal() {
-                if (this.method == 'pickup') {
-                    this.deliveryFee = 0;
-                }
+            // computeTotal() {
+            //     if (this.method == 'pickup') {
+            //         this.deliveryFee = 0;
+            //     }
 
-                let deliveryFeeFinal = this.deliveryFee;
+            //     let deliveryFeeFinal = this.deliveryFee;
 
-                // If free shipping applies
-                if (this.coupon && this.freeShipping) {
-                    if (this.freeShippingDiscountAmount === 100) {
-                        deliveryFeeFinal = 0;
-                    } else {
-                        deliveryFeeFinal = this.deliveryFee * (1 - this.freeShippingDiscountAmount / 100);
-                    }
-                }
+            //     // If free shipping applies
+            //     if (this.coupon && this.freeShipping) {
+            //         if (this.freeShippingDiscountAmount === 100) {
+            //             deliveryFeeFinal = 0;
+            //         } else {
+            //             deliveryFeeFinal = this.deliveryFee * (1 - this.freeShippingDiscountAmount / 100);
+            //         }
+            //     }
 
-                let total = parseFloat(this.orderAmount) + parseFloat(deliveryFeeFinal);
+            //     let total = parseFloat(this.orderAmount) + parseFloat(deliveryFeeFinal);
 
-                // Apply coupon discount (if not free shipping type)
-                if (this.coupon && this.discountAmount > 0) {
-                    total -= this.discountAmount;
-                }
+            //     // Apply coupon discount (if not free shipping type)
+            //     if (this.coupon && this.discountAmount > 0) {
+            //         total -= this.discountAmount;
+            //     }
 
-                // Update your component state
-                this.totalAmount = total;
-                this.deposit = this.totalAmount.toFixed(2);
+            //     // Update your component state
+            //     this.totalAmount = total;
+            //     this.deposit = this.totalAmount.toFixed(2);
 
-                // Trigger any input update (if needed)
-                this.$nextTick(() => {
-                    let input = this.$root.querySelector('input[name="deposit"]');
-                    if (input) {
-                        input.dispatchEvent(new Event('input'));
-                    }
-                });
+            //     // Trigger any input update (if needed)
+            //     this.$nextTick(() => {
+            //         let input = this.$root.querySelector('input[name="deposit"]');
+            //         if (input) {
+            //             input.dispatchEvent(new Event('input'));
+            //         }
+            //     });
 
-                return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(total);
-            },
+            //     return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(total);
+            // },
 
             async getDeliveryFeeForMultipleDelivery() {
                 const branch = this.$refs.branch?.value;

@@ -11,13 +11,14 @@ use App\Helpers\ListingHelper;
 
 
 use App\EcommerceModel\Coupon;
+use App\EcommerceModel\CouponCart;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\User;
 use App\Models\Deliverablecities;
 
 use Carbon\Carbon;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class CouponController extends Controller
@@ -533,5 +534,111 @@ class CouponController extends Controller
         return view('admin.reports.coupon.list', compact('rs'));
     }
 
+    public function add_manual_coupon(Request $request)
+    {
+        $coupon = Coupon::whereRaw('LOWER(coupon_code) = ?', [strtolower($request->couponcode)])
+            ->where('activation_type', 'manual')
+            ->first();
 
+        if (!$coupon) {
+            return response()->json([
+                'success' => false,
+                'status' => 'not_exist',
+                'message' => 'Coupon not found.'
+            ]);
+        }
+
+        // Combine start and end date/time
+        $now = Carbon::now();
+        $start = Carbon::parse("{$coupon->start_date} {$coupon->start_time}");
+        $end = Carbon::parse("{$coupon->end_date} {$coupon->end_time}");
+
+        // Check if current time is within allowed coupon window
+        if ($now->lt($start)) {
+            return response()->json([
+                'success' => false,
+                'status' => 'not_started',
+                'message' => 'This coupon is not active yet. Please try again later.'
+            ]);
+        }
+
+        if ($now->gt($end)) {
+            return response()->json([
+                'success' => false,
+                'status' => 'expired',
+                'message' => 'This coupon has already expired.'
+            ]);
+        }
+
+        // Check if inactive
+        if ($coupon->status !== 'ACTIVE') {
+            return response()->json([
+                'success' => false,
+                'status' => strtolower('inactive'),
+                'message' => 'Coupon is ' . strtolower('inactive') . '.'
+            ]);
+        }
+
+        // Check if customer is allowed
+        if ($coupon->customer_scope === 'specific') {
+            $allowedIds = explode('|', $coupon->scope_customer_id ?? '');
+            if (!in_array(Auth::id(), $allowedIds)) {
+                return response()->json([
+                    'success' => false,
+                    'status' => 'not_allowed',
+                    'message' => 'Sorry, you are not allowed to use this coupon.'
+                ]);
+            }
+        }
+
+        // Check if coupon was already applied
+        $totalUsed = CouponCart::where('coupon_id', $coupon->id)->where('status', 1)->sum('total_usage');
+        $customerUsed = CouponCart::where('coupon_id', $coupon->id)
+            ->where('status', 1)
+            ->where('customer_id', Auth::id())
+            ->sum('total_usage');
+
+        if ($coupon->usage_limit !== null && $totalUsed >= $coupon->usage_limit) {
+            return response()->json([
+                'success' => false,
+                'status' => 'limit_reached',
+                'message' => 'This coupon has reached its total usage limit.'
+            ]);
+        }
+
+        if ($coupon->customer_limit !== null && $customerUsed >= $coupon->customer_limit) {
+            return response()->json([
+                'success' => false,
+                'status' => 'customer_limit_reached',
+                'message' => 'You have reached your usage limit for this coupon.'
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'coupon' => [
+                'id' => $coupon->id,
+                'code' => $coupon->coupon_code,
+                'name' => $coupon->name,
+                'description' => $coupon->description,
+                'terms' => $coupon->terms_and_conditions,
+                'type' => $coupon->amount_discount_type == 1 ? 'amount' : 'product',
+                'discount_type' => $coupon->percentage > 0 ? 'percent' : 'amount',
+                'discount' => $coupon->percentage > 0 ? $coupon->percentage : $coupon->amount,
+                'applies_to' => $coupon->free_product_id ? 'free_product' : ($coupon->purchase_product_id ? 'product' : 'cart'),
+                'purchase_product_id' => $coupon->purchase_product_id,
+                'free_product_id' => $coupon->free_product_id,
+                'combination_allowed' => $coupon->combination == 1,
+                'total_usage_limit' => $coupon->usage_limit,
+                'total_usage_used' => $totalUsed,
+                'customer_limit' => $coupon->customer_limit,
+                'customer_usage_used' => $customerUsed,
+                'status' => 'valid',
+                'location' => $coupon->location,
+                'reward' => $coupon->reward,
+                'free_shipping' => $coupon->reward == 'free-shipping-optn',
+                'free_shipping_discount_amount' => ($coupon->reward == 'free-shipping-optn' && $coupon->location_discount_type == 'partial') ? $coupon->location_discount_amount : ($coupon->reward == 'free-shipping-optn' ? 100 : 0),
+            ]
+        ]);
+    }
 }
