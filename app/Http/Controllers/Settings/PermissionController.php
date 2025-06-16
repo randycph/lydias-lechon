@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Helpers\PanelHelper;
-use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Auth;
@@ -26,9 +25,9 @@ class PermissionController extends Controller
         $this->middleware('checkPermission:admin/permission/delete', ['only' => ['destroy']]);
     }
 
-    public function search(){
+    public function search(Request $request){
 
-        $params = Input::all();
+        $params = $request->all();
 
         return $this->index($params);
 

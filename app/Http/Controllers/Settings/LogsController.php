@@ -6,7 +6,6 @@ use App\Models\Permission;
 use Illuminate\Http\Request;
 use App\Helpers\ListingHelper;
 
-use Illuminate\Support\Facades\Input;
 use App\Models\Logs;
 
 class LogsController extends Controller

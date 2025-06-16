@@ -6,7 +6,6 @@ use App\Helpers\ListingHelper;
 use App\Http\Requests\UserRequest;
 use App\Mail\AddNewUserMail;
 use App\Models\Permission;
-use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\Controller;
 use App\Helpers\Webfocus\Setting;
 use Illuminate\Http\Request;
@@ -222,9 +221,9 @@ class UserController extends Controller
         return view('admin.users.profile',compact('user','logs','param'));
     }
 
-    public function filter()
+    public function filter(Request $request)
     {
-        $params = Input::all();
+        $params = $request->all();
 
         return $this->apply_filter($params);
     }

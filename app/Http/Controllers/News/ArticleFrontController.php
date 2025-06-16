@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Requests\ArticlePost;
-use Illuminate\Support\Facades\Input;
 
 class ArticleFrontController extends Controller
 {

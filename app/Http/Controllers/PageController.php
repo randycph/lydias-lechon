@@ -16,7 +16,6 @@ use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
@@ -299,11 +298,15 @@ class PageController extends Controller
         ];
     }
 
-    public function search()
+    public function search(Request $request)
     {
-        $params = Input::all();
+        $params = $request->all();
 
-        return $this->index($params);
+        return $this->index(new Request([
+            'search' => $params['search'] ?? '',
+            'page' => $params['page'] ?? 1,
+            'per_page' => $params['per_page'] ?? 10,
+        ]));
     }
 
     public function change_status(Request $request)

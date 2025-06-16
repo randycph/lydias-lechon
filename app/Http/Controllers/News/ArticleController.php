@@ -17,7 +17,6 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Requests\ArticlePost;
 use App\Models\Page;
-use Illuminate\Support\Facades\Input;
 
 class ArticleController extends Controller
 {
@@ -361,9 +360,9 @@ class ArticleController extends Controller
 
     }
 
-    public function search(){
+    public function search(Request $request){
 
-        $params = Input::all();
+        $params = $request->all();
 
         return $this->index($params);
 
