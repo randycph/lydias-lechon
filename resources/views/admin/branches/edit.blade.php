@@ -52,7 +52,7 @@
                             <select name="branch_type" class="form-control" id="branch_type">
                                 <option value="">Select</option>
                                 <option value="Restaurant" @if($branches->branch_type=='Restaurant') selected="selected" @endif>Restaurant</option>
-                                <option value="Mall Based Foodcourtk" @if($branches->branch_type=='Mall Based Foodcourt') selected="selected" @endif>Mall Based Foodcourt</option>
+                                <option value="Mall Based Foodcourt" @if($branches->branch_type=='Mall Based Foodcourt') selected="selected" @endif>Mall Based Foodcourt</option>
                                 <option value="Kiosk" @if($branches->branch_type=='Kiosk') selected="selected" @endif>Kiosk</option>
                             </select>
                         </div>
