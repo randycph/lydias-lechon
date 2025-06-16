@@ -5,9 +5,12 @@
     {{-- Hero Section --}}
     <div class="pb-16 flex flex-col items-center text-center relative h-screen overflow-hidden" style="background-image: url('{{ asset('/images/hero-bg.png') }}'); background-size: contain; background-position: center;">
         <div class="relative w-full h-full">
+            @if (isset($_GET['noheading']))
+            @else
             <div class="container absolute flex self-center text-[#c09562] px-3 font-cubao z-20 pt-10" style="position-area: center; align-self: anchor-center;">
                 <h1 class="text-8xl md:text-9xl font-light text-left md:text-center mx-auto w-full md:w-[80%]">EVERYDAY LECHON HAPPINESS</h1>
             </div>
+            @endif
             @if (isset($_GET['test1']))
                 <img src="{{ asset('images/lechon-image1.jpg') }}" alt="Lydias Lechon" class="hidden md:block w-full">   
             @elseif (isset($_GET['test2']))
