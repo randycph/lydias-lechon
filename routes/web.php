@@ -76,6 +76,7 @@ Route::post('save-delivery-address', [FrontendController::class, 'saveDeliveryAd
 Route::get('/privacy-policy', [FrontendController::class, 'privacyPolicy'])->name('privacy-policy');
 Route::get('/terms-of-service', [FrontendController::class, 'termsOfService'])->name('terms-of-service');
 
+
 Route::get('/admin/login', function() {
     return view('auth.login');
 })->name('admin.login');
@@ -627,12 +628,12 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
 
 
     // Coupon
-    Route::resource('/coupons','EcommerceControllers\CouponController');
-    Route::get('/coupon/{id}/{status}', 'EcommerceControllers\CouponController@update_status')->name('coupon.change-status');
-    Route::post('/coupon-single-delete', 'EcommerceControllers\CouponController@single_delete')->name('coupon.single.delete');
-    Route::get('/coupon-restore/{id}', 'EcommerceControllers\CouponController@restore')->name('coupon.restore');
-    Route::post('/coupon-multiple-change-status','EcommerceControllers\CouponController@multiple_change_status')->name('coupon.multiple.change.status');
-    Route::post('/coupon-multiple-delete','EcommerceControllers\CouponController@multiple_delete')->name('coupon.multiple.delete');
+    Route::resource('/admin/coupons','EcommerceControllers\CouponController');
+    Route::get('/admin/coupon/{id}/{status}', 'EcommerceControllers\CouponController@update_status')->name('coupon.change-status');
+    Route::post('/admin/coupon-single-delete', 'EcommerceControllers\CouponController@single_delete')->name('coupon.single.delete');
+    Route::get('/admin/coupon-restore/{id}', 'EcommerceControllers\CouponController@restore')->name('coupon.restore');
+    Route::post('/admin/coupon-multiple-change-status','EcommerceControllers\CouponController@multiple_change_status')->name('coupon.multiple.change.status');
+    Route::post('/admin/coupon-multiple-delete','EcommerceControllers\CouponController@multiple_delete')->name('coupon.multiple.delete');
 
     Route::get('/report/coupon_list', 'EcommerceControllers\CouponController@coupon_list')->name('report.coupon.list');
     Route::get('/report/sales_list', 'EcommerceControllers\CouponController@sales_list')->name('report.sales.list');
@@ -653,7 +654,7 @@ Route::get('/test', function(){
 });
 
 
-Route::get('/test-email-1', function(){
+Route::get('/test/test-email-1', function(){
     try {
         $salesHeader = SalesHeader::first();
 
@@ -667,7 +668,7 @@ Route::get('/test-email-1', function(){
     }
 });
 
-Route::get('/test-email-2', function(){
+Route::get('/test/test-email-2', function(){
     try {
         $salesHeader = SalesHeader::first();
 
@@ -681,7 +682,7 @@ Route::get('/test-email-2', function(){
     }
 });
 
-Route::get('/test-email-3', function(){
+Route::get('/test/test-email-3', function(){
     try {
         $salesHeader = SalesHeader::first();
 
@@ -695,7 +696,7 @@ Route::get('/test-email-3', function(){
     }
 });
 
-Route::get('/test-email', function () {
+Route::get('/test/test-email', function () {
     Mail::raw('This is a test email from Gmail SMTP via App Password', function ($message) {
         $message->to('evilryok@gmail.com')
                 ->subject('Gmail SMTP Test');
@@ -703,4 +704,7 @@ Route::get('/test-email', function () {
 
     return 'Email sent!';
 });
+
+Route::get('/{slug}', [FrontendController::class, 'page'])->name('page');
+
 

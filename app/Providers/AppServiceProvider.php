@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\Setting;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Pagination\Paginator;
@@ -47,5 +48,6 @@ class AppServiceProvider extends ServiceProvider
         Paginator::defaultView('vendor.pagination.default');
         Blade::component('components.error', 'hasError');
         View::share('errors', session()->get('errors', new ViewErrorBag));
+        View::share('globalAnalytics', optional(Setting::first())->google_analytics);
     }
 }

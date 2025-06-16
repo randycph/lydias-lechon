@@ -728,5 +728,15 @@ class FrontendController extends Controller
             'hasMore' => $articles->hasMorePages()
         ]);
     }
-    
+
+    public function page($slug)
+    {
+        $page = Page::where('slug', $slug)->first();
+
+        if (!$page) {
+            abort(404);
+        }
+
+        return view('v2.page', compact('page'));
+    }
 }
