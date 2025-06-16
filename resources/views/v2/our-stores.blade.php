@@ -1,8 +1,8 @@
 @extends('layouts.guest')
 
-@section('title', 'Stores')
-@section('meta_description', 'Find Lydia’s Lechon stores near you. With over 20 locations across Metro Manila, enjoy our famous lechon goodness in every neighborhood. Visit us today!')
-
+@section('title', $page->meta_title ?? $page->label)
+@section('meta_description', $page->meta_description ?? 'Find Lydia’s Lechon stores near you. With over 20 locations across Metro Manila, enjoy our famous lechon goodness in every neighborhood. Visit us today!')
+@section('image', $page->image_url ?? null)
 @section('content')
 
 <div 
@@ -20,11 +20,9 @@ x-data="{
 <div 
     class="bg-cream">
     <div class="py-20 px-4 container ">
-        <h1 class="text-4xl lg:text-7xl font-cubao font-medium text-primary text-center my-10 max-w-3xl mx-auto">lechon
-            goodness in every neighborhood</h1>
-        <p class="text-center text-base lg:text-2xl max-w-3xl mx-auto">With over <strong>20 stores</strong> across Metro
-            Manila, Lydia’s Lechon brings our famous roast lechon closer to you. Find your nearest branch and enjoy a
-            taste of Filipino tradition, making every meal a celebration.</p>
+        @if ($page->contents)
+        {!! $page->contents !!}
+        @endif
     </div>
 
     <div class="relative mx-auto bg-cream">

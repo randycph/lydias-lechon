@@ -39,7 +39,7 @@ use Illuminate\Support\Str;
 Route::get('/', [FrontendController::class, 'index'])->name('home');
 Route::get('/home', [FrontendController::class, 'home'])->name('index');
 Route::get('/our-story', [FrontendController::class, 'our_story'])->name('our-story');
-Route::get('/our-stores', [FrontendController::class, 'our_stores'])->name('our-stores');
+Route::get('/stores', [FrontendController::class, 'our_stores'])->name('our-stores');
 Route::get('/lechon-pricelist', [FrontendController::class, 'lechon_pricelist'])->name('lechon-pricelist');
 Route::get('/menu', [FrontendController::class, 'lechon_menu'])->name('lechon-menu');
 Route::get('/checkout', [FrontendController::class, 'checkout'])->name('checkout');

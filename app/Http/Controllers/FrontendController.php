@@ -13,6 +13,7 @@ use App\Mail\WelcomeEmail;
 use App\Models\Article;
 use App\Models\ArticleCategory;
 use App\Models\Deliverablecities;
+use App\Models\Page;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Setting;
@@ -66,7 +67,9 @@ class FrontendController extends Controller
         $malls = Branch::where('branch_type', 'Mall Based Foodcourt')->where('is_head_office', 0)->get();
         $kiosks = Branch::where('branch_type', 'Kiosk')->where('is_head_office', 0)->get();
 
-        return view('v2.our-stores', compact('headOffices', 'branches', 'outlets', 'malls', 'kiosks'));
+        $page = Page::where('slug', 'stores')->first();
+
+        return view('v2.our-stores', compact('headOffices', 'branches', 'outlets', 'malls', 'kiosks', 'page'));
     }
 
     public function lechon_pricelist()

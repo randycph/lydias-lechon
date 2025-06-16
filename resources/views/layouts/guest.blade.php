@@ -12,7 +12,7 @@
 
     <meta property="og:title" content="@yield('title', 'Lydia\'s Lechon')">
     <meta property="og:description" content="@yield('meta_description', 'Lydia\'s Lechon - The Best Lechon in the Philippines')">
-    <meta property="og:image" content="{{ asset('images/lydia-store-img2.png') }}">
+    <meta property="og:image" content="@yield('image', asset('images/lydia-store-img2.png'))">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="{{ config('app.name', 'Lydia\'s Lechon') }}">
@@ -20,7 +20,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="@yield('title', 'Lydia\'s Lechon')">
     <meta name="twitter:description" content="@yield('meta_description', 'Lydia\'s Lechon - The Best Lechon in the Philippines')">
-    <meta name="twitter:image" content="{{ asset('images/lydia-store-img2.png') }}">
+    <meta name="twitter:image" content="@yield('image', asset('images/lydia-store-img2.png'))">
     <meta name="twitter:site" content="@lydiaslechon">
     <meta name="twitter:creator" content="@lydiaslechon">
     <meta name="twitter:url" content="{{ url()->current() }}">
