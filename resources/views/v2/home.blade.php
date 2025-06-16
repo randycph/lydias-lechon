@@ -7,8 +7,10 @@
         <div class="relative w-full h-full">
             @if (isset($_GET['noheading']))
             @else
-            <div class="container absolute flex self-center text-white px-3 font-cubao z-20 pt-10" style="position-area: center; align-self: anchor-center;">
-                <h1 class="text-8xl md:text-9xl font-light text-left md:text-center mx-auto w-full md:w-[80%]">EVERYDAY LECHON HAPPINESS</h1>
+            <div class="container absolute flex self-center text-gray-200 px-3 font-cubao z-20 pt-10" style="position-area: center; align-self: anchor-center;">
+                <h1 class="text-8xl md:text-9xl font-light text-left md:text-center mx-auto w-full md:w-[80%] drop-shadow-[0_0_10px_green]">
+                    EVERYDAY LECHON HAPPINESS
+                </h1>
             </div>
             @endif
             @if (isset($_GET['test1']))
