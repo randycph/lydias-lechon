@@ -109,9 +109,9 @@ x-data="{
             <div x-transition.opacity>
                 <template x-if="carts?.length > 0"> 
                     <div>
-                        <div class="bg-tertiary text-white py-2 text-center w-full mt-2">
+                        {{-- <div class="bg-tertiary text-white py-2 text-center w-full mt-2">
                             You need <strong>₱1,050.00</strong> more for free delivery
-                        </div>
+                        </div> --}}
         
                         <div class="mt-4 flex flex-col gap-4">
         
