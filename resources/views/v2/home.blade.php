@@ -3,13 +3,22 @@
 @section('content')
 
     {{-- Hero Section --}}
-    <div class="pt-20 pb-16 flex flex-col items-center text-center relative h-screen overflow-hidden" style="background-image: url('{{ asset('/images/hero-bg.png') }}'); background-size: contain; background-position: center;">
+    <div class="pb-16 flex flex-col items-center text-center relative h-screen overflow-hidden" style="background-image: url('{{ asset('/images/hero-bg.png') }}'); background-size: contain; background-position: center;">
         <div class="relative w-full h-full">
-            <div class="container flex md:justify-center justify-start items-start text-primary px-3 font-cubao z-20 pt-10">
+            <div class="container absolute flex self-center text-[#c09562] px-3 font-cubao z-20 pt-10" style="position-area: center; align-self: anchor-center;">
                 <h1 class="text-8xl md:text-9xl font-light text-left md:text-center mx-auto w-full md:w-[80%]">EVERYDAY LECHON HAPPINESS</h1>
             </div>
-            <img src="{{ asset('images/hero-lechon.png') }}" alt="Lydias Lechon" class="hidden md:block">    
-            <img src="{{ asset('/images/lechon-chopped.png') }}" alt="Lechon" class="block md:hidden w-full h-full object-cover absolute -bottom-30 left-0 z-10 ">
+            @if (isset($_GET['test1']))
+                <img src="{{ asset('images/lechon-image1.jpg') }}" alt="Lydias Lechon" class="hidden md:block w-full">   
+            @elseif (isset($_GET['test2']))
+                <img src="{{ asset('images/lechon-image2.jpg') }}" alt="Lydias Lechon" class="w-full">    
+            @elseif (isset($_GET['test3']))
+                <img src="{{ asset('images/lechon-image3.jpg') }}" alt="Lydias Lechon" class="hidden md:block w-full"> 
+            @else
+                <img src="{{ asset('images/hero-lechon.png') }}" alt="Lydias Lechon" class="hidden md:block w-full">    
+            @endif 
+
+            {{-- <img src="{{ asset('/images/lechon-chopped.png') }}" alt="Lechon" class="block md:hidden w-full h-full object-cover absolute -bottom-30 left-0 z-10 "> --}}
         </div>
     </div>
 
