@@ -1,5 +1,8 @@
 @extends('layouts.guest', ['page' => $page])
 
+@section('title', 'Change Password | ')
+@section('meta_description', 'Change your password to enhance the security of your account. Ensure your new password meets the required criteria for a secure login experience.')
+
 @section('content')
 
 <div x-data="{ passwordSuccess: false }" class="bg-cream">

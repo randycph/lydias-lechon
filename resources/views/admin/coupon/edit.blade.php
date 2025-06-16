@@ -140,7 +140,6 @@
 					<div class="mb-3 reward-option" id="customer-optn" style="display:@if($coupon->customer_scope == 'specific') block @else none @endif">
 						<label class="d-block">Customer Name *</label>
 						<select class="select2" name="customer[]" multiple="multiple">
-							<option label="Choose one"></option>
 							@foreach($customers as $customer)
 								<option @if(in_array($customer->id, $selectedCustomers)) selected @endif value="{{$customer->id}}">{{ $customer->name }}</option>
 							@endforeach
@@ -285,10 +284,9 @@
 
 					<div class="mb-3 reward-option" id="free-product-optn" style="display:@if(isset($coupon->free_product_id)) block @else none @endif">
 						<label class="d-block">Free Product</label>
-						<select class="form-control select2" name="free_product_id" style="min-height: 32px;" multiple="multiple">
-							<option label="Choose one"></option>
+						<select class="form-control select2" name="free_product_id[]" style="min-height: 32px;" multiple="multiple">
 							@foreach($free_products as $product)
-								<option @if($coupon->free_product_id == $product->id) selected @endif value="{{$product->id}}">{{ $product->name }}</option>
+								<option @if(in_array($product->id, $selectedFreeProducts)) selected @endif value="{{$product->id}}">{{ $product->name }}</option>
 							@endforeach
 						</select>
 						@error('free_product_id')
@@ -976,7 +974,9 @@
 
 $(function() {
 	$('.selectpicker').selectpicker();
-	$('.select2').select2();
+	$('.select2').select2({
+		placeholder: 'Choose Options',
+	});
 });
 </script>
 @endsection

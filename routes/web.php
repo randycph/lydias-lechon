@@ -41,7 +41,7 @@ Route::get('/home', [FrontendController::class, 'home'])->name('index');
 Route::get('/our-story', [FrontendController::class, 'our_story'])->name('our-story');
 Route::get('/our-stores', [FrontendController::class, 'our_stores'])->name('our-stores');
 Route::get('/lechon-pricelist', [FrontendController::class, 'lechon_pricelist'])->name('lechon-pricelist');
-Route::get('/lechon-menu', [FrontendController::class, 'lechon_menu'])->name('lechon-menu');
+Route::get('/menu', [FrontendController::class, 'lechon_menu'])->name('lechon-menu');
 Route::get('/checkout', [FrontendController::class, 'checkout'])->name('checkout');
 Route::get('/sales-summary/{id}', [FrontendController::class, 'confirmation'])->name('confirmation');
 Route::get('/login', [FrontendController::class, 'login'])->name('login');
@@ -152,8 +152,8 @@ Route::get('/unsubscribe/{subscriber}/{code}', 'MailingList\SubscriberFrontContr
 //// END MAILING LIST ////
 
 //Menu
-Route::get('/menu', 'Product\Front\MenuFrontController@show')->name('menu.front.show');
-Route::get('/menu', 'Product\Front\MenuFrontController@list')->name('menu.front.list');
+// Route::get('/menu', 'Product\Front\MenuFrontController@show')->name('menu.front.show');
+// Route::get('/menu', 'Product\Front\MenuFrontController@list')->name('menu.front.list');
 //End Product
 Route::post('get_shipping_fee', 'EcommerceControllers\CartController@get_shipping_fee')->name('cart.front.get_shipping_fee');
 Route::post('get_shipping_fee_for_multiple_address', 'EcommerceControllers\CartController@get_shipping_fee_for_multiple_address')->name('cart.front.get_shipping_fee_for_multiple_address');

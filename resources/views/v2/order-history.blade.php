@@ -1,5 +1,8 @@
 @extends('layouts.guest', ['page' => $page])
 
+@section('title', 'Order History | ')
+@section('meta_description', 'View your order history, track your orders, and manage your account. Stay updated with your purchases and delivery status.')
+
 @section('content')
 
 <div

@@ -187,7 +187,10 @@ class CouponController extends Controller
         $selectedCustomers = explode('|', $coupon->scope_customer_id ?? '');
         $selectedCustomers = array_filter($selectedCustomers, function($value) { return !is_null($value) && $value !== ''; });
 
-        return view('admin.coupon.edit',compact('coupon','products','categories','customers','locations','free_products', 'selectedCustomers'));
+        $selectedFreeProducts = explode('|', $coupon->free_product_id ?? '');
+        $selectedFreeProducts = array_filter($selectedFreeProducts, function($value) { return !is_null($value) && $value !== ''; });
+
+        return view('admin.coupon.edit',compact('coupon','products','categories','customers','locations','free_products', 'selectedCustomers', 'selectedFreeProducts'));
     }
 
     /**
@@ -242,6 +245,14 @@ class CouponController extends Controller
             }
         }
 
+        $productids = '';
+        if(isset($request->free_product_id)){
+            $products_ids = $data['free_product_id'];
+            foreach($products_ids as $prod){
+                $productids .= $prod.'|';
+            }
+        }
+
         $amount_discount = 1;
         if($request->reward == 'discount-amount-optn' || $request->reward == 'discount-percentage-optn'){
             $amount_discount = $request->amount_discount;
@@ -270,7 +281,7 @@ class CouponController extends Controller
             'reward' => $request->reward,
             'amount' => $request->reward == 'discount-amount-optn' ? $request->discount_amount : NULL,
             'percentage' => $request->reward == 'discount-percentage-optn' ? $request->discount_percentage : NULL,
-            'free_product_id' => $request->free_product_id,
+            'free_product_id' => ($request->coupon_scope == 'specific' && $request->reward) == 'free-product-optn' ? $productids : NULL,
             'status' => ($request->has('status') ? 'ACTIVE' : 'INACTIVE'),
             'amount_discount_type' => $amount_discount,
             'product_discount' => $request->amount_discount == 2 ? $request->product_discount : NULL,

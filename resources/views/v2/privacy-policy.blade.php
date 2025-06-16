@@ -1,5 +1,8 @@
 @extends('layouts.guest')
 
+@section('title', 'Privacy Policy | ')
+@section('meta_description', 'Read Lydia’s Lechon Privacy Policy to understand how we collect, use, and protect your personal information. Your privacy is important to us.')
+
 @section('content')
 
     <div class="container">

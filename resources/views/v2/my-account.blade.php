@@ -1,5 +1,8 @@
 @extends('layouts.guest', ['page' => $page])
 
+@section('title', 'My Account | ')
+@section('meta_description', 'Manage your account details, personal information, and delivery address. Update your profile and preferences easily.')
+
 @section('alpine.plugins')
 <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/mask@3.x.x/dist/cdn.min.js"></script>
 @endsection

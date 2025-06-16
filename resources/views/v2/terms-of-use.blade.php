@@ -1,5 +1,8 @@
 @extends('layouts.guest')
 
+@section('title', 'Terms of Service | Lydia\'s Lechon')
+@section('meta_description', 'Read Lydia’s Lechon Terms of Service to understand the rules and regulations governing your use of our website. Your use of the site implies acceptance of these terms.')
+
 @section('content')
 
     <div class="container">

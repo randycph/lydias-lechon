@@ -1,5 +1,8 @@
 @extends('layouts.guest')
 
+@section('title', 'Stores | ')
+@section('meta_description', 'Find Lydia’s Lechon stores near you. With over 20 locations across Metro Manila, enjoy our famous lechon goodness in every neighborhood. Visit us today!')
+
 @section('content')
 
 <div 

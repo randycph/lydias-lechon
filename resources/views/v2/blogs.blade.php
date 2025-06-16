@@ -1,5 +1,8 @@
 @extends('layouts.guest')
 
+@section('title', 'News | ')
+@section('meta_description', 'Explore the latest news and articles about Lydia\'s Lechon. Discover our story, recipes, and more.')
+
 @section('content')
 
     <div class="pt-20 pb-10 px-4 container">

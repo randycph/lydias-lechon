@@ -8,6 +8,8 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ViewErrorBag;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -44,5 +46,6 @@ class AppServiceProvider extends ServiceProvider
         }
         Paginator::defaultView('vendor.pagination.default');
         Blade::component('components.error', 'hasError');
+        View::share('errors', session()->get('errors', new ViewErrorBag));
     }
 }

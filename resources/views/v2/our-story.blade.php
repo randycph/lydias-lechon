@@ -1,5 +1,8 @@
 @extends('layouts.guest')
 
+@section('title', 'Out Story | ')
+@section('meta_description', 'Discover the story behind Lydia\'s Lechon, from humble beginnings to becoming a beloved lechon house. Learn about our mission, vision, and commitment to quality.')
+
 @section('content')
 
     {{-- Hero Section --}}

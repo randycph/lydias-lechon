@@ -1,9 +1,9 @@
 @extends('layouts.guest', ['page' => $page])
 
+@section('title', 'My Cart | ')
+@section('meta_description', 'View and manage your cart items. Adjust quantities, remove items, and proceed to checkout for a seamless shopping experience.')
+
 @section('content')
-
-
-
 <div
     x-init="init"
     x-data="{

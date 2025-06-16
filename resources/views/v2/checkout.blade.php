@@ -1,7 +1,9 @@
 @extends('layouts.guest', ['page' => $page])
 
-@section('content')
+@section('title', 'Checkout | ')
+@section('meta_description', 'Complete your order at Lydia\'s Lechon. Review your cart, choose delivery or pickup, and finalize your purchase for a delicious meal.')
 
+@section('content')
 
 @php
     $total = 0;
