@@ -1,6 +1,6 @@
 @extends('layouts.guest', ['page' => $page])
 
-@section('title', 'Order Confirmation | ')
+@section('title', 'Order Confirmation')
 @section('meta_description', 'Thank you for ordering with us! Your delicious Lydia\'s Lechon meal is on its way. We’ll send you an update once it’s ready for pickup or delivery. Your order details has also been sent to your email. Enjoy!')
 
 @section('content')

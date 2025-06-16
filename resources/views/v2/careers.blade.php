@@ -1,6 +1,6 @@
 @extends('layouts.guest')
 
-@section('title', 'Careers | ')
+@section('title', 'Careers')
 @section('meta_description', 'Join the Lydia’s Lechon family! Explore exciting career opportunities and be part of our mission to bring joy and delicious lechon to every Filipino home. Apply now!')
 
 @section('content')

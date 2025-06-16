@@ -1,6 +1,6 @@
 @extends('layouts.guest', ['page' => $page])
 
-@section('title', 'Checkout | ')
+@section('title', 'Checkout')
 @section('meta_description', 'Complete your order at Lydia\'s Lechon. Review your cart, choose delivery or pickup, and finalize your purchase for a delicious meal.')
 
 @section('content')

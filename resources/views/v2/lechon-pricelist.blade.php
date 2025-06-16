@@ -1,6 +1,6 @@
 @extends('layouts.guest')
 
-@section('title', 'Updated Lechon Pricelist | ')
+@section('title', 'Updated Lechon Pricelist')
 @section('meta_description', 'Discover our updated lechon pricelist for 2024. Find the perfect lechon for your budget and occasion. Order now for your next celebration!')
 
 @section('content')

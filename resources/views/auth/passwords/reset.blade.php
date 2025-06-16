@@ -1,6 +1,6 @@
 @extends('layouts.guest', ['page' => ''])
 
-@section('title', 'Reset Password | ')
+@section('title', 'Reset Password')
 @section('meta_description', 'Reset your password to regain access to your account. Enter your email and new password to proceed.')
 
 @section('content')

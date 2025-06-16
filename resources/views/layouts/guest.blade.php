@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-    <title>@yield('title') {{ config('app.name', 'Lydia\'s Lechon') }}</title>
+    <title>@yield('title', 'Home') | {{ config('app.name', 'Lydia\'s Lechon') }}</title>
     <meta name="description" content="@yield('meta_description', 'Lydia\'s Lechon - The Best Lechon in the Philippines')">
     <meta name="keywords" content="@yield('meta_keywords', 'lechon, filipino food, best lechon, lydia\'s lechon')">
     <meta name="author" content="Lydia's Lechon">

@@ -1,6 +1,6 @@
 @extends('layouts.guest')
 
-@section('title', 'Menu | ')
+@section('title', 'Menu')
 @section('meta_description', 'Explore our menu of delicious lechon and other dishes. Perfect for any occasion, from parties to family gatherings. Order now!')
 
 @section('content')
