@@ -12,13 +12,13 @@
             </div>
             @endif
             @if (isset($_GET['test1']))
-                <img src="{{ asset('images/lechon-image1.jpg') }}" alt="Lydias Lechon" class="hidden md:block w-full">   
+                <img src="{{ asset('images/lechon-image1.jpg') }}" alt="Lydias Lechon" class="w-full h-screen object-cover object-right">   
             @elseif (isset($_GET['test2']))
-                <img src="{{ asset('images/lechon-image2.jpg') }}" alt="Lydias Lechon" class="w-full">    
+                <img src="{{ asset('images/lechon-image2.jpg') }}" alt="Lydias Lechon" class="w-full h-screen object-cover object-right">    
             @elseif (isset($_GET['test3']))
-                <img src="{{ asset('images/lechon-image3.jpg') }}" alt="Lydias Lechon" class="hidden md:block w-full"> 
+                <img src="{{ asset('images/lechon-image3.jpg') }}" alt="Lydias Lechon" class="w-full h-screen object-cover object-right"> 
             @else
-                <img src="{{ asset('images/hero-lechon.png') }}" alt="Lydias Lechon" class="hidden md:block w-full">    
+                <img src="{{ asset('images/hero-lechon.png') }}" alt="Lydias Lechon" class="w-full h-screen object-cover object-right">    
             @endif 
 
             {{-- <img src="{{ asset('/images/lechon-chopped.png') }}" alt="Lechon" class="block md:hidden w-full h-full object-cover absolute -bottom-30 left-0 z-10 "> --}}
