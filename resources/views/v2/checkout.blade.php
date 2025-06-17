@@ -1609,6 +1609,14 @@
     }
 </script>
 
+<script>
+    window.addEventListener('pageshow', function (event) {
+        if (event.persisted || performance.getEntriesByType('navigation')[0].type === 'back_forward') {
+            location.reload();
+        }
+    });
+</script>
+
 @section('alpine.plugins')
 <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/mask@3.x.x/dist/cdn.min.js"></script>
 @endsection
