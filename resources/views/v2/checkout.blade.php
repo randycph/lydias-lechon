@@ -892,7 +892,12 @@
             freeShippingDiscountAmount: 0,
 
             removeCoupon(index) {
-                this.coupons.splice(index, 1);
+                if (index) {
+                    this.coupons.splice(index, 1);
+                } else {
+                    this.coupons = [];
+                }
+                
                 this.recomputeCouponTotals();
             },
 
@@ -915,7 +920,10 @@
                 this.noNeededDate = false;
 
                 this.couponMessage = '';
-                this.removeCoupon()
+                this.deliveryFees = [];
+                this.removeCoupon();
+
+                this.loadAutoCoupons();
             },
 
             mobileValidationMessage: '',
