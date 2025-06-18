@@ -157,6 +157,10 @@ class FrontendController extends Controller
     {
         $page = 'checkout';
 
+        if (Auth::check() && Auth()->user()->role_id != 6) {
+            return redirect()->route('my-account')->with('error', 'You are not allowed to access this page. Please contact support for assistance.');
+        }
+
         if (Auth::check()) {
             $carts = Cart::where('user_id', Auth::id())->with('product.photos')->get();
         } else {
@@ -267,6 +271,10 @@ class FrontendController extends Controller
             return redirect()->route('login');
         }
 
+        if (Auth::check() && Auth()->user()->role_id != 6) {
+            return redirect()->route('my-account')->with('error', 'You are not allowed to access this page. Please contact support for assistance.');
+        }
+
         return view('v2.my-cart', compact('page'));
     }
 
@@ -274,6 +282,10 @@ class FrontendController extends Controller
     {
         if (!Auth::check()) {
             return redirect()->route('login');
+        }
+
+        if (Auth::check() && Auth()->user()->role_id != 6) {
+            return redirect()->route('my-account')->with('error', 'You are not allowed to access this page. Please contact support for assistance.');
         }
 
         $page = 'order-history';
