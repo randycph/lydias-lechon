@@ -159,7 +159,7 @@ class MenuController extends Controller
     {
         $menuIds = explode(',', request('ids'));
         if (sizeof($menuIds) > 0 ) {
-            $menus = Menu::whereIn('id', $menuIds);
+            $menus = Menu::whereIn('id', $menuIds)->get();
             foreach ($menus as $menu) {
                 $menu->update(['user_id' => auth()->id()]);
             }
