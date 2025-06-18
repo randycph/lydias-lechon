@@ -125,7 +125,7 @@ class CouponController extends Controller
         }
 
         $coupon = Coupon::create([
-            'coupon_code' => $request->coupon_activation == 'manual' ? $request->code : Coupon::generate_unique_code(),
+            'coupon_code' => $request->coupon_activation == 'manual' ? $request->code : $request->name,
             'name' => $request->name,
             'description' => $request->description,
             'terms_and_conditions' => $request->terms_and_conditions,
@@ -268,7 +268,7 @@ class CouponController extends Controller
         }
 
         Coupon::find($coupon->id)->update([
-            'coupon_code' => $request->coupon_activation == 'manual' ? $request->code : ($request->name ?? Coupon::generate_unique_code()),
+            'coupon_code' => $request->coupon_activation == 'manual' ? $request->code : ($request->name ?? $request->name),
             'name' => $request->name,
             'description' => $request->description,
             'terms_and_conditions' => $request->terms_and_conditions,
