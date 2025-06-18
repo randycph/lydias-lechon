@@ -14,7 +14,7 @@ class Subscriber extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['first_name', 'last_name', 'email', 'code'];
+    protected $fillable = ['first_name', 'last_name', 'email', 'code', 'is_active'];
 
     public function groups()
     {
