@@ -41,6 +41,9 @@
                                 <input required type="text" class="form-control @error('category_name') is-invalid @enderror" name="category_name" id="category_title" @htmlValidationMessage({{__('standard.empty_all_field')}})>
                                 <x-error-message inputName="category_name" />
                                 <small id="category_slug"></small>
+                                @error('category_name')
+                                    <div class="alert alert-danger">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                     </div>
