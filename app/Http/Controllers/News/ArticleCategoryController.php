@@ -58,10 +58,15 @@ class ArticleCategoryController extends Controller
      */
     public function store(ArticleCategoryRequest $request)
     {
+        Validator::make($request->all(), [
+            'category_name' => 'required|unique:article_categories,name',
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:10240', 
+        ])->validate();
+
         $category = ArticleCategory::create([
             'name' => $request->category_name,
             'slug' => Page::convert_to_slug($request->category_name),
-            'user_id'  => auth()->user()->id
+            'user_id'  => auth()->id
         ]);
 
         return redirect()->route('news-categories.index')->with('success', __('standard.news.category.create_success'));
@@ -103,7 +108,7 @@ class ArticleCategoryController extends Controller
         $articleCategory = ArticleCategory::findOrFail($id);
 
         Validator::make($request->all(), [
-            'category_name' => 'required',
+            'category_name' => 'required|unique:article_categories,name,'.$articleCategory->id,
             'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:10240', 
         ])->validate();
 
