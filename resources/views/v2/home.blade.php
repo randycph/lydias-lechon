@@ -8,14 +8,13 @@
             @if (isset($_GET['noheading']))
             @else
             <div class="container absolute flex self-center text-gray-200 px-3 font-cubao z-20 pt-10" style="position-area: center; align-self: anchor-center;">
-                <h1 class="text-8xl md:text-9xl font-light text-center mx-auto w-full md:w-[80%] drop-shadow-[0_0_10px_green]">
+                <h1 class="text-8xl lg:text-9xl font-light text-center mx-auto w-full lg:w-[80%] drop-shadow-[0_0_10px_green]">
                     EVERYDAY LECHON HAPPINESS
                 </h1>
             </div>
             @endif
-            <img src="{{ asset('images/lechon-image3.jpg') }}" alt="Lydias Lechon" class="w-full h-screen object-cover object-right"> 
-
-            {{-- <img src="{{ asset('/images/lechon-chopped.png') }}" alt="Lechon" class="block md:hidden w-full h-full object-cover absolute -bottom-30 left-0 z-10 "> --}}
+            <img src="{{ asset('images/lechon-image3.jpg') }}" alt="Lydias Lechon" class="w-full h-screen object-cover object-right hidden lg:block"> 
+            <img src="{{ asset('images/portrait-hero.jpg') }}" alt="Lydias Lechon" class="w-full h-screen object-cover object-right lg:hidden block"> 
         </div>
     </div>
 

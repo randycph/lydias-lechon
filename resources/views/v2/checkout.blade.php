@@ -17,9 +17,9 @@
 
 <div class="bg-cream">
     <div 
-    x-data="checkoutForm" 
-    init="init()" 
-    class="container">
+        x-data="checkoutForm" 
+        init="init()" 
+        class="container">
         <form
             action="{{ route('cart.temp_sales') }}" 
             method="POST" 
@@ -44,10 +44,7 @@
                     <a href="{{ route('lechon-menu') }}" class="mt-4 bg-primary text-white px-4 py-2 rounded-md">Start Shopping</a>
                 </div>
             @else
-            <div
-    
-            
-                class="flex flex-col lg:flex-row gap-4 w-full mt-10">
+            <div class="flex flex-col lg:flex-row gap-4 w-full mt-10">
                 
                 @csrf
                 <div class="w-full order-1 lg:order-2 rounded-lg border bg-white border-[#DFDFDF] shadow-md ">
@@ -55,35 +52,58 @@
                         <h2 class="text-lg lg:text-3xl font-semibold text-left">Order Summary</h2>
                     </div>
                     <div class="flex items-center text-sm lg:text-base justify-between px-4 py-3 border-b border-[#DFDFDF]">
-                        <div>{{ count($carts) }} items</div>
-                        <div class="font-bold">
-                            ₱{{ number_format($total, 2) }}
+                        <div x-text="carts.length + ' items'"></div>
+                        <div class="font-bold" 
+                            x-text="'₱' + carts.reduce((sum, item) => sum + (item.is_free_product ? 0 : item.price * item.qty), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })">
                         </div>
                     </div>
     
-    
-                    <div class="flex flex-col items-center gap-8 px-4 py-3 border-b border-[#DFDFDF] w-full">
-                        @foreach ($carts as $cart)
-                        <div class="flex gap-4 items-start w-full relative">
-                            <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')"
-                                class="w-20 h-20 min-w-20 min-h-20 object-cover overflow-hidden rounded-md bg-center">
-                                <img 
-                                    onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'" 
-                                    src="{{ $cart?->product?->photos->last()?->path ? asset('storage/products/' . $cart?->product?->photos->last()->path) : asset('images/no-image.jpg') }}" 
-                                    alt="{{ $cart['name'] ?? $cart?->product?->name }}"
-                                    class="w-20 h-20 object-cover">
+                    <div class="flex flex-col items-center gap-4 px-4 py-3 border-b border-[#DFDFDF] w-full">
+                        <template x-for="(item, index) in carts" :key="index">
+                            <div class="flex gap-4 items-start w-full relative  border-gray-200 py-3">
+                                <!-- Image -->
+                                <div class="w-20 h-20 min-w-20 min-h-20 bg-center rounded-md overflow-hidden">
+                                    <img 
+                                        onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'"
+                                        :src="item.product?.photos?.length 
+                                            ? '/storage/products/' + item.product.photos[item.product.photos.length - 1].path 
+                                            : @js(asset('images/no-image.jpg'))" 
+                                        
+                                        alt=""
+                                        class="w-20 h-20 object-cover"
+                                    >
+                                </div>
 
+                                <!-- Info -->
+                                <div class="flex flex-col flex-grow">
+                                    <div class="font-bold">
+                                        <span x-text="item?.product?.name"></span>
+                                        <template x-if="item.is_free_product">
+                                            <span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">FREE</span>
+                                        </template>
+                                    </div>
+                                    <div class="text-sm text-gray-600 font-medium">
+                                        Price:
+                                        <span x-text="item.is_free_product 
+                                            ? '₱0.00' 
+                                            : '₱' + parseFloat(item.price).toLocaleString(undefined, { minimumFractionDigits: 2 })">
+                                        </span>
+                                    </div>
+                                    <div class="text-sm text-gray-600 font-medium">
+                                        QTY: <span x-text="item.qty"></span>
+                                    </div>
+                                </div>
+
+                                <!-- Total -->
+                                <div class="absolute right-0 bottom-2 text-sm lg:text-base font-bold text-black text-right">
+                                    <span x-text="item.is_free_product 
+                                        ? '₱0.00' 
+                                        : '₱' + (item.price * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2 })">
+                                    </span>
+                                </div>
                             </div>
-                            <div class="flex flex-col">
-                                <div class="font-bold">{{ $cart['name'] ?? $cart?->product?->name }}</div>
-                                <div class="text-sm  text-gray-600 font-medium">Price: ₱{{ number_format($cart['price'], 2) }}</div>
-                                <div class="text-sm  text-gray-600 font-medium">QTY: {{ $cart['qty'] }}</div>
-                            </div>
-                            <div class="text-sm lg:text-base text-black font-bold text-right w-full absolute right-0 bottom-0">
-                                ₱{{ number_format($cart['price'] * $cart['qty'], 2) }}
-                            </div>
-                        </div>
-                        @endforeach
+                        </template>
+
                     </div>
     
                     <!-- Coupon Code Section -->
@@ -105,7 +125,9 @@
                         <div class="border-t border-gray-200 mt-2 pt-3 pb-1 gap-1 flex flex-col text-sm lg:text-base px-3">
                             <div class="flex justify-between">
                                 <span class="font-medium text-gray-800">Subtotal</span>
-                                <span class="font-medium" >₱{{ number_format($total, 2) }}</span>
+                                <span class="font-medium" 
+                                    x-text="'₱' + carts.reduce((sum, item) => sum + (item.is_free_product ? 0 : item.price * item.qty), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })">
+                                </span>
                             </div>
                             <template x-if="deliveryFees.length == 0 && !allowMultiple && method == 'delivery'">
                                 <div>
@@ -141,37 +163,20 @@
                                         <template x-if="item.free_shipping">
                                             <span x-text="'- ₱' + (item.free_shipping_discount_amount == 100 ? deliveryFee : (deliveryFee * item.free_shipping_discount_amount / 100)).toLocaleString(undefined, { minimumFractionDigits: 2 }) + ' (Shipping Discount)'"></span>
                                         </template>
-                                        <template x-if="!item.free_shipping">
+                                        <template x-if="!item.free_shipping && (item.free_products == null || item.free_products.length == 0)">
                                             <span x-text="'- ₱' + (
                                                 item.discount_type === 'amount' 
                                                     ? parseFloat(item.discount) 
                                                     : (orderAmount * parseFloat(item.discount) / 100)
                                             ).toLocaleString(undefined, { minimumFractionDigits: 2 }) + ' (Order Discount)'"></span>
                                         </template>
+                                        <template x-if="!item.free_shipping && (item.free_products && item.free_products.length > 0)">
+                                            <span>Free Products</span>
+                                        </template>
                                     </span>
                                 </div>
                             </template>
                         </template>
-                            
-                        {{-- <div class="flex justify-between lg:mt-2" x-show="showMessage">
-                            <span class="font-medium text-red-700 italic flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 text-green-600 mr-1">
-                                    <path fill-rule="evenodd" d="M4.5 2A2.5 2.5 0 0 0 2 4.5v2.879a2.5 2.5 0 0 0 .732 1.767l4.5 4.5a2.5 2.5 0 0 0 3.536 0l2.878-2.878a2.5 2.5 0 0 0 0-3.536l-4.5-4.5A2.5 2.5 0 0 0 7.38 2H4.5ZM5 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
-                                </svg>
-                                Coupon (<span x-text="coupon?.code"></span>) 
-                                <span class="text-xs ml-1 underline cursor-pointer" @click="removeCoupon">Remove Coupon</span>
-                            </span>
-
-                            <!-- Show discount amount, with label depending on freeShipping -->
-                            <span class="font-medium italic text-red-700">
-                                <template x-if="freeShipping">
-                                    <span x-text="'- ₱' + (deliveryFee * (freeShippingDiscountAmount / 100)).toLocaleString(undefined, { minimumFractionDigits: 2 }) + ' (Shipping Discount)'"></span>
-                                </template>
-                                <template x-if="!freeShipping">
-                                    <span x-text="'- ₱' + discountAmount.toLocaleString(undefined, { minimumFractionDigits: 2 }) + ' (Order Discount)'"></span>
-                                </template>
-                            </span>
-                        </div> --}}
 
                         </div>
     
@@ -659,12 +664,13 @@
     </div>
 </div>
 
-
 <x-footer-component />
+
 <script>
     window.disabledPickupDates = @json($disabledPickupDates);
     window.disabledDeliveryDates = @json($disabledDeliveryDates);
 </script>
+
 <script>
     function checkoutForm() {
         return {
@@ -702,6 +708,7 @@
                 window.location.href = '/sales-summary/' + this.paymentDetails.sales_header_id;
             },
             orders: @json($carts) || [],
+            carts: @json($carts) || [],
             totalQty: 1,
             deliveries: [
                 { 
@@ -824,6 +831,26 @@
                     }
                 }
 
+                if (result.coupon.free_products && result.coupon.free_products.length > 0) {
+                    result.coupon.free_products.forEach(fp => {
+                        if (!this.carts.find(item => item.is_free_product && item.id === fp.id)) {
+                            this.carts.push({
+                                id: fp.id,
+                                product: {
+                                    name: fp.name,
+                                    photos: fp.photos,
+                                },
+                                qty: 1,
+                                price: 0,
+                                is_free_product: true,
+                                coupon_code: result.coupon.code,
+                            });
+                        }
+                    });
+
+                    this.hasFreeProducts = true;
+                }
+
                 // Add coupon to coupons array
                 this.coupons.push(result.coupon);
 
@@ -836,6 +863,8 @@
                 // Clear input after success
                 this.couponCode = '';
             },
+
+            hasFreeProducts: false,
 
             recomputeCouponTotals() {
                 this.totalDiscountAmount = 0;
@@ -850,9 +879,9 @@
                         }
                     } else {
                         if (coupon.discount_type === 'amount') {
-                            this.totalDiscountAmount += parseFloat(coupon.discount);
+                            this.totalDiscountAmount += parseFloat(coupon.discount ?? 0);
                         } else if (coupon.discount_type === 'percent') {
-                            this.totalDiscountAmount += (this.orderAmount * parseFloat(coupon.discount)) / 100;
+                            this.totalDiscountAmount += (this.orderAmount * parseFloat(coupon.discount ?? 0)) / 100;
                         }
                     }
                 });
@@ -863,21 +892,27 @@
 
 
             computeTotal() {
-                if (this.method == 'pickup') {
-                    this.deliveryFee = 0;
+                // Fallbacks
+                const orderAmount = parseFloat(this.orderAmount) || 0;
+                const shippingDiscount = parseFloat(this.shippingDiscountAmount) || 0;
+                const couponDiscount = parseFloat(this.totalDiscountAmount) || 0;
+
+                // Handle delivery fee
+                let deliveryFeeFinal = parseFloat(this.deliveryFee) || 0;
+                if (this.method === 'pickup') {
+                    deliveryFeeFinal = 0;
+                } else {
+                    deliveryFeeFinal = deliveryFeeFinal - shippingDiscount;
+                    deliveryFeeFinal = Math.max(deliveryFeeFinal, 0); // no negative
                 }
 
-                let deliveryFeeFinal = this.deliveryFee - this.shippingDiscountAmount;
-                deliveryFeeFinal = Math.max(deliveryFeeFinal, 0); // no negative fee
-
-                let total = parseFloat(this.orderAmount) + parseFloat(deliveryFeeFinal);
-
-                // Subtract all coupon discounts
-                total -= this.totalDiscountAmount;
+                // Compute total
+                let total = orderAmount + deliveryFeeFinal - couponDiscount;
 
                 this.totalAmount = total;
-                this.deposit = this.totalAmount.toFixed(2);
+                this.deposit = total.toFixed(2);
 
+                // Update hidden input if needed
                 this.$nextTick(() => {
                     let input = this.$root.querySelector('input[name="deposit"]');
                     if (input) {
@@ -885,28 +920,31 @@
                     }
                 });
 
-                return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(total);
+                return new Intl.NumberFormat('en-PH', {
+                    style: 'currency',
+                    currency: 'PHP'
+                }).format(total);
             },
 
             freeShipping: false,
             freeShippingDiscountAmount: 0,
 
             removeCoupon(index) {
-                if (index) {
+                if (typeof index === 'number') {
+                    const removedCoupon = this.coupons[index];
                     this.coupons.splice(index, 1);
+
+                    this.carts = this.carts.filter(item =>
+                        !(item.is_free_product && item.coupon_code === removedCoupon.code)
+                    );
                 } else {
                     this.coupons = [];
+
+                    this.carts = this.carts.filter(item => !item.is_free_product);
                 }
-                
+
                 this.recomputeCouponTotals();
             },
-
-            // removeCoupon() {
-            //     this.couponCode = '';
-            //     this.coupon = null;
-            //     this.discountAmount = 0;
-            //     this.showMessage = false;
-            // },
 
             changeMethod(method) {
                 this.method = method;
@@ -986,8 +1024,9 @@
 
                 // Add dynamic fields
                 formData.append('shipping_type', this.method);
-                formData.append('coupon', this.coupon ? this.coupon?.code : null);
-                formData.append('discount_amount', this.coupon ? this.coupon.discount : null);
+                formData.append('coupons', JSON.stringify(this.coupons.map(c => c.code)));
+                formData.append('discount_amount', isNaN(this.totalDiscountAmount) ? 0 : this.totalDiscountAmount);
+                formData.append('coupon_data', JSON.stringify(this.coupons));
                 formData.append('order_amount', this.orderAmount);
                 formData.append('delivery_fee', this.deliveryFee);
                 formData.append('deposit', this.deposit);
@@ -1618,8 +1657,7 @@
 </script>
 
 @section('alpine.plugins')
-<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/mask@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/mask@3.x.x/dist/cdn.min.js"></script>
 @endsection
-
 
 @endsection

@@ -3,7 +3,7 @@
 @section('title', 'Order Confirmation')
 @section('meta_description', 'Thank you for ordering with us! Your delicious Lydia\'s Lechon meal is on its way. We’ll send you an update once it’s ready for pickup or delivery. Your order details has also been sent to your email. Enjoy!')
 
-@section('content')
+@section('content') 
 
     <div x-data="{ expanded: false }" class="bg-cream">
         <div class="pb-10 px-4 container">
@@ -172,8 +172,16 @@
                                 </div>
                                 
                                 <div class="flex flex-col">
-                                    <div class="font-bold">{{ $details['product_name'] }}</div>
-                                    <div class="text-sm text-gray-600 font-medium">QTY: {{ number_format($details['qty'], 0)}}</div>
+                                    <div class="flex gap-2 items-center">
+                                        <div class="font-bold">{{ $details['product_name'] }}</div>
+                                        @if ($details['price'] == 0)
+                                        <span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">FREE</span>
+                                        @endif
+                                    </div>
+                                    <div class="text-sm font-semibold">
+                                        Price: <span>₱{{ number_format($details['price'], 2) }}</span>
+                                    </div>
+                                    <div class="text-sm text-gray-600 font-medium">QTY: {{ $details['qty']}}</div>
                                 </div>
                                 
                                 <div class="text-sm text-black font-bold text-right w-full absolute right-0 bottom-0">₱{{ number_format(($details->price * $details->qty), 2) }}</div>

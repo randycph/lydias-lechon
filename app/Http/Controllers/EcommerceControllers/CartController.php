@@ -31,8 +31,9 @@ use Redirect;
 use DateTime;
 
 use Carbon\Carbon;
-use Cookie;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Str;
+use Illuminate\Support\Fluent;
 
 
 class CartController extends Controller
@@ -683,6 +684,49 @@ class CartController extends Controller
             $carts = Cart::where('user_id',$user->id)->get();
         }
 
+        $coupon_data = json_decode($request->input('coupon_data'), true);
+
+        if (!empty($coupon_data)) {
+            foreach ($coupon_data as $coupon) {
+                if (!empty($coupon['free_products'])) {
+                    foreach ($coupon['free_products'] as $freeProduct) {
+                        // Check if already added
+                        $alreadyFree = $carts->first(function ($item) use ($freeProduct) {
+                            return (isset($item->is_free_product) && $item->is_free_product === true)
+                                && ($item->product_id == $freeProduct['id']);
+                        });
+
+                        if (!$alreadyFree) {
+                            $cartItem = new Cart();
+                            $cartItem->id = 'free_' . $freeProduct['id'];
+                            $cartItem->product_id = $freeProduct['id'];
+                            $cartItem->name = $freeProduct['name'];
+                            $cartItem->price = 0;
+                            $cartItem->qty = 1;
+                            $cartItem->is_free_product = true;
+                            $cartItem->coupon_code = $coupon['code'];
+
+                            $product = new Fluent([
+                                'id' => $freeProduct['id'],
+                                'name' => $freeProduct['name'],
+                                'photos' => collect($freeProduct['photos'] ?? []),
+                                'price' => 0,
+                                'category_id' => $freeProduct['category_id'] ?? null,
+                                'uom' => $freeProduct['uom'] ?? '',
+                                'size' => $freeProduct['size'] ?? '',
+                                'no_of_pax' => $freeProduct['no_of_pax'] ?? '',
+                                'paella_price' => $freeProduct['paella_price'] ?? 0,
+                            ]);
+
+                            $cartItem->setRelation('product', $product);
+
+                            $carts->push($cartItem);
+                        }
+                    }
+                }
+            }
+        }
+
         //dd($request);
         $dn = explode(" - ", $request->need_date . ' - ' . $request->need_time);
         $date_needed = date('Y-m-d H:i:s',strtotime($dn[0]." ".$dn[1]));
@@ -714,7 +758,9 @@ class CartController extends Controller
         $delivery_fee = $request->shipping_type == 'pickup' ? 0 : $request->delivery_fee;
         $netAmount = $totalPrice + $delivery_fee;
         $totalPrice = (float) $totalPrice + (float) $delivery_fee;
-        if ($request->coupon && $request->discount_amount) {
+
+        $couponsList = json_decode($request->coupons, true);
+        if (($couponsList && count($couponsList) > 0) && $request->discount_amount) {
             $discount = (float) $request->discount_amount;
             $netAmount = (float) $totalPrice - (float) $request->discount_amount;
         }
@@ -766,20 +812,24 @@ class CartController extends Controller
 
         $couponCode = null;
 
-        if ($request->coupon && $request->discount_amount) {
-            $couponCode = Coupon::whereRaw('LOWER(coupon_code) = ?', [strtolower($request->coupon)])
-                ->where('activation_type', 'manual')
-                ->where('status', 'ACTIVE')
-                ->first();
+        $couponsList = json_decode($request->coupons, true);
+        if ($couponsList && $request->discount_amount) {
+            if (count($couponsList) > 0) {
+                foreach ($couponsList as $coupon) {
+                    $couponCode = Coupon::whereRaw('LOWER(coupon_code) = ?', [strtolower($coupon)])
+                        ->where('status', 'ACTIVE')
+                        ->first();
 
-            if ($couponCode) {
-                CouponCart::create([
-                    'coupon_id' => $couponCode?->id,
-                    'customer_id' => $user->id,
-                    'total_usage' => 1,
-                    'status' =>  0,
-                    'sales_header_id' => $salesHeader->id
-                ]);
+                    if ($couponCode) {
+                        CouponCart::create([
+                            'coupon_id' => $couponCode?->id,
+                            'customer_id' => $user->id,
+                            'total_usage' => 1,
+                            'status' =>  0,
+                            'sales_header_id' => $salesHeader->id
+                        ]);
+                    }
+                }
             }
         }
 
@@ -830,7 +880,7 @@ class CartController extends Controller
 
                     if(!empty($coupon)){
 
-                        $payment_coupon = SalesPayment::create([
+                        SalesPayment::create([
                             'sales_header_id' => $salesHeader->id,
                             'payment_type' => 'Gift Cert',
                             'amount' => $code[1],
@@ -848,16 +898,25 @@ class CartController extends Controller
             $tax_amount = $gross_amount - ($gross_amount/1.12);
             $grand_gross += $gross_amount;
             $grand_tax += $tax_amount;
+            
+            $couponsList = json_decode($request->coupons, true);
+            if ($couponsList && $request->discount_amount) {
+                if (count($couponsList) > 0) {
+                    foreach ($couponsList as $coupon) {
+                        $couponCode = Coupon::whereRaw('LOWER(coupon_code) = ?', [strtolower($coupon)])
+                            ->where('status', 'ACTIVE')
+                            ->first();
 
-            if ($request->coupon && $request->discount_amount) {
-                if ($couponCode) {
-                    CouponSale::create([
-                        'customer_id' => $user->id,
-                        'coupon_id' => $couponCode?->id,
-                        'coupon_code' => $couponCode->coupon_code,
-                        'product_id' => $product->id,
-                        'sales_header_id' => $salesHeader->id,
-                    ]);
+                        if ($couponCode) {
+                            CouponSale::create([
+                                'customer_id' => $user->id,
+                                'coupon_id' => $couponCode?->id,
+                                'coupon_code' => $couponCode->coupon_code,
+                                'product_id' => $product->id,
+                                'sales_header_id' => $salesHeader->id,
+                            ]);
+                        }
+                    }
                 }
             }
 
@@ -884,23 +943,13 @@ class CartController extends Controller
                 'uom' => $product->uom,
                 'size' => $product->size ?? "",
                 'no_of_pax' => $product->no_of_pax ?? "",
-                'paella_price' => $cart->paella_price,
+                'paella_price' => $product->paella_price,
                 'other_cost' => 0,
                 'other_cost_description' => '',
                 'created_by' => $user->id,
                 'delivery_date' => $date_needed
             ]);
             $saved_items .= $cart->qty." x ".$product->name.", ";
-            
-            // if($coupon_amount > 0){
-            //     $grand_gross = $grand_gross - $coupon_amount;
-            //     $update_header = SalesHeader::whereId($salesHeader->id)->update([
-            //         'gross_amount' => $grand_gross,
-            //         'tax_amount' => $grand_tax,
-            //         'net_amount' => $grand_gross,
-            //         'discount_amount' => $coupon_amount
-            //     ]);
-            // }
         }
 
         $recipient = $user->email ?: $request->email;

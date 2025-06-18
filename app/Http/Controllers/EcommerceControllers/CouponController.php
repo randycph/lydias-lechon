@@ -281,7 +281,7 @@ class CouponController extends Controller
             'reward' => $request->reward,
             'amount' => $request->reward == 'discount-amount-optn' ? $request->discount_amount : NULL,
             'percentage' => $request->reward == 'discount-percentage-optn' ? $request->discount_percentage : NULL,
-            'free_product_id' => ($request->coupon_scope == 'specific' && $request->reward) == 'free-product-optn' ? $productids : NULL,
+            'free_product_id' => ($request->reward) == 'free-product-optn' ? $productids : NULL,
             'status' => ($request->has('status') ? 'ACTIVE' : 'INACTIVE'),
             'amount_discount_type' => $amount_discount,
             'product_discount' => $request->amount_discount == 2 ? $request->product_discount : NULL,
@@ -630,6 +630,14 @@ class CouponController extends Controller
             ]);
         }
 
+        $free_products = null;
+
+        if ($coupon->free_product_id) {
+            $freeProductIds = explode('|', $coupon->free_product_id);
+            $freeProductIds = array_filter($freeProductIds, function($value) { return !is_null($value) && $value !== ''; });
+            $free_products = Product::with('photos')->whereIn('id', $freeProductIds)->get();
+        }
+
         return response()->json([
             'success' => true,
             'coupon' => [
@@ -643,7 +651,7 @@ class CouponController extends Controller
                 'discount' => $coupon->percentage > 0 ? $coupon->percentage : $coupon->amount,
                 'applies_to' => $coupon->free_product_id ? 'free_product' : ($coupon->purchase_product_id ? 'product' : 'cart'),
                 'purchase_product_id' => $coupon->purchase_product_id,
-                'free_product_id' => $coupon->free_product_id,
+                'free_products' => $free_products ?? [],
                 'combination_allowed' => $coupon->combination == 1,
                 'total_usage_limit' => $coupon->usage_limit,
                 'total_usage_used' => $totalUsed,
@@ -662,17 +670,14 @@ class CouponController extends Controller
     {
         $now = Carbon::now();
 
+
         $eligibleCoupons = Coupon::where('activation_type', 'auto')
             ->where('status', 'ACTIVE')
             ->whereRaw("CONCAT(start_date, ' ', start_time) <= ?", [$now])
             ->whereRaw("CONCAT(end_date, ' ', end_time) >= ?", [$now])
             ->where(function($q) {
                 $q->whereNull('customer_scope')
-                ->orWhere('customer_scope', 'all')
-                ->orWhere(function ($subq) {
-                    $subq->where('customer_scope', 'specific')
-                        ->whereRaw("FIND_IN_SET(?, scope_customer_id)", [Auth::id()]);
-                });
+                ->orWhere('customer_scope', 'all');
             })
             ->get();
 
@@ -694,6 +699,14 @@ class CouponController extends Controller
                 continue;
             }
 
+            $free_products = null;
+
+            if ($coupon->free_product_id) {
+                $freeProductIds = explode('|', $coupon->free_product_id);
+                $freeProductIds = array_filter($freeProductIds, function($value) { return !is_null($value) && $value !== ''; });
+                $free_products = Product::with('photos')->whereIn('id', $freeProductIds)->get();
+            }
+
             // Add eligible coupon to result
             $result[] = [
                 'id' => $coupon->id,
@@ -706,7 +719,7 @@ class CouponController extends Controller
                 'discount' => $coupon->percentage > 0 ? $coupon->percentage : $coupon->amount,
                 'applies_to' => $coupon->free_product_id ? 'free_product' : ($coupon->purchase_product_id ? 'product' : 'cart'),
                 'purchase_product_id' => $coupon->purchase_product_id,
-                'free_product_id' => $coupon->free_product_id,
+                'free_products' => $free_products ?? [],
                 'combination_allowed' => $coupon->combination == 1,
                 'total_usage_limit' => $coupon->usage_limit,
                 'total_usage_used' => $totalUsed,

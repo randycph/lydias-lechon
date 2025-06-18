@@ -154,10 +154,10 @@
 				<div class="form-group">
 					<label class="d-block">Reward</label>
 					<select class="custom-select @error('reward') is-invalid @enderror" id="reward-optn" name="reward">
-						<option @if(isset($coupon->location)) selected @endif value="free-shipping-optn">Free Shipping</option>
-						<option @if(isset($coupon->amount) )selected @endif value="discount-amount-optn">Discount Amount</option>
-						<option @if(isset($coupon->percentage)) selected @endif value="discount-percentage-optn">Discount Percentage</option>
-						<option @if(isset($coupon->free_product_id)) selected @endif value="free-product-optn">Free Product/Gift</option>
+						<option @if(isset($coupon->reward) && $coupon->reward == 'free-shipping-optn') selected @endif value="free-shipping-optn">Free Shipping</option>
+						<option @if(isset($coupon->reward) && $coupon->reward == 'discount-amount-optn')selected @endif value="discount-amount-optn">Discount Amount</option>
+						<option @if(isset($coupon->reward) && $coupon->reward == 'discount-percentage-optn') selected @endif value="discount-percentage-optn">Discount Percentage</option>
+						<option @if(isset($coupon->reward) && $coupon->reward == 'free-product-optn') selected @endif value="free-product-optn">Free Product/Gift</option>
 					</select>
 					@error('reward')
 						<span class="invalid-feedback" role="alert">
@@ -173,8 +173,9 @@
 						array_push($arr_loc,$l);
 					}
 				@endphp
+				{{ $coupon->location}}
 				<div class="form-group">
-					<div class="mb-3 reward-option" id="free-shipping-optn" style="display:@if(isset($coupon->location)) block @else none @endif">
+					<div class="mb-3 reward-option" id="free-shipping-optn" style="display:@if(isset($coupon->location) || $coupon->reward == 'free-shipping-optn') block @else none @endif">
 						<label class="d-block">Location</label>
 						<select class="form-control select2" name="location[]" multiple="multiple" style="min-height: 32px;">
 							<option label="Select Area"></option>
@@ -282,7 +283,7 @@
 						</div>
                 	</div>
 
-					<div class="mb-3 reward-option" id="free-product-optn" style="display:@if(isset($coupon->free_product_id)) block @else none @endif">
+					<div class="mb-3 reward-option" id="free-product-optn" style="display:@if(isset($coupon->free_product_id) || $coupon->reward == 'free-product-optn') block @else none @endif">
 						<label class="d-block">Free Product</label>
 						<select class="form-control select2" name="free_product_id[]" style="min-height: 32px;" multiple="multiple">
 							@foreach($free_products as $product)
