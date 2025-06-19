@@ -906,6 +906,10 @@
                     deliveryFeeFinal = Math.max(deliveryFeeFinal, 0); // no negative
                 }
 
+                if (shippingDiscount > 0) {
+                    this.totalDiscountAmount = shippingDiscount;
+                }
+
                 // Compute total
                 let total = orderAmount + deliveryFeeFinal - couponDiscount;
 
@@ -1262,6 +1266,8 @@
 
                     // Update total fee
                     // this.deliveryFee = this.deliveryFees.reduce((acc, item) => acc + item.fee, 0);
+
+                    this.recomputeCouponTotals();
 
                 } catch (e) {
                     console.error(e);
