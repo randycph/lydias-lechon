@@ -384,7 +384,7 @@
 					</div>
 				</div>
 
-				<div class="form-row border rounded p-3 mb-4" id="coupon-purchase-option" style="display:@if(isset($coupon->purchase_product_id) || isset($coupon->purchase_product_cat_id) || isset($coupon->purchase_product_brand) || isset($coupon->purchase_amount) || isset($coupon->purchase_qty)) flex @else none @endif;">
+				<div class="form-row border d-none rounded p-3 mb-4" id="coupon-purchase-option" style="display:@if(isset($coupon->purchase_product_id) || isset($coupon->purchase_product_cat_id) || isset($coupon->purchase_product_brand) || isset($coupon->purchase_amount) || isset($coupon->purchase_qty)) flex @else none @endif;">
 					<div class="col-md-3">
 						<div class="custom-control custom-checkbox">
 							<input type="checkbox" id="coupon-product" name="purchase_product" class="custom-control-input" onclick="purchase_products()"  @if(isset($coupon->purchase_product_id) || isset($coupon->purchase_product_cat_id) || isset($coupon->purchase_product_brand)) checked @endif >
