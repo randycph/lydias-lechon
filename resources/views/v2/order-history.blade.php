@@ -50,7 +50,7 @@
                             </div>
                         </div>
                         <div class="flex items-start font-bold flex-col gap-2  py-5 border-b border-[#DFDFDF]">
-                                        
+                            @if ($sale->items->count() > 0)                
                             <div class="flex flex-col items-center gap-8 px-4 py-3 border-b border-[#DFDFDF] w-full">
                                 @php
                                     $total = 0;
@@ -125,6 +125,12 @@
                                             <div class="text-sm text-red-600 font-bold italic">- ₱{{ number_format($sale->discount_amount, 2) }}</div>
                                         </div>
                                         @endif
+                                        @if ($sale->net_amount && $sale->net_amount > 0)
+                                        <div class="flex items-center justify-between w-full">
+                                            <div class="text-sm text-black font-bold">Total</div>
+                                            <div class="text-sm font-bold">₱{{ number_format($sale->net_amount, 2) }}</div>
+                                        </div>
+                                        @endif
                                         @if ($sale->payments && count($sale->payments) > 0)
                                         <div class="flex items-center justify-between w-full">
                                             <div class="text-sm text-black font-bold">Amount Paid</div>
@@ -143,6 +149,11 @@
                                     </div>
                                 </template>
                             </div>
+                            @else
+                            <div class="flex items-center justify-center w-full py-4">
+                                <div class="text-sm text-gray-600">No items in this order.</div>
+                            </div>
+                            @endif
                             @if ($sale->items->count() > 0)
                             <div class="w-full flex flex-col gap-2 px-4 mt-4 lg:flex-row justify-between">
     

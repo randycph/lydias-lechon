@@ -149,32 +149,44 @@
                                     @endforelse
                                 </td>
                                 <td class="tx-center">{{number_format($details->qty, 0)}}</td>
-                                <td class="tx-right">{{number_format(($details->paella_price),2)}}</td>
-                                <td class="tx-right">{{number_format($details->price, 2)}}</td>
-                                <td class="tx-right">{{number_format($details->gross_amount, 2)}}</td>                               
+                                <td class="tx-right">₱{{number_format(($details->paella_price),2)}}</td>
+                                <td class="tx-right">₱{{number_format($details->price, 2)}}</td>
+                                <td class="tx-right">₱{{number_format($details->gross_amount, 2)}}</td>                               
                             </tr>
                             @empty
                                 <tr>
                                     <td class="tx-center " colspan="8">No transaction found.</td>
                                 </tr>
                             @endforelse
+                            @if($salesDetails->sum('gross_amount') > 0)
+                                <tr>
+                                    <td class="tx-left" colspan="8">Subtotal</td>
+                                    <td class="tx-right">₱{{number_format($sales->gross_amount, 2)}}</td> 
+                                </tr>
+                            @endif
                             @if($sales->delivery_fee_amount > 0)
                                 <tr>
                                     <td class="tx-left " colspan="8">Delivery Fee</td>
-                                    <td class="tx-right ">{{number_format($sales->delivery_fee_amount, 2)}}</td>
+                                    <td class="tx-right ">₱{{number_format($sales->delivery_fee_amount, 2)}}</td>
+                                </tr>
+                            @endif
+                            @if($sales->discount_amount > 0)
+                                <tr>
+                                    <td class="tx-left " colspan="8">Discount</td>
+                                    <td class="tx-right text-danger">-₱{{number_format($sales->discount_amount, 2)}}</td>
                                 </tr>
                             @endif
                             @forelse($gc as $g)
                                 <tr style="font-weight:bold;">
                                     <td class="tx-left" colspan="8">Gift Certificate: {{$g->code}}</td>
-                                    <td class="tx-right">({{number_format($g->amount, 2)}})</td> 
+                                    <td class="tx-right">₱({{number_format($g->amount, 2)}})</td> 
                                 </tr>
                             @empty
                             @endforelse
-                            @if($salesDetails->sum('gross_amount') > 0)
+                            @if($salesDetails->sum('net_amount') > 0)
                                 <tr style="font-weight:bold;">
                                     <td class="tx-left" colspan="8">Total</td>
-                                    <td class="tx-right">{{number_format($sales->gross_amount, 2)}}</td> 
+                                    <td class="tx-right">₱{{number_format($sales->net_amount, 2)}}</td> 
                                 </tr>
                             @endif
                             </tbody>

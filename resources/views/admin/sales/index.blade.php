@@ -269,9 +269,9 @@
                                     </td>
                                     <td>
                                         @if(\App\EcommerceModel\SalesPayment::check_if_has_added_payments($sale->id) == 1)
-                                            <a href="javascript:;" onclick="show_added_payments('{{$sale->id}}');">{{ number_format($sale->gross_amount,2) }}</a>
+                                            <a href="javascript:;" onclick="show_added_payments('{{$sale->id}}');">{{ number_format($sale->net_amount, 2) }}</a>
                                         @else
-                                            {{ number_format($sale->gross_amount,2) }}
+                                            {{ number_format($sale->net_amount, 2) }}
                                         @endif
                                     </td>
                                      <td>{{ number_format((\App\EcommerceModel\SalesHeader::balance($sale->id)),2) }}</td>

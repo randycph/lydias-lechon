@@ -166,10 +166,24 @@
                             </tr>
                         @endforelse
 
+                        @if($sales->gross_amount > 0)
+                            <tr>
+                                <td class="tx-left " colspan="4">Subtotal</td>
+                                <td class="tx-right ">{{number_format($sales->gross_amount, 2)}}</td>
+                            </tr>
+                        @endif
+
                         @if($sales->delivery_fee_amount > 0)
                             <tr>
                                 <td class="tx-left " colspan="4">Delivery Fee</td>
                                 <td class="tx-right ">{{number_format($sales->delivery_fee_amount, 2)}}</td>
+                            </tr>
+                        @endif
+
+                        @if($sales->discount_amount > 0)
+                            <tr>
+                                <td class="tx-left " colspan="4">Discount</td>
+                                <td class="tx-right text-danger">-{{number_format($sales->discount_amount, 2)}}</td>
                             </tr>
                         @endif
 
@@ -183,7 +197,7 @@
                         @if($salesDetails->sum('gross_amount') > 0)
                             <tr style="font-weight:bold;">
                                 <td colspan="4">&nbsp;</td>
-                                <td class="tx-right">Total: {{number_format($sales->gross_amount, 2)}}</td> 
+                                <td class="tx-right">Total: {{number_format($sales->net_amount, 2)}}</td> 
                             </tr>
                         @endif
                     </tbody>

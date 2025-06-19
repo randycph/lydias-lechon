@@ -67,7 +67,7 @@ class SalesHeader extends Model
 
     public function getPaymentadminstatusAttribute()
     {
-       $amount = $this->gross_amount;
+       $amount = floatval($this->net_amount);
        $paid = (float) SalesPayment::where('sales_header_id',$this->id)->whereStatus('PAID')->sum('amount');
        $balance = $amount - $paid;
        if($balance <= 0){
@@ -84,7 +84,7 @@ class SalesHeader extends Model
     }
 
     public static function balance($id){
-        $amount = SalesHeader::whereId($id)->sum('gross_amount');
+        $amount = SalesHeader::whereId($id)->sum('net_amount');
         $paid = (float) SalesPayment::where('sales_header_id',$id)->whereStatus('PAID')->sum('amount');
         return ($amount - $paid);
     }
