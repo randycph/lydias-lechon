@@ -704,17 +704,29 @@ Media Item
                                                                               </tr>
                                                                               @empty
                                                                               @endforelse
+                                                                              @if($h->gross_amount > 0)
+                                                                              <tr>
+                                                                                    <td class="tx-left " colspan="6" style="font-size:11px;">Subtotal</td>
+                                                                                    <td class="tx-right " style="font-size:11px;">{{number_format($h->gross_amount, 2)}}</td>
+                                                                              </tr>
+                                                                              @endif
                                                                               @if($h->delivery_fee_amount > 0 && $h->delivery_type == 'Door to door delivery')
                                                                               <tr>
                                                                                     <td class="tx-left " colspan="6" style="font-size:11px;">Delivery Fee</td>
                                                                                     <td class="tx-right " style="font-size:11px;">{{number_format($h->delivery_fee_amount, 2)}}</td>
                                                                               </tr>
                                                                               @endif
+                                                                              @if($h->discount_amount > 0)
+                                                                              <tr>
+                                                                                    <td class="tx-left " colspan="6" style="font-size:11px;">Discount</td>
+                                                                                    <td class="tx-right " style="font-size:11px; color: red; text-decoration: italic">-{{number_format($h->discount_amount, 2)}}</td>
+                                                                              </tr>
+                                                                              @endif
                                                                               @if($h->gross_amount > 0)
                                                                               <tr><td colspan="7"><hr></td></tr>
                                                                               <tr style="font-weight:bold;">
                                                                                     <td class="tx-left" colspan="6" style="font-size:11px;">Total</td>
-                                                                                    <td class="tx-right" style="font-size:11px;">{{number_format($h->gross_amount, 2)}}</td> 
+                                                                                    <td class="tx-right" style="font-size:11px;">{{number_format($h->net_amount, 2)}}</td> 
                                                                               </tr>
                                                                               @endif      
                                                                         </table>
