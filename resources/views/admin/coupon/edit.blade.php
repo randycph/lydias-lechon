@@ -173,7 +173,6 @@
 						array_push($arr_loc,$l);
 					}
 				@endphp
-				{{ $coupon->location}}
 				<div class="form-group">
 					<div class="mb-3 reward-option" id="free-shipping-optn" style="display:@if(isset($coupon->location) || $coupon->reward == 'free-shipping-optn') block @else none @endif">
 						<label class="d-block">Location</label>
