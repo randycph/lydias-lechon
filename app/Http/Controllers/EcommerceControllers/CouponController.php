@@ -688,7 +688,6 @@ class CouponController extends Controller
             $totalUsed = CouponCart::where('coupon_id', $coupon->id)->where('status', 1)->sum('total_usage');
             $customerUsed = CouponCart::where('coupon_id', $coupon->id)
                 ->where('status', 1)
-                ->where('customer_id', Auth::id())
                 ->sum('total_usage');
 
             if ($coupon->usage_limit !== null && $totalUsed >= $coupon->usage_limit) {
