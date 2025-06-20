@@ -907,7 +907,7 @@
                 }
 
                 if (shippingDiscount > 0) {
-                    this.totalDiscountAmount = shippingDiscount;
+                    this.totalDiscountAmount += shippingDiscount;
                 }
 
                 // Compute total
@@ -1133,6 +1133,8 @@
                         let data = await response.json();
 
                         this.deliveryFee = data.fee;
+
+                        this.recomputeCouponTotals();
                         
                     } catch (error) {
                         console.error('There was a problem with the fetch operation:', error);

@@ -1454,7 +1454,8 @@ class CartController extends Controller
         }
         
         return response()->json([
-            'fee' => $rate
+            'fee' => $rate,
+            'location' => $request->location,
         ]);
     }  
 
