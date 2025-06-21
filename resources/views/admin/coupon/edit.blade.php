@@ -374,16 +374,16 @@
 
 
 
-				<div class="form-group d-none">
+				<div class="form-group">
 					<div class="custom-control custom-checkbox">
-						<input type="checkbox" class="custom-control-input" id="coupon-purchase" onclick="myFunction()" name="coupon_setting[]" value="purchase" @if(isset($coupon->purchase_product_id) || isset($coupon->purchase_product_cat_id) || isset($coupon->purchase_product_brand) || isset($coupon->purchase_amount) || isset($coupon->purchase_qty)) checked @endif>
+						<input type="checkbox" class="custom-control-input" id="coupon-purchase" onclick="myFunction()" name="coupon_setting[]" value="purchase" @if(isset($coupon->purchase_product_id) || isset($coupon->purchase_product_cat_id) || isset($coupon->purchase_product_brand) || isset($coupon->purchase_amount) || (isset($coupon->purchase_qty) && $coupon->purchase_qty > 0)) checked @endif>
 						<label class="custom-control-label" for="coupon-purchase">Purchase 
 							&nbsp;&nbsp;<span style="font-style: italic;">Coupon is received after the purchase conditions have been met.</span>
 						</label>
 					</div>
 				</div>
 
-				<div class="form-row border d-none rounded p-3 mb-4" id="coupon-purchase-option" style="display:@if(isset($coupon->purchase_product_id) || isset($coupon->purchase_product_cat_id) || isset($coupon->purchase_product_brand) || isset($coupon->purchase_amount) || isset($coupon->purchase_qty)) flex @else none @endif;">
+				<div class="form-row border  rounded p-3 mb-4" id="coupon-purchase-option" style="display:@if(isset($coupon->purchase_product_id) || isset($coupon->purchase_product_cat_id) || isset($coupon->purchase_product_brand) || isset($coupon->purchase_amount) || (isset($coupon->purchase_qty) && $coupon->purchase_qty > 0)) flex @else none @endif;">
 					<div class="col-md-3">
 						<div class="custom-control custom-checkbox">
 							<input type="checkbox" id="coupon-product" name="purchase_product" class="custom-control-input" onclick="purchase_products()"  @if(isset($coupon->purchase_product_id) || isset($coupon->purchase_product_cat_id) || isset($coupon->purchase_product_brand)) checked @endif >
@@ -398,7 +398,7 @@
 					</div>
 					<div class="col-md-3">
 						<div class="custom-control custom-checkbox">
-							<input type="checkbox" id="coupon-quantity" name="purchase_total_qty" class="custom-control-input" onclick="total_amount_purchase()" @if(isset($coupon->purchase_qty)) checked @endif>
+							<input type="checkbox" id="coupon-quantity" name="purchase_total_qty" class="custom-control-input" onclick="total_amount_purchase()" @if(isset($coupon->purchase_qty) && $coupon->purchase_qty > 0) checked @endif>
 							<label class="custom-control-label" for="coupon-quantity">Total Quantity</label>
 						</div>
 					</div>
@@ -465,14 +465,14 @@
 							</div>
 
 							<!-- Quantity -->
-							<div class="col-12" id="total-quantity-div" style="padding-top: 10px;display:@if(isset($coupon->purchase_qty)) block @else none @endif;">
+							<div class="col-12" id="total-quantity-div" style="padding-top: 10px;display:@if(isset($coupon->purchase_qty) && $coupon->purchase_qty > 0) block @else none @endif;">
 								<label class="d-block">Total Quantity *</label>
 							</div>
-							<div class="col-md-6" id="total-quantity-input" style="display:@if(isset($coupon->purchase_qty)) block @else none @endif;">
-								<input name="purchase_qty" id="purchase_qty" type="number" min="1" class="form-control" value="{{ $coupon->purchase_qty }}">
+							<div class="col-md-6" id="total-quantity-input" style="display:@if(isset($coupon->purchase_qty)  && $coupon->purchase_qty > 0) block @else none @endif;">
+								<input name="purchase_qty" id="purchase_qty" type="tel" min="1" class="form-control" value="{{ $coupon->purchase_qty }}">
 								<small id="spanPurchaseQty" style="display: none;" class="text-danger"></small>
 							</div>
-							<div class="col-md-6" id="total-quantity-select" style="display:@if(isset($coupon->purchase_qty)) block @else none @endif;">
+							<div class="col-md-6" id="total-quantity-select" style="display:@if(isset($coupon->purchase_qty)  && $coupon->purchase_qty > 0) block @else none @endif;">
 								<select class="custom-select" name="qty_opt" id="qty_opt">
 									<option value="min">Minimum</option>
 								</select>

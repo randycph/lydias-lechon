@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\EcommerceControllers;
 
 use App\EcommerceModel\Branch;
+use App\EcommerceModel\Cart;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
@@ -202,7 +203,6 @@ class CouponController extends Controller
      */
     public function update(Request $request, Coupon $coupon)
     {
-        // dd($request->all());
         Validator::make($request->all(), [
             'name' => 'required|max:150|unique:coupons,name,' . $coupon->id,
             'description' => 'required',
@@ -373,17 +373,31 @@ class CouponController extends Controller
             $qtytype = $request->qty_opt;
         }
 
-        Coupon::find($couponID)->update([
-            'purchase_product_id' => $productnames,
-            'purchase_product_cat_id' => $productcategories,
-            'purchase_product_brand' => $productbrand,
-            'purchase_amount' => $totalamount,
-            'purchase_qty' =>  $totalqty,
-            'purchase_amount_type' => $amounttype,
-            'purchase_qty_type' =>  $qtytype,
-            'purchase_combination_counter' => $coupon_combination_counter,
-            'purchase_combination' => $coupon_combination
-        ]);
+        if ($request->has('coupon_setting') && count($request->coupon_setting) > 1) {
+            Coupon::find($couponID)->update([
+                'purchase_product_id' => $productnames,
+                'purchase_product_cat_id' => $productcategories,
+                'purchase_product_brand' => $productbrand,
+                'purchase_amount' => $totalamount,
+                'purchase_qty' =>  $totalqty,
+                'purchase_amount_type' => $amounttype,
+                'purchase_qty_type' =>  $qtytype,
+                'purchase_combination_counter' => $coupon_combination_counter,
+                'purchase_combination' => $coupon_combination
+            ]);
+        } else {
+            Coupon::find($couponID)->update([
+                'purchase_product_id' => null,
+                'purchase_product_cat_id' => null,
+                'purchase_product_brand' => null,
+                'purchase_amount' => null,
+                'purchase_qty' =>  null,
+                'purchase_amount_type' => null,
+                'purchase_qty_type' =>  null,
+                'purchase_combination_counter' => null,
+                'purchase_combination' => null
+            ]);
+        }
     }
 
     // public function update_coupon_activity_settings($couponID,$request)
@@ -638,8 +652,82 @@ class CouponController extends Controller
             $free_products = Product::with('photos')->whereIn('id', $freeProductIds)->get();
         }
 
+        // Validate cart data if coupon has purchase condition logic
+        if ($coupon->purchase_combination) {
+            // Parse incoming cart items
+            if (Auth::check()) {
+                $cartItems = Cart::where('user_id', Auth::id())->get();
+            } else {
+                $cartItems = collect(session('cart', []));
+            }
+
+            $cartQty = $cartItems->sum('qty');
+            $cartTotal = $cartItems->sum(fn ($item) => ($item['price'] ?? 0) * ($item['qty'] ?? 0));
+
+            // Total Quantity Condition
+            if ($coupon->purchase_qty && $coupon->purchase_qty > 0) {
+                if ($coupon->purchase_qty_type === 'min' && $cartQty < $coupon->purchase_qty) {
+                    return response()->json([
+                        'success' => false,
+                        'status' => 'quantity_requirement_failed',
+                        'message' => 'Your cart does not meet the required quantity for this coupon.',
+                    ]);
+                }
+
+                if ($coupon->purchase_qty_type === 'max' && $cartQty > $coupon->purchase_qty) {
+                    return response()->json([
+                        'success' => false,
+                        'status' => 'quantity_requirement_failed',
+                        'message' => 'Your cart exceeds the allowed quantity for this coupon.',
+                    ]);
+                }
+            }
+
+            // Total Amount Condition
+            if ($coupon->purchase_amount && $coupon->purchase_amount > 0) {
+                if ($coupon->purchase_amount_type === 'min' && $cartTotal < $coupon->purchase_amount) {
+                    return response()->json([
+                        'success' => false,
+                        'status' => 'amount_requirement_failed',
+                        'message' => 'Your order amount does not meet the required total for this coupon.',
+                    ]);
+                }
+
+                if ($coupon->purchase_amount_type === 'max' && $cartTotal > $coupon->purchase_amount) {
+                    return response()->json([
+                        'success' => false,
+                        'status' => 'amount_requirement_failed',
+                        'message' => 'Your order exceeds the allowed total for this coupon.',
+                    ]);
+                }
+            }
+
+            // Product Matching Condition
+            if ($coupon->purchase_product_id && $coupon->purchase_product_id) {
+                $requiredIds = explode('|', $coupon->purchase_product_id);
+                $cartProductIds = $cartItems->pluck('product_id')->map(fn($id) => (string)$id)->toArray();
+
+                $hasRequiredProduct = false;
+                foreach ($requiredIds as $requiredId) {
+                    if (in_array((string)$requiredId, $cartProductIds)) {
+                        $hasRequiredProduct = true;
+                        break;
+                    }
+                }
+
+                if (!$hasRequiredProduct) {
+                    return response()->json([
+                        'success' => false,
+                        'status' => 'product_requirement_failed',
+                        'message' => 'This coupon requires specific product(s) in your cart.',
+                    ]);
+                }
+            }
+        }
+
         return response()->json([
             'success' => true,
+            'status' => 'valid',
             'coupon' => [
                 'id' => $coupon->id,
                 'code' => $coupon->coupon_code,
@@ -670,44 +758,73 @@ class CouponController extends Controller
     {
         $now = Carbon::now();
 
-
         $eligibleCoupons = Coupon::where('activation_type', 'auto')
             ->where('status', 'ACTIVE')
             ->whereRaw("CONCAT(start_date, ' ', start_time) <= ?", [$now])
             ->whereRaw("CONCAT(end_date, ' ', end_time) >= ?", [$now])
-            ->where(function($q) {
+            ->where(function ($q) {
                 $q->whereNull('customer_scope')
-                ->orWhere('customer_scope', 'all');
+                    ->orWhere('customer_scope', 'all');
             })
             ->get();
 
         $result = [];
+
+        // Get cart
+        $cartItems = Auth::check()
+            ? Cart::where('user_id', Auth::id())->get()
+            : collect(session('cart', []));
+
+        $cartQty = $cartItems->sum('qty');
+        $cartTotal = $cartItems->sum(fn($item) => ($item['price'] ?? 0) * ($item['qty'] ?? 0));
+        $cartProductIds = $cartItems->pluck('product_id')->map(fn($id) => (string)$id)->toArray();
 
         foreach ($eligibleCoupons as $coupon) {
             // Check usage limits
             $totalUsed = CouponCart::where('coupon_id', $coupon->id)->where('status', 1)->sum('total_usage');
             $customerUsed = CouponCart::where('coupon_id', $coupon->id)
                 ->where('status', 1)
-                // ->where('customer_id', Auth::id())
                 ->sum('total_usage');
 
-            if ($coupon->usage_limit !== null && $totalUsed >= $coupon->usage_limit) {
-                continue;
+            if ($coupon->usage_limit !== null && $totalUsed >= $coupon->usage_limit) continue;
+            if ($coupon->customer_limit !== null && $customerUsed >= $coupon->customer_limit) continue;
+
+            // Purchase condition logic
+            if ($coupon->purchase_combination) {
+                // Quantity Condition
+                if ($coupon->purchase_qty && $coupon->purchase_qty > 0) {
+                    if ($coupon->purchase_qty_type === 'min' && $cartQty < $coupon->purchase_qty) continue;
+                    if ($coupon->purchase_qty_type === 'max' && $cartQty > $coupon->purchase_qty) continue;
+                }
+
+                // Amount Condition
+                if ($coupon->purchase_amount && $coupon->purchase_amount > 0) {
+                    if ($coupon->purchase_amount_type === 'min' && $cartTotal < $coupon->purchase_amount) continue;
+                    if ($coupon->purchase_amount_type === 'max' && $cartTotal > $coupon->purchase_amount) continue;
+                }
+
+                // Product Condition
+                if ($coupon->purchase_product_id && $coupon->purchase_product_id) {
+                    $requiredIds = explode('|', $coupon->purchase_product_id);
+                    $hasRequiredProduct = false;
+                    foreach ($requiredIds as $requiredId) {
+                        if (in_array((string)$requiredId, $cartProductIds)) {
+                            $hasRequiredProduct = true;
+                            break;
+                        }
+                    }
+                    if (!$hasRequiredProduct) continue;
+                }
             }
 
-            if ($coupon->customer_limit !== null && $customerUsed >= $coupon->customer_limit) {
-                continue;
-            }
-
+            // Free products
             $free_products = null;
-
             if ($coupon->free_product_id) {
                 $freeProductIds = explode('|', $coupon->free_product_id);
-                $freeProductIds = array_filter($freeProductIds, function($value) { return !is_null($value) && $value !== ''; });
+                $freeProductIds = array_filter($freeProductIds, fn($val) => !is_null($val) && $val !== '');
                 $free_products = Product::with('photos')->whereIn('id', $freeProductIds)->get();
             }
 
-            // Add eligible coupon to result
             $result[] = [
                 'id' => $coupon->id,
                 'code' => $coupon->coupon_code,
@@ -740,5 +857,4 @@ class CouponController extends Controller
             'coupons' => $result
         ]);
     }
-
 }

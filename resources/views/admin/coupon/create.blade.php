@@ -325,7 +325,7 @@
 					</div>
 				</div>
 
-				<div class="form-group d-none">
+				<div class="form-group">
 					<div class="custom-control custom-checkbox">
 						<input type="checkbox" class="custom-control-input" id="coupon-purchase" onclick="myFunction()" name="coupon_setting[]" value="purchase" @if(is_array(old('coupon_setting')) && in_array('purchase', old('coupon_setting'))) checked @endif>
 						<label class="custom-control-label" for="coupon-purchase">Purchase 

@@ -787,18 +787,8 @@
                 const result = await res.json();
 
                 if (!result.success) {
-                    if (result.status === 'not_exist') {
-                        this.couponMessage = 'Coupon not found.';
-                    } else if (result.status === 'expired') {
-                        this.couponMessage = 'This coupon is already expired.';
-                    } else if (result.status === 'not_allowed') {
-                        this.couponMessage = 'You are not allowed to use this coupon.';
-                    } else if (result.status === 'limit_reached') {
-                        this.couponMessage = 'Coupon usage limit has been reached.';
-                    } else if (result.status === 'customer_limit_reached') {
-                        this.couponMessage = 'You have already used this coupon the maximum allowed times.';
-                    } else if (result.status === 'not_started') {
-                        this.couponMessage = 'This coupon is not active yet. Please try again later.';
+                    if (result.status !== 'valid') {
+                        this.couponMessage = result.message;
                     }
 
                     this.couponMessageType = 'error';
