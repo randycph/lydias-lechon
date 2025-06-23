@@ -151,7 +151,15 @@
                         <template x-if="coupons.length > 0">
                             <template x-for="(item, i) in coupons" :key="i">
                                 <div class="flex justify-between lg:mt-2">
-                                    <span class="font-medium text-red-700 italic flex items-center">
+                                    <span class="font-medium text-red-700 italic flex items-center" x-show="item.free_shipping && shippingDiscountAmount > 0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 text-green-600 mr-1">
+                                            <path fill-rule="evenodd" d="M4.5 2A2.5 2.5 0 0 0 2 4.5v2.879a2.5 2.5 0 0 0 .732 1.767l4.5 4.5a2.5 2.5 0 0 0 3.536 0l2.878-2.878a2.5 2.5 0 0 0 0-3.536l-4.5-4.5A2.5 2.5 0 0 0 7.38 2H4.5ZM5 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
+                                        </svg>
+                                        Coupon (<span x-text="item.code"></span>) 
+                                        <span class="text-xs ml-1 underline cursor-pointer" @click="removeCoupon(i)">Remove Coupon</span>
+                                    </span>
+                                    
+                                    <span class="font-medium text-red-700 italic flex items-center" x-show="!item.free_shipping">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 text-green-600 mr-1">
                                             <path fill-rule="evenodd" d="M4.5 2A2.5 2.5 0 0 0 2 4.5v2.879a2.5 2.5 0 0 0 .732 1.767l4.5 4.5a2.5 2.5 0 0 0 3.536 0l2.878-2.878a2.5 2.5 0 0 0 0-3.536l-4.5-4.5A2.5 2.5 0 0 0 7.38 2H4.5ZM5 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
                                         </svg>
@@ -160,7 +168,7 @@
                                     </span>
 
                                     <span class="font-medium italic text-red-700">
-                                        <template x-if="item.free_shipping">
+                                        <template x-if="item.free_shipping && shippingDiscountAmount > 0">
                                             <span x-text="'- ₱' + (item.free_shipping_discount_amount == 100 ? deliveryFee : (deliveryFee * item.free_shipping_discount_amount / 100)).toLocaleString(undefined, { minimumFractionDigits: 2 }) + ' (Shipping Discount)'"></span>
                                         </template>
                                         <template x-if="!item.free_shipping && (item.free_products == null || item.free_products.length == 0)">
@@ -769,6 +777,7 @@
             couponMessageType: '',
             totalDiscountAmount: 0,
             shippingDiscountAmount: 0,
+            location: '',
             async submitCouponCode() {
                 this.couponMessage = '';
                 this.couponMessageType = '';
@@ -862,10 +871,24 @@
 
                 this.coupons.forEach(coupon => {
                     if (coupon.free_shipping) {
-                        if (coupon.free_shipping_discount_amount === 100) {
-                            this.shippingDiscountAmount += this.deliveryFee;
+                        const allowedLocations = coupon.location.split('|').map(l => l.trim()).filter(l => l !== '');
+                        console.log(this.location)
+                        if (coupon.location) {
+                            if (allowedLocations.includes(this.location) || allowedLocations.includes('all')) {
+                                if (coupon.free_shipping_discount_amount === 100) {
+                                    this.shippingDiscountAmount += this.deliveryFee;
+                                } else {
+                                    this.shippingDiscountAmount += this.deliveryFee * (coupon.free_shipping_discount_amount / 100);
+                                }
+                            } else {
+                                this.shippingDiscountAmount = 0;
+                            }
                         } else {
-                            this.shippingDiscountAmount += this.deliveryFee * (coupon.free_shipping_discount_amount / 100);
+                            if (coupon.free_shipping_discount_amount === 100) {
+                                this.shippingDiscountAmount += this.deliveryFee;
+                            } else {
+                                this.shippingDiscountAmount += this.deliveryFee * (coupon.free_shipping_discount_amount / 100);
+                            }
                         }
                     } else {
                         if (coupon.discount_type === 'amount') {
@@ -875,6 +898,8 @@
                         }
                     }
                 });
+
+                console.log('this.this.shippingDiscountAmount', this.shippingDiscountAmount);
 
                 // Safety cap
                 this.totalDiscountAmount = Math.min(this.totalDiscountAmount, this.orderAmount);
@@ -1124,6 +1149,8 @@
 
                         this.deliveryFee = data.fee;
 
+                        this.location = location;
+
                         this.recomputeCouponTotals();
                         
                     } catch (error) {
@@ -1144,6 +1171,8 @@
                 const result = await res.json();
 
                 if (result.success && result.coupons.length > 0) {
+                    this.coupons = result.coupons;
+                    
                     result.coupons.forEach(autoCoupon => {
                         // Apply combination logic (same as submitCouponCode)
                         // Case 1: New coupon is non-combinable, and there are already applied coupons → skip
