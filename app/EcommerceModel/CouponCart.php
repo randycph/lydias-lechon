@@ -9,7 +9,7 @@ use App\Models\User;
 class CouponCart extends Model
 {
 	protected $table = 'coupon_cart';
-    protected $fillable = [ 'coupon_id','product_id','customer_id','total_usage', 'status', 'sales_header_id'];
+    protected $fillable = [ 'coupon_id','product_id','customer_id','total_usage', 'status', 'sales_header_id', 'coupon_code' ];
     public $timestamps = true;
 
     public function details()

@@ -826,7 +826,8 @@ class CartController extends Controller
                             'customer_id' => $user->id,
                             'total_usage' => 1,
                             'status' =>  0,
-                            'sales_header_id' => $salesHeader->id
+                            'sales_header_id' => $salesHeader->id,
+                            'coupon_code' => $couponCode->coupon_code,
                         ]);
                     }
                 }
