@@ -601,7 +601,7 @@
                         </div>
             
                         <div class="text-gray-600 font-medium px-4 mt-4">
-                            To complete your order, please enter the amount you wish to pay. You can choose to pay the full amount or a partial amount.
+                            To complete your order, please enter the amount you wish to pay.
                         </div>
             
                         <div class="px-4 mt-5">
@@ -1078,6 +1078,12 @@
                             signature: data.signature,
                             saved_items: data.saved_items
                         };
+
+                        if (data.amount <= 0) {
+                            window.location.href = '/sales-summary/' + data.sales_header_id;
+                            return;
+                        }
+
                         this.depositModal = true;
 
                         this.isSubmitting = false;

@@ -731,20 +731,18 @@ class CartController extends Controller
         $dn = explode(" - ", $request->need_date . ' - ' . $request->need_time);
         $date_needed = date('Y-m-d H:i:s',strtotime($dn[0]." ".$dn[1]));
         $deposit = $request->deposit;
-        if($request->shipping_type == 'pickup'){
+        if ($request->shipping_type == 'pickup') {
             $delivery_type='Store Pickup';
             $outlet = $request->delivery_branch;
             $customer_delivery_adress = $request?->delivery_branch ?? $request->delivery_address;            
             $customer_contact_number = $user->contact_mobile;
             $customer_location = '';
             $contact_person = $customer_name;
-        }
-        else{
+        } else {
             $delivery_type='Door to door delivery';
-            if($request->location == 'Other'){
-                $customer_delivery_adress = $request->delivery_address;  
-            }
-            else{
+            if ($request->location == 'Other') {
+                $customer_delivery_adress = $request->delivery_address;
+            } else {
                 $customer_delivery_adress = $request->delivery_address.", ".$request->location;  
             }
                      
@@ -797,7 +795,7 @@ class CartController extends Controller
             'tax_amount' => 0,
             'net_amount' => $netAmount,
             'discount_amount' => $discount,
-            'payment_status' => 'UNPAID',
+            'payment_status' => $request->order_amount <= 0 ? 'PAID' : 'PENDING',
             'delivery_status' => '',
             'status' => 'active',
             'currency' => 'PHP',
@@ -885,7 +883,7 @@ class CartController extends Controller
                             'sales_header_id' => $salesHeader->id,
                             'payment_type' => 'Gift Cert',
                             'amount' => $code[1],
-                            'status' => 'PENDING',
+                            'status' => $salesHeader->payment_status == 'PAID' ? 'PAID' : 'PENDING',
                             'payment_date' => date('Y-m-d'),
                             'receipt_number' => $code[0],
                             'created_by' => Auth::id()
