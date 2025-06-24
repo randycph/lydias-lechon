@@ -814,7 +814,7 @@ class CartController extends Controller
         if ($couponsList && $request->discount_amount) {
             if (count($couponsList) > 0) {
                 foreach ($couponsList as $coupon) {
-                    $couponCode = Coupon::whereRaw('LOWER(coupon_code) = ?', [strtolower($coupon)])
+                    $couponCode = Coupon::whereRaw('LOWER(coupon_code) = ?', [strtolower($coupon['code'])])
                         ->where('status', 'ACTIVE')
                         ->first();
 
@@ -826,6 +826,7 @@ class CartController extends Controller
                             'status' =>  0,
                             'sales_header_id' => $salesHeader->id,
                             'coupon_code' => $couponCode->coupon_code,
+                            'discount_used' => $coupon['discount_used']
                         ]);
                     }
                 }
@@ -902,7 +903,7 @@ class CartController extends Controller
             if ($couponsList && $request->discount_amount) {
                 if (count($couponsList) > 0) {
                     foreach ($couponsList as $coupon) {
-                        $couponCode = Coupon::whereRaw('LOWER(coupon_code) = ?', [strtolower($coupon)])
+                        $couponCode = Coupon::whereRaw('LOWER(coupon_code) = ?', [strtolower($coupon['code'])])
                             ->where('status', 'ACTIVE')
                             ->first();
 
@@ -913,6 +914,7 @@ class CartController extends Controller
                                 'coupon_code' => $couponCode->coupon_code,
                                 'product_id' => $product->id,
                                 'sales_header_id' => $salesHeader->id,
+                                'discount_used' => $coupon['discount_used']
                             ]);
                         }
                     }
@@ -952,6 +954,7 @@ class CartController extends Controller
         }
 
         $recipient = $user->email ?: $request->email;
+        $salesHeader = SalesHeader::with('couponUsed')->find($salesHeader->id);
         if (auth()->guest()) {
             try {
                 Mail::to($recipient)->send(new SalesCompleted($salesHeader));

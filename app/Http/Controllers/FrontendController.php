@@ -201,13 +201,14 @@ class FrontendController extends Controller
             $id = base64_decode($id);
         }
 
-        $sales = SalesHeader::where('id',$id)->with('deliveryAddress', 'items')->first();
+        $sales = SalesHeader::where('id',$id)->with('deliveryAddress', 'items', 'couponUsed')->first();
         $gc = GiftCertificate::where('sales_header_id',$id)->get();
         $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
         $salesDetails = SalesDetail::with('product.photos')->where('sales_header_id',$id)->get();
         $totalPayment = SalesPayment::where('sales_header_id',$id)->sum('amount');
         $deliveries = DeliveryStatus::where('order_id',$id)->get();
         $totalNet = SalesHeader::where('id',$id)->sum('net_amount');
+
         if($totalNet <= $totalPayment) {
             $status = 'PAID';
         } else {
@@ -292,6 +293,7 @@ class FrontendController extends Controller
 
         $sales = SalesHeader::where('user_id', Auth::id())
                             ->with([
+                                'couponUsed',
                                 'items.product.photos',
                                 'payments' => function ($query) {
                                     $query->where('status', 'PAID');

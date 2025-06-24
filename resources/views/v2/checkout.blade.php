@@ -1047,6 +1047,34 @@
                 // Add dynamic fields
                 formData.append('shipping_type', this.method);
                 formData.append('coupons', JSON.stringify(this.coupons.map(c => c.code)));
+                formData.append(
+                    'coupons',
+                    JSON.stringify(
+                        this.coupons.map(c => {
+                        let discountUsed = 0;
+
+                        if (c.free_shipping) {
+                            discountUsed =
+                            c.free_shipping_discount_amount === 100
+                                ? this.deliveryFee
+                                : this.deliveryFee * (c.free_shipping_discount_amount / 100);
+                        } else {
+                            if (c.discount_type === 'amount') {
+                            discountUsed = parseFloat(c.discount ?? 0);
+                            } else if (c.discount_type === 'percent') {
+                            discountUsed = (this.orderAmount * parseFloat(c.discount ?? 0)) / 100;
+                            }
+                        }
+
+                        return {
+                            ...c,
+                            discount_used: parseFloat(discountUsed.toFixed(2))
+                        };
+                        })
+                    )
+                );
+
+
                 formData.append('discount_amount', isNaN(this.totalDiscountAmount) ? 0 : this.totalDiscountAmount);
                 formData.append('coupon_data', JSON.stringify(this.coupons));
                 formData.append('order_amount', this.orderAmount);

@@ -717,10 +717,20 @@ Media Item
                                                                               </tr>
                                                                               @endif
                                                                               @if($h->discount_amount > 0)
-                                                                              <tr>
-                                                                                    <td class="tx-left " colspan="6" style="font-size:11px;">Discount</td>
-                                                                                    <td class="tx-right " style="font-size:11px; color: red; text-decoration: italic">-{{number_format($h->discount_amount, 2)}}</td>
-                                                                              </tr>
+                                                                                    <tr>
+                                                                                          <td class="tx-left" colspan="6" style="font-size:11px;">Discount</td>
+                                                                                    </tr>
+
+                                                                                    @if($h->couponUsed && count($h->couponUsed) > 0)
+                                                                                          @foreach($h->couponUsed as $coupon)
+                                                                                          <tr>
+                                                                                                <td class="tx-left" colspan="6" style="font-size:11px; padding-left: 20px;">
+                                                                                                      Coupon (<i>{{ $coupon->coupon_code }}</i>)
+                                                                                                </td>
+                                                                                                <td class="tx-right" style="font-size:11px; color: red;">-{{ number_format($coupon->discount_used, 2) }}</td>
+                                                                                          </tr>
+                                                                                          @endforeach
+                                                                                    @endif
                                                                               @endif
                                                                               @if($h->gross_amount > 0)
                                                                               <tr><td colspan="7"><hr></td></tr>

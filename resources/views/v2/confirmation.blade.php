@@ -214,13 +214,20 @@
                         </div>
                     </div>
                     @endif
-                    @if ($sales->discount_amount > 0)
-                    <div class="flex items-center text-sm justify-between px-4 py-3 border-b border-gray-200">
-                        <div>Discount</div>
-                        <div class="text-right text-red-500 italic">
-                            <div>-₱{{ number_format($sales->discount_amount, 2) }}</div>
-                        </div>
+                    @if ($sales->couponUsed && count($sales->couponUsed) > 0 && $sales->discount_amount > 0)
+                    <div class="text-sm px-4 pt-3">
+                        Discount
                     </div>
+                    <ul class="italic">
+                        @foreach ($sales->couponUsed as $coupon)
+                            <li class="pl-10 flex items-center text-sm justify-between pr-4 py-3 border-b border-gray-200">
+                                <div>{{ $coupon->coupon_code }}</div>
+                                <div class="text-right text-red-500 italic">
+                                    <div>-₱{{ number_format($coupon->discount_used ?? 0, 2) }}</div>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
                     @endif
                     {{-- <div class="flex items-center text-sm justify-between px-4 py-3 border-b border-gray-200">
                         <div>Coupon (lydiaslechon25)</div>

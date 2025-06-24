@@ -122,9 +122,22 @@
                                         @if ($sale->discount_amount && $sale->discount_amount > 0)
                                         <div class="flex items-center justify-between w-full">
                                             <div class="text-sm text-black font-bold">Discount</div>
-                                            <div class="text-sm text-red-600 font-bold italic">- ₱{{ number_format($sale->discount_amount, 2) }}</div>
                                         </div>
                                         @endif
+
+                                        @if ($sale->couponUsed && count($sale->couponUsed) > 0 && $sale->discount_amount > 0)
+                                        <ul class="italic">
+                                            @foreach ($sale->couponUsed as $coupon)
+                                                <li class="pl-4 flex items-center text-sm justify-between">
+                                                    <div>{{ $coupon->coupon_code }}</div>
+                                                    <div class="text-right text-red-500 italic">
+                                                        <div>-₱{{ number_format($coupon->discount_used ?? 0, 2) }}</div>
+                                                    </div>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                        @endif
+
                                         @if ($sale->net_amount && $sale->net_amount > 0)
                                         <div class="flex items-center justify-between w-full">
                                             <div class="text-sm text-black font-bold">Total</div>

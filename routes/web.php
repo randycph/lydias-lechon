@@ -670,7 +670,7 @@ Route::get('/test/test-email-1', function(){
 
 Route::get('/test/test-email-2', function(){
     try {
-        $salesHeader = SalesHeader::first();
+        $salesHeader = SalesHeader::with('couponUsed')->where('id', '18080')->first();
 
         Mail::to('evilryok@gmail.com')->send(new SalesCompletedRegistered($salesHeader));
 
