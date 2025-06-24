@@ -713,7 +713,9 @@
             depositModal: false,
             closeDepositModal() {
                 this.depositModal = false;
-                window.location.href = '/sales-summary/' + this.paymentDetails.sales_header_id;
+                setTimeout(() => {
+                    window.location.href = '/sales-summary/' + this.paymentDetails.sales_header_id;
+                }, 300);
             },
             orders: @json($carts) || [],
             carts: @json($carts) || [],
