@@ -171,11 +171,11 @@
                                 </tr>
                             @endif
                             @if($sales->discount_amount > 0)
-                                    <tr>
-                                        <td class="tx-left" colspan="6" style="">Discount</td>
-                                    </tr>
 
                                     @if($sales->couponUsed && count($sales->couponUsed) > 0)
+                                        <tr>
+                                            <td class="tx-left" colspan="6" style="">Discount</td>
+                                        </tr>
                                         @foreach($sales->couponUsed as $coupon)
                                         <tr>
                                                 <td class="tx-left" colspan="8" style=" padding-left: 20px;">
@@ -184,6 +184,11 @@
                                                 <td class="tx-right" style=" color: red;">-{{ number_format($coupon->discount_used, 2) }}</td>
                                         </tr>
                                         @endforeach
+                                    @else 
+                                        <tr>
+                                            <td class="tx-left" colspan="8" style="">Discount</td>
+                                            <td class="tx-right text-danger">-{{number_format($sales->discount_amount, 2)}}</td>
+                                        </tr>
                                     @endif
                             @endif
 

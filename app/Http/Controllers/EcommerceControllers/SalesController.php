@@ -692,7 +692,7 @@ class SalesController extends Controller
 
     public function show($id)
     {
-        $sales = SalesHeader::with('deliveryAddress')->where('id',$id)->first();
+        $sales = SalesHeader::with(['deliveryAddress', 'couponUsed'])->where('id',$id)->first();
         $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
         $gc = GiftCertificate::where('sales_header_id',$id)->get();
         $salesDetails = SalesDetail::where('sales_header_id',$id)->get();
@@ -1029,7 +1029,7 @@ class SalesController extends Controller
     {
         $id = base64_decode($id);
         
-        $sales = \App\EcommerceModel\SalesHeader::where('id',$id)->first();
+        $sales = \App\EcommerceModel\SalesHeader::with('couponUsed')->where('id',$id)->first();
         $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
         $salesDetails  = SalesDetail::where('sales_header_id',$id)->get();
         $deliveries    = DeliveryStatus::where('order_id',$id)->get();
