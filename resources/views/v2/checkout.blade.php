@@ -677,6 +677,7 @@
 <script>
     window.disabledPickupDates = @json($disabledPickupDates);
     window.disabledDeliveryDates = @json($disabledDeliveryDates);
+    window.fullUrl = @json(config('app.url'));
 </script>
 
 <script>
@@ -714,7 +715,7 @@
             closeDepositModal() {
                 this.depositModal = false;
                 setTimeout(() => {
-                    window.location.href = '/sales-summary/' + this.paymentDetails.sales_header_id;
+                    window.location.href = window.fullUrl + '/sales-summary/' + this.paymentDetails.sales_header_id;
                 }, 300);
             },
             orders: @json($carts) || [],
