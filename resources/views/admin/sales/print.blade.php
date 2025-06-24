@@ -181,12 +181,22 @@
                         @endif
 
                         @if($sales->discount_amount > 0)
-                            <tr>
-                                <td class="tx-left " colspan="4">Discount</td>
-                                <td class="tx-right text-danger">-{{number_format($sales->discount_amount, 2)}}</td>
-                            </tr>
-                        @endif
+                                <tr>
+                                    <td class="tx-left" colspan="6" style="">Discount</td>
+                                </tr>
 
+                                @if($sales->couponUsed && count($sales->couponUsed) > 0)
+                                    @foreach($sales->couponUsed as $coupon)
+                                    <tr>
+                                            <td class="tx-left" colspan="4" style=" padding-left: 20px;">
+                                                Coupon (<i>{{ $coupon->coupon_code }}</i>)
+                                            </td>
+                                            <td class="tx-right" style=" color: red;">-{{ number_format($coupon->discount_used, 2) }}</td>
+                                    </tr>
+                                    @endforeach
+                                @endif
+                        @endif
+                        
                         @forelse($gc as $g)
                             <tr style="font-weight:bold;">
                                 <td class="tx-left" colspan="4">Gift Certificate: {{$g->code}}</td>
