@@ -684,14 +684,18 @@
     function checkoutForm() {
         return {
             today: new Date(),
+            hasbaka: {{ $hasbaka ? 'true' : 'false' }},
+            haslechon: {{ $haslechon ? 'true' : 'false' }},
             minDate() {
                 if ({{ $hasbaka ? 'true' : 'false' }}) {
                     const day = new Date(this.today);
                     day.setDate(day.getDate() + 3);
+                    this.hasbaka = true;
                     return day.toISOString().split('T')[0];
                 } else if ({{ $haslechon ? 'true' : 'false' }}) {
                     const tomorrow = new Date(this.today);
                     tomorrow.setDate(tomorrow.getDate() + 1);
+                    this.haslechon = true;
                     return tomorrow.toISOString().split('T')[0];
                 } else {
                     return this.today.toISOString().split('T')[0];
@@ -1596,7 +1600,7 @@
 
                 delivery.warningMessage = '';
 
-                if (diffInHours < 24) {
+                if (hasLechon && diffInHours < 24) {
                     delivery.warningMessage = `⚠️ Warning! The date and time you've selected (${delivery.need_date} - ${this.formatTime(delivery.need_time)}) is less than 24 hours from now. Our standard processing time is at least 24 hours. However, you can still proceed by contacting our store directly at our <span class='underline text-blue-600 cursor-pointer' @click='openHotline = true'>Call Hotline</span> tab.`;
                 }
             },
@@ -1637,7 +1641,7 @@
 
                 this.warningMessage = '';
 
-                if (diffInHours <= 24) {
+                if (hasLechon && diffInHours <= 24) {
                     this.warningMessage = `⚠️ Warning! The date and time you've selected (${this.need_date} - ${this.formatTime(this.need_time)}) is less than 24 hours from now. Our standard processing time is at least 24 hours. However, you can still proceed by contacting our store directly at our <span class='underline text-blue-600 cursor-pointer' @click='openHotline = true'>Call Hotline</span> tab.`;
                     this.errorMessage = `⚠️ We are not able to accommodate your order base on your preferred date and time. Kindly refer to the warning message that appeared on your order screen or call our hotline at 89391221 / 89394665.  Thank you.`;
                 } else {

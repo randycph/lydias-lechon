@@ -28,7 +28,6 @@ class SalesCompletedRegistered extends Mailable
      */
     public function build()
     {
-        logger($this->h);
         return $this->view('mail.sales-completed-registered', ['h' => $this->h])
             ->subject('Sales Transaction');
     }
