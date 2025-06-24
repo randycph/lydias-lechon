@@ -100,7 +100,7 @@ class UserController extends Controller
                 'firstname'      => $request->fname,
                 'lastname'       => $request->lname,
                 'name'           => $request->fname.' '.$request->lname,
-                'password'       => Hash::make($request->email),
+                'password'       => Hash::make('password'),
                 'email'          => $request->email,
                 'role_id'        => $request->role,
                 'user_type'      => 'cms',
