@@ -808,11 +808,6 @@ class CartController extends Controller
             'forecast_date' => $forecast_date
         ]);
 
-        $formattedOrderNumber = sprintf('%07d', $salesHeader->id);
-        $salesHeader->update(['order_number' => $formattedOrderNumber]);
-        $salesHeader->order_number = $formattedOrderNumber;
-        $salesHeader->save();
-
         $couponCode = null;
 
         $couponsList = json_decode($request->coupons, true);
@@ -837,6 +832,11 @@ class CartController extends Controller
                 }
             }
         }
+
+        $formattedOrderNumber = sprintf('%07d', $salesHeader->id);
+        $salesHeader->update(['order_number' => $formattedOrderNumber]);
+        $salesHeader->order_number = $formattedOrderNumber;
+        $salesHeader->save();
 
         if ($request->has('deliveries')) {
             $deliveries = json_decode($request->deliveries ?? '');

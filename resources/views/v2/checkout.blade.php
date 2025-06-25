@@ -268,35 +268,38 @@
                                                 <div class="w-full">
                                                     <label class="font-bold block text-sm mb-1">Orders</label>
                                                     <div class="flex flex-col gap-2">
-                                                        <template x-for="(order, index2) in getAvailableOrders()" :key="index2">
-                                                            <div class="flex items-center gap-2 mb-2">
+                                                    <template x-for="(order, index2) in getAvailableOrders()" :key="index2">
+                                                        <template x-if="getRemainingQty(order.product_id) > 0 || isOrderChecked(delivery, order)">
+                                                            <div class="flex items-center gap-2 mb-2 justify-between">
                                                                 <!-- Product checkbox -->
-                                                                <input
-                                                                    :class="getRemainingQty(order.product_id) <= 0 && !isOrderChecked(delivery, order) ? 'invisible' : ''"
-                                                                    type="checkbox"
-                                                                    :id="'order-' + order.id + '-' + index + '-' + index2"
-                                                                    :value="order"
-                                                                    @change="toggleOrderSelection(delivery, order)"
-                                                                    :checked="isOrderChecked(delivery, order)"
-                                                                    :disabled="getRemainingQty(order.product_id) <= 0 && !isOrderChecked(delivery, order)"
-                                                                />
-                                                                <label :for="'order-' + order.id + '-' + index + '-' + index2" class="flex-1">
-                                                                    <span x-text="order.product.name + (getRemainingQty(order.product_id) <= 0 && !isOrderChecked(delivery, order) ? ' (Fully Assigned)' : '')"></span>
-                                                                </label>
+                                                                <div class="flex items-center gap-2">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        :id="'order-' + order.id + '-' + index + '-' + index2"
+                                                                        :value="order"
+                                                                        @change="toggleOrderSelection(delivery, order)"
+                                                                        :checked="isOrderChecked(delivery, order)"
+                                                                        :disabled="getRemainingQty(order.product_id) <= 0 && !isOrderChecked(delivery, order)"
+                                                                    />
+                                                                    <label :for="'order-' + order.id + '-' + index + '-' + index2" class="flex-1">
+                                                                        <span x-text="order.product.name + (getRemainingQty(order.product_id) <= 0 && !isOrderChecked(delivery, order) ? ' (Fully Assigned)' : '')"></span>
+                                                                    </label>
+                                                                </div>
 
                                                                 <!-- Quantity dropdown -->
                                                                 <select
                                                                     class="border rounded px-2 py-1"
                                                                     :disabled="!isOrderChecked(delivery, order)"
-                                                                    x-model="getSelectedQty(delivery, order)"
+                                                                    :value="getSelectedQty(delivery, order)"
                                                                     @change="updateSelectedQty(delivery, order, $event.target.value)">
-                                                                    <option value="">Qty</option>
                                                                     <template x-for="i in getRemainingQty(order.product_id) + getPreviouslySelectedQty(delivery, order)">
                                                                         <option :value="i" x-text="i"></option>
                                                                     </template>
                                                                 </select>
                                                             </div>
                                                         </template>
+                                                    </template>
+
                                                     </div>
                                                 </div>
 
@@ -1132,7 +1135,7 @@
                     let errText = await error.text();
                     console.error('Error:', errText);
 
-                    let errorMessage = JSON.parse(errText);+6391
+                    let errorMessage = JSON.parse(errText);
 
                     if (errorMessage.errors && errorMessage.errors.mobile) {
                         this.mobileValidationMessage = errorMessage.errors.mobile[0];
@@ -1363,31 +1366,27 @@
                 return found ? found.qty : '';
             },
 
-            // When quantity is changed
-            updateSelectedQty(delivery, order, qty) {
-                qty = parseInt(qty) || 0;
-                const found = delivery.orders.find(o => o.product_id === order.product_id);
-                if (found) {
-                    found.qty = qty;
-                }
-            },
-
             // When checkbox is toggled
             toggleOrderSelection(delivery, order) {
                 if (!delivery.orders) delivery.orders = [];
-                const idx = delivery.orders.findIndex(o => o.product_id === order.product_id);
 
-                if (idx !== -1) {
-                    // Uncheck
-                    delivery.orders.splice(idx, 1);
+                const index = this.deliveries.indexOf(delivery);
+                const existingIndex = delivery.orders.findIndex(o => o.product_id === order.product_id);
+
+                if (existingIndex !== -1) {
+                    delivery.orders.splice(existingIndex, 1); // Uncheck
                 } else {
-                    // Check (but don't assign qty yet)
                     delivery.orders.push({
                         product_id: order.product_id,
                         qty: 1,
-                        product: order.product,
+                        product: order.product
                     });
                 }
+
+                // Remove all deliveries after the current one
+                this.deliveries.splice(index + 1);
+
+                this.refreshAllAvailableQty();
             },
 
             // Get remaining qty for a product globally (used across all deliveries)
@@ -1418,9 +1417,11 @@
             updateSelectedQty(delivery, order, newQty) {
                 if (!delivery.orders) delivery.orders = [];
 
-                const index = delivery.orders.findIndex(o => o.product_id === order.product_id);
-                if (index !== -1) {
-                    delivery.orders[index].qty = parseInt(newQty) || 0;
+                const index = this.deliveries.indexOf(delivery);
+
+                const orderIndex = delivery.orders.findIndex(o => o.product_id === order.product_id);
+                if (orderIndex !== -1) {
+                    delivery.orders[orderIndex].qty = parseInt(newQty) || 0;
                 } else {
                     delivery.orders.push({
                         product_id: order.product_id,
@@ -1428,6 +1429,9 @@
                         product: order.product
                     });
                 }
+
+                // Remove deliveries after this one
+                this.deliveries.splice(index + 1);
 
                 this.refreshAllAvailableQty();
             },
