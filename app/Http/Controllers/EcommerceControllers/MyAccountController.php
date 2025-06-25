@@ -9,14 +9,26 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Mail\ManualOrderCancelledMail;
+use App\Mail\OrderCancelledMail;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Validator;
 
 class MyAccountController extends Controller
 {
-    public function cancel_order(Request $request){
-        $cancel = SalesHeader::whereId($request->sales_id)->delete();
+    public function cancel_order(Request $request) {
+        $salesHeader = SalesHeader::whereId($request->sales_id)->first();
+
+        if (!$salesHeader) {
+            return back()->with('error_cancelled', "Your order cannot be cancelled at this time");
+        }
+
+        $email_act = Mail::to(Auth::user()->email)->send(new ManualOrderCancelledMail($salesHeader));
+
+        $salesHeader->delete();
+
         return back()->with('success_cancelled',"Your order has been successfully cancelled");
     }
     public function manage_account(Request $request)
