@@ -17,6 +17,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\Logs;
 use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Str;
@@ -74,63 +75,55 @@ class CustomerController extends Controller
 
     public function store(Request $request)
     {
-        if($request->email){
-            $request->validate([
-               'email' => 'required|unique:users,email'
-            ]);
-            $email = $request->email;
-        }
-        else{
-            $ran = microtime();
-            $today = getdate();
-            $email = 'lydtmp_'.$today[0].substr($ran, 2,6).'@lydias.com';
-        }
-//        if(User::where('name',$request->fname.' '.$request->lname)->exists()){
-//            return back()->with('duplicate', __('standard.users.duplicate_email'));
-//        } else {
+        $request->validate([
+            'email' => 'required|email|max:191|unique:users,email',
+            'contact_mobile' => 'required|max:15',
+            'fname' => 'required_if:is_org,0|max:191',
+            'lname' => 'required_if:is_org,0|max:191',
+            'organization' => 'required_if:is_org,1|max:191',
+        ]);
+        
+        $email = $request->email;
+
         $fname = '';
-        if($request->is_org =='1')
-        {
-            // $fname = explode("@",$request->email);
-            // $fname = $fname[0];
+
+        if($request->is_org =='1') {
             $fname = $request->organization;
             $lname = '' ;
-        }
-        else
-        {
+        } else {
             $fname = $request->fname;
             $lname = $request->lname;
         }
-            $user = User::create([
-                'firstname'             => $fname,
-                'lastname'              => $lname,
-                'name'                  => $fname.' '.$lname,
-                'password'              => Str::random(32),
-                'email'                 => $email,
-                'role_id'               => 6,
-                'is_active'             => 1,
-                'user_id'               => NULL,
-                'remember_token'        => Str::random(10),
-                'is_org'                => $request->is_org,
-                'user_type'             => 'customer',
-                'birthday'              => $request->birthday,
-                'address_street'        => $request->address_street ?? '',
-                'address_municipality'  => $request->address_municipality ?? '',
-                'address_city'          => $request->address_city ?? '',
-                'address_region'        => $request->address_region ?? '',
-                'contact_person'        => $request->contact_person,
-                'organization'          => $request->organization,
-                'contact_tel'           => $request->contact_tel,
-                'contact_mobile'        => $request->contact_mobile,
-                'contact_fax'           => $request->contact_fax,
-                'registration_source'   => $request->registration_source,
-                'agent_code'            => $request->agent_code
-            ]);
 
-            //$user->send_reset_temporary_password_email();
+        $user = User::create([
+            'firstname'             => $fname,
+            'lastname'              => $lname,
+            'name'                  => $fname.' '.$lname,
+            'password'              => Hash::make('password'),
+            'email'                 => $email,
+            'role_id'               => 6,
+            'is_active'             => 1,
+            'user_id'               => NULL,
+            'remember_token'        => Str::random(10),
+            'is_org'                => $request->is_org,
+            'user_type'             => 'customer',
+            'birthday'              => $request->birthday,
+            'address_street'        => $request->address_street ?? '',
+            'address_municipality'  => $request->address_municipality ?? '',
+            'address_city'          => $request->address_city ?? '',
+            'address_region'        => $request->address_region ?? '',
+            'contact_person'        => $request->contact_person,
+            'organization'          => $request->organization,
+            'contact_tel'           => $request->contact_tel,
+            'contact_mobile'        => $request->contact_mobile,
+            'contact_fax'           => $request->contact_fax,
+            'registration_source'   => $request->registration_source,
+            'agent_code'            => $request->agent_code
+        ]);
 
-            return redirect()->route('customers.index')->with('success', 'Pending for activation. Please remind the user to check the email and activate the account.');
-//        }
+        $user->send_reset_temporary_password_email();
+
+        return redirect()->route('customers.index')->with('success', 'Pending for activation. Please remind the user to check the email and activate the account.');
     }
 
     public function edit($id)
@@ -160,10 +153,15 @@ class CustomerController extends Controller
     public function update(Request $request, User $customer)
     {
         $request->validate([
-            'email' => [
-                'required',
-                Rule::unique('users', 'email')->ignore($customer->id),
-            ]
+            'email' => 'required|email|max:191|unique:users,email,'.$customer->id,
+            'contact_mobile' => 'required|max:15',
+            'fname' => 'required_if:is_org,0|max:191',
+            'lname' => 'required_if:is_org,0|max:191',
+            'organization' => 'required_if:is_org,1|max:191',
+            'address_street' => 'nullable|max:191',
+            'address_municipality' => 'nullable|max:191',
+            'address_city' => 'nullable|max:191',
+            'address_region' => 'nullable|max:191',
         ]);
 
        $fname = '';

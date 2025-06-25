@@ -85,32 +85,47 @@
                     <div class="form-group">
                         <label class="d-block">Street *</label>
                         <input type="text" name="address_street" id="address_street" value="{{ old('address_street',$user->address_street)}}" class="form-control @error('address_street') is-invalid @enderror" required>
-                        @error(['inputName' => 'address_street'])
+                        @error('address_street')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
                         @enderror
                     </div>
                     <div class="form-group">
                         <label class="d-block">Municipality *</label>
                         <input type="text" name="address_municipality" id="address_municipality" value="{{ old('address_municipality',$user->address_municipality)}}" class="form-control @error('address_municipality') is-invalid @enderror" required>
-                        @error(['inputName' => 'address_municipality'])
+                        @error('address_municipality')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
                         @enderror
                     </div>
                     <div class="form-group">
                         <label class="d-block">City *</label>
                         <input type="text" name="address_city" id="address_city" value="{{ old('address_city',$user->address_city)}}" class="form-control @error('address_city') is-invalid @enderror" required>
-                        @error(['inputName' => 'address_city'])
+                        @error('address_city')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
                         @enderror
                     </div>
                     <div class="form-group">
                         <label class="d-block">Region *</label>
                         <input type="text" name="address_region" id="address_region" value="{{ old('address_region',$user->address_region)}}" class="form-control @error('address_region') is-invalid @enderror" required>
-                        @error(['inputName' => 'address_region'])
+                        @error('address_region')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
                         @enderror
                     </div>
                     <h4 class="mg-b-0 tx-spacing--1">Contact Information</h4>
                     <div class="form-group">
                         <label class="d-block">Email *</label>
                         <input type="text" name="email" id="email" required="required" value="{{ old('email', $user->email)}}" class="form-control @error('email') is-invalid @enderror" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
-                        @error(['inputName' => 'email'])
+                        @error('email')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
                         @enderror
                     </div>
                     <div class="form-group org" style="@if($user->is_org <> 1 ) display:none @endif">
@@ -121,15 +136,21 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="d-block">Telephone Number *</label>
+                        <label class="d-block">Telephone Number</label>
                         <input type="text" name="contact_tel" id="contact_tel" value="{{ old('contact_tel',$user->contact_tel)}}" class="form-control @error('contact_tel') is-invalid @enderror">
-                        @error(['inputName' => 'contact_tel'])
+                        @error('contact_tel')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
                         @enderror
                     </div>
                     <div class="form-group">
                         <label class="d-block">Mobile Number *</label>
                         <input type="text" name="contact_mobile" id="contact_mobile" value="{{ old('contact_mobile',$user->contact_mobile)}}" class="form-control @error('contact_mobile') is-invalid @enderror">
-                        @error(['inputName' => 'contact_mobile'])
+                        @error('contact_mobile')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
                         @enderror
                     </div>
                     <div class="form-group">

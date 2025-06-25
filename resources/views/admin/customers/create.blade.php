@@ -41,6 +41,9 @@
                             <option value="1">Organization</option>
                         </select>
                         @error('is_org')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
                         @enderror
                     </div>
                     <hr>
@@ -52,18 +55,27 @@
                             <label class="d-block">First Name *</label>
                             <input type="text" name="fname" id="fname" value="{{ old('fname')}}" class="form-control @error('fname') is-invalid @enderror">
                             @error('fname')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
                             @enderror
                         </div>
                         <div class="form-group">
                             <label class="d-block">Last Name *</label>
                             <input type="text" name="lname" id="lname" value="{{ old('lname')}}" class="form-control @error('lname') is-invalid @enderror" >
                             @error('lname')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
                             @enderror
                         </div>
                         <div class="form-group">
                             <label class="d-block">Birth Date</label>
                             <input type="date" name="birthday" id="birthday" value="{{ old('birthday')}}" class="form-control @error('birthday') is-invalid @enderror" >
                             @error('birthday')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
                             @enderror
                         </div>
                     </div>
@@ -71,6 +83,9 @@
                         <label class="d-block">Organization Name *</label>
                         <input type="text" name="organization" id="organization" value="{{ old('organization')}}" class="form-control @error('organization') is-invalid @enderror">
                         @error('organization')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
                         @enderror
                     </div>
                     
@@ -80,37 +95,55 @@
                         <label class="d-block">Street</label>
                         <input type="text" name="address_street" id="address_street" value="{{ old('address_street')}}" class="form-control @error('address_street') is-invalid @enderror">
                         @error('address_street')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
                         @enderror
                     </div>  
                     <div class="form-group">
                         <label class="d-block">Municipality</label>
                         <input type="text" name="address_municipality" id="address_municipality" value="{{ old('address_municipality')}}" class="form-control @error('address_municipality') is-invalid @enderror">
                         @error('address_municipality')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
                         @enderror
                     </div>  
                     <div class="form-group">
                         <label class="d-block">City</label>
                         <input type="text" name="address_city" id="address_city" value="{{ old('address_city')}}" class="form-control @error('address_city') is-invalid @enderror">
                         @error('address_city')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
                         @enderror
                     </div>  
                     <div class="form-group">
                         <label class="d-block">Region</label>
                         <input type="text" name="address_region" id="address_region" value="{{ old('address_region')}}" class="form-control @error('address_region') is-invalid @enderror">
                         @error('address_region')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
                         @enderror
                     </div>
                     <h4 class="mg-b-0 tx-spacing--1">Contact Information</h4>
                     <div class="form-group">
-                        <label class="d-block">Email</label>
+                        <label class="d-block">Email *</label>
                         <input type="email" name="email" id="email" value="{{ old('email')}}" class="form-control @error('email') is-invalid @enderror" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
                         @error('email')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
                         @enderror
                     </div>
                     <div class="form-group org" style="display:none;">
                         <label class="d-block">Contact Person *</label>
                         <input type="text" name="contact_person" id="contact_person" value="{{ old('contact_person')}}" class="form-control @error('contact_person') is-invalid @enderror" required>
                         @error('contact_person')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
                         @enderror
                     </div>
                     
@@ -118,18 +151,27 @@
                         <label class="d-block">Telephone Number </label>
                         <input type="text" name="contact_tel" id="contact_tel" value="{{ old('contact_tel')}}" class="form-control @error('contact_tel') is-invalid @enderror">
                         @error('contact_tel')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
                         @enderror
                     </div>  
                     <div class="form-group">
                         <label class="d-block">Mobile Number *</label>
                         <input type="text" name="contact_mobile" id="contact_mobile" value="{{ old('contact_mobile')}}" class="form-control @error('contact_mobile') is-invalid @enderror" required="required">
                         @error('contact_mobile')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
                         @enderror
                     </div>  
                     <div class="form-group">
                         <label class="d-block">Fax Number</label>
                         <input type="text" name="contact_fax" id="contact_fax" value="{{ old('contact_fax')}}" class="form-control @error('contact_fax') is-invalid @enderror">
                         @error('contact_fax')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
                         @enderror
                     </div>   
                     <hr>
@@ -137,12 +179,18 @@
                         <label class="d-block">Registration Source </label>
                         <input type="text" name="registration_source" id="registration_source" value="CMS" value="{{ old('registration_source')}}" class="form-control @error('registration_source') is-invalid @enderror">
                         @error('registration_source')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
                         @enderror
                     </div>  
                     <div class="form-group">
                         <label class="d-block">Agent Code </label>
                         <input type="text" name="agent_code" id="agent_code" value="{{ old('agent_code')}}" class="form-control @error('agent_code') is-invalid @enderror">
                         @error('agent_code')
+                        <div class="invalid-feedback">
+                            {{ $message }}
+                        </div>
                         @enderror
                     </div>              
                     <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Create Customer</button>
