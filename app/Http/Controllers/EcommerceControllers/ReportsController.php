@@ -1221,7 +1221,7 @@ class ReportsController extends Controller
                 $qry.= " and order_number like '%".$_GET['pb']."%'";
             }
             else{
-                $qry.= " and h.id ='1sdsa";
+                $qry.= " and h.id ='1'";
             }
             $qry.=" order by l.id desc";
         // end conditions
