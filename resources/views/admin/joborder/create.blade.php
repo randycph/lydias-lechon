@@ -227,7 +227,7 @@
                                 <option value="">- Select Branch -</option>
                                 @php 
                                     $name='delivery';
-                                    $brr = $branches_store->filter(function ($item) use($name){
+                                    $brr = $branches_store->where('delivery_branch','1')->filter(function ($item) use($name){
                                                  return false !== stristr($item->name, $name);
                                             })
                                 @endphp

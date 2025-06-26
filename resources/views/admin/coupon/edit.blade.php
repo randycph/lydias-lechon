@@ -449,19 +449,11 @@
 					<div class="col-12 mt-3" id="coupon-amount-form" style="display:@if(isset($coupon->purchase_amount) || isset($coupon->purchase_qty)) block @else none @endif">
 						<div class="row">
 							<div class="col-12" id="total-amount-div" style="display:@if(isset($coupon->purchase_amount)) block @else none @endif;">
-								<label class="d-block">Total Amount *</label>
+								<label class="d-block">Total Minimum Amount *</label>
 							</div>
 							<div class="col-md-6" id="total-amount-input" style="display:@if(isset($coupon->purchase_amount)) block @else none @endif;">
 								<input name="purchase_amount" id="purchase_amount" type="number" min="1" class="form-control" value="{{ $coupon->purchase_amount }}">
 								<small id="spanPurchaseAmount" style="display: none;" class="text-danger"></small>
-							</div>
-							<div class="col-md-6" id="total-amount-select" style="display:@if(isset($coupon->purchase_amount)) block @else none @endif;">
-								<select class="custom-select" name="amount_opt" id="amount_opt">
-									<option value="">Choose One</option>
-									<option @if($coupon->purchase_amount_type == 'min') selected @endif value="min">Minimum</option>
-									<option @if($coupon->purchase_amount_type == 'max') selected @endif value="max">Maximum</option>
-								</select>
-								<small id="spanAmountOpt" style="display: none;" class="text-danger"></small>
 							</div>
 
 							<!-- Quantity -->

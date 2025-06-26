@@ -384,19 +384,11 @@
 					<div class="col-12 mt-3" id="coupon-amount-form" style="display:{{ (old('purchase_total_amount') || old('purchase_qty') ? 'block':'none') }};">
 						<div class="row">
 							<div class="col-12" id="total-amount-div" style="display: {{ (old('purchase_total_amount') ? 'block':'none') }};">
-								<label class="d-block">Total Amount *</label>
+								<label class="d-block">Total Minimum Amount *</label>
 							</div>
 							<div class="col-md-6" id="total-amount-input" style="display: {{ (old('purchase_total_amount') ? 'block':'none') }};">
 								<input name="purchase_amount" id="purchase_amount" type="number" min="1" class="form-control" value="{{ old('purchase_amount') }}">
 								<small id="spanPurchaseAmount" style="display: none;" class="text-danger"></small>
-							</div>
-							<div class="col-md-6" id="total-amount-select" style="display: {{ (old('purchase_total_amount') ? 'block':'none') }};">
-								<select class="custom-select" name="amount_opt" id="amount_opt">
-									<option selected value="">Choose One</option>
-									<option @if(old('amount_opt') == 'min') selected @endif value="min">Minimum</option>
-									<option @if(old('amount_opt') == 'max') selected @endif value="max">Maximum</option>
-								</select>
-								<small id="spanAmountOpt" style="display: none;" class="text-danger"></small>
 							</div>
 
 							<!-- Quantity -->
