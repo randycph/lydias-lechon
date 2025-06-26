@@ -151,7 +151,7 @@
                         <template x-if="coupons.length > 0">
                             <template x-for="(item, i) in coupons" :key="i">
                                 <div class="flex justify-between lg:mt-2">
-                                    <span class="font-medium text-red-700 italic flex items-center" x-show="item.free_shipping && shippingDiscountAmount > 0">
+                                    <span class="font-medium text-red-700 italic flex items-center flex-wrap" x-show="item.free_shipping && shippingDiscountAmount > 0">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 text-green-600 mr-1">
                                             <path fill-rule="evenodd" d="M4.5 2A2.5 2.5 0 0 0 2 4.5v2.879a2.5 2.5 0 0 0 .732 1.767l4.5 4.5a2.5 2.5 0 0 0 3.536 0l2.878-2.878a2.5 2.5 0 0 0 0-3.536l-4.5-4.5A2.5 2.5 0 0 0 7.38 2H4.5ZM5 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
                                         </svg>
@@ -159,7 +159,7 @@
                                         <span class="text-xs ml-1 underline cursor-pointer" @click="removeCoupon(i)">Remove Coupon</span>
                                     </span>
                                     
-                                    <span class="font-medium text-red-700 italic flex items-center" x-show="!item.free_shipping">
+                                    <span class="font-medium text-red-700 italic flex items-center flex-wrap" x-show="!item.free_shipping">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 text-green-600 mr-1">
                                             <path fill-rule="evenodd" d="M4.5 2A2.5 2.5 0 0 0 2 4.5v2.879a2.5 2.5 0 0 0 .732 1.767l4.5 4.5a2.5 2.5 0 0 0 3.536 0l2.878-2.878a2.5 2.5 0 0 0 0-3.536l-4.5-4.5A2.5 2.5 0 0 0 7.38 2H4.5ZM5 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
                                         </svg>
@@ -771,7 +771,7 @@
             showMessage: false,
             need_date: this.minDate,
             need_time: '',
-            allHours: [...Array(24).keys()],
+            allHours: Array.from({ length: 24 }, (_, i) => i),
             warningMessage: '',
             errorMessage: '',
             hasErrorMessage: false,
@@ -1667,19 +1667,42 @@
 
             isTimeDisabled(hour) {
                 if (!this.need_date) return false;
-                let timeString = (hour < 10 ? '0' + hour : hour) + ':00';
-                let combined = `${this.need_date} ${timeString}`;
 
-                if (this.method === 'pickup') {
-                    return this.disabledPickupDates.includes(combined);
-                } else {
-                    return this.disabledDeliveryDates.includes(combined);
+                const selectedDate = new Date(this.need_date);
+                const now = new Date();
+
+                const isToday =
+                    selectedDate.getDate() === now.getDate() &&
+                    selectedDate.getMonth() === now.getMonth() &&
+                    selectedDate.getFullYear() === now.getFullYear();
+
+                if (isToday && hour <= now.getHours()) {
+                    return true;
                 }
+
+                const timeStr = (hour < 10 ? '0' + hour : hour) + ':00';
+                const fullStr = `${this.need_date} ${timeStr}`;
+
+                return this.method === 'pickup'
+                    ? this.disabledPickupDates.includes(fullStr)
+                    : this.disabledDeliveryDates.includes(fullStr);
             },
 
             isTimeDisabledForDelivery(hour) {
                 return (delivery) => {
                     if (!delivery.need_date) return false;
+
+                    const selectedDate = new Date(delivery.need_date);
+                    const now = new Date();
+
+                    const isToday =
+                        selectedDate.getDate() === now.getDate() &&
+                        selectedDate.getMonth() === now.getMonth() &&
+                        selectedDate.getFullYear() === now.getFullYear();
+                    if (isToday && hour <= now.getHours()) {
+                        return true;
+                    }
+
                     const timeStr = (hour < 10 ? '0' + hour : hour) + ':00';
                     return this.disabledDeliveryDates.includes(`${delivery.need_date} ${timeStr}`);
                 };
