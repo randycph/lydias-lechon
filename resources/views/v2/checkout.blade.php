@@ -319,7 +319,8 @@
                                                             </svg>
                                                             </div>
                                                             <input 
-                                                                :min="minDate()"
+                                                                onkeydown="return false"
+                                                                :min="minDate"
                                                                 @change="validateDeliveryDateTime(delivery)"
                                                                 x-model="delivery.need_date" name="need_date" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
                                                         </div>
@@ -503,8 +504,9 @@
                                                 </svg>
                                             </div>
                                             <input 
-                                                :min="minDate()" @change="validateDateTime" 
-                                                x-model="need_date" type="date" name="need_date" value="{{ old('need_date') }}"
+                                                onkeydown="return false"
+                                                :min="minDate" @change="validateDateTime" 
+                                                x-model="need_date" type="date" name="need_date"
                                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 "
                                                 placeholder="Select date">
                                         </div>
@@ -736,31 +738,28 @@
                     qty: 1, 
                     location: '', 
                     order: '', 
-                    need_date: '',
-                    need_time: '13:00',
+                    need_date: this.minDate,
+                    need_time: '',
                     note: '', 
                     delivery_fee: 0 
                 }
             ],
             allowMultiple: false,
             onChangeMultipleAddress() {
-                if (!this.allowMultiple) {
-                    this.deliveries = [{ 
-                        address: '', 
-                        name: '',
-                        phone: '', 
-                        qty: 1, 
-                        location: '', 
-                        order: '', 
-                        need_date: '',
-                        need_time: '13:00',
-                        note: '', 
-                        delivery_fee: 0 
-                    }];
-
-                    this.deliveryFees = [];
-                    this.deliveryFee = 0;
-                }
+                this.deliveries = this.orders.map(order => ({
+                    address: '',
+                    name: '',
+                    phone: '',
+                    qty: order.qty,
+                    location: '',
+                    order: order.id,
+                    need_date: this.minDate,
+                    need_time: '',
+                    note: '',
+                    delivery_fee: 0
+                }));
+                this.deliveryFees = [];
+                this.deliveryFee = 0;
             },
             formEl: null,
             deliveryFee: 0,
@@ -770,7 +769,7 @@
             rawDeposit: '',
             deliveryFees: [],
             showMessage: false,
-            need_date: '',
+            need_date: this.minDate,
             need_time: '',
             allHours: [...Array(24).keys()],
             warningMessage: '',
@@ -1345,6 +1344,8 @@
                 const cookie = document.cookie.split('; ').find(row => row.startsWith('shipping_method='));
                 this.method = cookie ? cookie.split('=')[1] : 'pickup';
 
+                this.need_date = this.minDate;
+
                 this.loadAutoCoupons();
             },
 
@@ -1584,8 +1585,8 @@
                     phone: '',
                     orders: [],
                     location: '',
-                    need_date: this.minDate(),
-                    need_time: '13:00',
+                    need_date: this.minDate,
+                    need_time: '',
                     note: '',
                     delivery_fee: 0,
                 });
