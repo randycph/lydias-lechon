@@ -455,6 +455,14 @@
 								<input name="purchase_amount" id="purchase_amount" type="number" min="1" class="form-control" value="{{ $coupon->purchase_amount }}">
 								<small id="spanPurchaseAmount" style="display: none;" class="text-danger"></small>
 							</div>
+							<div class="col-md-6 d-none" id="total-amount-select" style="display:@if(isset($coupon->purchase_amount)) block @else none @endif;">
+								<select class="custom-select" name="amount_opt" id="amount_opt">
+									<option value="">Choose One</option>
+									<option @if($coupon->purchase_amount_type == 'min') selected @endif value="min">Minimum</option>
+									<option @if($coupon->purchase_amount_type == 'max') selected @endif value="max">Maximum</option>
+								</select>
+								<small id="spanAmountOpt" style="display: none;" class="text-danger"></small>
+							</div>
 
 							<!-- Quantity -->
 							<div class="col-12" id="total-quantity-div" style="padding-top: 10px;display:@if(isset($coupon->purchase_qty) && $coupon->purchase_qty > 0) block @else none @endif;">
