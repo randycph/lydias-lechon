@@ -729,7 +729,7 @@ Route::get('/test-cart-reminder', function () {
         $diffInMinutes = $created->diffInMinutes($now);
         $diffInHours = $created->diffInHours($now);
 
-        if ($diffInMinutes >= 10 && $diffInHours < 6) {
+        if ($diffInMinutes >= 1 && $diffInHours < 6) {
             // Send reminder email if older than 10 minutes but not yet 6 hours
             Mail::to($user->email)->send(new CartReminderMail($userCarts));
             logger('Reminder sent to ' . $user->email);
