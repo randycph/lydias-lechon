@@ -753,7 +753,7 @@
                     qty: order.qty,
                     location: '',
                     order: order.id,
-                    need_date: this.minDate,
+                    need_date: this.minDate(),
                     need_time: '',
                     note: '',
                     delivery_fee: 0
@@ -769,7 +769,7 @@
             rawDeposit: '',
             deliveryFees: [],
             showMessage: false,
-            need_date: this.minDate,
+            need_date: '',
             need_time: '',
             allHours: Array.from({ length: 24 }, (_, i) => i),
             warningMessage: '',
@@ -1344,7 +1344,7 @@
                 const cookie = document.cookie.split('; ').find(row => row.startsWith('shipping_method='));
                 this.method = cookie ? cookie.split('=')[1] : 'pickup';
 
-                this.need_date = this.minDate;
+                this.need_date = this.minDate();
 
                 this.loadAutoCoupons();
             },
