@@ -1214,30 +1214,27 @@
                 const result = await res.json();
 
                 if (result.success && result.coupons.length > 0) {
-                    this.coupons = result.coupons;
-                    
-                    result.coupons.forEach(autoCoupon => {
-                        // Apply combination logic (same as submitCouponCode)
-                        // Case 1: New coupon is non-combinable, and there are already applied coupons → skip
-                        if (autoCoupon.combination_allowed === false && this.coupons.length > 0) {
-                            console.log('Skipping non-combinable coupon:', autoCoupon.code);
-                            return;
+                    for (const autoCoupon of result.coupons) {
+                        // Skip if already exists
+                        if (this.coupons.find(c => c.code === autoCoupon.code)) continue;
+
+                        // Case 1: Auto coupon is non-combinable and we already have applied coupons
+                        if (!autoCoupon.combination_allowed && this.coupons.length > 0) {
+                            console.log(`Skipping non-combinable auto coupon: ${autoCoupon.code}`);
+                            continue;
                         }
 
-                        // Case 2: New coupon is combinable, but existing coupons include non-combinable → skip
-                        if (autoCoupon.combination_allowed === true) {
-                            const nonCombinableCoupon = this.coupons.find(c => c.combination_allowed === false);
-                            if (nonCombinableCoupon) {
-                                return;
-                            }
+                        // Case 2: Auto coupon is combinable, but an existing coupon is non-combinable
+                        if (autoCoupon.combination_allowed && this.coupons.some(c => !c.combination_allowed)) {
+                            console.log(`Skipping auto coupon ${autoCoupon.code} due to non-combinable existing coupon`);
+                            continue;
                         }
 
-                        // Prevent duplicate (if called multiple times)
-                        if (!this.coupons.find(c => c.code === autoCoupon.code)) {
-                            this.coupons.push(autoCoupon);
-                        }
+                        // Passed logic check → push to coupons
+                        this.coupons.push(autoCoupon);
 
-                        if (autoCoupon.free_products && autoCoupon.free_products.length > 0) {
+                        // Handle free products if any
+                        if (autoCoupon.free_products?.length > 0) {
                             autoCoupon.free_products.forEach(fp => {
                                 if (!this.carts.find(item => item.is_free_product && item.id === fp.id)) {
                                     this.carts.push({
@@ -1256,8 +1253,9 @@
 
                             this.hasFreeProducts = true;
                         }
-                    });
+                    }
 
+                    // Recompute total
                     this.recomputeCouponTotals();
                 }
             },
