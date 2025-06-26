@@ -1220,6 +1220,7 @@
                         // Apply combination logic (same as submitCouponCode)
                         // Case 1: New coupon is non-combinable, and there are already applied coupons → skip
                         if (autoCoupon.combination_allowed === false && this.coupons.length > 0) {
+                            console.log('Skipping non-combinable coupon:', autoCoupon.code);
                             return;
                         }
 
@@ -1234,6 +1235,26 @@
                         // Prevent duplicate (if called multiple times)
                         if (!this.coupons.find(c => c.code === autoCoupon.code)) {
                             this.coupons.push(autoCoupon);
+                        }
+
+                        if (autoCoupon.free_products && autoCoupon.free_products.length > 0) {
+                            autoCoupon.free_products.forEach(fp => {
+                                if (!this.carts.find(item => item.is_free_product && item.id === fp.id)) {
+                                    this.carts.push({
+                                        id: fp.id,
+                                        product: {
+                                            name: fp.name,
+                                            photos: fp.photos,
+                                        },
+                                        qty: 1,
+                                        price: 0,
+                                        is_free_product: true,
+                                        coupon_code: autoCoupon.code,
+                                    });
+                                }
+                            });
+
+                            this.hasFreeProducts = true;
                         }
                     });
 
