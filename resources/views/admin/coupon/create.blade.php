@@ -503,7 +503,7 @@
 <script>
 	$('#coupon-scope-specific').click(function(){
 		$('#customer-optn').show();
-		$('#coupon-customer-limit').attr('disabled',true);
+		// $('#coupon-customer-limit').attr('disabled',true);
 	});
 
 	$('#coupon-scope-all').click(function(){

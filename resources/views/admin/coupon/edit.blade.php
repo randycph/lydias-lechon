@@ -483,11 +483,11 @@
 				<div class="form-row border rounded p-3">
 					<div class="col-12">
 						<div class="custom-control custom-checkbox">
-							<input type="checkbox" class="custom-control-input" id="coupon-customer-limit" name="customer_limit" onclick="myFunction()" @if($coupon->customer_scope == 'specific') disabled @else  @if($coupon->customer_limit <> 100000) checked @endif @endif>
+							<input type="checkbox" class="custom-control-input" id="coupon-customer-limit" name="customer_limit" onclick="myFunction()" @if($coupon->customer_limit <> 100000) checked @endif>
 							<label class="custom-control-label" for="coupon-customer-limit">Customer Limit &nbsp;&nbsp;<span style="font-style: italic;">Maximum number of customers who can use the coupon.</span></label>
 						</div>
 
-						<div class="mt-3" id="coupon-customer-limit-form" style="display:@if($coupon->customer_scope == 'specific') none @else @if($coupon->customer_limit <> 100000) block @else none @endif @endif;">
+						<div class="mt-3" id="coupon-customer-limit-form" style="display:@if($coupon->customer_limit <> 100000) block @else none @endif;">
 							<div class="input-group border rounded">
 								<span class="input-group-btn">
 									<button type="button" class="btn btn-default btn-number" disabled="disabled" data-type="minus" data-field="coupon_customer_limit_qty">
@@ -577,9 +577,9 @@
 @section('customjs')
 <script>
 	$('#coupon-scope-specific').click(function(){
-		$('#coupon-customer-limit').prop('checked',false);
-		$('#coupon-customer-limit-form').hide();
-		$('#coupon-customer-limit').attr('disabled',true);
+		// $('#coupon-customer-limit').prop('checked',false);
+		// // $('#coupon-customer-limit-form').hide();
+		// $('#coupon-customer-limit').attr('disabled',true);
 	});
 
 	$('#coupon-scope-all').click(function(){
