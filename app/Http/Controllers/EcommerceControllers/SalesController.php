@@ -1035,6 +1035,11 @@ class SalesController extends Controller
         $id = base64_decode($id);
         
         $sales = \App\EcommerceModel\SalesHeader::with('couponUsed')->where('id',$id)->first();
+        
+        if (!$sales) {
+            return redirect()->route('sales-transaction.index')->with('error', 'Sales record not found.');
+        }
+
         $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
         $salesDetails  = SalesDetail::where('sales_header_id',$id)->get();
         $deliveries    = DeliveryStatus::where('order_id',$id)->get();

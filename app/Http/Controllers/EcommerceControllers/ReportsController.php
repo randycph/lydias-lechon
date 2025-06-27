@@ -450,6 +450,11 @@ class ReportsController extends Controller
         }
         
         $sales = SalesHeader::where('id',$id)->first();
+
+        if (!$sales) {
+            return redirect()->route('sales-transaction.index')->with('error', 'Sales record not found.');
+        }
+
         $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
         $salesDetails  = SalesDetail::where('sales_header_id',$id)->get();
         $deliveries    = DeliveryStatus::where('order_id',$id)->get();
@@ -457,7 +462,7 @@ class ReportsController extends Controller
         $deliveryAddress = ProductDeliveryAddress::with('product')->where('id', $address)->where('sales_header_id', $sales->id)->first();
 
         if (!$deliveryAddress) {
-            return;
+            return redirect()->route('sales-transaction.index')->with('error', 'Delivery address not found.');
         }
 
         $gc = GiftCertificate::where('sales_header_id',$id)->get();

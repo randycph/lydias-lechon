@@ -290,6 +290,29 @@
                 </table>
             </div>
             @endif
+
+            <div class="mt-5">
+                <div class="text-uppercase">Acknowledgment receipt</div>
+                
+                <div class="text-center mt-3">
+                    <p class="text-uppercase font-weight-bold">Received the above in good order and condition</p>
+                </div>
+
+                <div class="d-flex justify-content-between mt-2">
+                    <div class="flex-fill text-center">
+                        <p class="font-weight-bold">Received by:</p>
+                        <p class="mt-5" style="border-top: 1px solid black; width: 200px; margin: auto;"></p>
+                    </div>
+                    <div class="flex-fill text-center">
+                        <p class="font-weight-bold">Received date and time:</p>
+                        <p class="mt-5" style="border-top: 1px solid black; width: 200px; margin: auto;"></p>
+                    </div>
+                    <div class="flex-fill text-center">
+                        <p class="font-weight-bold">Delivered by:</p>
+                        <p class="mt-5" style="border-top: 1px solid black; width: 200px; margin: auto;"></p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </body>
