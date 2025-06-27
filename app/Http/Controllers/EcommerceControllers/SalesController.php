@@ -692,7 +692,7 @@ class SalesController extends Controller
 
     public function show($id)
     {
-        $sales = SalesHeader::with(['deliveryAddress', 'couponUsed'])->where('id',$id)->first();
+        $sales = SalesHeader::with(['deliveryAddress', 'couponUsed', 'user'])->where('id',$id)->first();
 
         if (!$sales) {
             return redirect()->route('sales-transaction.index')->with('error', 'Sales record not found.');
@@ -1035,7 +1035,7 @@ class SalesController extends Controller
         $id = base64_decode($id);
         
         $sales = \App\EcommerceModel\SalesHeader::with('couponUsed')->where('id',$id)->first();
-        
+
         if (!$sales) {
             return redirect()->route('sales-transaction.index')->with('error', 'Sales record not found.');
         }

@@ -662,7 +662,8 @@ class CartController extends Controller
                 'regex:/^(09|\+639)\d{9}$/'
             ],
             'name' => 'required',
-            'email' => 'required|email:rfc,dns'
+            'email' => 'required|email:rfc,dns',
+            'delivery_branch' => 'required_if:shipping_type,pickup',
         ], [
             'mobile.regex' => 'The mobile number must start with 09 or +639 and be followed by 9 digits. No spaces allowed.',
         ]);
@@ -742,7 +743,7 @@ class CartController extends Controller
             if ($request->location == 'Other') {
                 $customer_delivery_adress = $request->delivery_address;
             } else {
-                $customer_delivery_adress = $request->delivery_address.", ".$request->location;  
+                $customer_delivery_adress = ($request->delivery_address).", ".$request->location;  
             }
                      
             $customer_contact_number = $request->mobile;
@@ -780,7 +781,7 @@ class CartController extends Controller
         
         $salesHeader = SalesHeader::create([
             'user_id' => $user->id,
-            'email' => $user->email ?? $request->email,
+            'email' => $request->email ?? $user->email,
             'order_number' => $requestId,
             'customer_name' => $customer_name,
             'customer_contact_number' => $customer_contact_number,

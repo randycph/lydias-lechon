@@ -37,8 +37,8 @@
                     <div class="col-sm-6 col-lg-8">
                         <label class="tx-sans tx-uppercase tx-10 tx-medium tx-spacing-1 tx-color-03">Customer Details</label>
                         <p class="mg-b-3 tx-semibold">@if($sales->user_id == 9999) {{$sales->customer_name}} @else {{$sales->user->FullName}} @endif</p>                  
-                        <p class="mg-b-3">Mobile No: {{$sales->customer_contact_number}} @if(!empty($sales->user->contact_tel)) | Tel no: {{$sales->user->contact_tel}} @endif</p>
-                        <p class="mg-b-3">Email: {{$sales->email}}</p>
+                        <p class="mg-b-3">Mobile No: {{$sales->customer_contact_number ?? $sales->user->contact_mobile }} @if(!empty($sales->user->contact_tel)) | Tel no: {{$sales->user->contact_tel}} @endif</p>
+                        <p class="mg-b-3">Email: {{$sales->email ?? $sales->user->email}}</p>
                         <p class="mg-b-3">{{$sales->delivery_type}}: 
                             @if ($sales->delivery_type == 'Door to door delivery')
                                 @if ($sales?->deliveryAddress && count($sales?->deliveryAddress) > 0)
