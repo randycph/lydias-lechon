@@ -693,6 +693,11 @@ class SalesController extends Controller
     public function show($id)
     {
         $sales = SalesHeader::with(['deliveryAddress', 'couponUsed'])->where('id',$id)->first();
+
+        if (!$sales) {
+            return redirect()->route('sales-transaction.index')->with('error', 'Sales record not found.');
+        }
+
         $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
         $gc = GiftCertificate::where('sales_header_id',$id)->get();
         $salesDetails = SalesDetail::where('sales_header_id',$id)->get();

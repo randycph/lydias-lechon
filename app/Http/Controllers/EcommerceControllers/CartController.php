@@ -32,6 +32,7 @@ use DateTime;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Fluent;
 
@@ -655,7 +656,6 @@ class CartController extends Controller
 
     public function save_sales(Request $request) 
     {
-        // dd($request->all());
         $request->validate([
             'mobile' => [
                 'required',
@@ -664,7 +664,7 @@ class CartController extends Controller
             'name' => 'required',
             'email' => 'required|email:rfc,dns'
         ], [
-            'mobile.regex' => 'The mobile number must start with 09 or +639 and be followed by 9 digits.',
+            'mobile.regex' => 'The mobile number must start with 09 or +639 and be followed by 9 digits. No spaces allowed.',
         ]);
 
         // dd($request->all());
@@ -676,7 +676,6 @@ class CartController extends Controller
             $customer_name = $request->name;
             $user->contact_mobile = $request->mobile;
             $user->email = $request->email;
-            $user->contact_mobile = $request->mobile;
             $carts = collect(session('cart', []));
         } else {
             $user = auth()->user();
@@ -735,9 +734,9 @@ class CartController extends Controller
             $delivery_type='Store Pickup';
             $outlet = $request->delivery_branch;
             $customer_delivery_adress = $request?->delivery_branch ?? $request->delivery_address;            
-            $customer_contact_number = $user->contact_mobile;
+            $customer_contact_number = $request->mobile;
             $customer_location = '';
-            $contact_person = $customer_name;
+            $contact_person = $request->name;
         } else {
             $delivery_type='Door to door delivery';
             if ($request->location == 'Other') {
@@ -1272,7 +1271,7 @@ class CartController extends Controller
             'Guest',
             'wsiphproduction@gmail.com',
             'web',
-            STR::random(10),
+            Hash::make(Str::random(10)),
             1
         ];
 
