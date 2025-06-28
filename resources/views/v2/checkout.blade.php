@@ -1039,7 +1039,7 @@
 
                 if (this.method === 'delivery' && this.allowMultiple) {
                     if (!this.validateAllDeliveryFields()) {
-                        this.noNeededTime = true;
+                        this.qtyValidationMessage = 'Please fill all quantity fields.';
                         this.isSubmitting = false;
                         return;
                     }
@@ -1406,6 +1406,8 @@
                 // Remove all deliveries after the current one
                 this.deliveries.splice(index + 1);
 
+                this.qtyValidationMessage = '';
+
                 this.refreshAllAvailableQty();
             },
 
@@ -1604,7 +1606,7 @@
                     phone: '',
                     orders: [],
                     location: '',
-                    need_date: this.minDate,
+                    need_date: this.minDate(),
                     need_time: '',
                     note: '',
                     delivery_fee: 0,
