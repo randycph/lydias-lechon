@@ -95,6 +95,7 @@ x-data="{
                     </svg>
                 </div>
             </a>
+            @if ((auth()->check() && auth()->user()->role_id == 6) || auth()->guest())
             <button @click="openCart = true" class="text-white" aria-label="Cart" title="Cart">
                 <div class="relative">
                     <span x-show="cartCount > 0" class="absolute -top-1 -right-1 bg-secondary text-black text-xs px-2 py-2 w-4 h-4 rounded-full flex items-center justify-center" x-text="cartCount"></span>
@@ -103,6 +104,7 @@ x-data="{
                     </svg>
                 </div>
             </button>
+            @endif
         </div>
     @endif
 
