@@ -1249,6 +1249,20 @@
                                         coupon_code: autoCoupon.code,
                                     });
                                 }
+
+                                // Push to orders so they appear in delivery assignment
+                                if (!this.orders.find(o => o.product_id === fp.id && o.is_free_product)) {
+                                    this.orders.push({
+                                        product_id: fp.id,
+                                        qty: 1,
+                                        product: fp,
+                                        is_free_product: true,
+                                        price: 0,
+                                        delivery_address: '',
+                                        need_date: '',
+                                        need_time: '',
+                                    });
+                                }
                             });
 
                             this.hasFreeProducts = true;

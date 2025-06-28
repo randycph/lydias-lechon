@@ -223,18 +223,27 @@
                             <li class="pl-10 flex items-center text-sm justify-between pr-4 py-3 border-b border-gray-200">
                                 <div>{{ $coupon->coupon_code }}</div>
                                 <div class="text-right text-red-500 italic">
-                                    <div>-₱{{ number_format($coupon->discount_used ?? 0, 2) }}</div>
+                                    @if ($coupon->coupon->free_product_id)
+                                        <span class="text-green-500">Free Products </span>
+                                        @php $products = explode('|', $coupon->coupon->free_product_id); @endphp
+                                        <ul class="mt-2">
+                                            @foreach ($products as $productId)
+                                                @php $product = \App\Models\Product::find($productId); @endphp
+                                                @if ($product)
+                                                    <li class="text-green-500">
+                                                        {{ $product->name }}
+                                                    </li>
+                                                @endif
+                                            @endforeach
+                                        </ul>
+                                    @else
+                                        <div>-₱{{ number_format($coupon->discount_used ?? 0, 2) }}</div>
+                                    @endif
                                 </div>
                             </li>
                         @endforeach
                     </ul>
                     @endif
-                    {{-- <div class="flex items-center text-sm justify-between px-4 py-3 border-b border-gray-200">
-                        <div>Coupon (lydiaslechon25)</div>
-                        <div class="text-right">
-                            <div>-  ₱250</div>
-                        </div>
-                    </div> --}}
                     <div class="flex items-center text-sm justify-between px-4 py-4 border-b border-gray-200">
                         <div>Total</div>
                         <div class="text-right font-bold">

@@ -181,7 +181,22 @@
                                                 <td class="tx-left" colspan="8" style=" padding-left: 20px;">
                                                     Coupon (<i>{{ $coupon->coupon_code }}</i>)
                                                 </td>
-                                                <td class="tx-right" style=" color: red;">-{{ number_format($coupon->discount_used, 2) }}</td>
+                                                @if ($coupon->coupon->free_product_id)
+                                                    <span class="text-green-500">Free Products </span>
+                                                    @php $products = explode('|', $coupon->coupon->free_product_id); @endphp
+                                                    <td class="tx-right" style=" color: red;">
+                                                        @foreach ($products as $productId)
+                                                            @php $product = \App\Models\Product::find($productId); @endphp
+                                                            @if ($product)
+                                                                <li class="text-green-500">
+                                                                    {{ $product->name }}
+                                                                </li>
+                                                            @endif
+                                                        @endforeach
+                                                    </td>
+                                                @else
+                                                    <td class="tx-right" style=" color: red;">-{{ number_format($coupon->discount_used, 2) }}</td>
+                                                @endif
                                         </tr>
                                         @endforeach
                                     @else 
