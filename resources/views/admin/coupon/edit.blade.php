@@ -177,7 +177,7 @@
 				<div class="form-group">
 					<div class="mb-3 reward-option" id="free-shipping-optn" 
 						style="display:@if(isset($coupon->location) || $coupon->reward == 'free-shipping-optn' || $errors->has('location')) block @else none @endif">						<label class="d-block">Location</label>
-						<select class="form-control select2" name="location[]" multiple="multiple" style="min-height: 32px;">
+						<select class="form-control select2 select-location" name="location[]" multiple="multiple" style="min-height: 32px;">
 							<option label="Select Area"></option>
 							<option value="all" @if(in_array('all',$arr_loc)) selected @endif>All Area</option>
 							@foreach($locations as $location)
@@ -977,6 +977,30 @@ $(function() {
 	$('.selectpicker').selectpicker();
 	$('.select2').select2({
 		placeholder: 'Choose Options',
+	});
+
+	let isHandlingSelect = false;
+
+	$('.select-location').on('change', function () {
+		if (isHandlingSelect) return;
+
+		isHandlingSelect = true;
+
+		const $select = $(this);
+		const selected = $select.val();
+
+		if (selected && selected.includes('all')) {
+			// Only keep "all" selected
+			$select.val(['all']).trigger('change.select2');
+		} else {
+			// Remove "all" if other options are selected
+			if (selected) {
+				const filtered = selected.filter(val => val !== 'all');
+				$select.val(filtered).trigger('change.select2');
+			}
+		}
+
+		isHandlingSelect = false;
 	});
 });
 </script>
