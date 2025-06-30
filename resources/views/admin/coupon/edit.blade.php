@@ -154,6 +154,7 @@
 				<div class="form-group">
 					<label class="d-block">Reward</label>
 					<select class="custom-select @error('reward') is-invalid @enderror" id="reward-optn" name="reward">
+						<option label="Choose Reward"></option>
 						<option @if(isset($coupon->reward) && $coupon->reward == 'free-shipping-optn') selected @endif value="free-shipping-optn">Free Shipping</option>
 						<option @if(isset($coupon->reward) && $coupon->reward == 'discount-amount-optn')selected @endif value="discount-amount-optn">Discount Amount</option>
 						<option @if(isset($coupon->reward) && $coupon->reward == 'discount-percentage-optn') selected @endif value="discount-percentage-optn">Discount Percentage</option>
@@ -174,8 +175,8 @@
 					}
 				@endphp
 				<div class="form-group">
-					<div class="mb-3 reward-option" id="free-shipping-optn" style="display:@if(isset($coupon->location) || $coupon->reward == 'free-shipping-optn') block @else none @endif">
-						<label class="d-block">Location</label>
+					<div class="mb-3 reward-option" id="free-shipping-optn" 
+						style="display:@if(isset($coupon->location) || $coupon->reward == 'free-shipping-optn' || $errors->has('location')) block @else none @endif">						<label class="d-block">Location</label>
 						<select class="form-control select2" name="location[]" multiple="multiple" style="min-height: 32px;">
 							<option label="Select Area"></option>
 							<option value="all" @if(in_array('all',$arr_loc)) selected @endif>All Area</option>
