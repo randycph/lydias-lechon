@@ -103,6 +103,31 @@ Update Sales Details
                             <!-- Hidden Template (NO name or required attributes) -->
                             <div id="addressSectionTemplate" class="address-section d-none" aria-hidden="true">
                                 <fieldset disabled>
+                                    <div class="d-flex justify-content-between flex-column 3">
+                                        @foreach($salesheader->items as $item)
+                                            <div class="d-flex justify-content-between product-row" data-product-id="{{ $item->product_id }}">
+                                                <div class="form-check me-2 d-flex align-items-center">
+                                                    <input class="form-check-input product-checkbox"
+                                                        type="checkbox"
+                                                        value="{{ $item->product_id }}"
+                                                        data-product-id="{{ $item->product_id }}"
+                                                        data-name="product_ids"
+                                                        id="item_{{ $item->product_id }}">
+                                                    <label class="form-check-label">{{ $item->product_name }}</label>
+                                                </div>
+                                                <div>
+                                                    <select class="form-select form-select-sm mb-2 product-qty"
+                                                        data-product-id="{{ $item->product_id }}"
+                                                        data-name="product_qty"
+                                                        id="item_qty_{{ $item->product_id }}">
+                                                        @for($i = 1; $i <= $item->qty; $i++)
+                                                            <option value="{{ $i }}">{{ $i }}</option>
+                                                        @endfor
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
                                     <div class="mb-3">
                                         <label class="form-label fw-bold address-label">Address</label>
                                         <textarea rows="5" class="form-control address"></textarea>
@@ -605,12 +630,52 @@ Update Sales Details
 
 
         $('#addMoreBtn').on('click', function () {
+            if (allProductsUsedUp()) {
+                alert('All products and their quantities have already been assigned. You cannot add more address blocks.');
+                return;
+            }
+
             addNewAddressBlock();
+            updateProductAvailability(); 
         });
+
+        function allProductsUsedUp() {
+            const used = getUsedQuantities();
+            let hasAvailable = false;
+
+            $('#addressSectionTemplate .form-check-input').each(function () {
+                const productId = this.id.replace('item_', '');
+                const $qtySelect = $(this).closest('div').next().find('select');
+                const maxQty = parseInt($qtySelect.find('option:last-child').val()) || 0;
+                const alreadyUsed = used[productId] || 0;
+
+                if (alreadyUsed < maxQty) {
+                    hasAvailable = true;
+                }
+            });
+
+            return !hasAvailable; // returns true if everything is used
+        }
+
+
 
         // Add new address block
         function addNewAddressBlock(data = {}) {
             const $template = $('#addressSectionTemplate').clone().removeClass('d-none').removeAttr('id').removeAttr('aria-hidden');
+            
+            const used = getUsedQuantities();
+
+            $template.find('.form-check-input').each(function () {
+                const productId = this.id.replace('item_', '');
+                const $qtySelect = $(this).closest('div').next().find('select');
+                const maxQty = parseInt($qtySelect.find('option:last-child').val()) || 0;
+
+                if (used[productId] >= maxQty) {
+                    $(this).closest('.d-flex.justify-content-between').remove();
+
+                }
+            });
+            
             const $fieldset = $template.find('fieldset').prop('disabled', false);
 
             $fieldset.find('.address').attr({ name: 'address[]', required: true }).val(data.address || '');
@@ -638,8 +703,56 @@ Update Sales Details
                 $timeSelect.append(`<option value="${time}" ${data.time === time ? 'selected' : ''}>${label}</option>`);
             });
 
+            // ✅ Populate checked products & quantities
+            if (data.products) {
+                try {
+                    const selectedProducts = JSON.parse(data.products);
+                    console.log(selectedProducts)
+                    selectedProducts.forEach(item => {
+                        const productId = item.product?.id;
+                        const qty = item.qty;
+
+                        const $checkbox = $fieldset.find(`#item_${productId}`);
+                        const $qtySelect = $fieldset.find(`#item_qty_${productId}`);
+
+                        if ($checkbox.length) {
+                            $checkbox.prop('checked', true);
+                        }
+
+                        if ($qtySelect.length) {
+                            $qtySelect.val(qty);
+                        }
+                    });
+                } catch (e) {
+                    console.error('Invalid products JSON:', data.products);
+                }
+            }
+
+
             $('#multipleAddressesWrapper').append($template);
             updateLabels();
+
+
+            const blockIndex = $('#multipleAddressesWrapper .address-section').length - 1;
+
+            $template.find('.product-checkbox').each(function () {
+                const productId = $(this).data('product-id');
+                const name = $(this).data('name');
+                $(this).attr('name', `${name}[${blockIndex}][]`);
+            });
+
+            $template.find('.product-qty').each(function () {
+                const productId = $(this).data('product-id');
+                const name = $(this).data('name');
+                const $checkbox = $template.find(`#item_${productId}`);
+
+                if ($checkbox.is(':checked')) {
+                    $(this).attr('name', `${name}[${blockIndex}][${productId}]`);
+                } else {
+                    $(this).removeAttr('name'); // Don't submit qty if not checked
+                }
+            });
+
         }
 
 
@@ -670,13 +783,99 @@ Update Sales Details
                     time: item.delivery_time,
                     note: item.note,
                     contact_tel: item.contact_tel,
-                    contact_person: item.contact_person
+                    contact_person: item.contact_person,
+                    products: item.products
+
                 });
             });
 
             updateLabels();
         }
 
+        function getUsedQuantities() {
+            const used = {};
+
+            $('#multipleAddressesWrapper .address-section').each(function () {
+                $(this).find('.form-check-input:checked').each(function () {
+                    const productId = this.id.replace('item_', '');
+                    const qty = parseInt($(this).closest('div').next().find('select').val()) || 0;
+
+                    used[productId] = (used[productId] || 0) + qty;
+                });
+            });
+
+            return used;
+        }
+
+        $(document).on('change', '.product-checkbox, .product-qty', function () {
+            cleanupFollowingBlocks($(this).closest('.address-section'));
+            updateProductAvailability();
+        });
+
+        function cleanupFollowingBlocks($changedBlock) {
+            const changedIndex = $('#multipleAddressesWrapper .address-section').index($changedBlock);
+
+            $('#multipleAddressesWrapper .address-section').each(function (index) {
+                if (index > changedIndex) {
+                    $(this).remove(); // remove all blocks after the one that changed
+                }
+            });
+        }
+
+        function updateProductAvailability() {
+            const used = getUsedQuantities();
+
+            // Get product max quantity from original template
+            const productMaxQtyMap = {};
+            $('#addressSectionTemplate .product-qty').each(function () {
+                const productId = $(this).data('product-id');
+                const maxQty = parseInt($(this).find('option:last-child').val()) || 0;
+                productMaxQtyMap[productId] = maxQty;
+            });
+
+            // Loop through ALL blocks and update each product row
+            $('#multipleAddressesWrapper .address-section').each(function () {
+                const $block = $(this);
+
+                $block.find('.product-row').each(function () {
+                    const $row = $(this);
+                    const productId = $row.data('product-id');
+                    const maxQty = productMaxQtyMap[productId] || 0;
+                    const alreadyUsed = used[productId] || 0;
+
+                    const isCheckedHere = $row.find('.product-checkbox').is(':checked');
+
+                    // Hide only if used up and not checked in this block
+                    if (alreadyUsed >= maxQty && !isCheckedHere) {
+                        $row.hide();
+                    } else {
+                        $row.show();
+                    }
+                });
+            });
+        }
+
+        $(document).on('change', '.product-checkbox', function () {
+            const productId = $(this).data('product-id');
+            const $qtySelect = $(this).closest('.product-row').find(`#item_qty_${productId}`);
+            const blockIndex = $(this).closest('.address-section').index();
+
+            if (this.checked) {
+                $qtySelect.prop('disabled', false);
+                $qtySelect.attr('name', `product_qty[${blockIndex}][${productId}]`);
+            } else {
+                $qtySelect.prop('disabled', true);
+                $qtySelect.removeAttr('name');
+            }
+        });
+
+        $(document).on('change', '.product-qty', function () {
+            const productId = $(this).data('product-id');
+            const $checkbox = $(this).closest('.product-row').find(`#item_${productId}`);
+            if (parseInt(this.value) > 0) {
+                $checkbox.prop('checked', true).trigger('change');
+            }
+        });
     });
 
 

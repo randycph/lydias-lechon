@@ -232,6 +232,19 @@ class SalesController extends Controller
             ProductDeliveryAddress::where('sales_header_id', $request->update_dateneeded_id)->delete();
 
             foreach ($request->address as $index => $addr) {
+
+                $prods = [];
+
+                $products = Product::whereIn('id', $request->product_ids[$index])->get();
+
+                foreach ($products as $product) {
+                    $prods[] = [
+                        'qty' => $request->product_qty[$index][$product->id] ?? 0,
+                        'product_id' => $product->id,
+                        'product' => $product->toArray(),
+                    ];
+                }
+
                 if (!empty($addr)) {
                     ProductDeliveryAddress::create([
                         'sales_header_id' => $request->update_dateneeded_id,
@@ -244,6 +257,7 @@ class SalesController extends Controller
                         'note' => $request->note[$index],
                         'contact_person' => $request->contact_person[$index] ?? null,
                         'contact_tel' => $request->contact_tel[$index] ?? null,
+                        'products' => json_encode($prods),
                     ]);
                 }
             }
@@ -745,6 +759,8 @@ class SalesController extends Controller
         }
 
         $branches_store = Branch::orderBy('name','asc')->get();
+
+        // dd($salesheader->deliveryAddress);
       
         ActivityLog::create([
             'created_by' => auth()->id(),
