@@ -683,24 +683,24 @@
     window.disabledPickupDates = @json($disabledPickupDates);
     window.disabledDeliveryDates = @json($disabledDeliveryDates);
     window.fullUrl = @json(config('app.url'));
+    window.hasBaka = @json($hasbaka);
+    window.hasLechon = @json($haslechon);
 </script>
 
 <script>
     function checkoutForm() {
         return {
             today: new Date(),
-            hasbaka: {{ $hasbaka ? 'true' : 'false' }},
-            haslechon: {{ $haslechon ? 'true' : 'false' }},
+            hasbaka: window.hasBaka || false,
+            haslechon: window.hasLechon || false,
             minDate() {
-                if ({{ $hasbaka ? 'true' : 'false' }}) {
+                if (this.hasbaka == true) {
                     const day = new Date(this.today);
                     day.setDate(day.getDate() + 3);
-                    this.hasbaka = true;
                     return day.toISOString().split('T')[0];
-                } else if ({{ $haslechon ? 'true' : 'false' }}) {
+                } else if (this.haslechon == true) {
                     const tomorrow = new Date(this.today);
                     tomorrow.setDate(tomorrow.getDate() + 1);
-                    this.haslechon = true;
                     return tomorrow.toISOString().split('T')[0];
                 } else {
                     return this.today.toISOString().split('T')[0];
@@ -874,6 +874,8 @@
 
             hasFreeProducts: false,
 
+            clearToProceed: true,
+
             recomputeCouponTotals() {
                 this.totalDiscountAmount = 0;
                 this.shippingDiscountAmount = 0;
@@ -1027,6 +1029,12 @@
                 }
 
                 if (this.errorMessage) {
+                    this.hasErrorMessage = true;
+                    this.isSubmitting = false;
+                    return;
+                }
+
+                if (!this.clearToProceed) {
                     this.hasErrorMessage = true;
                     this.isSubmitting = false;
                     return;
@@ -1236,6 +1244,18 @@
                         // Handle free products if any
                         if (autoCoupon.free_products?.length > 0) {
                             autoCoupon.free_products.forEach(fp => {
+                                if (parseInt(fp.category_id) === 1) {
+                                    this.haslechon = true;
+
+                                    this.need_date = this.minDate();
+                                }
+                                if (fp.slug == 'lechon-baka') {
+                                    this.hasbaka = true;
+
+                                    this.need_date = this.minDate();
+                                }
+
+
                                 if (!this.carts.find(item => item.is_free_product && item.id === fp.id)) {
                                     this.carts.push({
                                         id: fp.id,
@@ -1268,6 +1288,11 @@
                             this.hasFreeProducts = true;
                         }
                     }
+
+        
+                    this.$nextTick(() => {
+                        this.minDate();
+                    });
 
                     // Recompute total
                     this.recomputeCouponTotals();
@@ -1613,6 +1638,17 @@
                     return;
                 }
 
+                // check if need_date and need_time are less than 24 hours from now
+                const selectedDateTime = new Date(`${need_date}T${need_time}`);
+                const now = new Date();
+                const diffInMs = selectedDateTime - now;
+                const diffInHours = diffInMs / (1000 * 60 * 60);
+
+                if (this.haslechon && diffInHours < 24) {
+                    alert(`⚠️ Warning! The date and time you've selected (${need_date} - ${this.formatTime(need_time)}) is less than 24 hours from now. Our standard processing time is at least 24 hours. However, you can still proceed by contacting our store directly at our Call Hotline tab.`);
+                    return;
+                }
+
                 // If valid, add a new blank delivery
                 this.deliveries.push({
                     address: '',
@@ -1641,7 +1677,12 @@
                 delivery.warningMessage = '';
 
                 if (this.haslechon && diffInHours < 24) {
+                    this.clearToProceed = false;
                     delivery.warningMessage = `⚠️ Warning! The date and time you've selected (${delivery.need_date} - ${this.formatTime(delivery.need_time)}) is less than 24 hours from now. Our standard processing time is at least 24 hours. However, you can still proceed by contacting our store directly at our <span class='underline text-blue-600 cursor-pointer' @click='openHotline = true'>Call Hotline</span> tab.`;
+                } else {
+                    this.clearToProceed = true;
+                    this.hasErrorMessage = false;
+                    delivery.warningMessage = '';
                 }
             },
 
