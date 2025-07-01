@@ -242,6 +242,12 @@
                     </div>
 
                     <div class="mt-10">
+                        @if (auth()->check() && auth()->user()->role_id != 6)
+                        <button
+                            class="bg-primary primary-btn text-white w-full px-6 py-3 rounded-md font-semibold flex items-center justify-center gap-2 transition-all duration-300 ease-in-out custom-btn btn-primary">
+                            Add to Cart
+                        </button>
+                        @else
                         <button @click="added = true; add_to_cart('addcart', product.id, quantity, addons);"
                             class="bg-primary primary-btn text-white w-full px-6 py-3 rounded-md font-semibold flex items-center justify-center gap-2 transition-all duration-300 ease-in-out custom-btn btn-primary">
                             <template x-if="!added">
@@ -259,8 +265,8 @@
                                 </span>
                             </template>
                         </button>
+                        @endif
                     </div>
-
                 </div>
             </div>
         </div>
