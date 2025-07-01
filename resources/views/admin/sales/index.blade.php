@@ -347,7 +347,7 @@
                                                             <i data-feather="truck"></i>
                                                         </a>
                                                         <div class="dropdown-menu dropdown-menu-right">
-                                                            @if (auth()->user()->has_access_to_route('sales-transaction.quick_update') && $sale->Paymentadminstatus == 'PAID')
+                                                            @if (auth()->user()->has_access_to_route('sales-transaction.quick_update') && ($sale->isConfirm == 1 || $sale->Paymentadminstatus == 'PAID'))
                                                                 <a class="dropdown-item" href="javascript:void(0);" onclick="change_delivery_status({{$sale->id}}, {{$is_allowed_delivered}})" title="Update Order Status" data-id="{{$sale->id}}">Update Order Status</a>
                                                             @endif
                                                                 @if ($sale->delivery_type == 'Door to door delivery' && ($sale->deliveryAddress && count($sale->deliveryAddress) > 0))
