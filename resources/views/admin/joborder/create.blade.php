@@ -1140,40 +1140,44 @@
     <script>
     /** search customer and display customer details once selected **/
         $(document).ready(function(){
-            var customers = {!! \App\Models\User::customer_lookup() !!}
+            var customersData = {!! \App\Models\User::customer_lookup() !!};
 
             var customers = new Bloodhound({
-                datumTokenizer: Bloodhound.tokenizers.whitespace,
+                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
                 queryTokenizer: Bloodhound.tokenizers.whitespace,
-                local : customers,
-                sufficient: 20
+                local: customersData
             });
 
+            customers.initialize();
 
             $('#input2').tagsinput({
                 maxTags: 1,
-                typeaheadjs: ({
-                    sufficient: 20,
-                    hint: true,
-                    highlight: true,
-                    minLength: 1
-                },
-                {
-                    name : 'customers',
-                    source: customers,
-                    limit: 20
-                })
+                itemValue: 'id',
+                itemText: 'name',
+                typeaheadjs: [
+                    {
+                        hint: true,
+                        highlight: true,
+                        minLength: 1
+                    },
+                    {
+                        name: 'customers',
+                        displayKey: 'name',
+                        source: customers.ttAdapter()
+                    }
+                ]
             });
         });
 
-        function view_customer_details(name)
+
+        function view_customer_details(id)
         {
-            if(name.length > 0){
+            if(id > 0){
                 $.ajax({
                     type: "GET",
                     url: "{{ route('display-customer-details') }}",
-                    data: { name : name },
-                    success: function( response ) {
+                    data: { id : id },
+                    success: function(response) {
                         $('#customer_details').show();
                         $('#customer_details').html(response); 
                         $('#add_ress').val($('#customer_address').val());

@@ -649,9 +649,8 @@ class JoborderController extends Controller
         $input = $request->all();
         
         //$details = SalesHeader::where('customer_name',$request->name)->orderBy('id','desc')->first();
-        $details = User::where('name', 'LIKE', '%'.$request->name.'%')
-                        ->orWhere('organization', 'LIKE', '%'.$request->name.'%')
-                        ->first();
+        $details = User::find($request->id);
+
         return view('admin.joborder.display-customer-details',compact('details'));
 
     }
