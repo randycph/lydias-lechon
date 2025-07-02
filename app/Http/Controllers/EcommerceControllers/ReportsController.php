@@ -802,13 +802,18 @@ class ReportsController extends Controller
             }
         }
 
-        if ($request->filled('startdate')) {
+        if ($request->filled('startdate') && $request->filled('enddate')) {
             $start = date('Y-m-d 00:00:00', strtotime($request->startdate));
             $end = date('Y-m-d 23:59:59', strtotime($request->enddate));
-            $qry .= " AND h.created_at BETWEEN ? AND ?";
-            $params[] = $start;
-            $params[] = $end;
+        } else {
+            $start = now()->startOfDay()->format('Y-m-d H:i:s');
+            $end = now()->endOfDay()->format('Y-m-d H:i:s');
         }
+
+        $qry .= " AND h.created_at BETWEEN ? AND ?";
+        $params[] = $start;
+        $params[] = $end;
+
 
         $qry .= " ORDER BY h.created_at DESC";
         $rs = DB::select($qry, $params);
