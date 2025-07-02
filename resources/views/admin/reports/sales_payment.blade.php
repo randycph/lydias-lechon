@@ -164,7 +164,7 @@
                                     $approvalcode='';
                                     $approvalremarks='';
                                     if($r->status == 'PAID'){
-                                        $b = \App\Approvals::where('reference_id',$r->sales_header_id)->where('approval_type','Payment')->get();
+                                        $b = \App\Models\Approvals::where('reference_id',$r->sales_header_id)->where('approval_type','Payment')->get();
                                         if($b){
                                             $h = 0;
                                             foreach($b as $a){

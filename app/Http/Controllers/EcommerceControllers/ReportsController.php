@@ -1214,6 +1214,24 @@ class ReportsController extends Controller
         return view('admin.reports.audit_trail_per_user',compact('rs','users'));
     }
 
+    public function searchUsers(Request $request)
+    {
+        $search = $request->input('q');
+
+        $users = User::where('role_id', '<>', env('CUSTOMER_ROLE_ID'))
+                    ->when($search, fn($query) => $query->where('name', 'like', "%{$search}%"))
+                    ->orderBy('name')
+                    ->limit(20)
+                    ->get();
+
+        return response()->json([
+            'results' => $users->map(fn($user) => [
+                'id' => $user->id,
+                'text' => $user->name
+            ])
+        ]);
+    }
+
     public function audit_trail_per_sales(Request $request){
         $rs = '';
         $qry = "SELECT l.* FROM `cms_activity_logs` l
@@ -1241,7 +1259,8 @@ class ReportsController extends Controller
         $qry = "SELECT * FROM `cms_activity_logs` where id>0 ";
         // conditions
             if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-                $qry.= " and activity_date >='".date('Y-m-d',strtotime($_GET['startdate']))."' and activity_date <='".date('Y-m-d',strtotime($_GET['enddate']))."'";
+                $qry .= " and activity_date >= '" . date('Y-m-d 00:00:00', strtotime($_GET['startdate'])) . "' and activity_date <= '" . date('Y-m-d 23:59:59', strtotime($_GET['enddate'])) . "'";
+
             }
             else{
                 $qry.= " and activity_date >='".date('Y-m-d 00:00:00')."' and activity_date <='".date('Y-m-d 23:59:59')."'";

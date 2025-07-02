@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="{{ asset('css/dashforge.demo.css') }}">
     <link rel="stylesheet" href="{{ asset('css/skin.deepblue.css') }}">
     <link rel="stylesheet" href="{{ asset('css/custom-admin.css') }}">
+    <link href="{{ asset('lib/select2/css/select2.min.css') }}" rel="stylesheet" />
 
     <link href="{{ asset('lib/ion-rangeslider/css/ion.rangeSlider.min.css') }}" rel="stylesheet">
     <style>
@@ -47,18 +48,14 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="tx-13">Select External User</label>
-                                    <select name="pb" id="pb" class="form-control">
-                                        <option value="">- Select User -</option>
-                                        @forelse($users as $user)
-                                            <option value="{{$user->id}}|{{ $user->email }}">{{$user->name}}</option>
-                                        @empty
-                                        @endforelse                                       
-                                        @if(isset($_GET['pb']) && strlen($_GET['pb'])>0)                                        
-                                            @php 
-                                                $bb = \App\Models\User::whereId($_GET['pb'])->first();
-                                               
+                                    <select id="pb" name="pb" class="form-control select2-ajax" style="width:100%">
+                                        @if(request('pb'))
+                                            @php
+                                                $selectedUser = \App\Models\User::find(request('pb'));
                                             @endphp
-                                            <option value="{{$_GET['pb']}}|{{ $bb->email }}" selected="selected">{{ $bb->name }}</option>
+                                            @if($selectedUser)
+                                                <option value="{{ $selectedUser->id }}" selected>{{ $selectedUser->name }}</option>
+                                            @endif
                                         @endif
                                     </select>
                                 </div>
@@ -147,6 +144,7 @@
 @section('customjs')
 <script src="{{ asset('js/datatables/Buttons-1.6.1/js/buttons.colVis.min.js') }}"></script>
 <script src="https://cdn.datatables.net/plug-ins/1.10.21/sorting/time.js"></script>
+<script src="{{ asset('lib/select2/js/select2.min.js') }}"></script>
 <script>
     $(function() {
         'use strict'
@@ -157,6 +155,26 @@
     });
 
     $(document).ready(function() {
+        $('.select2-ajax').select2({
+            placeholder: 'Select a user',
+            ajax: {
+                url: '{{ route("ajax.search-users") }}',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        q: params.term // search term
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.results
+                    };
+                },
+                cache: true
+            },
+            minimumInputLength: 1
+        });
         $('#example').DataTable( {
             dom: 'Bfrtip',
             pageLength: 20,

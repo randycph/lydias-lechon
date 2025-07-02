@@ -11,9 +11,11 @@ use App\Helpers\ListingHelper;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\EcommerceControllers\ReportsController;
 use App\Http\Controllers\FacebookController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\GlobalSearchController;
+use App\Http\Controllers\Settings\UserController;
 use App\Mail\CartReminderMail;
 use App\Mail\OrderCancelledMail;
 use App\Mail\SalesCompleted;
@@ -498,6 +500,7 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::get('/admin/report/pickup_orders_per_branch', 'EcommerceControllers\ReportsController@pickup_orders_per_branch')->name('admin.report.pickup_orders_per_branch');
     Route::get('/admin/report/commissary_production', 'EcommerceControllers\ReportsController@commissary_production')->name('admin.report.commissary_production');
 
+    Route::get('/admin/ajax/search-users', [ReportsController::class, 'searchUsers'])->name('ajax.search-users');
 
 
 

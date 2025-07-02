@@ -20,6 +20,8 @@
     <link rel="stylesheet" href="{{ asset('css/custom-admin.css') }}">
 
     <link href="{{ asset('lib/ion-rangeslider/css/ion.rangeSlider.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('lib/select2/css/select2.min.css') }}" rel="stylesheet" />
+
     <style>
         .row-selected {
             background-color: #92b7da !important;
@@ -47,12 +49,15 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="tx-13">Select User</label>
-                                    <select name="pb" id="pb" class="form-control">
-                                        <option value="">- Select User -</option>
-                                        @forelse($users as $user)
-                                            <option value="{{$user->id}}" {{ ((isset($_GET['pb']) && strlen($_GET['pb']) > 0) && $_GET['pb'] == $user->id) ? 'selected' : '' }}>{{$user->name}}</option>
-                                        @empty
-                                        @endforelse  
+                                    <select id="pb" name="pb" class="form-control select2-ajax" style="width:100%">
+                                        @if(request('pb'))
+                                            @php
+                                                $selectedUser = \App\Models\User::find(request('pb'));
+                                            @endphp
+                                            @if($selectedUser)
+                                                <option value="{{ $selectedUser->id }}" selected>{{ $selectedUser->name }}</option>
+                                            @endif
+                                        @endif
                                     </select>
                                 </div>
                             </div>
@@ -134,7 +139,8 @@
     <script src="{{ asset('lib/bselect/dist/js/i18n/defaults-en_US.js') }}"></script>
     <script src="{{ asset('lib/prismjs/prism.js') }}"></script>
     <script src="{{ asset('lib/jqueryui/jquery-ui.min.js') }}"></script>
-
+    
+    <script src="{{ asset('lib/select2/js/select2.min.js') }}"></script>
 @endsection
 
 @section('customjs')
@@ -150,6 +156,27 @@
     });
 
     $(document).ready(function() {
+        $('.select2-ajax').select2({
+            placeholder: 'Select a user',
+            ajax: {
+                url: '{{ route("ajax.search-users") }}',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        q: params.term // search term
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.results
+                    };
+                },
+                cache: true
+            },
+            minimumInputLength: 1
+        });
+        
         $('#example').DataTable( {
             dom: 'Bfrtip',
             pageLength: 20,

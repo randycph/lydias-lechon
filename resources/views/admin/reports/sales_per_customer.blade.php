@@ -5,6 +5,12 @@
           size: auto;
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/dashforge.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/dashforge.dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/dashforge.demo.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/skin.deepblue.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/custom-admin.css') }}">
+    <link href="{{ asset('lib/select2/css/select2.min.css') }}" rel="stylesheet" />
 @endsection
 @section('content')
     
@@ -15,26 +21,43 @@
             <div class="col-md-12">
                 <form method="get" action="{{route('admin.report.sales-per-customer')}}">
                     @csrf
-                <table width="100%" style="font-size:12px;font-family:Arial;">
-                    <tr>
-                        <td>Customer:
-                            <select name="customer" id="customer" class="form-control">
-                                <option value="">Select Customer</option>
-                                @forelse($customers as $c)
-                                    <option value="{{$c->customer_name}}">{{$c->customer_name}}</option>
-                                @empty
-                                @endforelse
-                                @isset($_GET['customer'])
-                                    <option value="{{$_GET['customer']}}" selected="selected">{{ $_GET['customer'] }}</option>
-                                @endisset
-                            </select>
-                        </td>
-                        <td>Start: <input type="date" name="startdate" class="form-control input-sm " value="@isset($_GET['startdate']){{ $_GET['startdate'] }}@endisset"></td>
-                        <td>End: <input type="date" name="enddate" class="form-control input-sm " value="@isset($_GET['enddate']){{ $_GET['enddate'] }}@endisset"></td>                        
-                        <td><br><input type="submit" value="Generate" class="btn btn-md btn-success"></td>
-                        <td><br><a href="{{route('admin.report.sales-per-customer')}}" class="btn btn-info mg-t-7 mg-r-5">Reset</a></td>
-                    </tr>
-                </table>
+
+                       <div class="row row-sm">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="tx-13">Select External User</label>
+                                    <select id="pb" name="pb" class="form-control select2-ajax" style="width:100%">
+                                        @if(request('pb'))
+                                            @php
+                                                $selectedUser = \App\Models\User::find(request('pb'));
+                                            @endphp
+                                            @if($selectedUser)
+                                                <option value="{{ $selectedUser->id }}" selected>{{ $selectedUser->name }}</option>
+                                            @endif
+                                        @endif
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="tx-13">Start Date</label>
+                                    <input type="date" required class="form-control input-sm" name="startdate"  autocomplete="off" value="@isset($_GET['startdate']){{ $_GET['startdate'] }}@endisset">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="tx-13">End Date</label>
+                                    <input type="date" required class="form-control input-sm" name="enddate"  autocomplete="off" value="@isset($_GET['enddate']){{ $_GET['enddate'] }}@endisset">
+                                </div>
+                            </div>
+                            <div class="col-md-3 filter-action mg-r-5">
+                            
+                                <button type="submit" class="btn btn-sm btn-primary mg-t-7 mg-r-5">Generate</button>
+                                <a href="{{route('admin.report.sales-per-customer')}}" class="btn btn-sm btn-info mg-t-7 mg-r-5">Reset</a>
+                            </div>
+                        </div>
+
+
                 </form>
                
             </div>
@@ -126,6 +149,7 @@
     <script src="{{ asset('lib/bselect/dist/js/i18n/defaults-en_US.js') }}"></script>
     <script src="{{ asset('lib/prismjs/prism.js') }}"></script>
     <script src="{{ asset('lib/jqueryui/jquery-ui.min.js') }}"></script>
+<script src="{{ asset('lib/select2/js/select2.min.js') }}"></script>
 
 @endsection
 
@@ -141,6 +165,26 @@
     });
 
     $(document).ready(function() {
+        $('.select2-ajax').select2({
+            placeholder: 'Select a user',
+            ajax: {
+                url: '{{ route("ajax.search-users") }}',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        q: params.term // search term
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.results
+                    };
+                },
+                cache: true
+            },
+            minimumInputLength: 1
+        });
         $('#example').DataTable( {
             dom: 'Bfrtip',
             pageLength: 20,
