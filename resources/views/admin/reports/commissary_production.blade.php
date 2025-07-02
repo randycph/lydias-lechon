@@ -40,7 +40,7 @@
 
             <div class="row-sm">
                 <div class="col-md-12">
-                    <form action="{{route('admin.report.delivery_per_production_location')}}" method="get">
+                    <form action="{{route('admin.report.commissary_production')}}" method="get">
                       
                         @csrf
                         <div class="row row-sm">
@@ -50,16 +50,9 @@
                                     <select name="pb" id="pb" class="form-control">
                                         <option value="">- Select Production -</option>
                                         @forelse(\App\EcommerceModel\ProductionBranch::orderBy('name')->get() as $cus)
-                                            <option value="{{$cus->id}}">{{$cus->name}}</option>
+                                            <option value="{{$cus->id}}" {{ (isset($_GET['pb']) && $_GET['pb'] == $cus->id) ? 'selected' : '' }}>{{$cus->name}}</option>
                                         @empty
-                                        @endforelse                                       
-                                        @if(isset($_GET['pb']) && strlen($_GET['pb'])>0)                                        
-                                            @php 
-                                                $bb = \App\EcommerceModel\ProductionBranch::whereId($_GET['pb'])->first();
-                                               
-                                            @endphp
-                                            <option value="{{$_GET['pb']}}" selected="selected">{{ $bb->name }}</option>
-                                        @endif
+                                        @endforelse  
                                     </select>
                                 </div>
                             </div>
