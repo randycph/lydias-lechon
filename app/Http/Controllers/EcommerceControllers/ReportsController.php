@@ -764,35 +764,62 @@ class ReportsController extends Controller
 
     public function sales_per_agent(Request $request)
     {
-       $qry = "SELECT pb.name as prod_branch,jo.jo_number as jnum,h.*,d.*,h.created_at as hcreated,h.id as hid,p.category_id,c.name as catname,d.id as did
-            FROM `ecommerce_sales_details` d
-            left join ecommerce_sales_headers h on h.id=d.sales_header_id
-            left join products p on p.id=d.product_id
-            left join product_categories c on c.id=p.category_id
-            left join job_orders jo on jo.sales_detail_id = d.id
-            left join production_orders po on po.joborder_id = jo.id
-            left join production_branches pb on pb.id = po.branch_id
-         where h.id>0 and h.agent is not null and h.deleted_at is null";
-        // conditions
+        $params = [];
+        $qry = "
+            SELECT 
+                pb.name AS prod_branch,
+                jo.jo_number AS jnum,
+                h.id AS hid,
+                h.created_at AS hcreated,
+                h.agent,
+                h.order_number,
+                h.customer_name,
+                d.id AS did,
+                d.product_id,
+                d.qty,
+                d.price,
+                (d.qty * d.price) AS total,
+                p.category_id,
+                p.name AS product_name,
+                c.name AS catname
 
-            if(isset($_GET['agent']) && $_GET['agent']<>''){
-                if($_GET['agent']=='no-agent')
-                    $qry.= " and (h.agent='' OR h.agent is null)";
-                else
-                    $qry.= " and h.agent='".$_GET['agent']."'";
+            FROM ecommerce_sales_headers h
+            INNER JOIN ecommerce_sales_details d ON h.id = d.sales_header_id
+            LEFT JOIN products p ON p.id = d.product_id
+            LEFT JOIN product_categories c ON c.id = p.category_id
+            LEFT JOIN job_orders jo ON jo.sales_detail_id = d.id
+            LEFT JOIN production_orders po ON po.joborder_id = jo.id
+            LEFT JOIN production_branches pb ON pb.id = po.branch_id
+            WHERE h.agent IS NOT NULL AND h.deleted_at IS NULL
+        ";
+
+        if ($request->filled('agent')) {
+            if ($request->agent === 'no-agent') {
+                $qry .= " AND (h.agent = '' OR h.agent IS NULL)";
+            } else {
+                $qry .= " AND h.agent = ?";
+                $params[] = $request->agent;
             }
+        }
 
+        if ($request->filled('startdate')) {
+            $start = date('Y-m-d 00:00:00', strtotime($request->startdate));
+            $end = date('Y-m-d 23:59:59', strtotime($request->enddate));
+            $qry .= " AND h.created_at BETWEEN ? AND ?";
+            $params[] = $start;
+            $params[] = $end;
+        }
 
-            if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-                $qry.= " and h.created_at >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and h.created_at <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
-            }
-        // end conditions
+        $qry .= " ORDER BY h.created_at DESC";
+        $rs = DB::select($qry, $params);
 
-        $rs = DB::select($qry);
+        $agents = SalesHeader::whereNotNull('agent')
+                    ->where('agent', '<>', '')
+                    ->distinct()
+                    ->orderBy('agent')
+                    ->get(['agent']);
 
-        $agents = SalesHeader::distinct()->where('agent','<>','')->orderBy('agent')->get(['agent']);
-
-        return view('admin.reports.sales_per_agent',compact('rs','agents'));
+        return view('admin.reports.sales_per_agent', compact('rs', 'agents'));
     }
 
     public function sales_per_customer(Request $request)

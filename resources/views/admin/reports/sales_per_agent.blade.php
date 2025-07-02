@@ -38,13 +38,9 @@
                         <td>Agent Code:
                             <select name="agent" id="agent" class="form-control">
                                 <option value="">Select Agent Code</option>
-                                @forelse($agents as $a)
-                                    <option value="{{$a->agent}}">{{$a->agent}}</option>
-                                @empty
-                                @endforelse
-                                @isset($_GET['agent'])
-                                    <option value="{{$_GET['agent']}}" selected="selected">{{ $_GET['agent'] }}</option>
-                                @endisset
+                                @foreach($agents as $a)
+                                    <option value="{{ $a->agent }}" {{ request('agent') == $a->agent ? 'selected' : '' }}>{{ $a->agent }}</option>
+                                @endforeach
                             </select>
                         </td>
                         <td>Start: <input type="date" name="startdate" class="form-control input-sm " value="@isset($_GET['startdate']){{ $_GET['startdate'] }}@endisset"></td>
