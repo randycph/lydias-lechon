@@ -50,16 +50,9 @@
                                     <select name="pb" id="pb" class="form-control">
                                         <option value="">- Select User -</option>
                                         @forelse($users as $user)
-                                            <option value="{{$user->id}}|{{ $user->email }}">{{$user->name}}</option>
+                                            <option value="{{$user->id}}" {{ ((isset($_GET['pb']) && strlen($_GET['pb']) > 0) && $_GET['pb'] == $user->id) ? 'selected' : '' }}>{{$user->name}}</option>
                                         @empty
-                                        @endforelse                                       
-                                        @if(isset($_GET['pb']) && strlen($_GET['pb'])>0)                                        
-                                            @php 
-                                                $bb = \App\Models\User::whereId($_GET['pb'])->first();
-                                               
-                                            @endphp
-                                            <option value="{{$_GET['pb']}}|{{ $bb->email }}" selected="selected">{{ $bb->name }}</option>
-                                        @endif
+                                        @endforelse  
                                     </select>
                                 </div>
                             </div>

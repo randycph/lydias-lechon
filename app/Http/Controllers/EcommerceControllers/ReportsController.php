@@ -1193,15 +1193,15 @@ class ReportsController extends Controller
         $qry = "SELECT * FROM `cms_activity_logs` where id>0 ";
         // conditions
             if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-                $qry.= " and activity_date >='".date('Y-m-d',strtotime($_GET['startdate']))."' and activity_date <='".date('Y-m-d',strtotime($_GET['enddate']))."'";
+                $qry .= " and activity_date >= '" . date('Y-m-d 00:00:00', strtotime($_GET['startdate'])) . "' and activity_date <= '" . date('Y-m-d 23:59:59', strtotime($_GET['enddate'])) . "'";
             }
             else{
                 $qry.= " and activity_date >='".date('Y-m-d 00:00:00')."' and activity_date <='".date('Y-m-d 23:59:59')."'";
             }
 
             if(isset($_GET['pb']) && strlen($_GET['pb'])>=1){
-                $ex = explode("|", $_GET['pb']);
-                $qry.= " and (created_by ='".$ex[0]."' or  created_by ='".$ex[1]."')";
+                $ex = $_GET['pb'];
+                $qry.= " and (created_by ='".$ex."')";
             }
             else{
                 $qry.= " and created_by ='1111111111111111111111111111111111111'";
