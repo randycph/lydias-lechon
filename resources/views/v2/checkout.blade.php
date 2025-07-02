@@ -367,13 +367,19 @@
                                                     <div class="w-full">
                                                         <label :for="'locations' + index" class="font-bold">Select Location <span
                                                                 class="text-red-700">*</span></label>
-                                                        <select x-model="delivery.location" :id="'locations' + index" name="location" @change="getDeliveryFeeForMultipleDelivery" required
+                                                        <select x-model="delivery.location" :id="'locations' + index" name="location" @change="getDeliveryFeeForMultipleDelivery(index)" required
                                                             class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                                             <option selected value="">Choose a location</option>
                                                             @foreach ($locations as $location)
                                                                 <option value="{{ $location->name }}">{{ $location->name }}</option>
                                                             @endforeach
                                                         </select>
+                                                        <p
+                                                            x-show="(!delivery.orders || delivery.orders.length === 0) && delivery.location"
+                                                            class="mt-1 text-red-600"
+                                                        >
+                                                            Order is required to get delivery fee. Please select at least one order for this delivery address.
+                                                        </p>
                                                     </div>
                                                 </div>
 
@@ -1339,60 +1345,45 @@
             //     return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(total);
             // },
 
-            async getDeliveryFeeForMultipleDelivery() {
-                const branch = this.$refs.branch?.value;
-                
-                const locations = this.deliveries.map(d => d.location).filter(Boolean);
+            async getDeliveryFeeForMultipleDelivery(index) {
+                const delivery = this.deliveries[index];
+                const location = delivery.location;
+                const products = delivery?.orders?.map(o => o.product_id);
 
-                if (locations.length === 0) return;
+                console.log('index', index, 'location', location, 'products', products);
+
+                if (!location || products?.length === 0 || products == undefined) return;
 
                 try {
-                    let response = await fetch('{{ route('cart.front.get_shipping_fee_for_multiple_address_new') }}', {
+                    const response = await fetch('{{ route('cart.front.get_shipping_fee_for_multiple_address_new') }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         },
-                        body: JSON.stringify({ locations }),
+                        body: JSON.stringify({ locations: [location], products }),
                     });
 
                     if (!response.ok) throw new Error('Network error');
 
                     const data = await response.json();
+                    const fee = parseFloat(data.fee || 0);
 
-                    // Optional: update deliveryFees if backend returns breakdown
+                    delivery.delivery_fee = fee;
 
-                    if (data.fees) {
-                        this.deliveryFees = data.fees;
+                    // ✅ Always store by index — 1 entry per row
+                    this.deliveryFees[index] = { location, fee };
 
-                        // 🛠 Assign the correct fee to each delivery based on location
-                        this.deliveries.forEach(delivery => {
-                            const feeObj = this.deliveryFees.find(f => f.location === delivery.location);
-                            delivery.delivery_fee = feeObj ? feeObj.fee : 0;
-                        });
+                    console.log('Updated fee at index', index, this.deliveryFees);
 
-                    } else {
-                        // fallback if backend only returns a single total
-                        const perDeliveryFee = data.fee / locations.length;
-                        this.deliveries.forEach(delivery => {
-                            delivery.delivery_fee = perDeliveryFee;
-                        });
-
-                        this.deliveryFees = locations.map(l => ({ location: l, fee: data.fee / locations.length }));
-                    }
-
-
-                    this.deliveryFees = data.fees;
-
-                    this.deliveryFee = data.fee;
-
-                    // Update total fee
-                    // this.deliveryFee = this.deliveryFees.reduce((acc, item) => acc + item.fee, 0);
+                    // ✅ Update total delivery fee
+                    this.deliveryFee = this.deliveries.reduce((sum, d) => sum + parseFloat(d.delivery_fee || 0), 0);
 
                     this.recomputeCouponTotals();
 
                 } catch (e) {
-                    console.error(e);
+                    console.error(`Failed to fetch delivery fee for ${location}`, e);
+                    delivery.delivery_fee = 0;
                 }
             },
 
@@ -1427,6 +1418,8 @@
 
             // When checkbox is toggled
             toggleOrderSelection(delivery, order) {
+                delivery.location = '';
+
                 if (!delivery.orders) delivery.orders = [];
 
                 const index = this.deliveries.indexOf(delivery);

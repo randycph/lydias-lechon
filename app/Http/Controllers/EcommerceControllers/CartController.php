@@ -1284,17 +1284,30 @@ class CartController extends Controller
     public function get_shipping_fee_for_multiple_address_new(Request $request)
     {
         $locations = $request->input('locations');
+        $productIds = $request->input('products', []);
         $totalFee = 0;
         $fees = [];
 
-        $carts = Auth::check()
-            ? Cart::where('user_id', Auth::id())->get()
-            : collect(session('cart', []));
+        $carts = Product::whereIn('id', $productIds)
+            ->get()
+            ->map(function ($product) {
+                return (object)[
+                    'product_id' => $product->id,
+                    'name' => $product->name,
+                    'price' => $product->price,
+                    'paella_price' => $product->paella_price ?? 0,
+                    'qty' => 1,
+                    'photo' => $product->photos()->first() ? asset('storage/products/' . $product->photos()->first()->path) : '',
+                    'product' => $product
+                ];
+            });
+
 
         $check_customer = Auth::check() && \App\Models\DeliveryFeePromo::check_customer(Auth::id()) ? 1 : 0;
 
         // Handle single location
         if (is_string($locations)) {
+            logger('Single location fee calculation', ['location' => $locations]);
             $fee = $this->calculateRate($locations, $carts, $check_customer);
             $fees[] = [
                 'location' => $locations,
@@ -1305,6 +1318,7 @@ class CartController extends Controller
 
         // Handle multiple locations
         if (is_array($locations)) {
+            logger('Multiple locations fee calculation', ['locations' => $locations]);
             foreach ($locations as $loc) {
                 $fee = $this->calculateRate($loc, $carts, $check_customer);
                 $fees[] = [
