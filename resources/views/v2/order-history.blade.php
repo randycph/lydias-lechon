@@ -131,7 +131,7 @@
                                                 <li class="pl-4 flex items-center text-sm justify-between">
                                                     <div>{{ $coupon->coupon_code }}</div>
                                                     <div class="text-right text-red-500 italic">
-                                                    @if ($coupon->coupon->free_product_id)
+                                                    @if ($coupon?->coupon?->free_product_id)
                                                         <span class="text-green-500">Free Products </span>
                                                         @php $products = explode('|', $coupon->coupon->free_product_id); @endphp
                                                         <ul class="mt-2">
