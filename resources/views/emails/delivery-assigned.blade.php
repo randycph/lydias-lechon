@@ -8,12 +8,11 @@ You have been assigned a new delivery. Please see the details below:
 @component('mail::panel')
 **Order Number:** {{ $delivery->order_number }}  
 **Customer Name:** {{ $delivery->customer_name }}  
-**Delivery Address:** {{ $delivery->customer_delivery_address ?? $delivery->customer_address }}  
 **Contact Number:** {{ $delivery->customer_contact_number }}  
 @if ($delivery?->deliveryAddress && count($delivery->deliveryAddress) > 0)
 @else
 @if ($delivery?->items)
-**Scheduled Date and Time:** {{ \Carbon\Carbon::parse($delivery->items[0]->delivery_date)->format('F j, Y') }}
+**Scheduled Date and Time:** {{ \Carbon\Carbon::parse($delivery->items[0]->delivery_date)->format('F j, Y g:i A') }}
 @endif
 @endif
 
@@ -50,7 +49,7 @@ You have been assigned a new delivery. Please see the details below:
 @endforeach
 
 @else
-{{ $delivery->customer_delivery_adress ?? $delivery->customer_address }}
+**Delivery Address:** {{ $delivery->customer_delivery_address ?? $delivery->customer_address }}  
 @endif
 @endcomponent
 
