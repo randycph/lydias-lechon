@@ -711,13 +711,13 @@
 	            					return false;
 						   		}
 
-						   		if(amounttype.length === 0){
-						   			$('#amount_opt').addClass('is-invalid');
-						   			$('#spanAmountOpt').css('display','block');
-						   			$('#spanAmountOpt').html('Please select one(1) option.');
-						   			rs = false;
-	            					return false;
-						   		}
+						   		// if(amounttype.length === 0){
+						   		// 	$('#amount_opt').addClass('is-invalid');
+						   		// 	$('#spanAmountOpt').css('display','block');
+						   		// 	$('#spanAmountOpt').html('Please select one(1) option.');
+						   		// 	rs = false;
+	            				// 	return false;
+						   		// }
 
 						   		rs = true;
 				   			}
