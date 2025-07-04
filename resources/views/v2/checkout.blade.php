@@ -167,7 +167,7 @@
                                         <span class="text-xs ml-1 underline cursor-pointer" @click="removeCoupon(i)">Remove Coupon</span>
                                     </span>
 
-                                    <span class="font-medium italic text-red-700">
+                                    <span class="font-medium italic text-red-700 text-right">
                                         <template x-if="item.free_shipping && shippingDiscountAmount > 0">
                                             <span x-text="'- ₱' + (item.free_shipping_discount_amount == 100 ? deliveryFee : (deliveryFee * item.free_shipping_discount_amount / 100)).toLocaleString(undefined, { minimumFractionDigits: 2 }) + ' (Shipping Discount)'"></span>
                                         </template>
@@ -889,7 +889,6 @@
                 this.coupons.forEach(coupon => {
                     if (coupon.free_shipping) {
                         const allowedLocations = coupon.location.split('|').map(l => l.trim()).filter(l => l !== '');
-                        console.log(this.location)
                         if (coupon.location) {
                             if (allowedLocations.includes(this.location) || allowedLocations.includes('all')) {
                                 if (coupon.free_shipping_discount_amount === 100) {
@@ -907,6 +906,7 @@
                                 this.shippingDiscountAmount += this.deliveryFee * (coupon.free_shipping_discount_amount / 100);
                             }
                         }
+
                     } else {
                         if (coupon.discount_type === 'amount') {
                             this.totalDiscountAmount += parseFloat(coupon.discount ?? 0);
@@ -943,7 +943,9 @@
                 }
 
                 // Compute total
-                let total = orderAmount + deliveryFeeFinal - couponDiscount;
+                let total = orderAmount + deliveryFeeFinal - (couponDiscount + this.shippingDiscountAmount);
+
+                total = total <= 0 ? 0 : total;
 
                 this.totalAmount = total;
                 this.deposit = total.toFixed(2);

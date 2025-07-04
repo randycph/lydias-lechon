@@ -86,10 +86,12 @@
 
                                 @php
                                     $amountPaid = ($sale->payments && count($sale->payments) > 0) ? $sale->payments->sum('amount') : 0;
+                                    $amountPaid = $amountPaid < 0 ? 0 : $amountPaid;
                                     $cartTotal = $total;
                                     $total += $fee;
                                     $discount = $sale->discount_amount ? $sale->discount_amount : 0;
                                     $balance = $total - $amountPaid - $discount;
+                                    $balance = $balance < 0 ? 0 : $balance;
                                 @endphp
             
                                 <div class="flex items-center justify-between w-full mt-4">
@@ -156,13 +158,13 @@
                                         @if ($sale->net_amount && $sale->net_amount > 0)
                                         <div class="flex items-center justify-between w-full">
                                             <div class="text-sm text-black font-bold">Total</div>
-                                            <div class="text-sm font-bold">₱{{ number_format($sale->net_amount, 2) }}</div>
+                                            <div class="text-sm font-bold">₱{{ number_format($sale->net_amount <= 0 ? 0 : $sale->net_amount, 2) }}</div>
                                         </div>
                                         @endif
                                         @if ($sale->payments && count($sale->payments) > 0)
                                         <div class="flex items-center justify-between w-full">
                                             <div class="text-sm text-black font-bold">Amount Paid</div>
-                                            <div class="text-sm text-red-600 font-bold italic">- ₱{{ number_format($amountPaid, 2) }}</div>
+                                            <div class="text-sm text-red-600 font-bold italic">- ₱{{ number_format($amountPaid <= 0 ? 0 : $amountPaid, 2) }}</div>
                                         </div>
                                         @endif
 
@@ -170,7 +172,7 @@
                                         <div class="flex items-center justify-between w-full">
                                             <div class="text-sm text-black font-bold">Amount to pay</div>
                                             <div class="text-sm text-black font-bold">
-                                                ₱{{ number_format($balance, 2) }}
+                                                ₱{{ number_format($balance <= 0 ? 0 : $balance, 2) }}
                                             </div>
                                         </div>
                                         @endif

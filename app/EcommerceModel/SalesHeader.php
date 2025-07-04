@@ -86,7 +86,11 @@ class SalesHeader extends Model
     public static function balance($id){
         $amount = SalesHeader::whereId($id)->sum('net_amount');
         $paid = (float) SalesPayment::where('sales_header_id',$id)->whereStatus('PAID')->sum('amount');
-        return ($amount - $paid);
+        $total = $amount - $paid;
+        if($total < 0){
+            $total = 0;
+        }
+        return $total;
     }
 
     public static function paid($id){

@@ -203,6 +203,8 @@ class CouponController extends Controller
      */
     public function update(Request $request, Coupon $coupon)
     {
+
+        // dd($request->all());
         Validator::make($request->all(), [
             'name' => 'required|max:150|unique:coupons,name,' . $coupon->id,
             'description' => 'required',
@@ -276,7 +278,7 @@ class CouponController extends Controller
             'scope_customer_id' => $request->coupon_scope == 'specific' ? $customernames : NULL,
             'location' => $loc,
             'location_discount_type' => $loc_discount_type,
-            'location_discount_amount' => $loc_discount_amount,
+            'location_discount_amount' => $request->discount_type == 'full' ? null : $loc_discount_amount,
             'reward' => $request->reward,
             'amount' => $request->reward == 'discount-amount-optn' ? $request->discount_amount : NULL,
             'percentage' => $request->reward == 'discount-percentage-optn' ? $request->discount_percentage : NULL,
@@ -831,7 +833,9 @@ class CouponController extends Controller
                 'description' => $coupon->description,
                 'terms' => $coupon->terms_and_conditions,
                 'type' => $coupon->amount_discount_type == 1 ? 'amount' : 'product',
-                'discount_type' => $coupon->percentage > 0 ? 'percent' : 'amount',
+                'discount_type' => $coupon->reward == 'free-shipping-optn'
+                    ? ($coupon->location_discount_type == 'partial' ? 'amount' : 'percent')
+                    : ($coupon->percentage > 0 ? 'percent' : 'amount'),
                 'discount' => $coupon->percentage > 0 ? $coupon->percentage : $coupon->amount,
                 'applies_to' => $coupon->free_product_id ? 'free_product' : ($coupon->purchase_product_id ? 'product' : 'cart'),
                 'purchase_product_id' => $coupon->purchase_product_id,

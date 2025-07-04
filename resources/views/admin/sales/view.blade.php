@@ -217,7 +217,7 @@
                             @if($salesDetails->sum('net_amount') > 0)
                                 <tr style="font-weight:bold;">
                                     <td class="tx-left" colspan="8">Total</td>
-                                    <td class="tx-right">₱{{number_format($sales->net_amount, 2)}}</td> 
+                                    <td class="tx-right">₱{{number_format($sales->net_amount <= 0 ? 0 : $sales->net_amount, 2)}}</td>
                                 </tr>
                             @endif
                             </tbody>

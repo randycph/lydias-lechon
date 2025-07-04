@@ -247,7 +247,7 @@
                     <div class="flex items-center text-sm justify-between px-4 py-4 border-b border-gray-200">
                         <div>Total</div>
                         <div class="text-right font-bold">
-                            <div>₱{{ number_format($sales->net_amount, 2) }}</div>
+                            <div>₱{{ number_format($sales->net_amount <= 0 ? 0 : $sales->net_amount, 2) }}</div>
                         </div>
                     </div>
                 </div>

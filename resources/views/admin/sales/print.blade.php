@@ -227,7 +227,7 @@
                         @if($salesDetails->sum('gross_amount') > 0)
                             <tr style="font-weight:bold;">
                                 <td colspan="4">&nbsp;</td>
-                                <td class="tx-right">Total: {{number_format($sales->net_amount, 2)}}</td> 
+                                <td class="tx-right">Total: {{number_format($sales->net_amount < 0 ? 0 : $sales->net_amount, 2)}}</td>
                             </tr>
                         @endif
                     </tbody>
