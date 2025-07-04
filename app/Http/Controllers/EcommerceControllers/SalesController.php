@@ -1134,7 +1134,7 @@ class SalesController extends Controller
             ];
         }
         if(auth()->user()->role_id == config('auth.driver_role_id')){
-            $userName = Auth::user()->name;
+            $userName = Auth::user()->id;
 
         // Step 1: SalesHeader
         $salesHeaders = SalesHeader::with(['user', 'items', 'deliveryAddress', 'deliveryStatuses'])

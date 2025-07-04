@@ -323,7 +323,7 @@
                                                         </a>
                                                         <div class="dropdown-menu dropdown-menu-right">
                                                             @if (auth()->user()->has_access_to_route('sales-transaction.quick_update'))
-                                                                <a class="dropdown-item" href="javascript:void(0);" onclick="change_delivery_status({{$sale->id}}, {{$is_allowed_delivered}})" title="Update Order Status" data-id="{{$sale->id}}">Update Order Status</a>
+                                                                <a class="dropdown-item" href="javascript:void(0);" onclick="change_delivery_status({{$sale->id}}, {{$is_allowed_delivered}}, '{{$sale['delivery_type']}}')" title="Update Order Status" data-id="{{$sale->id}}">Update Order Status</a>
                                                             @endif
                                                                 <a class="dropdown-item" href="{{route('admin.report.delivery_report',$sale->id)}}" target="_blank" >Print Delivery Receipt</a>
                                                                 <a class="dropdown-item" href="javascript:void(0);" onclick="show_delivery_history({{$sale->id}})" title="Order History" data-id="{{$sale->id}}">Show Order Status History</a>
@@ -976,7 +976,7 @@
 
         });
 
-        function change_delivery_status(id,is_allowed_delivered){
+        function change_delivery_status(id,is_allowed_delivered, delivery_type){
 
             if(is_allowed_delivered == 0){
                 $("#delivery_status option[value='Delivered']").each(function() {
@@ -992,6 +992,10 @@
             }
             $('#prompt-change-delivery-status').modal('show');
             $('#del_id').val(id);
+
+            if (delivery_type == 'Store Pickup') {
+                $("#delivery_status option[value='In Transit']").remove();
+            }
 
             // $('#btnChangeDeliveryStatus').on('click', function() {
             //     let sales = $('#delivery_status').val();

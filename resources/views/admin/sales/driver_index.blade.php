@@ -210,7 +210,7 @@
                                                             <i data-feather="truck"></i>
                                                         </a>
                                                         <div class="dropdown-menu dropdown-menu-right">
-                                                                <a class="dropdown-item" href="javascript:void(0);" onclick="change_delivery_status({{$sale['id']}}, {{$is_allowed_delivered}})" title="Update Order Status" data-id="{{$sale['id']}}">Update Order Status</a>
+                                                                <a class="dropdown-item" href="javascript:void(0);" onclick="change_delivery_status({{$sale['id']}}, {{$is_allowed_delivered}}, '{{$sale['delivery_type']}}')" title="Update Order Status" data-id="{{$sale['id']}}">Update Order Status</a>
                                                                 @if ($sale['delivery_type'] == 'Door to door delivery' && ($sale['delivery_address'] && count($sale['delivery_address']) > 0))
                                                                 <div class="printReceipt" data-addresses="{{ json_encode($sale['delivery_address']) }}" data-saleid="{{ $sale['id'] }}">
                                                                     <button class="dropdown-item">Print Delivery Receipt</button>
@@ -963,7 +963,7 @@
 
         });
 
-        function change_delivery_status(id,is_allowed_delivered){
+        function change_delivery_status(id,is_allowed_delivered, delivery_type){
 
             if(is_allowed_delivered == 0){
                 $("#delivery_status option[value='Delivered']").each(function() {
@@ -979,6 +979,10 @@
             }
             $('#prompt-change-delivery-status').modal('show');
             $('#del_id').val(id);
+
+            if (delivery_type == 'Store Pickup') {
+                $("#delivery_status option[value='In Transit']").remove();
+            }
 
             // $('#btnChangeDeliveryStatus').on('click', function() {
             //     let sales = $('#delivery_status').val();

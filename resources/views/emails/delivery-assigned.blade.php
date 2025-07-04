@@ -11,8 +11,9 @@ You have been assigned a new delivery. Please see the details below:
 **Contact Number:** {{ $delivery->customer_contact_number }}  
 @if ($delivery?->deliveryAddress && count($delivery->deliveryAddress) > 0)
 @else
-@if ($delivery?->items)
-**Scheduled Date and Time:** {{ \Carbon\Carbon::parse($delivery->items[0]->delivery_date)->format('F j, Y g:i A') }}
+@if ($delivery?->items && $delivery->items->count() > 0)
+@php ($items = $delivery->items->first()) @endphp
+**Scheduled Date and Time:** {{ \Carbon\Carbon::parse($items->delivery_date)->format('F d, Y g:i A') }}
 @endif
 @endif
 
@@ -54,7 +55,7 @@ You have been assigned a new delivery. Please see the details below:
 @endcomponent
 
 **Items to Deliver:**
-
+@if ($delivery?->items && $delivery->items->count() > 0)
 @component('mail::table')
 | Item              | Quantity |
 |-------------------|----------|
@@ -62,6 +63,7 @@ You have been assigned a new delivery. Please see the details below:
 | {{ $item->product_name }} | {{ number_format($item->qty, 0) }} |
 @endforeach
 @endcomponent
+@endif
 
 Please ensure a safe and timely delivery.
 
