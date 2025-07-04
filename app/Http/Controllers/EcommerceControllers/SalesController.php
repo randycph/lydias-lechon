@@ -34,6 +34,7 @@ use Illuminate\Support\Facades\Storage;
 
 use App\EcommerceModel\Branch;
 use App\EcommerceModel\JobOrder;
+use App\Mail\DeliveryAssignedMail;
 use App\Models\ActivityLog;
 use App\Models\ProductDeliveryAddress;
 use App\Models\UserBranch;
@@ -829,10 +830,19 @@ class SalesController extends Controller
                 Mail::to($update_delivery_table->sales->email)->send(new DeliveryMovement($update_delivery_table));
             }
 
-            $order = SalesHeader::findOrFail($request->del_id);
+            $order =  SalesHeader::where('id',$request->del_id)->with('deliveryAddress', 'items', 'couponUsed')->first();
             if($order->customer_contact_number && ($request->delivery_status == 'Ready For delivery' || $request->delivery_status == 'Delivered' || $request->delivery_status == 'In Transit')){
                 $sms = new Sms();
                 $sms->send_sms($order->customer_contact_number, 'delivery_update', $order);
+
+                if ($request->delivery_status == 'In Transit') {
+                    $driver = User::where('id', $request->delivered_by)->first();
+
+                    if ($driver && !empty($driver->email)) {
+                        Mail::to($driver->email)->send(new DeliveryAssignedMail($order, $driver));
+                    }
+                    
+                }
             }
 
             //$this->sms_update_order_status($order->customer_contact_number,$order);

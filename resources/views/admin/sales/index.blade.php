@@ -573,7 +573,7 @@
                             <select name="delivered_by" id="delivered_by" class="form-control">
                                 <option value="">- Select -</option>
                                 @foreach(\App\Models\User::where('role_id', 15)->get() as $driver)
-                                    <option value="{{$driver->name}}">{{$driver->name}}</option>
+                                    <option value="{{ $driver->id }}">{{ $driver->name }}</option>
                                 @endforeach
                             </select>
                         </div>

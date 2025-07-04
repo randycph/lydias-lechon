@@ -426,13 +426,10 @@
                                 <x-error-message inputName="delivery_status" />
                             </p>
                         </div>
-                        <div class="form-group" style="display:none;" id="delivered_by_div">
+                        <div class="form-group" id="delivered_by_div" style="display: none">
                             <label for="delivered_by">Delivered by:</label>
                             <select name="delivered_by" id="delivered_by" class="form-control">
-                                <option value="">- Select -</option>
-                                @foreach(\App\Models\User::where('role_id', 15)->get() as $driver)
-                                    <option value="{{$driver->name}}" {{ $driver->name == auth()->user()->name ? 'selected' : '' }}>{{$driver->name}}</option>
-                                @endforeach
+                                <option value="{{ auth()->user()->id }}" selected>{{ auth()->user()->name }}</option>
                             </select>
                         </div>
                         <div class="form-group">
