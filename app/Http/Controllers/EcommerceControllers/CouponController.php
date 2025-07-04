@@ -76,7 +76,6 @@ class CouponController extends Controller
             'customer' => $request->coupon_scope == 'specific' ? 'required' : '',
             'reward' => 'required',
             'code' => $request->coupon_activation == 'manual' ? 'required|unique:coupons,coupon_code' : '',
-            'reward' => 'required',
             'location' => $request->reward == 'free-shipping-optn' ? 'required' : '',
             'shipping_fee_discount_amount' => ($request->reward == 'free-shipping-optn' && $request->discount_type == 'partial') ? 'required' : '',
             'discount_amount' => $request->reward == 'discount-amount-optn' ? 'required' : '',
@@ -143,6 +142,7 @@ class CouponController extends Controller
             'amount_discount_type' => $amount_discount,
             'product_discount' => $request->amount_discount == 2 ? $request->product_discount : NULL,
             'discount_product_id' => $discount_productid,
+            'reward' => $request->reward,
             // 'availability' => ($request->has('availability')) ? 1 : 0,
             'user_id' => Auth::id(),
         ]);
@@ -208,7 +208,6 @@ class CouponController extends Controller
             'description' => 'required',
             'terms_and_conditions' => 'required',
             'customer' => $request->coupon_scope == 'specific' ? 'required' : '',
-            'reward' => 'required',
             'code' => $request->coupon_activation == 'manual' ? 'required' : '',
             'reward' => 'required',
             'location' => $request->reward == 'free-shipping-optn' ? 'required' : '',
