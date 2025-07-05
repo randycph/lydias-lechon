@@ -60,7 +60,7 @@ class ArticleCategoryController extends Controller
     {
         Validator::make($request->all(), [
             'category_name' => 'required|unique:article_categories,name',
-            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:10240|nullable', 
+            'image' => 'image|max:10240|nullable', 
         ])->validate();
 
         $category = ArticleCategory::create([
@@ -109,7 +109,7 @@ class ArticleCategoryController extends Controller
 
         Validator::make($request->all(), [
             'category_name' => 'required|unique:article_categories,name,'.$articleCategory->id,
-            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:10240|nullable',
+            'image' => 'image|max:10240|nullable',
         ])->validate();
 
         if($articleCategory->name == $request->category_name){
