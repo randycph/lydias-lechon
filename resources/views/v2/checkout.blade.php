@@ -886,27 +886,27 @@
                 this.totalDiscountAmount = 0;
                 this.shippingDiscountAmount = 0;
 
+                // Filter out free_shipping coupons with unmatched location
+                this.coupons = this.coupons.filter(coupon => {
+                    if (coupon.free_shipping && coupon.location) {
+                        const allowedLocations = coupon.location
+                            .split('|')
+                            .map(l => l.trim())
+                            .filter(l => l !== '');
+
+                        return allowedLocations.includes(this.location) || allowedLocations.includes('all');
+                    }
+                    return true; // keep all non-shipping coupons
+                });
+
+                // Now compute totals using cleaned coupon list
                 this.coupons.forEach(coupon => {
                     if (coupon.free_shipping) {
-                        const allowedLocations = coupon.location.split('|').map(l => l.trim()).filter(l => l !== '');
-                        if (coupon.location) {
-                            if (allowedLocations.includes(this.location) || allowedLocations.includes('all')) {
-                                if (coupon.free_shipping_discount_amount === 100) {
-                                    this.shippingDiscountAmount += this.deliveryFee;
-                                } else {
-                                    this.shippingDiscountAmount += this.deliveryFee * (coupon.free_shipping_discount_amount / 100);
-                                }
-                            } else {
-                                this.shippingDiscountAmount = 0;
-                            }
+                        if (parseFloat(coupon.free_shipping_discount_amount) === 100) {
+                            this.shippingDiscountAmount += parseFloat(this.deliveryFee);
                         } else {
-                            if (coupon.free_shipping_discount_amount === 100) {
-                                this.shippingDiscountAmount += this.deliveryFee;
-                            } else {
-                                this.shippingDiscountAmount += this.deliveryFee * (coupon.free_shipping_discount_amount / 100);
-                            }
+                            this.shippingDiscountAmount += parseFloat(this.deliveryFee) * (parseFloat(coupon.free_shipping_discount_amount) / 100);
                         }
-
                     } else {
                         if (coupon.discount_type === 'amount') {
                             this.totalDiscountAmount += parseFloat(coupon.discount ?? 0);
@@ -914,9 +914,14 @@
                             this.totalDiscountAmount += (this.orderAmount * parseFloat(coupon.discount ?? 0)) / 100;
                         }
                     }
+
+                    console.log(typeof this.deliveryFee, this.deliveryFee);
+                    console.log(typeof coupon.free_shipping_discount_amount, coupon.free_shipping_discount_amount);
                 });
 
                 console.log('this.this.shippingDiscountAmount', this.shippingDiscountAmount);
+                console.log(this.totalDiscountAmount, this.orderAmount);
+                console.log(this.coupons);
 
                 // Safety cap
                 this.totalDiscountAmount = Math.min(this.totalDiscountAmount, this.orderAmount);
@@ -1066,38 +1071,43 @@
                     }
                 }
 
+                const couponsWithDiscountUsed = this.coupons.map(c => {
+                    let discountUsed = 0;
+
+                    if (c.free_shipping) {
+                        discountUsed =
+                            parseFloat(c.free_shipping_discount_amount) === 100
+                                ? parseFloat(this.deliveryFee)
+                                : parseFloat(this.deliveryFee) * (parseFloat(c.free_shipping_discount_amount) / 100);
+                    } else {
+                        if (c.discount_type === 'amount') {
+                            discountUsed = parseFloat(c.discount ?? 0);
+                        } else if (c.discount_type === 'percent') {
+                            discountUsed = (parseFloat(this.orderAmount) * parseFloat(c.discount ?? 0)) / 100;
+                        }
+                    }
+
+                    return {
+                        ...c,
+                        discount_used: parseFloat(discountUsed.toFixed(2)),
+                    };
+                });
+
+
                 // Add dynamic fields
                 formData.append('shipping_type', this.method);
                 formData.append('coupons', JSON.stringify(this.coupons.map(c => c.code)));
-                formData.append(
-                    'coupons',
-                    JSON.stringify(
-                        this.coupons.map(c => {
-                        let discountUsed = 0;
+                formData.append('coupons', JSON.stringify(couponsWithDiscountUsed));
 
-                        if (c.free_shipping) {
-                            discountUsed =
-                            c.free_shipping_discount_amount === 100
-                                ? this.deliveryFee
-                                : this.deliveryFee * (c.free_shipping_discount_amount / 100);
-                        } else {
-                            if (c.discount_type === 'amount') {
-                            discountUsed = parseFloat(c.discount ?? 0);
-                            } else if (c.discount_type === 'percent') {
-                            discountUsed = (this.orderAmount * parseFloat(c.discount ?? 0)) / 100;
-                            }
-                        }
+                // Get total discount_used
+                const discounted_amount = couponsWithDiscountUsed.reduce((sum, c) => {
+                    return sum + parseFloat(c.discount_used || 0);
+                }, 0);
 
-                        return {
-                            ...c,
-                            discount_used: parseFloat(discountUsed.toFixed(2))
-                        };
-                        })
-                    )
-                );
+                console.log('Total discount used:', discounted_amount);
 
 
-                formData.append('discount_amount', isNaN(this.totalDiscountAmount) ? 0 : this.totalDiscountAmount);
+                formData.append('discount_amount', isNaN(discounted_amount) ? 0 : discounted_amount);
                 formData.append('coupon_data', JSON.stringify(this.coupons));
                 formData.append('order_amount', this.orderAmount);
                 formData.append('delivery_fee', this.deliveryFee);
@@ -1210,7 +1220,11 @@
 
                         this.location = location;
 
+                        this.coupons = this.coupons.filter(coupon => !coupon.free_shipping);
+                        
                         this.recomputeCouponTotals();
+                        
+                        this.loadAutoCoupons();
                         
                     } catch (error) {
                         console.error('There was a problem with the fetch operation:', error);
@@ -1373,12 +1387,12 @@
 
                     delivery.delivery_fee = fee;
 
-                    // ✅ Always store by index — 1 entry per row
+                    // Always store by index — 1 entry per row
                     this.deliveryFees[index] = { location, fee };
 
                     console.log('Updated fee at index', index, this.deliveryFees);
 
-                    // ✅ Update total delivery fee
+                    // Update total delivery fee
                     this.deliveryFee = this.deliveries.reduce((sum, d) => sum + parseFloat(d.delivery_fee || 0), 0);
 
                     this.recomputeCouponTotals();
