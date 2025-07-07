@@ -10,6 +10,7 @@ use App\EcommerceModel\SalesDetail;
 use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\SalesPayment;
 use App\Mail\WelcomeEmail;
+use App\Models\Album;
 use App\Models\Article;
 use App\Models\ArticleCategory;
 use App\Models\Deliverablecities;
@@ -51,7 +52,8 @@ class FrontendController extends Controller
             ->latest()
             ->limit(10)
             ->get();
-        return view('v2.home', compact('categories', 'blogs'));
+        $albums = Album::with('banners')->where('name', 'Home Banner')->first();
+        return view('v2.home', compact('categories', 'blogs', 'albums'));
     }
 
     public function our_story()

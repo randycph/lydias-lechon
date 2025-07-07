@@ -2,23 +2,22 @@
 
 @section('content')
 
-    {{-- Hero Section --}}
-    <div class="pb-16 flex flex-col items-center text-center relative h-screen overflow-hidden" style="background-image: url('{{ asset('/images/hero-bg.png') }}'); background-size: contain; background-position: center;">
+    @if ($albums && $albums->banners->isNotEmpty())
+    @php
+        $banner = $albums->banners->first();
+    @endphp
+    <div class="pb-16 flex flex-col w-full items-center text-center relative h-screen overflow-hidden" style="background-image: url('{{ $banner->image_path }}'); background-size: cover; background-position: center; background-repeat: no-repeat; background-color: rgba(0, 0, 0, 0.5);">
         <div class="relative w-full h-full">
-            @if (isset($_GET['noheading']))
-            @else
             <div class="container absolute flex self-center text-gray-200 px-3 font-cubao z-20 pt-10" style="position-area: center; align-self: anchor-center;">
                 <h1 class="text-8xl lg:text-9xl font-light text-center mx-auto w-full lg:w-[80%] drop-shadow-[0_0_10px_green]">
-                    EVERYDAY LECHON HAPPINESS
+                    {{ $banner->title }}
                 </h1>
             </div>
-            @endif
-            <img src="{{ asset('images/lechon-image3.jpg') }}" alt="Lydias Lechon" class="w-full h-screen object-cover object-right hidden lg:block"> 
-            <img src="{{ asset('images/portrait-hero.jpg') }}" alt="Lydias Lechon" class="w-full h-screen object-cover object-right lg:hidden block"> 
+            {{-- <img src="{{ asset('images/lechon-image3.jpg') }}" alt="Lydias Lechon" class="w-full h-screen object-cover object-right hidden lg:block"> 
+            <img src="{{ asset('images/portrait-hero.jpg') }}" alt="Lydias Lechon" class="w-full h-screen object-cover object-right lg:hidden block">  --}}
         </div>
     </div>
-
-    {{-- Delivery option --}}
+    @endif
 
     @php 
     
