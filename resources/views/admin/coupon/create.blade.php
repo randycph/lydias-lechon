@@ -245,7 +245,11 @@
 								<option @if(old('free_product_id') == $product->id) selected @endif value="{{$product->id}}">{{ $product->name }}</option>
 							@endforeach
 						</select>
-				
+						@error('free_product_id')
+							<span class="invalid-feedback" role="alert">
+								<strong>{{ $message }}</strong>
+							</span>
+						@enderror
 					</div>
 					<hr>
 				</div>
@@ -439,7 +443,7 @@
 						</div>
 					</div>
 
-					<div class="col-12 mt-3" style="display:none;">
+					<div class="col-12 mt-3">
 						<div class="custom-control custom-checkbox">
 							<input {{ (old("combination") ? "checked":"") }} type="checkbox" class="custom-control-input" id="coupon-combination" name="combination">
 							<label class="custom-control-label" for="coupon-combination">Coupon Combination &nbsp;&nbsp;<span style="font-style: italic;">Can be used together with other coupons.</span></label>

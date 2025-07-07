@@ -286,8 +286,9 @@
 					<div class="mb-3 reward-option" id="free-product-optn" style="display:@if(isset($coupon->free_product_id) || $coupon->reward == 'free-product-optn') block @else none @endif">
 						<label class="d-block">Free Product</label>
 						<select class="form-control select2" name="free_product_id[]" style="min-height: 32px;" multiple="multiple">
+							<option label="Choose one"></option>
 							@foreach($free_products as $product)
-								<option @if(in_array($product->id, $selectedFreeProducts)) selected @endif value="{{$product->id}}">{{ $product->name }}</option>
+								<option @if(old('free_product_id') == $product->id) selected @endif value="{{$product->id}}">{{ $product->name }}</option>
 							@endforeach
 						</select>
 						@error('free_product_id')

@@ -56,7 +56,7 @@ class CouponController extends Controller
         $customers = User::where('role_id',6)->where('is_active',1)->get();
 
         $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
-        $free_products = Product::where('category_id',28)->get();
+        $free_products = Product::get();
 
         return view('admin.coupon.create',compact('products','categories','customers','locations','free_products'));
     }
