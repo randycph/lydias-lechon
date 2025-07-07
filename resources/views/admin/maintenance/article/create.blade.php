@@ -31,7 +31,7 @@
 
     <div class="row row-sm">
         <div class="col-lg-12">
-                <form autocomplete="off" action="{{ route('news-categories.store') }}" method="post">
+                <form autocomplete="off" action="{{ route('news-categories.store') }}" method="post" enctype="multipart/form-data">
                     @method('POST')
                     @csrf
                     <div class="row row-sm">
