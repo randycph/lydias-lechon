@@ -56,7 +56,7 @@ class ArticleCategoryController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(ArticleCategoryRequest $request)
+    public function store(Request $request)
     {
         Validator::make($request->all(), [
             'category_name' => 'required|unique:article_categories,name',
@@ -66,7 +66,7 @@ class ArticleCategoryController extends Controller
         $category = ArticleCategory::create([
             'name' => $request->category_name,
             'slug' => Page::convert_to_slug($request->category_name),
-            'user_id'  => auth()->id
+            'user_id'  => auth()->id()
         ]);
 
         return redirect()->route('news-categories.index')->with('success', __('standard.news.category.create_success'));
@@ -103,7 +103,7 @@ class ArticleCategoryController extends Controller
      * @param  \App\Models\ArticleCategory  $articleCategory
      * @return \Illuminate\Http\Response
      */
-    public function update(ArticleCategoryRequest $request, $id)
+    public function update(Request $request, $id)
     {
         $articleCategory = ArticleCategory::findOrFail($id);
 
@@ -150,7 +150,7 @@ class ArticleCategoryController extends Controller
     public function destroy(Request $request)
     {
         $articleCategory = ArticleCategory::findOrFail($request->id);
-        $articleCategory->update([ 'user_id' => auth()->id ]);
+        $articleCategory->update([ 'user_id' => auth()->id() ]);
         $articleCategory->delete();
 
         return back()->with('success', __('standard.news.category.delete_success'));
