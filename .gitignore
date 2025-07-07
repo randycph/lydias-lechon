@@ -1,5 +1,7 @@
 *.env
 readme.md
+public/images
+public/images/*
 public/storage
 .idea/*
 .phpintel/*
