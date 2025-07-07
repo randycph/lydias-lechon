@@ -397,7 +397,8 @@ class User extends Authenticatable implements MustVerifyEmail
        $names = array();
 
         foreach($customers as $customer){
-            $names[] = ['name' => $customer->name, 'id' => $customer->id];
+            $isGuest = (strpos($customer->email, 'lydtmp_') === 0 || empty($customer->email));
+            $names[] = ['name' => $customer->name, 'id' => $customer->id, 'is_guest' => $isGuest];
         }
 
         return json_encode($names);

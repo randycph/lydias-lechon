@@ -1163,7 +1163,12 @@
                     {
                         name: 'customers',
                         displayKey: 'name',
-                        source: customers.ttAdapter()
+                        source: customers.ttAdapter(),
+                        templates: {
+                            suggestion: function (data) {
+                                return `<div>${data.name}${data.is_guest ? ' - Guest' : ''}</div>`;
+                            }
+                        }
                     }
                 ]
             });
