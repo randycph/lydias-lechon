@@ -68,6 +68,19 @@ class ArticleCategoryController extends Controller
             'slug' => Page::convert_to_slug($request->category_name),
             'user_id'  => auth()->id()
         ]);
+        
+
+        if($request->hasFile('image')){
+            $image = $request->file('image');
+            $imageName = time().'.'.$image->getClientOriginalExtension();
+
+            if (!file_exists(public_path('/images/news'))) {
+                mkdir(public_path('/images/news'), 0777, true);
+            }
+            $destinationPath = public_path('/images/news');
+            $image->move($destinationPath, $imageName);
+            $category->update(['image' => $imageName]);
+        }
 
         return redirect()->route('news-categories.index')->with('success', __('standard.news.category.create_success'));
     }
