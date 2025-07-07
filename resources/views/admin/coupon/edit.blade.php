@@ -437,7 +437,7 @@
 
 						<div class="form-group">
 							<label class="d-block">Category</label>
-							<select class="form-control select2" multiple="multiple" name="product_category[]" id="category_opt">
+							<select class="form-control select2" multiple="multiple" name="product_category[]" id="category_opt" {{ $arr_products ? 'disabled' : '' }}>
 								<option label="Choose one"></option>
 								@foreach($categories as $category)
 									<option @if(in_array($category->id,$arr_categories)) selected @endif value="{{$category->id}}">{{ $category->name }}</option>
