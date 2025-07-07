@@ -11,7 +11,7 @@
         carts: [],
         async getCarts() {
             try {
-                this.carts = [];
+                {{-- this.carts = []; --}}
                 let response = await fetch('{{ route('cart.get') }}', {
                     method: 'POST',
                     headers: {
@@ -29,8 +29,6 @@
                 let data = await response.json();
 
                 this.carts = data.cart;
-
-                console.log(data.cart);
 
                 this.cartCount = this.carts?.length ?? 0;
 
@@ -102,14 +100,20 @@
                                         <div class="flex justify-between items-center gap-4 hover:bg-gray-100 py-2" >
                                             <div class="flex gap-4 items-center px-6">
                                                 <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="w-20 h-20 object-cover rounded-md scale-110 bg-center">
-                                                    <template x-if="cart?.product?.photos?.length > 0">
-                                                        <img 
-                                                            :src="cart.product.photos[0].url" 
-                                                            alt="Checkout" 
-                                                            class="w-20 h-20 object-cover rounded-md scale-110" 
-                                                            onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}';">
-                                                    </template>
-                                                    
+                                                    <img
+                                                        x-ref="productImage"
+                                                        x-init="
+                                                            let img = $refs.productImage;
+                                                            img.onerror = () => {
+                                                                img.src = '{{ asset('images/no-image.jpg') }}';
+                                                            };
+                                                            img.src = cart?.product?.photos?.length > 0
+                                                                ? cart.product.photos[cart.product.photos.length - 1]?.url
+                                                                : '{{ asset('images/no-image.jpg') }}';
+                                                        "
+                                                        :alt="cart?.product?.name"
+                                                        class="w-20 h-20 object-cover rounded-md scale-110"
+                                                    />
                                                 </div>
                                                 <div class="flex flex-col gap-1">
                                                     <div class="font-bold" x-text="cart?.product?.name"></div>
@@ -134,6 +138,13 @@
                                                             </svg>
                                                         </button>
                                                     </div>
+                                                    <div class="text-xs italic text-gray-400" x-text="new Date(cart.created_at).toLocaleDateString('en-PH', { 
+                                                        year: 'numeric', 
+                                                        month: 'short', 
+                                                        day: 'numeric', 
+                                                        hour: '2-digit', 
+                                                        minute: '2-digit' 
+                                                    })"></div>
                                                 </div>
                                             </div>
                                             <div class="pr-2">
