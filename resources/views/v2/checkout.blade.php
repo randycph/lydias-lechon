@@ -63,15 +63,20 @@
                             <div class="flex gap-4 items-start w-full relative  border-gray-200 py-3">
                                 <!-- Image -->
                                 <div class="w-20 h-20 min-w-20 min-h-20 bg-center rounded-md overflow-hidden">
-                                    <img 
-                                        onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'"
-                                        :src="item.product?.photos?.length 
-                                            ? '/storage/products/' + item.product.photos[item.product.photos.length - 1].path 
-                                            : @js(asset('images/no-image.jpg'))" 
-                                        
-                                        alt=""
-                                        class="w-20 h-20 object-cover"
-                                    >
+                                    <img
+                                        x-ref="productImage"
+                                        x-init="
+                                            let img = $refs.productImage;
+                                            img.onerror = () => {
+                                                img.src = '{{ asset('images/no-image.jpg') }}';
+                                            };
+                                            img.src = item?.product?.photos?.length > 0
+                                                ? item.product.photos[item.product.photos.length - 1]?.url
+                                                : '{{ asset('images/no-image.jpg') }}';
+                                        "
+                                        :alt="item?.product?.name"
+                                        class="w-20 h-20 object-cover rounded-md scale-110"
+                                    />
                                 </div>
 
                                 <!-- Info -->
