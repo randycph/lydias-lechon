@@ -39,7 +39,8 @@ class FrontendController extends Controller
             ->latest()
             ->limit(10)
             ->get();
-        return view('v2.home', compact('categories', 'blogs'));
+        $albums = Album::with('banners')->where('name', 'Home Banner')->first();
+        return view('v2.home', compact('categories', 'blogs', 'albums'));
     }
 
     public function home()
