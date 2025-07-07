@@ -218,7 +218,7 @@
                     url: "{{ route('news.get-slug') }}",
                     data: { url: url, _token: "{{ csrf_token() }}" }
                 }).done(function(response){
-                    slug_url = '{{env('APP_URL')}}/news/'+response;
+                    slug_url = '{{env('APP_URL')}}/blog/'+response;
                     $('#news_slug').html("<a target='_blank' href='"+slug_url+"'>"+slug_url+"</a>");
                 });
             });

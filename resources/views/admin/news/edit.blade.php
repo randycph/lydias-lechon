@@ -38,7 +38,7 @@
                     <div class="form-group">
                         <label class="d-block">Title *</label>
                         <input type="text" class="form-control @error('news_title') is-invalid @enderror" maxlength="150" name="news_title" id="news_title" value="{{ old('news_title',$article->name) }}" required>
-                        <small id="news_slug">{{ $article->get_url() }}</small>
+                        <small id="news_slug">{{ route('article', ['category' => $article->category->slug, 'slug' => $article->slug]) }}</small>
                         <x-error-message inputName="news_title" />
                     </div>
                     <div class="form-group">
@@ -289,7 +289,7 @@
                     url: "{{ route('news.get-slug') }}",
                     data: {url: url, _token: "{{ csrf_token() }}"}
                 }).done(function (response) {
-                    slug_url = '{{env('APP_URL')}}/news/' + response;
+                    slug_url = '{{env('APP_URL')}}/blog/' + response;
                     $('#news_slug').html("<a target='_blank' href='" + slug_url + "'>" + slug_url + "</a>");
                 });
             });

@@ -153,7 +153,7 @@ Manage News & Blogs
                                         <td style="overflow: hidden;" title="{{$new->name}}">
                                             <strong @if($new->trashed()) style="text-decoration:line-through;" @endif> {{$new->name}}</strong>
                                             <p class="mg-b-0 tx-gray-500 tx-11">
-                                               <a target="_blank" href="{{route('news.front.show',$new->slug)}}">{{route('news.front.show',$new->slug)}}</a>
+                                               <a target="_blank" href="{{ route('article', ['category' => $new->category->slug, 'slug' => $new->slug]) }}">{{ route('article', ['category' => $new->category->slug, 'slug' => $new->slug]) }}</a>
                                             </p>
                                         </td>
                                         <td>
