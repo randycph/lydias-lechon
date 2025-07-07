@@ -123,7 +123,7 @@
                                     $approved_by = '';
                                     $approved_date = '';
                                     if($p->status == 'PAID'){
-                                        $payment_approval = \App\Approvals::where('reference_id',$p->sales_header_id)->where('approval_type','Payment')->first();
+                                        $payment_approval = \App\Models\Approvals::where('reference_id',$p->sales_header_id)->where('approval_type','Payment')->first();
                                         if($payment_approval){
                                             $approval_code = '<br>'.$payment_approval->approval_code;
                                             $approved_by = $payment_approval->user->name;
