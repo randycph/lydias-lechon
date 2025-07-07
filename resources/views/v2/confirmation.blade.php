@@ -5,7 +5,17 @@
 
 @section('content') 
 
-    <div x-data="{ expanded: false }" class="bg-cream">
+    <div x-data="{ 
+        expanded: false,
+        openPaymentModal(amount, sales_header_id) {
+            this.depositModal = true;
+            this.amount = amount;
+            this.sales_header_id = sales_header_id;
+        },
+        depositModal: false,
+        amount: 0,
+        sales_header_id: null,
+    }" class="bg-cream">
         <div class="pb-10 px-4 container">
             <div class="pt-20 pb-5 px-4 flex flex-col justify-start">
                 <h1 class="text-4xl lg:text-7xl font-cubao font-medium text-primary mt-10">order confirmation</h1>
@@ -15,9 +25,19 @@
 
             <div class="flex flex-col px-4  lg:flex-row gap-4 mt-5 w-full max-w-lg justify-start">
                 <a href="{{ route('lechon-menu') }}" class="primary-btn bg-primary border-primary border text-white px-6 py-4 w-full rounded-md text-center">Go Shopping</a>
-                <div class="border border-primary text-primary px-6 py-4 w-full text-center rounded-md">
-                    <a href="{{ route('order-history') }}" class="text-center">View Order History</a>
-                </div>
+                @if (auth()->check())
+                    <div class="border border-primary text-primary px-6 py-4 w-full text-center rounded-md">
+                        <a href="{{ route('order-history') }}" class="text-center">View Order History</a>
+                    </div>
+                @else
+                    @if (strtolower($sales->PaymentStatus) != 'paid')
+                    <button @click="openPaymentModal({{$sales->net_amount}}, '{{ $sales->order_number }}')" type="button"
+                        class="border border-primary text-primary px-6 py-4 w-full text-center rounded-md hover:bg-primary hover:text-white transition-colors duration-300">
+                        Pay Now
+                    </button>
+                    @endif
+                @endif
+
             </div>
 
             @if (count($salesDetails) > 0)
@@ -463,6 +483,97 @@
                 </div>
             </div>
             @endif
+        </div>
+        
+        <div x-show="depositModal"
+            x-transition
+            class="relative z-50"
+            aria-labelledby="modal-title"
+            role="dialog"
+            aria-modal="true"
+            style="display: none;">
+            <!-- Backdrop -->
+            <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
+
+            <!-- Modal content -->
+            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+                    <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg pb-5">
+                        <!-- Modal body -->
+                        <div class="">
+
+                            <div class="flex justify-between items-center px-3 pt-3">
+                                <div class="flex gap-2 items-center">
+                                    <div class="text-2xl font-bold">Amount to pay</div>
+                                </div>
+                                <button @click="depositModal = false" class="self-end text-2xl text-gray-800">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                
+                            <div class="text-gray-600 font-medium px-4 mt-4">
+                                To complete your order, please enter the amount you wish to pay. You can choose to pay the full amount or a partial amount.
+                            </div>
+                
+                            <div class="px-4 mt-5">
+                                <div>
+                                    <form
+                                        x-data="{ isFormSubmitting: false }"
+                                        @submit="isFormSubmitting = true; setTimeout(() => { this.depositModal = true}, 3000)"
+                                        action="{{ route('paymaya.paytest') }}" method="POST" enctype="multipart/form-data" class="flex flex-col">
+                                        
+                                        {{-- action="{{ route('paymaya.pay') }}" method="POST" enctype="multipart/form-data" class="flex flex-col"> --}}
+                                        @csrf
+                                        <input type="hidden" name="sales_header_id" x-model="sales_header_id">
+                            
+                                        <div class="pb-4">
+                                            <img src="{{ asset('images/payment/pay-maya.jpg') }}">
+                                        </div>
+
+                                        <!-- GCash / PayMaya -->
+                                        <div>
+                                            <label class="font-semibold block mb-1">PayMaya:</label>
+                                            <select name="pamenty_mode" id="pamenty_mode_gpay" required class="border-gray-300 rounded-md w-full p-2">
+                                                <option value="PayMaya">PayMaya</option>
+                                            </select>
+                                        </div>
+
+                                        <input type="hidden" id="payment_dt" name="payment_dt">
+                                        <input type="hidden" id="ref_no" name="ref_no">
+                            
+                                        <!-- Amount -->
+                                        <div class="mt-4">
+                                            <label class="font-semibold block mb-1">Amount to Pay:</label>
+                                            <div class="flex">
+                                                <span class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 border-e-0 rounded-s-md">
+                                                    ₱
+                                                </span>
+                                                <input required name="amount" x-model="amount" type="text" id="money" class="rounded-none rounded-e-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full border-gray-300 p-2.5  " placeholder="">
+                                            </div>
+                                        </div>
+                            
+                                        <!-- Submit Button -->
+                                        <div class="text-right mt-4">
+                                            <button :disabled="isFormSubmitting" type="submit" class="bg-primary hover:bg-primary-dark text-white font-semibold px-6 py-2 rounded-md">
+                                                <span x-show="!isFormSubmitting">Submit</span>
+                                                <span x-show="isFormSubmitting" class="flex items-center justify-center gap-2">
+                                                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                                                    </svg>
+                                                    Submitting...
+                                                </span>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <x-footer-component />
     </div>
