@@ -2,6 +2,7 @@
 
 @section('content')
 
+    {{-- Hero Section --}}
     @if ($albums && $albums->banners->isNotEmpty())
     @php
         $banner = $albums->banners->first();
@@ -13,12 +14,12 @@
                     {{ $banner->title }}
                 </h1>
             </div>
-            {{-- <img src="{{ asset('images/lechon-image3.jpg') }}" alt="Lydias Lechon" class="w-full h-screen object-cover object-right hidden lg:block"> 
-            <img src="{{ asset('images/portrait-hero.jpg') }}" alt="Lydias Lechon" class="w-full h-screen object-cover object-right lg:hidden block">  --}}
+            <img src="{{ asset('images/lechon-image3.jpg') }}" alt="Lydias Lechon" class="w-full h-screen object-cover object-right hidden lg:block"> 
+            <img src="{{ asset('images/portrait-hero.jpg') }}" alt="Lydias Lechon" class="w-full h-screen object-cover object-right lg:hidden block"> 
         </div>
     </div>
     @endif
-
+    
     @php 
     
     $blocks = [
