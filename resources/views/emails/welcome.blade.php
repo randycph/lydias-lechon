@@ -3,7 +3,7 @@
 
 We're excited to have you on board.
 
-@component('mail::button', ['url' => route('index')])
+@component('mail::button', ['url' => route('home')])
 Visit Our Website
 @endcomponent
 
