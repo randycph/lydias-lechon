@@ -40,7 +40,7 @@ x-data="{
 }"  class="fixed max-w-8xl top-5 left-1/2 transform -translate-x-[50%] w-[90%] bg-green-700 px-4 flex justify-between items-center z-40 rounded-full">
     @if (isset($page) && $page == 'checkout')
         <div class="text-white font-bold text-lg py-3">
-            <a href="{{ url('/') }}">
+            <a href="{{ route('home') }}">
                 <img src="{{ asset('images/lydia-logo.png') }}" alt="Lydia's Logo" class="w-[60px]">
             </a>
         </div>
@@ -59,7 +59,7 @@ x-data="{
             </svg>
         </button>
         <div class="text-white font-bold text-lg py-3">
-            <a href="{{ url('/') }}">
+            <a href="{{ route('home') }}">
                 <img src="{{ asset('images/lydia-logo.png') }}" alt="Lydia's Logo" class="w-[60px]">
             </a>
         </div>
