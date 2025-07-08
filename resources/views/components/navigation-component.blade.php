@@ -64,21 +64,14 @@ x-data="{
             </a>
         </div>
         <div class="hidden md:flex text-white text-lg gap-4">
-            <a href="{{ route('lechon-menu') }}" class="uppercase hover:bg-primary-dark py-4 px-2 transition-all duration-100">
-                Menu
-            </a>
-            <a href="{{ route('lechon-pricelist') }}" class="uppercase hover:bg-primary-dark py-4 px-2 transition-all duration-100">
-                Lechon Pricelist
-            </a>
-            <a href="{{ route('our-stores') }}" class="uppercase hover:bg-primary-dark py-4 px-2 transition-all duration-100">
-                Stores
-            </a>
-            <a href="{{ route('blogs') }}" class="uppercase hover:bg-primary-dark py-4 px-2 transition-all duration-100">
-                Blogs
-            </a>
-            <button @click="openHotline = true" class="uppercase hover:bg-primary-dark py-4 px-2 transition-all duration-100">
-                Hotline
-            </button>
+            @php
+                $grouped = $menu->navigation->groupBy('parent_id');
+            @endphp
+
+            @foreach ($grouped->get(0, collect()) as $item)
+                @include('components.menu-item', ['item' => $item, 'grouped' => $grouped])
+            @endforeach
+
         </div>
         <div class="flex">
             <button @click="toggleSearch()" aria-label="Search Lydia's lechon website" class="text-white" title="Search Lydia's lechon website">

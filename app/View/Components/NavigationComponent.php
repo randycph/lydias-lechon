@@ -2,6 +2,7 @@
 
 namespace App\View\Components;
 
+use App\Models\Menu;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
@@ -23,6 +24,12 @@ class NavigationComponent extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.navigation-component');
+        $menu = Menu::with(['navigation' => function ($query) {
+            $query->orderBy('page_order', 'asc');
+        }])
+        ->where('name', 'Main Menu')
+        ->first();
+
+        return view('components.navigation-component', compact('menu'));
     }
 }
