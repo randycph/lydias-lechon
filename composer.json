@@ -48,7 +48,8 @@
         },
         "files": [
             "app/Helpers/Shortcode.php",
-            "app/Helpers/Helpers.php"
+            "app/Helpers/Helpers.php",
+            "app/Helpers/ShortcodeHelper.php"
 
         ],
         "classmap": [

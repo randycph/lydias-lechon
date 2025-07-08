@@ -6,14 +6,14 @@
 
 @section('content')
 
-    <div class="container">
-        <div class="pt-32 pb-10 px-4">
+    <div>
+        @if ($page->contents)
+            @php
+                $cleanContent = stripslashes($page->contents);
+            @endphp
 
-            @if ($page->contents)
-                {!! $page->contents !!}
-            @endif
-
-        </div>
+            {!! parse_shortcodes($cleanContent) !!}
+        @endif
     </div>
 
     <x-footer-component />

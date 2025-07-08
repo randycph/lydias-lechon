@@ -1,10 +1,3 @@
-@extends('layouts.guest')
-
-@section('title', 'Updated Lechon Pricelist')
-@section('meta_description', 'Discover our updated lechon pricelist for 2024. Find the perfect lechon for your budget and occasion. Order now for your next celebration!')
-
-@section('content')
-
     <div 
         class=""
         x-data="{ 
@@ -109,15 +102,6 @@
                 }
             })()
         ">
-        <div class="pt-20 pb-5 px-4 container">
-            <h3 class="font-medium uppercase text-center mt-10 text-base lg:text-3xl">Find the perfect lechon for your budget</hh3>
-            <h1 class="text-4xl lg:text-7xl font-cubao font-medium text-primary text-center">lechon pricelist</h1>
-        </div>
-
-        <div>
-
-        </div>
-    
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 px-4 lechons pb-10 container">
             @foreach ($products as $product)
             <div class="bg-white shadow-md rounded-lg  border-primary border lechon flex flex-col justify-between">
@@ -208,16 +192,5 @@
             @endforeach
         </div>
     
-        <x-faq-component />
-    
-        <div class="py-10 lg:py-20 px-4">
-            <h2 class="text-2xl lg:text-7xl font-cubao font-medium text-secondary text-center">your #everydaylechonhappiness</h2>
-        </div>
-    
-        <x-footer-component />
-    
         <x-lechon-cart-component />
     </div>
-    
-@endsection
-
