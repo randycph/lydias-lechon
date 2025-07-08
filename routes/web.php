@@ -43,9 +43,9 @@ use Illuminate\Support\Str;
 // Auth::routes(['verify' => true]);
 
 Route::get('/', [FrontendController::class, 'index'])->name('home');
-Route::get('/home', [FrontendController::class, 'home'])->name('index');
-Route::get('/our-story', [FrontendController::class, 'our_story'])->name('our-story');
-Route::get('/stores', [FrontendController::class, 'our_stores'])->name('our-stores');
+Route::get('/homsse', [FrontendController::class, 'home'])->name('index');
+Route::get('/our-storyyy', [FrontendController::class, 'our_story'])->name('our-story');
+Route::get('/storesss', [FrontendController::class, 'our_stores'])->name('our-stores');
 Route::get('/lechon-pricelistss', [FrontendController::class, 'lechon_pricelist'])->name('lechon-pricelist');
 Route::get('/menuss', [FrontendController::class, 'lechon_menu'])->name('lechon-menu');
 Route::get('/checkout', [FrontendController::class, 'checkout'])->name('checkout');
@@ -62,7 +62,7 @@ Route::get('/my-account', [FrontendController::class, 'my_account'])->name('my-a
 Route::get('/my-cart', [FrontendController::class, 'my_cart'])->name('my-cart');
 Route::get('/order-history', [FrontendController::class, 'order_history'])->name('order-history');
 Route::get('/change-password', [FrontendController::class, 'change_password'])->name('change-password');
-Route::get('/careers', [FrontendController::class, 'carrers'])->name('careers.v2');
+Route::get('/careersss', [FrontendController::class, 'carrers'])->name('careers.v2');
 Route::get('/blogs', [FrontendController::class, 'blogs'])->name('blogs');
 Route::get('/blogs/{category}', [FrontendController::class, 'blogCategory'])->name('blogs-category');
 Route::get('blog/{category}/{slug}', [FrontendController::class, 'article'])->name('article');    

@@ -1,5 +1,6 @@
 <?php
 
+use App\EcommerceModel\Branch;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use Illuminate\Support\Facades\DB;
@@ -113,6 +114,25 @@ if (!function_exists('handle_shortcode')) {
                 }
 
                 return View::make('components.shortcode-menu', compact('categories'))->render();
+
+            case 'shortcodes_categories':
+                $categories = ProductCategory::where('status', 'PUBLISHED')->get();
+
+                return View::make('components.shortcode-categories', compact('categories'))->render();
+
+            case 'shortcodes_newsletter':
+
+                return View::make('components.newsletter-component')->render();
+
+            case 'shortcodes_branches':
+
+                $headOffices = Branch::where('is_head_office', 1)->get();
+                $branches = Branch::with('numbers')->where('is_head_office', 0)->get();
+                $outlets = Branch::where('branch_type', 'Restaurant')->where('is_head_office', 0)->get();
+                $malls = Branch::where('branch_type', 'Mall Based Foodcourt')->where('is_head_office', 0)->get();
+                $kiosks = Branch::where('branch_type', 'Kiosk')->where('is_head_office', 0)->get();
+
+                return View::make('components.shortcode-branches', compact('headOffices', 'branches', 'outlets', 'malls', 'kiosks'))->render();
 
             default:
                 return ''; // Unknown shortcode

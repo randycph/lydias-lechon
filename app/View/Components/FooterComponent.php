@@ -2,6 +2,7 @@
 
 namespace App\View\Components;
 
+use App\Models\Page;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
@@ -21,6 +22,8 @@ class FooterComponent extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.footer-component');
+        $page = Page::where('slug', 'footer')->first();
+
+        return view('components.footer-component', compact('page'));
     }
 }
