@@ -309,9 +309,9 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::post('/admin/popup-message-multiple-change-status','PopupMessageController@multiple_change_status')->name('popup-message.multiple.change.status');
     Route::post('/admin/popup-message-multiple-delete','PopupMessageController@multiple_delete')->name('popup-message.multiple.delete');
 
-    Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']], function () {
-        '\vendor\UniSharp\LaravelFilemanager\Lfm::routes()'; 
-    });
+    // Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']], function () {
+    //     '\vendor\UniSharp\LaravelFilemanager\Lfm::routes()'; 
+    // });
 
     // Files
     Route::get('/admin/laravel-filemanager', '\UniSharp\LaravelFilemanager\Controllers\LfmController@show')->name('file-manager.show');
