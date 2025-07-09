@@ -15,7 +15,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
         $schedule->command('cart:check')->hourly();
         $schedule->command('transactions:check-unpaid')->hourly();
-        $schedule->command('cron:test-email')->everyTenMinutes();
+        // $schedule->command('cron:test-email')->everyTenMinutes();
     }
 
     /**
