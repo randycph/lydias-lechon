@@ -48,8 +48,8 @@ if (!function_exists('handle_shortcode')) {
     {
         switch ($tag) {
             case 'shortcodes_products':
-                $show = isset($attributes['show']) ? (int) $attributes['show'] : 5;
-                $category = isset($attributes['category']) ? (int) $attributes['category'] : null;
+                $show = isset($attributes['show']) ? (int) $attributes['show'] : 100;
+                $category = isset($attributes['category']) ? (int) $attributes['category'] : 1;
 
                 $products = Product::with([
                         'photos',
