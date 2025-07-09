@@ -79,8 +79,8 @@ Route::post('/signup-store', [FrontendController::class, 'signupStore'])->name('
 Route::post('save-personal-information', [FrontendController::class, 'savePersonalInformation'])->name('save-personal-information');
 Route::post('save-delivery-address', [FrontendController::class, 'saveDeliveryAddress'])->name('save-delivery-address');
 
-Route::get('/privacy-policy', [FrontendController::class, 'privacyPolicy'])->name('privacy-policy');
-Route::get('/terms-of-service', [FrontendController::class, 'termsOfService'])->name('terms-of-service');
+Route::get('/privacy-policyss', [FrontendController::class, 'privacyPolicy'])->name('privacy-policy');
+Route::get('/terms-of-servicess', [FrontendController::class, 'termsOfService'])->name('terms-of-service');
 
 
 Route::get('/admin/login', function() {

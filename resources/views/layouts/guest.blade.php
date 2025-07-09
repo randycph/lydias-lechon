@@ -287,9 +287,9 @@
 
     <x-drawer-component />
     
-    <x-hotline-component />
+    {{-- <x-hotline-component /> --}}
 
-    <x-contact-us-component />
+    {{-- <x-contact-us-component /> --}}
 
     <main class="" x-cloak>
         @yield('content')

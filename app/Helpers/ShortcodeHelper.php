@@ -138,6 +138,16 @@ if (!function_exists('handle_shortcode')) {
 
                 return View::make('components.newsletter-component')->render();
 
+            case 'shortcodes_contact_form':
+
+                return View::make('components.shortcode-contact')->render();
+
+            case 'shortcodes_hotline':
+                
+                $headOffices = Branch::where('is_head_office', 1)->get();
+                $branches = Branch::with('numbers')->where('is_head_office', 0)->get();
+                return View::make('components.shortcode-hotline', compact('headOffices', 'branches'))->render();
+
             case 'shortcodes_branches':
 
                 $headOffices = Branch::where('is_head_office', 1)->get();
