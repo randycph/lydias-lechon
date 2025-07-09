@@ -155,7 +155,7 @@ class PopupMessageController extends Controller
 
     public function single_delete(Request $request)
     {
-        $message = PopupMessage::findOrFail($request->messages);
+        $message = PopupMessage::findOrFail($request->coupons);
         $message->update([ 'user_id' => Auth::id() ]);
         $message->delete();
 
