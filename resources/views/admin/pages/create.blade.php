@@ -203,6 +203,7 @@
             filebrowserBrowseUrl: '/laravel-filemanager?type=Files',
             filebrowserUploadUrl: '/laravel-filemanager/upload?type=Files&_token',
             allowedContent: true,
+            contentsCss: ["{{ vite_asset('resources/css/app.css') }}"],
 
         };
         let editor = CKEDITOR.replace('content', options);

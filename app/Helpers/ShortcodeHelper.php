@@ -6,6 +6,20 @@ use App\Models\ProductCategory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 
+if (!function_exists('vite_asset')) {
+    function vite_asset($path)
+    {
+        $manifest = json_decode(file_get_contents(public_path('build/manifest.json')), true);
+        $key = $path;
+
+        if (!isset($manifest[$key])) {
+            throw new Exception("Vite asset not found: {$key}");
+        }
+
+        return asset('build/' . $manifest[$key]['file']);
+    }
+}
+
 if (!function_exists('parse_shortcodes')) {
     function parse_shortcodes($content)
     {
