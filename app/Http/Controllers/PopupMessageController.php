@@ -188,7 +188,7 @@ class PopupMessageController extends Controller
 
     public function multiple_delete(Request $request)
     {
-        $popup_messages = explode("|",$request->messages);
+        $popup_messages = explode("|",$request->coupons);
 
         foreach($popup_messages as $message){
             PopupMessage::whereId($message)->update(['user_id' => Auth::id() ]);
