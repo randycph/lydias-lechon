@@ -19,6 +19,8 @@ class LogsController extends Controller
 
     public function index(Request $request)
     {
+        return redirect()->route('admin.report.audit_trail_per_user');
+
         $listing = new ListingHelper('desc',10,'activity_date');
 
         $logs = $listing->simple_search(Logs::class, $this->searchFields);
