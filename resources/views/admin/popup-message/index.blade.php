@@ -122,7 +122,7 @@
                             		<tr>
 	                                    <th>
 	                                        <div class="custom-control custom-checkbox">
-	                                            <input type="checkbox" class="custom-control-input " id="cb{{ $coupon->id }}">
+	                                            <input type="checkbox" class="custom-control-input cb" id="cb{{ $coupon->id }}">
 	                                            <label class="custom-control-label" for="cb{{ $coupon->id }}"></label>
 	                                        </div>
 	                                    </th>

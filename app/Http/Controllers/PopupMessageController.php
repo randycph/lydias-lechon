@@ -171,11 +171,14 @@ class PopupMessageController extends Controller
 
     public function multiple_change_status(Request $request)
     {
-        $popup_messages = explode("|", $request->messages);
+        $popup_messages = explode("|", $request->coupons);
+
+        $status = $request->status == 'ACTIVE' ? 1 : 0;
 
         foreach ($popup_messages as $message) {
-            PopupMessage::where('is_active', '!=', $request->is_active)->whereId($message)->update([
-                'is_active'  => $request->is_active,
+            $id = (int) $message;
+            PopupMessage::where('is_active', '!=', $status)->whereId($id)->update([
+                'is_active'  => $status,
                 'user_id' => Auth::id()
             ]);
         }
