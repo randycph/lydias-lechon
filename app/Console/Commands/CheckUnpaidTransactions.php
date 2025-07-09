@@ -17,7 +17,8 @@ class CheckUnpaidTransactions extends Command
         $now = Carbon::now();
 
         // Transactions unpaid for 2+ days (but less than 5)
-        $remind = SalesHeader::where('payment_status', 'UNPAID')
+        $remind = SalesHeader::where('payment_status', '!=', 'PAID')
+            ->where('status', '!=', 'CANCELLED')
             ->whereDate('created_at', '<=', $now->copy()->subDays(2))
             ->whereDate('created_at', '>', $now->copy()->subDays(5))
             ->get();
@@ -27,7 +28,8 @@ class CheckUnpaidTransactions extends Command
         }
 
         // Transactions unpaid for 5+ days — cancel them
-        $cancel = SalesHeader::where('payment_status', 'UNPAID')
+        $cancel = SalesHeader::where('payment_status', '!=', 'PAID')
+            ->where('status', '!=', 'CANCELLED')
             ->whereDate('created_at', '<=', $now->copy()->subDays(5))
             ->get();
 
