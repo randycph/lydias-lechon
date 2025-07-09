@@ -180,9 +180,9 @@
                 @if (auth()->user()->has_access_to_website_settings_module())
                     <li @if (\Route::current()->getName() == 'settings.edit') class="active" @endif><a href="{{ route('settings.edit', 1) }}">Website Settings</a></li>
                 @endif
-                @if (auth()->user()->has_access_to_audit_logs_module())
+                {{-- @if (auth()->user()->has_access_to_audit_logs_module())
                     <li @if (\Route::current()->getName() == 'settings.audit') class="active" @endif><a href="{{ route('settings.audit') }}">Audit Trail</a></li>
-                @endif
+                @endif --}}
             </ul>
         </li>
         @if (auth()->user()->has_access_to_user_module())
