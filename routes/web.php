@@ -314,8 +314,8 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     });
 
     // Files
-    // Route::get('/laravel-filemanager', '\UniSharp\LaravelFilemanager\Controllers\LfmController@show')->name('file-manager.show');
-    // Route::post('/laravel-filemanager/upload', '\UniSharp\LaravelFilemanager\Controllers\UploadController@upload');
+    Route::get('/admin/laravel-filemanager', '\UniSharp\LaravelFilemanager\Controllers\LfmController@show')->name('file-manager.show');
+    Route::post('/admin/laravel-filemanager/upload', '\UniSharp\LaravelFilemanager\Controllers\UploadController@upload');
     Route::get('/admin/file-manager', 'FileManagerController@index')->name('file-manager.index');
     //
 
