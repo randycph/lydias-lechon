@@ -128,7 +128,15 @@
 	                                    </th>
 	                                    <td>{{ $coupon->title }}</td>
 	                                    <td>{{ $coupon->url }}</td>
-	                                    <td>{{ $coupon->is_active }}</td>
+	                                    <td>
+	                                    	@if($coupon->is_active == 1)
+	                                    		<span class="badge badge-success">Active</span>
+	                                    	@endif
+
+	                                    	@if($coupon->is_active != 1)
+	                                    		<span class="badge badge-secondary">Inactive</span>
+	                                    	@endif
+                                        </td>
 	                                    
 	                                    <td>
 	                                        @if($coupon->trashed())
@@ -265,7 +273,7 @@
     <script src="{{ asset('lib/ion-rangeslider/js/ion.rangeSlider.min.js') }}"></script>
 
     <script>
-        let listingUrl = "{{ route('coupons.index') }}";
+        let listingUrl = "{{ route('popup-message.index') }}";
         let advanceListingUrl = "";
         let searchType = "{{ $searchType }}";
     </script>
