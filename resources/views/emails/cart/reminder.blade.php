@@ -22,7 +22,7 @@ You still have items waiting in your cart. Here’s a quick summary:
 
 ## Grand Total: **{{ format_price($grandTotal) }}**
 
-@component('mail::button', ['url' => url('/')])
+@component('mail::button', ['url' => route('my-cart')])
 Return to Shop
 @endcomponent
 
