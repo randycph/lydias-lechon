@@ -33,6 +33,8 @@ class ProductFrontController extends Controller
 
     public function show_forsale(){
 
+        return redirect()->route('order-history');
+
         $products = DB::table('products')->where('for_sale', '1')->whereNull('deleted_at')->where('status','PUBLISHED')->where('for_sale_web','1')->where('is_misc','0')->select('name')->distinct()->get();
 
         $miscs = DB::table('products')->where('for_sale', '1')->whereNull('deleted_at')->where('status','PUBLISHED')->where('for_sale_web','1')->where('is_misc','1')->select('name')->distinct()->get();
