@@ -126,14 +126,16 @@
 	                                            <label class="custom-control-label" for="cb{{ $coupon->id }}"></label>
 	                                        </div>
 	                                    </th>
-	                                    <td>{{ $coupon->title }}</td>
-	                                    <td>{{ $coupon->url }}</td>
 	                                    <td>
-	                                    	@if($coupon->is_active == 1)
+                                            <strong @if($coupon->trashed()) style="text-decoration:line-through;" @endif title="{{$coupon->title}}"> {{$coupon->title}}</strong>
+                                        </td>
+	                                    <td>{{ $coupon->url }}</td>
+	                                    <td>	                                    	
+                                            @if ($coupon->trashed())
+                                                <span class="badge badge-danger">Deleted</span>
+                                            @elseif($coupon->is_active == 1)
 	                                    		<span class="badge badge-success">Active</span>
-	                                    	@endif
-
-	                                    	@if($coupon->is_active != 1)
+	                                    	@elseif($coupon->is_active != 1)
 	                                    		<span class="badge badge-secondary">Inactive</span>
 	                                    	@endif
                                         </td>
