@@ -83,7 +83,12 @@ class Permission extends Model
             'delivery_rate' => 'Delivery Rate',
             'branch' => 'Branch',
             'sales_transaction' => 'Sales Transaction',
-            'shareable_link' => 'Shareable Link'
+            'shareable_link' => 'Shareable Link',
+            'coupon' => 'Coupons',
+            'popup_message' => 'Popup Messages',
+            'driver_sale_transaction' => 'Driver Sale Transactions',
+            'sales_transaction_payment' => 'Sales Transaction Payment',
+            'mailing_list' => 'Mailing List',
         ];
     }
     
