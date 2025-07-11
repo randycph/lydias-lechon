@@ -38,16 +38,18 @@ class CheckCarts extends Command
     
             if ($diffInDays >= 2) {
                 // Send reminder email with all their cart items
-                Mail::to($user->email)->send(new CartReminderMail($userCarts));
-                $this->info('Reminder sent to ' . $user->email);
-            } 
-            
+                if ($user->receive_updates) {
+                    Mail::to($user->email)->send(new CartReminderMail($userCarts));
+                    logger('Reminder sent to ' . $user->email);
+                }
+            }
+
             if ($diffInDays >= 5) {
                 // Delete all their cart items
                 foreach ($userCarts as $cart) {
                     $cart->delete();
                 }
-                $this->info('Deleted carts for user ID ' . $userId);
+                logger('Deleted carts for user ID ' . $userId);
             }
         }
     }
@@ -74,14 +76,14 @@ class CheckCarts extends Command
 
     //         if ($diffInHours >= 1) {
     //             Mail::to($user->email)->send(new CartReminderMail($userCarts));
-    //             $this->info('Reminder sent to ' . $user->email);
+    //             logger('Reminder sent to ' . $user->email);
     //         }
 
     //         if ($diffInHours >= 120) {
     //             foreach ($userCarts as $cart) {
     //                 $cart->delete();
     //             }
-    //             $this->info('Deleted carts for user ID ' . $userId);
+    //             logger('Deleted carts for user ID ' . $userId);
     //         }
     //     }
     // }

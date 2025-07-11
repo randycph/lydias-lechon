@@ -99,6 +99,15 @@
                                     @enderror
                                 </div>
                             </div>
+                            <div class="mb-5">
+                                <label class="inline-flex items-center">
+                                    <input type="checkbox" name="receive_updates" value="1" {{ auth()->user()->receive_updates == 1 ? 'checked' : '' }} class="form-checkbox h-5 w-5 text-blue-600">
+                                    <span class="ml-2 text-gray-700">Receive updates, reminders, and special offers via email</span>
+                                </label>
+                                @error('receive_updates')
+                                    <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
         
                         <div class="w-full px-6">

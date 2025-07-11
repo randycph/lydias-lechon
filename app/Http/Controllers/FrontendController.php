@@ -575,12 +575,21 @@ class FrontendController extends Controller
                 'required',
                 'regex:/^(09|\+639)\d{9}$/'
             ],
+            'receive_updates' => 'nullable',
             'email' => 'required|email:rfc,dns|max:191|unique:users,email,' . Auth::id(), 
+
         ], [
             'contact_mobile.regex' => 'The mobile number must start with 09 or +639 and be followed by 9 digits.',
         ]);
 
         $user = Auth::user();
+
+        if ($request->has('receive_updates')) {
+            $validated['receive_updates'] = $request->receive_updates ? 1 : 0;
+        } else {
+            $validated['receive_updates'] = 0;
+        }
+
         if ($request->account_type == 'organization') {
             $validated['name'] = $request->organization;
         } elseif ($request->account_type == 'individual') {

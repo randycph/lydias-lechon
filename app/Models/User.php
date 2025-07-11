@@ -31,7 +31,7 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'email_verified_at', 'password', 'google_id', 'role_id', 'is_active', 'country', 'remember_token', 'username', 'user_type', 'firstname', 'lastname', 'avatar', 'user_id', 'address_street', 'address_municipality', 'address_city', 'address_region', 'international_address' ,'address_brgy', 'registration_source', 'contact_tel', 'contact_mobile', 'contact_fax', 'contact_person', 'is_org', 'organization', 'agent_code', 'birthday', 'security_questions', 'security_answer', 'branch', 'isDeleted','is_subscribe','allowed_payments'
+        'name', 'email', 'email_verified_at', 'receive_updates', 'password', 'google_id', 'role_id', 'is_active', 'country', 'remember_token', 'username', 'user_type', 'firstname', 'lastname', 'avatar', 'user_id', 'address_street', 'address_municipality', 'address_city', 'address_region', 'international_address' ,'address_brgy', 'registration_source', 'contact_tel', 'contact_mobile', 'contact_fax', 'contact_person', 'is_org', 'organization', 'agent_code', 'birthday', 'security_questions', 'security_answer', 'branch', 'isDeleted','is_subscribe','allowed_payments'
     ];
 
     /**
