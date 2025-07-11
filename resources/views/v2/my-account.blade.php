@@ -23,7 +23,20 @@
                     </div>
                     <form method="POST" action="{{ route('save-personal-information') }}" class="flex items-start font-bold flex-col gap-2  py-5 border-b border-[#DFDFDF]">
                         @csrf
+                        <input type="hidden" name="account_type" value="{{ auth()->user()?->is_org ? 'organization' : 'individual' }}" />
                         <div class="px-6 w-full">
+                            @if (auth()->check() && auth()->user()?->is_org)
+                            <div class="mb-5">
+                                <label for="organization" class="block mb-2 font-bold text-gray-900">Organization Name <span class="text-red-800">*</span> </label>
+                                <input type="text" id="organization" name="organization" value="{{ old('organization', auth()->user()->organization) }}"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                                    placeholder="" required />
+                                
+                                @error('organization')
+                                    <p class="text-red-500 text-xs italic mt-2">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            @else
                             <div class="mb-5">
                                 <label for="firstname" class="block mb-2 font-bold text-gray-900">First Name <span class="text-red-800">*</span> </label>
                                 <input type="text" id="firstname" name="firstname" value="{{ auth()->user()->firstname }}"
@@ -46,6 +59,7 @@
                                 @enderror
 
                             </div>
+                            @endif
                             <div class="mb-5">
                                 <label for="email" class="block mb-2 font-bold text-gray-900">Email address <span class="text-red-800">*</span> </label>
                                 <input type="email" id="email" name="email" value="{{ auth()->user()->email }}"

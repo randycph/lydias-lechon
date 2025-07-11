@@ -557,12 +557,17 @@ class FrontendController extends Controller
         }
 
         $validated = $request->validate([
+            'organization' => [
+                'required_if:account_type,organization',
+                'nullable',
+                'regex:/^[A-Za-z\s\-]+$/'
+            ],
             'firstname' => [
-                'required',
+                'required_if:account_type,individual',
                 'regex:/^[A-Za-z\s\-]+$/'
             ],
             'lastname' => [
-                'required',
+                'required_if:account_type,individual',
                 'regex:/^[A-Za-z\s\-]+$/'
             ],
             'birthday' => 'nullable|date',
@@ -576,6 +581,11 @@ class FrontendController extends Controller
         ]);
 
         $user = Auth::user();
+        if ($request->account_type == 'organization') {
+            $validated['name'] = $request->organization;
+        } elseif ($request->account_type == 'individual') {
+            $validated['name'] = $request->firstname . ' ' . $request->lastname;
+        }
         $user->update($validated);
 
         return redirect(route('my-account'))->with('success', 'Personal information updated successfully!');
