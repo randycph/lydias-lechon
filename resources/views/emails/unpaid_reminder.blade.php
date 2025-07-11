@@ -7,7 +7,7 @@ We noticed your order (Order #{{ $order->order_number }}) placed on {{ $order->c
 
 Please complete your payment to ensure we can process and deliver your order on time.
 
-@component('mail::button', ['url' => url('/account/orders')])
+@component('mail::button', ['url' => url('/account/order-history')])
 Pay Now
 @endcomponent
 

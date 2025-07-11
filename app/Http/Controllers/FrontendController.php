@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Intervention\Image\Colors\Rgb\Channels\Red;
 
 class FrontendController extends Controller
 {
@@ -229,7 +230,7 @@ class FrontendController extends Controller
         $page = 'login';
 
         if (Auth::check()) {
-            return redirect()->route('my-account');
+            return redirect()->intended(route('my-account'));
         }
 
         return view('v2.login', compact('page'));
@@ -261,18 +262,18 @@ class FrontendController extends Controller
         $request->session()->forget('redirect_after_login');
         
         if (!Auth::check()) {
-            return redirect()->route('login');
+            return redirect()->route('login', ['redirect' => $request->fullUrl()]);
         }
 
         return view('v2.my-account', compact('page'));
     }
 
-    public function my_cart()
+    public function my_cart(Request $request)
     {
         $page = 'my-cart';
         
         if (!Auth::check()) {
-            return redirect()->route('login');
+            return redirect()->route('login', ['redirect' => $request->fullUrl()]);
         }
 
         if (Auth::check() && Auth()->user()->role_id != 6) {
@@ -282,10 +283,10 @@ class FrontendController extends Controller
         return view('v2.my-cart', compact('page'));
     }
 
-    public function order_history()
+    public function order_history(Request $request)
     {
         if (!Auth::check()) {
-            return redirect()->route('login');
+            return redirect()->route('login', ['redirect' => $request->fullUrl()]);
         }
 
         if (Auth::check() && Auth()->user()->role_id != 6) {
@@ -311,12 +312,12 @@ class FrontendController extends Controller
         return view('v2.order-history', compact('page', 'sales'));
     }
 
-    public function change_password()
+    public function change_password(Request $request)
     {
         $page = 'change-password';
 
         if (!Auth::check()) {
-            return redirect()->route('login');
+            return redirect()->route('login', ['redirect' => $request->fullUrl()]);
         }
 
         return view('v2.change-password', compact('page'));
