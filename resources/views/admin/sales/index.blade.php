@@ -249,7 +249,7 @@
                                                         if ($dateneeded != '') {
                                                             $dateneeded .= ', ';
                                                         }
-                                                        $dateneeded .= \Carbon\Carbon::parse($address->delivery_date)->format('Y-m-d H:i A');
+                                                        $dateneeded .= \Carbon\Carbon::parse($address?->delivery_date . ' ' . $address?->delivery_time)->format('Y-m-d H:i A');
                                                     }
                                                 @endphp
                                                     {{ $dateneeded }}
