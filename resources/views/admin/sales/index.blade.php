@@ -249,7 +249,7 @@
                                                         if ($dateneeded != '') {
                                                             $dateneeded .= ', ';
                                                         }
-                                                        $dateneeded .= \Carbon\Carbon::parse($address?->delivery_date . ' ' . $address?->delivery_time)->format('Y-m-d H:i A');
+                                                        $dateneeded .= \Carbon\Carbon::parse($address->delivery_date . ' ' . $address->delivery_time)->format('Y-m-d H:i A');
                                                     }
                                                 @endphp
                                                     {{ $dateneeded }}
@@ -561,7 +561,7 @@
                                 <option value="Processing">Processing</option>
                                 <option value="Ready For delivery">Ready For delivery</option>
                                 <option value="In Transit">In Transit</option>
-                                <option value="Delivered">Delivered</option>
+                                <option value="Delivered">Delivered/Picked Up</option>
                                 <option value="Returned">Returned</option>
                             </select>
                             <p class="tx-10 text-danger" id="error">
