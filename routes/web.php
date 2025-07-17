@@ -792,7 +792,7 @@ Route::get('unpaid-transaction-reminder', function () {
 
 Route::get('tests/sms', function() {
     $sms = new Sms();
-    $salesHeader = SalesHeader::find(10723);
+    $salesHeader = SalesHeader::latest()->first();
     $sms->send_sms('+639174128392', 'new_order', $salesHeader);
 });
 
