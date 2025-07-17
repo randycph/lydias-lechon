@@ -133,6 +133,42 @@ class Sms
 
 	public function new_order($receiver, $order){
 		
+// $curl = curl_init();
+
+// curl_setopt_array($curl, [
+//   CURLOPT_URL => "https://sms.8x8.com/api/v1/subaccounts/Lydia_MKT/messages",
+//   CURLOPT_RETURNTRANSFER => true,
+//   CURLOPT_ENCODING => "",
+//   CURLOPT_MAXREDIRS => 10,
+//   CURLOPT_TIMEOUT => 30,
+//   CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+//   CURLOPT_CUSTOMREQUEST => "POST",
+//   CURLOPT_SSL_VERIFYPEER => false,
+//   CURLOPT_SSL_VERIFYHOST  => false,
+//   CURLOPT_POSTFIELDS => json_encode([
+//     'encoding' => 'AUTO',
+//     'track' => null,
+//     'destination' => '+639174128392',
+//     'text' => 'hello wrld'
+//   ]),
+//   CURLOPT_HTTPHEADER => [
+//     "accept: application/json",
+//     "authorization: Bearer dwD2PXjYKV9kQv6KAI1l4ohYEjuOEwIoeoTPtwrEkU",
+//     "content-type: application/json"
+//   ],
+// ]);
+
+// $response = curl_exec($curl);
+// $err = curl_error($curl);
+
+// curl_close($curl);
+
+// if ($err) {
+//   echo "cURL Error #:" . $err;
+// } else {
+//   echo $response;
+// }
+
 		$message = "Hi $order->customer_name. Thank you for choosing Lydia's Lechon! Your order #".$order->order_number." is currently being process, kindly wait for order confirmation upon validation of your payment.";
 		$ch = curl_init();
 

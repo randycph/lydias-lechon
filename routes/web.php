@@ -29,6 +29,7 @@ use App\Models\Deliverablecities;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Setting;
+use App\Models\Sms;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -789,6 +790,13 @@ Route::get('unpaid-transaction-reminder', function () {
     ]);
 });
 
+Route::get('tests/sms', function() {
+    $sms = new Sms();
+    $salesHeader = SalesHeader::find(10723);
+    $sms->send_sms('+639174128392', 'new_order', $salesHeader);
+});
+
 Route::get('/{slug}', [FrontendController::class, 'page'])->name('page');
+
 
 
