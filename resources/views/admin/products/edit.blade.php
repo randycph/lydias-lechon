@@ -77,6 +77,16 @@
                 </div>
                 <div class="col-lg-12">
                     <div class="form-group">
+                        <label class="d-block">Sold out</label>
+                        <div class="custom-control custom-switch @error('sold_out') is-invalid @enderror">
+                            <input type="checkbox" class="custom-control-input" name="sold_out" {{ (old("sold_out", $product->sold_out) ? "checked":"") }} id="customSwitch13">
+                            <label class="custom-control-label" id="label_visibility13" for="customSwitch13">{{ (old("sold_out", $product->sold_out) ? "Yes":"No") }}</label>
+                            <x-error-message inputName="sold_out" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="form-group">
                         <label class="d-block" id="long_descriptionLabel">Description</label>
                         <textarea name="long_description" id="editor1" rows="10" cols="80">
                              {{ old('long_description', $product->description) }}
@@ -479,6 +489,15 @@
                 }
                 else{
                     $('#label_visibility3').html('No');
+                }
+            });
+
+            $("#customSwitch13").change(function() {
+                if(this.checked) {
+                    $('#label_visibility13').html('Yes');
+                }
+                else{
+                    $('#label_visibility13').html('No');
                 }
             });
 

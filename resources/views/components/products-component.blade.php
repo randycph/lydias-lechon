@@ -18,7 +18,7 @@
                 </a>
                 <div class="flex justify-between mt-4">
                     <div class="font-bold">{{ $category->name }}</div>
-                    <a href="{{ route('lechon-menu') }}?s={{ $category->slug }}" class="bg-primary custom-btn btn-primary-dark text-white rounded-md px-4 py-2 flex items-center justify-center text-sm">Shop Now</a>
+                    <a href="/menu?s={{ $category->slug }}" class="bg-primary custom-btn btn-primary-dark text-white rounded-md px-4 py-2 flex items-center justify-center text-sm">Shop Now</a>
                 </div>
             </div>
         @endforeach

@@ -78,6 +78,7 @@ if (!function_exists('handle_shortcode')) {
                             ->pluck('product_id');
 
                         $fallbackAddons = Product::whereIn('id', $addonProductIds)
+                            ->where('sold_out', 0)
                             ->where('status', 'PUBLISHED')
                             ->with(['photos'])
                             ->get();
@@ -118,6 +119,7 @@ if (!function_exists('handle_shortcode')) {
                                 ->pluck('product_id');
 
                             $fallbackAddons = Product::whereIn('id', $addonProductIds)
+                                ->where('sold_out', 0)
                                 ->where('status', 'PUBLISHED')
                                 ->with(['photos'])
                                 ->get();

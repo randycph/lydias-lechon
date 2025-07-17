@@ -186,7 +186,11 @@
                     @endif
                 </div>
                 <div class="mt-4 border-t border-primary ">
+                    @if (isset($product->sold_out) && $product->sold_out == 1)
+                    <button class="text-primary px-4 py-3 lg:py-5 w-full custom-btnbtn-primary text-base lg:text-xl" disabled>Sold out</button>
+                    @else
                     <button @click="show(@js($product))" class="text-primary px-4 py-3 lg:py-5 w-full custom-btn btn-primary text-base lg:text-xl">Add to Cart</button>
+                    @endif
                 </div>
             </div>
             @endforeach

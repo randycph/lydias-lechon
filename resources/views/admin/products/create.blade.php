@@ -92,6 +92,16 @@
                         </span>
                     </div>
                 </div>
+                <div class="col-lg-12">
+                    <div class="form-group">
+                        <label class="d-block">Sold out</label>
+                        <div class="custom-control custom-switch @error('sold_out') is-invalid @enderror">
+                            <input type="checkbox" class="custom-control-input" name="sold_out" {{ (old("sold_out") ? "checked":"") }} id="customSwitch13">
+                            <label class="custom-control-label" id="label_visibility13" for="customSwitch13">No</label>
+                            <x-error-message inputName="sold_out" />
+                        </div>
+                    </div>
+                </div>
                 <div class="form-group">
                     <label class="d-block">For sale</label>
                     <div class="custom-control custom-switch @error('for_sale') is-invalid @enderror">
@@ -375,6 +385,15 @@
                     $('#paella_optiond').html('Without Paella');
                     $("#paella_price").attr("required", "false");
                     $('#paella_price_div').hide();
+                }
+            });
+
+            $("#customSwitch13").change(function() {
+                if(this.checked) {
+                    $('#label_visibility13').html('Yes');
+                }
+                else{
+                    $('#label_visibility13').html('No');
                 }
             });
 

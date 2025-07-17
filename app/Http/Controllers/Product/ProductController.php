@@ -108,6 +108,7 @@ class ProductController extends Controller
                 'meta_keyword' => $request->seo_keywords,
                 'meta_description' => $request->seo_description,
                 'created_by' => Auth::id(),
+                'sold_out' => $request->has('sold_out'),
             ]);
 
             $this->tags($product->id, $request->tags);
@@ -251,7 +252,8 @@ class ProductController extends Controller
             'meta_title' => $request->seo_title,
             'meta_keyword' => $request->seo_keywords,
             'meta_description' => $request->seo_description,
-            'created_by' => Auth::id()
+            'created_by' => Auth::id(),
+            'sold_out' => $request->has('sold_out'),
         ]);
 
         if ($request->has('addons') && count($request->addons) > 0) {
