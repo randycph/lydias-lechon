@@ -566,6 +566,22 @@
                                             name="instruction" id="" cols="30" rows="10"></textarea>
                                     </div>
                                 </div>
+                                
+                                @if (auth()->guest())
+                                <div class="flex items-start">
+                                    <div class="flex items-center h-5">
+                                        <input id="privacy" type="checkbox" x-model="privacy" name="privacy"
+                                            class="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-3 focus:ring-blue-300" />
+                                    </div>
+                                    <label for="privacy" class="ms-2 text-sm font-medium">
+                                        I agree to 
+                                        <a class="underline" target="_blank" href="/privacy-policy">Lydia’s Lechon’s Privacy Protection Policy</a>
+                                    </label>
+                                </div>
+                                <template x-if="errors.privacy">
+                                    <p class="text-red-500 text-xs mt-1" x-text="errors.privacy[0]"></p>
+                                </template>
+                                @endif
                             </div>
                             <div x-show="hasErrorMessage" class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
                                 We are not able to accommodate your order base on your preferred date and time. Kindly refer to the warning message that appeared on your order screen or call our hotline at 89391221 / 89394665.  Thank you.
@@ -696,6 +712,7 @@
     window.fullUrl = @json(config('app.url'));
     window.hasBaka = @json($hasbaka);
     window.hasLechon = @json($haslechon);
+    window.privacy = @json(auth()->check());
 </script>
 
 <script>
@@ -1017,6 +1034,10 @@
             emailValidationMessage: '',
             noDeliveryAddress: false,
             delivery_address: '',
+            privacy: window.privacy || false,
+            errors: {
+                privacy: null,
+            },
 
             submitForm() {
                 this.formEl = document.getElementById('checkoutForm');
@@ -1061,6 +1082,14 @@
                 if (this.hasErrorMessage) {
                     this.isSubmitting = false;
                     return;
+                }
+                
+                if (!this.privacy) {
+                    this.errors.privacy = ['You must agree to the privacy policy.'];
+                    this.isSubmitting = false;
+                    return;
+                } else {
+                    this.errors.privacy = null;
                 }
 
                 if (this.method === 'delivery' && this.allowMultiple) {

@@ -542,16 +542,20 @@
                                     </div>
                                     <label for="is_subscribe" class="ms-2 text-sm font-medium">I want to receive exclusive offers and promotions.</label>
                                 </div>
-        
-                                
+                     
                                 <div class="flex items-start mb-5">
                                     <div class="flex items-center h-5">
-                                        <input id="privacy" type="checkbox" value="" name="privacy"
+                                        <input id="privacy" type="checkbox" x-model="privacy" name="privacy"
                                             class="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-3 focus:ring-blue-300" />
                                     </div>
-                                    <label for="privacy" class="ms-2 text-sm font-medium">I agree to Lydia’s Lechon’s Privacy Protection Policy</label>
+                                    <label for="privacy" class="ms-2 text-sm font-medium">
+                                        I agree to 
+                                        <a class="underline" target="_blank" href="/privacy-policy">Lydia’s Lechon’s Privacy Protection Policy</a>
+                                    </label>
                                 </div>
-
+                                <template x-if="errors.privacy">
+                                    <p class="text-red-500 text-xs mt-1" x-text="errors.privacy[0]"></p>
+                                </template>
                                 
                                 <template x-for="[key, value] in Object.entries({
                                     email,
@@ -638,6 +642,7 @@ function registrationForm() {
         fax: '',
         agent_code: '',
         is_subscribe: false,
+        privacy: false,
 
         async nextStep(event) {
             this.errors = {};
@@ -669,6 +674,12 @@ function registrationForm() {
                     this.step++;
                 } else {
                     this.injectHiddenFields(form);
+                    if (!this.privacy) {
+                        this.errors.privacy = ['You must agree to the privacy policy.'];
+                        return;
+                    } else {
+                        this.errors.privacy = null;
+                    }
                     form.submit();
                 }
 
