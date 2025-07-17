@@ -13,9 +13,8 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
-        $schedule->command('cart:check')->hourly();
-        $schedule->command('transactions:check-unpaid')->hourly();
-        // $schedule->command('cron:test-email')->everyTenMinutes();
+        $schedule->command('cart:check')->daily();
+        $schedule->command('transactions:check-unpaid')->daily();
     }
 
     /**
