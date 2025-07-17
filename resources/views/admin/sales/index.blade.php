@@ -561,8 +561,8 @@
                                 <option value="Processing">Processing</option>
                                 <option value="Ready For delivery">Ready For delivery</option>
                                 <option value="In Transit">In Transit</option>
-                                <option value="Delivered">Delivered/Picked Up</option>
-                                <option value="Returned">Returned</option>
+                                <option value="Delivered/Picked Up">Delivered/Picked Up</option>
+                                <option value="Returned/Rejected">Returned/Rejected</option>
                             </select>
                             <p class="tx-10 text-danger" id="error">
                                 <x-error-message inputName="delivery_status" />

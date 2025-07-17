@@ -670,13 +670,25 @@ class CartController extends Controller
 
         // dd($request->all());
         if (auth()->guest()) {
-            $user = User::find(9999);
-            if (empty($user)) {
-                $user = $this->create_guest_account();
-            }
-            $customer_name = $request->name;
-            $user->contact_mobile = $request->mobile;
-            $user->email = $request->email;
+            // $user = User::find(9999);
+            // if (empty($user)) {
+            //     $user = $this->create_guest_account();
+            // }
+
+            $customer_name = $request->name ?? 'Guest';
+
+            $user = User::create([
+                'name' => $request->name ?? 'Guest',
+                'contact_mobile' => $request->mobile,
+                'email' => $request->email ?? 'wsiphproduction@gmail.com',
+                'registration_type' => 'guest',
+                'registration_source' => 'Guest',
+                'password' => Hash::make(Str::random(10)),
+                'firstname' => $request->name,
+                'lastname' => $request->name,
+                'is_active' => 1
+            ]);
+
             $carts = collect(session('cart', []));
         } else {
             $user = auth()->user();
@@ -807,6 +819,14 @@ class CartController extends Controller
             'origin' => $origin,
             'forecast_date' => $forecast_date
         ]);
+
+        if ($request->order_amount <= 0) {
+            $salesHeader->isConfirm = 1;
+            $salesHeader->confirmed_by = 'Customer';
+            $salesHeader->confirmed_on = date('Y-m-d H:i:s');
+            $salesHeader->confirm_remarks = 'Auto confirm via Checkout';
+            $salesHeader->save();
+        }
 
         $couponCode = null;
 
@@ -1269,6 +1289,7 @@ class CartController extends Controller
             9999,
             'Guest',
             '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+            'guest',
             'Guest',
             'wsiphproduction@gmail.com',
             'web',
@@ -1276,7 +1297,7 @@ class CartController extends Controller
             1
         ];
 
-        DB::insert('insert into users (id, name, password, firstname, email, registration_source, remember_token, is_active) values (?, ?, ?, ?, ?, ?, ?, ?)', $guestAccount);
+        DB::insert('insert into users (id, name, password, registration_type, firstname, email, registration_source, remember_token, is_active) values (?, ?, ?, ?, ?, ?, ?, ?)', $guestAccount);
 
         return User::find(9999);
     }

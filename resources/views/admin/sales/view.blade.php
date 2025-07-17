@@ -33,7 +33,7 @@
                     
                 </div>
 
-                <div class="row row-sm">
+                <div class="row row-sm align-items-start">
                     <div class="col-sm-6 col-lg-8">
                         <label class="tx-sans tx-uppercase tx-10 tx-medium tx-spacing-1 tx-color-03">Customer Details</label>
                         <p class="mg-b-3 tx-semibold">@if($sales->user_id == 9999) {{$sales->customer_name}} @else {{$sales->user->FullName}} @endif</p>                  
@@ -77,7 +77,14 @@
                             @else
                                 {{$sales->customer_delivery_adress}}
                             @endif
-                        </p>                
+                        </p>
+                        @if ($sales?->deliveryAddress && count($sales?->deliveryAddress) == 0)
+                            @php 
+                                $saleDetail = $sales->items ? $sales->items->first() : null;
+                                $deliveryDate = $saleDetail ? date('F d, Y g:i A', strtotime($saleDetail?->delivery_date)) : 'N/A';
+                            @endphp
+                            <p class="mg-b-3">Date needed: {{$deliveryDate}}</p>
+                        @endif
 
                         <p class="mg-b-3">Contact Person: {{$sales->contact_person ?? $sales->customer_name}}</p>
                         @if ($sales->instruction)

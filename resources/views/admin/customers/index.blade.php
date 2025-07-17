@@ -107,6 +107,7 @@
                                     <th scope="col">Email</th>
                                     {{-- <th scope="col">Role</th> --}}
                                     <th scope="col">Status</th>
+                                    <th scope="col">Type</th>
                                     <th scope="col">Options</th>
                                 </tr>
                             </thead>
@@ -123,6 +124,13 @@
                                                 <span class="badge badge-success">Active</span>
                                             @else
                                                 <span class="badge badge-danger">Inactive</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($user->registration_type == 'registered')
+                                                <span class="badge badge-primary">Registered</span>
+                                            @else
+                                                <span class="badge badge-secondary">Guest</span>
                                             @endif
                                         </td>
                                         <td>

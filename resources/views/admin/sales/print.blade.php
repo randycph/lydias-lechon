@@ -132,6 +132,13 @@
                         @endif
                     </p>   
 
+                    @if ($sales?->deliveryAddress && count($sales?->deliveryAddress) == 0)
+                        @php 
+                            $saleDetail = $sales->items ? $sales->items->first() : null;
+                            $deliveryDate = $saleDetail ? date('F d, Y g:i A', strtotime($saleDetail?->delivery_date)) : 'N/A';
+                        @endphp
+                        <p class="mg-b-0 tx-15">Date needed: {{$deliveryDate}}</p>
+                    @endif
                     <p class="mg-b-0 tx-15">Contact Person: {{$sales->contact_person ?? $sales->customer_name}}</p>
                     @if ($sales->instruction)
                     <p class="mg-b-0 tx-15">Instruction: {{$sales->instruction}}</p>

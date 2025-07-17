@@ -419,8 +419,8 @@
                             <select id="delivery_status" class="form-control mg-b-5" name="delivery_status"  data-width="100%" required="required">
                                 <option value="">- Select -</option>
                                 <option value="In Transit">In Transit</option>
-                                <option value="Delivered">Delivered</option>
-                                <option value="Returned">Returned</option>
+                                <option value="Delivered/Picked Up">Delivered/Picked Up</option>
+                                <option value="Returned/Rejected">Returned/Rejected</option>
                             </select>
                             <p class="tx-10 text-danger" id="error">
                                 <x-error-message inputName="delivery_status" />

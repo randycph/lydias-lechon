@@ -1,13 +1,13 @@
 <div class="cs-search">
     <label class="d-block tx-semibold">Customer Details</label>
-    @php $isGuest = (strpos($details->email, 'lydtmp_') === 0 || empty($details->email)); @endphp
+    @php $isGuest = (strpos($details->email, 'lydtmp_') === 0 || empty($details->email) || $details->registration_type === 'guest'); @endphp
     <div class="table-responsive">
         <table class="table table-sm table-borderless">
             <tbody>
                 <tr>
                     <th scope="row">Name</th>
                     <td>{{ $details->name }}</td>
-                </tr>
+            </tr>
                 <tr>
                     <th scope="row">Account</th>
                     <td>{{ $isGuest ? 'Guest' : 'Registered' }}</td>

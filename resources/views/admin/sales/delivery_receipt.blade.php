@@ -92,9 +92,15 @@
                             @else
                                 {{$sales->customer_delivery_adress}}
                             @endif
-                        </p>  
-                            
+                        </p>   
 
+                        @if ($sales?->deliveryAddress && count($sales?->deliveryAddress) == 0)
+                            @php 
+                                $saleDetail = $sales->items ? $sales->items->first() : null;
+                                $deliveryDate = $saleDetail ? date('F d, Y g:i A', strtotime($saleDetail?->delivery_date)) : 'N/A';
+                            @endphp
+                            <p class="mg-b-0 tx-15">Date needed: {{$deliveryDate}}</p>
+                        @endif
 
                         <p class="mg-b-3">Instruction: {{$sales->instruction}}</p>
                     </div>

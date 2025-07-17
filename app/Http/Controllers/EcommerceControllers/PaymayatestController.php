@@ -66,6 +66,12 @@ class PaymayatestController extends Controller
                 'status' => 'PAID'
             ]);
 
+            $sales->sales->isConfirm = 1;
+            $sales->sales->confirmed_by = 'Customer';
+            $sales->sales->confirmed_on = date('Y-m-d H:i:s');
+            $sales->sales->confirm_remarks = 'Auto confirm via Paymaya checkout';
+            $sales->sales->save();
+
             if ($sales->sales->discount_amount && $sales->sales->discount_amount > 0) {
                 CouponCart::where('sales_header_id', $sales->sales->id)->update([
                     'status' => 1

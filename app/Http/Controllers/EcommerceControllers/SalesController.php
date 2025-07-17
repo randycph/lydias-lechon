@@ -707,8 +707,7 @@ class SalesController extends Controller
 
     public function show($id)
     {
-        $sales = SalesHeader::with(['deliveryAddress', 'couponUsed', 'user'])->where('id',$id)->first();
-
+        $sales = SalesHeader::with(['deliveryAddress', 'couponUsed', 'user', 'items'])->where('id',$id)->first();
         if (!$sales) {
             return redirect()->route('sales-transaction.index')->with('error', 'Sales record not found.');
         }
@@ -831,7 +830,7 @@ class SalesController extends Controller
             }
 
             $order =  SalesHeader::where('id',$request->del_id)->with('deliveryAddress', 'items', 'couponUsed')->first();
-            if($order->customer_contact_number && ($request->delivery_status == 'Ready For delivery' || $request->delivery_status == 'Delivered' || $request->delivery_status == 'In Transit')){
+            if($order->customer_contact_number && ($request->delivery_status == 'Ready For delivery' || $request->delivery_status == 'Delivered/Picked Up' || $request->delivery_status == 'In Transit')){
                 $sms = new Sms();
                 $sms->send_sms($order->customer_contact_number, 'delivery_update', $order);
 

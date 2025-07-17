@@ -21,6 +21,9 @@
             background-color : rgb(255, 255, 255, 0.5);
             color : black;
         }
+        .tt-menu {
+            width: 300px;
+        }
     </style>
 @endsection
 
