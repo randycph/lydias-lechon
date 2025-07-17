@@ -367,9 +367,8 @@ Manage Customer
                             <label for="delivery_status">Status</label>
                             <select id="delivery_status" class="selectpicker mg-b-5" name="delivery_status" data-style="btn btn-outline-light btn-md btn-block tx-left" title="- None -" data-width="100%" required="required">
 
-                                <option value="Ready For delivery">Ready For delivery</option>
                                 <option value="In Transit">In Transit</option>
-                                <option value="Delivered">Delivered</option>
+                                <option value="Delivered/Picked Up">Delivered/Picked Up</option>
 
                             </select>
                             <p class="tx-10 text-danger" id="error">

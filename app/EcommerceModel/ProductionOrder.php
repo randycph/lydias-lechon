@@ -38,7 +38,7 @@ class ProductionOrder extends Model
     {
         $orders = ProductionOrder::where('branch_id',$branch_id)->whereDate('delivery_date',$date)->get();
         $total = 0;
-        $exclude = ['Delivered'];
+        $exclude = ['Delivered/Picked Up'];
         foreach($orders as $order){
             if(!empty($order->jobOrder_details)){
                 if($order->jobOrder_details->sales_detail_id > 0){

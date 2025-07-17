@@ -966,15 +966,15 @@
         function change_delivery_status(id,is_allowed_delivered, delivery_type){
 
             if(is_allowed_delivered == 0){
-                $("#delivery_status option[value='Delivered']").each(function() {
+                $("#delivery_status option[value='Delivered/Picked Up']").each(function() {
                     $(this).remove();
                 });
           
             }
             else{
-                var optionExists = ($("#delivery_status option[value='Delivered']").length > 0);
+                var optionExists = ($("#delivery_status option[value='Delivered/Picked Up']").length > 0);
                 if(!optionExists){
-                    $("#delivery_status").append(new Option("Delivered", "Delivered"));
+                    $("#delivery_status").append(new Option("Delivered/Picked Up", "Delivered/Picked Up"));
                 }
             }
             $('#prompt-change-delivery-status').modal('show');

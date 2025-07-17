@@ -46,7 +46,7 @@
                     $del_status == $order->jobOrder_details->sales_detail->header->delivery_status;
                 }
             @endphp
-            @if($del_status <> 'Delivered')
+            @if($del_status <> 'Delivered/Picked Up')
                 <tr style="font-size:12px !important;">
                     <td>
                         @if($order->jobOrder_details->sales_detail_id == '0'){{ $order->jobOrder_details->customer_address ?? '' }} @else {{ $order->jobOrder_details->customer_name ?? '' }} @endif

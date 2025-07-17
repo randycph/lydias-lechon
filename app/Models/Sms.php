@@ -31,7 +31,7 @@ class Sms
 	}
 
 	public function delivery_update($receiver, $order){
-		if($order->delivery_status == 'Delivered'){
+		if($order->delivery_status == 'Delivered/Picked Up'){
 
 
 			if($order->delivery_type == 'Store Pickup'){
