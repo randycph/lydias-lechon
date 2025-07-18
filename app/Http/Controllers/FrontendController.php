@@ -39,7 +39,9 @@ class FrontendController extends Controller
             abort(404);
         }
 
-        return view('v2.page', compact('page'));
+        $albums = Album::with('banners')->where('name', 'Home Banner')->first();
+
+        return view('v2.page', compact('page', 'albums'));
 
         // $categories = ProductCategory::where('status', 'PUBLISHED')->get();
         // $blogs = Article::with('category')
