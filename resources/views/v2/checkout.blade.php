@@ -575,7 +575,7 @@
                                     </div>
                                     <label for="privacy" class="ms-2 text-sm font-medium">
                                         I agree to 
-                                        <a class="underline" target="_blank" href="/privacy-policy">Lydia’s Lechon’s Privacy Protection Policy</a>
+                                        <a class="underline" target="_blank" href="privacy-policy">Lydia’s Lechon’s Privacy Protection Policy</a>
                                     </label>
                                 </div>
                                 <template x-if="errors.privacy">
