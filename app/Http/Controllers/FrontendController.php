@@ -190,7 +190,11 @@ class FrontendController extends Controller
             return $cart->product->slug == 'lechon-baka';
         });
 
-        return view('v2.checkout', compact('page', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka'));
+        $hasMisc = $carts->contains(function ($cart) {
+            return $cart->product->is_misc == 1;
+        });
+
+        return view('v2.checkout', compact('page', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc'));
     }
 
     public function confirmation($id)

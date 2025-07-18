@@ -711,6 +711,7 @@
     window.disabledDeliveryDates = @json($disabledDeliveryDates);
     window.fullUrl = @json(config('app.url'));
     window.hasBaka = @json($hasbaka);
+    window.hasMisc = @json($hasMisc);
     window.hasLechon = @json($haslechon);
     window.privacy = @json(auth()->check());
 </script>
@@ -721,6 +722,7 @@
             today: new Date(),
             hasbaka: window.hasBaka || false,
             haslechon: window.hasLechon || false,
+            hasMisc: window.hasMisc || false,
             minDate() {
                 if (this.hasbaka == true) {
                     const day = new Date(this.today);
@@ -799,7 +801,7 @@
             showMessage: false,
             need_date: '',
             need_time: '',
-            allHours: Array.from({ length: 24 }, (_, i) => i),
+            allHours: Array.from({ length: 21 }, (_, i) => i),
             warningMessage: '',
             errorMessage: '',
             hasErrorMessage: false,
@@ -1799,6 +1801,10 @@
                     return true;
                 }
 
+                if (isToday && this.hasMisc && hour < (now.getHours() + 6)) {
+                    return true;
+                }
+
                 const timeStr = (hour < 10 ? '0' + hour : hour) + ':00';
                 const fullStr = `${this.need_date} ${timeStr}`;
 
@@ -1819,6 +1825,10 @@
                         selectedDate.getMonth() === now.getMonth() &&
                         selectedDate.getFullYear() === now.getFullYear();
                     if (isToday && hour <= now.getHours()) {
+                        return true;
+                    }
+
+                    if (isToday && this.hasMisc && hour < (now.getHours() + 6)) {
                         return true;
                     }
 
