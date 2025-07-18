@@ -18,6 +18,7 @@ use App\Models\Page;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Setting;
+use App\Models\Sms;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -542,6 +543,10 @@ class FrontendController extends Controller
             
             try {
                 Mail::to($user->email)->send(new WelcomeEmail($user));
+                if ($user->contact_mobile) {
+                    $sms = new Sms();
+                    $sms->send_sms($user->contact_mobile, 'welcome', $user);
+                }
             } catch (\Exception $th) {
                 //throw $th;
             }

@@ -27,6 +27,9 @@ class Sms
 		elseif($type == 'payment_new'){
 			$send_to_customer = $this->payment_new($receiver, $transaction);
 		}
+		elseif($type == 'welcome'){
+			$send_to_customer = $this->welcome($receiver, $transaction);
+		}
 
 	}
 
@@ -101,6 +104,34 @@ class Sms
     			}
     			curl_close($ch);
 	        }
+		}
+	}
+
+	public function welcome($receiver, $user){		
+
+		$name = $user->name;
+
+		try {
+			$message = "Hi $name. Welcome to Lydia's Lechon! We're excited to have you on board.";
+			$ch = curl_init();
+
+			curl_setopt($ch, CURLOPT_URL, 'https://api.wavecell.com/sms/v1/Lydia_MKT/single');
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, "{\"source\":\"Lydias\",\"destination\":\"$receiver\",\"text\":\"$message\"}");
+
+			$headers = array();
+			$headers[] = 'Authorization: Bearer dwD2PXjYKV9kQv6KAI1l4ohYEjuOEwIoeoTPtwrEkU';
+			$headers[] = 'Content-Type: application/json';
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+			$result = curl_exec($ch);
+			if (curl_errno($ch)) {
+			    //echo 'Error:' . curl_error($ch);
+			}
+			curl_close($ch);
+		} catch (\Exception $e) {
+			logger()->error('SMS Error: '.$e->getMessage());
 		}
 	}
 
