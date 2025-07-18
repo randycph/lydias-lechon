@@ -18,7 +18,6 @@ use App\Models\Page;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Setting;
-use App\Models\Sms;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,16 +32,24 @@ class FrontendController extends Controller
 {
     public function index()
     {
-        $categories = ProductCategory::where('status', 'PUBLISHED')->get();
-        $blogs = Article::with('category')
-            ->where('is_blog', 1)
-            ->where('status', 'Published')
-            ->where('category_id', '>', 0)
-            ->latest()
-            ->limit(10)
-            ->get();
-        $albums = Album::with('banners')->where('name', 'Home Banner')->first();
-        return view('v2.home', compact('categories', 'blogs', 'albums'));
+        $page = Page::where('slug', 'home')->first();
+
+        if (!$page) {
+            abort(404);
+        }
+
+        return view('v2.page', compact('page'));
+
+        // $categories = ProductCategory::where('status', 'PUBLISHED')->get();
+        // $blogs = Article::with('category')
+        //     ->where('is_blog', 1)
+        //     ->where('status', 'Published')
+        //     ->where('category_id', '>', 0)
+        //     ->latest()
+        //     ->limit(10)
+        //     ->get();
+        // $albums = Album::with('banners')->where('name', 'Home Banner')->first();
+        // return view('v2.home', compact('categories', 'blogs', 'albums'));
     }
 
     public function home()
