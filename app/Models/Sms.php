@@ -5,7 +5,7 @@ use App\EcommerceModel\DeliveryStatus;
 class Sms
 {
 
-	public function send_sms($receiver, $type, $transaction){
+	public function send_sms($receiver, $type, $transaction, $driver = null){
 		//return '';
 		if(substr($receiver, 0, 2) == '09'){
 			$receiver = '+639'.substr($receiver, 2);
@@ -30,7 +30,39 @@ class Sms
 		elseif($type == 'welcome'){
 			$send_to_customer = $this->welcome($receiver, $transaction);
 		}
+		elseif($type == 'delivery_assigned'){
+			$send_to_customer = $this->delivery_assigned($receiver, $transaction, $driver);
+		}
 
+	}
+
+	public function delivery_assigned($receiver, $transaction, $driver = null){
+
+		$name = $driver->name;
+		$orderNumber = $transaction->order_number;
+
+		try {
+			$message = "Hi $name. Order #$orderNumber has been assigned to you. Please check the details in the system.";
+			$ch = curl_init();
+
+			curl_setopt($ch, CURLOPT_URL, 'https://api.wavecell.com/sms/v1/Lydia_MKT/single');
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, "{\"source\":\"Lydias\",\"destination\":\"$receiver\",\"text\":\"$message\"}");
+
+			$headers = array();
+			$headers[] = 'Authorization: Bearer dwD2PXjYKV9kQv6KAI1l4ohYEjuOEwIoeoTPtwrEkU';
+			$headers[] = 'Content-Type: application/json';
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+			$result = curl_exec($ch);
+			if (curl_errno($ch)) {
+			    //echo 'Error:' . curl_error($ch);
+			}
+			curl_close($ch);
+		} catch (\Exception $e) {
+			logger()->error('SMS Error: '.$e->getMessage());
+		}
 	}
 
 	public function delivery_update($receiver, $order){

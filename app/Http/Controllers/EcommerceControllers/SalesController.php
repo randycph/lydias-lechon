@@ -813,6 +813,21 @@ class SalesController extends Controller
                 'delivery_status' => $request->delivery_status
             ]);
 
+            if ($request->has('image')) {
+                if($request->hasFile('image')){
+                    $image = $request->file('image');
+                    $imageName = time().'.'.$image->getClientOriginalExtension();
+
+                    if (!file_exists(public_path('/images/proof-of-delivery'))) {
+                        mkdir(public_path('/images/proof-of-delivery'), 0777, true);
+                    }
+                    $destinationPath = public_path('/images/proof-of-delivery');
+                    $image->move($destinationPath, $imageName);
+
+                    $data['image'] = $imageName;
+                }
+            }
+
             $update_delivery_table = DeliveryStatus::create($data);
 
         } else {
@@ -823,15 +838,31 @@ class SalesController extends Controller
             $data['order_id'] = $request->del_id;
             $data['type'] = 'sales';
 
+            if ($request->has('image')) {
+                if($request->hasFile('image')){
+                    $image = $request->file('image');
+                    $imageName = time().'.'.$image->getClientOriginalExtension();
+
+                    if (!file_exists(public_path('/images/proof-of-delivery'))) {
+                        mkdir(public_path('/images/proof-of-delivery'), 0777, true);
+                    }
+                    $destinationPath = public_path('/images/proof-of-delivery');
+                    $image->move($destinationPath, $imageName);
+
+                    $data['image'] = $imageName;
+                }
+            }
+
             $update_delivery_table = DeliveryStatus::create($data);
 
             if(!empty($update_delivery_table->sales->email)){
                 Mail::to($update_delivery_table->sales->email)->send(new DeliveryMovement($update_delivery_table));
             }
 
-            $order =  SalesHeader::where('id',$request->del_id)->with('deliveryAddress', 'items', 'couponUsed')->first();
+            $sms = new Sms();
+            $order =  SalesHeader::where('id',$request->del_id)->with('deliveryAddress', 'items', 'couponUsed', 'user')->first();
             if($order->customer_contact_number && ($request->delivery_status == 'Ready For delivery' || $request->delivery_status == 'Delivered/Picked Up' || $request->delivery_status == 'In Transit')){
-                $sms = new Sms();
+                
                 $sms->send_sms($order->customer_contact_number, 'delivery_update', $order);
 
                 if ($request->delivery_status == 'In Transit') {
@@ -840,11 +871,13 @@ class SalesController extends Controller
                     if ($driver && !empty($driver->email)) {
                         Mail::to($driver->email)->send(new DeliveryAssignedMail($order, $driver));
                     }
-                    
+                    if ($driver && $driver->contact_mobile) {
+                        $sms->send_sms($driver->contact_mobile, 'delivery_assigned', $order, $driver);
+                    }
                 }
             }
 
-            //$this->sms_update_order_status($order->customer_contact_number,$order);
+            $this->sms_send_order_status($order->customer_contact_number, $order);
         }
 
         ActivityLog::create([
@@ -861,6 +894,45 @@ class SalesController extends Controller
 
         return back()->with('success','Successfully updated delivery status!');
 
+    }
+
+    public function showDeliveryStatus($id)
+    {
+        $status = DeliveryStatus::where('order_id', $id)->orWhere('job_order_id', $id)->latest()->first();
+
+        return response()->json([
+            'status' => $status,
+        ]);
+    }
+
+    public function sms_send_order_status($number, $order){
+
+		$name = $order->user->name;
+		$orderNumber = $order->order_number;
+        $receiver = $number;
+
+		try {
+			$message = "Hi $name. Your order #$orderNumber is now on ".strtoupper($order->delivery_status)." status -LydiasLechon";
+			$ch = curl_init();
+
+			curl_setopt($ch, CURLOPT_URL, 'https://api.wavecell.com/sms/v1/Lydia_MKT/single');
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, "{\"source\":\"Lydias\",\"destination\":\"$receiver\",\"text\":\"$message\"}");
+
+			$headers = array();
+			$headers[] = 'Authorization: Bearer dwD2PXjYKV9kQv6KAI1l4ohYEjuOEwIoeoTPtwrEkU';
+			$headers[] = 'Content-Type: application/json';
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+			$result = curl_exec($ch);
+			if (curl_errno($ch)) {
+			    //echo 'Error:' . curl_error($ch);
+			}
+			curl_close($ch);
+		} catch (\Exception $e) {
+			logger()->error('SMS Error: '.$e->getMessage());
+		}
     }
 
     public function sms_update_order_status($number,$order){

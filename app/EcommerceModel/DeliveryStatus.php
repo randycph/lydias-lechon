@@ -9,7 +9,7 @@ class DeliveryStatus extends Model
 {
 
     protected $table = 'ecommerce_delivery_status';
-    protected $fillable = ['order_id', 'user_id', 'status', 'remarks','delivered_by', 'type', 'job_order_id'];
+    protected $fillable = ['order_id', 'user_id', 'status', 'remarks','delivered_by', 'type', 'job_order_id', 'image'];
 
 
     public function getDeliveryAddressAttribute()

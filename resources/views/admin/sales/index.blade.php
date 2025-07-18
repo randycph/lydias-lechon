@@ -548,7 +548,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form id="dd_form" method="POST" action="{{route('sales-transaction.delivery_status')}}">
+                <form id="dd_form" method="POST" action="{{route('sales-transaction.delivery_status')}}" enctype="multipart/form-data">
                     @csrf
                     @method('POST')
                     <div class="modal-body">
@@ -579,6 +579,15 @@
                         <div class="form-group">
                             <label for="delivery_status">Remarks</label>
                             <textarea name="del_remarks" required="required" class="form-control" id="del_remarks" cols="30" rows="4"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="image">Attachment</label>
+                            <input type="file" name="image" class="form-control" id="image">
+                        </div>
+                        <div class="form-group">
+                            <a href="" target="_blank" id="view_image" style="display: none;">
+                                <img id="del_image" src="" alt="Delivery Image" style="max-width: 200px; display: none;">
+                            </a>
                         </div>
                     </div>
                     <input type="hidden" id="del_id" name="del_id" value="">
@@ -842,6 +851,7 @@
                                 <th>Status</th>
                                 <th>Remarks</th>
                                 <th>Delivered By</th>
+                                <th>Attachment</th>
                             </thead>
                             <tbody id="delivery_history_tbl">
 
@@ -917,6 +927,9 @@
 @endsection
 
 @section('customjs')
+    <script>
+        window.base_url = @json(config('app.url'));
+    </script>
     <script>
 
         function ui_add_product(x){    
@@ -1125,6 +1138,22 @@
             //     let sales = $('#delivery_status').val();
             //     post_form("{{route('sales-transaction.delivery_status')}}",sales,id)
             // });
+
+            $.ajax({
+                type: "GET",
+                url: "/admin/delivery-status/" + id,
+                success: function( response ) {
+                    if (response.status.status != 'In Transit') {
+                        $('#delivery_status').val(response.status.status);
+                        $('#del_remarks').val(response.status.remarks);
+
+                        if (response.status.image) {
+                            $('#del_image').attr('src', window.base_url + '/images/proof-of-delivery/' + response.status.image).show();
+                            $('#view_image').attr('href', window.base_url + '/images/proof-of-delivery/' + response.status.image).show();
+                        }
+                    }
+                }
+            });
         }
 
         $('#delivery_status').change(function(){

@@ -547,6 +547,7 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::post('/admin/change-delivery-status', 'EcommerceControllers\SalesController@delivery_status')->name('sales-transaction.delivery_status');
     Route::post('/admin/confirm-order', 'EcommerceControllers\SalesController@confirm')->name('sales.confirm.order');
     Route::post('/admin/delivery-fee-update', 'EcommerceControllers\SalesController@update_delivery_fee')->name('admin.sales.update_deliveryfee');
+    Route::get('/admin/delivery-status/{id}', 'EcommerceControllers\SalesController@showDeliveryStatus')->name('show.delivery-status');
 
     Route::get('/admin/sales-transaction/view-payment/{sales}', 'EcommerceControllers\SalesController@view_payment')->name('sales-transaction.view_payment');
     Route::post('/admin/sales-transaction/cancel-product', 'EcommerceControllers\SalesController@cancel_product')->name('sales-transaction.cancel_product');
