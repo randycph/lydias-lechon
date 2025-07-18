@@ -1001,7 +1001,7 @@ class CartController extends Controller
 
         if(strlen($salesHeader->customer_contact_number) > 1){
             $sms = new Sms();
-            // $sms->send_sms($salesHeader->customer_contact_number, 'new_order', $salesHeader);
+            $sms->send_sms($salesHeader->customer_contact_number, 'new_order', $salesHeader);
         }
 
         $merchantkey = '2amqVf04H9';
