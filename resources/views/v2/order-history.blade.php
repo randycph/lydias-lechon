@@ -708,24 +708,19 @@
                     subtitle: 'We are currently preparing your order.',
                     icon: 'cog-6-tooth',
                 },
-                'Ready For delivery': {
-                    title: 'Ready For Delivery',
-                    subtitle: 'Your order is ready for pickup.',
-                    icon: 'archive-box',
-                },
                 'In Transit': {
                     title: 'In Transit',
                     subtitle: 'Your order is on the way.',
                     icon: 'truck',
                 },
-                'Delivered': {
-                    title: 'Delivered',
-                    subtitle: 'Your order has been delivered.',
+                'Delivered/Picked Up': {
+                    title: 'Delivered/Picked Up',
+                    subtitle: 'Your order has been delivered or picked up.',
                     icon: 'check-circle',
                 },
-                'Returned': {
-                    title: 'Returned',
-                    subtitle: 'Your order was returned.',
+                'Returned/Rejected': {
+                    title: 'Returned/Rejected',
+                    subtitle: 'Your order was returned or rejected.',
                     icon: 'arrow-uturn-left',
                 },
             },
