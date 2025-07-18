@@ -18,6 +18,7 @@ use App\Models\Page;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\Setting;
+use App\Models\Sms;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
