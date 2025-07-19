@@ -6,7 +6,7 @@
                     @foreach ($categories as $category)
                     <a href="{{ route('blogs-category', $category->slug) }}" class="swiper-slide !flex items-center justify-center p-4 flex-col !w-[140px] lg:!w-[175px] h-[140px] lg:h-[175px]">
                         <div class="bg-white border-secondary border-2 p-2 rounded-lg items-center w-[140px] lg:w-[175px] h-[140px] lg:h-[175px] flex flex-col justify-center overflow-hidden">
-                            <img src="{{ asset('images/news/' . $category->image) }}" alt="{{ $category->name }}" class="rounded-lg hover:scale-125 transition-transform duration-300">
+                            <img onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'" src="{{ asset('images/news/' . $category->image) }}" alt="{{ $category->name }}" class="rounded-lg hover:scale-125 transition-transform duration-300">
                         </div>
                         <div class="font-semibold text-base lg:text-lg text-center mt-2">{{ $category->name }}</div>
                     </a>
