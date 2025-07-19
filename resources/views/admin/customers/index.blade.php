@@ -140,7 +140,7 @@
                                                         <a class="nav-link" href="{{ route('customers.edit', $user->id) }}" title="Edit User"><i data-feather="edit"></i></a>
                                                      @endif
                                                 @endif
-                                                <a class="nav-link" target="_blank" href="{{ route('customers.show', $user->id) }}" title="View User"><i data-feather="eye"></i></a>
+                                                <a class="nav-link" target="_blank" href="{{ route('admin.report.audit_trail_per_user') }}?pb={{ $user->id }}&startdate={{ \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') }}&enddate={{ \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d') }}" title="View User"><i data-feather="eye"></i></a>
                                                 @if (auth()->user()->has_access_to_route('customer.deactivate'))
                                                     @if($user->is_active == 1)
                                                         <a class="nav-link deactivate_user" data-user_id="{{ $user->id }}" href="#" title="Deactivate User" data-toggle="modal" data-target="#modalUserDeactivate"><i data-feather="user-x"></i></a>
