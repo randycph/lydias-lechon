@@ -1,6 +1,8 @@
 <?php
 
 use App\EcommerceModel\Branch;
+use App\Models\Article;
+use App\Models\ArticleCategory;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use Illuminate\Support\Facades\DB;
@@ -159,6 +161,31 @@ if (!function_exists('handle_shortcode')) {
                 $kiosks = Branch::where('branch_type', 'Kiosk')->where('is_head_office', 0)->get();
 
                 return View::make('components.shortcode-branches', compact('headOffices', 'branches', 'outlets', 'malls', 'kiosks'))->render();
+
+            case 'shortcodes_featured_blog':
+
+                $featuredBlog = Article::where('is_featured', $attributes['id'])->first();
+
+                return View::make('components.shortcode-featured-blog', compact('featuredBlog'))->render();
+
+            case 'shortcodes_blog_category':
+
+                $categories = ArticleCategory::get();
+
+                return View::make('components.shortcode-blog-category', compact('categories'))->render();
+
+            case 'shortcodes_blogs':
+
+                $blogs = Article::with('category')
+                    ->where('is_blog', 1)
+                    ->where('status', 'Published')
+                    ->where('category_id', '>', 0)
+                    ->latest()
+                    ->limit(10)
+                    ->get();
+
+                return View::make('components.shortcode-blog', compact('blogs'))->render();
+
 
             default:
                 return ''; // Unknown shortcode

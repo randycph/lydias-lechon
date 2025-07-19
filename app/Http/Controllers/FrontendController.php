@@ -356,6 +356,14 @@ class FrontendController extends Controller
 
     public function blogs()
     {
+        $page = Page::where('slug', 'blogs')->first();
+
+        if (!$page) {
+            abort(404);
+        }
+
+        return view('v2.page', compact('page'));
+
         $featuredArticle = Article::with('category')
                                 ->where('is_featured', 1)
                                 ->where('category_id', '>', 0)
