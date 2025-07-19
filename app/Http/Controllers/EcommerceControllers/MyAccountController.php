@@ -27,7 +27,8 @@ class MyAccountController extends Controller
 
         $email_act = Mail::to(Auth::user()->email)->send(new ManualOrderCancelledMail($salesHeader));
 
-        $salesHeader->delete();
+        $salesHeader->status = 'CANCELLED';
+        $salesHeader->save();
 
         return back()->with('success_cancelled',"Your order has been successfully cancelled");
     }

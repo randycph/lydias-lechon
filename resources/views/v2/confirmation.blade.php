@@ -32,7 +32,7 @@
                 @else
                     @if (strtolower($sales->PaymentStatus) != 'paid')
                     <button @click="openPaymentModal({{$sales->net_amount}}, '{{ $sales->order_number }}')" type="button"
-                        class="border border-primary text-primary px-6 py-4 w-full text-center rounded-md hover:bg-primary hover:text-white transition-colors duration-300">
+                        class="border {{ $sales->status == 'CANCELLED' ? 'hidden' : '' }} border-primary text-primary px-6 py-4 w-full text-center rounded-md hover:bg-primary hover:text-white transition-colors duration-300">
                         Pay Now
                     </button>
                     @endif

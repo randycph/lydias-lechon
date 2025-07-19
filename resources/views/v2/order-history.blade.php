@@ -42,9 +42,12 @@
                     
                     @if (count($sales) > 0)
                     @foreach ($sales as $index => $sale)
-                    <div x-data="{ viewMore{{ $index }}: false }" class="rounded-lg border bg-white border-[#DFDFDF] shadow-md mb-5">
+                    <div x-data="{ viewMore{{ $index }}: false }" class="rounded-lg border bg-white border-[#DFDFDF] shadow-md mb-5 {{ $sale->status == 'CANCELLED' ? 'opacity-50 bg-gray-200' : 'bg-white' }}">
                         <div class="px-6 py-4 border-b border-[#DFDFDF] flex items-center justify-between">
-                            <h2 class="font-semibold">Order #{{ $sale->order_number }}</h2>
+                            <div class="flex items-center gap-2">
+                                <h2 class="font-semibold {{ $sale->status == 'CANCELLED' ? 'line-through' : '' }}">Order #{{ $sale->order_number }}</h2> 
+                                <span class="{{ $sale->status == 'CANCELLED' ? 'text-red-700 uppercase' : 'hidden' }}">{{ $sale->status }}</span>
+                            </div>
                             <div class="font-semibold text-tertiary uppercase {{ strtolower($sale->payment_status) == 'unpaid' ? 'text-red-500' : '' }}">
                                 {{ $sale->payment_status }}
                             </div>
@@ -188,7 +191,7 @@
                             <div class="w-full flex flex-col gap-2 px-4 mt-4 lg:flex-row justify-between">
     
                                 {{-- Left side: Cancel Order --}}
-                                <div class="lg:order-1 order-2 w-full lg:w-auto">
+                                <div class="lg:order-1 order-2 w-full lg:w-auto {{ $sale->status == 'CANCELLED' ? 'invisible' : '' }}">
                                     @if (strtolower($sale->payment_status) != 'paid')
                                         <button @click="cancelOrderModal = true; saleId = '{{ $sale->id }}'" type="button"
                                             class="text-white custom-btn btn-tertiary-dark bg-tertiary hover:bg-secondary font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
@@ -211,7 +214,7 @@
                                     </a>
                                     @if (strtolower($sale->payment_status) != 'paid')
                                     <button @click="openPaymentModal({{$balance}}, '{{ $sale->order_number }}')" type="button"
-                                        class="text-white bg-primary custom-btn btn-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
+                                        class="{{ $sale->status == 'CANCELLED' ? 'hidden' : '' }} text-white bg-primary custom-btn btn-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
                                         Pay Now
                                     </button>
                                     @endif
