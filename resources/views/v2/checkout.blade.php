@@ -569,13 +569,14 @@
                                 
                                 @if (auth()->guest())
                                 <div class="flex items-start">
-                                    <div class="flex items-center h-5">
-                                        <input id="privacy" type="checkbox" x-model="privacy" name="privacy"
-                                            class="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-3 focus:ring-blue-300" />
-                                    </div>
-                                    <label for="privacy" class="ms-2 text-sm font-medium">
-                                        I agree to 
-                                        <a class="underline" target="_blank" href="privacy-policy">Lydia’s Lechon’s Privacy Protection Policy</a>
+                                    <label class="flex items-center space-x-2">
+                                        <input
+                                            x-model="privacy" name="privacy" 
+                                            type="checkbox"
+                                            :checked="agreed"
+                                            @change="onCheckboxChange"
+                                        >
+                                        <span>I agree Lydia’s Lechon’s Privacy Protection Policy</span>
                                     </label>
                                 </div>
                                 <template x-if="errors.privacy">
@@ -604,7 +605,17 @@
 
         </form>
 
-        <div x-show="depositModal"
+    <div x-show="showModal" x-transition.opacity class="fixed inset-0 bg-black/50 z-40 overflow-y-auto py-10 px-4"
+        @click.self="showModal = false">
+        <div x-show="showModal" 
+            class="relative m-auto bg-white text-black z-50 w-full max-w-lg rounded-lg shadow-lg">
+            <div id="data-privacy-render">
+                {!! $dataPrivacyRender !!}
+            </div>
+        </div>
+    </div>
+
+    <div x-show="depositModal"
         x-transition
         class="relative z-50"
         aria-labelledby="modal-title"
@@ -1868,6 +1879,23 @@
                 if (!response.ok) throw new Error('Network error');
 
                 const data = await response.json();
+            },
+
+            agreed: false,
+            showModal: false,
+            onCheckboxChange(e) {
+                // Only trigger modal if not already agreed
+                if (!this.agreed) {
+                    e.target.checked = false; // uncheck until modal confirm
+                    this.showModal = true;
+                }
+            },
+            agreeInModal() {
+                this.agreed = true;
+                this.showModal = false;
+                // Optionally: If your form validation reads checkbox value,
+                // set it programmatically:
+                this.$el.querySelector('input[type=checkbox]').checked = true;
             }
         }
     }

@@ -205,7 +205,11 @@ class FrontendController extends Controller
             return $cart->product->is_misc == 1;
         });
 
-        return view('v2.checkout', compact('page', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc'));
+        $dataPrivacy = Page::where('slug', 'data-privacy')->first();
+
+        $dataPrivacyRender = view('v2.data-privacy', compact('dataPrivacy'))->render();
+
+        return view('v2.checkout', compact('page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc'));
     }
 
     public function confirmation($id)
