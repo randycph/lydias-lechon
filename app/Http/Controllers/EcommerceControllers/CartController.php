@@ -877,7 +877,7 @@ class CartController extends Controller
                             'note' => $delivery->note,
                             'branch' => $request->delivery_branch,
                             'products' => json_encode($delivery->orders),
-                            'receive_sms' => $request->sms ? 1 : 0,
+                            'receive_sms' => $delivery->sms ? 1 : 0,
                         ]);
                     }
                 }
