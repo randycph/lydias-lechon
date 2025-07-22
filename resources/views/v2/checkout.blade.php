@@ -569,12 +569,12 @@
                                 
                                 @if (auth()->guest())
                                 <div class="flex items-start">
-                                    <label class="flex items-center space-x-2">
+                                    <label @click="onCheckboxChange" class="flex items-center space-x-2">
                                         <input
-                                            x-model="privacy" name="privacy" 
+                                            x-model="privacy" 
+                                            name="privacy" 
                                             type="checkbox"
-                                            :checked="agreed"
-                                            @change="onCheckboxChange"
+                                            disabled="true"
                                         >
                                         <span>I agree Lydia’s Lechon’s Privacy Protection Policy</span>
                                     </label>
@@ -608,9 +608,18 @@
     <div x-show="showModal" x-transition.opacity class="fixed inset-0 bg-black/50 z-40 overflow-y-auto py-10 px-4"
         @click.self="showModal = false">
         <div x-show="showModal" 
-            class="relative m-auto bg-white text-black z-50 w-full max-w-lg rounded-lg shadow-lg">
+            class="relative m-auto bg-white text-black z-50 w-full max-w-2xl rounded-md">
             <div id="data-privacy-render">
                 {!! $dataPrivacyRender !!}
+            </div>
+
+            <div class="flex justify-end p-4">
+                <button @click="showModal = false" class="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 mr-2">
+                    Decline
+                </button>
+                <button @click="agreePrivacy" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark">
+                    Agree
+                </button>
             </div>
         </div>
     </div>
@@ -1098,6 +1107,7 @@
                 }
                 
                 if (!this.privacy) {
+                    this.onCheckboxChange();
                     this.errors.privacy = ['You must agree to the privacy policy.'];
                     this.isSubmitting = false;
                     return;
@@ -1883,19 +1893,12 @@
 
             agreed: false,
             showModal: false,
-            onCheckboxChange(e) {
-                // Only trigger modal if not already agreed
-                if (!this.agreed) {
-                    e.target.checked = false; // uncheck until modal confirm
-                    this.showModal = true;
-                }
+            onCheckboxChange() {
+                this.showModal = true;
             },
-            agreeInModal() {
-                this.agreed = true;
+            agreePrivacy() {
+                this.privacy = true;
                 this.showModal = false;
-                // Optionally: If your form validation reads checkbox value,
-                // set it programmatically:
-                this.$el.querySelector('input[type=checkbox]').checked = true;
             }
         }
     }
