@@ -271,7 +271,10 @@ class FrontendController extends Controller
     public function signup()
     {
         $page = 'signup';
-        return view('v2.signup', compact('page'));
+        $dataPrivacy = Page::where('slug', 'data-privacy')->first();
+
+        $dataPrivacyRender = view('v2.data-privacy', compact('dataPrivacy'))->render();
+        return view('v2.signup', compact('page', 'dataPrivacyRender'));
     }
 
     public function my_account(Request $request)
