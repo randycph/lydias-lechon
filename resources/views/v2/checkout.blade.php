@@ -261,19 +261,37 @@
                                                 <div class="w-full">
                                                     <label class="font-bold block text-sm mb-1">Address</label>
                                                     <textarea x-model="delivery.address"
-                                                        class="w-full border border-gray-300 p-2 rounded-md" placeholder="Enter address"></textarea>
+                                                        class="w-full border border-gray-300 p-2 rounded-md" placeholder="Enter address" :class="{'border-red-500': errors.address}"></textarea>
+                                                    <template x-if="errors.address">
+                                                        <div class="text-red-500 text-xs mt-1" x-text="errors.address"></div>
+                                                    </template>
                                                 </div>
                                                 <div class="w-full flex gap-4">
                                                     <div class="w-full lg:w-1/2">
                                                         <label class="font-bold block text-sm mb-1">Contact Person</label>
                                                         <input type="text" x-model="delivery.name"
-                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" />
+                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors.name}" />
+                                                        <template x-if="errors.name">
+                                                            <div class="text-red-500 text-xs mt-1" x-text="errors.name"></div>
+                                                        </template>
                                                     </div>
                                                     <div class="w-full lg:w-1/2">
                                                         <label class="font-bold block text-sm mb-1">Contact Number</label>
                                                         <input type="tel" x-model="delivery.phone"
-                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" />
+                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors.phone}" />
+                                                        <template x-if="errors.phone">
+                                                            <div class="text-red-500 text-xs mt-1" x-text="errors.phone"></div>
+                                                        </template>
                                                     </div>
+                                                </div>
+                                                <div class="w-full flex gap-2">
+                                                    <input
+                                                        :id="'sms-' + index"
+                                                        type="checkbox"
+                                                        x-model="delivery.sms"
+                                                        class="border border-gray-300 p-2"
+                                                    />
+                                                    <label class="block text-sm mb-1" :for="'sms-' + index">Notify recipient through SMS?</label>
                                                 </div>
                                                 
                                                 <div class="w-full">
@@ -330,10 +348,15 @@
                                                             </svg>
                                                             </div>
                                                             <input 
+                                                                :class="{'border-red-500': errors.need_date}"
                                                                 onkeydown="return false"
                                                                 :min="minDate"
                                                                 @change="validateDeliveryDateTime(delivery)"
                                                                 x-model="delivery.need_date" name="need_date" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
+                                                        
+                                                            <template x-if="errors.need_date">
+                                                                <div class="text-red-500 text-xs mt-1" x-text="errors.need_date"></div>
+                                                            </template>
                                                         </div>
                                                     </div>
                                                     <div class="w-full lg:w-1/2">
@@ -345,6 +368,7 @@
                                                                 </svg>
                                                             </div>
                                                             <select 
+                                                                :class="{'border-red-500': errors.need_time}"
                                                                 name="need_time" 
                                                                 id="need_time"
                                                                 x-model="delivery.need_time" 
@@ -361,6 +385,9 @@
                                                                     </template>
                                                                 </template>
                                                             </select>
+                                                            <template x-if="errors.need_time">
+                                                                <div class="text-red-500 text-xs mt-1" x-text="errors.need_time"></div>
+                                                            </template>
                                                         </div>
                                                         <div x-show="noNeededTime" class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
                                                             Please select a time.
@@ -620,10 +647,7 @@
             </div>
 
             <div class="flex justify-end p-4">
-                <button @click="showModal = false, privacy = false" class="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 mr-2">
-                    Decline
-                </button>
-                <button @click="agreePrivacy" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark">
+                <button type="button" @click="agreePrivacy" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark">
                     Agree
                 </button>
             </div>
@@ -790,7 +814,8 @@
                 { 
                     address: '', 
                     name: '',
-                    phone: '', 
+                    phone: '',
+                    sms: false, 
                     qty: 1, 
                     location: '', 
                     order: '', 
@@ -806,6 +831,7 @@
                     address: '',
                     name: '',
                     phone: '',
+                    sms: false,
                     qty: order.qty,
                     location: '',
                     order: order.id,
@@ -1691,6 +1717,8 @@
             validateBeforeAddDelivery() {
                 const lastDelivery = this.deliveries[this.deliveries.length - 1];
 
+                this.errors = {}; // Clear previous errors
+
                 if (!lastDelivery) return;
 
                 // Check if at least one product with quantity is selected
@@ -1704,9 +1732,25 @@
                 }
 
                 // Check required address fields
-                const { address, name, phone, location, need_date, need_time } = lastDelivery;
-                if (!address || !name || !phone || !location || !need_date || !need_time) {
-                    alert('Please fill in all required fields before adding another delivery address.');
+                const { address, name, phone, location, need_date, need_time, sms } = lastDelivery;
+                
+                if (!address) this.errors.address = 'Address is required.';
+                if (!name) this.errors.name = 'Contact person is required.';
+                if (!location) this.errors.location = 'Location is required.';
+                if (!need_date) this.errors.need_date = 'Date is required.';
+                if (!need_time) this.errors.need_time = 'Time is required.';
+
+                // Phone validation for SMS
+                if (sms && phone) {
+                    const phonePattern = /^(09|(\+63)|639)\d{9}$/;
+                    if (!phonePattern.test(phone)) {
+                        this.errors.phone = 'Please provide a valid phone number for SMS notifications.';
+                        return;
+                    }
+                }
+
+                if (!phone && sms) {
+                    this.errors.phone = 'Please provide a phone number if you want the recipient to receive SMS notifications.';
                     return;
                 }
 
@@ -1732,6 +1776,7 @@
                     need_time: '',
                     note: '',
                     delivery_fee: 0,
+                    sms: false
                 });
 
                 this.qtyValidationMessage = '';
