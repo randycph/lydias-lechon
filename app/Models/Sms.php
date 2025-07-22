@@ -33,7 +33,37 @@ class Sms
 		elseif($type == 'delivery_assigned'){
 			$send_to_customer = $this->delivery_assigned($receiver, $transaction, $driver);
 		}
+		elseif($type == 'new_order_delivery'){
+			$send_to_customer = $this->new_order_delivery($receiver, $transaction);
+		}
 
+	}
+
+	public function new_order_delivery($receiver, $transaction){
+
+		try {
+			$message = "Thank you for ordering at Lydia's Lechon. You will receive further instructions soon.";
+			$ch = curl_init();
+
+			curl_setopt($ch, CURLOPT_URL, 'https://api.wavecell.com/sms/v1/Lydia_MKT/single');
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, "{\"source\":\"Lydias\",\"destination\":\"$receiver\",\"text\":\"$message\"}");
+
+			$headers = array();
+			$headers[] = 'Authorization: Bearer dwD2PXjYKV9kQv6KAI1l4ohYEjuOEwIoeoTPtwrEkU';
+			$headers[] = 'Content-Type: application/json';
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+			$result = curl_exec($ch);
+			if (curl_errno($ch)) {
+			    //echo 'Error:' . curl_error($ch);
+			}
+			curl_close($ch);
+		} catch (\Exception $e) {
+			logger()->error('SMS Error: '.$e->getMessage());
+		}
+	
 	}
 
 	public function delivery_assigned($receiver, $transaction, $driver = null){
