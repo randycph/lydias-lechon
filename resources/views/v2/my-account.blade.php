@@ -17,6 +17,11 @@
             </div>
 
             <div class="w-full lg:w-3/4">
+                @if (session('success'))
+                    <div class="bg-green-100 text-green-800 p-4 rounded-md mb-4">
+                        <strong>Success!</strong> {{ session('success') }}
+                    </div>
+                @endif
                 <div class="rounded-lg border bg-white border-[#DFDFDF] shadow-md">
                     <div class="px-6 py-4 border-b border-[#DFDFDF]">
                         <h2 class="font-semibold text-tertiary text-left uppercase">Personal Information</h2>

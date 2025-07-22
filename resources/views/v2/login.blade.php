@@ -97,7 +97,7 @@
         
                     <div>
                         <div class="flex items-center justify-center mt-8">
-                            <div class="text-center text-sm">Don't have an account yet? <a class="text-primary font-bold underline hover:text-primary-dark" href="{{ route('signup') }}">Sign up now</a></div>
+                            <div class="text-center text-sm">Don't have an account yet? <a class="text-primary font-bold underline hover:text-primary-dark" href="{{ route('signup', ['redirect' => request()->get('redirect')]) }}">Sign up now</a></div>
                         </div>
                     </div>
                 </div>

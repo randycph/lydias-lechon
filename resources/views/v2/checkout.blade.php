@@ -34,6 +34,12 @@
                 @endif
             </div>
 
+            @if (session('success'))
+                <div class="bg-green-100 text-green-800 p-4 rounded-md mb-4">
+                    <strong>Success!</strong> {{ session('success') }}
+                </div>
+            @endif
+
             @if ($carts->isEmpty())
                 <div class="flex flex-col items-center justify-center h-96">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-20">

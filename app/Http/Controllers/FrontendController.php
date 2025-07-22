@@ -577,7 +577,7 @@ class FrontendController extends Controller
             }
 
             $redirectTo = $request->input('redirect') ?? route('my-account');
-            return redirect()->intended($redirectTo);
+            return redirect()->intended($redirectTo)->with('success', 'Account created successfully! Welcome to our website! Please check your email inbox or spam folder for the welcome email.');
         } catch (\Throwable $th) {
             throw $th;
         }
