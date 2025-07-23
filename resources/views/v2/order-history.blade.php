@@ -52,7 +52,7 @@
                                 {{ $sale->payment_status }}
                             </div>
                         </div>
-                        <div class="flex items-start font-bold flex-col gap-2  py-5 border-b border-[#DFDFDF]">
+                        <div class="flex items-start flex-col gap-2  py-5 border-b border-[#DFDFDF]">
                             @if ($sale->items->count() > 0)                
                             <div class="flex flex-col items-center gap-8 px-4 py-3 border-b border-[#DFDFDF] w-full">
                                 @php
@@ -179,6 +179,66 @@
                                             </div>
                                         </div>
                                         @endif
+
+                                        <div class="mt-5">
+                                            <div class="text-sm text-slate-500 font-bold mb-3">Order Details</div>
+                                            <p class="mg-b-3 tx-semibold">@if($sale->user_id == 9999) {{$sale->customer_name}} @else {{$sale->user->FullName}} @endif</p>                  
+                                            <p class="mg-b-3">Mobile No: {{$sale->customer_contact_number ?? $sale->user->contact_mobile }} @if(!empty($sale->user->contact_tel)) | Tel no: {{$sale->user->contact_tel}} @endif</p>
+                                            <p class="mg-b-3">Email: {{$sale->email ?? $sale->user->email}}</p>
+                                            <p class="mg-b-3 mt-5">{{$sale->delivery_type}}: 
+                                                <div class="mt-1">
+                                                    @if ($sale->delivery_type == 'Door to door delivery')
+                                                    @if ($sale?->deliveryAddress && count($sale?->deliveryAddress) > 0)
+                                                    <ul class="list-disc pl-10">
+                                                    @foreach ($sale->deliveryAddress as $k => $address)
+                                                    <li>
+                                                        Address: {{ $address->address }}<br>
+                                                        Contact person: {{ $address->contact_person }}<br>
+                                                        Contact number: {{ $address->contact_tel }}<br>
+                                                        Delivery fee: ₱{{ number_format($address->delivery_fee, 2) }}<br>
+                                                        Location: {{ $address->location }}<br>
+                                                        Delivery Date and time: {{ \Carbon\Carbon::parse(strtotime($address->delivery_date . ' ' . $address->delivery_time))->format('F d, Y g:i A') }}<br>
+                                                        Order/s:
+                                                            @if ($address->products)
+                                                                @php
+                                                                    $products = json_decode($address->products);
+                                                                @endphp
+
+                                                                @if(is_array($products) || is_object($products))
+                                                                    <ul class="list-disc pl-10">
+                                                                        @foreach ($products as $product)
+                                                                            <li>
+                                                                                {{ $product->product->name ?? 'Unknown Product' }} x {{ $product->qty }}
+                                                                            </li>
+                                                                        @endforeach
+                                                                    </ul>
+                                                                @endif
+                                                            @endif
+                                                        <br>
+                                                    </li>
+                                                    @endforeach
+                                                    </ul>
+                                                    @else
+                                                        {{ $sale->customer_delivery_adress }}
+                                                    @endif
+                                                @else
+                                                    {{$sale->customer_delivery_adress}}
+                                                @endif
+                                                </div>
+                                            </p>
+                                            @if ($sale?->deliveryAddress && count($sale?->deliveryAddress) == 0)
+                                                @php 
+                                                    $saleDetail = $sale->items ? $sale->items->first() : null;
+                                                    $deliveryDate = $saleDetail ? date('F d, Y g:i A', strtotime($saleDetail?->delivery_date)) : 'N/A';
+                                                @endphp
+                                                <p class="mg-b-3">Date needed: {{$deliveryDate}}</p>
+                                            @endif
+
+                                            <p class="mg-b-3">Contact Person: {{$sale->contact_person ?? $sale->customer_name}}</p>
+                                            @if ($sale->instruction)
+                                            <p class="mg-b-3">Instruction: {{$sale->instruction}}</p>
+                                            @endif
+                                        </div>
                                     </div>
                                 </template>
                             </div>
