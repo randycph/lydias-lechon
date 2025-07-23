@@ -140,7 +140,11 @@
                                     @if(date('H:i A',strtotime($details->delivery_date)) == '12:00 PM')
                                         {{date('F d, Y',strtotime($details->delivery_date))}} 12:00 NOON
                                     @else
-                                        {{date('F d, Y g:i A',strtotime($details->delivery_date))}}
+                                        @if($sales?->deliveryAddress && count($sales?->deliveryAddress) > 0)
+
+                                        @else
+                                            {{date('F d, Y g:i A',strtotime($details->delivery_date))}}
+                                        @endif
                                     @endif
                                     
                                 </td>
