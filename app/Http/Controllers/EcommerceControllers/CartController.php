@@ -877,6 +877,7 @@ class CartController extends Controller
                             'note' => $delivery->note,
                             'branch' => $request->delivery_branch,
                             'products' => json_encode($delivery->orders),
+                            'receive_sms' => $delivery->sms ? 1 : 0,
                         ]);
                     }
                 }
@@ -1002,6 +1003,15 @@ class CartController extends Controller
         if(strlen($salesHeader->customer_contact_number) > 1){
             $sms = new Sms();
             $sms->send_sms($salesHeader->customer_contact_number, 'new_order', $salesHeader);
+        }
+
+        $multipleDeliveries = ProductDeliveryAddress::where('sales_header_id', $salesHeader->id)->get();
+
+        foreach ($multipleDeliveries as $delivery) {
+            $sms = new Sms();
+            if ($delivery?->receive_sms == 1 && strlen($delivery->contact_tel) > 1) {
+                $sms->send_sms($delivery->contact_tel, 'new_order_delivery', $salesHeader);
+            }
         }
 
         $merchantkey = '2amqVf04H9';

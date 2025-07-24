@@ -34,6 +34,12 @@
                 @endif
             </div>
 
+            @if (session('success'))
+                <div class="bg-green-100 text-green-800 p-4 rounded-md mb-4">
+                    <strong>Success!</strong> {{ session('success') }}
+                </div>
+            @endif
+
             @if ($carts->isEmpty())
                 <div class="flex flex-col items-center justify-center h-96">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-20">
@@ -255,19 +261,37 @@
                                                 <div class="w-full">
                                                     <label class="font-bold block text-sm mb-1">Address</label>
                                                     <textarea x-model="delivery.address"
-                                                        class="w-full border border-gray-300 p-2 rounded-md" placeholder="Enter address"></textarea>
+                                                        class="w-full border border-gray-300 p-2 rounded-md" placeholder="Enter address" :class="{'border-red-500': errors.address}"></textarea>
+                                                    <template x-if="errors.address">
+                                                        <div class="text-red-500 text-xs mt-1" x-text="errors.address"></div>
+                                                    </template>
                                                 </div>
                                                 <div class="w-full flex gap-4">
                                                     <div class="w-full lg:w-1/2">
                                                         <label class="font-bold block text-sm mb-1">Contact Person</label>
                                                         <input type="text" x-model="delivery.name"
-                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" />
+                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors.name}" />
+                                                        <template x-if="errors.name">
+                                                            <div class="text-red-500 text-xs mt-1" x-text="errors.name"></div>
+                                                        </template>
                                                     </div>
                                                     <div class="w-full lg:w-1/2">
                                                         <label class="font-bold block text-sm mb-1">Contact Number</label>
                                                         <input type="tel" x-model="delivery.phone"
-                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" />
+                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors.phone}" />
+                                                        <template x-if="errors.phone">
+                                                            <div class="text-red-500 text-xs mt-1" x-text="errors.phone"></div>
+                                                        </template>
                                                     </div>
+                                                </div>
+                                                <div class="w-full flex gap-2">
+                                                    <input
+                                                        :id="'sms-' + index"
+                                                        type="checkbox"
+                                                        x-model="delivery.sms"
+                                                        class="border border-gray-300 p-2"
+                                                    />
+                                                    <label class="block text-sm mb-1" :for="'sms-' + index">Notify recipient through SMS?</label>
                                                 </div>
                                                 
                                                 <div class="w-full">
@@ -324,10 +348,15 @@
                                                             </svg>
                                                             </div>
                                                             <input 
+                                                                :class="{'border-red-500': errors.need_date}"
                                                                 onkeydown="return false"
                                                                 :min="minDate"
                                                                 @change="validateDeliveryDateTime(delivery)"
                                                                 x-model="delivery.need_date" name="need_date" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
+                                                        
+                                                            <template x-if="errors.need_date">
+                                                                <div class="text-red-500 text-xs mt-1" x-text="errors.need_date"></div>
+                                                            </template>
                                                         </div>
                                                     </div>
                                                     <div class="w-full lg:w-1/2">
@@ -339,14 +368,16 @@
                                                                 </svg>
                                                             </div>
                                                             <select 
+                                                                :class="{'border-red-500': errors.need_time}"
                                                                 name="need_time" 
                                                                 id="need_time"
                                                                 x-model="delivery.need_time" 
+                                                                @click="validateDeliveryDateTime(delivery)"
                                                                 @change="validateDeliveryDateTime(delivery)"
                                                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                                             >
                                                                 <option value="">Select Hour</option>
-                                                                <template x-for="hour in allHours" :key="hour">
+                                                                <template x-for="hour in getAvailableHours(delivery)" :key="hour">
                                                                     <template x-if="!isTimeDisabledForDelivery(hour)(delivery)">
                                                                         <option 
                                                                             :value="(hour < 10 ? '0' + hour : hour) + ':00'" 
@@ -355,6 +386,9 @@
                                                                     </template>
                                                                 </template>
                                                             </select>
+                                                            <template x-if="errors.need_time">
+                                                                <div class="text-red-500 text-xs mt-1" x-text="errors.need_time"></div>
+                                                            </template>
                                                         </div>
                                                         <div x-show="noNeededTime" class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
                                                             Please select a time.
@@ -569,13 +603,14 @@
                                 
                                 @if (auth()->guest())
                                 <div class="flex items-start">
-                                    <div class="flex items-center h-5">
-                                        <input id="privacy" type="checkbox" x-model="privacy" name="privacy"
-                                            class="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-3 focus:ring-blue-300" />
-                                    </div>
-                                    <label for="privacy" class="ms-2 text-sm font-medium">
-                                        I agree to 
-                                        <a class="underline" target="_blank" href="privacy-policy">Lydia’s Lechon’s Privacy Protection Policy</a>
+                                    <label @click="onCheckboxChange" class="flex items-center space-x-2">
+                                        <input
+                                            x-model="privacy" 
+                                            name="privacy" 
+                                            type="checkbox"
+                                            disabled="true"
+                                        >
+                                        <span>I agree Lydia’s Lechon’s Privacy Protection Policy</span>
                                     </label>
                                 </div>
                                 <template x-if="errors.privacy">
@@ -604,7 +639,23 @@
 
         </form>
 
-        <div x-show="depositModal"
+    <div x-show="showModal" x-transition.opacity class="fixed inset-0 bg-black/50 z-40 overflow-y-auto py-10 px-4"
+        @click.self="showModal = false">
+        <div x-show="showModal" 
+            class="relative m-auto bg-white text-black z-50 w-full max-w-2xl rounded-md">
+            <div id="data-privacy-render">
+                {!! $dataPrivacyRender !!}
+            </div>
+
+            <div class="flex justify-end p-4">
+                <button type="button" @click="agreePrivacy" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark">
+                    Agree
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="depositModal"
         x-transition
         class="relative z-50"
         aria-labelledby="modal-title"
@@ -764,7 +815,8 @@
                 { 
                     address: '', 
                     name: '',
-                    phone: '', 
+                    phone: '',
+                    sms: false, 
                     qty: 1, 
                     location: '', 
                     order: '', 
@@ -780,6 +832,7 @@
                     address: '',
                     name: '',
                     phone: '',
+                    sms: false,
                     qty: order.qty,
                     location: '',
                     order: order.id,
@@ -1087,6 +1140,7 @@
                 }
                 
                 if (!this.privacy) {
+                    this.onCheckboxChange();
                     this.errors.privacy = ['You must agree to the privacy policy.'];
                     this.isSubmitting = false;
                     return;
@@ -1448,6 +1502,12 @@
                 this.need_date = this.minDate();
 
                 this.loadAutoCoupons();
+
+                this.$watch('need_date', value => {
+                    this.checkAndAdvanceDateIfNoHours();
+                });
+
+                this.checkAndAdvanceDateIfNoHours();
             },
 
             checkMultipleDeliveries() {
@@ -1470,6 +1530,7 @@
 
             // When checkbox is toggled
             toggleOrderSelection(delivery, order) {
+                this.autoAdvanceDateIfNoHours(delivery)
                 delivery.location = '';
 
                 if (!delivery.orders) delivery.orders = [];
@@ -1664,6 +1725,8 @@
             validateBeforeAddDelivery() {
                 const lastDelivery = this.deliveries[this.deliveries.length - 1];
 
+                this.errors = {}; // Clear previous errors
+
                 if (!lastDelivery) return;
 
                 // Check if at least one product with quantity is selected
@@ -1677,9 +1740,25 @@
                 }
 
                 // Check required address fields
-                const { address, name, phone, location, need_date, need_time } = lastDelivery;
-                if (!address || !name || !phone || !location || !need_date || !need_time) {
-                    alert('Please fill in all required fields before adding another delivery address.');
+                const { address, name, phone, location, need_date, need_time, sms } = lastDelivery;
+                
+                if (!address) this.errors.address = 'Address is required.';
+                if (!name) this.errors.name = 'Contact person is required.';
+                if (!location) this.errors.location = 'Location is required.';
+                if (!need_date) this.errors.need_date = 'Date is required.';
+                if (!need_time) this.errors.need_time = 'Time is required.';
+
+                // Phone validation for SMS
+                if (sms && phone) {
+                    const phonePattern = /^(09|(\+63)|639)\d{9}$/;
+                    if (!phonePattern.test(phone)) {
+                        this.errors.phone = 'Please provide a valid phone number for SMS notifications.';
+                        return;
+                    }
+                }
+
+                if (!phone && sms) {
+                    this.errors.phone = 'Please provide a phone number if you want the recipient to receive SMS notifications.';
                     return;
                 }
 
@@ -1705,12 +1784,66 @@
                     need_time: '',
                     note: '',
                     delivery_fee: 0,
+                    sms: false
                 });
 
                 this.qtyValidationMessage = '';
             },
 
+            getAvailableHours(delivery) {
+                return this.allHours.filter(hour => !this.isTimeDisabledForDelivery(hour)(delivery));
+            },
+            autoAdvanceDateIfNoHours(delivery, tries = 0) {
+                if (tries > 31) return; // Don't go more than a month ahead
+
+                const available = this.getAvailableHours(delivery);
+                if (available.length === 0) {
+                    // Add 1 day
+                    let d = new Date(delivery.need_date);
+                    d.setDate(d.getDate() + 1);
+                    delivery.need_date = d.toISOString().split('T')[0];
+
+                    console.log(`Auto-advanced delivery date to: ${delivery.need_date}`);
+
+                    // Force Alpine to update: set time to empty to prevent stuck state
+                    delivery.need_time = "";
+
+                    // Recursively check again for next date
+                    this.autoAdvanceDateIfNoHours(delivery, tries + 1);
+                }
+            },
+            isTimeDisabledForDelivery(hour) {
+                return (delivery) => {
+                    if (!delivery.need_date) return false;
+
+                    const selectedDate = new Date(delivery.need_date);
+                    const now = new Date();
+
+                    const isToday =
+                        selectedDate.getDate() === now.getDate() &&
+                        selectedDate.getMonth() === now.getMonth() &&
+                        selectedDate.getFullYear() === now.getFullYear();
+                    if (isToday && hour <= now.getHours()) {
+                        return true;
+                    }
+
+                    if (isToday && this.hasMisc && hour < (now.getHours() + 6)) {
+                        return true;
+                    }
+
+                    const timeStr = (hour < 10 ? '0' + hour : hour) + ':00';
+                    return this.disabledDeliveryDates.includes(`${delivery.need_date} ${timeStr}`);
+                };
+            },
             validateDeliveryDateTime(delivery) {
+                this.autoAdvanceDateIfNoHours(delivery);
+
+                // Optionally, always clear time when date changes (user can't select invalid time)
+                const available = this.getAvailableHours(delivery);
+                if (!available.includes(parseInt(delivery.need_time))) {
+                    delivery.need_time = "";
+                }
+
                 if (!delivery.need_date || !delivery.need_time) return;
 
                 const selectedDateTime = new Date(`${delivery.need_date}T${delivery.need_time}`);
@@ -1730,7 +1863,6 @@
                     delivery.warningMessage = '';
                 }
             },
-
             formatTime(timeStr) {
                 const [hours, minutes] = timeStr?.split(':');
                 const hoursNum = parseInt(hours, 10);
@@ -1786,6 +1918,16 @@
                 return `${h}:00 ${suffix}`;
             },
 
+            checkAndAdvanceDateIfNoHours() {
+                const available = this.allHours.filter(hour => !this.isTimeDisabled(hour));
+                if (available.length === 0) {
+                    // Add 1 day to need_date
+                    const current = new Date(this.need_date);
+                    current.setDate(current.getDate() + 1);
+                    this.need_date = current.toISOString().split('T')[0];
+                }
+            },
+
             isTimeDisabled(hour) {
                 if (!this.need_date) return false;
 
@@ -1812,31 +1954,6 @@
                     ? this.disabledPickupDates.includes(fullStr)
                     : this.disabledDeliveryDates.includes(fullStr);
             },
-
-            isTimeDisabledForDelivery(hour) {
-                return (delivery) => {
-                    if (!delivery.need_date) return false;
-
-                    const selectedDate = new Date(delivery.need_date);
-                    const now = new Date();
-
-                    const isToday =
-                        selectedDate.getDate() === now.getDate() &&
-                        selectedDate.getMonth() === now.getMonth() &&
-                        selectedDate.getFullYear() === now.getFullYear();
-                    if (isToday && hour <= now.getHours()) {
-                        return true;
-                    }
-
-                    if (isToday && this.hasMisc && hour < (now.getHours() + 6)) {
-                        return true;
-                    }
-
-                    const timeStr = (hour < 10 ? '0' + hour : hour) + ':00';
-                    return this.disabledDeliveryDates.includes(`${delivery.need_date} ${timeStr}`);
-                };
-            },
-
             removeDelivery(index) {
                 const removed = this.deliveries.splice(index, 1)[0];
 
@@ -1868,6 +1985,16 @@
                 if (!response.ok) throw new Error('Network error');
 
                 const data = await response.json();
+            },
+
+            agreed: false,
+            showModal: false,
+            onCheckboxChange() {
+                this.showModal = true;
+            },
+            agreePrivacy() {
+                this.privacy = true;
+                this.showModal = false;
             }
         }
     }

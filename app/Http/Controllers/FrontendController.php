@@ -205,7 +205,11 @@ class FrontendController extends Controller
             return $cart->product->is_misc == 1;
         });
 
-        return view('v2.checkout', compact('page', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc'));
+        $dataPrivacy = Page::where('slug', 'data-privacy')->first();
+
+        $dataPrivacyRender = view('v2.data-privacy', compact('dataPrivacy'))->render();
+
+        return view('v2.checkout', compact('page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc'));
     }
 
     public function confirmation($id)
@@ -267,7 +271,10 @@ class FrontendController extends Controller
     public function signup()
     {
         $page = 'signup';
-        return view('v2.signup', compact('page'));
+        $dataPrivacy = Page::where('slug', 'data-privacy')->first();
+
+        $dataPrivacyRender = view('v2.data-privacy', compact('dataPrivacy'))->render();
+        return view('v2.signup', compact('page', 'dataPrivacyRender'));
     }
 
     public function my_account(Request $request)
@@ -356,6 +363,14 @@ class FrontendController extends Controller
 
     public function blogs()
     {
+        $page = Page::where('slug', 'blogs')->first();
+
+        if (!$page) {
+            abort(404);
+        }
+
+        return view('v2.page', compact('page'));
+
         $featuredArticle = Article::with('category')
                                 ->where('is_featured', 1)
                                 ->where('category_id', '>', 0)
@@ -562,7 +577,7 @@ class FrontendController extends Controller
             }
 
             $redirectTo = $request->input('redirect') ?? route('my-account');
-            return redirect()->intended($redirectTo);
+            return redirect()->intended($redirectTo)->with('success', 'Account created successfully! Welcome to our website! Please check your email inbox or spam folder for the welcome email.');
         } catch (\Throwable $th) {
             throw $th;
         }
@@ -783,6 +798,8 @@ class FrontendController extends Controller
             abort(404);
         }
 
-        return view('v2.page', compact('page'));
+        $albums = Album::with('banners')->where('name', 'Home Banner')->first();
+
+        return view('v2.page', compact('page', 'albums'));
     }
 }

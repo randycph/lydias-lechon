@@ -544,13 +544,22 @@
                                 </div>
                      
                                 <div class="flex items-start mb-5">
-                                    <div class="flex items-center h-5">
+                                    {{-- <div class="flex items-center h-5">
                                         <input id="privacy" type="checkbox" x-model="privacy" name="privacy"
                                             class="w-4 h-4 border border-gray-300 rounded-sm bg-gray-50 focus:ring-3 focus:ring-blue-300" />
                                     </div>
                                     <label for="privacy" class="ms-2 text-sm font-medium">
                                         I agree to 
                                         <a class="underline" target="_blank" href="/privacy-policy">Lydia’s Lechon’s Privacy Protection Policy</a>
+                                    </label> --}}
+                                    <label @click="onCheckboxChange" class="flex items-center space-x-2 text-sm font-medium">
+                                        <input
+                                            x-model="privacy" 
+                                            name="privacy" 
+                                            type="checkbox"
+                                            disabled="true"
+                                        >
+                                        <span>I agree Lydia’s Lechon’s Privacy Protection Policy</span>
                                     </label>
                                 </div>
                                 <template x-if="errors.privacy">
@@ -601,6 +610,22 @@
                     @if(request()->has('redirect'))
                         <input type="hidden" name="redirect" value="{{ request()->get('redirect') }}">
                     @endif
+
+                    <div x-show="showModal" x-transition.opacity class="fixed inset-0 bg-black/50 z-40 overflow-y-auto py-10 px-4"
+                        @click.self="showModal = false">
+                        <div x-show="showModal" 
+                            class="relative m-auto bg-white text-black z-50 w-full max-w-2xl rounded-md">
+                            <div id="data-privacy-render">
+                                {!! $dataPrivacyRender !!}
+                            </div>
+
+                            <div class="flex justify-end p-4">
+                                <button type="button" @click="agreePrivacy" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark">
+                                    I Agree
+                                </button>
+                            </div>
+                        </div>
+                    </div>
         
                 </form>
             </div>
@@ -611,7 +636,7 @@
         </div>
     </div>
 </div>
-    
+
 <x-footer-component />
 
 <script>
@@ -620,6 +645,14 @@ function registrationForm() {
         step: 1,
         accountType: 'individual',
         errors: {},
+        showModal: false,
+        onCheckboxChange() {
+            this.showModal = true;
+        },
+        agreePrivacy() {
+            this.privacy = true;
+            this.showModal = false;
+        },
 
         // Collected data
         email: '',

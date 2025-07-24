@@ -69,7 +69,7 @@
                     <ul class="list-unstyled lh-7">
                         <li class="d-flex justify-content-between tx-15">
                             <span>Order Date</span>
-                            <span>{{ date('F d, Y g:i A', strtotime($sales->created_at))}}</span>
+                            <span>{{ \Carbon\Carbon::parse($sales->created_at)->format('F d, Y g:i A') }}</span>
                         </li>
                         <li class="d-flex justify-content-between tx-15">
                             <span>Payment Status</span>
@@ -87,6 +87,17 @@
                 </div>
 
                 <div class="col-sm-12 col-lg-12 mg-t-10">
+                    <div>Date Needed: {{\Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('F d, Y g:i A')}}</div>
+                    <div>Day: {{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('l') }}</div>
+                    <div>Time: {{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('g:i A') }}</div>
+                    <div>Name: {{$sales->contact_person ?? $sales->customer_name}}</div>
+                    <div>Contact #: {{$sales->customer_contact_number}}</div>
+                    <div>Qty/Size: {{$sales->qty}}</div>
+                    <div>Delivery Charge: {{number_format($sales->delivery_fee ?? 0)}}</div>
+                    <div>Delivery Address: {{ $deliveryAddress->address }}</div>
+                    <div>Payment Method: {{$sales->payment_used ?? 'Paymaya'}}</div>
+
+
                     <p class="mg-b-0 tx-15">Contact Person: {{$sales->contact_person ?? $sales->customer_name}}</p>
                     <p class="mg-b-0 tx-15">Delivery Type: {{$sales->delivery_type}}</p>
                     <p class="mg-b-3 tx-15">
@@ -127,7 +138,7 @@
                                 <td class="tx-nowrap">
                                     {{ $product->product->name ?? 'Unknown Product' }}
                                 </td>                
-                                <td class="tx-nowrap tx-center">{{date('F d, Y g:i A',strtotime($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time))}}</td>
+                                <td class="tx-nowrap tx-center">{{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('F d, Y g:i A') }}</td>
                                 <td class="tx-center">{{number_format($product->qty, 0)}}</td>
                                 <td class="tx-center">₱{{number_format($product->product->price, 2)}}</td>
                                 <td class="tx-right">
@@ -182,7 +193,7 @@
                             <tr>
                                 <td class="tx-left">{{$payment->payment_type}}</td>
                                 <td class="tx-center">{{$payment->receipt_number}}</td>
-                                <td class="tx-center">{{ date('F d, Y', strtotime($payment->payment_date))}}</td>
+                                <td class="tx-center">{{ \Carbon\Carbon::parse($payment->payment_date)->format('F d, Y') }}</td>
                                 <td class="tx-center">@if($payment->status=='PENDING' && ($payment->payment_type=='IPAY' || $payment->payment_type=='Paymaya' )) Subject for Confirmation @else {{$payment->status}} @endif</td>
                                 <td class="tx-right">{{number_format($payment->amount, 2)}}</td>
                                

@@ -64,7 +64,7 @@ Route::get('/my-cart', [FrontendController::class, 'my_cart'])->name('my-cart');
 Route::get('/order-history', [FrontendController::class, 'order_history'])->name('order-history');
 Route::get('/change-password', [FrontendController::class, 'change_password'])->name('change-password');
 Route::get('/careersss', [FrontendController::class, 'carrers'])->name('careers.v2');
-Route::get('/blogs', [FrontendController::class, 'blogs'])->name('blogs');
+Route::get('/blogss', [FrontendController::class, 'blogs'])->name('blogs');
 Route::get('/blogs/{category}', [FrontendController::class, 'blogCategory'])->name('blogs-category');
 Route::get('blog/{category}/{slug}', [FrontendController::class, 'article'])->name('article');    
 
