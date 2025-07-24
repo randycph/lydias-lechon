@@ -1501,6 +1501,12 @@
                 this.need_date = this.minDate();
 
                 this.loadAutoCoupons();
+
+                this.$watch('need_date', value => {
+                    this.checkAndAdvanceDateIfNoHours();
+                });
+
+                this.checkAndAdvanceDateIfNoHours();
             },
 
             checkMultipleDeliveries() {
@@ -1856,6 +1862,16 @@
                 const h = hour % 12 || 12;
                 const suffix = hour < 12 ? 'AM' : 'PM';
                 return `${h}:00 ${suffix}`;
+            },
+
+            checkAndAdvanceDateIfNoHours() {
+                const available = this.allHours.filter(hour => !this.isTimeDisabled(hour));
+                if (available.length === 0) {
+                    // Add 1 day to need_date
+                    const current = new Date(this.need_date);
+                    current.setDate(current.getDate() + 1);
+                    this.need_date = current.toISOString().split('T')[0];
+                }
             },
 
             isTimeDisabled(hour) {
