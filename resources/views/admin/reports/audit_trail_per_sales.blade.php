@@ -87,10 +87,13 @@
                             @forelse($rs as $r) 
                                 @php
                                     $user = $r->created_by;
-                                    if(is_int($user)){
-                                        $uu = \App\Models\User::find($user);
-                                        if($uu)
-                                            $user = $uu->email;
+                                    if(($user)){
+                                        $uu = \App\Models\User::where('id', $user)->orWhere('email', $user)->first();
+                                        if($uu) {
+                                            $user = $uu->name;
+                                        } else {
+                                            $user = 'Unknown User';
+                                        }
                                     }
                                 @endphp
                                 <tr style="text-align: left">
