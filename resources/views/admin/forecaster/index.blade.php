@@ -222,7 +222,7 @@ Manage Customer
                                         <td>
                                             <nav class="nav table-options">
                                                 @if (auth()->user()->has_access_to_route('joborder.assign'))
-                                                    {{--<a class="nav-link" href="{{ route('joborder.assign',$order->id) }}" title="Assign Order"><i data-feather="send"></i></a>--}}
+                                                    <a class="nav-link" href="{{ route('joborder.assign',$order->id) }}" title="Assign Order"><i data-feather="send"></i></a>
                                                 @endif
                                                 @if (auth()->user()->has_access_to_route('joborder.cancel-order'))
                                                     <a class="nav-link" href="javascript:void(0)"  onclick="cancel_order('{{$order->sales_header_id}}');" title="Cancel Order"><i data-feather="x"></i></a>

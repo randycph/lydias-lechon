@@ -86,7 +86,7 @@
                     <label class="d-block">Branch <span class="tx-danger">*</span></label>
                     <select class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select production branch" data-width="100%" name="branch_id" required>
                         @foreach($branches as $branch)
-                        <option value="{{$branch->id}}">{{$branch->name}}</option>
+                        <option value="{{$branch->id}}" @if($branch->name == 'Tandang Sora' || $branch->name == 'Quezon City') selected @endif>{{$branch->name}}</option>
                         @endforeach
                     </select>
                 </div>
