@@ -1827,7 +1827,7 @@
                         return true;
                     }
 
-                    if (isToday && this.hasMisc && hour < (now.getHours() + 11)) {
+                    if (isToday && this.hasMisc && hour < (now.getHours() + 6)) {
                         return true;
                     }
 
