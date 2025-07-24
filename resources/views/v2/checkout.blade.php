@@ -372,11 +372,12 @@
                                                                 name="need_time" 
                                                                 id="need_time"
                                                                 x-model="delivery.need_time" 
+                                                                @click="validateDeliveryDateTime(delivery)"
                                                                 @change="validateDeliveryDateTime(delivery)"
                                                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                                             >
                                                                 <option value="">Select Hour</option>
-                                                                <template x-for="hour in allHours" :key="hour">
+                                                                <template x-for="hour in getAvailableHours(delivery)" :key="hour">
                                                                     <template x-if="!isTimeDisabledForDelivery(hour)(delivery)">
                                                                         <option 
                                                                             :value="(hour < 10 ? '0' + hour : hour) + ':00'" 
@@ -1529,6 +1530,7 @@
 
             // When checkbox is toggled
             toggleOrderSelection(delivery, order) {
+                this.autoAdvanceDateIfNoHours(delivery)
                 delivery.location = '';
 
                 if (!delivery.orders) delivery.orders = [];
@@ -1788,7 +1790,60 @@
                 this.qtyValidationMessage = '';
             },
 
+            getAvailableHours(delivery) {
+                return this.allHours.filter(hour => !this.isTimeDisabledForDelivery(hour)(delivery));
+            },
+            autoAdvanceDateIfNoHours(delivery, tries = 0) {
+                if (tries > 31) return; // Don't go more than a month ahead
+
+                const available = this.getAvailableHours(delivery);
+                if (available.length === 0) {
+                    // Add 1 day
+                    let d = new Date(delivery.need_date);
+                    d.setDate(d.getDate() + 1);
+                    delivery.need_date = d.toISOString().split('T')[0];
+
+                    console.log(`Auto-advanced delivery date to: ${delivery.need_date}`);
+
+                    // Force Alpine to update: set time to empty to prevent stuck state
+                    delivery.need_time = "";
+
+                    // Recursively check again for next date
+                    this.autoAdvanceDateIfNoHours(delivery, tries + 1);
+                }
+            },
+            isTimeDisabledForDelivery(hour) {
+                return (delivery) => {
+                    if (!delivery.need_date) return false;
+
+                    const selectedDate = new Date(delivery.need_date);
+                    const now = new Date();
+
+                    const isToday =
+                        selectedDate.getDate() === now.getDate() &&
+                        selectedDate.getMonth() === now.getMonth() &&
+                        selectedDate.getFullYear() === now.getFullYear();
+                    if (isToday && hour <= now.getHours()) {
+                        return true;
+                    }
+
+                    if (isToday && this.hasMisc && hour < (now.getHours() + 11)) {
+                        return true;
+                    }
+
+                    const timeStr = (hour < 10 ? '0' + hour : hour) + ':00';
+                    return this.disabledDeliveryDates.includes(`${delivery.need_date} ${timeStr}`);
+                };
+            },
             validateDeliveryDateTime(delivery) {
+                this.autoAdvanceDateIfNoHours(delivery);
+
+                // Optionally, always clear time when date changes (user can't select invalid time)
+                const available = this.getAvailableHours(delivery);
+                if (!available.includes(parseInt(delivery.need_time))) {
+                    delivery.need_time = "";
+                }
+
                 if (!delivery.need_date || !delivery.need_time) return;
 
                 const selectedDateTime = new Date(`${delivery.need_date}T${delivery.need_time}`);
@@ -1808,7 +1863,6 @@
                     delivery.warningMessage = '';
                 }
             },
-
             formatTime(timeStr) {
                 const [hours, minutes] = timeStr?.split(':');
                 const hoursNum = parseInt(hours, 10);
@@ -1900,31 +1954,6 @@
                     ? this.disabledPickupDates.includes(fullStr)
                     : this.disabledDeliveryDates.includes(fullStr);
             },
-
-            isTimeDisabledForDelivery(hour) {
-                return (delivery) => {
-                    if (!delivery.need_date) return false;
-
-                    const selectedDate = new Date(delivery.need_date);
-                    const now = new Date();
-
-                    const isToday =
-                        selectedDate.getDate() === now.getDate() &&
-                        selectedDate.getMonth() === now.getMonth() &&
-                        selectedDate.getFullYear() === now.getFullYear();
-                    if (isToday && hour <= now.getHours()) {
-                        return true;
-                    }
-
-                    if (isToday && this.hasMisc && hour < (now.getHours() + 6)) {
-                        return true;
-                    }
-
-                    const timeStr = (hour < 10 ? '0' + hour : hour) + ':00';
-                    return this.disabledDeliveryDates.includes(`${delivery.need_date} ${timeStr}`);
-                };
-            },
-
             removeDelivery(index) {
                 const removed = this.deliveries.splice(index, 1)[0];
 
