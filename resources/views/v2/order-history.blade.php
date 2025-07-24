@@ -195,7 +195,7 @@
                                                         Address: {{ $address->address }}<br>
                                                         Contact person: {{ $address->contact_person }}<br>
                                                         Contact number: {{ $address->contact_tel }}<br>
-                                                        Delivery fee: ₱{{ number_format($address->delivery_fee, 2) }}<br>
+                                                        Delivery charge: ₱{{ number_format($address->delivery_fee, 2) }}<br>
                                                         Location: {{ $address->location }}<br>
                                                         Delivery Date and time: {{ \Carbon\Carbon::parse($address->delivery_date . ' ' . $address->delivery_time)->format('F d, Y g:i A') }}<br>
                                                         Order/s:
@@ -216,6 +216,12 @@
                                                                 @endif
                                                             @endif
                                                         <br>
+                                                        @php 
+                                                            $payment = App\EcommerceModel\SalesPayment::where('sales_header_id', $sale->id)->where('status', 'PAID')->latest()->first();
+                                                        @endphp
+                                                        @if ($payment)
+                                                        Payment type: {{ $payment->payment_type }}<br>
+                                                        @endif
                                                     </li>
                                                     @endforeach
                                                     </ul>
