@@ -85,6 +85,8 @@
             }
         },
 
+        withPaella: false,
+
         async save_to_cart(act, id, qty, addons) {
 
             this.loading = true;
@@ -104,7 +106,8 @@
                     body: JSON.stringify({
                         ac_item: id,
                         ac_qty: qty,
-                        misc_cntr: add_ons
+                        misc_cntr: add_ons,
+                        ac_paella: this.withPaella ? 1 : 0,
                     })
                 }).then((response) => {
                     return response;
@@ -138,11 +141,9 @@
 
         loading: false,
 
-        async updateCartQty(act, id, qty) {
+        async updateCartQty(act, id, qty, paellaPrice = 0) {
 
             this.loading = true;
-
-            console.log(act, id, qty);
 
             try {
                 let response = await fetch('{{ route('cart.qty.update') }}', {
@@ -154,6 +155,7 @@
                     body: JSON.stringify({
                         ac_item: id,
                         ac_qty: qty,
+                        ac_paella: paellaPrice > 0 ? 1 : 0,
                     })
                 }).then((response) => {
                     return response;
@@ -187,10 +189,10 @@
                 console.error('There was a problem with the fetch operation:', error);
             }
         },
-        handleQtyChange(productId, currentQty, diff) {
+        handleQtyChange(productId, currentQty, diff, paellaPrice = 0) {
             const newQty = currentQty + diff;
             if (newQty < 1) return;
-            this.updateCartQty('addcart', productId, newQty);
+            this.updateCartQty('addcart', productId, newQty, paellaPrice);
         },
         added: false,
         searchModal: false,

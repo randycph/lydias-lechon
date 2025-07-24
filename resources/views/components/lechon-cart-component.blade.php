@@ -108,6 +108,12 @@
                             </button>
                         </div>
                     </div>
+                    <div x-show="product?.paella_price && product?.paella_price > 0">
+                        <div class="flex items-center mb-4">
+                            <input id="with-paella" x-model="withPaella" type="checkbox" class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                            <label for="with-paella" class="ms-2 font-medium text-gray-900 dark:text-gray-300">Add Seafood Paella</label>
+                        </div>
+                    </div>
 
                     <div>
                         <div class="font-bold">Description</div>
@@ -215,8 +221,8 @@
                                     </thead>
                                     <tbody>
                                         <tr class="border-b">
-                                            <td class="py-2" x-text="product?.name"></td>
-                                            <td class="py-2" x-text="format(product?.price)"></td>
+                                            <td class="py-2" x-text="productName"></td>
+                                            <td class="py-2" x-text="format(productPrice)"></td>
                                             <td class="py-2" x-text="quantity"></td>
                                             <td class="py-2" x-text="format(baseTotal)"></td>
                                         </tr>

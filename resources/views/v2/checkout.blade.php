@@ -10,7 +10,8 @@
     $deliveryFee = 0;
     if (count($carts) > 0) {
         foreach ($carts as $cart) {
-            $total += $cart['price'] * $cart['qty'];
+            $paella_price = $cart['paella_price'] > 0 ? $cart['product']['paella_price'] : 0;
+            $total += ($cart['price'] + $paella_price) * $cart['qty'];
         }
     }
 @endphp
@@ -60,7 +61,7 @@
                     <div class="flex items-center text-sm lg:text-base justify-between px-4 py-3 border-b border-[#DFDFDF]">
                         <div x-text="carts.length + ' items'"></div>
                         <div class="font-bold" 
-                            x-text="'₱' + carts.reduce((sum, item) => sum + (item.is_free_product ? 0 : item.price * item.qty), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })">
+                            x-text="'₱' + carts.reduce((sum, item) => item.paella_price + sum + (item.is_free_product ? 0 : item.price * item.qty), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })">
                         </div>
                     </div>
     
@@ -87,8 +88,8 @@
 
                                 <!-- Info -->
                                 <div class="flex flex-col flex-grow">
-                                    <div class="font-bold">
-                                        <span x-text="item?.product?.name"></span>
+                                    <div class="">
+                                        <span class="font-bold" x-text="item?.product?.name"></span> <span class="italic" x-text="parseFloat(item.paella_price) > 0 ? 'with Seafood Paella' : ''"></span>
                                         <template x-if="item.is_free_product">
                                             <span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">FREE</span>
                                         </template>
@@ -99,6 +100,7 @@
                                             ? '₱0.00' 
                                             : '₱' + parseFloat(item.price).toLocaleString(undefined, { minimumFractionDigits: 2 })">
                                         </span>
+                                        <span class="italic" x-text="item?.paella_price > 0 ? '+ ₱' + parseFloat(item.product.paella_price).toLocaleString(undefined, { minimumFractionDigits: 2 }) : ''"></span>
                                     </div>
                                     <div class="text-sm text-gray-600 font-medium">
                                         QTY: <span x-text="item.qty"></span>
@@ -109,7 +111,7 @@
                                 <div class="absolute right-0 bottom-2 text-sm lg:text-base font-bold text-black text-right">
                                     <span x-text="item.is_free_product 
                                         ? '₱0.00' 
-                                        : '₱' + (item.price * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2 })">
+                                        : '₱' + ((parseFloat(item.price) + parseFloat(item?.paella_price > 0 ? item?.product?.paella_price || 0 : 0)) * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2 })">
                                     </span>
                                 </div>
                             </div>
@@ -137,7 +139,7 @@
                             <div class="flex justify-between">
                                 <span class="font-medium text-gray-800">Subtotal</span>
                                 <span class="font-medium" 
-                                    x-text="'₱' + carts.reduce((sum, item) => sum + (item.is_free_product ? 0 : item.price * item.qty), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })">
+                                    x-text="'₱' + carts.reduce((sum, item) => item.paella_price + sum + (item.is_free_product ? 0 : item.price * item.qty), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })">
                                 </span>
                             </div>
                             <template x-if="deliveryFees.length == 0 && !allowMultiple && method == 'delivery'">

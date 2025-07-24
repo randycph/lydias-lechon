@@ -41,12 +41,34 @@
             this.carts = cartData.cart;
         },
         close() {
+            this.withPaella = false;
             this.lechonCart = false;
             this.product = null;
         },
         quantity: 1,
+        get productName() {
+            const withPaella = this.withPaella ? ' with Paella' : '';
+            if (this.product?.name) {
+                return this.product.name + withPaella;
+            }
+
+            return this.product.name;
+        },
+
+        get productPrice() {
+            const withPaella = this.withPaella ? this.product?.paella_price : 0;
+            if (withPaella) {
+                return (parseFloat(withPaella) + parseFloat(this.product?.price)) * this.quantity;
+            }
+
+            return parseFloat(this.product?.price) * this.quantity;
+        },
         get baseTotal() {
-            return this.product?.price * this.quantity || 0;
+            const withPaella = this.withPaella ? this.product?.paella_price : 0;
+            if (withPaella) {
+                return (parseFloat(withPaella) + parseFloat(this.product?.price)) * this.quantity || 0;
+            }
+            return parseFloat(this.product?.price) * this.quantity || 0;
         },
         addons: [],
         updateAddons() {

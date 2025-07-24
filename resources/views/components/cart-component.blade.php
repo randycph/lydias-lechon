@@ -92,7 +92,7 @@ x-data="{
         x-transition:enter-start="translate-x-full" x-transition:enter-end="translate-x-0"
         x-transition:leave="transition-transform transform duration-300"
         x-transition:leave-start="translate-x-0" x-transition:leave-end="translate-x-full"
-        class="fixed top-[2%] right-[5%] w-[90%] max-w-sm h-[90%] bg-white text-black z-50 py-3 flex flex-col shadow-lg rounded-lg overflow-x-scroll scrollbar-hide scroll-smooth snap-y">
+        class="fixed top-[2%] right-[5%] w-[90%] md:max-w-lg max-w-sm h-[90%] bg-white text-black z-50 py-3 flex flex-col shadow-lg rounded-lg overflow-x-scroll scrollbar-hide scroll-smooth snap-y">
 
         <!-- Cart Content -->
         <div>
@@ -131,13 +131,18 @@ x-data="{
                                             </template>
                                         </div>
                                         <div class="flex flex-col gap-1">
-                                            <div class="font-bold" x-text="cart?.product?.name"></div>
-                                            <div class="text-sm text-gray-600" x-text="new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cart?.product?.price * (cart?.qty || 1))"></div>
-        
+                                            <div class="">
+                                                <span class="font-bold" x-text="cart?.product?.name"></span>
+                                                <span class="italic" x-text="cart?.paella_price > 0 ? 'with Seafood Paella' : ''"></span>
+                                            </div>
+                                            <div class="">
+                                                <span class="text-sm text-gray-600" x-text="new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cart?.product?.price * (cart?.qty || 1))"></span>
+                                                <span class="italic text-sm text-gray-600" x-text="cart?.paella_price > 0 ? '+ ₱' + parseFloat(cart.paella_price).toLocaleString(undefined, { minimumFractionDigits: 2 }) : ''"></span>
+                                            </div>
                                             <!-- Quantity Selector -->
                                             <div class="flex items-center space-x-1">
                                                 <!-- Minus Button -->
-                                                <button :class="cart.qty <= 1 ? 'invisible' : ''" @click="handleQtyChange(cart.product.id, cart.qty, -1)" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
+                                                <button :class="cart.qty <= 1 ? 'invisible' : ''" @click="handleQtyChange(cart.product.id, cart.qty, -1, cart?.paella_price)" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
                                                         <path fill-rule="evenodd" d="M4 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H4.75A.75.75 0 0 1 4 10Z" clip-rule="evenodd" />
                                                     </svg>
@@ -147,7 +152,7 @@ x-data="{
                                                 <span class="w-8 text-center font-bold text-green-600" x-text="cart.qty"></span>
         
                                                 <!-- Plus Button -->
-                                                <button @click="handleQtyChange(cart.product.id, cart.qty, 1)" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
+                                                <button @click="handleQtyChange(cart.product.id, cart.qty, 1, cart?.paella_price)" class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
                                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
                                                         <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
                                                     </svg>
@@ -196,7 +201,7 @@ x-data="{
                                 <div class="border-t border-gray-200 mt-4 pt-4">
                                     <div class="flex justify-between">
                                         <span class="font-bold text-gray-800">Subtotal</span>
-                                        <span class="font-bold text-lg" x-text="new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(carts.reduce((total, cart) => total + (cart?.product?.price * (cart?.qty || 1)), 0))"></span>
+                                        <span class="font-bold text-lg" x-text="new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(carts.reduce((total, cart) => total + cart.paella_price + (cart?.product?.price * (cart?.qty || 1)), 0))"></span>
                                     </div>
                                     <p class="text-gray-600 text-sm">Delivery fee is calculated upon checkout</p>
                                 </div>
