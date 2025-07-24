@@ -27,7 +27,8 @@ class ProductDeliveryAddress extends Model
         'branch',
         'note',
         'products',
-        'receive_sms'
+        'receive_sms',
+        'paella_price'
     ];
 
     public function user()

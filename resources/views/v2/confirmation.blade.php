@@ -159,7 +159,8 @@
                     $deliveryFee = 0;
                     if (count($salesDetails) > 0) {
                         foreach ($salesDetails as $detail) {
-                            $total += $detail['price'] * $detail['qty'];
+                            $paella_price = $detail['paella_price'] > 0 ? $detail['product']['paella_price'] : 0;
+                            $total += ($detail['price'] + $paella_price) * $detail['qty'];
                         }
                     }
                     $colspan = 6;
@@ -193,18 +194,21 @@
                                 
                                 <div class="flex flex-col">
                                     <div class="flex gap-2 items-center">
-                                        <div class="font-bold">{{ $details['product_name'] }}</div>
+                                        <div class="font-bold">{{ $details['product_name'] }}</div> <span class="italic">{{ $details['paella_price'] > 0 ? 'with Seafood Paella' : '' }}</span>
                                         @if ($details['price'] == 0)
                                         <span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">FREE</span>
                                         @endif
                                     </div>
-                                    <div class="text-sm font-semibold">
-                                        Price: <span>₱{{ number_format($details['price'], 2) }}</span>
+                                    <div class="text-sm ">
+                                        Price: <span class="font-semibold">₱{{ number_format($details['price'], 2) }}</span> 
+                                                @if ($details['paella_price'] > 0)
+                                                <span class="italic"> + ₱{{ number_format($details['paella_price'], 2) }}</span>
+                                                @endif
                                     </div>
                                     <div class="text-sm text-gray-600 font-medium">QTY: {{ $details['qty']}}</div>
                                 </div>
-                                
-                                <div class="text-sm text-black font-bold text-right w-full absolute right-0 bottom-0">₱{{ number_format(($details->price * $details->qty), 2) }}</div>
+
+                                <div class="text-sm text-black font-bold text-right w-full absolute right-0 bottom-0">₱{{ number_format((($details->price + ($details->paella_price > 0 ? $details->product->paella_price : 0)) * $details->qty), 2) }}</div>
                             </div>
                         @endforeach
                     </div>
@@ -325,7 +329,10 @@
                                 ₱{{ number_format($details->price, 2) }}
                             </td>
                             <td class="px-6 py-4">
-                                ₱{{ number_format($details->gross_amount, 2) }}
+                                @php
+                                    $rowTotal = ($details->price + $details->paella_price) * $details->qty;
+                                @endphp
+                                ₱{{ number_format($rowTotal, 2) }}
                             </td>
                         </tr>
                         @empty

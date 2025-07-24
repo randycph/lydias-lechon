@@ -916,7 +916,7 @@ class CartController extends Controller
             }
             
             $product = $cart->product;
-            $gross_amount = ($product->price * $cart->qty) + ($cart->paella_price * $cart->qty);
+            $gross_amount = ((float)$product->price + ($cart->paella_price > 0 ? $product->paella_price : 0)) * $cart->qty;
             $tax_amount = $gross_amount - ($gross_amount/1.12);
             $grand_gross += $gross_amount;
             $grand_tax += $tax_amount;
@@ -966,7 +966,7 @@ class CartController extends Controller
                 'uom' => $product->uom,
                 'size' => $product->size ?? "",
                 'no_of_pax' => $product->no_of_pax ?? "",
-                'paella_price' => $product->paella_price,
+                'paella_price' => $cart->paella_price > 0 ? $product->paella_price : 0,
                 'other_cost' => 0,
                 'other_cost_description' => '',
                 'created_by' => $user->id,
