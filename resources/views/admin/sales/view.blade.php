@@ -81,7 +81,7 @@
                         @if ($sales?->deliveryAddress && count($sales?->deliveryAddress) == 0)
                             @php 
                                 $saleDetail = $sales->items ? $sales->items->first() : null;
-                                $deliveryDate = $saleDetail ? date('F d, Y g:i A', strtotime($saleDetail?->delivery_date)) : 'N/A';
+                                $deliveryDate = $saleDetail ? \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y g:i A') : 'N/A';
                             @endphp
                             <p class="mg-b-3">Date needed: {{$deliveryDate}}</p>
                         @endif
@@ -97,7 +97,7 @@
                         <ul class="list-unstyled lh-7">
                             <li class="d-flex justify-content-between">
                                 <span>Order Date</span>
-                                <span>{{ date('F d, Y g:i A', strtotime($sales->created_at))}}</span>
+                                <span>{{ \Carbon\Carbon::parse($sales->created_at)->format('F d, Y g:i A') }}</span>
                             </li>                                                   
                             <li class="d-flex justify-content-between">
                                 <span>Payment Status</span>
@@ -138,12 +138,12 @@
                                 <th class="tx-center">{{$details->no_of_pax}}</th>                                
                                 <td class="tx-nowrap">
                                     @if(date('H:i A',strtotime($details->delivery_date)) == '12:00 PM')
-                                        {{date('F d, Y',strtotime($details->delivery_date))}} 12:00 NOON
+                                        {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
                                     @else
                                         @if($sales?->deliveryAddress && count($sales?->deliveryAddress) > 0)
 
                                         @else
-                                            {{date('F d, Y g:i A',strtotime($details->delivery_date))}}
+                                            {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
                                         @endif
                                     @endif
                                     
@@ -260,7 +260,7 @@
                             <tr>
                                 <td class="tx-left">{{$payment->payment_type}}</td>
                                 <td class="tx-center">{{$payment->receipt_number}}</td>
-                                <td class="tx-center">{{ date('F d, Y', strtotime($payment->payment_date))}}</td>
+                                <td class="tx-center">{{ \Carbon\Carbon::parse($payment->payment_date)->format('F d, Y') }}</td>
                                 <td class="tx-center">
                                     @if($payment->payment_type == 'Ok Order' || $payment->payment_type == 'COD')
                                         @if($payment->status == 'PAID')

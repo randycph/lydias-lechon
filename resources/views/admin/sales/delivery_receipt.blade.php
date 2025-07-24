@@ -97,7 +97,7 @@
                         @if ($sales?->deliveryAddress && count($sales?->deliveryAddress) == 0)
                             @php 
                                 $saleDetail = $sales->items ? $sales->items->first() : null;
-                                $deliveryDate = $saleDetail ? date('F d, Y g:i A', strtotime($saleDetail?->delivery_date)) : 'N/A';
+                                $deliveryDate = $saleDetail ? \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y g:i A') : 'N/A';
                             @endphp
                             <p class="mg-b-0 tx-15">Date needed: {{$deliveryDate}}</p>
                         @endif
@@ -110,7 +110,7 @@
                         <ul class="list-unstyled lh-7">
                             <li class="d-flex justify-content-between">
                                 <span>Order Date</span>
-                                <span>{{ date('F d, Y H:i A', strtotime($sales->created_at))}}</span>
+                                <span>{{ \Carbon\Carbon::parse($sales->created_at)->format('F d, Y H:i A') }}</span>
                             </li>                                                   
                             <li class="d-flex justify-content-between">
                                 <span>Payment Status</span>
@@ -164,7 +164,7 @@
                                 <td class="tx-nowrap">{{$details->product->code}}</td>
                                 <td class="tx-nowrap">{{$details->product_name}} @if($details->paella_price > 0) with paella @endif</td>
                                 <th class="tx-center">{{$details->no_of_pax}}</th>                                
-                                <td class="tx-nowrap">{{date('F d, Y H:i A',strtotime($details->delivery_date))}}</td>
+                                <td class="tx-nowrap">{{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y H:i A') }}</td>
                                 <td class="tx-center">{{number_format($details->qty, 0)}}</td>
                                 <td class="tx-right">{{number_format(($details->paella_price),2)}}</td>
                                 <td class="tx-right">{{number_format($details->price, 2)}}</td>
@@ -210,7 +210,7 @@
                             <tr>
                                 <td class="tx-left">{{$payment->payment_type}}</td>
                                 <td class="tx-center">{{$payment->receipt_number}}</td>
-                                <td class="tx-center">{{ date('F d, Y', strtotime($payment->payment_date))}}</td>
+                                <td class="tx-center">{{ \Carbon\Carbon::parse($payment->payment_date)->format('F d, Y') }}</td>
                                 <td class="tx-center">{{$payment->status}}</td>
                                 <td class="tx-right">{{number_format($payment->amount, 2)}}</td>
                                
