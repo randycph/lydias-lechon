@@ -18,9 +18,17 @@
             $datetxt = '<br>'.date('M d, Y (l)',strtotime($dstart))." - ".date('M d, Y (l)',strtotime($dend));
     }
     $dbranch = '';
-    if(isset($_GET['receiver']) && strlen($_GET['receiver']) > 0){
-        $br = \App\EcommerceModel\Branch::whereId($_GET['receiver'])->first();
-        $dbranch = "<br>".$br['name'];
+
+    if(isset($_GET['receiver']) && count($_GET['receiver']) > 0){
+            $br_opts = "<br>";            
+            foreach($_GET['receiver'] as $re){
+                $br = \App\EcommerceModel\Branch::whereId($re)->first();
+                $br_opts .= $br->name.",";            
+            }
+            $br_opts = rtrim($br_opts,",");
+         
+        //$br = \App\EcommerceModel\Branch::whereId($_GET['receiver'])->first();
+        $dbranch = $br_opts;
     }
 
     
@@ -149,7 +157,7 @@
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13">Receiver Branch</label>
-                                    <select name="receiver" id="receiver" class="form-control">
+                                    <select name="receiver[]" id="receiver" class="form-control" multiple>
                                         <option value="">- Select Receiver -</option>
                                         @forelse(\App\EcommerceModel\Branch::orderBy('name')->get() as $cus)
                                             <option @isset($_GET['receiver']) @if(app('request')->input('receiver') == $cus->id) selected @endif @endif value="{{$cus->id}}">{{$cus->name}}</option>

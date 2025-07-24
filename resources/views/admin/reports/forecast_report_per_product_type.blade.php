@@ -18,9 +18,17 @@
             $datetxt = '<br>'.date('M d, Y (l)',strtotime($dstart))." - ".date('M d, Y (l)',strtotime($dend));
     }
     $dbranch = '';
-    if(isset($_GET['receiver']) && strlen($_GET['receiver']) > 0){
-        $br = \App\EcommerceModel\Branch::whereId($_GET['receiver'])->first();
-        $dbranch = "<br>".$br['name'];
+
+    if(isset($_GET['receiver']) && count($_GET['receiver']) > 0){
+            $br_opts = "<br>";            
+            foreach($_GET['receiver'] as $re){
+                $br = \App\EcommerceModel\Branch::whereId($re)->first();
+                $br_opts .= $br->name.",";            
+            }
+            $br_opts = rtrim($br_opts,",");
+         
+        //$br = \App\EcommerceModel\Branch::whereId($_GET['receiver'])->first();
+        $dbranch = $br_opts;
     }
 
     
@@ -129,7 +137,7 @@
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13">Receiver Branch</label>
-                                    <select name="receiver" id="receiver" class="form-control">
+                                    <select name="receiver[]" id="receiver" class="form-control" multiple>
                                         <option value="">- Select Receiver -</option>
                                         @forelse(\App\EcommerceModel\Branch::orderBy('name')->get() as $cus)
                                             <option @isset($_GET['receiver']) @if(app('request')->input('receiver') == $cus->id) selected @endif @endif value="{{$cus->id}}">{{$cus->name}}</option>
@@ -377,14 +385,12 @@
                                         <td class="">{{number_format($r->qty,2)}}</td>
                                         <td class="">{{$r->product_name}} @if($r->paella_price > 0) Boneless @endif</td>
 
-                                        @if($old_value <> $r->order_number)
+                                     
                                             <td class="" rowspan="1" valign="top">@if(strlen($address)>15){!!$address!!}@endif</td>   
-                                        @else        
-                                            <td class="" >&nbsp;</td>   
-                                        @endif  
+                                      
 
                                         <td class="">{{number_format($r->price,2)}}</td>
-                                        @if($old_value <> $r->order_number)
+              
                                             <td class="" rowspan="1" valign="top">
                                                 @php
                                                     $payment = \App\EcommerceModel\SalesPayment::where('sales_header_id',$r->hid)->get();
@@ -432,24 +438,14 @@
                                             <td class="" rowspan="1" valign="top">@if(date('Y-m-d',strtotime($r->deldate)) <> '1970-01-01'){{date('m-d-Y',strtotime($r->deldate))}} @endif</td>
                                             <td class="" rowspan="1" valign="top">@if(date('Y-m-d',strtotime($r->deldate)) <> '1970-01-01'){{date('h:i A',strtotime($r->deldate))}} @endif</td>
                                             <td class="" rowspan="1" valign="top">{{$r->delivery_type}}</td>   
-                                        @else 
-                                            <td class="" >&nbsp;</td>  
-                                            <td class="" >&nbsp;</td>         
-                                            <td class="" >&nbsp;</td>   
-                                            <td class="" >&nbsp;</td>  
-                                            <td class="" >&nbsp;</td>         
-                                            <td class="" >&nbsp;</td>   
-                                            <td class="" >&nbsp;</td>  
-                                            <td class="" >&nbsp;</td>         
-                                            <td class="" >&nbsp;</td>   
-                                        @endif  
+                                      
                                         
                                           
                                         
                                         <td class="">{{$r->jo_number}}</td>
                                         <td class="">{{$r->pbname}}</td>
 
-                                        @if($old_value <> $r->order_number)
+                                  
                                             <td class="" rowspan="1" valign="top">{{$r->delstat}}</td>
                                             
                                             <td class="" rowspan="1" valign="top">{{$r->agent}}</td>                                    
@@ -461,20 +457,12 @@
                                             
                                             <td class="" rowspan="1" valign="top">&nbsp;</td>
                                             <td class="" rowspan="1" valign="top">{{number_format($r->delivery_fee_amount,2)}}</td>
-                                        @else
-                                            <td class="" >&nbsp;</td>  
-                                            <td class="" >&nbsp;</td>         
-                                            <td class="" >&nbsp;</td>   
-                                            <td class="" >&nbsp;</td>  
-                                            <td class="" >&nbsp;</td>         
-                                            <td class="" >&nbsp;</td> 
-                                            <td class="" >&nbsp;</td> 
-                                        @endif
+                                  
 
                                         
                                         <td class="">{{number_format(($r->price * $r->qty),2)}}</td>
 
-                                        @if($old_value <> $r->order_number)
+                              
                                             <td class="" rowspan="1" valign="top">&nbsp;</td>
                                             <td class="" rowspan="1" valign="top">
                                                {{$r->order_source}}
@@ -482,23 +470,17 @@
                                             <td class="" rowspan="1" valign="top">
                                                {{$r->receiver}}
                                             </td>
-                                        @else
-                                            <td class="" >&nbsp;</td>  
-                                            <td class="" >&nbsp;</td>         
-                                            <td class="" >&nbsp;</td> 
-                                        @endif
+                                    
 
                                         <td class="">
                                            {{$r->catname}}
                                         </td>
 
-                                        @if($old_value <> $r->order_number)
+                              
                                             <td class="" rowspan="1" valign="top">
                                                {{$r->username}}
                                             </td>
-                                        @else
-                                            <td class="" >&nbsp;</td>   
-                                        @endif
+                                       
                                         <td class="">
                                            {{$r->hordertype}}
                                         </td>
@@ -506,20 +488,13 @@
                                            {{$itemType}}
                                         </td>
                                         
-                                        @if($old_value <> $r->order_number)
+                               
                                             <td class="" rowspan="1" valign="top">{{ $r->forecast_dt }}</td>
                                             <td class="" rowspan="1" valign="top">{{ $r->del_branch }}</td>   
-                                        @else        
-                                            <td class="" >&nbsp;</td>   
-                                            <td class="" >&nbsp;</td>   
-                                        @endif
-                                        @if($old_value <> $r->order_number)
+                             
                                             <td class="" rowspan="1" valign="top">@if(date('m-d-Y',strtotime($r->created)) <> '1970-01-01'){{date('Y-m-d',strtotime($r->created))}} @endif</td>
                                             <td class="" rowspan="1" valign="top">@if(date('m-d-Y',strtotime($r->created)) <> '1970-01-01'){{date('h:i A',strtotime($r->created))}} @endif</td>
-                                        @else
-                                            <td class="" >&nbsp;</td>   
-                                            <td class="" >&nbsp;</td>
-                                        @endif
+                                     
                                         
                                     </tr>
                                     @endif

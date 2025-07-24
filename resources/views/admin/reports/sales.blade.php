@@ -203,6 +203,7 @@
                                 <th>Item Type</th>
                                 <th>Confirmed</th>
                                 <th>Delivery Branch</th>
+                                <th>tt</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -255,6 +256,7 @@
                                     <td>{{$itemType}}</td>
                                     <td>@if($r->isConfirm==1) Yes @else No @endif</td>
                                     <td>{{ $r->del_branch }}</td>  
+                                    <td>{{date('H:i:s',strtotime($r->delivery_date))}}</td>
                                 </tr>
                             @empty
                             @endforelse
@@ -298,6 +300,7 @@
         $('#example').DataTable( {
             dom: 'Bfrtip',
             pageLength: 20,
+            aaSorting: [],
             buttons: [
                 {
                     extend: 'print',
@@ -335,7 +338,8 @@
             ],
             columnDefs: [ {
                 targets: [4,5,6,7,10,11,12,13,20],
-                visible: false
+                visible: false,
+                orderable: false
             },{ type: 'time-uni', targets: [2,14] } ]
         } );
     } );

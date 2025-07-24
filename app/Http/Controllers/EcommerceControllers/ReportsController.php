@@ -34,6 +34,7 @@ class ReportsController extends Controller
 
     public function sales(Request $request)
     {
+
         $wra="(";
         $wra_array=[];
         $products = Product::where('production_item',1)->where('is_misc',0)->get();
@@ -44,7 +45,7 @@ class ReportsController extends Controller
         $wra = rtrim($wra,",");
         $wra.=")";
 
-        $qry = "SELECT pb.name as prod_branch,jo.jo_number as jnum,h.*,d.*,h.created_at as hcreated,h.id as hid,p.category_id,c.name as catname,d.id as did,p.id as prodid,p.is_misc, h.delivery_branch as del_branch
+        $qry = "SELECT pb.name as prod_branch,jo.jo_number as jnum,h.*,d.*,h.created_at as hcreated,h.id as hid,p.category_id,c.name as catname,d.id as did,p.id as prodid,p.is_misc, h.delivery_branch, time(d.delivery_date) as del_branch
             FROM `ecommerce_sales_details` d
             left join ecommerce_sales_headers h on h.id=d.sales_header_id
             left join products p on p.id=d.product_id
@@ -93,8 +94,8 @@ class ReportsController extends Controller
             if(!isset($_GET['startdate'])  && !isset($_GET['startdateneeded'])){
                 $qry.= " and h.created_at >='2050-01-01 00:00:00.000'";
             }
-
-            
+            $qry.=" order by time(d.delivery_date)";
+            //dd($qry);
             //return $qry;
         // end conditions
 
@@ -248,7 +249,7 @@ class ReportsController extends Controller
             $qry.= " and pb.id='".$_GET['production_branch']."'";
         }
 
-
+        /*
        if(isset($_GET['receiver']) && $_GET['receiver']<>''){
 
             $br = \App\EcommerceModel\Branch::whereId($_GET['receiver'])->first();
@@ -256,6 +257,28 @@ class ReportsController extends Controller
             $qry.= " and ((h.delivery_type='Store Pickup' and h.customer_delivery_adress='".$br->name."') or 
 
             (jo.pickup_branch='".$_GET['receiver']."' OR h.delivery_branch='".$br->name."')
+
+            )";
+        }
+        */
+        if(isset($_GET['receiver']) && $_GET['receiver']<>''){
+            $br_opts = "(";
+            $id_opts = "(";
+            foreach($_GET['receiver'] as $re){
+                $br = \App\EcommerceModel\Branch::whereId($re)->first();
+                $br_opts .= "'".$br->name."',";
+                $id_opts .= $re.",";
+            }
+            $br_opts = rtrim($br_opts,",");
+            $id_opts = rtrim($id_opts,",");
+            $br_opts .= ")";
+            $id_opts .= ")";
+
+            
+
+            $qry.= " and ((h.delivery_type='Store Pickup' and h.customer_delivery_adress in ".$br_opts.") or 
+
+            (jo.pickup_branch in ".$id_opts." OR h.delivery_branch in ".$br_opts.")
 
             )";
         }
@@ -345,8 +368,14 @@ class ReportsController extends Controller
         if(isset($_GET['start_time']) && $_GET['start_time']<>''){
             $jos.= " and time(po.delivery_date)='".$_GET['start_time']."'";
         }
+
+        /*
         if(isset($_GET['receiver']) && $_GET['receiver']<>''){
             $jos.= " and jo.pickup_branch='".$_GET['receiver']."'";
+        }
+        */
+        if(isset($_GET['receiver']) && $_GET['receiver']<>''){
+            $jos.= " and jo.pickup_branch in ".$id_opts."";
         }
 
         if(isset($_GET['customer']) && $_GET['customer']<>''){
@@ -1325,7 +1354,7 @@ class ReportsController extends Controller
         $wra.=")";
         $no_jo = 0;
 
-        $qry = "SELECT d.product_name, d.paella_price,
+        $qry = "SELECT d.product_name, d.paella_price,d.id as didi,
         d.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,d.price, h.customer_delivery_adress,
         h.customer_name, d.delivery_date as delivery_date, h.instruction, po.delivery_date as deldate, h.delivery_type, jo.jo_number, pb.name as pbname, h.delivery_status as delstat,h.agent, h.customer_contact_number,'' as dr, h.delivery_fee_amount, d.price, '' as releasing, h.order_source, br.name as receiver, c.name as catname, u.name as username, jo.jo_order_type,h.order_type as hordertype, h.id as hid, '' as jo_category, 'sales' as trantype, DATE_FORMAT(d.delivery_date,'%H:%i:%s') as timeneeded, DATE_FORMAT(d.delivery_date, '%Y-%m-%d') as dateneeded, p.is_misc, p.production_item, h.isConfirm as isConfirm, h.gross_amount as gros, h.forecast_date as forecast_dt, h.delivery_branch as del_branch,p.id as prodid,h.created_at as created
         FROM `ecommerce_sales_details` d
@@ -1362,14 +1391,26 @@ class ReportsController extends Controller
             $qry.= " and pb.id='".$_GET['production_branch']."'";
         }
 
+        //dd($_GET['receiver']);
 
        if(isset($_GET['receiver']) && $_GET['receiver']<>''){
+            $br_opts = "(";
+            $id_opts = "(";
+            foreach($_GET['receiver'] as $re){
+                $br = \App\EcommerceModel\Branch::whereId($re)->first();
+                $br_opts .= "'".$br->name."',";
+                $id_opts .= $re.",";
+            }
+            $br_opts = rtrim($br_opts,",");
+            $id_opts = rtrim($id_opts,",");
+            $br_opts .= ")";
+            $id_opts .= ")";
 
-            $br = \App\EcommerceModel\Branch::whereId($_GET['receiver'])->first();
+            
 
-            $qry.= " and ((h.delivery_type='Store Pickup' and h.customer_delivery_adress='".$br->name."') or 
+            $qry.= " and ((h.delivery_type='Store Pickup' and h.customer_delivery_adress in ".$br_opts.") or 
 
-            (jo.pickup_branch='".$_GET['receiver']."' OR h.delivery_branch='".$br->name."')
+            (jo.pickup_branch in ".$id_opts." OR h.delivery_branch in ".$br_opts.")
 
             )";
         }
@@ -1411,7 +1452,7 @@ class ReportsController extends Controller
         $rs = DB::select($qry);
        
         $jos = "
-            SELECT jo.jo_category as product_name, '' as paella_price,'' as hordertype,
+            SELECT jo.jo_category as product_name, '' as paella_price,'' as hordertype,jo.id as didi,
         jo.qty as qty, '' as order_number, u.address_street, u.address_municipality, u.address_city, u.address_region, jo.price, jo.customer_address as customer_delivery_adress,
         jo.customer_name, jo.date_needed as delivery_date,jo.remarks as instruction, po.delivery_date as deldate,'' as delivery_type, jo.jo_number, pb.name as pbname, jo.created_at as created,
 
@@ -1444,7 +1485,7 @@ class ReportsController extends Controller
             $jos.= " and time(po.delivery_date)='".$_GET['start_time']."'";
         }
         if(isset($_GET['receiver']) && $_GET['receiver']<>''){
-            $jos.= " and jo.pickup_branch='".$_GET['receiver']."'";
+            $jos.= " and jo.pickup_branch in ".$id_opts."";
         }
 
         if(isset($_GET['customer']) && $_GET['customer']<>''){
