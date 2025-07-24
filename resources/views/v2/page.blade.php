@@ -13,7 +13,14 @@
         @endphp
         <div class="flex flex-col w-full items-center text-center relative overflow-hidden" >
             <div class="relative w-full ">
-                <div class="absolute flex-col bottom-[4%] flex w-full text-gray-200 px-3 z-20" style="">
+                <div 
+                    class="
+                        absolute flex-col flex w-full text-gray-200 px-3 z-20
+                        bottom-[4%] 
+                        left-1/2 -translate-x-1/2
+                        lg:top-1/2 lg:bottom-auto lg:-translate-y-1/2 lg:left-1/2
+                        place-items-center place-content-center
+                    " style="">
                     <h1 class="text-4xl md:text-7xl font-light font-cubao  text-center mx-auto w-full drop-shadow-[0_0_10px_green]" style="place-content: center">
                         {{ $banner->title }}
                     </h1>
