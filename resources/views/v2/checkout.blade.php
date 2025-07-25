@@ -106,7 +106,7 @@
                                             ? '₱0.00' 
                                             : '₱' + parseFloat(item.price).toLocaleString(undefined, { minimumFractionDigits: 2 })">
                                         </span>
-                                        <span class="italic" x-text="item?.paella_price > 0 ? '+ ₱' + parseFloat(item.product.paella_price).toLocaleString(undefined, { minimumFractionDigits: 2 }) : ''"></span>
+                                        <span class="italic" x-text="item?.paella_price > 0 ? '+ ₱' + parseFloat(item.product.paella_price * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2 }) : ''"></span>
                                     </div>
                                     <div class="text-sm text-gray-600 font-medium">
                                         QTY: <span x-text="item.qty"></span>
