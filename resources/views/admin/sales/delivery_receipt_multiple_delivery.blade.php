@@ -87,15 +87,15 @@
                 </div>
 
                 <div class="col-sm-12 col-lg-12 mg-t-10">
-                    <div>Date Needed: {{\Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('F d, Y g:i A')}}</div>
-                    <div>Day: {{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('l') }}</div>
-                    <div>Time: {{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('g:i A') }}</div>
-                    <div>Name: {{$sales->contact_person ?? $sales->customer_name}}</div>
-                    <div>Contact #: {{$sales->customer_contact_number}}</div>
-                    <div>Qty/Size: {{$sales->qty}}</div>
-                    <div>Delivery Charge: {{number_format($sales->delivery_fee ?? 0)}}</div>
-                    <div>Delivery Address: {{ $deliveryAddress->address }}</div>
-                    <div>Payment Method: {{$sales->payment_used ?? 'Paymaya'}}</div>
+                    <div class="mg-b-0 tx-15">Date Needed: {{\Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('F d, Y g:i A')}}</div>
+                    <div class="mg-b-0 tx-15">Day: {{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('l') }}</div>
+                    <div class="mg-b-0 tx-15">Time: {{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('g:i A') }}</div>
+                    <div class="mg-b-0 tx-15">Name: {{$sales->contact_person ?? $sales->customer_name}}</div>
+                    <div class="mg-b-0 tx-15">Contact #: {{$sales->customer_contact_number}}</div>
+                    <div class="mg-b-0 tx-15">Qty/Size: {{$sales->qty}}</div>
+                    <div class="mg-b-0 tx-15">Delivery Charge: {{number_format($sales->delivery_fee ?? 0)}}</div>
+                    <div class="mg-b-0 tx-15">Delivery Address: {{ $deliveryAddress->address }}</div>
+                    <div class="mg-b-0 tx-15">Payment Method: {{$sales->payment_used ?? 'Paymaya'}}</div>
 
 
                     <p class="mg-b-0 tx-15">Contact Person: {{$sales->contact_person ?? $sales->customer_name}}</p>
@@ -132,17 +132,23 @@
                             @foreach ($products as $product)
                                 @php
                                     $lineTotal = ($product->product->price ?? 0) * ($product->qty ?? 0);
+                                    if (isset($product->product->paella_price) && $product->product->paella_price > 0) {
+                                        $lineTotal += $product->product->paella_price * ($product->qty ?? 0);
+                                    }
                                     $total += $lineTotal;
                                 @endphp
                             <tr>
                                 <td class="tx-nowrap">
-                                    {{ $product->product->name ?? 'Unknown Product' }}
-                                </td>                
+                                    {{ $product->product->name . (isset($product?->paella) && $product?->paella ?' with Paella' : '') ?? 'Unknown Product' }}
+                                </td>
                                 <td class="tx-nowrap tx-center">{{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('F d, Y g:i A') }}</td>
                                 <td class="tx-center">{{number_format($product->qty, 0)}}</td>
-                                <td class="tx-center">₱{{number_format($product->product->price, 2)}}</td>
+                                <td class="tx-center">₱{{number_format($product->product->price, 2)}} {{ isset($product->product->paella_price) && $product->product->paella_price > 0 ? '+₱' . number_format($product->product->paella_price, 2) : '' }}</td>
                                 <td class="tx-right">
-                                    ₱{{number_format($product->product->price * $product->qty, 2)}}
+                                    @php
+                                        $rowTotal = ($product->product->price + $product->product->paella_price) * $product->qty;
+                                    @endphp
+                                    ₱{{ number_format($rowTotal, 2) }}
                                 </td>
                             </tr>
                             @endforeach
