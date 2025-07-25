@@ -76,7 +76,7 @@
                                                 class="w-20 h-20 object-cover">
                                         </div>
                                         <div class="flex flex-col">
-                                            <div class="font-bold">{{ $cart->product->name }}</div>
+                                            <div class="font-bold">{{ $cart->product->name }} {{ isset($cart?->paella_price) && $cart?->paella_price > 0 ?' with Paella' : '' }}</div>
                                             <div class="text-sm text-gray-600 font-medium">Price: ₱{{ number_format($cart->price, 2) }}</div>
                                             <div class="text-sm text-gray-600 font-medium">QTY: {{ number_format($cart->qty, 0) }}</div>
                                         </div>
@@ -209,7 +209,7 @@
                                                                     <ul class="list-disc pl-10">
                                                                         @foreach ($products as $product)
                                                                             <li>
-                                                                                {{ $product->product->name ?? 'Unknown Product' }} x {{ $product->qty }}
+                                                                                {{ $product->product->name . (isset($product?->paella) && $product?->paella ?' with Paella' : '') ?? 'Unknown Product' }} x {{ $product->qty }}
                                                                             </li>
                                                                         @endforeach
                                                                     </ul>
