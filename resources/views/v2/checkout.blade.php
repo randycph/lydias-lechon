@@ -839,7 +839,8 @@
                     need_date: this.minDate,
                     need_time: '',
                     note: '', 
-                    delivery_fee: 0 
+                    delivery_fee: 0,
+                    paella: false,
                 }
             ],
             allowMultiple: false,
@@ -855,6 +856,7 @@
                     need_date: this.minDate(),
                     need_time: '',
                     note: '',
+                    paella: false,
                     delivery_fee: 0
                 }));
                 this.deliveryFees = [];
@@ -1546,6 +1548,8 @@
 
             // When checkbox is toggled
             toggleOrderSelection(delivery, order) {
+                console.log('delivery:', delivery);
+                console.log('order:', order);
                 this.autoAdvanceDateIfNoHours(delivery)
                 delivery.location = '';
 
@@ -1558,6 +1562,7 @@
                     delivery.orders.splice(existingIndex, 1); // Uncheck
                 } else {
                     delivery.orders.push({
+                        paella: order.paella_price > 0 ? true : false,
                         product_id: order.product_id,
                         qty: 1,
                         product: order.product
@@ -1607,6 +1612,7 @@
                     delivery.orders[orderIndex].qty = parseInt(newQty) || 0;
                 } else {
                     delivery.orders.push({
+                        paella: order.paella_price > 0 ? true : false,
                         product_id: order.product_id,
                         qty: parseInt(newQty) || 0,
                         product: order.product
@@ -1796,6 +1802,7 @@
                     phone: '',
                     orders: [],
                     location: '',
+                    paella: false,
                     need_date: this.minDate(),
                     need_time: '',
                     note: '',

@@ -878,6 +878,10 @@ class CartController extends Controller
                             'branch' => $request->delivery_branch,
                             'products' => json_encode($delivery->orders),
                             'receive_sms' => $delivery->sms ? 1 : 0,
+                            'paella_price' =>
+                                (isset($delivery->orders[0]->paella) && $delivery->orders[0]->paella === true && !empty($delivery->orders[0]->product->paella_price))
+                                    ? $delivery->orders[0]->product->paella_price
+                                    : 0,
                         ]);
                     }
                 }
