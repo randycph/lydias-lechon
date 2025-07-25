@@ -90,11 +90,8 @@
                     <div class="mg-b-0 tx-15">Date Needed: {{\Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('F d, Y g:i A')}}</div>
                     <div class="mg-b-0 tx-15">Day: {{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('l') }}</div>
                     <div class="mg-b-0 tx-15">Time: {{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('g:i A') }}</div>
-                    <div class="mg-b-0 tx-15">Name: {{$sales->contact_person ?? $sales->customer_name}}</div>
                     <div class="mg-b-0 tx-15">Contact #: {{$sales->customer_contact_number}}</div>
-                    <div class="mg-b-0 tx-15">Qty/Size: {{$sales->qty}}</div>
-                    <div class="mg-b-0 tx-15">Delivery Charge: {{number_format($sales->delivery_fee ?? 0)}}</div>
-                    <div class="mg-b-0 tx-15">Delivery Address: {{ $deliveryAddress->address }}</div>
+                    <div class="mg-b-0 tx-15">Delivery Charge: ₱{{number_format($deliveryAddress->delivery_fee ?? 0)}}</div>
                     <div class="mg-b-0 tx-15">Payment Method: {{$sales->payment_used ?? 'Paymaya'}}</div>
 
 
@@ -103,7 +100,6 @@
                     <p class="mg-b-3 tx-15">
                         Delivery Address: {{ $deliveryAddress->address }}
                     </p>                        
-                    <p class="mg-b-3 tx-15">Date needed: {{\Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('F d, Y g:i A')}}</p>
                     <p class="mg-b-3 tx-15">Instruction: {{$deliveryAddress->note ?? $sales->instruction}}</p>
                     <p class="mg-b-3 tx-15">Location: {{$deliveryAddress->location}}</p>
                 </div>
