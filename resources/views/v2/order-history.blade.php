@@ -187,7 +187,7 @@
                                             <p class="mg-b-3">Email: {{$sale->email ?? $sale->user->email}}</p>
                                             <p class="mg-b-3 mt-5">
                                                 <div class="mt-1">
-                                                    @if ($sale->delivery_type == 'Door to door delivery')
+                                                @if ($sale->delivery_type == 'Door to door delivery')
                                                     @if ($sale?->deliveryAddress && count($sale?->deliveryAddress) > 0)
                                                     <ul class="list-disc pl-10">
                                                         @foreach ($sale->deliveryAddress as $k => $address)
@@ -249,6 +249,20 @@
                                                         Payment Method: {{ $sale->payments->first()->payment_type ?? 'Coupon' }}<br>
                                                         Delivery charge: ₱{{ number_format($fee, 2) }}<br>
                                                     @endif
+                                                @else 
+                                                    @php 
+                                                        $saleDetail = $sale->items ? $sale->items->first() : null;
+                                                        $deliveryDate = $saleDetail ? date('F d, Y g:i A', strtotime($saleDetail?->delivery_date)) : 'N/A';
+                                                    @endphp
+                                                    Date: {{ \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y') }}<br>
+                                                    Time: {{ \Carbon\Carbon::parse($saleDetail?->delivery_time)->format('g:i A') }}<br>
+                                                    Name: {{ $saleDetail?->contact_person ?? $sale->customer_name }}<br>
+                                                    Contact #: {{ $saleDetail?->contact_tel ?? $sale->customer_contact_number }}<br>
+                                                    QTY/Size: {{ count($sale->items) }} <br>
+                                                    Delivery/Pickup: {{ $sale->delivery_type }}<br>
+                                                    Instruction: {{ $sale?->instruction ?? 'N/A' }}<br>
+                                                    Payment Method: {{ $sale->payments->first()->payment_type ?? 'Coupon' }}<br>
+                                                    Delivery charge: ₱{{ number_format($fee, 2) }}<br>
                                                 @endif
                                                 </div>
                                             </p>
