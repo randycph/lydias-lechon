@@ -185,66 +185,70 @@
                                             <p class="mg-b-3 tx-semibold">@if($sale->user_id == 9999) {{$sale->customer_name}} @else {{$sale->user->FullName}} @endif</p>                  
                                             <p class="mg-b-3">Mobile No: {{$sale->customer_contact_number ?? $sale->user->contact_mobile }} @if(!empty($sale->user->contact_tel)) | Tel no: {{$sale->user->contact_tel}} @endif</p>
                                             <p class="mg-b-3">Email: {{$sale->email ?? $sale->user->email}}</p>
-                                            <p class="mg-b-3 mt-5">{{$sale->delivery_type}}: 
+                                            <p class="mg-b-3 mt-5">
                                                 <div class="mt-1">
                                                     @if ($sale->delivery_type == 'Door to door delivery')
                                                     @if ($sale?->deliveryAddress && count($sale?->deliveryAddress) > 0)
                                                     <ul class="list-disc pl-10">
-                                                    @foreach ($sale->deliveryAddress as $k => $address)
-                                                    <li>
-                                                        Address: {{ $address->address }}<br>
-                                                        Contact person: {{ $address->contact_person }}<br>
-                                                        Contact number: {{ $address->contact_tel }}<br>
-                                                        Delivery charge: ₱{{ number_format($address->delivery_fee, 2) }}<br>
-                                                        Location: {{ $address->location }}<br>
-                                                        Delivery Date and time: {{ \Carbon\Carbon::parse($address->delivery_date . ' ' . $address->delivery_time)->format('F d, Y g:i A') }}<br>
-                                                        Order/s:
-                                                            @if ($address->products)
+                                                        @foreach ($sale->deliveryAddress as $k => $address)
+                                                            @php
+                                                                $products = json_decode($address->products);
+                                                            @endphp
+                                                            <li>
+                                                                Date: {{ \Carbon\Carbon::parse($address->delivery_date)->format('F d, Y') }}<br>
+                                                                Time: {{ \Carbon\Carbon::parse($address->delivery_time)->format('g:i A') }}<br>
+                                                                Name: {{ $address->contact_person ?? $sale->customer_name }}<br>
+                                                                Contact #: {{ $address->contact_tel ?? $sale->customer_contact_number }}<br>
+                                                                QTY/Size: {{ count($products) }} <br>
+                                                                Delivery Date and time: {{ \Carbon\Carbon::parse($address->delivery_date . ' ' . $address->delivery_time)->format('F d, Y g:i A') }}<br>
+                                                                Delivery/Pickup: {{ $sale->delivery_type }}<br>
+                                                                Instruction: {{ $address->instruction ?? 'N/A' }}<br>
+                                                                Payment Method: {{ $sale->payment_method ?? 'N/A' }}<br>
+                                                                Location: {{ $address->location }}<br>
+                                                                Delivery charge: ₱{{ number_format($address->delivery_fee, 2) }}<br>
+                                                                Order/s:
+                                                                    @if ($address->products)
 
-                                                                @php
-                                                                    $products = json_decode($address->products);
+
+                                                                        @if(is_array($products) || is_object($products))
+                                                                            <ul class="list-disc pl-10">
+                                                                                @foreach ($products as $product)
+                                                                                    <li>
+                                                                                        {{ $product->product->name . (isset($product?->paella) && $product?->paella ?' with Paella' : '') ?? 'Unknown Product' }} x {{ $product->qty }}
+                                                                                    </li>
+                                                                                @endforeach
+                                                                            </ul>
+                                                                        @endif
+                                                                    @endif
+                                                                <br>
+                                                                @php 
+                                                                    $payment = App\EcommerceModel\SalesPayment::where('sales_header_id', $sale->id)->where('status', 'PAID')->latest()->first();
                                                                 @endphp
-
-                                                                @if(is_array($products) || is_object($products))
-                                                                    <ul class="list-disc pl-10">
-                                                                        @foreach ($products as $product)
-                                                                            <li>
-                                                                                {{ $product->product->name . (isset($product?->paella) && $product?->paella ?' with Paella' : '') ?? 'Unknown Product' }} x {{ $product->qty }}
-                                                                            </li>
-                                                                        @endforeach
-                                                                    </ul>
+                                                                @if ($payment)
+                                                                Payment type: {{ $payment->payment_type }}<br>
                                                                 @endif
-                                                            @endif
-                                                        <br>
-                                                        @php 
-                                                            $payment = App\EcommerceModel\SalesPayment::where('sales_header_id', $sale->id)->where('status', 'PAID')->latest()->first();
-                                                        @endphp
-                                                        @if ($payment)
-                                                        Payment type: {{ $payment->payment_type }}<br>
-                                                        @endif
-                                                    </li>
-                                                    @endforeach
+                                                            </li>
+                                                        @endforeach
                                                     </ul>
                                                     @else
-                                                        {{ $sale->customer_delivery_adress }}
+
+                                                    @php 
+                                                        $saleDetail = $sale->items ? $sale->items->first() : null;
+                                                        $deliveryDate = $saleDetail ? date('F d, Y g:i A', strtotime($saleDetail?->delivery_date)) : 'N/A';
+                                                    @endphp
+                                                        Date: {{ \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y') }}<br>
+                                                        Time: {{ \Carbon\Carbon::parse($saleDetail?->delivery_time)->format('g:i A') }}<br>
+                                                        Name: {{ $saleDetail?->contact_person ?? $sale->customer_name }}<br>
+                                                        Contact #: {{ $saleDetail?->contact_tel ?? $sale->customer_contact_number }}<br>
+                                                        QTY/Size: {{ count($sale->items) }} <br>
+                                                        Delivery/Pickup: {{ $sale->delivery_type }}<br>
+                                                        Instruction: {{ $sale?->instruction ?? 'N/A' }}<br>
+                                                        Payment Method: {{ $sale->payments->first()->payment_type ?? 'Coupon' }}<br>
+                                                        Delivery charge: ₱{{ number_format($fee, 2) }}<br>
                                                     @endif
-                                                @else
-                                                    {{$sale->customer_delivery_adress}}
                                                 @endif
                                                 </div>
                                             </p>
-                                            @if ($sale?->deliveryAddress && count($sale?->deliveryAddress) == 0)
-                                                @php 
-                                                    $saleDetail = $sale->items ? $sale->items->first() : null;
-                                                    $deliveryDate = $saleDetail ? date('F d, Y g:i A', strtotime($saleDetail?->delivery_date)) : 'N/A';
-                                                @endphp
-                                                <p class="mg-b-3">Date needed: {{$deliveryDate}}</p>
-                                            @endif
-
-                                            <p class="mg-b-3">Contact Person: {{$sale->contact_person ?? $sale->customer_name}}</p>
-                                            @if ($sale->instruction)
-                                            <p class="mg-b-3">Instruction: {{$sale->instruction}}</p>
-                                            @endif
                                         </div>
                                     </div>
                                 </template>
