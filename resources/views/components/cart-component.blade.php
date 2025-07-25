@@ -124,7 +124,7 @@ x-data="{
                                                     onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'" 
                                                     :src="cart?.product?.photos[cart?.product?.photos?.length - 1]?.url" 
                                                     alt="Checkout" 
-                                                    class="w-20 h-20 object-cover rounded-md scale-110">
+                                                    class="w-20 min-w-20 h-20 object-cover rounded-md scale-110">
                                             </template>
                                             <template x-if="cart?.product?.photos.length == 0">
                                                 <img src="{{ asset('images/no-image.jpg') }}" alt="placeholder">
