@@ -202,7 +202,7 @@
                                                                 QTY/Size: {{ count($products) }} <br>
                                                                 Delivery Date and time: {{ \Carbon\Carbon::parse($address->delivery_date . ' ' . $address->delivery_time)->format('F d, Y g:i A') }}<br>
                                                                 Delivery/Pickup: {{ $sale->delivery_type }}<br>
-                                                                Instruction: {{ $address->instruction ?? 'N/A' }}<br>
+                                                                Instruction: {{ $address->note ?? 'N/A' }}<br>
                                                                 Payment Method: {{ $sale->payment_method ?? 'N/A' }}<br>
                                                                 Location: {{ $address->location }}<br>
                                                                 Delivery charge: ₱{{ number_format($address->delivery_fee, 2) }}<br>
@@ -230,6 +230,7 @@
                                                             </li>
                                                         @endforeach
                                                     </ul>
+                                                    <div>Instruction: {{ $sale?->instruction }}</div>
                                                     @else
 
                                                     @php 
