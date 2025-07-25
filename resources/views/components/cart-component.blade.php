@@ -201,7 +201,19 @@ x-data="{
                                 <div class="border-t border-gray-200 mt-4 pt-4">
                                     <div class="flex justify-between">
                                         <span class="font-bold text-gray-800">Subtotal</span>
-                                        <span class="font-bold text-lg" x-text="new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(carts.reduce((total, cart) => total + cart.paella_price + (cart?.product?.price * (cart?.qty || 1)), 0))"></span>
+                                        <span class="font-bold text-lg"
+                                            x-text="
+                                                new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(
+                                                    carts.reduce(
+                                                        (total, cart) => 
+                                                            total +
+                                                            (Number(cart.paella_price) || 0) +
+                                                            ((cart?.is_free_product ? 0 : (Number(cart?.product?.price) || 0) * (Number(cart?.qty) || 1))),
+                                                        0
+                                                    )
+                                                )
+                                            ">
+                                        </span>
                                     </div>
                                     <p class="text-gray-600 text-sm">Delivery fee is calculated upon checkout</p>
                                 </div>
