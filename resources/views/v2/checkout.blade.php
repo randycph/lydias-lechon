@@ -313,7 +313,7 @@
                                                                         :disabled="getRemainingQty(order.product_id) <= 0 && !isOrderChecked(delivery, order)"
                                                                     />
                                                                     <label :for="'order-' + order.id + '-' + index + '-' + index2" class="flex-1">
-                                                                        <span x-text="order.product.name + (getRemainingQty(order.product_id) <= 0 && !isOrderChecked(delivery, order) ? ' (Fully Assigned)' : '')"></span>
+                                                                        <span x-text="order.product.name + (order.paella_price > 0 ? ' with Paella' : '') + (getRemainingQty(order.product_id) <= 0 && !isOrderChecked(delivery, order) ? ' (Fully Assigned)' : '')"></span>
                                                                     </label>
                                                                 </div>
 
