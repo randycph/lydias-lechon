@@ -147,12 +147,9 @@
                                 <span class="font-medium" 
                                         x-text="'₱' + carts.reduce((sum, item) => 
                                             sum + 
-                                            (Number(item.paella_price) || 0) + 
-                                            (item.is_free_product ? 0 : (Number(item.price) || 0) * (Number(item.qty) || 0))
+                                            ((Number(item.paella_price) || 0) * (Number(item.qty) || 1)) + 
+                                            (item.is_free_product ? 0 : (Number(item.price) || 0) * (Number(item.qty) || 1))
                                         , 0).toLocaleString(undefined, { minimumFractionDigits: 2 })"
-
-
-
                                     {{-- x-text="'₱' + carts.reduce((sum, item) => sum + item.paella_price + (item.is_free_product ? 0 : item.price * item.qty), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })" --}}
                                  ></span>
                             </div>
@@ -320,13 +317,13 @@
                                                                 <div class="flex items-center gap-2">
                                                                     <input
                                                                         type="checkbox"
-                                                                        :id="'order-' + order.id + '-' + index + '-' + index2"
+                                                                        :id="'order-' + order.id + order.paella_price + '-' + index + '-' + index2"
                                                                         :value="order"
                                                                         @change="toggleOrderSelection(delivery, order)"
                                                                         :checked="isOrderChecked(delivery, order)"
                                                                         :disabled="getRemainingQty(order.product_id) <= 0 && !isOrderChecked(delivery, order)"
                                                                     />
-                                                                    <label :for="'order-' + order.id + '-' + index + '-' + index2" class="flex-1">
+                                                                    <label :for="'order-' + order.id + order.paella_price + '-' + index + '-' + index2" class="flex-1">
                                                                         <span x-text="order.product.name + (order.paella_price > 0 ? ' with Paella' : '') + (getRemainingQty(order.product_id) <= 0 && !isOrderChecked(delivery, order) ? ' (Fully Assigned)' : '')"></span>
                                                                     </label>
                                                                 </div>
@@ -1534,10 +1531,14 @@
             },
 
             // Check if a product is selected for this delivery
-            isOrderChecked(delivery, order) {
-                return delivery.orders?.some(o => o.product_id === order.product_id);
-            },
+isOrderChecked(delivery, order) {
+    return delivery.orders?.some(o =>
+        o.product_id === order.product_id &&
+        (o.has_paella || 0) === (order.has_paella || 0)
+    );
+},
 
+            
             // Get selected quantity for dropdown binding
             getSelectedQty(delivery, order) {
                 const found = delivery.orders?.find(o => o.product_id === order.product_id);
@@ -1700,6 +1701,7 @@
             qtyValidationMessage: '',
 
             getAvailableOrders() {
+                console.log('Calculating available orders...', this.orders);
                 const availableOrders = this.orders.map(o => ({ ...o })); // Clone to avoid mutating
 
                 for (const delivery of this.deliveries) {
@@ -1713,6 +1715,8 @@
                         }
                     }
                 }
+
+                console.log('availableOrders', availableOrders)
 
                 return availableOrders;
             },

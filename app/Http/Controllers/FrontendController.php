@@ -205,6 +205,8 @@ class FrontendController extends Controller
             return $cart->product->is_misc == 1;
         });
 
+        // dd($carts->toArray());
+
         $dataPrivacy = Page::where('slug', 'data-privacy')->first();
 
         $dataPrivacyRender = view('v2.data-privacy', compact('dataPrivacy'))->render();
