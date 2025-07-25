@@ -110,9 +110,9 @@
                                         @if(is_array($products) || is_object($products))
                                             <ul>
                                                 @foreach ($products as $product)
-                                                    <li>
-                                                        {{ $product->product->name . ($product?->paella ?' with Paella' : '') ?? 'Unknown Product' }} x {{ $product->qty }}
-                                                    </li>
+                                                        <li>
+                                                            {{ $product->product->name . (isset($product?->paella) && $product?->paella ?' with Paella' : '') ?? 'Unknown Product' }} x {{ $product->qty }}
+                                                        </li>
                                                 @endforeach
                                             </ul>
                                         @endif
