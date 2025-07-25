@@ -98,7 +98,7 @@
                     <div class="mg-b-0 tx-15">Payment Method: {{$sales->payment_used ?? 'Paymaya'}}</div>
 
 
-                    <p class="mg-b-0 tx-15">Contact Person: {{$sales->contact_person ?? $sales->customer_name}}</p>
+                    <p class="mg-b-0 tx-15 mt-2">Contact Person: {{$sales->contact_person ?? $sales->customer_name}}</p>
                     <p class="mg-b-0 tx-15">Delivery Type: {{$sales->delivery_type}}</p>
                     <p class="mg-b-3 tx-15">
                         Delivery Address: {{ $deliveryAddress->address }}
@@ -118,6 +118,7 @@
                             <th class="wd-15p tx-center">Date Needed</th>
                             <th class="tx-center">Quantity</th>
                             <th class="tx-center">Price</th>
+                            <th class="tx-center">Paella Price</th>
                             <th class="tx-right">Total</th>
                         </tr>
                     </thead>
@@ -143,7 +144,14 @@
                                 </td>
                                 <td class="tx-nowrap tx-center">{{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('F d, Y g:i A') }}</td>
                                 <td class="tx-center">{{number_format($product->qty, 0)}}</td>
-                                <td class="tx-center">₱{{number_format($product->product->price, 2)}} {{ isset($product->product->paella_price) && $product->product->paella_price > 0 ? '+₱' . number_format($product->product->paella_price, 2) : '' }}</td>
+                                <td class="tx-center">₱{{number_format($product->product->price, 2)}}</td>
+                                <td class="tx-right">
+                                    @if(isset($product->product->paella_price) && $product->product->paella_price > 0)
+                                        ₱{{number_format($product->product->paella_price, 2)}}
+                                    @else
+                                        ₱0.00
+                                    @endif
+                                </td>
                                 <td class="tx-right">
                                     @php
                                         $rowTotal = ($product->product->price + $product->product->paella_price) * $product->qty;
@@ -156,21 +164,21 @@
 
                             @if($deliveryAddress->delivery_fee > 0)
                                 <tr>
-                                    <td class="tx-left " colspan="4">Delivery Fee</td>
+                                    <td class="tx-left " colspan="5">Delivery Fee</td>
                                     <td class="tx-right ">₱{{number_format($deliveryAddress->delivery_fee, 2)}}</td>
                                 </tr>
                             @endif
 
                             @forelse($gc as $g)
                                 <tr style="font-weight:bold;">
-                                    <td class="tx-left" colspan="4">Gift Certificate: {{$g->code}}</td>
+                                    <td class="tx-left" colspan="5">Gift Certificate: {{$g->code}}</td>
                                     <td class="tx-right">₱{{number_format($g->amount, 2)}}</td> 
                                 </tr>
                             @empty
                             @endforelse
                             @if($salesDetails->sum('gross_amount') > 0)
                                 <tr style="font-weight:bold;">
-                                    <td colspan="4">&nbsp;</td>
+                                    <td colspan="5">&nbsp;</td>
                                     <td class="tx-right">
                                         Total: ₱{{ number_format($total + $deliveryAddress->delivery_fee, 2) }}
                                 </tr>
