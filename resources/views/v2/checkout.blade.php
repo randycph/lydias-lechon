@@ -414,7 +414,7 @@
 
                                                 <template x-if="delivery.warningMessage">
                                                     <div class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
-                                                        <div x-html="delivery.warningMessage"></div>
+                                                        <div x-html="delivery.warningMessage">We've pre-selected the earliest available time for your order. You’re welcome to adjust the date and time to your preference.</div>
                                                     </div>
                                                 </template>
 
