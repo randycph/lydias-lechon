@@ -205,7 +205,7 @@
                                                                 
                                                                 Note: {{ $address->note ?? '' }}<br>
                                                                 
-                                                                Payment Method: {{ $sale->payment_method ?? 'N/A' }}<br>
+                                                                Payment Method: {{ $sale->payments->first()->payment_type  ?? 'N/A' }}<br>
                                                                 Location: {{ $address->location }}<br>
                                                                 Delivery charge: ₱{{ number_format($address->delivery_fee, 2) }}<br>
                                                                 Order/s:
@@ -227,7 +227,7 @@
                                                                     $payment = App\EcommerceModel\SalesPayment::where('sales_header_id', $sale->id)->where('status', 'PAID')->latest()->first();
                                                                 @endphp
                                                                 @if ($payment)
-                                                                Payment type: {{ $payment->payment_type }}<br>
+                                                                Payment type: {{ $sale->payments->first()->payment_type  }}<br>
                                                                 @endif
                                                             </li>
                                                         @endforeach
