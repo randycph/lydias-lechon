@@ -41,7 +41,7 @@
                             <tr>
                                 
                                 <td style="width:10%">
-                                    <select name="order_source_filter" id="order_source_filter" class="form-control">
+                                    <select name="order_source" id="order_source" class="form-control">
                                         <option value="">Source</option>
                                         @foreach(\App\EcommerceModel\Branch::orderBy('name','asc')->get() as $b)
                                             <option value="{{$b->name}}">{{$b->name}}</option>

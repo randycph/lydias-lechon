@@ -210,7 +210,9 @@
                                                             <i data-feather="truck"></i>
                                                         </a>
                                                         <div class="dropdown-menu dropdown-menu-right">
-                                                                <a class="dropdown-item" href="javascript:void(0);" onclick="change_delivery_status({{$sale['id']}}, {{$is_allowed_delivered}}, '{{$sale['delivery_type']}}')" title="Update Order Status" data-id="{{$sale['id']}}">Update Order Status</a>
+                                                                @if($sale['delivery_status'] <> 'Delivered')
+                                                                    <a class="dropdown-item" href="javascript:void(0);" onclick="change_delivery_status({{$sale['id']}}, {{$is_allowed_delivered}}, '{{$sale['delivery_type']}}')" title="Update Order Status" data-id="{{$sale['id']}}">Update Order Status</a>
+                                                                @endif
                                                                 @if ($sale['delivery_type'] == 'Door to door delivery' && ($sale['delivery_address'] && count($sale['delivery_address']) > 0))
                                                                 <div class="printReceipt" data-addresses="{{ json_encode($sale['delivery_address']) }}" data-saleid="{{ $sale['id'] }}">
                                                                     <button class="dropdown-item">Print Delivery Receipt</button>

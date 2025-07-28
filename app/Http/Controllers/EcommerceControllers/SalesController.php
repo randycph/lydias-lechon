@@ -601,8 +601,8 @@ class SalesController extends Controller
 
     public function additional_filters($model){
     
-        if(isset($_GET['order_source_filter']) && strlen($_GET['order_source_filter']) > 1){
-            $model = $model->where('order_source','=',$_GET['order_source_filter']);        
+        if(isset($_GET['order_source']) && strlen($_GET['order_source']) > 1){
+            $model = $model->where('order_source','=',$_GET['order_source']);        
         }
         if(isset($_GET['order_status']) && strlen($_GET['order_status']) > 0){
             if($_GET['order_status'] == 2){
