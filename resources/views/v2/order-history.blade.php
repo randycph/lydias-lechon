@@ -103,7 +103,7 @@
                                 </div>
             
                                 <div class="flex items-center justify-between w-full mt-4">
-                                    <div class="text-sm text-slate-500 font-bold">{{ \Carbon\Carbon::parse($sale->created_at)->format('m/d/Y g:i A') }}</div> 
+                                    <div class="text-sm text-slate-500 font-bold">{{ \Carbon\Carbon::parse($sale->created_at)->format('m/d/Y h:i A') }}</div> 
                                     <button class="text-sm text-primary uppercase font-bold flex gap-1 hover:underline" @click="viewMore{{ $index }} = !viewMore{{ $index }}; $event.stopPropagation()">
                                         VIEW ALL DETAILS
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
@@ -196,11 +196,11 @@
                                                             @endphp
                                                             <li>
                                                                 Date: {{ \Carbon\Carbon::parse($address->delivery_date)->format('F d, Y') }}<br>
-                                                                Time: {{ \Carbon\Carbon::parse($address->delivery_time)->format('g:i A') }}<br>
+                                                                Time: {{ \Carbon\Carbon::parse($address->delivery_time)->format('h:i A') }}<br>
                                                                 Name: {{ $address->contact_person ?? $sale->customer_name }}<br>
                                                                 Contact #: {{ $address->contact_tel ?? $sale->customer_contact_number }}<br>
                                                                 QTY/Size: {{ count($products) }} <br>
-                                                                Delivery Date and time: {{ \Carbon\Carbon::parse($address->delivery_date . ' ' . $address->delivery_time)->format('F d, Y g:i A') }}<br>
+                                                                Delivery Date and time: {{ \Carbon\Carbon::parse($address->delivery_date . ' ' . $address->delivery_time)->format('F d, Y h:i A') }}<br>
                                                                 Delivery/Pickup: {{ $sale->delivery_type }}<br>
                                                                 
                                                                 Note: {{ $address->note ?? '' }}<br>
@@ -237,10 +237,10 @@
 
                                                     @php 
                                                         $saleDetail = $sale->items ? $sale->items->first() : null;
-                                                        $deliveryDate = $saleDetail ? date('F d, Y g:i A', strtotime($saleDetail?->delivery_date)) : 'N/A';
+                                                        $deliveryDate = $saleDetail ? date('F d, Y h:i A', strtotime($saleDetail?->delivery_date)) : 'N/A';
                                                     @endphp
                                                         Date: {{ \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y') }}<br>
-                                                        Time: {{ \Carbon\Carbon::parse($saleDetail?->delivery_time)->format('g:i A') }}<br>
+                                                        Time: {{ \Carbon\Carbon::parse($saleDetail?->delivery_time)->format('h:i A') }}<br>
                                                         Name: {{ $saleDetail?->contact_person ?? $sale->customer_name }}<br>
                                                         Contact #: {{ $saleDetail?->contact_tel ?? $sale->customer_contact_number }}<br>
                                                         QTY/Size: {{ count($sale->items) }} <br>
@@ -252,10 +252,10 @@
                                                 @else 
                                                     @php 
                                                         $saleDetail = $sale->items ? $sale->items->first() : null;
-                                                        $deliveryDate = $saleDetail ? date('F d, Y g:i A', strtotime($saleDetail?->delivery_date)) : 'N/A';
+                                                        $deliveryDate = $saleDetail ? date('F d, Y h:i A', strtotime($saleDetail?->delivery_date)) : 'N/A';
                                                     @endphp
                                                     Date: {{ \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y') }}<br>
-                                                    Time: {{ \Carbon\Carbon::parse($saleDetail?->delivery_time)->format('g:i A') }}<br>
+                                                    Time: {{ \Carbon\Carbon::parse($saleDetail?->delivery_time)->format('h:i A') }}<br>
                                                     Name: {{ $saleDetail?->contact_person ?? $sale->customer_name }}<br>
                                                     Contact #: {{ $saleDetail?->contact_tel ?? $sale->customer_contact_number }}<br>
                                                     QTY/Size: {{ count($sale->items) }} <br>
