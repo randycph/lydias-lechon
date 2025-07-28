@@ -240,7 +240,7 @@
                                                         $deliveryDate = $saleDetail ? date('F d, Y h:i A', strtotime($saleDetail?->delivery_date)) : 'N/A';
                                                     @endphp
                                                         Date: {{ \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y') }}<br>
-                                                        Time: {{ \Carbon\Carbon::parse($saleDetail?->delivery_time)->format('h:i A') }}<br>
+                                                        Time: {{ \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('h:i A') }}<br>
                                                         Name: {{ $saleDetail?->contact_person ?? $sale->customer_name }}<br>
                                                         Contact #: {{ $saleDetail?->contact_tel ?? $sale->customer_contact_number }}<br>
                                                         QTY/Size: {{ count($sale->items) }} <br>
@@ -255,7 +255,7 @@
                                                         $deliveryDate = $saleDetail ? date('F d, Y h:i A', strtotime($saleDetail?->delivery_date)) : 'N/A';
                                                     @endphp
                                                     Date: {{ \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y') }}<br>
-                                                    Time: {{ \Carbon\Carbon::parse($saleDetail?->delivery_time)->format('h:i A') }}<br>
+                                                    Time: {{ \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('h:i A') }}<br>
                                                     Name: {{ $saleDetail?->contact_person ?? $sale->customer_name }}<br>
                                                     Contact #: {{ $saleDetail?->contact_tel ?? $sale->customer_contact_number }}<br>
                                                     QTY/Size: {{ count($sale->items) }} <br>
