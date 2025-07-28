@@ -90,7 +90,7 @@
                     <div class="mg-b-0 tx-15">Date Needed: {{\Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('F d, Y g:i A')}}</div>
                     <div class="mg-b-0 tx-15">Day: {{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('l') }}</div>
                     <div class="mg-b-0 tx-15">Time: {{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('g:i A') }}</div>
-                    <div class="mg-b-0 tx-15">Contact #: {{$sales->customer_contact_number}}</div>
+                    <div class="mg-b-0 tx-15">Contact #: {{$deliveryAddress->contact_tel ?? $sales->customer_contact_number}}</div>
                     <div class="mg-b-0 tx-15">Delivery Charge: ₱{{number_format($deliveryAddress->delivery_fee ?? 0)}}</div>
                     <div class="mg-b-0 tx-15">Payment Method: {{$sales->payment_used ?? 'Paymaya'}}</div>
 
