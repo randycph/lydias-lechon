@@ -1552,6 +1552,21 @@
                 return found ? found.qty : '';
             },
 
+            getProductType(order) {
+                const slug = order.product?.slug;
+                const categoryId = order.product?.category_id;
+
+                if (slug === 'lechon-baka') {
+                    return 'baka';
+                }
+
+                if (categoryId === 1 && slug !== 'lechon-baka') {
+                    return 'lechon';
+                }
+
+                return 'misc';
+            },
+
             // When checkbox is toggled
             toggleOrderSelection(delivery, order) {
                 console.log('delivery:', delivery);
@@ -1573,6 +1588,23 @@
                         qty: 1,
                         product: order.product
                     });
+                }
+
+                let originalAllHours = Array.from({ length: 21 }, (_, i) => i);
+
+                const type = this.getProductType(order);
+                
+                if (type === 'lechon') {
+                    const selectedHour = parseInt(delivery.need_time.split(':')[0]);
+
+                    this.allHours = this.allHours.filter(hour => {
+                        if (hour >= selectedHour) {
+                            return true;
+                        }
+                        return false;
+                    });
+                } else {
+                    this.allHours = originalAllHours;
                 }
 
                 // Remove all deliveries after the current one
@@ -2001,6 +2033,13 @@
 
                 if (isToday && this.hasMisc && hour < (now.getHours() + 6)) {
                     return true;
+                }
+
+                if (this.need_time && this.haslechon) {
+                    const selectedHour = parseInt(this.need_time.split(':')[0]);
+                    if (hour < selectedHour) {
+                        return true;
+                    }
                 }
 
                 const timeStr = (hour < 10 ? '0' + hour : hour) + ':00';
