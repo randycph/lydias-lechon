@@ -107,7 +107,7 @@
 							<small style="font-style: italic;">Customer inputs a code to redeem coupon reward.</small>
 						</div>
 					</div>
-					<div class="mb-3" id="coupon-code" style="display: @if(old('coupon_activation') == 'manual' || $coupon->activation_type == 'manual') block @else none @endif;">
+					<div class="mb-3" id="coupon-code" style="display: @if(old('coupon_activation', $coupon->activation_type) == 'manual' || $coupon->activation_type == 'manual') block @else none @endif;">
 						<label class="d-block">Coupon Code</label>
 						<input type="text" name="code" class="form-control @error('code') is-invalid @enderror" value="{{ old('code',$coupon->coupon_code) }}">
 						@error('code')
@@ -283,12 +283,23 @@
 						</div>
                 	</div>
 
+					
+					@php
+						$free_product_ids = [];
+
+						$coupon_free_products = explode('|',$coupon->free_product_id);
+
+						foreach($coupon_free_products as $cprod){
+							array_push($free_product_ids, $cprod);
+						}
+					@endphp
+
 					<div class="mb-3 reward-option" id="free-product-optn" style="display:@if(isset($coupon->free_product_id) || $coupon->reward == 'free-product-optn') block @else none @endif">
 						<label class="d-block">Free Product</label>
 						<select class="form-control select2" name="free_product_id[]" style="min-height: 32px;" multiple="multiple">
 							<option label="Choose one"></option>
 							@foreach($free_products as $product)
-								<option @if(old('free_product_id') == $product->id) selected @endif value="{{$product->id}}">{{ $product->name }}</option>
+								<option @if(in_array($product->id, $free_product_ids)) selected @endif value="{{$product->id}}">{{ $product->name }}</option>
 							@endforeach
 						</select>
 						@error('free_product_id')
@@ -315,7 +326,7 @@
 				<div class="form-row border rounded p-3 pt-4 mb-4" id="coupon-time-option" style="display:flex;">
 					<div class="col-md-3">
 						<div class="custom-control custom-radio">
-							<input type="radio" id="coupon-date-time" name="coupon_time[]" class="custom-control-input" onclick="ShowHideDiv()" value="datetime" @if(is_array(old('coupon_time')) && in_array('datetime', old('coupon_time')) || isset($coupon->start_date)) checked @endif>
+							<input type="radio" id="coupon-date-time" name="coupon_time[]" class="custom-control-input" onclick="ShowHideDiv()" value="datetime" @if(is_array(old('coupon_time', $coupon->coupon_time)) && in_array('datetime', old('coupon_time', $coupon->coupon_time)) || isset($coupon->start_date)) checked @endif>
 							<label class="custom-control-label" for="coupon-date-time">Date and Time</label>
 						</div>
 					</div>
@@ -324,7 +335,7 @@
 						</div>
 					</div>
 
-					<div class="col-12" id="coupon-date-time-form" style="display:@if(is_array(old('coupon_time')) && in_array('datetime', old('coupon_time')) || isset($coupon->start_date)) block @else none @endif;">
+					<div class="col-12" id="coupon-date-time-form" style="display:@if(is_array(old('coupon_time', $coupon->coupon_time)) && in_array('datetime', old('coupon_time', $coupon->coupon_time)) || isset($coupon->start_date)) block @else none @endif;">
 						<div class="row mt-3">
 							<div class="col-6">
 								<label class="d-block">Start Date *</label>
@@ -349,7 +360,7 @@
 						</div>
 					</div>
 
-					<div class="col-12 d-none" id="coupon-custom-form" style="display:@if(is_array(old('coupon_time')) && in_array('custom', old('coupon_time')) || isset($coupon->event_name)) block @else none @endif;">
+					<div class="col-12 d-none" id="coupon-custom-form" style="display:@if(is_array(old('coupon_time', $coupon->coupon_time)) && in_array('custom', old('coupon_time', $coupon->coupon_time)) || isset($coupon->event_name)) block @else none @endif;">
 						<div class="row mt-3">
 							<div class="col-md-6">
 								<label class="d-block">Event Name *</label>
@@ -363,7 +374,7 @@
 							</div>
 							<div class="col-12 mt-3">
 								<div class="custom-control custom-switch">
-									<input name="repeat_annually" type="checkbox" {{old("repeat_annually") == "ON" || $coupon->repeat_annually == 1 ? "checked":"" }} class="custom-control-input" id="customSwitch1" >
+									<input name="repeat_annually" type="checkbox" {{old("repeat_annually", $coupon->repeat_annually) == "ON" || $coupon->repeat_annually == 1 ? "checked":"" }} class="custom-control-input" id="customSwitch1" >
 									<label class="custom-control-label" for="customSwitch1">Repeat Annually</label>
 								</div>
 							</div>
@@ -540,7 +551,7 @@
 				<div class="form-group">
 					<label class="d-block">Status</label>
 					<div class="custom-control custom-switch">
-						<input type="checkbox" class="custom-control-input" id="enableSwitch1" name="status" {{ (old("status") == "ON" || $coupon->status == "ACTIVE" ? "checked":"") }}>
+						<input type="checkbox" class="custom-control-input" id="enableSwitch1" name="status" {{ (old("status", $coupon->status) == "ON" || $coupon->status == "ACTIVE" ? "checked":"") }}>
 						<label class="custom-control-label" for="enableSwitch1" id="label_status">{{ucfirst(strtolower($coupon->status))}}</label>
 					</div>
 				</div>
