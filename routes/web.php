@@ -40,6 +40,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use UniSharp\LaravelFilemanager\Lfm;
 
 // Auth::routes(['verify' => true]);
 
@@ -277,6 +278,12 @@ Route::group(['middleware' => ['authenticated']], function () {
 //     Auth::routes(['verify' => true]);
 // });
 
+Route::group(['prefix' => '/laravel-filemanager', 'middleware' => ['authenticated', 'cmsUserOnly']], function () {
+
+    '\vendor\UniSharp\LaravelFilemanager\Lfm::routes()'; 
+});
+
+
 Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
 
     Route::get('/admin', function () { return redirect(route('dashboard')); })->name('admin');
@@ -310,13 +317,10 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::post('/admin/popup-message-multiple-change-status','PopupMessageController@multiple_change_status')->name('popup-message.multiple.change.status');
     Route::post('/admin/popup-message-multiple-delete','PopupMessageController@multiple_delete')->name('popup-message.multiple.delete');
 
-    // Route::group(['prefix' => 'laravel-filemanager', 'middleware' => ['web', 'auth']], function () {
-    //     '\vendor\UniSharp\LaravelFilemanager\Lfm::routes()'; 
-    // });
-
+    
     // Files
-    Route::get('/admin/laravel-filemanager', '\UniSharp\LaravelFilemanager\Controllers\LfmController@show')->name('file-manager.show');
-    Route::post('/admin/laravel-filemanager/upload', '\UniSharp\LaravelFilemanager\Controllers\UploadController@upload');
+    //Route::get('/admin/laravel-filemanager/', '\UniSharp\LaravelFilemanager\Controllers\LfmController@show')->name('file-manager.show');
+    //Route::post('/admin/laravel-filemanager/upload', '\UniSharp\LaravelFilemanager\Controllers\UploadController@upload');
     Route::get('/admin/file-manager', 'FileManagerController@index')->name('file-manager.index');
     //
 

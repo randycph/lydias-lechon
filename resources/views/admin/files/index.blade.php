@@ -25,7 +25,7 @@
             <h4 class="mg-b-0 tx-spacing--1">Manage Files</h4>
         </div>
     </div>
-    <iframe src="{{ route('file-manager.show') }}" style="width: 100%; height: 600px; overflow: hidden; border: solid 1px #eee;"></iframe>
+    <iframe src="{{ route('unisharp.lfm.show') }}" style="width: 100%; height: 600px; overflow: hidden; border: solid 1px #eee;"></iframe>
 </div>
 @include('admin.files.modals')
 @endsection
