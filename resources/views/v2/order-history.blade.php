@@ -285,6 +285,10 @@
                                             class="text-white custom-btn btn-tertiary-dark bg-tertiary hover:bg-secondary font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
                                             Cancel Order
                                         </button>
+                                        <button @click="editOrderModal = true; saleId = '{{ $sale->id }}'" type="button"
+                                            class="text-white custom-btn btn-primary-dark bg-indigo-600 hover:bg-indigo-500 font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
+                                            Edit Order
+                                        </button>
                                     @endif
                                 </div>
                             
@@ -698,6 +702,60 @@
     </div>
 </div>
 
+<div x-show="editOrderModal"
+    x-transition
+    class="relative z-50"
+    aria-labelledby="modal-title"
+    role="dialog"
+    aria-modal="true"
+    style="display: none;">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
+
+    <!-- Modal content -->
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+            <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md">
+                <!-- Modal body -->
+                <div class="bg-white px-4 pt-5 pb-4 p-6">
+                    <div class="flex w-full flex-col">
+                        <div class="flex justify-end ">
+                            <button @click="editOrderModal" = false" class="self-end text-2xl text-gray-800">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="text-center">
+                            <h3 class="text-lg lg:text-2xl font-semibold" id="modal-title">Editing this transaction will clear any existing items in your cart. Do you want to continue?</h3>
+                            <div class="mt-2">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full flex flex-col gap-2 px-10 pt-4 pb-6">
+
+                    <form action="{{ route('my-account.edit_order') }}" method="post">
+                        @csrf
+                        <input type="hidden" name="sales_id" x-model="saleId">
+                        <div class="flex flex-col gap-2">
+                            <button type="submit"
+                                class="text-primary border hover:text-white border-primary bg-white hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3 text-center">
+                                Yes
+                            </button>
+                            <button type="button" @click="editOrderModal = false"
+                                class="text-white bg-primary hover:bg-primary font-medium rounded-lg w-full sm:w-auto px-5 py-3 text-center">
+                                No
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <x-bank-deposit-proof />
 <x-payment-center-proof />
 <x-footer-component />
@@ -707,7 +765,7 @@
         return {
             init() {
                 const lockBody = () => {
-                    const anyOpen = this.cancelOrderModal || this.successPaymentModal || this.trackOrderModal || this.paymentMethodModal || this.bankDepositProof || this.paymentCenterProof;
+                    const anyOpen = this.cancelOrderModal || this.successPaymentModal || this.trackOrderModal || this.paymentMethodModal || this.bankDepositProof || this.paymentCenterProof || this.editOrderModal || this.depositModal;
                     if (anyOpen) {
                         document.body.classList.add('overflow-hidden');
                     } else {
@@ -721,9 +779,11 @@
                 this.$watch('paymentMethodModal', lockBody);
                 this.$watch('bankDepositProof', lockBody);
                 this.$watch('paymentCenterProof', lockBody);
+                this.$watch('editOrderModal', lockBody);
             },
             depositModal: false,
             cancelOrderModal: false, 
+            editOrderModal: false,
             successPaymentModal: false, 
             trackOrderModal: false, 
             paymentMethodModal: false, 
@@ -732,7 +792,7 @@
             paymentMethod: '',
             choosePaymentMethod() {
                 if (this.paymentMethod == '') {
-                    return;closeBankParentModal
+                    return;
                 }
 
                 if (this.paymentMethod == 'bank') {
@@ -743,7 +803,6 @@
 
             },
             closeBankDepositProof() {
-                    console.log('xxxx')
                 this.bankDepositProof = false;
             },
             openPaymentModal(amount, sales_header_id) {
@@ -752,14 +811,11 @@
                 this.sales_header_id = sales_header_id;
             },
             trackOrder(sale) {
-            console.log(sale)
                 this.trackOrderModal = true;
                 this.saleId = sale.order_number;
                 this.saleDate = this.formatDate(sale.created_at);
 
                 this.deliveryStatuses = sale.delivery_status;
-
-                console.log(this.deliveryStatuses)
             },
             deliveryStatuses: [],
             saleDate: '',
