@@ -225,6 +225,7 @@ class GiftCertificateController extends Controller
                 ->update([
                     'status'  => (isset($request->status) ? 'Used' : 'Unused'),
                     'sales_header_id'  => $request->status,
+                    'claimed_at'  => date('Y-m-d H:i:s'),
                     'user_id' => Auth::user()->id
                 ]);
         }

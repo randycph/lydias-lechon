@@ -66,10 +66,13 @@
                             <tr>
                                 
                                 <th>Code</th>
+                                <th>Serial</th>
                                 <th>Amount</th>
                                 <th>Type</th>
                                 <th>Status</th>                                
                                 <th>Sales/JO order #</th>
+                                <th>Claimed Date</th>
+                                
                                                              
                             </tr>
                         </thead>
@@ -77,10 +80,12 @@
                             @forelse($rs as $r)
                             <tr>
                                 <td>{{$r->code}}</td>
+                                <td>{{$r->serial_number}}</td>
                                 <td align="right">{{number_format($r->amount,2)}}</td>
-                                <td>{{$r->gc_type}}</td>
+                                <td>{{$r->gc_type}}</td>                                
                                 <td>{{$r->status}}</td>
                                 <td>{{$r->sales_header_id}}</td>
+                                <td>@if(isset($r->claimed_at)){{date('Y-m-d h:i A',strtotime($r->claimed_at))}} @endif</td>
                                
                             </tr>
                             @empty
