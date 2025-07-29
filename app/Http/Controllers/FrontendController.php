@@ -225,6 +225,11 @@ class FrontendController extends Controller
         }
 
         $sales = SalesHeader::where('id',$id)->with('deliveryAddress', 'items', 'couponUsed')->first();
+
+        if (!$sales) {
+            abort(404);
+        }
+
         $gc = GiftCertificate::where('sales_header_id',$id)->get();
         $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
         $salesDetails = SalesDetail::with('product.photos')->where('sales_header_id',$id)->get();
