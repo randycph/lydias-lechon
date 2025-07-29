@@ -1026,6 +1026,22 @@ class CartController extends Controller
 
         $sign = $this->generateSignature($merchantkey,$merchantcode,$refno,$amount,$currency);
 
+        $oldId = null;
+
+        if (session()->has('old_sales_header_id')) {
+            $oldId = session('old_sales_header_id');
+        }
+
+        if ($oldId != null) {
+            $oldSalesHeader = SalesHeader::where('id', $oldId)->first();
+
+            if ($oldSalesHeader) {
+                $oldSalesHeader->delete();
+            }
+
+            session()->forget('old_sales_header_id');
+        }
+
         //$payment = $this->ipay($salesHeader,$deposit,$sign);
 
         logger('sales_header_id', [$salesHeader->id]);
