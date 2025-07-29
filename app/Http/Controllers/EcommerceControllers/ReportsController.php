@@ -1342,6 +1342,40 @@ class ReportsController extends Controller
         return view('admin.reports.audit_trail_per_external',compact('rs','users'));
     }
 
+    public function gift_cert(Request $request){
+        $rs = '';
+        $qry = "SELECT * FROM `gift_certificate` where id>0 ";
+        // conditions
+            if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
+                $qry .= " and 
+                (
+                (created_at >= '" . date('Y-m-d 00:00:00', strtotime($_GET['startdate'])) . "' and created_at <= '" . date('Y-m-d 23:59:59', strtotime($_GET['enddate'])). "')
+                or
+                (updated_at >= '" . date('Y-m-d 00:00:00', strtotime($_GET['startdate'])) . "' and updated_at <= '" . date('Y-m-d 23:59:59', strtotime($_GET['enddate'])). "')
+                )
+                
+                 ";
+
+            }
+            else{
+                $qry.= " and created_at >='".date('Y-m-d 00:00:00')."' and created_at <='".date('Y-m-d 23:59:59')."'";
+            }
+
+            if(isset($_GET['status']) && strlen($_GET['status'])>=2){
+               
+                $qry.= " and status ='".$_GET['status']."'";
+            }
+            else{
+                $qry.= " and status <>'1xcx'";
+            }
+            $qry.=" order by id desc";
+        // end conditions
+           //dd($qry);
+        $rs = DB::select($qry);
+        
+        return view('admin.reports.giftcert',compact('rs'));
+    }
+
     public function forecast_report_per_product_type(Request $request){
         $wra="(";
         $wra_array=[];

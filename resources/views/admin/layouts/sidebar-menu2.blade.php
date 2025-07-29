@@ -106,6 +106,7 @@
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.pickup_orders_per_branch')}}">Pickup Orders per Branch</a></li>
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.commissary_production')}}">Commissary Production</a></li>
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.customer-details')}}">Customer Details Report</a></li>
+                    <li><a style="color: white;" target="_blank" href="{{route('admin.report.gift_cert')}}">Gift Cert Report</a></li>
                  
                 </ul>
             </li>
