@@ -12,7 +12,7 @@
         }
     ],
     "require": {
-        "php": ">=8.2",
+        "php": "^8.2",
         "doctrine/dbal": "^3.6",
         "fakerphp/faker": "^1.19",
         "laravel/framework": "^11.44",
@@ -22,7 +22,7 @@
         "laravel/tinker": "^2.10",
         "laravel/ui": "^4.6",
         "maatwebsite/excel": "^3.1.50",
-        "unisharp/laravel-filemanager": "2.8.1"
+        "unisharp/laravel-filemanager": "^1.8"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "^2.1",
