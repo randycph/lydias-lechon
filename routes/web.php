@@ -239,6 +239,7 @@ Route::group(['middleware' => ['authenticated']], function () {
     
     Route::get('account/sales', 'EcommerceControllers\SalesController@sales_list')->name('profile.sales');
     Route::post('account/sales/cancel', 'EcommerceControllers\MyAccountController@cancel_order')->name('my-account.cancel_order');
+    Route::post('account/sales/edit', 'EcommerceControllers\MyAccountController@edit_order')->name('my-account.edit_order');
     // Route::get('sales-summary/{id}', 'FrontController@show_sales_summary')->name('profile.show_sales_summary');
 
     //// My Account

@@ -120,5 +120,47 @@ class MyAccountController extends Controller
     }
 
 
+    public function edit_order(Request $request) {
+
+        session()->forget('old_sales_header_id');
+
+        $salesHeader = SalesHeader::whereId($request->sales_id)->first();
+
+        if (Auth::user()->id != $salesHeader->user_id) {
+            return back()->with('error_cancelled', "You are not authorized to edit this order");
+        }
+
+        if (!$salesHeader) {
+            return back()->with('error_cancelled', "Your order cannot be edited at this time");
+        }
+
+        $cart = Cart::where('user_id', Auth::user()->id)->get();
+
+        if (!$cart) {
+            return back()->with('error_cancelled', "Your order cannot be edited at this time");
+        }
+
+        // Clear existing cart items
+        foreach ($cart as $item) {
+            $item->delete();
+        }
+
+        // Re-add items to cart
+        foreach ($salesHeader->items as $item) {
+            Cart::create([
+                'user_id' => Auth::user()->id,
+                'product_id' => $item->product_id,
+                'qty' => $item->qty,
+                'paella_price' => $item->paella_price,
+                'price' => $item->price,
+            ]);
+        }
+
+        session([
+            'old_sales_header_id' => $salesHeader->id,
+        ]);
+
+        return redirect()->route('checkout');
+    }
 }
 // corpuz.randy@webfocus.ph
