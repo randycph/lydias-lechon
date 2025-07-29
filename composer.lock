@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b78f943009ba4aacd58557a65379ad9d",
+    "content-hash": "d54dc606afba78c875301adac8244f86",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -7523,39 +7523,37 @@
         },
         {
             "name": "unisharp/laravel-filemanager",
-            "version": "v2.8.1",
+            "version": "v1.9.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/UniSharp/laravel-filemanager.git",
-                "reference": "200db5ca9d982180d43882ef7f969fcc110e5fc6"
+                "reference": "aaf2764f26eb8dcc9356bea1e25010333c2e61f4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/UniSharp/laravel-filemanager/zipball/200db5ca9d982180d43882ef7f969fcc110e5fc6",
-                "reference": "200db5ca9d982180d43882ef7f969fcc110e5fc6",
+                "url": "https://api.github.com/repos/UniSharp/laravel-filemanager/zipball/aaf2764f26eb8dcc9356bea1e25010333c2e61f4",
+                "reference": "aaf2764f26eb8dcc9356bea1e25010333c2e61f4",
                 "shasum": ""
             },
             "require": {
                 "ext-exif": "*",
                 "ext-fileinfo": "*",
-                "illuminate/config": "5.4.* || 5.5.* || 5.6.* || 5.7.* || 5.8.* || ^6.0 || ^7.0 || ^8.0 || ^9.0 || ^10.0 || ^11.0",
-                "illuminate/container": "5.4.* || 5.5.* || 5.6.* || 5.7.* || 5.8.* || ^6.0 || ^7.0 || ^8.0 || ^9.0 || ^10.0 || ^11.0",
-                "illuminate/filesystem": "5.4.* || 5.5.* || 5.6.* || 5.7.* || 5.8.* || ^6.0 || ^7.0 || ^8.0 || ^9.0 || ^10.0 || ^11.0",
-                "illuminate/http": "5.4.* || 5.5.* || 5.6.* || 5.7.* || 5.8.* || ^6.0 || ^7.0 || ^8.0 || ^9.0 || ^10.0 || ^11.0",
-                "illuminate/support": "5.4.* || 5.5.* || 5.6.* || 5.7.* || 5.8.* || ^6.0 || ^7.0 || ^8.0 || ^9.0 || ^10.0 || ^11.0",
+                "illuminate/support": ">=4.2.0",
                 "intervention/image": "2.*",
-                "league/flysystem": ">=2.0.0",
-                "php": ">=7.2.0"
+                "php": ">=5.4.0"
             },
             "require-dev": {
-                "mockery/mockery": "~1.3.0",
-                "phpunit/phpunit": "~8.0",
-                "squizlabs/php_codesniffer": "^3.1"
+                "orchestra/testbench": "~3.0",
+                "phpspec/phpspec": "~2.1",
+                "phpunit/phpunit": "~4.8"
             },
             "suggest": {
                 "ext-gd": "to use GD library based image processing.",
                 "ext-imagick": "to use Imagick based image processing."
             },
+            "bin": [
+                "bin/debug"
+            ],
             "type": "library",
             "extra": {
                 "laravel": {
@@ -7581,10 +7579,10 @@
                 },
                 {
                     "name": "UniSharp Ltd.",
-                    "email": "opensource@unisharp.com"
+                    "email": "unisharp-service@unisharp.com"
                 }
             ],
-            "description": "A file upload/editor intended for use with Laravel 5 to 10 and CKEditor / TinyMCE",
+            "description": "A file upload/editor intended for use with Laravel 5 and CKEditor / TinyMCE",
             "keywords": [
                 "CKEditor",
                 "file",
@@ -7597,9 +7595,9 @@
             ],
             "support": {
                 "issues": "https://github.com/UniSharp/laravel-filemanager/issues",
-                "source": "https://github.com/UniSharp/laravel-filemanager/tree/v2.8.1"
+                "source": "https://github.com/UniSharp/laravel-filemanager/tree/v1"
             },
-            "time": "2024-04-03T06:44:20+00:00"
+            "time": "2018-07-05T11:36:08+00:00"
         },
         {
             "name": "vlucas/phpdotenv",
@@ -9827,12 +9825,15 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.2"
     },
-    "platform-dev": [],
+    "platform-dev": {},
+    "platform-overrides": {
+        "php": "8.2.29"
+    },
     "plugin-api-version": "2.6.0"
 }

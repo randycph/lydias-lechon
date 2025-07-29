@@ -412,11 +412,9 @@
                                                     </div>
                                                 </div>
 
-                                                <template x-if="delivery.warningMessage">
-                                                    <div class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
-                                                        <div x-html="delivery.warningMessage">We've pre-selected the earliest available time for your order. You’re welcome to adjust the date and time to your preference.</div>
-                                                    </div>
-                                                </template>
+                                                <div class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
+                                                    <div>We've pre-selected the earliest available time for your order. You’re welcome to adjust the date and time to your preference.</div>
+                                                </div>
 
                                                 <div class="w-full flex gap-4">
                                                     <div class="w-full">
@@ -602,11 +600,14 @@
                                     </div>
                                 </div>
                                 </template>
-                                <div x-show="warningMessage">
+                                <div class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
+                                    <div>We've pre-selected the earliest available time for your order. You’re welcome to adjust the date and time to your preference.</div>
+                                </div>
+                                {{-- <div x-show="warningMessage">
                                     <div class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
                                         <div x-html="warningMessage"></div>
                                     </div>
-                                </div>
+                                </div> --}}
                                 <div class="my-2">
                                     <label for="time"
                                         class="block mb-2 text-sm font-bold text-gray-900">Instruction</label>
@@ -845,6 +846,9 @@
             ],
             allowMultiple: false,
             onChangeMultipleAddress() {
+                if (!this.allowMultiple) {
+                    this.init()
+                }
                 this.deliveries = this.orders.map(order => ({
                     address: '',
                     name: '',
@@ -861,6 +865,7 @@
                 }));
                 this.deliveryFees = [];
                 this.deliveryFee = 0;
+
             },
             formEl: null,
             deliveryFee: 0,
@@ -1009,13 +1014,8 @@
                             this.totalDiscountAmount += (this.orderAmount * parseFloat(coupon.discount ?? 0)) / 100;
                         }
                     }
-
-                    console.log(typeof this.deliveryFee, this.deliveryFee);
-                    console.log(typeof coupon.free_shipping_discount_amount, coupon.free_shipping_discount_amount);
                 });
 
-                console.log('this.this.shippingDiscountAmount', this.shippingDiscountAmount);
-                console.log(this.totalDiscountAmount, this.orderAmount);
                 console.log(this.coupons);
 
                 // Safety cap
@@ -1088,9 +1088,7 @@
                 this.method = method;
                 document.cookie = `shipping_method=${method}; path=/;`;
 
-                if (this.method == 'pickup') {
-                    this.allowMultiple = false;
-                }
+                this.allowMultiple = false;
 
                 this.noNeededTime = false;
                 this.noNeededDate = false;
@@ -1100,6 +1098,10 @@
                 this.removeCoupon();
 
                 this.loadAutoCoupons();
+
+                if (!this.allowMultiple) {
+                    this.validateDateTime();
+                }
             },
 
             mobileValidationMessage: '',
@@ -1526,6 +1528,10 @@
                 });
 
                 this.checkAndAdvanceDateIfNoHours();
+
+                if (!this.allowMultiple) {
+                    this.validateDateTime();
+                }
             },
 
             checkMultipleDeliveries() {
@@ -1790,10 +1796,10 @@
                 const diffInMs = selectedDateTime - now;
                 const diffInHours = diffInMs / (1000 * 60 * 60);
 
-                if (this.haslechon && diffInHours < 24) {
-                    alert(`⚠️ Warning! The date and time you've selected (${need_date} - ${this.formatTime(need_time)}) is less than 24 hours from now. Our standard processing time is at least 24 hours. However, you can still proceed by contacting our store directly at our Call Hotline tab.`);
-                    return;
-                }
+                // if (this.haslechon && diffInHours < 24) {
+                //     alert(`⚠️ Warning! The date and time you've selected (${need_date} - ${this.formatTime(need_time)}) is less than 24 hours from now. Our standard processing time is at least 24 hours. However, you can still proceed by contacting our store directly at our Call Hotline tab.`);
+                //     return;
+                // }
 
                 // If valid, add a new blank delivery
                 this.deliveries.push({
@@ -1826,13 +1832,21 @@
                     d.setDate(d.getDate() + 1);
                     delivery.need_date = d.toISOString().split('T')[0];
 
-                    console.log(`Auto-advanced delivery date to: ${delivery.need_date}`);
-
-                    // Force Alpine to update: set time to empty to prevent stuck state
-                    delivery.need_time = "";
-
                     // Recursively check again for next date
                     this.autoAdvanceDateIfNoHours(delivery, tries + 1);
+                } else {
+                    const now = new Date();
+                    if (!delivery.need_time) {
+
+                        // Round up to next hour if minutes > 0
+                        let roundedHour = now.getHours();
+                        if (now.getMinutes() > 0) roundedHour += 1;
+
+                        this.$nextTick(() => {
+                            delivery.need_time = (roundedHour < 10 ? '0' + roundedHour : roundedHour) + ':00';
+                            delivery.noNeededTime = false;
+                        });
+                    }
                 }
             },
             isTimeDisabledForDelivery(hour) {
@@ -1877,8 +1891,13 @@
 
                 delivery.warningMessage = '';
 
-                if (this.haslechon && diffInHours < 24) {
-                    this.clearToProceed = false;
+                if (this.haslechon) {
+                    // pick the time that are 1 day or 24hours. example if today date is 7/29/2025 9:35.. then pick 7/30/2025 11:00 since it only display hour. and dont make it static and i want dynamic
+                    if (diffInHours < 24) {
+                       delivery.need_time = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[1].substring(0, 5);
+                    }
+
+                    this.clearToProceed = true;
                     delivery.warningMessage = `⚠️ Warning! The date and time you've selected (${delivery.need_date} - ${this.formatTime(delivery.need_time)}) is less than 24 hours from now. Our standard processing time is at least 24 hours. However, you can still proceed by contacting our store directly at our <span class='underline text-blue-600 cursor-pointer' @click='openHotline = true'>Call Hotline</span> tab.`;
                 } else {
                     this.clearToProceed = true;
@@ -1895,40 +1914,54 @@
             },
 
             validateDateTime() {
-
-                if (!this.need_time) {
-                    this.noNeededTime = true;
-                    return;
-                }
+                const now = new Date();
 
                 if (!this.need_date) {
                     this.noNeededDate = true;
                     return;
                 }
 
-                if (this.noNeededTime) {
-                    this.noNeededTime = false;
+                const selectedDate = new Date(this.need_date);
+                const isToday =
+                    selectedDate.getDate() === now.getDate() &&
+                    selectedDate.getMonth() === now.getMonth() &&
+                    selectedDate.getFullYear() === now.getFullYear();
+
+                if (!this.need_time) {
+                    // Round up to next hour if minutes > 0
+                    let roundedHour = now.getHours();
+                    if (now.getMinutes() > 0) roundedHour += 1;
+
+                    // Ensure the hour exists in your dropdown list
+                    if (this.allHours.includes(roundedHour)) {
+                        this.$nextTick(() => {
+                            this.need_time = (roundedHour < 10 ? '0' + roundedHour : roundedHour) + ':00';
+                            this.noNeededTime = false;
+                        });
+                    }
                 }
 
-                if (this.noNeededDate) {
-                    this.noNeededDate = false;
+                if (!this.need_time) {
+                    this.noNeededTime = true;
+                    return;
                 }
+
+                if (this.noNeededTime) this.noNeededTime = false;
+                if (this.noNeededDate) this.noNeededDate = false;
 
                 const selectedDateTime = new Date(`${this.need_date}T${this.need_time}`);
-                const now = new Date();
-
                 const diffInMs = selectedDateTime - now;
                 const diffInHours = diffInMs / (1000 * 60 * 60);
 
                 this.warningMessage = '';
 
-                if (this.haslechon && diffInHours <= 24) {
-                    this.warningMessage = `⚠️ Warning! The date and time you've selected (${this.need_date} - ${this.formatTime(this.need_time)}) is less than 24 hours from now. Our standard processing time is at least 24 hours. However, you can still proceed by contacting our store directly at our <span class='underline text-blue-600 cursor-pointer' @click='openHotline = true'>Call Hotline</span> tab.`;
-                    this.errorMessage = `⚠️ We are not able to accommodate your order base on your preferred date and time. Kindly refer to the warning message that appeared on your order screen or call our hotline at 89391221 / 89394665.  Thank you.`;
-                } else {
-                    this.errorMessage = '';
-                    this.hasErrorMessage = false;
-                }
+                // if (this.haslechon) {
+                //     this.warningMessage = `⚠️ Warning! The date and time you've selected (${this.need_date} - ${this.formatTime(this.need_time)}) is less than 24 hours from now. Our standard processing time is at least 24 hours. However, you can still proceed by contacting our store directly at our <span class='underline text-blue-600 cursor-pointer' @click='openHotline = true'>Call Hotline</span> tab.`;
+                //     this.errorMessage = `⚠️ We are not able to accommodate your order based on your preferred date and time. Kindly refer to the warning message that appeared on your order screen or call our hotline at 89391221 / 89394665. Thank you.`;
+                // } else {
+                //     this.errorMessage = '';
+                //     this.hasErrorMessage = false;
+                // }
             },
 
             async submit() {
