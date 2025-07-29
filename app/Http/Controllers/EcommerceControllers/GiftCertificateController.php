@@ -189,6 +189,7 @@ class GiftCertificateController extends Controller
             'code' => $request->code,
             'amount' => $request->amount,
             'gc_type' => $request->gc_type,
+            'sales_header_id' => $request->sales_header_id,
             'status' => (isset($request->status) ? 'Used' : 'Unused'),
             'user_id' => Auth::id(),
             'sales_header_id' => $request->sales_header_id
