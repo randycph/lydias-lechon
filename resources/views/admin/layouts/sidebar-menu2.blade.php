@@ -101,7 +101,7 @@
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.delivery_per_production_location')}}">Delivery per Production Location</a></i></li>
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.audit_trail_per_user')}}">Audit Trail (User)</a></li>
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.audit_trail_per_sales')}}">Audit Trail (Sales)</a></li>
-                    <li><a style="color: white;" target="_blank" href="{{route('admin.report.audit_trail_per_external')}}">Audit Trail (External)</a></li>
+                    <!-- <li><a style="color: white;" target="_blank" href="{{route('admin.report.audit_trail_per_external')}}">Audit Trail (External)</a></li> -->
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.forecast_report_per_product_type')}}">Forecast Report per Product Type</a></li>
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.pickup_orders_per_branch')}}">Pickup Orders per Branch</a></li>
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.commissary_production')}}">Commissary Production</a></li>
