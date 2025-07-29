@@ -585,7 +585,7 @@
                                             >
                                                 <option value="">Select Hour</option>
                                                 <template x-for="hour in allHours" :key="hour">
-                                                    <template x-if="!isTimeDisabled(hour)">
+                                                    <template x-if="parseInt(need_time?.split(':')[0] || 0) <= hour">
                                                         <option 
                                                             :value="(hour < 10 ? '0' + hour : hour) + ':00'" 
                                                             x-text="formatAMPM(hour)"
