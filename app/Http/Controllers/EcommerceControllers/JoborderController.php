@@ -113,7 +113,7 @@ class JoborderController extends Controller
                     'operator' => '=',
                     'value' => 'active',
                     'apply_to_deleted_data' => true
-                ],
+                ]
             ];
 
      
@@ -149,8 +149,8 @@ class JoborderController extends Controller
 
     public function additional_filters($model){
     
-        if(isset($_GET['order_source_filter']) && strlen($_GET['order_source_filter']) > 1){
-            $model = $model->where('order_source','=',$_GET['order_source_filter']);        
+        if(isset($_GET['order_source']) && strlen($_GET['order_source']) > 1){
+            $model = $model->where('customer_address','=',$_GET['order_source']);        
         }       
         if(isset($_GET['start_date']) && strlen($_GET['start_date']) > 1){
             $model = $model->where('created_at','>=',$_GET['start_date'].' 00:00:00');        

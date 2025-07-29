@@ -25,14 +25,14 @@
                                 <tr>
                                     
                                     <td style="width:14%">
-                                        <select name="order_source_filter" id="order_source_filter" class="form-control">
+                                        <select name="order_source" id="order_source" class="form-control">
                                             <option value="">Source</option>
                                             @foreach(\App\EcommerceModel\Branch::orderBy('name','asc')->get() as $b)
                                                 <option value="{{$b->name}}">{{$b->name}}</option>
                                             @endforeach
                                             <option value="Web">Web</option>
-                                            @if(isset($_GET['order_source_filter']) && strlen($_GET['order_source_filter']) > 1)
-                                                <option value="{{$_GET['order_source_filter']}}" selected="selected">{{$_GET['order_source_filter']}}</option>
+                                            @if(isset($_GET['order_source']) && strlen($_GET['order_source']) > 1)
+                                                <option value="{{$_GET['order_source']}}" selected="selected">{{$_GET['order_source']}}</option>
                                             @endif
                                         </select>
                                     </td>
