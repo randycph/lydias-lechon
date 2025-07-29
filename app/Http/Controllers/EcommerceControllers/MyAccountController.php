@@ -160,7 +160,7 @@ class MyAccountController extends Controller
             'old_sales_header_id' => $salesHeader->id,
         ]);
 
-        return redirect()->route('checkout');
+        return redirect()->route('page', ['slug' => 'menu']);
     }
 }
 // corpuz.randy@webfocus.ph
