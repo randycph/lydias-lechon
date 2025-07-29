@@ -55,7 +55,7 @@
                                     <option value="Complimentary">Complimentary (Amount)</option>
                                 </select>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group" style="visibility:hidden">
                                 <label class="mg-b-5 tx-color-03">Status</label>
                                 <div class="custom-control custom-switch @error('status') is-invalid @enderror">
                                     <input type="checkbox" class="custom-control-input" name="status" {{ (old("status") ? "checked":"") }} id="customSwitch1">

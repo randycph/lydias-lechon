@@ -147,7 +147,8 @@
                                     <td>{{ $gc->amount }}</td>
                                     <td>{{ $gc->gc_type }}</td>
                                     <td>{{ $gc->status }}</td>
-                                    <td>@if($gc->sales_header_id == NULL) - @else <a href="{{route('sales-transaction.view',$gc->sales_header_id) }}" target="_blank">{{ $gc->sales->order_number }}</a> @endif</td>
+                                    <td>{{ $gc->sales_header_id }}</td>
+                                    
                                     <td>
                                         <nav class="nav table-options">
                                             @if($gc->trashed())
@@ -160,17 +161,18 @@
                                                 @if (auth()->user()->has_access_to_route('gift-certificate.edit'))
                                                     <a class="nav-link" href="{{ route('gift-certificate.edit',$gc->id) }}" title="Edit Gift Certificate"><i data-feather="edit"></i></a>
                                                 @endif
-                                                <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                    <i data-feather="settings"></i>
-                                                </a>
-                                                <div class="dropdown-menu dropdown-menu-right">
-                                                    @if($gc->status=='Unused')
-                                                        <a class="dropdown-item" href="javascript:void(0);" onclick="change_status({{$gc->id}},'Used')" title="Change Status"> Used</a>
-                                                    @endif
+                                                
+                                                @if($gc->status=='Unused')
+                                                    <a class="nav-link" href="javascript:void(0);" onclick="change_status({{$gc->id}},'Used')" title="Tag as Used">
+                                                        <i data-feather="external-link"></i>
+                                                    </a>
                                                     @if (auth()->user()->has_access_to_route('gift-certificate.single.delete'))
-                                                        <a class="dropdown-item text-danger" href="javascript:void(0)" onclick="delete_one_category({{$gc->id}},'{{$gc->code}}')" title="Delete Gift Certificate">Delete</a>
+                                                        <a class="nav-link" href="javascript:void(0)" onclick="delete_one_category({{$gc->id}},'{{$gc->code}}')" title="Delete Gift Certificate">
+                                                            <i data-feather="delete"></i>
+                                                        </a>
                                                     @endif
-                                                </div>
+                                                @endif
+                                               
                                             @endif
                                         </nav>
                                     </td>

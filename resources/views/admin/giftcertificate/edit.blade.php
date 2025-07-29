@@ -54,6 +54,11 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label class="d-block">Sales Order #</label>
+                        <input name="sales_header_id" id="sales_header_id" value="{{ old('sales_header_id', $giftcertificate->sales_header_id) }}" required type="text" class="form-control @error('sales_header_id') is-invalid @enderror" maxlength="250">
+                        <x-error-message inputName="sales_header_id" />
+                    </div>
+                    <div class="form-group" style="visibility:hidden;">
                         <label class="d-block">Status *</label>
                         <div class="custom-control custom-switch @error('status') is-invalid @enderror">
                             <input type="checkbox" class="custom-control-input" name="status" {{ (old("status") == "ON" || $giftcertificate->status == "Used" ? "checked":"") }} id="customSwitch1">
