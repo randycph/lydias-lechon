@@ -45,12 +45,14 @@
                                 <ul>
                                 @foreach ($sales->deliveryAddress as $k => $address)
                                 <li>
-                                    Address {{ $k + 1 }}: {{ $address->address }}<br>
+                                    Delivery Date and time: {{ \Carbon\Carbon::parse(($address->delivery_date . ' ' . $address->delivery_time))->format('F d, Y g:i A') }}<br>
                                     Contact person: {{ $address->contact_person }}<br>
                                     Contact number: {{ $address->contact_tel }}<br>
                                     Delivery fee: ₱{{ number_format($address->delivery_fee, 2) }}<br>
                                     Location: {{ $address->location }}<br>
-                                    Delivery Date and time: {{ \Carbon\Carbon::parse(($address->delivery_date . ' ' . $address->delivery_time))->format('F d, Y g:i A') }}<br>
+                                    Address {{ $k + 1 }}: {{ $address->address }}<br>                                    
+                                    Payment Method: {{ $sales->payments->first()->payment_type }}<br>
+                                    
                                     Order/s:
                                         @if ($address->products)
                                             @php

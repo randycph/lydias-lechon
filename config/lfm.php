@@ -32,7 +32,7 @@ return [
     // If you want to customize client folders, publish tag="lfm_handler"
     // Then you can rewrite userField function in App\Handler\ConfigHandler class
     // And set 'user_field' to App\Handler\ConfigHandler::class
-    // Ex: The private folder of user will be named as the user id.
+    // Ex: The private folder of user will be named as the user id.  sd
     'private_folder_name'      => UniSharp\LaravelFilemanager\Handlers\ConfigHandler::class,
 
     'allow_shared_folder'      => true,
