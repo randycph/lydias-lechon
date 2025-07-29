@@ -130,7 +130,7 @@
                                 <th>Amount</th>
                                 <th>GC Type</th>
                                 <th>Status</th>
-                                <th>Sales Transaction</th>
+                                <th>Sales/JO Order#</th>
                                 <th>Action</th>
                             </tr>
                             </thead>

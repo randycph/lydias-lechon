@@ -505,6 +505,7 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     
     Route::get('/admin/report/pickup_orders_per_branch', 'EcommerceControllers\ReportsController@pickup_orders_per_branch')->name('admin.report.pickup_orders_per_branch');
     Route::get('/admin/report/commissary_production', 'EcommerceControllers\ReportsController@commissary_production')->name('admin.report.commissary_production');
+    Route::get('/admin/report/gift_cert', 'EcommerceControllers\ReportsController@gift_cert')->name('admin.report.gift_cert');
 
     Route::get('/admin/ajax/search-users', [ReportsController::class, 'searchUsers'])->name('ajax.search-users');
 

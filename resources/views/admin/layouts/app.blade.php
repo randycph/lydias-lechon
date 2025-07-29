@@ -165,6 +165,11 @@
             $('#toast_success').toast('show');
         </script>
     @endif
+    @if(Session::has('error'))
+        <script>
+            $('#toast_error').toast('show');
+        </script>
+    @endif
 
 </body>
 </html>
