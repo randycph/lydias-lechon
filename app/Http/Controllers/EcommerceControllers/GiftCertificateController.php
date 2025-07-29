@@ -185,6 +185,7 @@ class GiftCertificateController extends Controller
 
     public function update(Request $request, $id)
     {
+        
         $save = GiftCertificate::findOrFail($id)->update([
             'code' => $request->code,
             'amount' => $request->amount,
@@ -200,13 +201,22 @@ class GiftCertificateController extends Controller
 
     public function change_status(Request $request)
     {
+        
         $pages = explode("|", $request->pages);
 
         //Validator::make($request->all(), [
         //    'sales_header_id' => 'exists:order_number,id',
         //])->validate();
-
+        $er = 0;
         foreach ($pages as $page) {
+
+            if (SalesHeader::where('order_number', '=', $request->status)->count() > 0) {
+                $er = 1;
+            }
+            if($er == 0){
+              
+                return back()->with('error','Sales or JO#: '.$request->status.' does not exist!');
+            }
             $publish = GiftCertificate::where('status', '!=', $request->status)
                 ->whereId($page)
                 ->update([

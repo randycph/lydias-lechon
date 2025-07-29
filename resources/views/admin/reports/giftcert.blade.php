@@ -69,7 +69,7 @@
                                 <th>Amount</th>
                                 <th>Type</th>
                                 <th>Status</th>                                
-                                <th>Sales order #</th>
+                                <th>Sales/JO order #</th>
                                                              
                             </tr>
                         </thead>
