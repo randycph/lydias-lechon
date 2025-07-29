@@ -43,6 +43,11 @@
                                 <x-error-message inputName="code" />
                             </div>
                             <div class="form-group mg-b-20">
+                                <label class="mg-b-5 tx-color-03">Serial# <i class="tx-danger">*</i></label>
+                                <input required type="text" class="form-control @error('serial_number') is-invalid @enderror" name="serial_number" id="serial_number" @htmlValidationMessage({{__('standard.empty_all_field')}})>
+                                <x-error-message inputName="serial_number" />
+                            </div>
+                            <div class="form-group mg-b-20">
                                 <label class="mg-b-5 tx-color-03">Amount <i class="tx-danger">*</i></label>
                                 <input required type="text" class="form-control @error('amount') is-invalid @enderror" name="amount" id="amount" @htmlValidationMessage({{__('standard.empty_all_field')}})>
                                 <x-error-message inputName="amount" />

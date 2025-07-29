@@ -127,6 +127,7 @@
                                     </div>
                                 </th>
                                 <th>Code</th>
+                                <th>Serial#</th>
                                 <th>Amount</th>
                                 <th>GC Type</th>
                                 <th>Status</th>
@@ -144,6 +145,7 @@
                                         </div>
                                     </th>
                                     <td> <strong @if($gc->trashed()) style="text-decoration:line-through;" @endif> {{$gc->code }}</strong></td>
+                                    <td>{{ $gc->serial_number }}</td>
                                     <td>{{ $gc->amount }}</td>
                                     <td>{{ $gc->gc_type }}</td>
                                     <td>{{ $gc->status }}</td>

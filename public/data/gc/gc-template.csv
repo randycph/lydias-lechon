@@ -1,8 +1,8 @@
-﻿Gift Certificate Code,Amount,GC Type
-code1,1100,e-gift
-code2,1200,e-gift
-code3,1300,e-gift
-code4,1400,e-gift
-code5,1500,e-gift
-code6,1600,e-gift
-code7,1700,e-gift
+﻿Gift Certificate Code,Amount,GC Type,Serial#
+code1,1100,e-gift,GC001
+code2,1200,e-gift,GC002
+code3,1300,e-gift,GC003
+code4,1400,e-gift,GC004
+code5,1500,e-gift,GC005
+code6,1600,e-gift,GC006
+code7,1700,e-gift,GC007
