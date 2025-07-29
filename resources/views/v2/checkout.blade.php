@@ -388,7 +388,7 @@
                                                                 name="need_time" 
                                                                 id="need_time"
                                                                 x-model="delivery.need_time" 
-                                                                @click="validateDeliveryDateTime(delivery)"
+                                                                {{-- @click="validateDeliveryDateTime(delivery)" --}}
                                                                 @change="validateDeliveryDateTime(delivery)"
                                                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                                             >
@@ -1569,8 +1569,6 @@
 
             // When checkbox is toggled
             toggleOrderSelection(delivery, order) {
-                console.log('delivery:', delivery);
-                console.log('order:', order);
                 this.autoAdvanceDateIfNoHours(delivery)
                 delivery.location = '';
 
@@ -1589,20 +1587,38 @@
                         product: order.product
                     });
                 }
+                
+                const now = new Date(); // current time
+                const selectedDate = new Date(delivery.need_date); // delivery date
 
                 let originalAllHours = Array.from({ length: 21 }, (_, i) => i);
-
                 const type = this.getProductType(order);
-                
-                if (type === 'lechon') {
-                    const selectedHour = parseInt(delivery.need_time.split(':')[0]);
 
-                    this.allHours = this.allHours.filter(hour => {
-                        if (hour >= selectedHour) {
-                            return true;
-                        }
-                        return false;
-                    });
+                // Check if selected date is tomorrow
+                const tomorrow = new Date();
+                tomorrow.setDate(now.getDate() + 1);
+
+                const isTomorrow =
+                    selectedDate.getDate() === tomorrow.getDate() &&
+                    selectedDate.getMonth() === tomorrow.getMonth() &&
+                    selectedDate.getFullYear() === tomorrow.getFullYear();
+
+                if (isTomorrow && type === 'lechon') {
+                    // 1. Get the current hour and round up
+                    let selectedHour = now.getHours();
+                    if (now.getMinutes() > 0) {
+                        selectedHour += 1; // Round up if there's any minute
+                    }
+
+                    // 2. Set the need_time as HH:00 format
+                    delivery.need_time = (selectedHour < 10 ? '0' + selectedHour : selectedHour) + ':00';
+
+                    // 3. Get available hours and remove hours before selectedHour
+                    let hours = this.getAvailableHours(delivery);
+                    hours = hours.filter(hour => hour >= selectedHour);
+
+                    // If you want to use these filtered hours for a dropdown
+                    this.allHours = hours;
                 } else {
                     this.allHours = originalAllHours;
                 }
