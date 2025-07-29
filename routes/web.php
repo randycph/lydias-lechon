@@ -113,7 +113,7 @@ Route::post('/signup-validate-fields', [FrontendController::class, 'signupValida
 Route::get('/articles/load-more', [FrontendController::class, 'articleLoadMore'])->name('articles.load-more');
 Route::get('/articles-category/load-more', [FrontendController::class, 'articleCategoryLoadMore'])->name('articles-category.load-more');
 
-Route::any('/ipay_response',  'ipayController@receive_data')->name('ipay.response');
+//Route::any('/ipay_response',  'ipayController@receive_data')->name('ipay.response');
 Route::get('/ipaysig',  'EcommerceControllers\CartController@payment');
 
 // Route::get('/page-test',  function(){
