@@ -988,9 +988,6 @@
 
                 let location = delivery ? delivery?.location : this.location;
 
-                console.log('this.coupons', this.coupons)
-                console.log('location', location)
-
                 this.coupons = this.coupons.filter(coupon => {
                     if (coupon.free_shipping && coupon.location) {
                         const allowedLocations = coupon.location
