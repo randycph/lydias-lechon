@@ -727,7 +727,7 @@
                             </button>
                         </div>
                         <div class="text-center">
-                            <h3 class="text-lg lg:text-2xl font-semibold" id="modal-title">Editing this transaction will clear any existing items in your cart. Do you want to continue?</h3>
+                            <h3 class="text-lg lg:text-2xl font-semibold" id="modal-title">You will now redirect to Menu to Add more Product!</h3>
                             <div class="mt-2">
                             </div>
                         </div>
@@ -739,13 +739,13 @@
                     <form action="{{ route('my-account.edit_order') }}" method="post">
                         @csrf
                         <input type="hidden" name="sales_id" x-model="saleId">
-                        <div class="flex flex-col gap-2">
+                        <div class="flex flex gap-2">
                             <button type="submit"
-                                class="text-primary border hover:text-white border-primary bg-white hover:bg-primary-dark font-medium rounded-lg w-full sm:w-auto px-5 py-3 text-center">
+                                class="text-primary border hover:text-white border-primary bg-white hover:bg-primary-dark font-medium rounded-lg w-full px-5 py-3 text-center">
                                 Yes
                             </button>
                             <button type="button" @click="editOrderModal = false"
-                                class="text-white bg-primary hover:bg-primary font-medium rounded-lg w-full sm:w-auto px-5 py-3 text-center">
+                                class="text-white bg-primary hover:bg-primary font-medium rounded-lg w-full px-5 py-3 text-center">
                                 No
                             </button>
                         </div>
