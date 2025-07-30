@@ -127,6 +127,7 @@
                                     </div>
                                 </th>
                                 <th>Code</th>
+                                <th>Serial#</th>
                                 <th>Amount</th>
                                 <th>GC Type</th>
                                 <th>Status</th>
@@ -144,10 +145,13 @@
                                         </div>
                                     </th>
                                     <td> <strong @if($gc->trashed()) style="text-decoration:line-through;" @endif> {{$gc->code }}</strong></td>
+                                    <td>{{ $gc->serial_number }}</td>
                                     <td>{{ $gc->amount }}</td>
                                     <td>{{ $gc->gc_type }}</td>
                                     <td>{{ $gc->status }}</td>
-                                    <td>{{ $gc->sales_header_id }}</td>
+                                    <td>{{ $gc->sales_header_id }}
+                                        <!-- @if(isset($gc->claimed_at)) <br><i style="font-size:10px;">Claimed: {{date('Y-m-d h:i A',strtotime($gc->claimed_at))}}</i> @endif -->
+                                    </td>
                                     
                                     <td>
                                         <nav class="nav table-options">

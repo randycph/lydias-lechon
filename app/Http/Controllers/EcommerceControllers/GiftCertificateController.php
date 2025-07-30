@@ -26,7 +26,7 @@ class GiftCertificateController extends Controller
 
     public function index()
     {
-        $listing = new ListingHelper('desc',10,'code');
+        $listing = new ListingHelper('desc',10,'id');
         $giftcertificate = $listing->simple_search(GiftCertificate::class, $this->searchFields);
 
         $filter = $listing->get_filter($this->searchFields);
@@ -79,6 +79,7 @@ class GiftCertificateController extends Controller
                     'code' => $d[0],
                     'amount' => $d[1],
                     'gc_type' => $d[2],
+                    'serial_number' => $d[3],
                     'status' => 'Unused',
                     'user_id' => Auth::id()
                 ]);
@@ -131,7 +132,7 @@ class GiftCertificateController extends Controller
         );
 
         $gc = GiftCertificate::all();
-        $columns = array('Code', 'Amount', 'GC Type', 'Status', 'Added By', 'Sales#', 'Customer', 'Added On', 'Updated On');
+        $columns = array('Code', 'Amount', 'GC Type', 'Serial#', 'Status', 'Added By', 'Sales#', 'Customer', 'Added On', 'Updated On');
 
         $callback = function() use ($gc, $columns)
         {
@@ -139,7 +140,7 @@ class GiftCertificateController extends Controller
             fputcsv($file, $columns);
 
             foreach($gc as $g) {
-                fputcsv($file, array($g->code, $g->amount, $g->gc_type, $g->status, $g->user->name, $g->sales->order_number, $g->sales->customer_name, $g->created_at, $g->updated_at));
+                fputcsv($file, array($g->code, $g->amount, $g->gc_type, $g->status, $g->serial_number, $g->user->name, $g->sales->order_number, $g->sales->customer_name, $g->created_at, $g->updated_at));
             }
             fclose($file);
         };
@@ -159,6 +160,7 @@ class GiftCertificateController extends Controller
             'code' => $request->code,
             'amount' => $request->amount,
             'gc_type' => $request->gc_type,
+            'serial_number' => $request->serial_number,
             'status' => (isset($request->status) ? 'Used' : 'Unused'),
             'user_id' => Auth::id(),
             'sales_header_id' => $request->sales_header_id
@@ -190,6 +192,7 @@ class GiftCertificateController extends Controller
             'code' => $request->code,
             'amount' => $request->amount,
             'gc_type' => $request->gc_type,
+            'serial_number' => $request->serial_number,
             'sales_header_id' => $request->sales_header_id,
             'status' => (isset($request->status) ? 'Used' : 'Unused'),
             'user_id' => Auth::id(),
@@ -222,6 +225,7 @@ class GiftCertificateController extends Controller
                 ->update([
                     'status'  => (isset($request->status) ? 'Used' : 'Unused'),
                     'sales_header_id'  => $request->status,
+                    'claimed_at'  => date('Y-m-d H:i:s'),
                     'user_id' => Auth::user()->id
                 ]);
         }

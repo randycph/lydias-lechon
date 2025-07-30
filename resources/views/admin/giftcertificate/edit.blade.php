@@ -41,6 +41,11 @@
                         <x-error-message inputName="code" />
                     </div>
                     <div class="form-group">
+                        <label class="d-block">Serial# *</label>
+                        <input name="serial_number" id="serial_number" value="{{ old('serial_number', $giftcertificate->serial_number) }}" required type="text" class="form-control @error('serial_number') is-invalid @enderror" maxlength="250">
+                        <x-error-message inputName="serial_number" />
+                    </div>
+                    <div class="form-group">
                         <label class="d-block">Amount *</label>
                         <input name="amount" id="amount" value="{{ old('code', $giftcertificate->amount) }}" required type="text" class="form-control @error('amount') is-invalid @enderror" maxlength="250">
                         <x-error-message inputName="amount" />
@@ -55,7 +60,7 @@
                     </div>
                     <div class="form-group">
                         <label class="d-block">Sales Order #</label>
-                        <input name="sales_header_id" id="sales_header_id" value="{{ old('sales_header_id', $giftcertificate->sales_header_id) }}" required type="text" class="form-control @error('sales_header_id') is-invalid @enderror" maxlength="250">
+                        <input name="sales_header_id" id="sales_header_id" value="{{ old('sales_header_id', $giftcertificate->sales_header_id) }}" type="text" class="form-control @error('sales_header_id') is-invalid @enderror" maxlength="250">
                         <x-error-message inputName="sales_header_id" />
                     </div>
                     <div class="form-group" style="visibility:hidden;">
