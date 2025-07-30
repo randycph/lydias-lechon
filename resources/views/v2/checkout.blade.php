@@ -366,7 +366,7 @@
                                                             <input 
                                                                 :class="{'border-red-500': errors.need_date}"
                                                                 onkeydown="return false"
-                                                                {{-- :min="minDate" --}}
+                                                                :min="minimumDate"
                                                                 @change="validateDeliveryDateTime(delivery)"
                                                                 x-model="delivery.need_date" name="need_date" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
                                                         
@@ -1609,16 +1609,20 @@
                         let d = new Date();
                         d.setDate(d.getDate() + 1);
                         delivery.need_date = d.toISOString().split('T')[0];
+                        this.minimumDate(d)
                     });
                 } else if (type === 'baka') {
                     this.$nextTick(() => {
                         let d = new Date();
                         d.setDate(d.getDate() + 3);
                         delivery.need_date = d.toISOString().split('T')[0];
+                        this.minimumDate(d)
                     });
                 } else {
                     this.$nextTick(() => {
                         delivery.need_date = now.toISOString().split('T')[0];
+                        this.minimumDate(now)
+                        this.autoAdvanceDateIfNoHours(delivery)
                     });
                 }
 
@@ -1897,7 +1901,10 @@
                     // Add 1 day
                     let d = new Date(delivery.need_date);
                     d.setDate(d.getDate() + 1);
-                    delivery.need_date = d.toISOString().split('T')[0];
+                    
+                    this.$nextTick(() => {
+                        delivery.need_date = d.toISOString().split('T')[0];
+                    });
 
                     // Recursively check again for next date
                     this.autoAdvanceDateIfNoHours(delivery, tries + 1);
@@ -2125,6 +2132,14 @@
             agreePrivacy() {
                 this.privacy = true;
                 this.showModal = false;
+            },
+
+            minimumDate(date) {
+                if (date) {
+                    return new Date(date).toISOString().split('T')[0];
+                } 
+
+                return new Date().toISOString().split('T')[0]; // Default to today
             }
         }
     }
