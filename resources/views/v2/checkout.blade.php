@@ -982,11 +982,12 @@
 
             clearToProceed: true,
 
-            recomputeCouponTotals() {
+            recomputeCouponTotals(delivery = null) {
                 this.totalDiscountAmount = 0;
                 this.shippingDiscountAmount = 0;
 
-                // Filter out free_shipping coupons with unmatched location
+                let location = delivery ? delivery?.location : this.location;
+
                 this.coupons = this.coupons.filter(coupon => {
                     if (coupon.free_shipping && coupon.location) {
                         const allowedLocations = coupon.location
@@ -994,7 +995,7 @@
                             .map(l => l.trim())
                             .filter(l => l !== '');
 
-                        return allowedLocations.includes(this.location) || allowedLocations.includes('all');
+                        return allowedLocations.includes(location) || allowedLocations.includes('all');
                     }
                     return true; // keep all non-shipping coupons
                 });
@@ -1015,8 +1016,6 @@
                         }
                     }
                 });
-
-                console.log(this.coupons);
 
                 // Safety cap
                 this.totalDiscountAmount = Math.min(this.totalDiscountAmount, this.orderAmount);
@@ -1342,7 +1341,7 @@
                 }
             },
 
-            async loadAutoCoupons() {
+            async loadAutoCoupons(refetch = false) {
                 const res = await fetch('{{ route('get-auto-coupons') }}', {
                     method: 'GET',
                     headers: {
@@ -1426,8 +1425,10 @@
                         this.minDate();
                     });
 
-                    // Recompute total
-                    this.recomputeCouponTotals();
+                    if (!refetch) {
+                        // Recompute totals after loading auto coupons
+                        this.recomputeCouponTotals();
+                    }
                 }
             },
 
@@ -1476,8 +1477,6 @@
                 const location = delivery.location;
                 const products = delivery?.orders?.map(o => o.product_id);
 
-                console.log('index', index, 'location', location, 'products', products);
-
                 if (!location || products?.length === 0 || products == undefined) return;
 
                 try {
@@ -1500,12 +1499,12 @@
                     // Always store by index — 1 entry per row
                     this.deliveryFees[index] = { location, fee };
 
-                    console.log('Updated fee at index', index, this.deliveryFees);
-
                     // Update total delivery fee
                     this.deliveryFee = this.deliveries.reduce((sum, d) => sum + parseFloat(d.delivery_fee || 0), 0);
 
-                    this.recomputeCouponTotals();
+                    this.loadAutoCoupons(true);
+
+                    this.recomputeCouponTotals(delivery);
 
                 } catch (e) {
                     console.error(`Failed to fetch delivery fee for ${location}`, e);
