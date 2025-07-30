@@ -69,10 +69,11 @@
                                     <br>
                                     Delivery Charge: ₱{{ number_format($address->delivery_fee, 2) }}<br>
                                     Location: {{ $address->location }}<br>
-                                    Address {{ $k + 1 }}: {{ $address->address }}<br>                                    
-                                    Payment Method: {{ $sales->payments->first()->payment_type }}<br>
-                                    
-                                    
+                                    Address {{ $k + 1 }}: {{ $address->address }}<br>
+                                    @php
+                                        $salesPayments = $sales->payments;
+                                    @endphp                             
+                                    Payment Method: {{ $salesPayments?->first()?->payment_type ?? 'None' }}<br>
                                 </li>
                                 @endforeach
                                 </ul>
