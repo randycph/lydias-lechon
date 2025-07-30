@@ -160,7 +160,7 @@ class MyAccountController extends Controller
             'old_sales_header_id' => $salesHeader->id,
         ]);
 
-        return redirect()->route('page', ['slug' => 'menu']);
+        return redirect()->route('page', ['slug' => 'menu'])->with('success_edit', 'Your order has been successfully edited. Please review your cart.');
     }
 }
 // corpuz.randy@webfocus.ph
