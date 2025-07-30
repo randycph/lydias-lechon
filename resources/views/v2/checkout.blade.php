@@ -366,7 +366,7 @@
                                                             <input 
                                                                 :class="{'border-red-500': errors.need_date}"
                                                                 onkeydown="return false"
-                                                                :min="minDate"
+                                                                {{-- :min="minDate" --}}
                                                                 @change="validateDeliveryDateTime(delivery)"
                                                                 x-model="delivery.need_date" name="need_date" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
                                                         
@@ -849,7 +849,7 @@
                 if (!this.allowMultiple) {
                     this.init()
                 }
-                this.deliveries = this.orders.map(order => ({
+                this.deliveries = {
                     address: '',
                     name: '',
                     phone: '',
@@ -861,8 +861,8 @@
                     need_time: '',
                     note: '',
                     paella: false,
-                    delivery_fee: 0
-                }));
+                    delivery_fee: 0,
+                };
                 this.deliveryFees = [];
                 this.deliveryFee = 0;
 
@@ -1588,7 +1588,7 @@
                 }
                 
                 const now = new Date(); // current time
-                const selectedDate = new Date(delivery.need_date); // delivery date
+                const selectedDate = new Date(delivery.need_date ?? ''); // delivery date
 
                 let originalAllHours = Array.from({ length: 21 }, (_, i) => i);
                 const type = this.getProductType(order);
@@ -1601,6 +1601,24 @@
                     selectedDate.getDate() === tomorrow.getDate() &&
                     selectedDate.getMonth() === tomorrow.getMonth() &&
                     selectedDate.getFullYear() === tomorrow.getFullYear();
+
+                if (type === 'lechon') {
+                    this.$nextTick(() => {
+                        let d = new Date();
+                        d.setDate(d.getDate() + 1);
+                        delivery.need_date = d.toISOString().split('T')[0];
+                    });
+                } else if (type === 'baka') {
+                    this.$nextTick(() => {
+                        let d = new Date();
+                        d.setDate(d.getDate() + 3);
+                        delivery.need_date = d.toISOString().split('T')[0];
+                    });
+                } else {
+                    this.$nextTick(() => {
+                        delivery.need_date = now.toISOString().split('T')[0];
+                    });
+                }
 
                 if (isTomorrow && type === 'lechon') {
                     // 1. Get the current hour and round up
