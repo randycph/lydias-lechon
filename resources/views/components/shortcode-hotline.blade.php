@@ -1,5 +1,3 @@
-<div class="pt-20 pb-10 px-4 container">
-    
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 @if ($headOffices && count($headOffices) > 0)
 @foreach ($headOffices as $branch)
@@ -137,5 +135,4 @@
 </div>
 @endforeach
 @endif
-</div>
 </div>
