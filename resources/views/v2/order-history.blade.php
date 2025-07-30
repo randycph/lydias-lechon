@@ -720,7 +720,7 @@
                 <div class="bg-white px-4 pt-5 pb-4 p-6">
                     <div class="flex w-full flex-col">
                         <div class="flex justify-end ">
-                            <button @click="editOrderModal" = false" class="self-end text-2xl text-gray-800">
+                            <button @click="editOrderModal = false" class="self-end text-2xl text-gray-800">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                                 </svg>
