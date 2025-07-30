@@ -1,4 +1,6 @@
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+<div class="flex justify-center mb-10">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl w-full">
 @if ($headOffices && count($headOffices) > 0)
 @foreach ($headOffices as $branch)
 <div class="px-4 mt-5">
@@ -66,9 +68,11 @@
 
 @endforeach
 @endif
-
 </div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+</div>
+
+<div class="flex justify-center">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl w-full">
 @if ($branches && count($branches) > 0)
 @foreach ($branches as $branch)
 <div class="px-4 mt-5">
@@ -135,4 +139,5 @@
 </div>
 @endforeach
 @endif
+</div>
 </div>
