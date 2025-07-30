@@ -849,20 +849,20 @@
                 if (!this.allowMultiple) {
                     this.init()
                 }
-                this.deliveries = {
+                this.deliveries = [{
                     address: '',
                     name: '',
                     phone: '',
                     sms: false,
-                    qty: order.qty,
+                    qty: 1,
                     location: '',
-                    order: order.id,
+                    order: '',
                     need_date: this.minDate(),
                     need_time: '',
                     note: '',
                     paella: false,
                     delivery_fee: 0,
-                };
+                }];
                 this.deliveryFees = [];
                 this.deliveryFee = 0;
 
@@ -987,6 +987,9 @@
                 this.shippingDiscountAmount = 0;
 
                 let location = delivery ? delivery?.location : this.location;
+
+                console.log('this.coupons', this.coupons)
+                console.log('location', location)
 
                 this.coupons = this.coupons.filter(coupon => {
                     if (coupon.free_shipping && coupon.location) {
@@ -1502,7 +1505,7 @@
                     // Update total delivery fee
                     this.deliveryFee = this.deliveries.reduce((sum, d) => sum + parseFloat(d.delivery_fee || 0), 0);
 
-                    this.loadAutoCoupons(true);
+                    await this.loadAutoCoupons(true);
 
                     this.recomputeCouponTotals(delivery);
 
