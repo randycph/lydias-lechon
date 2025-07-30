@@ -1499,10 +1499,10 @@
                     // Always store by index — 1 entry per row
                     this.deliveryFees[index] = { location, fee };
 
-                    this.deliveryFee += fee;
+                    // this.deliveryFee += fee;
 
                     // Update total delivery fee
-                    // this.deliveryFee = this.deliveries.reduce((sum, d) => sum + parseFloat(d.delivery_fee || 0), 0);
+                    this.deliveryFee = this.deliveries.reduce((sum, d) => sum + parseFloat(d.delivery_fee || 0), 0);
 
                     await this.loadAutoCoupons(true);
 
