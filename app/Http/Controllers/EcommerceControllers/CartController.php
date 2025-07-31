@@ -566,29 +566,20 @@ class CartController extends Controller
         if (auth()->check()) {
 
             $cart = Cart::where('product_id', $request->ac_item)->with('product')
+                ->where('paella', $has_paella)
                 ->where('user_id', Auth::id())
                 ->first();
 
-            if (!empty($cart)) {
-                $newQty = $cart->qty + $request->ac_qty;
-                // $save = $cart->update([
-                //     'qty' => $newQty,
-                //     'price' => $product->price,
-                //     'paella_price' => $paella_cost
-                // ]);
-
-                $save = Cart::create([
-                    'product_id' => $request->ac_item,
-                    'user_id' => Auth::id(),
-                    'qty' => $request->ac_qty,
+            if ($cart) {
+                // Update qty if same product + paella combo already exists
+                $cart->update([
+                    'qty' => $cart->qty + $request->ac_qty,
                     'price' => $product->price,
                     'paella_price' => $paella_cost,
-                    'photo' => $photo,
-                    'paella' => $has_paella,
                 ]);
-
             } else {
-                $save = Cart::create([
+                // Otherwise, create new row
+                Cart::create([
                     'product_id' => $request->ac_item,
                     'user_id' => Auth::id(),
                     'qty' => $request->ac_qty,
