@@ -63,8 +63,8 @@
                         <div class="font-bold" 
                             x-text="'₱' + carts.reduce((sum, item) => 
                                 sum + 
-                                (Number(item.paella_price) || 0) + 
-                                (item.is_free_product ? 0 : (Number(item.price) || 0) * (Number(item.qty) || 0))
+                                ((Number(item.paella_price) || 0) * (Number(item.qty) || 1)) + 
+                                (item.is_free_product ? 0 : (Number(item.price) || 0) * (Number(item.qty) || 1))
                             , 0).toLocaleString(undefined, { minimumFractionDigits: 2 })"
 
                             {{-- x-text="'₱' + carts.reduce((sum, item) => sum + item.paella_price + (item.is_free_product ? 0 : item.price * item.qty), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })" --}}
@@ -147,11 +147,9 @@
                                 <span class="font-medium" 
                                         x-text="'₱' + carts.reduce((sum, item) => 
                                             sum + 
-                                            (Number(item.paella_price) || 0) + 
-                                            (item.is_free_product ? 0 : (Number(item.price) || 0) * (Number(item.qty) || 0))
+                                            ((Number(item.paella_price) || 0) * (Number(item.qty) || 1)) + 
+                                            (item.is_free_product ? 0 : (Number(item.price) || 0) * (Number(item.qty) || 1))
                                         , 0).toLocaleString(undefined, { minimumFractionDigits: 2 })"
-
-
 
                                     {{-- x-text="'₱' + carts.reduce((sum, item) => sum + item.paella_price + (item.is_free_product ? 0 : item.price * item.qty), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })" --}}
                                  ></span>
