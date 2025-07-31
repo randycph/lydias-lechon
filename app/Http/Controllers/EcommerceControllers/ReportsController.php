@@ -347,25 +347,28 @@ class ReportsController extends Controller
             $ss = '';
             foreach($tm_mrs as $tm){
                 $obj2 = json_decode($tm->products);
-                foreach($obj2 as $obj){
-                    DB::table('temp_mrs')->insert([
-                        'product_id' => $obj->product_id,
-                        'product_name' => $obj->product->name,
-                        'price' => $obj->product->price,
-                        'address' => $tm->address,
-                        'contact_person' => $tm->contact_person,
-                        'contact_tel' => $tm->contact_tel,
-                        'qty' => $obj->qty,
-                        'delivery_date' => $tm->delivery_date,
-                        'delivery_time' => $tm->delivery_time,
-                        'delivery_status' => $tm->delivery_status,
-                        'delivery_fee' => $tm->delivery_fee,
-                        'location' => $tm->location,
-                        'branch' => $tm->branch,
-                        'note' => $tm->note,
-                        'sales_header_id' => $tm->sales_header_id,
-                        'paella_price' => $tm->paella_price,
-                    ]);
+                if(count((array)$obj2) > 0){              
+                
+                    foreach($obj2 as $obj){
+                        DB::table('temp_mrs')->insert([
+                            'product_id' => $obj->product_id,
+                            'product_name' => $obj->product->name,
+                            'price' => $obj->product->price,
+                            'address' => $tm->address,
+                            'contact_person' => $tm->contact_person,
+                            'contact_tel' => $tm->contact_tel,
+                            'qty' => $obj->qty,
+                            'delivery_date' => $tm->delivery_date,
+                            'delivery_time' => $tm->delivery_time,
+                            'delivery_status' => $tm->delivery_status,
+                            'delivery_fee' => $tm->delivery_fee,
+                            'location' => $tm->location,
+                            'branch' => $tm->branch,
+                            'note' => $tm->note,
+                            'sales_header_id' => $tm->sales_header_id,
+                            'paella_price' => $tm->paella_price,
+                        ]);
+                    }
                 }
             }
             //dd(DB::select("select * from temp_mrs"));
