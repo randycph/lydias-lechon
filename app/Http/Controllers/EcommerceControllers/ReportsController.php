@@ -333,7 +333,15 @@ class ReportsController extends Controller
                     )
 
             ");
-            $tm_mrs=\App\Models\ProductDeliveryAddress::where('delivery_date','>=',date('Y-m-d',strtotime($_GET['startdate'])))->where('delivery_date','<=',date('Y-m-d',strtotime($_GET['enddate'])))
+            $tm_st = '2051-01-01 00:00:00.000';
+            $tm_en = '2051-01-01 23:59:59.999';
+            if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
+                $tm_st= $_GET['startdate'];
+                $tm_en= $_GET['enddate'];
+            }
+            
+            
+            $tm_mrs=\App\Models\ProductDeliveryAddress::where('delivery_date','>=',date('Y-m-d',strtotime($tm_st)))->where('delivery_date','<=',date('Y-m-d',strtotime($tm_en)))
             ->get();
             //dd($tm_mrs);
             $ss = '';
