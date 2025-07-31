@@ -156,7 +156,7 @@
 
                             <div class="col-md-2">
                                 <div class="form-group">
-                                    <label class="tx-13">Receiver Branch</label>
+                                    <label class="tx-13" style="font-size:15px;font-weight:bold;">Receiver Branch</label>
                                     <select name="receiver[]" id="receiver" class="form-control" multiple>
                                         <option value="">- Select Receiver -</option>
                                         @forelse(\App\EcommerceModel\Branch::orderBy('name')->get() as $cus)
@@ -410,8 +410,12 @@
                                 @if($r->trantype == 'sales')
 
                                     @php
+                                           
                                         $address = trim($r->address_street)."<br>".trim($r->address_municipality).",<br>".trim($r->address_city).", ".trim($r->address_region);
-                                        $cntsales = collect($rs)->where('order_number',$r->order_number)->count();
+                                        $cntsales = (collect($rs)->where('order_number',$r->order_number)->where('delivery_date',$r->delivery_date)->count())
+                                                    +
+                                                    (collect($mrs)->where('order_number',$r->order_number)->where('delivery_date',$r->delivery_date)->count())
+                                                    ;
                                         $isAllowed = 0;
                                      
                                         
@@ -426,7 +430,7 @@
                                         if(in_array($r->prodid,$wra_array)){
                                             $itemType = 'WRA';
                                         }
-                                        
+                                        $uni=$r->order_number."".$r->delivery_date;
                                     @endphp
                                     @if($isAllowed == 1)
                                     <tr style="text-align: left">
@@ -434,14 +438,14 @@
                                         <td class="bord">{{number_format($r->qty,2)}}</td>
                                         <td class="bord">{{$r->product_name}} @if($r->paella_price > 0) Boneless @endif</td>
 
-                                        @if($old_value <> $r->order_number)
+                                        @if($old_value <> $uni)
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">@if(strlen($address)>15){!!$address!!}@endif</td>   
                                         @else        
                                             <td class="wala" style="display:none;"></td>   
                                         @endif  
 
                                         <td class="bord">{{number_format($r->price,2)}}</td>
-                                        @if($old_value <> $r->order_number)
+                                        @if($old_value <> $uni)
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">
                                                 @php
                                                     $payment = \App\EcommerceModel\SalesPayment::where('sales_header_id',$r->hid)->get();
@@ -506,7 +510,7 @@
                                         <td class="bord">{{$r->jo_number}}</td>
                                         <td class="bord">{{$r->pbname}}</td>
 
-                                        @if($old_value <> $r->order_number)
+                                        @if($old_value <> $uni)
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">{{$r->delstat}}</td>
                                             
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">{{$r->agent}}</td>                                    
@@ -531,7 +535,7 @@
                                         
                                         <td class="bord">{{number_format(($r->price * $r->qty),2)}}</td>
 
-                                        @if($old_value <> $r->order_number)
+                                        @if($old_value <> $uni)
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">&nbsp;</td>
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">
                                                {{$r->order_source}}
@@ -549,7 +553,7 @@
                                            {{$r->catname}}
                                         </td>
 
-                                        @if($old_value <> $r->order_number)
+                                        @if($old_value <> $uni)
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">
                                                {{$r->username}}
                                             </td>
@@ -563,14 +567,14 @@
                                            {{$itemType}}
                                         </td>
                                         
-                                        @if($old_value <> $r->order_number)
+                                        @if($old_value <> $uni)
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">{{ $r->forecast_dt }}</td>
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">{{ $r->del_branch }}</td>   
                                         @else        
                                             <td class="wala" style="display:none;"></td>   
                                             <td class="wala" style="display:none;"></td>   
                                         @endif
-                                        @if($old_value <> $r->order_number)
+                                        @if($old_value <> $uni)
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">@if(date('m-d-Y',strtotime($r->created)) <> '1970-01-01'){{date('Y-m-d',strtotime($r->created))}} @endif</td>
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">@if(date('m-d-Y',strtotime($r->created)) <> '1970-01-01'){{date('h:i A',strtotime($r->created))}} @endif</td>
                                         @else
@@ -580,7 +584,7 @@
                                         
                                     </tr>
                                     @endif
-                                    @php if($isAllowed == 1) { $old_value=$r->order_number; } @endphp
+                                    @php if($isAllowed == 1) { $old_value=$uni; } @endphp
 
                                 @elseif($r->trantype == 'jo')
 
