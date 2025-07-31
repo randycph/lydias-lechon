@@ -199,8 +199,7 @@ class ReportsController extends Controller
 
     public function forecaster(Request $request)
     {
-        /*SELECT h.*,d.*,po.delivery_date as hcreated,h.id as hid,p.category_id,c.name as catname,h.agent,pb.name as pbname, h.delivery_status as delstat,
-        po.delivery_date as deldate, h.delivery_type,h.instruction, jo.jo_number,br.name as receiver,p.is_misc,u.name as username, jo.jo_order_type, u.address_street, u.address_municipality, u.address_city, u.address_region, IF(p.is_misc=1, 'Miscellaneous', c.name) as item_type,p.is_misc,p.production_item,*/
+       
         $wra="(";
         $wra_array=[];
         $products = Product::where('production_item',1)->where('is_misc',0)->get();
@@ -212,226 +211,339 @@ class ReportsController extends Controller
         $wra.=")";
         $no_jo = 0;
 
-        $qry = "SELECT d.product_name, d.paella_price,
-        d.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,d.price, h.customer_delivery_adress,
-        h.customer_name, d.delivery_date as delivery_date, h.instruction, po.delivery_date as deldate, h.delivery_type, jo.jo_number, pb.name as pbname, h.delivery_status as delstat,h.agent, h.customer_contact_number,'' as dr, h.delivery_fee_amount, d.price, '' as releasing, h.order_source, br.name as receiver, c.name as catname, u.name as username, jo.jo_order_type,h.order_type as hordertype, h.id as hid, '' as jo_category, 'sales' as trantype, DATE_FORMAT(d.delivery_date,'%H:%i:%s') as timeneeded, DATE_FORMAT(d.delivery_date, '%Y-%m-%d') as dateneeded, p.is_misc, p.production_item, h.isConfirm as isConfirm, h.gross_amount as gros, h.forecast_date as forecast_dt, h.delivery_branch as del_branch,p.id as prodid,h.created_at as created
-        FROM `ecommerce_sales_details` d
-        left join ecommerce_sales_headers h on h.id=d.sales_header_id
-        left join products p on p.id=d.product_id
-        left join product_categories c on c.id=p.category_id
-        left join job_orders jo on jo.sales_detail_id = d.id
-        left join branches br on  br.id = jo.pickup_branch
-        left join production_orders po on po.joborder_id = jo.id
-        left join production_branches pb on pb.id = po.branch_id
-        left join users u on u.id = d.created_by
-        where h.id>0 and h.delivery_status<>'Open Date' and h.deleted_at is null and jo.deleted_at is null and po.deleted_at is null and (h.payment_status = 'PAID' OR h.isConfirm=1)";
+        // Sales
+            $qry = "SELECT d.product_name, d.paella_price,
+            d.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,d.price, h.customer_delivery_adress,
+            h.customer_name, d.delivery_date as delivery_date, h.instruction, po.delivery_date as deldate, h.delivery_type, jo.jo_number, pb.name as pbname, h.delivery_status as delstat,h.agent, h.customer_contact_number,'' as dr, h.delivery_fee_amount, d.price, '' as releasing, h.order_source, br.name as receiver, c.name as catname, u.name as username, jo.jo_order_type,h.order_type as hordertype, h.id as hid, '' as jo_category, 'sales' as trantype, DATE_FORMAT(d.delivery_date,'%H:%i:%s') as timeneeded, DATE_FORMAT(d.delivery_date, '%Y-%m-%d') as dateneeded, p.is_misc, p.production_item, h.isConfirm as isConfirm, h.gross_amount as gros, h.forecast_date as forecast_dt, h.delivery_branch as del_branch,p.id as prodid,h.created_at as created
+            FROM `ecommerce_sales_details` d
+            left join ecommerce_sales_headers h on h.id=d.sales_header_id
+            left join products p on p.id=d.product_id
+            left join product_categories c on c.id=p.category_id
+            left join job_orders jo on jo.sales_detail_id = d.id
+            left join branches br on  br.id = jo.pickup_branch
+            left join production_orders po on po.joborder_id = jo.id
+            left join production_branches pb on pb.id = po.branch_id
+            left join users u on u.id = d.created_by
+            where h.id>0 and h.delivery_status<>'Open Date' and h.deleted_at is null and jo.deleted_at is null and po.deleted_at is null and (h.payment_status = 'PAID' OR h.isConfirm=1)
+            and h.id not in (select sales_header_id from product_delivery_addresses)
+            ";
 
-        if(isset($_GET['agent']) && $_GET['agent']<>''){
-            $qry.= " and h.agent='".$_GET['agent']."'";
-        }
-        if(isset($_GET['customer']) && $_GET['customer']<>''){
-            $qry.= " and h.customer_name='".$_GET['customer']."'";
-        }
-        if(isset($_GET['product']) && $_GET['product']<>''){
-            $qry.= " and d.product_name='".$_GET['product']."'";
-        }
-        if(isset($_GET['category']) && $_GET['category']<>''){
-            $qry.= " and p.category_id='".$_GET['category']."'";
-        }
-        if(isset($_GET['order_type']) && $_GET['order_type']<>''){
-            $qry.= " and h.order_type='".$_GET['order_type']."'";
-        }
-        if(isset($_GET['order_source']) && $_GET['order_source']<>''){
-            $qry.= " and h.order_source='".$_GET['order_source']."'";
-            $no_jo = 1;
-        }
-        if(isset($_GET['production_branch']) && $_GET['production_branch']<>''){
-            $qry.= " and pb.id='".$_GET['production_branch']."'";
-        }
-
-        /*
-       if(isset($_GET['receiver']) && $_GET['receiver']<>''){
-
-            $br = \App\EcommerceModel\Branch::whereId($_GET['receiver'])->first();
-
-            $qry.= " and ((h.delivery_type='Store Pickup' and h.customer_delivery_adress='".$br->name."') or 
-
-            (jo.pickup_branch='".$_GET['receiver']."' OR h.delivery_branch='".$br->name."')
-
-            )";
-        }
-        */
-        if(isset($_GET['receiver']) && $_GET['receiver']<>''){
-            $br_opts = "(";
-            $id_opts = "(";
-            foreach($_GET['receiver'] as $re){
-                $br = \App\EcommerceModel\Branch::whereId($re)->first();
-                $br_opts .= "'".$br->name."',";
-                $id_opts .= $re.",";
+            if(isset($_GET['agent']) && $_GET['agent']<>''){
+                $qry.= " and h.agent='".$_GET['agent']."'";
             }
-            $br_opts = rtrim($br_opts,",");
-            $id_opts = rtrim($id_opts,",");
-            $br_opts .= ")";
-            $id_opts .= ")";
-
+            if(isset($_GET['customer']) && $_GET['customer']<>''){
+                $qry.= " and h.customer_name='".$_GET['customer']."'";
+            }
+            if(isset($_GET['product']) && $_GET['product']<>''){
+                $qry.= " and d.product_name='".$_GET['product']."'";
+            }
+            if(isset($_GET['category']) && $_GET['category']<>''){
+                $qry.= " and p.category_id='".$_GET['category']."'";
+            }
+            if(isset($_GET['order_type']) && $_GET['order_type']<>''){
+                $qry.= " and h.order_type='".$_GET['order_type']."'";
+            }
+            if(isset($_GET['order_source']) && $_GET['order_source']<>''){
+                $qry.= " and h.order_source='".$_GET['order_source']."'";
+                $no_jo = 1;
+            }
+            if(isset($_GET['production_branch']) && $_GET['production_branch']<>''){
+                $qry.= " and pb.id='".$_GET['production_branch']."'";
+            }
             
+            if(isset($_GET['receiver']) && $_GET['receiver']<>''){
+                $br_opts = "(";
+                $id_opts = "(";
+                foreach($_GET['receiver'] as $re){
+                    $br = \App\EcommerceModel\Branch::whereId($re)->first();
+                    $br_opts .= "'".$br->name."',";
+                    $id_opts .= $re.",";
+                }
+                $br_opts = rtrim($br_opts,",");
+                $id_opts = rtrim($id_opts,",");
+                $br_opts .= ")";
+                $id_opts .= ")";
 
-            $qry.= " and ((h.delivery_type='Store Pickup' and h.customer_delivery_adress in ".$br_opts.") or 
+                
 
-            (jo.pickup_branch in ".$id_opts." OR h.delivery_branch in ".$br_opts.")
+                $qry.= " and ((h.delivery_type='Store Pickup' and h.customer_delivery_adress in ".$br_opts.") or 
 
-            )";
-        }
+                (jo.pickup_branch in ".$id_opts." OR h.delivery_branch in ".$br_opts.")
 
-
-        if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-            $qry.= " and d.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and d.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
-        }
-        else{
-            $qry.= " and d.delivery_date >='2051-01-01 00:00:00.000' and d.delivery_date <='2051-01-01 23:59:59.999'";
-        }
-        if(isset($_GET['start_time']) && $_GET['start_time']<>''){ 
-            $qry.= " and time(d.delivery_date)='".$_GET['start_time']."'";
-        }
-        /*
-        if(isset($_GET['item_type']) && $_GET['item_type']<>''){
-            if($_GET['item_type'] == 'WRA'){
-                $qry.= " and p.id in ".$wra;
+                )";
             }
-            elseif($_GET['item_type'] == 'Miscellaneous'){
-                $qry.= " and p.is_misc=1";
+
+
+            if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
+                $qry.= " and d.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and d.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
             }
             else{
-                $qry.= " and d.id=-10011000";   
+                $qry.= " and d.delivery_date >='2051-01-01 00:00:00.000' and d.delivery_date <='2051-01-01 23:59:59.999'";
+            }
+            if(isset($_GET['start_time']) && $_GET['start_time']<>''){ 
+                $qry.= " and time(d.delivery_date)='".$_GET['start_time']."'";
             }
             
-        }*/
-        if(isset($_GET['item_type']) && count($_GET['item_type']) >= 1){
-            if(in_array("WRA",$_GET['item_type']) || in_array("Miscellaneous",$_GET['item_type'])){
+            if(isset($_GET['item_type']) && count($_GET['item_type']) >= 1){
+                if(in_array("WRA",$_GET['item_type']) || in_array("Miscellaneous",$_GET['item_type'])){
 
-                if(in_array("WRA",$_GET['item_type']) && in_array("Miscellaneous",$_GET['item_type'])){
-                    $qry.= " and (p.id in ".$wra." or p.is_misc=1)";
+                    if(in_array("WRA",$_GET['item_type']) && in_array("Miscellaneous",$_GET['item_type'])){
+                        $qry.= " and (p.id in ".$wra." or p.is_misc=1)";
+                    }
+                    else{
+                        if(in_array("WRA",$_GET['item_type'])){
+                            $qry.= " and p.id in ".$wra;
+                        }
+                        if(in_array("Miscellaneous",$_GET['item_type'])){
+                            $qry.= " and p.is_misc=1";
+                        }
+                    }
+
                 }
                 else{
-                    if(in_array("WRA",$_GET['item_type'])){
-                        $qry.= " and p.id in ".$wra;
-                    }
-                    if(in_array("Miscellaneous",$_GET['item_type'])){
-                        $qry.= " and p.is_misc=1";
-                    }
-                }
-
-            }
-            else{
-                $qry.= " and d.id=-10011000";   
-            }
-            
-        }
-        //return $qry;
-        $qry.= " order by d.delivery_date,customer_name,order_number";
-        $rs = DB::select($qry);
-        //dd($rs);
-        // Pantaga created by forecaster
-        // SELECT jo.*,p.category_id,c.name as catname,pb.name as pbname, p.name as product_name,po.delivery_date as deldate,br.name as receiver,jo.remarks as joremarks,u.name as username, jo.jo_order_type, u.address_street, u.address_municipality, u.address_city, u.address_region,
-        //     IF(p.is_misc=1, 'Miscellaneous', c.name) as item_type,p.is_misc,p.production_item from job_orders jo 
-
-        $jos = "
-            SELECT jo.jo_category as product_name, '' as paella_price,'' as hordertype,
-        jo.qty as qty, '' as order_number, u.address_street, u.address_municipality, u.address_city, u.address_region, jo.price, jo.customer_address as customer_delivery_adress,
-        jo.customer_name, jo.date_needed as delivery_date,jo.remarks as instruction, po.delivery_date as deldate,'' as delivery_type, jo.jo_number, pb.name as pbname, jo.created_at as created,
-
-        '' as delstat, '' as agent, '' as customer_contact_number,'' as dr, '0' as delivery_fee_amount,'0' as price, '' as releasing, 'Forecaster' as order_source, br.name as receiver, c.name as catname, u.name as username, jo.jo_order_type, '0' as hid, jo.jo_category as jo_category, 'jo' as trantype, DATE_FORMAT(jo.date_needed,'%H:%i:%s') as timeneeded, DATE_FORMAT(jo.date_needed, '%Y-%m-%d') as dateneeded, p.is_misc, p.production_item, '1' as isConfirm, 0 as gros, '' as forecast_dt, '' as del_branch,p.id as prodid
-        from job_orders jo 
-        left join branches br on  br.id = jo.pickup_branch
-        left join production_orders po on po.joborder_id = jo.id
-        left join production_branches pb on pb.id = po.branch_id
-        left join products p on p.id=jo.product_id
-        left join product_categories c on c.id=p.category_id
-        left join users u on u.id = jo.user_id
-        where jo.id>0 and jo.deleted_at is null and po.deleted_at is null and (jo.sales_detail_id=0 or jo.sales_detail_id is null)";
-
-        if(isset($_GET['product']) && $_GET['product']<>''){
-            $jos.= " and p.name='".$_GET['product']."'";
-        }
-        if(isset($_GET['category']) && $_GET['category']<>''){
-            $jos.= " and p.category_id='".$_GET['category']."'";
-        }        
-        if(isset($_GET['production_branch']) && $_GET['production_branch']<>''){
-            $jos.= " and pb.id='".$_GET['production_branch']."'";
-        }
-        if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-            $jos.= " and po.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and po.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
-        }
-        else{
-            $jos.= " and po.delivery_date >='2051-01-01 00:00:00.000' and po.delivery_date <='2051-01-01 23:59:59.999'";
-        }
-        if(isset($_GET['start_time']) && $_GET['start_time']<>''){
-            $jos.= " and time(po.delivery_date)='".$_GET['start_time']."'";
-        }
-
-        /*
-        if(isset($_GET['receiver']) && $_GET['receiver']<>''){
-            $jos.= " and jo.pickup_branch='".$_GET['receiver']."'";
-        }
-        */
-        if(isset($_GET['receiver']) && $_GET['receiver']<>''){
-            $jos.= " and jo.pickup_branch in ".$id_opts."";
-        }
-
-        if(isset($_GET['customer']) && $_GET['customer']<>''){
-            $jos.= " and jo.id='-1'";
-        }
-
-        if($no_jo == 1){
-            $jos.= " and jo.id='-1'"; // exclude all jo record
-        }
-
-        if(isset($_GET['order_type']) && $_GET['order_type']<>''){
-            $jos.= " and jo.id='-1100000'";
-        }
-        //dd($jos);
-        // if(isset($_GET['item_type']) && $_GET['item_type']<>''){
-        //     $jos.= " and IF(p.is_misc=1, 'Miscellaneous', c.name)='".$_GET['item_type']."'";
-        // }
-
-
-        /*
-            if(isset($_GET['item_type']) && $_GET['item_type']<>''){
-                if($_GET['item_type'] == 'WRA'){
-                    //$jos.= " and p.id in ".$wra;
-                }
-                elseif($_GET['item_type'] == 'Miscellaneous'){
-                   // $jos.= " and p.is_misc=1";
-                }
-                else{
-                     $jos.= " and jo.jo_category = '".$_GET['item_type']."'";
+                    $qry.= " and d.id=-10011000";   
                 }
                 
             }
-        */
-
-        if(isset($_GET['item_type']) && count($_GET['item_type']) >= 1){
-            $itemtype_sels = "(";
-            foreach($_GET['item_type'] as $se){
-                $itemtype_sels .= "'".$se."',";
-            }            
-            $itemtype_sels = rtrim($itemtype_sels,",").")";
             
-            $jos.= " and jo.jo_category in ".$itemtype_sels;
+            $qry.= " order by d.delivery_date,customer_name,order_number";
             
-        }
+            $rs = DB::select($qry);
+        // Sales
 
+        // Sales with multiple deliveries
+            DB::statement("DROP TEMPORARY TABLE IF EXISTS temp_mrs");
+            DB::statement("CREATE TEMPORARY TABLE temp_mrs ( 
+                    `product_id` bigint(20) DEFAULT NULL,
+                    `product_name` varchar(191) DEFAULT NULL,
+                    `price` decimal(15,2) DEFAULT NULL,
+                    `address` varchar(191) DEFAULT NULL,
+                    `contact_person` varchar(191) DEFAULT NULL,
+                    `contact_tel` varchar(191) DEFAULT NULL, 
+                    `qty` varchar(191) DEFAULT NULL,
+                    `delivery_date` date DEFAULT NULL,
+                    `delivery_time` varchar(191) DEFAULT NULL,
+                    `delivery_status` int(11) NULL DEFAULT 0,
+                    `delivery_fee` decimal(8,2)  NULL DEFAULT 0.00,
+                    `location` varchar(191) DEFAULT NULL,
+                    `branch` varchar(191) DEFAULT NULL,
+                    `note` text DEFAULT NULL,
+                    `sales_header_id` bigint(20) DEFAULT NULL,         
+                    `paella_price` decimal(10,2) NOT NULL DEFAULT 0.00
+                    )
 
-        $jos.= " order by jo.date_needed, customer_name,jo_number";
-        //return $jos;
-        $jo = DB::select($jos);
-        //dd($rs);
+            ");
+            $tm_mrs=\App\Models\ProductDeliveryAddress::where('delivery_date','>=',date('Y-m-d',strtotime($_GET['startdate'])))->where('delivery_date','<=',date('Y-m-d',strtotime($_GET['enddate'])))
+            ->get();
+            //dd($tm_mrs);
+            $ss = '';
+            foreach($tm_mrs as $tm){
+                $obj = json_decode($tm->products)[0];
+                
+                DB::table('temp_mrs')->insert([
+                    'product_id' => $obj->product_id,
+                    'product_name' => $obj->product->name,
+                    'price' => $obj->product->price,
+                    'address' => $tm->address,
+                    'contact_person' => $tm->contact_person,
+                    'contact_tel' => $tm->contact_tel,
+                    'qty' => $obj->qty,
+                    'delivery_date' => $tm->delivery_date,
+                    'delivery_time' => $tm->delivery_time,
+                    'delivery_status' => $tm->delivery_status,
+                    'delivery_fee' => $tm->delivery_fee,
+                    'location' => $tm->location,
+                    'branch' => $tm->branch,
+                    'note' => $tm->note,
+                    'sales_header_id' => $tm->sales_header_id,
+                    'paella_price' => $tm->paella_price,
+                ]);
+            }
+            //dd(DB::select("select * from temp_mrs"));
         
-        $results = collect($jo)->merge(collect($rs));
-        //dd($jo);
-        //collect($jo)->where('jo_category','=','Order')->where('is_misc','0')->where('production_item','1')->sum('qty')  + collect($rs)->where('is_misc','0')->where('production_item','1')->sum('qty')
-        //dd(collect($jo)->where('jo_category','=','Order')->sum('qty')  + collect($rs)->where('is_misc','0')->sum('qty'));
-        return view('admin.reports.forecaster',compact('rs','jo','results','wra_array'));
+            $mqry = "SELECT m.product_name, m.paella_price,
+            m.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,m.price, m.address as customer_delivery_adress,
+            h.customer_name, 
+            cast(concat(m.delivery_date, ' ', m.delivery_time) as datetime)  as delivery_date,
+            m.note as instruction, po.delivery_date as deldate, h.delivery_type, jo.jo_number, pb.name as pbname, m.delivery_status as delstat,h.agent, 
+            m.contact_tel as customer_contact_number,'' as dr, m.delivery_fee as delivery_fee_amount, d.price, '' as releasing, h.order_source, br.name as receiver, 
+            c.name as catname, u.name as username, jo.jo_order_type,h.order_type as hordertype, h.id as hid, '' as jo_category, 'sales' as trantype, 
+            m.delivery_time as timeneeded, m.delivery_date as dateneeded, 
+            p.is_misc, p.production_item, h.isConfirm as isConfirm, h.gross_amount as gros, h.forecast_date as forecast_dt, 
+            h.delivery_branch as del_branch,p.id as prodid,h.created_at as created
+            FROM `temp_mrs` m
+            left join `ecommerce_sales_details` d on d.product_id=m.product_id and d.sales_header_id=m.sales_header_id
+            left join ecommerce_sales_headers h on h.id=d.sales_header_id
+            left join products p on p.id=d.product_id
+            left join product_categories c on c.id=p.category_id
+            left join job_orders jo on jo.sales_detail_id = d.id
+            left join branches br on  br.id = jo.pickup_branch
+            left join production_orders po on po.joborder_id = jo.id
+            left join production_branches pb on pb.id = po.branch_id
+            left join users u on u.id = d.created_by
+            where h.id>0 and h.delivery_status<>'Open Date' and h.deleted_at is null and jo.deleted_at is null and po.deleted_at is null and (h.payment_status = 'PAID' OR h.isConfirm=1)
+            and h.id in (select sales_header_id from product_delivery_addresses)
+            ";
+
+            if(isset($_GET['agent']) && $_GET['agent']<>''){
+                $mqry.= " and h.agent='".$_GET['agent']."'";
+            }
+            if(isset($_GET['customer']) && $_GET['customer']<>''){
+                $mqry.= " and h.customer_name='".$_GET['customer']."'";
+            }
+            if(isset($_GET['product']) && $_GET['product']<>''){
+                $mqry.= " and d.product_name='".$_GET['product']."'";
+            }
+            if(isset($_GET['category']) && $_GET['category']<>''){
+                $mqry.= " and p.category_id='".$_GET['category']."'";
+            }
+            if(isset($_GET['order_type']) && $_GET['order_type']<>''){
+                $mqry.= " and h.order_type='".$_GET['order_type']."'";
+            }
+            if(isset($_GET['order_source']) && $_GET['order_source']<>''){
+                $mqry.= " and h.order_source='".$_GET['order_source']."'";
+                
+            }
+            if(isset($_GET['production_branch']) && $_GET['production_branch']<>''){
+                $mqry.= " and pb.id='".$_GET['production_branch']."'";
+            }
+            
+            if(isset($_GET['receiver']) && $_GET['receiver']<>''){
+                $br_opts = "(";
+                $id_opts = "(";
+                foreach($_GET['receiver'] as $re){
+                    $br = \App\EcommerceModel\Branch::whereId($re)->first();
+                    $br_opts .= "'".$br->name."',";
+                    $id_opts .= $re.",";
+                }
+                $br_opts = rtrim($br_opts,",");
+                $id_opts = rtrim($id_opts,",");
+                $br_opts .= ")";
+                $id_opts .= ")";
+
+                
+
+                $mqry.= " and ((h.delivery_type='Store Pickup' and h.customer_delivery_adress in ".$br_opts.") or 
+
+                (jo.pickup_branch in ".$id_opts." OR h.delivery_branch in ".$br_opts.")
+
+                )";
+            }
+
+
+            if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
+                $mqry.= " and m.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and m.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
+            }
+            else{
+                $mqry.= " and m.delivery_date >='2051-01-01 00:00:00.000' and m.delivery_date <='2051-01-01 23:59:59.999'";
+            }
+            if(isset($_GET['start_time']) && $_GET['start_time']<>''){ 
+                $mqry.= " and concat(m.delivery_time,':00')='".$_GET['start_time']."'";
+            }
+            
+            if(isset($_GET['item_type']) && count($_GET['item_type']) >= 1){
+                if(in_array("WRA",$_GET['item_type']) || in_array("Miscellaneous",$_GET['item_type'])){
+
+                    if(in_array("WRA",$_GET['item_type']) && in_array("Miscellaneous",$_GET['item_type'])){
+                        $mqry.= " and (p.id in ".$wra." or p.is_misc=1)";
+                    }
+                    else{
+                        if(in_array("WRA",$_GET['item_type'])){
+                            $mqry.= " and p.id in ".$wra;
+                        }
+                        if(in_array("Miscellaneous",$_GET['item_type'])){
+                            $mqry.= " and p.is_misc=1";
+                        }
+                    }
+
+                }
+                else{
+                    $mqry.= " and d.id=-10011000";   
+                }
+                
+            }
+            
+            $mqry.= " order by m.delivery_date,customer_name,order_number";
+            //return $mqry;
+            $mrs = DB::select($mqry);
+            //dd($mrs);
+        // Sales Multiple
+        
+        // JO
+            $jos = "
+                SELECT jo.jo_category as product_name, '' as paella_price,'' as hordertype,
+            jo.qty as qty, '' as order_number, u.address_street, u.address_municipality, u.address_city, u.address_region, jo.price, jo.customer_address as customer_delivery_adress,
+            jo.customer_name, jo.date_needed as delivery_date,jo.remarks as instruction, po.delivery_date as deldate,'' as delivery_type, jo.jo_number, pb.name as pbname, jo.created_at as created,
+
+            '' as delstat, '' as agent, '' as customer_contact_number,'' as dr, '0' as delivery_fee_amount,'0' as price, '' as releasing, 'Forecaster' as order_source, br.name as receiver, c.name as catname, u.name as username, jo.jo_order_type, '0' as hid, jo.jo_category as jo_category, 'jo' as trantype, DATE_FORMAT(jo.date_needed,'%H:%i:%s') as timeneeded, DATE_FORMAT(jo.date_needed, '%Y-%m-%d') as dateneeded, p.is_misc, p.production_item, '1' as isConfirm, 0 as gros, '' as forecast_dt, '' as del_branch,p.id as prodid
+            from job_orders jo 
+            left join branches br on  br.id = jo.pickup_branch
+            left join production_orders po on po.joborder_id = jo.id
+            left join production_branches pb on pb.id = po.branch_id
+            left join products p on p.id=jo.product_id
+            left join product_categories c on c.id=p.category_id
+            left join users u on u.id = jo.user_id
+            where jo.id>0 and jo.deleted_at is null and po.deleted_at is null and (jo.sales_detail_id=0 or jo.sales_detail_id is null)";
+
+            if(isset($_GET['product']) && $_GET['product']<>''){
+                $jos.= " and p.name='".$_GET['product']."'";
+            }
+            if(isset($_GET['category']) && $_GET['category']<>''){
+                $jos.= " and p.category_id='".$_GET['category']."'";
+            }        
+            if(isset($_GET['production_branch']) && $_GET['production_branch']<>''){
+                $jos.= " and pb.id='".$_GET['production_branch']."'";
+            }
+            if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
+                $jos.= " and po.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and po.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
+            }
+            else{
+                $jos.= " and po.delivery_date >='2051-01-01 00:00:00.000' and po.delivery_date <='2051-01-01 23:59:59.999'";
+            }
+            if(isset($_GET['start_time']) && $_GET['start_time']<>''){
+                $jos.= " and time(po.delivery_date)='".$_GET['start_time']."'";
+            }
+
+            
+            if(isset($_GET['receiver']) && $_GET['receiver']<>''){
+                $jos.= " and jo.pickup_branch in ".$id_opts."";
+            }
+
+            if(isset($_GET['customer']) && $_GET['customer']<>''){
+                $jos.= " and jo.id='-1'";
+            }
+
+            if($no_jo == 1){
+                $jos.= " and jo.id='-1'"; // exclude all jo record
+            }
+
+            if(isset($_GET['order_type']) && $_GET['order_type']<>''){
+                $jos.= " and jo.id='-1100000'";
+            }
+            
+
+            if(isset($_GET['item_type']) && count($_GET['item_type']) >= 1){
+                $itemtype_sels = "(";
+                foreach($_GET['item_type'] as $se){
+                    $itemtype_sels .= "'".$se."',";
+                }            
+                $itemtype_sels = rtrim($itemtype_sels,",").")";
+                
+                $jos.= " and jo.jo_category in ".$itemtype_sels;
+                
+            }
+
+
+            $jos.= " order by jo.date_needed, customer_name,jo_number";
+            
+            $jo = DB::select($jos);
+        // JO
+        //dd($mrs);
+        //$results = collect($jo)->merge(collect($rs));
+        $results = collect($mrs)->merge(collect($jo)->merge(collect($rs)));
+        //dd($results);
+        
+        return view('admin.reports.forecaster',compact('rs','jo','results','wra_array','mrs'));
 
     }
 
