@@ -391,12 +391,177 @@ class CartController extends Controller
         }
     }
 
+    // public function store(Request $request)
+    // {
+    //     $product = Product::with('photos')->whereId($request->ac_item)->first();
+    //     $photos = $product->photos()->where('is_primary', 1)->first();
+    //     $photo = !empty($photos) ? asset('storage/products/'.$photos->path ) : '';
+    //     $paella_cost = ($request->ac_paella == '1' ? ($product->paella_price * $request->ac_qty) : 0);
+    //     if (auth()->check()) {
+
+    //         $cart = Cart::where('product_id', $request->ac_item)->with('product')
+    //             ->where('user_id', Auth::id())
+    //             ->first();
+
+    //         if (!empty($cart)) {
+    //             $newQty = $cart->qty + $request->ac_qty;
+    //             $save = $cart->update([
+    //                 'qty' => $newQty,
+    //                 'price' => $product->price,
+    //                 'paella_price' => $paella_cost
+    //             ]);
+    //         } else {
+    //             $save = Cart::create([
+    //                 'product_id' => $request->ac_item,
+    //                 'user_id' => Auth::id(),
+    //                 'qty' => $request->ac_qty,
+    //                 'price' => $product->price,
+    //                 'paella_price' => $paella_cost,
+    //                 'photo' => $photo,
+    //             ]);
+    //         }
+
+    //         //misc items
+    //         if ($request->has('misc_cntr') && (is_array($request->misc_cntr) && count($request->misc_cntr) > 0)) {
+    //             foreach ($request->misc_cntr as $key => $misc) {
+    //                 $miscProductId = $misc['misc_id'];
+    //                 $miscQty = $misc['misc_qty'];
+                    
+    //                 $prod = Product::with([
+    //                     'photos' => function ($q) {
+    //                         $q->limit(1);
+    //                     },
+    //                 ])->where('id', $miscProductId)->first();
+                
+    //                 $image = $prod->photos()->first();
+    //                 $image = !empty($image) ? asset('storage/products/'.$image->path ) : '';
+
+    //                 $cart = Cart::where('product_id', $miscProductId)
+    //                     ->where('user_id', Auth::id())
+    //                     ->first();
+
+    //                 if (!empty($cart)) {
+    //                     logger($miscQty);
+    //                     $save = $cart->update([
+    //                         'qty' => $miscQty,
+    //                         'price' => $prod->price
+    //                     ]);
+    //                 } else {
+    //                     logger('11111');
+    //                     $save = Cart::create([
+    //                         'product_id' => $miscProductId,
+    //                         'user_id' => Auth::id(),
+    //                         'qty' => $miscQty,
+    //                         'price' => $prod->price,
+    //                         'photo' => $image,
+    //                         'paella_price' => 0
+    //                     ]);
+    //                 }
+    //             }
+    //         }
+    //     } else {
+    //         $cart = session('cart', []);
+    //         $not_exist = true;
+
+    //         foreach ($cart as $key => $order) {
+    //             if ($order->product_id == $request->ac_item) {
+    //                 $cart[$key]->qty = $request->ac_qty;
+    //                 $cart[$key]->price = $product->price;
+    //                 $cart[$key]->paella_price = $paella_cost;
+    //                 $cart[$key]->photo = $photo;
+    //                 $cart[$key]->product = $product;
+
+    //                 $not_exist = false;
+    //                 break;
+    //             }
+    //         }
+
+    //         if ($not_exist) {
+    //             $order = new Cart();
+    //             $order->product_id = $request->ac_item;
+    //             $order->qty = $request->ac_qty;
+    //             $order->price = $product->price;
+    //             $order->paella_price = $paella_cost;
+    //             $order->photo = $photo;
+    //             $order->product = $product;
+    //             $order->coupon_code = '';
+    //             $order->coupon_amount = '0';
+
+    //             array_push($cart, $order);
+    //         }
+            
+    //         session(['cart' => $cart]);
+
+    //         //misc items
+    //         if ($request->has('misc_cntr') && (is_array($request->misc_cntr) && count($request->misc_cntr) > 0)) {
+    //             foreach ($request->misc_cntr as $misc) {
+    //                 $miscProductId = $misc['misc_id'];
+    //                 $miscQty = $misc['misc_qty'];
+
+    //                 $prod = Product::with([
+    //                         'photos' => function ($q) {
+    //                             $q->limit(1);
+    //                         },
+    //                     ])->where('id', $miscProductId)->first();
+                    
+    //                 $image = $prod->photos()->first();
+    //                 $image = !empty($image) ? asset('storage/products/'.$image->path ) : '';
+            
+    //                 $miscExist = false;
+            
+    //                 foreach ($cart as $key => $order) {
+    //                     if ($order->product_id == $miscProductId) {
+    //                         $cart[$key]->qty = $miscQty;
+    //                         $cart[$key]->price = $prod->price;
+    //                         $cart[$key]->paella_price = 0;
+    //                         $cart[$key]->photo = $image;
+    //                         $cart[$key]->product = $prod;
+    //                         $miscExist = true;
+    //                         break;
+    //                     }
+    //                 }
+            
+    //                 if (!$miscExist) {
+    //                     $order = new Cart();
+    //                     $order->product_id = $miscProductId;
+    //                     $order->qty = $miscQty;
+    //                     $order->price = $prod->price;
+    //                     $order->paella_price = 0;
+    //                     $order->photo = $image;
+    //                     $order->product = $prod;
+            
+    //                     array_push($cart, $order);
+    //                 }
+    //             }
+            
+    //             session(['cart' => $cart]);
+    //         }
+    //     }
+
+    //     if($request->action == 'buynow'){
+    //         return response()->json([
+    //             'success' => true,
+    //             'act' => 'buynow',
+    //             'totalItems' => Setting::EcommerceCartTotalItems()
+    //         ]);
+
+    //     }else{
+    //         return response()->json([
+    //             'success' => true,
+    //             'act' => 'addcart',
+    //             'totalItems' => Setting::EcommerceCartTotalItems()
+    //         ]);
+    //     }
+    // }
+
     public function store(Request $request)
     {
         $product = Product::with('photos')->whereId($request->ac_item)->first();
         $photos = $product->photos()->where('is_primary', 1)->first();
         $photo = !empty($photos) ? asset('storage/products/'.$photos->path ) : '';
         $paella_cost = ($request->ac_paella == '1' ? ($product->paella_price * $request->ac_qty) : 0);
+        $has_paella = $request->ac_paella == '1' ? 1 : 0;
+
         if (auth()->check()) {
 
             $cart = Cart::where('product_id', $request->ac_item)->with('product')
@@ -405,11 +570,21 @@ class CartController extends Controller
 
             if (!empty($cart)) {
                 $newQty = $cart->qty + $request->ac_qty;
-                $save = $cart->update([
-                    'qty' => $newQty,
+                // $save = $cart->update([
+                //     'qty' => $newQty,
+                //     'price' => $product->price,
+                //     'paella_price' => $paella_cost
+                // ]);
+
+                $save = Cart::create([
+                    'product_id' => $request->ac_item,
+                    'user_id' => Auth::id(),
+                    'qty' => $request->ac_qty,
                     'price' => $product->price,
-                    'paella_price' => $paella_cost
+                    'paella_price' => $paella_cost,
+                    'photo' => $photo,
                 ]);
+
             } else {
                 $save = Cart::create([
                     'product_id' => $request->ac_item,
@@ -460,17 +635,24 @@ class CartController extends Controller
                 }
             }
         } else {
+
             $cart = session('cart', []);
             $not_exist = true;
+            $has_paella = $request->ac_paella == '1' ? 1 : 0;
 
             foreach ($cart as $key => $order) {
-                if ($order->product_id == $request->ac_item) {
-                    $cart[$key]->qty = $request->ac_qty;
+                // Compare BOTH product_id AND has_paella flag
+                if (
+                    $order->product_id == $request->ac_item &&
+                    (isset($order->has_paella) ? $order->has_paella : 0) == $has_paella
+                ) {
+                    // Same product and same paella option → increment qty
+                    $cart[$key]->qty += $request->ac_qty;
+                    // Optionally update other details
                     $cart[$key]->price = $product->price;
                     $cart[$key]->paella_price = $paella_cost;
                     $cart[$key]->photo = $photo;
                     $cart[$key]->product = $product;
-
                     $not_exist = false;
                     break;
                 }
@@ -484,12 +666,13 @@ class CartController extends Controller
                 $order->paella_price = $paella_cost;
                 $order->photo = $photo;
                 $order->product = $product;
+                $order->has_paella = $has_paella;
                 $order->coupon_code = '';
                 $order->coupon_amount = '0';
 
                 array_push($cart, $order);
             }
-            
+
             session(['cart' => $cart]);
 
             //misc items
@@ -553,6 +736,7 @@ class CartController extends Controller
             ]);
         }
     }
+
 
     public function getTotalItems(){
 
