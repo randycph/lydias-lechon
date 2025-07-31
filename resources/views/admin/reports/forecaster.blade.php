@@ -156,7 +156,7 @@
 
                             <div class="col-md-2">
                                 <div class="form-group">
-                                    <label class="tx-13">Receiver Branch</label>
+                                    <label class="tx-13" style="font-size:15px;font-weight:bold;">Receiver Branch</label>
                                     <select name="receiver[]" id="receiver" class="form-control" multiple>
                                         <option value="">- Select Receiver -</option>
                                         @forelse(\App\EcommerceModel\Branch::orderBy('name')->get() as $cus)
