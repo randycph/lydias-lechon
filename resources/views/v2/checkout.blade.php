@@ -335,8 +335,7 @@
                                                                     :disabled="!isOrderChecked(delivery, order)"
                                                                     :value="getSelectedQty(delivery, order)"
                                                                     @change="updateSelectedQty(delivery, order, $event.target.value)">
-                                                                    <template x-for="i in getRemainingQty(order) + getPreviouslySelectedQty(delivery, order)">
-
+                                                                    <template x-for="i in getAvailableQtyForDropdown(delivery, order)">
 
                                                                         <option :value="i" x-text="i"></option>
                                                                     </template>
@@ -1543,10 +1542,16 @@
             },
 
             // Get selected quantity for dropdown binding
-            getSelectedQty(delivery, order) {
-                const found = delivery.orders?.find(o => o.product_id === order.product_id);
-                return found ? found.qty : '';
-            },
+getSelectedQty(delivery, order) {
+    const isPaella = parseFloat(order.paella_price) > 0;
+
+    const found = delivery.orders?.find(o =>
+        o.product_id === order.product_id &&
+        !!o.paella === isPaella
+    );
+
+    return found ? found.qty : '';
+},
 
             getProductType(order) {
                 const slug = order.product?.slug;
@@ -1662,56 +1667,84 @@ isOrderChecked(delivery, order) {
 
             // Get remaining qty for a product globally (used across all deliveries)
 getRemainingQty(order) {
-    const total = parseInt(order.qty) || 0;
+    const isPaella = parseFloat(order.paella_price) > 0;
+
+    // Fetch from original clean source
+    const baseOrder = this.orders.find(o =>
+        o.product_id === order.product_id &&
+        (parseFloat(o.paella_price) > 0) === isPaella
+    );
+
+    const total = baseOrder ? parseInt(baseOrder.qty) : 0;
 
     const used = this.deliveries.reduce((sum, d) => {
         return sum + (d.orders?.reduce((inner, o) => {
-            return o.product_id === order.product_id &&
-                (!!o.paella === (parseFloat(order.paella_price) > 0))
-                ? inner + (parseInt(o.qty) || 0)
-                : inner;
+            return (
+                o.product_id === order.product_id &&
+                !!o.paella === isPaella
+            ) ? inner + (parseInt(o.qty) || 0) : inner;
         }, 0) || 0);
     }, 0);
 
+
+    console.log('Matching order for remaining qty:', {
+        input: order.product_id,
+        isPaella: parseFloat(order.paella_price) > 0,
+        matchedTotal: baseOrder?.qty
+    });
     return Math.max(total - used, 0);
 },
 
+
+
+
             // Get previously selected qty in *this delivery* to allow it again in dropdown
 getPreviouslySelectedQty(delivery, order) {
+    const isPaella = parseFloat(order.paella_price) > 0;
     const found = delivery.orders?.find(o =>
         o.product_id === order.product_id &&
-        !!o.paella === (parseFloat(order.paella_price) > 0)
+        !!o.paella === isPaella
     );
+    console.log('Selected in delivery', delivery, 'qty:', found?.qty);
+
     return found ? parseInt(found.qty) || 0 : 0;
 },
+
+
+getAvailableQtyForDropdown(delivery, order) {
+    return this.getRemainingQty(order) + this.getPreviouslySelectedQty(delivery, order);
+},
+
 
             getOrderQtyBinding(delivery, order) {
                 const selected = delivery.orders?.find(o => o.product_id === order.product_id);
                 return selected ? selected.qty : '';
             },
 
-            updateSelectedQty(delivery, order, newQty) {
-                if (!delivery.orders) delivery.orders = [];
+updateSelectedQty(delivery, order, newQty) {
+    if (!delivery.orders) delivery.orders = [];
 
-                const index = this.deliveries.indexOf(delivery);
+    const isPaella = parseFloat(order.paella_price) > 0;
 
-                const orderIndex = delivery.orders.findIndex(o => o.product_id === order.product_id);
-                if (orderIndex !== -1) {
-                    delivery.orders[orderIndex].qty = parseInt(newQty) || 0;
-                } else {
-                    delivery.orders.push({
-                        paella: order.paella_price > 0 ? true : false,
-                        product_id: order.product_id,
-                        qty: parseInt(newQty) || 0,
-                        product: order.product
-                    });
-                }
+    const orderIndex = delivery.orders.findIndex(o =>
+        o.product_id === order.product_id &&
+        !!o.paella === isPaella
+    );
 
-                // Remove deliveries after this one
-                this.deliveries.splice(index + 1);
+    if (orderIndex !== -1) {
+        delivery.orders[orderIndex].qty = parseInt(newQty) || 0;
+    } else {
+        delivery.orders.push({
+            paella: isPaella,
+            product_id: order.product_id,
+            qty: parseInt(newQty) || 0,
+            product: order.product
+        });
+    }
 
-                this.refreshAllAvailableQty();
-            },
+    this.refreshAllAvailableQty();
+},
+
 
             refreshAllAvailableQty() {
                 // re-trigger a render
@@ -1794,21 +1827,7 @@ getPreviouslySelectedQty(delivery, order) {
             qtyValidationMessage: '',
 
             getAvailableOrders() {
-                const availableOrders = this.orders.map(o => ({ ...o })); // Clone to avoid mutating
-
-                for (const delivery of this.deliveries) {
-                    if (Array.isArray(delivery.orders)) {
-                        for (const selected of delivery.orders) {
-                            const match = availableOrders.find(o => o.product_id === selected.product_id);
-                            if (match) {
-                                match.qty -= parseInt(selected.qty) || 0;
-                                if (match.qty < 0) match.qty = 0;
-                            }
-                        }
-                    }
-                }
-
-                return availableOrders;
+                return this.orders.map(o => ({ ...o }));
             },
 
 canAddMoreDeliveries() {
