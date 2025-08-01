@@ -32,7 +32,7 @@
                                                 $selectedUser = \App\Models\User::find(request('pb'));
                                             @endphp
                                             @if($selectedUser)
-                                                <option value="{{ $selectedUser->id }}" selected>{{ $selectedUser->name }}</option>
+                                                <option value="{{ $selectedUser->name }}" selected>{{ $selectedUser->name }}</option>
                                             @endif
                                         @endif
                                     </select>
@@ -188,6 +188,8 @@
         $('#example').DataTable( {
             dom: 'Bfrtip',
             pageLength: 20,
+            aaSorting: [],
+            bSort: false,
             buttons: [
                 {
                     extend: 'print',
