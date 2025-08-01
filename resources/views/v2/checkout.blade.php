@@ -1654,6 +1654,11 @@
                 // Remove all deliveries after the current one
                 this.deliveries.splice(index + 1);
 
+                this.deliveryFees = this.deliveryFees.slice(0, index + 1);
+
+                this.deliveryFee = this.deliveryFees.reduce((acc, item) => acc + item.fee, 0);
+
+
                 this.qtyValidationMessage = '';
 
                 this.refreshAllAvailableQty();
