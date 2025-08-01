@@ -342,7 +342,7 @@ class ReportsController extends Controller
             
             
             $tm_mrs=\App\Models\ProductDeliveryAddress::where('delivery_date','>=',date('Y-m-d',strtotime($tm_st)))->where('delivery_date','<=',date('Y-m-d',strtotime($tm_en)))
-            //->where('sales_header_id','10841')
+            ->where('sales_header_id','10845')
             ->get();
             
             $ss = '';
@@ -373,12 +373,16 @@ class ReportsController extends Controller
                 }
             }
             //dd(DB::select("select * from temp_mrs"));
-        
-            $mqry = "SELECT m.product_name, m.paella_price, 
+            //    IF(m.delivery_status, "YES", "NO") as delstat,
+
+            $mqry = "SELECT distinct m.product_name, m.paella_price, 
             m.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,m.price, m.address as customer_delivery_adress,
             h.customer_name, 
             cast(concat(m.delivery_date, ' ', m.delivery_time) as datetime)  as delivery_date,
-            m.note as instruction, po.delivery_date as deldate, h.delivery_type, jo.jo_number, pb.name as pbname, m.delivery_status as delstat,h.agent, 
+            m.note as instruction, po.delivery_date as deldate, h.delivery_type, jo.jo_number, pb.name as pbname, 
+        
+            IFNULL(NULLIF(m.delivery_status, 0), '') as delstat,
+            h.agent, 
             m.contact_tel as customer_contact_number,'' as dr, m.delivery_fee as delivery_fee_amount, d.price, '' as releasing, h.order_source, br.name as receiver, 
             c.name as catname, u.name as username, jo.jo_order_type,h.order_type as hordertype, h.id as hid, '' as jo_category, 'sales' as trantype, 
             m.delivery_time as timeneeded, m.delivery_date as dateneeded, 
