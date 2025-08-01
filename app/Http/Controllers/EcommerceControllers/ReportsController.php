@@ -342,7 +342,7 @@ class ReportsController extends Controller
             
             
             $tm_mrs=\App\Models\ProductDeliveryAddress::where('delivery_date','>=',date('Y-m-d',strtotime($tm_st)))->where('delivery_date','<=',date('Y-m-d',strtotime($tm_en)))
-            ->where('sales_header_id','10845')
+            //->where('sales_header_id','10845')
             ->get();
             
             $ss = '';
