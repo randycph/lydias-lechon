@@ -1689,11 +1689,6 @@ getRemainingQty(order) {
     }, 0);
 
 
-    console.log('Matching order for remaining qty:', {
-        input: order.product_id,
-        isPaella: parseFloat(order.paella_price) > 0,
-        matchedTotal: baseOrder?.qty
-    });
     return Math.max(total - used, 0);
 },
 
@@ -1707,8 +1702,7 @@ getPreviouslySelectedQty(delivery, order) {
         o.product_id === order.product_id &&
         !!o.paella === isPaella
     );
-    console.log('Selected in delivery', delivery, 'qty:', found?.qty);
-
+    
     return found ? parseInt(found.qty) || 0 : 0;
 },
 
@@ -1932,8 +1926,23 @@ canAddMoreDeliveries() {
             },
 
             getAvailableHours(delivery) {
-                return this.allHours.filter(hour => !this.isTimeDisabledForDelivery(hour)(delivery));
+                const now = new Date();
+                const productTypes = delivery.orders?.map(o => this.getProductType(o)) || [];
+
+                let offset = 0;
+                if (productTypes.includes('baka')) offset = 72;
+                else if (productTypes.includes('lechon')) offset = 24;
+                else if (productTypes.includes('misc')) offset = 6;
+
+                const minAllowedTime = new Date(now.getTime() + offset * 3600 * 1000);
+                const deliveryDate = new Date(delivery.need_date + 'T00:00');
+
+                return this.allHours.filter(hour => {
+                    const testTime = new Date(`${delivery.need_date}T${hour < 10 ? '0' + hour : hour}:00`);
+                    return testTime >= minAllowedTime && hour >= 5 && hour <= 20;
+                });
             },
+
             autoAdvanceDateIfNoHours(delivery, tries = 0) {
                 if (tries > 31) return; // Don't go more than a month ahead
 
@@ -1988,37 +1997,66 @@ canAddMoreDeliveries() {
                 };
             },
             validateDeliveryDateTime(delivery) {
-                this.autoAdvanceDateIfNoHours(delivery);
+                const now = new Date();
+                const productTypes = delivery.orders?.map(o => this.getProductType(o)) || [];
 
-                // Optionally, always clear time when date changes (user can't select invalid time)
-                const available = this.getAvailableHours(delivery);
-                if (!available.includes(parseInt(delivery.need_time))) {
-                    delivery.need_time = "";
+                const hasLechon = productTypes.includes('lechon');
+                const hasBaka = productTypes.includes('baka');
+                const hasMisc = productTypes.includes('misc');
+
+                let requiredOffsetHours = 0;
+
+                if (hasBaka) {
+                    requiredOffsetHours = 72; // 3 days
+                } else if (hasLechon) {
+                    requiredOffsetHours = 24;
+                } else if (hasMisc) {
+                    requiredOffsetHours = 6;
                 }
 
-                if (!delivery.need_date || !delivery.need_time) return;
+                const currentTime = new Date();
+                let minAllowedTime = new Date(currentTime.getTime() + requiredOffsetHours * 60 * 60 * 1000);
 
-                const selectedDateTime = new Date(`${delivery.need_date}T${delivery.need_time}`);
-                const now = new Date();
+                const selectedDate = new Date(`${delivery.need_date}T00:00`);
+                const selectedTime = delivery.need_time ? parseInt(delivery.need_time.split(':')[0]) : null;
 
-                const diffInMs = selectedDateTime - now;
-                const diffInHours = diffInMs / (1000 * 60 * 60);
+                const selectedDateTime = delivery.need_time
+                    ? new Date(`${delivery.need_date}T${delivery.need_time}`)
+                    : null;
 
+                const availableHours = this.allHours.filter(hour => hour >= 5 && hour <= 20); // 5PM–8PM
+
+                // Auto-adjust date if selected date is too early
+                if (!delivery.need_date || selectedDateTime < minAllowedTime) {
+                    const adjustedDate = new Date(minAllowedTime);
+                    delivery.need_date = adjustedDate.toISOString().split('T')[0];
+                }
+
+                // Auto-adjust time
+                const validHour = availableHours.find(hour => {
+                    const hourDate = new Date(`${delivery.need_date}T${hour < 10 ? '0' + hour : hour}:00`);
+                    return hourDate >= minAllowedTime;
+                });
+
+                if (validHour !== undefined) {
+                    delivery.need_time = `${validHour < 10 ? '0' + validHour : validHour}:00`;
+                } else {
+                    // No valid time on selected day, so bump the date
+                    const nextDay = new Date(minAllowedTime);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    delivery.need_date = nextDay.toISOString().split('T')[0];
+                    delivery.need_time = '';
+                }
+
+                // Reset warning
                 delivery.warningMessage = '';
 
-                if (this.haslechon) {
-                    // pick the time that are 1 day or 24hours. example if today date is 7/29/2025 9:35.. then pick 7/30/2025 11:00 since it only display hour. and dont make it static and i want dynamic
-                    if (diffInHours < 24) {
-                       delivery.need_time = new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString().split('T')[1].substring(0, 5);
-                    }
-
-                    this.clearToProceed = true;
+                // Optional warning display for lechon < 24h
+                if (hasLechon && selectedDateTime && (selectedDateTime - now) / 3600000 < 24) {
                     delivery.warningMessage = `⚠️ Warning! The date and time you've selected (${delivery.need_date} - ${this.formatTime(delivery.need_time)}) is less than 24 hours from now. Our standard processing time is at least 24 hours. However, you can still proceed by contacting our store directly at our <span class='underline text-blue-600 cursor-pointer' @click='openHotline = true'>Call Hotline</span> tab.`;
-                } else {
-                    this.clearToProceed = true;
-                    this.hasErrorMessage = false;
-                    delivery.warningMessage = '';
                 }
+
+                this.clearToProceed = true;
             },
             formatTime(timeStr) {
                 const [hours, minutes] = timeStr?.split(':');
