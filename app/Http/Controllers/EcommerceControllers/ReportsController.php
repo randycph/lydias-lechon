@@ -987,7 +987,7 @@ class ReportsController extends Controller
 
     public function sales_per_customer(Request $request)
     {
-
+        //dd($_GET);
         $qry = "SELECT pb.name as prod_branch,jo.jo_number as jnum,h.*,d.*,h.created_at as hcreated,h.id as hid,p.category_id,c.name as catname,d.id as did
             FROM `ecommerce_sales_details` d
             left join ecommerce_sales_headers h on h.id=d.sales_header_id
@@ -999,8 +999,8 @@ class ReportsController extends Controller
          where h.id>0 and h.deleted_at is null";
         // conditions
 
-            if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $qry.= " and h.customer_name='".$_GET['customer']."'";
+            if(isset($_GET['pb']) && $_GET['pb']<>''){
+                $qry.= " and h.customer_name='".$_GET['pb']."'";
             }
 
 
@@ -1011,7 +1011,7 @@ class ReportsController extends Controller
                  $qry.= " and h.created_at >='2051-01-01 00:00:00.000'";
             }
         // end conditions
-
+            //dd($qry);
         $rs = DB::select($qry);
 
         $customers = SalesHeader::distinct()->orderBy('customer_name')->get(['customer_name']);
@@ -1408,19 +1408,42 @@ class ReportsController extends Controller
     {
         $search = $request->input('q');
 
-        $users = User::where('role_id', '<>', env('CUSTOMER_ROLE_ID'))
-                    ->when($search, fn($query) => $query->where('name', 'like', "%{$search}%"))
+        // $users = User::where('role_id', '<>', env('CUSTOMER_ROLE_ID'))
+        //             ->when($search, fn($query) => $query->where('name', 'like', "%{$search}%"))
+        //             ->orderBy('name')
+        //             ->limit(20)
+        //             ->get();
+            $users = User::where('role_id', '=', env('CUSTOMER_ROLE_ID'))
+                     ->when($search, fn($query) => $query->where('name', 'like', "%{$search}%"))
                     ->orderBy('name')
                     ->limit(20)
                     ->get();
 
+
         return response()->json([
             'results' => $users->map(fn($user) => [
-                'id' => $user->id,
-                'text' => $user->name
+                'id' => $user->name,
+                'text' => $user->name." (".$user->email.")"
             ])
         ]);
     }
+
+    // public function searchCustomers(Request $request)
+    // {
+    //     $search = $request->input('q');
+
+    //     $users = SalesHeader::where('customer_name', 'like', "%{$search}%")                    
+    //                 ->orderBy('name')
+    //                 ->limit(20)
+    //                 ->get();
+
+    //     return response()->json([
+    //         'results' => $users->map(fn($user) => [
+    //             'id' => $user->id,
+    //             'text' => $user->name
+    //         ])
+    //     ]);
+    // }
 
     public function audit_trail_per_sales(Request $request){
         $rs = '';
