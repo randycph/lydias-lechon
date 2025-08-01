@@ -342,6 +342,7 @@ class ReportsController extends Controller
             
             
             $tm_mrs=\App\Models\ProductDeliveryAddress::where('delivery_date','>=',date('Y-m-d',strtotime($tm_st)))->where('delivery_date','<=',date('Y-m-d',strtotime($tm_en)))
+            //->where('sales_header_id','10841')
             ->get();
             
             $ss = '';
@@ -373,7 +374,7 @@ class ReportsController extends Controller
             }
             //dd(DB::select("select * from temp_mrs"));
         
-            $mqry = "SELECT m.product_name, m.paella_price,
+            $mqry = "SELECT m.product_name, m.paella_price, 
             m.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,m.price, m.address as customer_delivery_adress,
             h.customer_name, 
             cast(concat(m.delivery_date, ' ', m.delivery_time) as datetime)  as delivery_date,
