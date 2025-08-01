@@ -599,9 +599,11 @@
                                     </div>
                                 </div>
                                 </template>
-                                <div class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
-                                    <div>We've pre-selected the earliest available time for your order. You’re welcome to adjust the date and time to your preference.</div>
-                                </div>
+                                <template x-if="!allowMultiple">
+                                    <div class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
+                                        <div>We've pre-selected the earliest available time for your order. You’re welcome to adjust the date and time to your preference.</div>
+                                    </div>
+                                </template>
                                 {{-- <div x-show="warningMessage">
                                     <div class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
                                         <div x-html="warningMessage"></div>
@@ -1787,42 +1789,45 @@ updateSelectedQty(delivery, order, newQty) {
                 });
             },
 
-            validateAllQtyUsed() {
-                const expectedTotals = {};
-                const assignedTotals = {};
+validateAllQtyUsed() {
+    const expectedTotals = {};
+    const assignedTotals = {};
 
-                // Build the expected total quantity for each product
-                this.orders.forEach(order => {
-                    expectedTotals[order.product_id] = parseInt(order.qty) || 0;
-                });
+    // Build expected totals (use product_id + paella as key)
+    this.orders.forEach(order => {
+        const isPaella = parseFloat(order.paella_price) > 0;
+        const key = `${order.product_id}-${isPaella ? 'paella' : 'nopaella'}`;
+        expectedTotals[key] = parseInt(order.qty) || 0;
+    });
 
-                // Sum up assigned quantities from all deliveries
-                this.deliveries.forEach(delivery => {
-                    if (Array.isArray(delivery.orders)) {
-                        delivery.orders.forEach(o => {
-                            if (!o.product_id || !o.qty) return;
+    // Build assigned totals across all deliveries
+    this.deliveries.forEach(delivery => {
+        if (!Array.isArray(delivery.orders)) return;
 
-                            const productId = o.product_id;
-                            assignedTotals[productId] = (assignedTotals[productId] || 0) + parseInt(o.qty);
-                        });
-                    }
-                });
+        delivery.orders.forEach(o => {
+            if (!o.product_id || !o.qty) return;
 
-                // Compare expected vs assigned
-                for (const productId in expectedTotals) {
-                    const expected = expectedTotals[productId];
-                    const assigned = assignedTotals[productId] || 0;
+            const key = `${o.product_id}-${!!o.paella ? 'paella' : 'nopaella'}`;
+            assignedTotals[key] = (assignedTotals[key] || 0) + parseInt(o.qty);
+        });
+    });
 
-                    if (assigned !== expected) {
-                        this.qtyValidationMessage = '⚠️ Please assign all available quantities before proceeding.';
-                        return false;
-                    }
-                }
+    // Compare expected vs assigned
+    for (const key in expectedTotals) {
+        const expected = expectedTotals[key];
+        const assigned = assignedTotals[key] || 0;
 
-                // All quantities match
-                this.qtyValidationMessage = '';
-                return true;
-            },
+        if (expected !== assigned) {
+            this.qtyValidationMessage = '⚠️ Please assign all available quantities before proceeding.';
+            return false;
+        }
+    }
+
+    // All quantities match
+    this.qtyValidationMessage = '';
+    return true;
+},
+
 
             qtyValidationMessage: '',
 
