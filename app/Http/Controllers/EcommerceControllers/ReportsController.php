@@ -1413,7 +1413,7 @@ class ReportsController extends Controller
         //             ->orderBy('name')
         //             ->limit(20)
         //             ->get();
-            $users = User::where('role_id', '=', env('CUSTOMER_ROLE_ID'))
+            $users = User::where('role_id', '=', 6)
                      ->when($search, fn($query) => $query->where('name', 'like', "%{$search}%"))
                     ->orderBy('name')
                     ->limit(20)
