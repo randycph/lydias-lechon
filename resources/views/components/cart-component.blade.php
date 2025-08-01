@@ -58,6 +58,8 @@ x-data="{
 
             this.getCarts();
 
+            $dispatch('update-cart');
+
             this.loading = false;
 
         } catch (error) {
