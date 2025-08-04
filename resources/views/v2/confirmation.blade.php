@@ -107,7 +107,7 @@
                                                 <ul>
                                                     @foreach ($products as $product)
                                                         <li>
-                                                            {{ $product->product->name . (isset($product?->paella) && $product?->paella ?' with Paella' : '') ?? 'Unknown Product' }} x {{ $product->qty }}
+                                                            {{ $product->product->name . (isset($product?->paella) && $product?->paella ?' Boneless with Paella' : '') ?? 'Unknown Product' }} x {{ $product->qty }}
                                                         </li>
                                                     @endforeach
                                                 </ul>
@@ -194,7 +194,7 @@
                                 
                                 <div class="flex flex-col">
                                     <div class="flex gap-2 items-center">
-                                        <div class="font-bold">{{ $details['product_name'] }}</div> <span class="italic">{{ $details['paella_price'] > 0 ? 'with Seafood Paella' : '' }}</span>
+                                        <div class="font-bold">{{ $details['product_name'] }}</div> <span class="italic">{{ $details['paella_price'] > 0 ? 'Boneless with Paella' : '' }}</span>
                                         @if ($details['price'] == 0)
                                         <span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">FREE</span>
                                         @endif
@@ -314,7 +314,7 @@
                                 {{ $details->product->code }}
                             </th>
                             <td class="px-6 py-4">
-                                {{ $details->product_name }} @if($details->paella_price > 0) with paella @endif
+                                {{ $details->product_name }} @if($details->paella_price > 0) Boneless with Paella @endif
                             </td>
                             <td class="px-6 py-4">
                                 {{ $details->no_of_pax }}

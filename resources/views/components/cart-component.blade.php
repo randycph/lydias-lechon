@@ -136,7 +136,7 @@ x-data="{
                                         <div class="flex flex-col gap-1">
                                             <div class="">
                                                 <span class="font-bold" x-text="cart?.product?.name"></span>
-                                                <span class="italic" x-text="cart?.paella_price > 0 ? 'with Seafood Paella' : ''"></span>
+                                                <span class="italic" x-text="cart?.paella_price > 0 ? 'Boneless with Paella' : ''"></span>
                                             </div>
                                             <div class="">
                                                 <span class="text-sm text-gray-600" x-text="new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cart?.product?.price * (cart?.qty || 1))"></span>

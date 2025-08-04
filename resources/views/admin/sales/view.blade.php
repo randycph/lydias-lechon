@@ -60,7 +60,7 @@
                                                 <ul>
                                                     @foreach ($products as $product)
                                                         <li>
-                                                            {{ $product->product->name . (isset($product?->paella) && $product?->paella ?' with Paella' : '') ?? 'Unknown Product' }} x {{ $product->qty }}
+                                                            {{ $product->product->name . (isset($product?->paella) && $product?->paella ?' Boneless with Paella' : '') ?? 'Unknown Product' }} x {{ $product->qty }}
                                                         </li>
                                                     @endforeach
                                                 </ul>
@@ -140,7 +140,7 @@
                             @forelse($salesDetails as $details)
                             <tr>
                                 <td class="tx-nowrap">{{$details->product->code}}</td>
-                                <td class="tx-nowrap">{{$details->product_name}} @if($details->paella_price > 0) with paella @endif</td>
+                                <td class="tx-nowrap">{{$details->product_name}} @if($details->paella_price > 0) Boneless with Paella @endif</td>
                                 <th class="tx-center">{{$details->no_of_pax}}</th>                                
                                 <td class="tx-nowrap">
                                     @if(date('H:i A',strtotime($details->delivery_date)) == '12:00 PM')

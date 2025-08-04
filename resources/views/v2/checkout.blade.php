@@ -95,7 +95,7 @@
                                 <!-- Info -->
                                 <div class="flex flex-col flex-grow">
                                     <div class="">
-                                        <span class="font-bold" x-text="item?.product?.name"></span> <span class="italic" x-text="parseFloat(item.paella_price) > 0 ? 'with Seafood Paella' : ''"></span>
+                                        <span class="font-bold" x-text="item?.product?.name"></span> <span class="italic" x-text="parseFloat(item.paella_price) > 0 ? 'Boneless with Paella' : ''"></span>
                                         <template x-if="item.is_free_product">
                                             <span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">FREE</span>
                                         </template>
@@ -326,7 +326,7 @@
                                                                         :disabled="getRemainingQty(order) <= 0 && !isOrderChecked(delivery, order)"
                                                                     />
                                                                     <label :for="'order-' + order.id + '-' + index + '-' + index2 + '-' + (order.paella_price > 0 ? 'paella' : 'nopaella')" class="flex-1">
-                                                                        <span x-text="order.product.name + (order.paella_price > 0 ? ' with Paella' : '') + (getRemainingQty(order) <= 0 && !isOrderChecked(delivery, order) ? ' (Fully Assigned)' : '')"></span>
+                                                                        <span x-text="order.product.name + (order.paella_price > 0 ? ' Boneless with Paella' : '') + (getRemainingQty(order) <= 0 && !isOrderChecked(delivery, order) ? ' (Fully Assigned)' : '')"></span>
                                                                     </label>
                                                                 </div>
 

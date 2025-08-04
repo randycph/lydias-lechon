@@ -47,7 +47,7 @@
         },
         quantity: 1,
         get productName() {
-            const withPaella = this.withPaella ? ' with Paella' : '';
+            const withPaella = this.withPaella ? ' Boneless with Paella' : '';
             if (this.product?.name) {
                 return this.product.name + withPaella;
             }

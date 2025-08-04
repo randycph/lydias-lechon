@@ -198,7 +198,7 @@
                                             </div>
                                             <div class="col-md-12 col-lg-2 text-center">
                                                 @if($order->paella_price > 0)
-                                                    With Paella<br> &#8369; {{ number_format($order->paella_price,2) }}
+                                                    Boneless with Paella<br> &#8369; {{ number_format($order->paella_price,2) }}
                                                 @endif
                                             </div>
                                             <div class="col-md-12 col-lg-2">
