@@ -116,7 +116,10 @@
                                                     />
                                                 </div>
                                                 <div class="flex flex-col gap-1">
-                                                    <div class="font-bold" x-text="cart?.product?.name"></div>
+                                                    <div class="flex flex-wrap items-center gap-1">
+                                                        <div class="font-bold" x-text="cart?.product?.name"></div>
+                                                        <span class="italic" x-text="cart?.paella ? 'with Seafood Paella' : ''"></span>
+                                                    </div>
                                                     <div class="text-sm text-gray-600" x-text="new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cart?.product?.price * (cart?.qty || 1))"></div>
                 
                                                     <!-- Quantity Selector -->
