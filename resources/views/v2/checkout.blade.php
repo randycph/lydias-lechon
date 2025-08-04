@@ -320,8 +320,9 @@
                                                                     <input
                                                                         type="checkbox"
                                                                         :id="'order-' + order.id + '-' + index + '-' + index2 + '-' + (order.paella_price > 0 ? 'paella' : 'nopaella')"
-                                                                        @change="toggleOrderSelection(delivery, order)"
+                                                                        {{-- x-model="order.checked" --}}
                                                                         :checked="isOrderChecked(delivery, order)"
+                                                                        @change="onOrderCheckToggle(delivery, order, $event.target.checked)"
                                                                         :disabled="getRemainingQty(order) <= 0 && !isOrderChecked(delivery, order)"
                                                                     />
                                                                     <label :for="'order-' + order.id + '-' + index + '-' + index2 + '-' + (order.paella_price > 0 ? 'paella' : 'nopaella')" class="flex-1">
@@ -382,13 +383,12 @@
                                                                     <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clip-rule="evenodd"/>
                                                                 </svg>
                                                             </div>
-                                                            <select 
+                                                            <select
                                                                 :class="{'border-red-500': errors.need_time}"
-                                                                name="need_time" 
+                                                                name="need_time"
                                                                 id="need_time"
-                                                                x-model="delivery.need_time" 
-                                                                {{-- @click="validateDeliveryDateTime(delivery)" --}}
-                                                                @change="validateDeliveryDateTime(delivery)"
+                                                                x-model="delivery.need_time"
+                                                                @change="validateDeliveryDateTime(delivery);"
                                                                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                                                             >
                                                                 <option value="">Select Hour</option>
@@ -401,6 +401,7 @@
                                                                     </template>
                                                                 </template>
                                                             </select>
+
                                                             <template x-if="errors.need_time">
                                                                 <div class="text-red-500 text-xs mt-1" x-text="errors.need_time"></div>
                                                             </template>
@@ -1664,87 +1665,233 @@
                 this.refreshAllAvailableQty();
             },
 
-            // Check if a product is selected for this delivery
-isOrderChecked(delivery, order) {
-    return delivery.orders?.some(o =>
-        o.product_id === order.product_id &&
-        !!o.paella === (parseFloat(order.paella_price) > 0)
-    );
-},
-
             // Get remaining qty for a product globally (used across all deliveries)
-getRemainingQty(order) {
-    const isPaella = parseFloat(order.paella_price) > 0;
+            getRemainingQty(order) {
+                const isPaella = parseFloat(order.paella_price) > 0;
 
-    // Fetch from original clean source
-    const baseOrder = this.orders.find(o =>
-        o.product_id === order.product_id &&
-        (parseFloat(o.paella_price) > 0) === isPaella
-    );
+                // Fetch from original clean source
+                const baseOrder = this.orders.find(o =>
+                    o.product_id === order.product_id &&
+                    (parseFloat(o.paella_price) > 0) === isPaella
+                );
 
-    const total = baseOrder ? parseInt(baseOrder.qty) : 0;
+                const total = baseOrder ? parseInt(baseOrder.qty) : 0;
 
-    const used = this.deliveries.reduce((sum, d) => {
-        return sum + (d.orders?.reduce((inner, o) => {
-            return (
-                o.product_id === order.product_id &&
-                !!o.paella === isPaella
-            ) ? inner + (parseInt(o.qty) || 0) : inner;
-        }, 0) || 0);
-    }, 0);
+                const used = this.deliveries.reduce((sum, d) => {
+                    return sum + (d.orders?.reduce((inner, o) => {
+                        return (
+                            o.product_id === order.product_id &&
+                            !!o.paella === isPaella
+                        ) ? inner + (parseInt(o.qty) || 0) : inner;
+                    }, 0) || 0);
+                }, 0);
 
 
-    return Math.max(total - used, 0);
-},
+                return Math.max(total - used, 0);
+            },
+
+            // Check if a product is selected for this delivery
+            isOrderChecked(delivery, order) {
+                const isPaella = parseFloat(order.paella_price) > 0;
+
+                return delivery.orders?.some(o =>
+                    o.product_id === order.product_id &&
+                    !!o.paella === isPaella
+                );
+            },
+
+            onOrderCheckToggle(delivery, order, isChecked) {
+                if (!delivery.orders) delivery.orders = [];
+
+                const hasPaella = parseFloat(order.paella_price) > 0;
+
+                const existingIndex = delivery.orders.findIndex(o =>
+                    o.product_id === order.product_id &&
+                    !!o.paella === hasPaella
+                );
+
+                if (isChecked && existingIndex === -1) {
+                    delivery.orders.push({
+                        paella: hasPaella,
+                        product_id: order.product_id,
+                        qty: 1,
+                        product: order.product
+                    });
+                } else if (!isChecked && existingIndex !== -1) {
+                    delivery.orders.splice(existingIndex, 1);
+                }
+
+                this.refreshAllAvailableQty();
+
+                this.$nextTick(() => {
+                    if (delivery.orders.length > 0) {
+                        this.validateDeliveryDateTime(delivery, true);
+                    } else {
+                        delivery.need_time = '';
+                        delivery.need_date = '';
+                    }
+                });
+
+                this.validateDeliveryDateTime(delivery, true);
+
+                this.qtyValidationMessage = '';
+            },
+
+
+
+
+
+            autoSetDateTimeBasedOnOrders(delivery) {
+                const now = new Date();
+
+                const productTypes = delivery.orders.map(o => this.getProductType(o));
+                let offsetHours = 0;
+
+                if (productTypes.includes('baka')) offsetHours = Math.max(offsetHours, 72);
+                if (productTypes.includes('lechon')) offsetHours = Math.max(offsetHours, 24);
+                if (productTypes.includes('misc')) offsetHours = Math.max(offsetHours, 6);
+
+                const minAllowedTime = new Date(now.getTime() + offsetHours * 60 * 60 * 1000);
+
+                // Update need_date to match the offset
+                delivery.need_date = minAllowedTime.toISOString().split('T')[0];
+
+                const availableHours = this.getAvailableHours(delivery).filter(h => h >= 5 && h <= 20);
+
+                // Check if current selected time is valid
+                let selectedDateTime = null;
+                if (delivery.need_time) {
+                    selectedDateTime = new Date(`${delivery.need_date}T${delivery.need_time}`);
+                }
+
+                // Find the first valid hour that satisfies the required offset
+                const firstValidHour = availableHours.find(hour => {
+                    const timeStr = (hour < 10 ? '0' + hour : hour) + ':00';
+                    const dateTime = new Date(`${delivery.need_date}T${timeStr}`);
+                    return dateTime >= minAllowedTime;
+                });
+
+                // Only assign time if:
+                // - no time selected
+                // - or selected time is before the allowed minimum
+                if (
+                    !delivery.need_time ||
+                    (selectedDateTime && selectedDateTime < minAllowedTime)
+                ) {
+                    delivery.need_time = firstValidHour !== undefined
+                        ? (firstValidHour < 10 ? '0' + firstValidHour : firstValidHour) + ':00'
+                        : '';
+                }
+
+                // Optional: if still invalid (e.g., no valid hours at all), show warning
+                if (!delivery.need_time) {
+                    delivery.warningMessage = '⚠️ No valid time available for this date.';
+                } else {
+                    delivery.warningMessage = '';
+                }
+            },
+
+
+            validateDeliveryDateTime(delivery, force = false) {
+                const now = new Date();
+                const productTypes = delivery.orders?.map(o => this.getProductType(o)) || [];
+
+                let offsetHours = 0;
+                if (productTypes.includes('baka')) offsetHours = Math.max(offsetHours, 72);
+                if (productTypes.includes('lechon')) offsetHours = Math.max(offsetHours, 24);
+                if (productTypes.includes('misc')) offsetHours = Math.max(offsetHours, 6);
+
+                const minAllowedDateTime = new Date(now.getTime() + offsetHours * 60 * 60 * 1000);
+                const availableHours = this.getAvailableHours(delivery).filter(h => h >= 5 && h <= 20);
+
+                // Set or adjust delivery.need_date
+                const selectedDate = delivery.need_date ? new Date(delivery.need_date) : null;
+                if (force || !selectedDate || selectedDate < minAllowedDateTime) {
+                    const newDate = new Date(minAllowedDateTime);
+                    delivery.need_date = newDate.toISOString().split('T')[0];
+                }
+
+                // Set or validate need_time
+                const selectedTime = delivery.need_time;
+                let selectedDateTime = selectedTime
+                    ? new Date(`${delivery.need_date}T${selectedTime}`)
+                    : null;
+
+                let isValidTime = selectedDateTime && selectedDateTime >= minAllowedDateTime;
+
+                if (force || !isValidTime) {
+                    // Set to first valid hour
+                    const validHour = availableHours.find(hour => {
+                        const dt = new Date(`${delivery.need_date}T${hour < 10 ? '0' + hour : hour}:00`);
+                        return dt >= minAllowedDateTime;
+                    });
+
+                    delivery.need_time = validHour !== undefined
+                        ? (validHour < 10 ? '0' + validHour : validHour) + ':00'
+                        : '';
+                }
+
+                // Optional warning for lechon < 24h
+                delivery.warningMessage = '';
+                if (
+                    productTypes.includes('lechon') &&
+                    selectedDateTime &&
+                    (selectedDateTime - now) / 3600000 < 24
+                ) {
+                    delivery.warningMessage = `⚠️ Warning! The date and time you've selected (${delivery.need_date} - ${this.formatTime(delivery.need_time)}) is less than 24 hours from now. You can still proceed by contacting our <span class='underline text-blue-600 cursor-pointer' @click='openHotline = true'>Hotline</span>.`;
+                }
+
+                this.clearToProceed = true;
+            },
 
 
 
 
             // Get previously selected qty in *this delivery* to allow it again in dropdown
-getPreviouslySelectedQty(delivery, order) {
-    const isPaella = parseFloat(order.paella_price) > 0;
-    const found = delivery.orders?.find(o =>
-        o.product_id === order.product_id &&
-        !!o.paella === isPaella
-    );
-    
-    return found ? parseInt(found.qty) || 0 : 0;
-},
-
-
-getAvailableQtyForDropdown(delivery, order) {
-    return this.getRemainingQty(order) + this.getPreviouslySelectedQty(delivery, order);
-},
-
-
-            getOrderQtyBinding(delivery, order) {
-                const selected = delivery.orders?.find(o => o.product_id === order.product_id);
-                return selected ? selected.qty : '';
+            getPreviouslySelectedQty(delivery, order) {
+                const isPaella = parseFloat(order.paella_price) > 0;
+                const found = delivery.orders?.find(o =>
+                    o.product_id === order.product_id &&
+                    !!o.paella === isPaella
+                );
+                
+                return found ? parseInt(found.qty) || 0 : 0;
             },
 
-updateSelectedQty(delivery, order, newQty) {
-    if (!delivery.orders) delivery.orders = [];
 
-    const isPaella = parseFloat(order.paella_price) > 0;
+            getAvailableQtyForDropdown(delivery, order) {
+                return this.getRemainingQty(order) + this.getPreviouslySelectedQty(delivery, order);
+            },
 
-    const orderIndex = delivery.orders.findIndex(o =>
-        o.product_id === order.product_id &&
-        !!o.paella === isPaella
-    );
 
-    if (orderIndex !== -1) {
-        delivery.orders[orderIndex].qty = parseInt(newQty) || 0;
-    } else {
-        delivery.orders.push({
-            paella: isPaella,
-            product_id: order.product_id,
-            qty: parseInt(newQty) || 0,
-            product: order.product
-        });
-    }
+                        getOrderQtyBinding(delivery, order) {
+                            const selected = delivery.orders?.find(o => o.product_id === order.product_id);
+                            return selected ? selected.qty : '';
+                        },
 
-    this.refreshAllAvailableQty();
-},
+            updateSelectedQty(delivery, order, newQty) {
+                if (!delivery.orders) delivery.orders = [];
+
+                const isPaella = parseFloat(order.paella_price) > 0;
+
+                const orderIndex = delivery.orders.findIndex(o =>
+                    o.product_id === order.product_id &&
+                    !!o.paella === isPaella
+                );
+
+                if (orderIndex !== -1) {
+                    delivery.orders[orderIndex].qty = parseInt(newQty) || 0;
+                } else {
+                    delivery.orders.push({
+                        paella: isPaella,
+                        product_id: order.product_id,
+                        qty: parseInt(newQty) || 0,
+                        product: order.product
+                    });
+                }
+
+                this.refreshAllAvailableQty();
+            },
 
 
             refreshAllAvailableQty() {
@@ -2001,68 +2148,7 @@ canAddMoreDeliveries() {
                     return this.disabledDeliveryDates.includes(`${delivery.need_date} ${timeStr}`);
                 };
             },
-            validateDeliveryDateTime(delivery) {
-                const now = new Date();
-                const productTypes = delivery.orders?.map(o => this.getProductType(o)) || [];
 
-                const hasLechon = productTypes.includes('lechon');
-                const hasBaka = productTypes.includes('baka');
-                const hasMisc = productTypes.includes('misc');
-
-                let requiredOffsetHours = 0;
-
-                if (hasBaka) {
-                    requiredOffsetHours = 72; // 3 days
-                } else if (hasLechon) {
-                    requiredOffsetHours = 24;
-                } else if (hasMisc) {
-                    requiredOffsetHours = 6;
-                }
-
-                const currentTime = new Date();
-                let minAllowedTime = new Date(currentTime.getTime() + requiredOffsetHours * 60 * 60 * 1000);
-
-                const selectedDate = new Date(`${delivery.need_date}T00:00`);
-                const selectedTime = delivery.need_time ? parseInt(delivery.need_time.split(':')[0]) : null;
-
-                const selectedDateTime = delivery.need_time
-                    ? new Date(`${delivery.need_date}T${delivery.need_time}`)
-                    : null;
-
-                const availableHours = this.allHours.filter(hour => hour >= 5 && hour <= 20); // 5PM–8PM
-
-                // Auto-adjust date if selected date is too early
-                if (!delivery.need_date || selectedDateTime < minAllowedTime) {
-                    const adjustedDate = new Date(minAllowedTime);
-                    delivery.need_date = adjustedDate.toISOString().split('T')[0];
-                }
-
-                // Auto-adjust time
-                const validHour = availableHours.find(hour => {
-                    const hourDate = new Date(`${delivery.need_date}T${hour < 10 ? '0' + hour : hour}:00`);
-                    return hourDate >= minAllowedTime;
-                });
-
-                if (validHour !== undefined) {
-                    delivery.need_time = `${validHour < 10 ? '0' + validHour : validHour}:00`;
-                } else {
-                    // No valid time on selected day, so bump the date
-                    const nextDay = new Date(minAllowedTime);
-                    nextDay.setDate(nextDay.getDate() + 1);
-                    delivery.need_date = nextDay.toISOString().split('T')[0];
-                    delivery.need_time = '';
-                }
-
-                // Reset warning
-                delivery.warningMessage = '';
-
-                // Optional warning display for lechon < 24h
-                if (hasLechon && selectedDateTime && (selectedDateTime - now) / 3600000 < 24) {
-                    delivery.warningMessage = `⚠️ Warning! The date and time you've selected (${delivery.need_date} - ${this.formatTime(delivery.need_time)}) is less than 24 hours from now. Our standard processing time is at least 24 hours. However, you can still proceed by contacting our store directly at our <span class='underline text-blue-600 cursor-pointer' @click='openHotline = true'>Call Hotline</span> tab.`;
-                }
-
-                this.clearToProceed = true;
-            },
             formatTime(timeStr) {
                 const [hours, minutes] = timeStr?.split(':');
                 const hoursNum = parseInt(hours, 10);
