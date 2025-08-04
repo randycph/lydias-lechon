@@ -1220,10 +1220,26 @@ recomputeCouponTotals(delivery = null) {
                     let discountUsed = 0;
 
                     if (c.free_shipping) {
-                        discountUsed =
-                            parseFloat(c.free_shipping_discount_amount) === 100
-                                ? parseFloat(this.deliveryFee)
-                                : parseFloat(this.deliveryFee) * (parseFloat(c.free_shipping_discount_amount) / 100);
+                        const allowedLocations = (c.location || '')
+                            .split('|')
+                            .map(l => l.trim())
+                            .filter(l => l !== '');
+
+                        // Loop through each delivery fee entry and apply if location matches
+                        this.deliveryFees.forEach(row => {
+                            const isAllowed =
+                                allowedLocations.includes(row.location) ||
+                                allowedLocations.includes('all');
+
+                            if (isAllowed) {
+                                const fee = parseFloat(row.fee || 0);
+                                const rate = parseFloat(c.free_shipping_discount_amount || 0);
+
+                                discountUsed += rate === 100
+                                    ? fee
+                                    : (fee * rate / 100);
+                            }
+                        });
                     } else {
                         if (c.discount_type === 'amount') {
                             discountUsed = parseFloat(c.discount ?? 0);
@@ -1252,7 +1268,7 @@ recomputeCouponTotals(delivery = null) {
                 console.log('Total discount used:', discounted_amount);
 
 
-                formData.append('discount_amount', isNaN(discounted_amount) ? 0 : discounted_amount);
+                formData.append('discount_amount', couponsWithDiscountUsed.reduce((sum, c) => sum + (c.discount_used || 0), 0));
                 formData.append('coupon_data', JSON.stringify(this.coupons));
                 formData.append('order_amount', this.orderAmount);
                 formData.append('delivery_fee', this.deliveryFee);
