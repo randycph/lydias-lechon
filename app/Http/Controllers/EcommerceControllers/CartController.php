@@ -975,11 +975,41 @@ class CartController extends Controller
             $forecast_date = date('Y-m-d');
         }
 
-        if ($request->has('edit_sales_header') && !empty($request->edit_sales_header)) {
-            $salesHeader = SalesHeader::find($request->edit_sales_header);
+        if (session()->has('edit_sales_header_id') && !empty(session()->get('edit_sales_header_id'))) {
+            $salesHeader = SalesHeader::find(session()->get('edit_sales_header_id'));
             if (!$salesHeader) {
-                session()->forget('edit_sales_header');
+                session()->forget('edit_sales_header_id');
                 return redirect()->back()->withErrors(['error' => 'A problem has occurred.']);
+            }
+            $details = SalesDetail::where('sales_header_id', $salesHeader->id)->get();
+            if ($details) {
+                foreach ($details as $detail) {
+                    $detail->delete();
+                }
+            }
+            $couponCart = CouponCart::where('sales_header_id', $salesHeader->id)->get();
+            if ($couponCart) {
+                foreach ($couponCart as $coupon) {
+                    $coupon->delete();
+                }
+            }
+            $productDeliveryAddress = ProductDeliveryAddress::where('sales_header_id', $salesHeader->id)->get();
+            if ($productDeliveryAddress) {
+                foreach ($productDeliveryAddress as $address) {
+                    $address->delete();
+                }
+            }
+            $salesPayment = SalesPayment::where('sales_header_id', $salesHeader->id)->get();
+            if ($salesPayment) {
+                foreach ($salesPayment as $payment) {
+                    $payment->delete();
+                }
+            }
+            $ouponSale  = CouponSale::where('sales_header_id', $salesHeader->id)->get();
+            if ($ouponSale) {
+                foreach ($ouponSale as $sale) {
+                    $sale->delete();
+                }
             }
         } else {
             $salesHeader = SalesHeader::create([

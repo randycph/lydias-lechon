@@ -156,10 +156,9 @@ class MyAccountController extends Controller
             ]);
         }
 
-        session([
-            'edit_sales_header_id' => $salesHeader->id,
-            'old_sales_header_id' => $salesHeader->id,
-        ]);
+        session()->put('edit_sales_header_id', $salesHeader->id);
+        session()->put('old_sales_header_id', $salesHeader->id);
+        session()->save();
 
         return redirect()->route('page', ['slug' => 'menu'])->with('success_edit', 'Your order has been successfully edited. Please review your cart.');
     }
