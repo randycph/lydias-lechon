@@ -1756,7 +1756,7 @@
                 // Update need_date to match the offset
                 delivery.need_date = minAllowedTime.toISOString().split('T')[0];
 
-                const availableHours = this.getAvailableHours(delivery).filter(h => h >= 5 && h <= 20);
+                const availableHours = this.getAvailableHours(delivery);
 
                 // Check if current selected time is valid
                 let selectedDateTime = null;
@@ -1796,42 +1796,53 @@
                 const now = new Date();
                 const productTypes = delivery.orders?.map(o => this.getProductType(o)) || [];
 
+                // Get the maximum offset required
                 let offsetHours = 0;
                 if (productTypes.includes('baka')) offsetHours = Math.max(offsetHours, 72);
                 if (productTypes.includes('lechon')) offsetHours = Math.max(offsetHours, 24);
                 if (productTypes.includes('misc')) offsetHours = Math.max(offsetHours, 6);
 
-                const minAllowedDateTime = new Date(now.getTime() + offsetHours * 60 * 60 * 1000);
-                const availableHours = this.getAvailableHours(delivery).filter(h => h >= 5 && h <= 20);
+                let minAllowedDateTime = new Date(now.getTime() + offsetHours * 60 * 60 * 1000);
 
-                // Set or adjust delivery.need_date
-                const selectedDate = delivery.need_date ? new Date(delivery.need_date) : null;
+                let selectedDate = delivery.need_date ? new Date(delivery.need_date) : null;
+
+                // Update need_date if forced or empty/invalid
                 if (force || !selectedDate || selectedDate < minAllowedDateTime) {
-                    const newDate = new Date(minAllowedDateTime);
-                    delivery.need_date = newDate.toISOString().split('T')[0];
+                    delivery.need_date = minAllowedDateTime.toISOString().split('T')[0];
                 }
 
-                // Set or validate need_time
-                const selectedTime = delivery.need_time;
-                let selectedDateTime = selectedTime
-                    ? new Date(`${delivery.need_date}T${selectedTime}`)
-                    : null;
+                // List of hours for dropdown
+                const availableHours = this.getAvailableHours(delivery).filter(h => h >= 5 && h <= 20);
 
-                let isValidTime = selectedDateTime && selectedDateTime >= minAllowedDateTime;
+                // Try to find a valid time on selected date
+                const validHour = availableHours.find(hour => {
+                    const timeStr = (hour < 10 ? '0' + hour : hour) + ':00';
+                    const dt = new Date(`${delivery.need_date}T${timeStr}`);
+                    return dt >= minAllowedDateTime;
+                });
 
-                if (force || !isValidTime) {
-                    // Set to first valid hour
-                    const validHour = availableHours.find(hour => {
-                        const dt = new Date(`${delivery.need_date}T${hour < 10 ? '0' + hour : hour}:00`);
-                        return dt >= minAllowedDateTime;
-                    });
+                if (validHour !== undefined) {
+                    delivery.need_time = (validHour < 10 ? '0' + validHour : validHour) + ':00';
+                } else {
+                    // ❗ No valid time today — add 1 day and pick earliest valid hour tomorrow
+                    const nextDay = new Date(minAllowedDateTime);
+                    nextDay.setDate(nextDay.getDate() + 1);
+                    delivery.need_date = nextDay.toISOString().split('T')[0];
 
-                    delivery.need_time = validHour !== undefined
-                        ? (validHour < 10 ? '0' + validHour : validHour) + ':00'
+                    // Re-fetch valid hours for next day
+                    const hoursNextDay = this.getAvailableHours(delivery).filter(h => h >= 5 && h <= 20);
+                    const firstHour = hoursNextDay[0];
+
+                    delivery.need_time = firstHour !== undefined
+                        ? (firstHour < 10 ? '0' + firstHour : firstHour) + ':00'
                         : '';
                 }
 
-                // Optional warning for lechon < 24h
+                // Optional warning for lechon if under 24h
+                const selectedDateTime = delivery.need_time
+                    ? new Date(`${delivery.need_date}T${delivery.need_time}`)
+                    : null;
+
                 delivery.warningMessage = '';
                 if (
                     productTypes.includes('lechon') &&
@@ -2091,7 +2102,7 @@ canAddMoreDeliveries() {
 
                 return this.allHours.filter(hour => {
                     const testTime = new Date(`${delivery.need_date}T${hour < 10 ? '0' + hour : hour}:00`);
-                    return testTime >= minAllowedTime && hour >= 5 && hour <= 20;
+                    return testTime >= minAllowedTime && hour >= 7 && hour <= 20;
                 });
             },
 
