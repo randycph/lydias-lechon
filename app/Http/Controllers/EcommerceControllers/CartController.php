@@ -977,6 +977,33 @@ class CartController extends Controller
 
         if (session()->has('edit_sales_header_id') && !empty(session()->get('edit_sales_header_id'))) {
             $salesHeader = SalesHeader::find(session()->get('edit_sales_header_id'));
+            $salesHeader = SalesHeader::where('id', $salesHeader->id)->update([
+                'user_id' => $user->id,
+                'email' => $request->email ?? $user->email,
+                'customer_name' => $customer_name,
+                'customer_contact_number' => $customer_contact_number,
+                'customer_address' => $customer_delivery_adress,
+                'customer_delivery_adress' => $customer_delivery_adress,
+                'delivery_tracking_number' => '',
+                'delivery_type' => $delivery_type,
+                'delivery_fee_amount' => $request->shipping_type == 'pickup' ? 0 : $request->delivery_fee,
+                'order_source' => 'Web',
+                'gross_amount' => $totalPrice,
+                'tax_amount' => 0,
+                'net_amount' => $netAmount,
+                'discount_amount' => $discount,
+                'payment_status' => $request->order_amount <= 0 ? 'PAID' : 'PENDING',
+                'delivery_status' => '',
+                'status' => 'active',
+                'currency' => 'PHP',
+                'customer_location' => $customer_location,
+                'instruction' => $request->instruction,
+                'agent' => $request->agent,
+                'contact_person' => $contact_person,
+                'outlet' => $outlet,
+                'origin' => $origin,
+                'forecast_date' => $forecast_date
+            ]);
             if (!$salesHeader) {
                 session()->forget('edit_sales_header_id');
                 return redirect()->back()->withErrors(['error' => 'A problem has occurred.']);
