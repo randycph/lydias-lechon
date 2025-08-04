@@ -977,7 +977,7 @@ class CartController extends Controller
 
         if (session()->has('edit_sales_header_id') && !empty(session()->get('edit_sales_header_id'))) {
             $salesHeader = SalesHeader::find(session()->get('edit_sales_header_id'));
-            $salesHeader = SalesHeader::where('id', $salesHeader->id)->update([
+            SalesHeader::where('id', $salesHeader->id)->update([
                 'user_id' => $user->id,
                 'email' => $request->email ?? $user->email,
                 'customer_name' => $customer_name,
@@ -1004,6 +1004,7 @@ class CartController extends Controller
                 'origin' => $origin,
                 'forecast_date' => $forecast_date
             ]);
+            $salesHeader = SalesHeader::find($salesHeader->id);
             if (!$salesHeader) {
                 session()->forget('edit_sales_header_id');
                 return redirect()->back()->withErrors(['error' => 'A problem has occurred.']);
