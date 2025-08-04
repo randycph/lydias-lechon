@@ -140,7 +140,7 @@ x-data="{
                                             </div>
                                             <div class="">
                                                 <span class="text-sm text-gray-600" x-text="new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cart?.product?.price * (cart?.qty || 1))"></span>
-                                                <span class="italic text-sm text-gray-600" x-text="cart?.paella_price > 0 ? '+ ₱' + parseFloat(cart.paella_price).toLocaleString(undefined, { minimumFractionDigits: 2 }) : ''"></span>
+                                                <span class="italic text-sm text-gray-600" x-text="cart?.paella_price > 0 ? '+ ₱' + parseFloat(cart.paella_price * cart.qty).toLocaleString(undefined, { minimumFractionDigits: 2 }) : ''"></span>
                                             </div>
                                             <!-- Quantity Selector -->
                                             <div class="flex items-center space-x-1">
@@ -210,7 +210,7 @@ x-data="{
                                                     carts.reduce(
                                                         (total, cart) => 
                                                             total +
-                                                            (Number(cart.paella_price) || 0) +
+                                                            (Number(cart.paella_price * (cart?.qty || 1)) || 0) +
                                                             ((cart?.is_free_product ? 0 : (Number(cart?.product?.price) || 0) * (Number(cart?.qty) || 1))),
                                                         0
                                                     )
