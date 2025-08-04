@@ -327,6 +327,7 @@
                                                                     />
                                                                     <label :for="'order-' + order.id + '-' + index + '-' + index2 + '-' + (order.paella_price > 0 ? 'paella' : 'nopaella')" class="flex-1">
                                                                         <span x-text="order.product.name + (order.paella_price > 0 ? ' Boneless with Paella' : '') + (getRemainingQty(order) <= 0 && !isOrderChecked(delivery, order) ? ' (Fully Assigned)' : '')"></span>
+                                                                        <span x-show="order.is_free_product" class="text-green-600 font-semibold text-sm">(Free)</span>
                                                                     </label>
                                                                 </div>
 
@@ -1668,11 +1669,14 @@
             // Get remaining qty for a product globally (used across all deliveries)
             getRemainingQty(order) {
                 const isPaella = parseFloat(order.paella_price) > 0;
+                const isFree = !!order.is_free_product;
+
 
                 // Fetch from original clean source
                 const baseOrder = this.orders.find(o =>
                     o.product_id === order.product_id &&
-                    (parseFloat(o.paella_price) > 0) === isPaella
+                    (parseFloat(o.paella_price) > 0) === isPaella &&
+                    !!o.is_free_product === isFree
                 );
 
                 const total = baseOrder ? parseInt(baseOrder.qty) : 0;
@@ -1681,7 +1685,8 @@
                     return sum + (d.orders?.reduce((inner, o) => {
                         return (
                             o.product_id === order.product_id &&
-                            !!o.paella === isPaella
+                            !!o.paella === isPaella &&
+                            !!o.is_free_product === isFree
                         ) ? inner + (parseInt(o.qty) || 0) : inner;
                     }, 0) || 0);
                 }, 0);
@@ -1693,10 +1698,12 @@
             // Check if a product is selected for this delivery
             isOrderChecked(delivery, order) {
                 const isPaella = parseFloat(order.paella_price) > 0;
+                const isFree = !!order.is_free_product;
 
                 return delivery.orders?.some(o =>
                     o.product_id === order.product_id &&
-                    !!o.paella === isPaella
+                    !!o.paella === isPaella &&
+                    !!o.is_free_product === isFree
                 );
             },
 
@@ -1704,15 +1711,19 @@
                 if (!delivery.orders) delivery.orders = [];
 
                 const hasPaella = parseFloat(order.paella_price) > 0;
+                const isPaella = parseFloat(order.paella_price) > 0;
+                const isFree = !!order.is_free_product;
 
                 const existingIndex = delivery.orders.findIndex(o =>
                     o.product_id === order.product_id &&
-                    !!o.paella === hasPaella
+                    !!o.paella === isPaella &&
+                    !!o.is_free_product === isFree
                 );
 
                 if (isChecked && existingIndex === -1) {
                     delivery.orders.push({
-                        paella: hasPaella,
+                        paella: isPaella,
+                        is_free_product: isFree,
                         product_id: order.product_id,
                         qty: 1,
                         product: order.product
@@ -1875,19 +1886,21 @@
             },
 
 
-                        getOrderQtyBinding(delivery, order) {
-                            const selected = delivery.orders?.find(o => o.product_id === order.product_id);
-                            return selected ? selected.qty : '';
-                        },
+            getOrderQtyBinding(delivery, order) {
+                const selected = delivery.orders?.find(o => o.product_id === order.product_id);
+                return selected ? selected.qty : '';
+            },
 
             updateSelectedQty(delivery, order, newQty) {
                 if (!delivery.orders) delivery.orders = [];
 
                 const isPaella = parseFloat(order.paella_price) > 0;
+                const isFree = !!order.is_free_product;
 
                 const orderIndex = delivery.orders.findIndex(o =>
                     o.product_id === order.product_id &&
-                    !!o.paella === isPaella
+                    !!o.paella === isPaella &&
+                    !!o.is_free_product === isFree
                 );
 
                 if (orderIndex !== -1) {
@@ -1946,44 +1959,45 @@
                 });
             },
 
-validateAllQtyUsed() {
-    const expectedTotals = {};
-    const assignedTotals = {};
+            validateAllQtyUsed() {
+                const expectedTotals = {};
+                const assignedTotals = {};
 
-    // Build expected totals (use product_id + paella as key)
-    this.orders.forEach(order => {
-        const isPaella = parseFloat(order.paella_price) > 0;
-        const key = `${order.product_id}-${isPaella ? 'paella' : 'nopaella'}`;
-        expectedTotals[key] = parseInt(order.qty) || 0;
-    });
+                // Build expected totals (use product_id + paella as key)
+                this.orders.forEach(order => {
+                    const isPaella = parseFloat(order.paella_price) > 0;
+                    const isFree = !!order.is_free_product;
+                    const key = `${order.product_id}-${isPaella ? 'paella' : 'nopaella'}-${isFree ? 'free' : 'paid'}`;
+                    expectedTotals[key] = parseInt(order.qty) || 0;
+                });
 
-    // Build assigned totals across all deliveries
-    this.deliveries.forEach(delivery => {
-        if (!Array.isArray(delivery.orders)) return;
+                // Build assigned totals across all deliveries
+                this.deliveries.forEach(delivery => {
+                    if (!Array.isArray(delivery.orders)) return;
 
-        delivery.orders.forEach(o => {
-            if (!o.product_id || !o.qty) return;
+                    delivery.orders.forEach(o => {
+                        if (!o.product_id || !o.qty) return;
 
-            const key = `${o.product_id}-${!!o.paella ? 'paella' : 'nopaella'}`;
-            assignedTotals[key] = (assignedTotals[key] || 0) + parseInt(o.qty);
-        });
-    });
+                        const key = `${o.product_id}-${!!o.paella ? 'paella' : 'nopaella'}-${!!o.is_free_product ? 'free' : 'paid'}`;
+                        assignedTotals[key] = (assignedTotals[key] || 0) + parseInt(o.qty);
+                    });
+                });
 
-    // Compare expected vs assigned
-    for (const key in expectedTotals) {
-        const expected = expectedTotals[key];
-        const assigned = assignedTotals[key] || 0;
+                // Compare expected vs assigned
+                for (const key in expectedTotals) {
+                    const expected = expectedTotals[key];
+                    const assigned = assignedTotals[key] || 0;
 
-        if (expected !== assigned) {
-            this.qtyValidationMessage = '⚠️ Please assign all available quantities before proceeding.';
-            return false;
-        }
-    }
+                    if (expected !== assigned) {
+                        this.qtyValidationMessage = '⚠️ Please assign all available quantities before proceeding.';
+                        return false;
+                    }
+                }
 
-    // All quantities match
-    this.qtyValidationMessage = '';
-    return true;
-},
+                // All quantities match
+                this.qtyValidationMessage = '';
+                return true;
+            },
 
 
             qtyValidationMessage: '',

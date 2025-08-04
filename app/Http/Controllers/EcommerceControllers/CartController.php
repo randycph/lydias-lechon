@@ -839,7 +839,7 @@ class CartController extends Controller
 
     public function save_sales(Request $request) 
     {
-        // dd($request->all());
+        dd($request->all());
         $request->validate([
             'mobile' => [
                 'required',
