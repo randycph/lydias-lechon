@@ -157,6 +157,7 @@ class MyAccountController extends Controller
         }
 
         session([
+            'edit_sales_header_id' => $salesHeader->id,
             'old_sales_header_id' => $salesHeader->id,
         ]);
 
