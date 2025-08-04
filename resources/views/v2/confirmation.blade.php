@@ -30,7 +30,7 @@
                         <a href="{{ route('order-history') }}" class="text-center">View Order History</a>
                     </div>
                 @else
-                    @if (strtolower($sales->PaymentStatus) != 'paid')
+                    @if (strtolower($sales->PaymentStatus) != 'paid' && $sales->status != 'CANCELLED')
                     <button @click="openPaymentModal({{$sales->net_amount}}, '{{ $sales->order_number }}')" type="button"
                         class="border {{ $sales->status == 'CANCELLED' ? 'hidden' : '' }} border-primary text-primary px-6 py-4 w-full text-center rounded-md hover:bg-primary hover:text-white transition-colors duration-300">
                         Pay Now
@@ -53,7 +53,7 @@
                     </div>
                     <div class="flex items-center text-sm justify-between px-4 py-3 border-b border-gray-200">
                         <div>Payment Status</div>
-                        <div class="font-bold {{ strtolower($sales->PaymentStatus) == 'paid' ? 'text-primary' : 'text-yellow-500' }}">{{ $sales->PaymentStatus }}</div>
+                        <div class="font-bold {{ strtolower($sales->PaymentStatus) == 'paid' ? 'text-primary' : 'text-yellow-500' }}">{{ $sales->PaymentStatus }}  {{ $sales->status == 'CANCELLED' ? '- CANCELLED' : '' }}</div>
                     </div>
                     @if ($sales->delivery_type == 'Door to door delivery')
                     <div class="flex items-center text-sm  justify-between px-4 py-3 border-b border-gray-200">
