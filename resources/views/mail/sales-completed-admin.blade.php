@@ -668,6 +668,101 @@ Media Item
                                           </table>
                                           <span class="devider">
                                           </span>
+
+                                          @if (count($h?->deliveryAddress) > 0)
+                                          <table class="row">
+                                                <tr>
+                                                      <td class="wrapper last">
+                                                            <!-- BEGIN: Disscount Content -->
+                                                            <table class="twelve columns">
+                                                                  <tr>
+                                                                        <td>
+                                                                              <h4>Order Details</h4>
+                                                                              <span class="devider"></span>
+                                                                              <table width="100%" style="font-size:11px;">
+
+                                                                                    <tr>
+                                                                                          <th align="left">Code</th>
+                                                                                          <th align="left">Product</th>
+                                                                                          <th align="left">No of Pax</th>  
+                                                                                          <th align="left">Qty</th>
+                                                                                          <th align="left">Price</th>
+                                                                                          <th align="left">Total</th>
+                                                                                    </tr>
+                                                                                    <tr>
+                                                                                          <td colspan="5"></td>
+                                                                                    </tr>
+
+                                                                                    @forelse($h->items as $details)                                                      
+                                                                                    <tr>
+                                                                                    <td align="left" style="font-size:11px;padding: 3px;">{{$details->product->code}}</td>    
+                                                                                    <td align="left" style="font-size:11px;padding: 3px;">
+                                                                                          {{$details->product_name}} @if($details->paella_price > 0) Boneless with Paella @endif
+                                                                                    </td> 
+                                                                                    <td align="left" style="font-size:11px;padding: 3px;">{{$details->no_of_pax}}</td>                         
+                                                                                    <td align="left" style="font-size:11px;padding: 3px;">{{number_format($details->qty, 0)}}</td>
+                                                                                    <td align="left" style="font-size:11px;padding: 3px;">{{number_format(($details->paella_price + $details->price),2)}}</td>
+                                                                                    <td align="left" style="font-size:11px;padding: 3px;">{{number_format($details->gross_amount, 2)}}</td>                               
+                                                                                    </tr>
+                                                                                    @empty
+                                                                                    @endforelse
+                                                                                    <tr style="font-weight:bold;">
+                                                                                          <td class="tx-left" colspan="6" style="font-size:11px;">Subtotal</td>
+                                                                                          <td class="tx-right" style="font-size:11px;">{{number_format($h->gross_amount, 2)}}</td> 
+                                                                                    </tr>
+                                                                                    @if($h->delivery_fee_amount > 0 && $h->delivery_type == 'Door to door delivery')
+                                                                                    <tr>
+                                                                                          <td class="tx-left " colspan="6" style="font-size:11px;">Delivery Fee</td>
+                                                                                          <td class="tx-right " style="font-size:11px;">{{number_format($h->delivery_fee_amount, 2)}}</td>
+                                                                                    </tr>
+                                                                                    @endif
+                                                                                    @if($h->gross_amount > 0)
+                                                                                    <tr><td colspan="7"><hr></td></tr>
+                                                                                    <tr style="font-weight:bold;">
+                                                                                          <td class="tx-left" colspan="6" style="font-size:11px;">Total</td>
+                                                                                          <td class="tx-right" style="font-size:11px;">{{number_format($h->gross_amount + $h->delivery_fee_amount, 2)}}</td> 
+                                                                                    </tr>
+                                                                                    @endif      
+                                                                              </table>
+                                                                        </td>
+                                                                        <td class="expander">
+                                                                        </td>
+                                                                  </tr>
+                                                            </table>
+                                                            <table class="twelve columns">
+                                                                  <tr>
+                                                                        <td>
+                                                                              <h4>Delivery Addresses</h4>
+                                                                              <span class="devider"></span>
+                                                                              <table width="100%" style="font-size:11px;">
+
+                                                                                    <tr>
+                                                                                          <th align="left">Contact Person</th>
+                                                                                          <th align="left">Contact Number</th>
+                                                                                          <th align="left">Delivery Date</th>  
+                                                                                          <th align="left">Delivery Address</th>
+                                                                                    </tr>
+
+                                                                                    @forelse($h?->deliveryAddress as $address)                                                      
+                                                                                    <tr>
+                                                                                    <td align="left" style="font-size:11px;padding: 3px;">{{$address->contact_person}}</td>
+                                                                                    <td align="left" style="font-size:11px;padding: 3px;">{{$address->contact_tel}}</td>
+                                                                                    <td align="left" style="font-size:11px;padding: 3px;">{{$address->delivery_date}}</td>
+                                                                                    <td align="left" style="font-size:11px;padding: 3px;">{{$address->address}}</td>
+                                                                                    </tr>
+                                                                                    @empty
+                                                                                    @endforelse   
+                                                                              </table>
+                                                                        </td>
+                                                                        <td class="expander">
+                                                                        </td>
+                                                                  </tr>
+                                                            </table>
+                                                            <!-- END: Disscount Content -->
+                                                      </td>
+                                                </tr>
+                                          </table>
+                                          @else
                                           <table class="row">
                                                 <tr>
                                                       <td class="wrapper last">
@@ -727,6 +822,7 @@ Media Item
                                                       </td>
                                                 </tr>
                                           </table>
+                                          @endif
                                     </td>
                               </tr>                              
                         </table>

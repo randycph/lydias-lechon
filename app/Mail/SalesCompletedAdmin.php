@@ -28,7 +28,12 @@ class SalesCompletedAdmin extends Mailable
      */
     public function build()
     {
-        return $this->view('mail.sales-completed-admin')
+        return $this->view('mail.sales-completed-admin', ['h' => $this->h])
             ->subject('Sales Transaction ('.$this->h->order_number.')');
     }
+
+    // {
+    //     return $this->markdown('emails.sales-completed-admin')
+    //         ->subject('Sales Transaction (' . $this->h->order_number . ')');
+    // }
 }
