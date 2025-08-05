@@ -10,7 +10,7 @@
     $deliveryFee = 0;
     if (count($carts) > 0) {
         foreach ($carts as $cart) {
-            $paella_price = $cart['paella_price'] > 0 ? $cart['product']['paella_price'] : 0;
+            $paella_price = $cart['paella_price'] > 0 ? $cart['product']['paella_price'] * $cart['qty'] : 0;
             $total += ($cart['price'] + $paella_price) * $cart['qty'];
         }
     }
@@ -276,27 +276,27 @@
                                             <div class="flex flex-col gap-4">
                                                 <div class="w-full">
                                                     <label class="font-bold block text-sm mb-1">Address</label>
-                                                    <textarea x-model="delivery.address" @change="validateDeliveryAddress(delivery, 'address')"
-                                                        class="w-full border border-gray-300 p-2 rounded-md" placeholder="Enter address" :class="{'border-red-500': errors.address}"></textarea>
-                                                    <template x-if="errors.address">
-                                                        <div class="text-red-500 text-xs mt-1" x-text="errors.address"></div>
+                                                    <textarea x-model="delivery.address" @change="validateDeliveryAddress(delivery, 'address', index)"
+                                                        class="w-full border border-gray-300 p-2 rounded-md" placeholder="Enter address" :class="{'border-red-500': errors[index].address}"></textarea>
+                                                    <template x-if="errors[index].address">
+                                                        <div class="text-red-500 text-xs mt-1" x-text="errors[index].address"></div>
                                                     </template>
                                                 </div>
                                                 <div class="w-full flex gap-4">
                                                     <div class="w-full lg:w-1/2">
                                                         <label class="font-bold block text-sm mb-1">Contact Person</label>
-                                                        <input type="text" x-model="delivery.name" @change="validateDeliveryAddress(delivery, 'name')"
-                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors.name}" />
-                                                        <template x-if="errors.name">
-                                                            <div class="text-red-500 text-xs mt-1" x-text="errors.name"></div>
+                                                        <input type="text" x-model="delivery.name" @change="validateDeliveryAddress(delivery, 'name', index)"
+                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors[index].name}" />
+                                                        <template x-if="errors[index].name">
+                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index].name"></div>
                                                         </template>
                                                     </div>
                                                     <div class="w-full lg:w-1/2">
                                                         <label class="font-bold block text-sm mb-1">Contact Number</label>
-                                                        <input type="tel" x-model="delivery.phone" @change="validateDeliveryAddress(delivery, 'phone')"
-                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors.phone}" />
-                                                        <template x-if="errors.phone">
-                                                            <div class="text-red-500 text-xs mt-1" x-text="errors.phone"></div>
+                                                        <input type="tel" x-model="delivery.phone" @change="validateDeliveryAddress(delivery, 'phone', index)"
+                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors[index].phone}" />
+                                                        <template x-if="errors[index].phone">
+                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index].phone"></div>
                                                         </template>
                                                     </div>
                                                 </div>
@@ -373,8 +373,8 @@
                                                                 @change="validateDeliveryDateTime(delivery)"
                                                                 x-model="delivery.need_date" name="need_date" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
                                                         
-                                                            <template x-if="errors.need_date">
-                                                                <div class="text-red-500 text-xs mt-1" x-text="errors.need_date"></div>
+                                                            <template x-if="errors[index].need_date">
+                                                                <div class="text-red-500 text-xs mt-1" x-text="errors[index].need_date"></div>
                                                             </template>
                                                         </div>
                                                     </div>
@@ -405,8 +405,8 @@
                                                                 </template>
                                                             </select>
 
-                                                            <template x-if="errors.need_time">
-                                                                <div class="text-red-500 text-xs mt-1" x-text="errors.need_time"></div>
+                                                            <template x-if="errors[index].need_time">
+                                                                <div class="text-red-500 text-xs mt-1" x-text="errors[index].need_time"></div>
                                                             </template>
                                                         </div>
                                                         <div x-show="noNeededTime" class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
@@ -423,7 +423,7 @@
                                                     <div class="w-full">
                                                         <label :for="'locations' + index" class="font-bold">Select Location <span
                                                                 class="text-red-700">*</span></label>
-                                                        <select x-model="delivery.location" :id="'locations' + index" name="location" @change="getDeliveryFeeForMultipleDelivery(index)" required
+                                                        <select x-model="delivery.location" :id="'locations' + index" name="location" @change="getDeliveryFeeForMultipleDelivery(index); validateDeliveryAddress(delivery, 'location', index);" required
                                                             class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                                             <option selected value="">Choose a location</option>
                                                             @foreach ($locations as $location)
@@ -436,6 +436,10 @@
                                                         >
                                                             Order is required to get delivery fee. Please select at least one order for this delivery address.
                                                         </p>
+
+                                                        <template x-if="errors[index] && errors[index].location">
+                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index].location"></div>
+                                                        </template>
                                                     </div>
                                                 </div>
 
@@ -1597,10 +1601,12 @@ recomputeCouponTotals(delivery = null) {
             // Get selected quantity for dropdown binding
             getSelectedQty(delivery, order) {
                 const isPaella = parseFloat(order.paella_price) > 0;
+                const isFree = !!order.is_free_product;
 
                 const found = delivery.orders?.find(o =>
                     o.product_id === order.product_id &&
-                    !!o.paella === isPaella
+                    !!o.paella === isPaella &&
+                    !!o.is_free_product === isFree
                 );
 
                 return found ? found.qty : '';
@@ -1926,9 +1932,11 @@ recomputeCouponTotals(delivery = null) {
             // Get previously selected qty in *this delivery* to allow it again in dropdown
             getPreviouslySelectedQty(delivery, order) {
                 const isPaella = parseFloat(order.paella_price) > 0;
+                const isFree = !!order.is_free_product;
                 const found = delivery.orders?.find(o =>
                     o.product_id === order.product_id &&
-                    !!o.paella === isPaella
+                    !!o.paella === isPaella &&
+                    !!o.is_free_product === isFree
                 );
                 
                 return found ? parseInt(found.qty) || 0 : 0;
@@ -2088,9 +2096,12 @@ canAddMoreDeliveries() {
 
 
             validateBeforeAddDelivery() {
-                const lastDelivery = this.deliveries[this.deliveries.length - 1];
+                const index = this.deliveries.length - 1;
+                const lastDelivery = this.deliveries[index];
 
-                this.errors = {}; // Clear previous errors
+                // Initialize errors for this delivery
+                if (!this.errors) this.errors = {};
+                this.errors[index] = {}; // Clear previous errors for this delivery
 
                 if (!lastDelivery) return;
 
@@ -2107,23 +2118,28 @@ canAddMoreDeliveries() {
                 // Check required address fields
                 const { address, name, phone, location, need_date, need_time, sms } = lastDelivery;
                 
-                if (!address) this.errors.address = 'Address is required.';
-                if (!name) this.errors.name = 'Contact person is required.';
-                if (!location) this.errors.location = 'Location is required.';
-                if (!need_date) this.errors.need_date = 'Date is required.';
-                if (!need_time) this.errors.need_time = 'Time is required.';
+                if (!address) this.errors[index].address = 'Address is required.';
+                if (!name) this.errors[index].name = 'Contact person is required.';
+                if (!location) this.errors[index].location = 'Location is required.';
+                if (!need_date) this.errors[index].need_date = 'Date is required.';
+                if (!need_time) this.errors[index].need_time = 'Time is required.';
+
+                if (!location) {
+                        this.errors[index].location = 'Location is required.';
+                        return;
+                    }
 
                 // Phone validation for SMS
                 if (sms && phone) {
                     const phonePattern = /^(09|(\+63)|639)\d{9}$/;
                     if (!phonePattern.test(phone)) {
-                        this.errors.phone = 'Please provide a valid phone number for SMS notifications.';
+                        this.errors[index].phone = 'Please provide a valid phone number for SMS notifications.';
                         return;
                     }
                 }
 
                 if (!phone && sms) {
-                    this.errors.phone = 'Please provide a phone number if you want the recipient to receive SMS notifications.';
+                    this.errors[index].phone = 'Please provide a phone number if you want the recipient to receive SMS notifications.';
                     return;
                 }
 
@@ -2325,12 +2341,13 @@ canAddMoreDeliveries() {
                 if (removed?.location) {
                     this.deliveryFees = this.deliveryFees.filter(f => f.location !== removed.location);
 
-                    // update delivery fee and total amount
-                    // this.deliveryFee = this.deliveryFees.reduce((acc, item) => acc + item.fee, 0);
-
                     this.deliveryFee = this.deliveryFees.reduce((sum, item) => sum + parseFloat(item.fee || 0) - parseFloat(item.discount || 0), 0);
 
                 }
+
+                this.deliveries.forEach((_, i) => {
+                    this.getDeliveryFeeForMultipleDelivery(i);
+                });
 
                 this.computeTotal();
             },
@@ -2373,19 +2390,19 @@ canAddMoreDeliveries() {
                 return new Date().toISOString().split('T')[0]; // Default to today
             },
 
-            validateDeliveryAddress(delivery, type) {
+            validateDeliveryAddress(delivery, type, index = null) {
                 if (type === 'address' && delivery.address) {
-                    this.errors.address = '';
+                    this.errors[index].address = '';
                 } else if (type === 'name' && delivery.name) {
-                    this.errors.name = '';
+                    this.errors[index].name = '';
                 } else if (type === 'phone' && delivery.phone) {
-                    this.errors.phone = '';
+                    this.errors[index].phone = '';
                 } else if (type === 'location' && delivery.location) {
-                    this.errors.location = '';
+                    this.errors[index].location = '';
                 } else if (type === 'need_date' && delivery.need_date) {
-                    this.errors.need_date = '';
+                    this.errors[index].need_date = '';
                 } else if (type === 'need_time' && delivery.need_time) {
-                    this.errors.need_time = '';
+                    this.errors[index].need_time = '';
                 }
             }
         }

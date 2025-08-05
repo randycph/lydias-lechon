@@ -123,6 +123,7 @@ class MyAccountController extends Controller
     public function edit_order(Request $request) {
 
         session()->forget('old_sales_header_id');
+        session()->forget('edit_sales_header_id');
 
         $salesHeader = SalesHeader::whereId($request->sales_id)->first();
 
@@ -134,14 +135,14 @@ class MyAccountController extends Controller
             return back()->with('error_cancelled', "Your order cannot be edited at this time");
         }
 
-        $cart = Cart::where('user_id', Auth::user()->id)->get();
+        $carts = Cart::where('user_id', Auth::user()->id)->get();
 
-        if (!$cart) {
+        if (!$carts) {
             return back()->with('error_cancelled', "Your order cannot be edited at this time");
         }
 
         // Clear existing cart items
-        foreach ($cart as $item) {
+        foreach ($carts as $item) {
             $item->delete();
         }
 
