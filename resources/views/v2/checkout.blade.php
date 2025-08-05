@@ -276,7 +276,7 @@
                                             <div class="flex flex-col gap-4">
                                                 <div class="w-full">
                                                     <label class="font-bold block text-sm mb-1">Address</label>
-                                                    <textarea x-model="delivery.address"
+                                                    <textarea x-model="delivery.address" @change="validateDeliveryAddress(delivery, 'address')"
                                                         class="w-full border border-gray-300 p-2 rounded-md" placeholder="Enter address" :class="{'border-red-500': errors.address}"></textarea>
                                                     <template x-if="errors.address">
                                                         <div class="text-red-500 text-xs mt-1" x-text="errors.address"></div>
@@ -285,7 +285,7 @@
                                                 <div class="w-full flex gap-4">
                                                     <div class="w-full lg:w-1/2">
                                                         <label class="font-bold block text-sm mb-1">Contact Person</label>
-                                                        <input type="text" x-model="delivery.name"
+                                                        <input type="text" x-model="delivery.name" @change="validateDeliveryAddress(delivery, 'name')"
                                                             class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors.name}" />
                                                         <template x-if="errors.name">
                                                             <div class="text-red-500 text-xs mt-1" x-text="errors.name"></div>
@@ -293,7 +293,7 @@
                                                     </div>
                                                     <div class="w-full lg:w-1/2">
                                                         <label class="font-bold block text-sm mb-1">Contact Number</label>
-                                                        <input type="tel" x-model="delivery.phone"
+                                                        <input type="tel" x-model="delivery.phone" @change="validateDeliveryAddress(delivery, 'phone')"
                                                             class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors.phone}" />
                                                         <template x-if="errors.phone">
                                                             <div class="text-red-500 text-xs mt-1" x-text="errors.phone"></div>
@@ -2371,6 +2371,22 @@ canAddMoreDeliveries() {
                 } 
 
                 return new Date().toISOString().split('T')[0]; // Default to today
+            },
+
+            validateDeliveryAddress(delivery, type) {
+                if (type === 'address' && delivery.address) {
+                    this.errors.address = '';
+                } else if (type === 'name' && delivery.name) {
+                    this.errors.name = '';
+                } else if (type === 'phone' && delivery.phone) {
+                    this.errors.phone = '';
+                } else if (type === 'location' && delivery.location) {
+                    this.errors.location = '';
+                } else if (type === 'need_date' && delivery.need_date) {
+                    this.errors.need_date = '';
+                } else if (type === 'need_time' && delivery.need_time) {
+                    this.errors.need_time = '';
+                }
             }
         }
     }
