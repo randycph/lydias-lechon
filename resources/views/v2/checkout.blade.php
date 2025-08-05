@@ -276,7 +276,7 @@
                                             <div class="flex flex-col gap-4">
                                                 <div class="w-full">
                                                     <label class="font-bold block text-sm mb-1">Address</label>
-                                                    <textarea x-model="delivery.address" @change="validateDeliveryAddress(delivery, 'address')"
+                                                    <textarea x-model="delivery.address" @change="validateDeliveryAddress(delivery, 'address', index)"
                                                         class="w-full border border-gray-300 p-2 rounded-md" placeholder="Enter address" :class="{'border-red-500': errors[index].address}"></textarea>
                                                     <template x-if="errors[index].address">
                                                         <div class="text-red-500 text-xs mt-1" x-text="errors[index].address"></div>
@@ -285,7 +285,7 @@
                                                 <div class="w-full flex gap-4">
                                                     <div class="w-full lg:w-1/2">
                                                         <label class="font-bold block text-sm mb-1">Contact Person</label>
-                                                        <input type="text" x-model="delivery.name" @change="validateDeliveryAddress(delivery, 'name')"
+                                                        <input type="text" x-model="delivery.name" @change="validateDeliveryAddress(delivery, 'name', index)"
                                                             class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors[index].name}" />
                                                         <template x-if="errors[index].name">
                                                             <div class="text-red-500 text-xs mt-1" x-text="errors[index].name"></div>
@@ -293,7 +293,7 @@
                                                     </div>
                                                     <div class="w-full lg:w-1/2">
                                                         <label class="font-bold block text-sm mb-1">Contact Number</label>
-                                                        <input type="tel" x-model="delivery.phone" @change="validateDeliveryAddress(delivery, 'phone')"
+                                                        <input type="tel" x-model="delivery.phone" @change="validateDeliveryAddress(delivery, 'phone', index)"
                                                             class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors[index].phone}" />
                                                         <template x-if="errors[index].phone">
                                                             <div class="text-red-500 text-xs mt-1" x-text="errors[index].phone"></div>
@@ -423,7 +423,7 @@
                                                     <div class="w-full">
                                                         <label :for="'locations' + index" class="font-bold">Select Location <span
                                                                 class="text-red-700">*</span></label>
-                                                        <select x-model="delivery.location" :id="'locations' + index" name="location" @change="getDeliveryFeeForMultipleDelivery(index); validateDeliveryAddress(delivery, 'location');" required
+                                                        <select x-model="delivery.location" :id="'locations' + index" name="location" @change="getDeliveryFeeForMultipleDelivery(index); validateDeliveryAddress(delivery, 'location', index);" required
                                                             class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                                             <option selected value="">Choose a location</option>
                                                             @foreach ($locations as $location)
@@ -2390,19 +2390,19 @@ canAddMoreDeliveries() {
                 return new Date().toISOString().split('T')[0]; // Default to today
             },
 
-            validateDeliveryAddress(delivery, type) {
+            validateDeliveryAddress(delivery, type, index = null) {
                 if (type === 'address' && delivery.address) {
-                    this.errors.address = '';
+                    this.errors[index].address = '';
                 } else if (type === 'name' && delivery.name) {
-                    this.errors.name = '';
+                    this.errors[index].name = '';
                 } else if (type === 'phone' && delivery.phone) {
-                    this.errors.phone = '';
+                    this.errors[index].phone = '';
                 } else if (type === 'location' && delivery.location) {
-                    this.errors.location = '';
+                    this.errors[index].location = '';
                 } else if (type === 'need_date' && delivery.need_date) {
-                    this.errors.need_date = '';
+                    this.errors[index].need_date = '';
                 } else if (type === 'need_time' && delivery.need_time) {
-                    this.errors.need_time = '';
+                    this.errors[index].need_time = '';
                 }
             }
         }
