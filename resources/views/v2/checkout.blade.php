@@ -423,7 +423,7 @@
                                                     <div class="w-full">
                                                         <label :for="'locations' + index" class="font-bold">Select Location <span
                                                                 class="text-red-700">*</span></label>
-                                                        <select x-model="delivery.location" :id="'locations' + index" name="location" @change="getDeliveryFeeForMultipleDelivery(index)" required
+                                                        <select x-model="delivery.location" :id="'locations' + index" name="location" @change="getDeliveryFeeForMultipleDelivery(index); validateDeliveryAddress(delivery, 'location');" required
                                                             class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                                             <option selected value="">Choose a location</option>
                                                             @foreach ($locations as $location)
@@ -436,6 +436,10 @@
                                                         >
                                                             Order is required to get delivery fee. Please select at least one order for this delivery address.
                                                         </p>
+
+                                                        <template x-if="errors[index] && errors[index].location">
+                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index].location"></div>
+                                                        </template>
                                                     </div>
                                                 </div>
 
@@ -2088,9 +2092,12 @@ canAddMoreDeliveries() {
 
 
             validateBeforeAddDelivery() {
-                const lastDelivery = this.deliveries[this.deliveries.length - 1];
+                const index = this.deliveries.length - 1;
+                const lastDelivery = this.deliveries[index];
 
-                this.errors = {}; // Clear previous errors
+                // Initialize errors for this delivery
+                if (!this.errors) this.errors = {};
+                this.errors[index] = {}; // Clear previous errors for this delivery
 
                 if (!lastDelivery) return;
 
@@ -2107,23 +2114,28 @@ canAddMoreDeliveries() {
                 // Check required address fields
                 const { address, name, phone, location, need_date, need_time, sms } = lastDelivery;
                 
-                if (!address) this.errors.address = 'Address is required.';
-                if (!name) this.errors.name = 'Contact person is required.';
-                if (!location) this.errors.location = 'Location is required.';
-                if (!need_date) this.errors.need_date = 'Date is required.';
-                if (!need_time) this.errors.need_time = 'Time is required.';
+                if (!address) this.errors[index].address = 'Address is required.';
+                if (!name) this.errors[index].name = 'Contact person is required.';
+                if (!location) this.errors[index].location = 'Location is required.';
+                if (!need_date) this.errors[index].need_date = 'Date is required.';
+                if (!need_time) this.errors[index].need_time = 'Time is required.';
+
+                if (!location) {
+                        this.errors[index].location = 'Location is required.';
+                        return;
+                    }
 
                 // Phone validation for SMS
                 if (sms && phone) {
                     const phonePattern = /^(09|(\+63)|639)\d{9}$/;
                     if (!phonePattern.test(phone)) {
-                        this.errors.phone = 'Please provide a valid phone number for SMS notifications.';
+                        this.errors[index].phone = 'Please provide a valid phone number for SMS notifications.';
                         return;
                     }
                 }
 
                 if (!phone && sms) {
-                    this.errors.phone = 'Please provide a phone number if you want the recipient to receive SMS notifications.';
+                    this.errors[index].phone = 'Please provide a phone number if you want the recipient to receive SMS notifications.';
                     return;
                 }
 
