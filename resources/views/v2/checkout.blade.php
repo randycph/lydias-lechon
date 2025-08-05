@@ -2325,12 +2325,13 @@ canAddMoreDeliveries() {
                 if (removed?.location) {
                     this.deliveryFees = this.deliveryFees.filter(f => f.location !== removed.location);
 
-                    // update delivery fee and total amount
-                    // this.deliveryFee = this.deliveryFees.reduce((acc, item) => acc + item.fee, 0);
-
                     this.deliveryFee = this.deliveryFees.reduce((sum, item) => sum + parseFloat(item.fee || 0) - parseFloat(item.discount || 0), 0);
 
                 }
+
+                this.deliveries.forEach((_, i) => {
+                    this.getDeliveryFeeForMultipleDelivery(i);
+                });
 
                 this.computeTotal();
             },
