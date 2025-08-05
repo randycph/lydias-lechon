@@ -277,26 +277,26 @@
                                                 <div class="w-full">
                                                     <label class="font-bold block text-sm mb-1">Address</label>
                                                     <textarea x-model="delivery.address" @change="validateDeliveryAddress(delivery, 'address', index)"
-                                                        class="w-full border border-gray-300 p-2 rounded-md" placeholder="Enter address" :class="{'border-red-500': errors[index].address}"></textarea>
-                                                    <template x-if="errors[index].address">
-                                                        <div class="text-red-500 text-xs mt-1" x-text="errors[index].address"></div>
+                                                        class="w-full border border-gray-300 p-2 rounded-md" placeholder="Enter address" :class="{'border-red-500': errors[index]?.address}"></textarea>
+                                                    <template x-if="errors[index]?.address">
+                                                        <div class="text-red-500 text-xs mt-1" x-text="errors[index]?.address"></div>
                                                     </template>
                                                 </div>
                                                 <div class="w-full flex gap-4">
                                                     <div class="w-full lg:w-1/2">
                                                         <label class="font-bold block text-sm mb-1">Contact Person</label>
                                                         <input type="text" x-model="delivery.name" @change="validateDeliveryAddress(delivery, 'name', index)"
-                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors[index].name}" />
-                                                        <template x-if="errors[index].name">
-                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index].name"></div>
+                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors[index]?.name}" />
+                                                        <template x-if="errors[index]?.name">
+                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index]?.name"></div>
                                                         </template>
                                                     </div>
                                                     <div class="w-full lg:w-1/2">
                                                         <label class="font-bold block text-sm mb-1">Contact Number</label>
                                                         <input type="tel" x-model="delivery.phone" @change="validateDeliveryAddress(delivery, 'phone', index)"
-                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors[index].phone}" />
-                                                        <template x-if="errors[index].phone">
-                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index].phone"></div>
+                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors[index]?.phone}" />
+                                                        <template x-if="errors[index]?.phone">
+                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index]?.phone"></div>
                                                         </template>
                                                     </div>
                                                 </div>
@@ -367,14 +367,14 @@
                                                             </svg>
                                                             </div>
                                                             <input 
-                                                                :class="{'border-red-500': errors.need_date}"
+                                                                :class="{'border-red-500': errors[index]?.need_date}"
                                                                 onkeydown="return false"
                                                                 :min="minimumDate"
                                                                 @change="validateDeliveryDateTime(delivery)"
                                                                 x-model="delivery.need_date" name="need_date" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
                                                         
-                                                            <template x-if="errors[index].need_date">
-                                                                <div class="text-red-500 text-xs mt-1" x-text="errors[index].need_date"></div>
+                                                            <template x-if="errors[index]?.need_date">
+                                                                <div class="text-red-500 text-xs mt-1" x-text="errors[index]?.need_date"></div>
                                                             </template>
                                                         </div>
                                                     </div>
@@ -387,7 +387,7 @@
                                                                 </svg>
                                                             </div>
                                                             <select
-                                                                :class="{'border-red-500': errors.need_time}"
+                                                                :class="{'border-red-500': errors[index]?.need_time}"
                                                                 name="need_time"
                                                                 id="need_time"
                                                                 x-model="delivery.need_time"
@@ -405,8 +405,8 @@
                                                                 </template>
                                                             </select>
 
-                                                            <template x-if="errors[index].need_time">
-                                                                <div class="text-red-500 text-xs mt-1" x-text="errors[index].need_time"></div>
+                                                            <template x-if="errors[index]?.need_time">
+                                                                <div class="text-red-500 text-xs mt-1" x-text="errors[index]?.need_time"></div>
                                                             </template>
                                                         </div>
                                                         <div x-show="noNeededTime" class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
@@ -423,7 +423,7 @@
                                                     <div class="w-full">
                                                         <label :for="'locations' + index" class="font-bold">Select Location <span
                                                                 class="text-red-700">*</span></label>
-                                                        <select x-model="delivery.location" :id="'locations' + index" name="location" @change="getDeliveryFeeForMultipleDelivery(index); validateDeliveryAddress(delivery, 'location', index);" required
+                                                        <select :disabled="!delivery.orders || delivery.orders.length === 0" x-model="delivery.location" :id="'locations' + index" name="location" @change="getDeliveryFeeForMultipleDelivery(index); validateDeliveryAddress(delivery, 'location', index);" required
                                                             class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                                             <option selected value="">Choose a location</option>
                                                             @foreach ($locations as $location)
@@ -1533,6 +1533,19 @@ recomputeCouponTotals(delivery = null) {
                 const location = delivery.location;
                 const products = delivery?.orders?.map(o => o.product_id);
 
+                if (!delivery?.orders && !delivery?.orders?.length) {
+                    delivery.location = '';
+
+                    if (this.errors[index]) {
+                        this.errors[index].location = 'Please select at least one product for this delivery.';
+                    } else {
+                        this.errors[index] = { location: 'Please select at least one product for this delivery.' };
+                    }
+
+                    // this.errors[index].location = 'Please select at least one product for this delivery.';
+                    return;
+                }
+
                 if (!location || products?.length === 0 || products == undefined) return;
 
                 try {
@@ -2116,7 +2129,7 @@ canAddMoreDeliveries() {
                 }
 
                 // Check required address fields
-                const { address, name, phone, location, need_date, need_time, sms } = lastDelivery;
+                let { address, name, phone, location, need_date, need_time, sms, orders } = lastDelivery;
                 
                 if (!address) this.errors[index].address = 'Address is required.';
                 if (!name) this.errors[index].name = 'Contact person is required.';
@@ -2125,9 +2138,15 @@ canAddMoreDeliveries() {
                 if (!need_time) this.errors[index].need_time = 'Time is required.';
 
                 if (!location) {
-                        this.errors[index].location = 'Location is required.';
-                        return;
-                    }
+                    location = '';
+                    this.errors[index].location = 'Location is required.';
+                    return;
+                }
+
+                if (!orders || !Array.isArray(orders) || orders.length === 0) {
+                    this.errors[index].orders = 'Please select at least one product for this delivery.';
+                    return;
+                }
 
                 // Phone validation for SMS
                 if (sms && phone) {
@@ -2392,16 +2411,22 @@ canAddMoreDeliveries() {
 
             validateDeliveryAddress(delivery, type, index = null) {
                 if (type === 'address' && delivery.address) {
+                    if (!this.errors[index]) this.errors[index] = {};
                     this.errors[index].address = '';
                 } else if (type === 'name' && delivery.name) {
+                    if (!this.errors[index]) this.errors[index] = {};
                     this.errors[index].name = '';
                 } else if (type === 'phone' && delivery.phone) {
+                    if (!this.errors[index]) this.errors[index] = {};
                     this.errors[index].phone = '';
                 } else if (type === 'location' && delivery.location) {
+                if (!this.errors[index]) this.errors[index] = {};
                     this.errors[index].location = '';
                 } else if (type === 'need_date' && delivery.need_date) {
+                    if (!this.errors[index]) this.errors[index] = {};
                     this.errors[index].need_date = '';
                 } else if (type === 'need_time' && delivery.need_time) {
+                    if (!this.errors[index]) this.errors[index] = {};
                     this.errors[index].need_time = '';
                 }
             }
