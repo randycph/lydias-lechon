@@ -277,26 +277,26 @@
                                                 <div class="w-full">
                                                     <label class="font-bold block text-sm mb-1">Address</label>
                                                     <textarea x-model="delivery.address" @change="validateDeliveryAddress(delivery, 'address')"
-                                                        class="w-full border border-gray-300 p-2 rounded-md" placeholder="Enter address" :class="{'border-red-500': errors.address}"></textarea>
-                                                    <template x-if="errors.address">
-                                                        <div class="text-red-500 text-xs mt-1" x-text="errors.address"></div>
+                                                        class="w-full border border-gray-300 p-2 rounded-md" placeholder="Enter address" :class="{'border-red-500': errors[index].address}"></textarea>
+                                                    <template x-if="errors[index].address">
+                                                        <div class="text-red-500 text-xs mt-1" x-text="errors[index].address"></div>
                                                     </template>
                                                 </div>
                                                 <div class="w-full flex gap-4">
                                                     <div class="w-full lg:w-1/2">
                                                         <label class="font-bold block text-sm mb-1">Contact Person</label>
                                                         <input type="text" x-model="delivery.name" @change="validateDeliveryAddress(delivery, 'name')"
-                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors.name}" />
-                                                        <template x-if="errors.name">
-                                                            <div class="text-red-500 text-xs mt-1" x-text="errors.name"></div>
+                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors[index].name}" />
+                                                        <template x-if="errors[index].name">
+                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index].name"></div>
                                                         </template>
                                                     </div>
                                                     <div class="w-full lg:w-1/2">
                                                         <label class="font-bold block text-sm mb-1">Contact Number</label>
                                                         <input type="tel" x-model="delivery.phone" @change="validateDeliveryAddress(delivery, 'phone')"
-                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors.phone}" />
-                                                        <template x-if="errors.phone">
-                                                            <div class="text-red-500 text-xs mt-1" x-text="errors.phone"></div>
+                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors[index].phone}" />
+                                                        <template x-if="errors[index].phone">
+                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index].phone"></div>
                                                         </template>
                                                     </div>
                                                 </div>
@@ -373,8 +373,8 @@
                                                                 @change="validateDeliveryDateTime(delivery)"
                                                                 x-model="delivery.need_date" name="need_date" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
                                                         
-                                                            <template x-if="errors.need_date">
-                                                                <div class="text-red-500 text-xs mt-1" x-text="errors.need_date"></div>
+                                                            <template x-if="errors[index].need_date">
+                                                                <div class="text-red-500 text-xs mt-1" x-text="errors[index].need_date"></div>
                                                             </template>
                                                         </div>
                                                     </div>
@@ -405,8 +405,8 @@
                                                                 </template>
                                                             </select>
 
-                                                            <template x-if="errors.need_time">
-                                                                <div class="text-red-500 text-xs mt-1" x-text="errors.need_time"></div>
+                                                            <template x-if="errors[index].need_time">
+                                                                <div class="text-red-500 text-xs mt-1" x-text="errors[index].need_time"></div>
                                                             </template>
                                                         </div>
                                                         <div x-show="noNeededTime" class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
