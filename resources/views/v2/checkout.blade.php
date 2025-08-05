@@ -10,7 +10,7 @@
     $deliveryFee = 0;
     if (count($carts) > 0) {
         foreach ($carts as $cart) {
-            $paella_price = $cart['paella_price'] > 0 ? $cart['product']['paella_price'] : 0;
+            $paella_price = $cart['paella_price'] > 0 ? $cart['product']['paella_price'] * $cart['qty'] : 0;
             $total += ($cart['price'] + $paella_price) * $cart['qty'];
         }
     }
