@@ -196,15 +196,14 @@
 @section('customjs')
 	<script>
         // Replace the <textarea id="editor1"> with a CKEditor
-        // instance, using default configuration.
+        // instance, using default configuration.        
         var options = {
-            filebrowserImageBrowseUrl: '/laravel-filemanager?type=Images',
-            filebrowserImageUpload: '/laravel-filemanager/upload?type=Images&_token=',
-            filebrowserBrowseUrl: '/laravel-filemanager?type=Files',
-            filebrowserUploadUrl: '/laravel-filemanager/upload?type=Files&_token',
+            filebrowserImageBrowseUrl: '{{env("APP_URL")}}/filemanager?type=Images',
+            filebrowserImageUpload: '{{env("APP_URL")}}/filemanager/upload?type=Images&_token=',
+            filebrowserBrowseUrl: '{{env("APP_URL")}}/filemanager?type=Files',
+            filebrowserUploadUrl: '{{env("APP_URL")}}/filemanager/upload?type=Files&_token',
             allowedContent: true,
             contentsCss: ["{{ vite_asset('resources/css/app.css') }}"],
-
         };
         let editor = CKEDITOR.replace('content', options);
         editor.on('required', function (evt) {

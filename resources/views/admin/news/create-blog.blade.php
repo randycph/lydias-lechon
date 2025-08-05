@@ -125,11 +125,12 @@
 @section('customjs')
     <script>
         // CKEditor
+        
         var options = {
-            filebrowserImageBrowseUrl: '/laravel-filemanager?type=Images',
-            filebrowserImageUpload: '/laravel-filemanager/upload?type=Images&_token=',
-            filebrowserBrowseUrl: '/laravel-filemanager?type=Files',
-            filebrowserUploadUrl: '/laravel-filemanager/upload?type=Files&_token',
+            filebrowserImageBrowseUrl: '{{env("APP_URL")}}/filemanager?type=Images',
+            filebrowserImageUpload: '{{env("APP_URL")}}/filemanager/upload?type=Images&_token=',
+            filebrowserBrowseUrl: '{{env("APP_URL")}}/filemanager?type=Files',
+            filebrowserUploadUrl: '{{env("APP_URL")}}/filemanager/upload?type=Files&_token',
             allowedContent: true,
         };
        
