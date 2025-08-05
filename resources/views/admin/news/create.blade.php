@@ -182,10 +182,10 @@
 	<script>
         // CKEditor
         var options = {
-            filebrowserImageBrowseUrl: '{{env("APP_URL")}}/filemanager?type=Images',
-            filebrowserImageUpload: '{{env("APP_URL")}}/filemanager/upload?type=Images&_token=',
-            filebrowserBrowseUrl: '{{env("APP_URL")}}/filemanager?type=Files',
-            filebrowserUploadUrl: '{{env("APP_URL")}}/filemanager/upload?type=Files&_token',
+            filebrowserImageBrowseUrl: '{{env("APP_URL")}}/filemanager?',
+            filebrowserImageUpload: '{{env("APP_URL")}}/filemanager/upload?_token=',
+            filebrowserBrowseUrl: '{{env("APP_URL")}}/filemanager?',
+            filebrowserUploadUrl: '{{env("APP_URL")}}/filemanager/upload?_token',
             allowedContent: true,
         };
         let editor = CKEDITOR.replace('content', options);
