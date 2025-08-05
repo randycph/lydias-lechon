@@ -1853,7 +1853,6 @@ recomputeCouponTotals(delivery = null) {
                 }
             },
 
-
             validateDeliveryDateTime(delivery, force = false) {
                 const now = new Date();
                 const productTypes = delivery.orders?.map(o => this.getProductType(o)) || [];
@@ -1873,52 +1872,56 @@ recomputeCouponTotals(delivery = null) {
                     delivery.need_date = minAllowedDateTime.toISOString().split('T')[0];
                 }
 
-                // List of hours for dropdown
-                const availableHours = this.getAvailableHours(delivery).filter(h => h >= 5 && h <= 20);
+                // Filter hours from 7 AM to 8 PM only
+                const availableHours = this.getAvailableHours(delivery).filter(h => h >= 7 && h <= 20);
 
-                // Try to find a valid time on selected date
-                const validHour = availableHours.find(hour => {
-                    const timeStr = (hour < 10 ? '0' + hour : hour) + ':00';
-                    const dt = new Date(`${delivery.need_date}T${timeStr}`);
-                    return dt >= minAllowedDateTime;
-                });
+                const selectedDateTime = delivery.need_time
+                    ? new Date(`${delivery.need_date}T${delivery.need_time}`)
+                    : null;
 
-                if (validHour !== undefined) {
-                    delivery.need_time = (validHour < 10 ? '0' + validHour : validHour) + ':00';
-                } else {
-                    // ❗ No valid time today — add 1 day and pick earliest valid hour tomorrow
-                    const nextDay = new Date(minAllowedDateTime);
-                    nextDay.setDate(nextDay.getDate() + 1);
-                    delivery.need_date = nextDay.toISOString().split('T')[0];
+                const isSelectedTimeValid = selectedDateTime && selectedDateTime >= minAllowedDateTime;
 
-                    // Re-fetch valid hours for next day
-                    const hoursNextDay = this.getAvailableHours(delivery).filter(h => h >= 5 && h <= 20);
-                    const firstHour = hoursNextDay[0];
+                // Only update time if it's invalid or force is true
+                if (!isSelectedTimeValid || force) {
+                    const validHour = availableHours.find(hour => {
+                        const timeStr = (hour < 10 ? '0' + hour : hour) + ':00';
+                        const dt = new Date(`${delivery.need_date}T${timeStr}`);
+                        return dt >= minAllowedDateTime;
+                    });
 
-                    delivery.need_time = firstHour !== undefined
-                        ? (firstHour < 10 ? '0' + firstHour : firstHour) + ':00'
-                        : '';
+                    if (validHour !== undefined) {
+                        delivery.need_time = (validHour < 10 ? '0' + validHour : validHour) + ':00';
+                    } else {
+                        // ❗ No valid time today — add 1 day and pick earliest valid hour tomorrow
+                        const nextDay = new Date(minAllowedDateTime);
+                        nextDay.setDate(nextDay.getDate() + 1);
+                        delivery.need_date = nextDay.toISOString().split('T')[0];
+
+                        const hoursNextDay = this.getAvailableHours(delivery).filter(h => h >= 7 && h <= 20);
+                        const firstHour = hoursNextDay[0];
+
+                        delivery.need_time = firstHour !== undefined
+                            ? (firstHour < 10 ? '0' + firstHour : firstHour) + ':00'
+                            : '';
+                    }
                 }
 
                 // Optional warning for lechon if under 24h
-                const selectedDateTime = delivery.need_time
+                const finalSelectedDateTime = delivery.need_time
                     ? new Date(`${delivery.need_date}T${delivery.need_time}`)
                     : null;
 
                 delivery.warningMessage = '';
                 if (
                     productTypes.includes('lechon') &&
-                    selectedDateTime &&
-                    (selectedDateTime - now) / 3600000 < 24
+                    finalSelectedDateTime &&
+                    (finalSelectedDateTime - now) / 3600000 < 24
                 ) {
                     delivery.warningMessage = `⚠️ Warning! The date and time you've selected (${delivery.need_date} - ${this.formatTime(delivery.need_time)}) is less than 24 hours from now. You can still proceed by contacting our <span class='underline text-blue-600 cursor-pointer' @click='openHotline = true'>Hotline</span>.`;
                 }
 
                 this.clearToProceed = true;
             },
-
-
-
 
             // Get previously selected qty in *this delivery* to allow it again in dropdown
             getPreviouslySelectedQty(delivery, order) {
