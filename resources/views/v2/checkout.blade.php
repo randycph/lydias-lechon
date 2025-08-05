@@ -1601,10 +1601,12 @@ recomputeCouponTotals(delivery = null) {
             // Get selected quantity for dropdown binding
             getSelectedQty(delivery, order) {
                 const isPaella = parseFloat(order.paella_price) > 0;
+                const isFree = !!order.is_free_product;
 
                 const found = delivery.orders?.find(o =>
                     o.product_id === order.product_id &&
-                    !!o.paella === isPaella
+                    !!o.paella === isPaella &&
+                    !!o.is_free_product === isFree
                 );
 
                 return found ? found.qty : '';
@@ -1930,9 +1932,11 @@ recomputeCouponTotals(delivery = null) {
             // Get previously selected qty in *this delivery* to allow it again in dropdown
             getPreviouslySelectedQty(delivery, order) {
                 const isPaella = parseFloat(order.paella_price) > 0;
+                const isFree = !!order.is_free_product;
                 const found = delivery.orders?.find(o =>
                     o.product_id === order.product_id &&
-                    !!o.paella === isPaella
+                    !!o.paella === isPaella &&
+                    !!o.is_free_product === isFree
                 );
                 
                 return found ? parseInt(found.qty) || 0 : 0;
