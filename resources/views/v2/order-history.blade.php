@@ -64,8 +64,6 @@
                                     @php
                                         $itemTotal = $cart->net_amount;
                                         $total += $itemTotal;
-
-                                        
                                     @endphp
                                     <div class="flex gap-4 items-start w-full relative">
                                         <div style="background-image: url('{{ asset('images/checkout-bg.png') }}')" class="w-20 h-20 min-w-20 min-h-20 object-cover overflow-hidden rounded-md bg-center">
@@ -93,7 +91,7 @@
                                     $cartTotal = $total;
                                     $total += $fee;
                                     $discount = $sale->discount_amount ? $sale->discount_amount : 0;
-                                    $balance = $total - $amountPaid - $discount;
+                                    $balance = ($total - $amountPaid) - $discount;
                                     $balance = $balance < 0 ? 0 : $balance;
                                 @endphp
             
@@ -114,16 +112,16 @@
 
                                 <template x-if="viewMore{{ $index }}">
                                     <div class="flex flex-col gap-2 w-full">
+                                        <div class="flex items-center justify-between w-full ">
+                                            <div class="text-sm text-black font-bold">Sub total</div>
+                                            <div class="text-sm text-black font-bold">₱{{ number_format($cartTotal, 2) }}</div>
+                                        </div>
                                         @if ($sale->delivery_type == 'Door to door delivery')
                                         <div class="flex items-center justify-between w-full ">
                                             <div class="text-sm text-black font-bold">Total Delivery fee</div>
                                             <div class="text-sm text-black font-bold">₱{{ number_format($fee, 2) }}</div>
                                         </div>
                                         @endif
-                                        <div class="flex items-center justify-between w-full ">
-                                            <div class="text-sm text-black font-bold">Sub total</div>
-                                            <div class="text-sm text-black font-bold">₱{{ number_format($total, 2) }}</div>
-                                        </div>
                                         @if ($sale->discount_amount && $sale->discount_amount > 0)
                                         <div class="flex items-center justify-between w-full">
                                             <div class="text-sm text-black font-bold">Discount</div>
@@ -161,7 +159,7 @@
                                         @if ($sale->net_amount && $sale->net_amount > 0)
                                         <div class="flex items-center justify-between w-full">
                                             <div class="text-sm text-black font-bold">Total</div>
-                                            <div class="text-sm font-bold">₱{{ number_format($sale->net_amount <= 0 ? 0 : $sale->net_amount, 2) }}</div>
+                                            <div class="text-sm font-bold">₱{{ number_format($total <= 0 ? 0 : $total, 2) }}</div>
                                         </div>
                                         @endif
                                         @if ($sale->payments && count($sale->payments) > 0)
