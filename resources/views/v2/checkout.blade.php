@@ -6,14 +6,18 @@
 @section('content')
 
 @php
-    $total = 0;
     $deliveryFee = 0;
-    if (count($carts) > 0) {
-        foreach ($carts as $cart) {
-            $paella_price = $cart['paella_price'] > 0 ? $cart['product']['paella_price'] : 0;
-            $total += ($cart['price'] + $paella_price) * $cart['qty'];
-        }
-    }
+    $total = 0;
+
+    foreach ($carts as $cart) {
+        $qty = $cart['qty'] ?? 1;
+        $paella_price = $cart['paella_price'] ?? 0;
+        $price = $cart['price'] ?? 0;
+
+        $isFree = $cart['is_free_product'] ?? false;
+
+        $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
+    }                 
 @endphp
 
 <div class="bg-cream">
