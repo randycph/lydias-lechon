@@ -560,7 +560,7 @@ class CartController extends Controller
         $product = Product::with('photos')->whereId($request->ac_item)->first();
         $photos = $product->photos()->where('is_primary', 1)->first();
         $photo = !empty($photos) ? asset('storage/products/'.$photos->path ) : '';
-        $paella_cost = ($request->ac_paella == '1' ? ($product->paella_price * $request->ac_qty) : 0);
+        $paella_cost = ($request->ac_paella == '1' ? ($product->paella_price) : 0);
         $has_paella = $request->ac_paella == '1' ? 1 : 0;
 
         if (auth()->check()) {
@@ -610,7 +610,6 @@ class CartController extends Controller
                         ->first();
 
                     if (!empty($cart)) {
-                        logger($miscQty);
                         $save = $cart->update([
                             'qty' => $miscQty,
                             'price' => $prod->price,

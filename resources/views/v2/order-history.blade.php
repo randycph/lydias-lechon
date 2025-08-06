@@ -76,8 +76,8 @@
                                                 class="w-20 h-20 object-cover">
                                         </div>
                                         <div class="flex flex-col">
-                                            <div class="font-bold">{{ $cart->product->name }} {{ isset($cart?->paella_price) && $cart?->paella_price > 0 ?' Boneless with Paella' : '' }}</div>
-                                            <div class="text-sm text-gray-600 font-medium">Price: ₱{{ number_format($cart->price, 2) }}</div>
+                                            <div class="font-bold">{{ $cart->product->name }} {{ isset($cart?->paella_price) && $cart?->paella_price > 0 ?' Boneless with Paella' : '' }} @if ($cart->price == 0)<span class="text-green-600 font-semibold text-sm">(Free)</span>@endif</div>
+                                            <div class="text-sm text-gray-600 font-medium">Price: ₱{{ number_format($cart->price, 2) }} <span class="italic">{{ isset($cart?->paella_price) && $cart?->paella_price > 0 ? '+ ₱' . number_format($cart?->paella_price, 2) : '' }}</span></div>
                                             <div class="text-sm text-gray-600 font-medium">QTY: {{ number_format($cart->qty, 0) }}</div>
                                         </div>
                                         <div class="text-sm text-black font-bold text-right w-full absolute right-0 bottom-0">₱{{ number_format($itemTotal, 2) }}</div>

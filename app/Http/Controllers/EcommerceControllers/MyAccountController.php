@@ -148,12 +148,16 @@ class MyAccountController extends Controller
 
         // Re-add items to cart
         foreach ($salesHeader->items as $item) {
+            if ($item->price == 0) {
+                continue; // Skip items with zero price
+            }
             Cart::create([
                 'user_id' => Auth::user()->id,
                 'product_id' => $item->product_id,
                 'qty' => $item->qty,
                 'paella_price' => $item->paella_price,
                 'price' => $item->price,
+                'paella' => $item->paella_price > 0 ? 1 : 0,
             ]);
         }
 

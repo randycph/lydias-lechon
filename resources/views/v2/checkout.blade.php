@@ -10,7 +10,7 @@
     $deliveryFee = 0;
     if (count($carts) > 0) {
         foreach ($carts as $cart) {
-            $paella_price = $cart['paella_price'] > 0 ? $cart['product']['paella_price'] * $cart['qty'] : 0;
+            $paella_price = $cart['paella_price'] > 0 ? $cart['product']['paella_price'] : 0;
             $total += ($cart['price'] + $paella_price) * $cart['qty'];
         }
     }
@@ -106,7 +106,7 @@
                                             ? '₱0.00' 
                                             : '₱' + parseFloat(item.price).toLocaleString(undefined, { minimumFractionDigits: 2 })">
                                         </span>
-                                        <span class="italic" x-text="item?.paella_price > 0 ? '+ ₱' + parseFloat(item.product.paella_price * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2 }) : ''"></span>
+                                        <span class="italic" x-text="item?.paella_price > 0 ? '+ ₱' + parseFloat(item.product.paella_price).toLocaleString(undefined, { minimumFractionDigits: 2 }) : ''"></span>
                                     </div>
                                     <div class="text-sm text-gray-600 font-medium">
                                         QTY: <span x-text="item.qty"></span>
