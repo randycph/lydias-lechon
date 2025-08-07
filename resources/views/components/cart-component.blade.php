@@ -210,7 +210,7 @@ x-data="{
                                                     carts.reduce(
                                                         (total, cart) => 
                                                             total +
-                                                            (Number(cart.product?.paella_price * (cart?.qty || 1)) || 0) +
+                                                            (Number((cart?.paella_price > 0 ? cart.product?.paella_price : 0) * (cart?.qty || 1)) || 0) +
                                                             ((cart?.is_free_product ? 0 : (Number(cart?.product?.price) || 0) * (Number(cart?.qty) || 1))),
                                                         0
                                                     )

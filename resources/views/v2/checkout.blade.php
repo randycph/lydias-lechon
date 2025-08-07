@@ -11,7 +11,7 @@
 
     foreach ($carts as $cart) {
         $qty = $cart['qty'] ?? 1;
-        $paella_price = $cart['product']['paella_price'] ?? 0;
+        $paella_price = $cart['paella_price'] > 0 ? $cart['product']['paella_price'] : 0;
         $price = $cart['price'] ?? 0;
 
         $isFree = $cart['is_free_product'] ?? false;
@@ -67,7 +67,7 @@
                         <div class="font-bold" 
                             x-text="'₱' + carts.reduce((sum, item) => 
                                 sum + 
-                                ((Number(item?.product?.paella_price) || 0) * (Number(item.qty) || 1)) + 
+                                ((Number((item?.paella_price > 0 ? item?.product?.paella_price : 0)) || 0) * (Number(item.qty) || 1)) + 
                                 (item.is_free_product ? 0 : (Number(item.price) || 0) * (Number(item.qty) || 1))
                             , 0).toLocaleString(undefined, { minimumFractionDigits: 2 })"
 
@@ -151,7 +151,7 @@
                                 <span class="font-medium" 
                                         x-text="'₱' + carts.reduce((sum, item) => 
                                             sum + 
-                                            ((Number(item?.product?.paella_price) || 0) * (Number(item.qty) || 1)) + 
+                                            ((Number((item?.paella_price > 0 ? item?.product?.paella_price : 0)) || 0) * (Number(item.qty) || 1)) + 
                                             (item.is_free_product ? 0 : (Number(item.price) || 0) * (Number(item.qty) || 1))
                                         , 0).toLocaleString(undefined, { minimumFractionDigits: 2 })"
 
