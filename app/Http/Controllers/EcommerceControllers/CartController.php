@@ -305,7 +305,10 @@ class CartController extends Controller
             $not_exist = true;
 
             foreach ($cart as $key => $order) {
-                if ($order->product_id == $request->ac_item) {
+                if (
+                    $order->product_id == $request->ac_item &&
+                    $order->paella == ($request->ac_paella == '1')
+                ) {
                     $cart[$key]->qty = $request->ac_qty;
                     $cart[$key]->price = $product->price;
                     $cart[$key]->paella_price = $paella_cost;
