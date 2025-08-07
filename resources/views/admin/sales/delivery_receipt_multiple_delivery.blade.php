@@ -87,21 +87,22 @@
                 </div>
 
                 <div class="col-sm-12 col-lg-12 mg-t-10">
-                    <div class="mg-b-0 tx-15">Date Needed: {{\Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('F d, Y g:i A')}}</div>
+                    <div class="mg-b-0 tx-15">Date Needed: {{\Carbon\Carbon::parse($deliveryAddress->delivery_date)->format('F d, Y')}}</div>
                     <div class="mg-b-0 tx-15">Day: {{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('l') }}</div>
                     <div class="mg-b-0 tx-15">Time: {{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('g:i A') }}</div>
                     <div class="mg-b-0 tx-15">Contact #: {{$deliveryAddress->contact_tel ?? $sales->customer_contact_number}}</div>
-                    <div class="mg-b-0 tx-15">Delivery Charge: ₱{{number_format($deliveryAddress->delivery_fee ?? 0)}}</div>
-                    <div class="mg-b-0 tx-15">Payment Method: {{$sales->payment_used ?? 'Paymaya'}}</div>
+                    <div class="mg-b-0 tx-15" style="display:none;">Delivery Charge: ₱{{number_format($deliveryAddress->delivery_fee ?? 0)}}</div>
+                    <div class="mg-b-0 tx-15" style="display:none;">Payment Method: {{$sales->payment_used ?? 'Paymaya'}}</div>
 
 
                     <p class="mg-b-0 tx-15 mt-2">Contact Person: {{$deliveryAddress->contact_person ?? $sales->customer_name}}</p>
                     <p class="mg-b-0 tx-15">Delivery Type: {{$sales->delivery_type}}</p>
+                    <p class="mg-b-3 tx-15">Location: {{$deliveryAddress->location}}</p>
                     <p class="mg-b-3 tx-15">
                         Delivery Address: {{ $deliveryAddress->address }}
                     </p>                        
                     <p class="mg-b-3 tx-15">Instruction: {{$deliveryAddress->note ?? $sales->instruction}}</p>
-                    <p class="mg-b-3 tx-15">Location: {{$deliveryAddress->location}}</p>
+                    
                 </div>
             </div>
 
@@ -111,7 +112,7 @@
                     <thead>
                         <tr>
                             <th class="wd-28p">Product Name</th>        
-                            <th class="wd-15p tx-center">Date Needed</th>
+                            <th class="wd-15p tx-center" style="display:none;">Date Needed</th>
                             <th class="tx-center">Quantity</th>
                             <th class="tx-center">Price</th>
                             <th class="tx-center">Paella Price</th>
@@ -138,7 +139,7 @@
                                 <td class="tx-nowrap">
                                     {{ $product->product->name . (isset($product?->paella) && $product?->paella ?' Boneless with Paella' : '') ?? 'Unknown Product' }}
                                 </td>
-                                <td class="tx-nowrap tx-center">{{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('F d, Y g:i A') }}</td>
+                                <td class="tx-nowrap tx-center" style="display:none;">{{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('F d, Y g:i A') }}</td>
                                 <td class="tx-center">{{number_format($product->qty, 0)}}</td>
                                 <td class="tx-center">₱{{number_format($product->product->price, 2)}}</td>
                                 <td class="tx-right">
@@ -160,21 +161,21 @@
 
                             @if($deliveryAddress->delivery_fee > 0)
                                 <tr>
-                                    <td class="tx-left " colspan="5">Delivery Fee</td>
+                                    <td class="tx-left " colspan="4">Delivery Fee</td>
                                     <td class="tx-right ">₱{{number_format($deliveryAddress->delivery_fee, 2)}}</td>
                                 </tr>
                             @endif
 
                             @forelse($gc as $g)
                                 <tr style="font-weight:bold;">
-                                    <td class="tx-left" colspan="5">Gift Certificate: {{$g->code}}</td>
+                                    <td class="tx-left" colspan="4">Gift Certificate: {{$g->code}}</td>
                                     <td class="tx-right">₱{{number_format($g->amount, 2)}}</td> 
                                 </tr>
                             @empty
                             @endforelse
                             @if($salesDetails->sum('gross_amount') > 0)
                                 <tr style="font-weight:bold;">
-                                    <td colspan="5">&nbsp;</td>
+                                    <td colspan="4">&nbsp;</td>
                                     <td class="tx-right">
                                         Total: ₱{{ number_format($total + $deliveryAddress->delivery_fee, 2) }}
                                 </tr>
