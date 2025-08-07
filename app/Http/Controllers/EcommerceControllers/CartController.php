@@ -243,7 +243,7 @@ class CartController extends Controller
         $mainProduct = $product;
         $photos = $product->photos()->where('is_primary', 1)->first();
         $photo = !empty($photos) ? asset('storage/products/'.$photos->path ) : '';
-        $paella_cost = ($request->ac_paella == '1' ? ($product->paella_price * $request->ac_qty) : 0);
+        $paella_cost = ($request->ac_paella == '1' ? ($product->paella_price) : 0);
         if (auth()->check()) {
             $cart = Cart::where('product_id', $request->ac_item)->where('paella', $request->ac_paella == '1')
                 ->where('user_id', Auth::id())

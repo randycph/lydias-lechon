@@ -155,7 +155,7 @@
                     body: JSON.stringify({
                         ac_item: id,
                         ac_qty: qty,
-                        ac_paella: paellaPrice > 0 ? 1 : 0,
+                        ac_paella: parseInt(paellaPrice) > 0 ? 1 : 0,
                     })
                 }).then((response) => {
                     return response;
@@ -192,7 +192,7 @@
         handleQtyChange(productId, currentQty, diff, paellaPrice = 0) {
             const newQty = currentQty + diff;
             if (newQty < 1) return;
-            this.updateCartQty('addcart', productId, newQty, paellaPrice);
+            this.updateCartQty('addcart', productId, newQty, parseInt(paellaPrice));
         },
         added: false,
         searchModal: false,
