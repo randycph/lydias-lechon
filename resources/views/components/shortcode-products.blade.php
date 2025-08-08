@@ -56,6 +56,22 @@
 
                 return this.product.name;
             },
+
+            get productPrice() {
+                const withPaella = this.withPaella ? this.product?.paella_price : 0;
+                if (withPaella) {
+                    return (parseFloat(withPaella) + parseFloat(this.product?.price)) * this.quantity;
+                }
+
+                return parseFloat(this.product?.price) * this.quantity;
+            },
+            get baseTotal() {
+                const withPaella = this.withPaella ? this.product?.paella_price : 0;
+                if (withPaella) {
+                    return (parseFloat(withPaella) + parseFloat(this.product?.price)) * this.quantity || 0;
+                }
+                return parseFloat(this.product?.price) * this.quantity || 0;
+            },
             addons: [],
             updateAddons() {
                 if (!this.product?.addon_products) return;
@@ -66,9 +82,6 @@
                         id: a.id,
                         qty: 1
                     }));
-            },
-            get baseTotal() {
-                return this.product?.price * this.quantity || 0;
             },
             get addonsTotal() {
                 if (!this.product?.addon_products) return 0;
