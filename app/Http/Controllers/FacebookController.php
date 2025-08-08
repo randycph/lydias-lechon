@@ -38,6 +38,9 @@ public function redirectoFacebook()
                     'facebook_id' => $facebookUser->getId(),
                     'password' => bcrypt(str()->random(16)),
                     'is_active' => 1,
+                    'role_id' => 6,
+                    'user_type' => 'customer',
+                    'registration_source' => 'web',
                 ]);
             }
     

@@ -35,6 +35,9 @@ class GoogleController extends Controller
                     'name' => $googleUser->getName(),
                     'email' => $googleUser->getEmail(),
                     'google_id' => $googleUser->getId(),
+                    'role_id' => 6,
+                    'user_type' => 'customer',
+                    'registration_source' => 'web',
                     'password' => bcrypt(str()->random(16)), // random password
                     'is_active' => 1,
                 ]);
