@@ -171,7 +171,12 @@
                                     <template x-for="(item, i) in deliveryFees" :key="i">
                                         <div class="flex justify-between text-gray-500 text-sm">
                                             <span x-text="'Delivery Fee (' + item.location + ')'"></span>
-                                            <span x-text="'₱' + (item.fee - (item.discount || 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+                                            <div class="flex items-center gap-1">
+                                                <template x-if="item.discount && item.discount > 0">
+                                                    <span class="line-through text-red-700 italic" x-text="'₱' + item.fee.toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+                                                </template>
+                                                <span x-text="'₱' + (item.fee - (item.discount || 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+                                            </div>
                                         </div>
                                     </template>
                                 </div>
@@ -197,11 +202,18 @@
                                     </span>
 
                                     <span class="font-medium italic text-red-700 text-right">
-                                        <template x-if="item.free_shipping && shippingDiscountAmount > 0">
-                                            <span x-text="'- ₱' + shippingDiscountAmount.toLocaleString(undefined, { minimumFractionDigits: 2 }) + ' (Shipping Discount)'"></span>
+                                        <template x-if="item.free_shipping && shippingDiscountLists.length > 0">
+                                            <div class="mt-2 space-y-1">
+                                                <template x-for="(shippingList, key) in shippingDiscountLists" :key="key">
+                                                    <div>
+                                                        <span x-text="'- ₱' + shippingList.discount.toLocaleString(undefined, { minimumFractionDigits: 2 }) + ' Shipping Discount (' + shippingList.location + ')'"></span>
+                                                    </div>
+                                                </template>
 
-                                            {{-- <span x-text="'- ₱' + (item.free_shipping_discount_amount == 100 ? deliveryFee : (deliveryFee * item.free_shipping_discount_amount / 100)).toLocaleString(undefined, { minimumFractionDigits: 2 }) + ' (Shipping Discount)'"></span> --}}
+                                                <div class="">Total discount: <span x-text="'- ₱' + shippingDiscountLists.reduce((acc, curr) => acc + curr.discount, 0).toLocaleString(undefined, { minimumFractionDigits: 2 })"></span></div>
+                                            </div>
                                         </template>
+
                                         <template x-if="!item.free_shipping && (item.free_products == null || item.free_products.length == 0)">
                                             <span x-text="'- ₱' + (
                                                 item.discount_type === 'amount' 
@@ -995,74 +1007,82 @@
 
             clearToProceed: true,
 
-recomputeCouponTotals(delivery = null) {
-    this.totalDiscountAmount = 0;
-    this.shippingDiscountAmount = 0;
+            recomputeCouponTotals(delivery = null) {
+                this.totalDiscountAmount = 0;
+                this.shippingDiscountAmount = 0;
+                this.shippingDiscountLists = [];
 
-    const deliveryList = delivery ? [delivery] : this.deliveries;
+                const deliveryList = delivery ? [delivery] : this.deliveries;
 
-    // Reset per-row delivery fee discounts
-    this.deliveryFees = this.deliveryFees.map(row => ({
-        ...row,
-        discount: 0
-    }));
+                // Reset per-row delivery fee discounts
+                this.deliveryFees = this.deliveryFees.map(row => ({
+                    ...row,
+                    discount: 0
+                }));
 
-    // Re-filter coupons
-    this.coupons = this.coupons.filter(coupon => {
-        if (coupon.free_shipping && coupon.location) {
-            // If it applies to at least 1 delivery, keep it
-            const allowedLocations = coupon.location
-                .split('|')
-                .map(l => l.trim())
-                .filter(l => l !== '');
+                // Re-filter coupons
+                this.coupons = this.coupons.filter(coupon => {
+                    if (coupon.free_shipping && coupon.location) {
+                        // If it applies to at least 1 delivery, keep it
+                        const allowedLocations = coupon.location
+                            .split('|')
+                            .map(l => l.trim())
+                            .filter(l => l !== '');
 
-            return this.deliveries.some(d =>
-                allowedLocations.includes(d.location) || allowedLocations.includes('all')
-            );
-        }
-        return true;
-    });
+                        return this.deliveries.some(d =>
+                            allowedLocations.includes(d.location) || allowedLocations.includes('all')
+                        );
+                    }
+                    return true;
+                });
 
-    // Apply per-coupon logic
-    this.coupons.forEach(coupon => {
-        if (coupon.free_shipping) {
-            const allowedLocations = coupon.location
-                ?.split('|')
-                .map(l => l.trim())
-                .filter(l => l !== '') || [];
+                // Apply per-coupon logic
+                this.coupons.forEach(coupon => {
+                    if (coupon.free_shipping) {
+                        const allowedLocations = coupon.location
+                            ?.split('|')
+                            .map(l => l.trim())
+                            .filter(l => l !== '') || [];
 
-            this.deliveryFees.forEach((feeRow, idx) => {
-                if (
-                    allowedLocations.includes(feeRow.location) ||
-                    allowedLocations.includes('all')
-                ) {
-                    const fee = feeRow.fee || 0;
-                    const discount = parseFloat(coupon.free_shipping_discount_amount || 0);
+                        this.deliveryFees.forEach((feeRow, idx) => {
+                            if (
+                                allowedLocations.includes(feeRow.location) ||
+                                allowedLocations.includes('all')
+                            ) {
+                                const fee = feeRow.fee || 0;
+                                const discount = parseFloat(coupon.free_shipping_discount_amount || 0);
 
-                    const discountAmount =
-                        discount === 100
-                            ? fee
-                            : (fee * discount) / 100;
+                                const discountAmount =
+                                    discount === 100
+                                        ? fee
+                                        : (fee * discount) / 100;
 
-                    // Assign discount to that delivery
-                    this.deliveryFees[idx].discount = discountAmount;
+                                // Assign discount to that delivery
+                                this.deliveryFees[idx].discount = discountAmount;
 
-                    this.shippingDiscountAmount += discountAmount;
-                }
-            });
-        } else {
-            // Handle order discount
-            if (coupon.discount_type === 'amount') {
-                this.totalDiscountAmount += parseFloat(coupon.discount ?? 0);
-            } else if (coupon.discount_type === 'percent') {
-                this.totalDiscountAmount += (this.orderAmount * parseFloat(coupon.discount ?? 0)) / 100;
-            }
-        }
-    });
+                                this.shippingDiscountAmount += discountAmount;
+                                
+                                // Track itemized shipping discount per location/index
+                                this.shippingDiscountLists.push({
+                                    location: feeRow.location,
+                                    index: idx,
+                                    discount: parseFloat(discountAmount.toFixed(2))
+                                });
+                            }
+                        });
+                    } else {
+                        // Handle order discount
+                        if (coupon.discount_type === 'amount') {
+                            this.totalDiscountAmount += parseFloat(coupon.discount ?? 0);
+                        } else if (coupon.discount_type === 'percent') {
+                            this.totalDiscountAmount += (this.orderAmount * parseFloat(coupon.discount ?? 0)) / 100;
+                        }
+                    }
+                });
 
-    // Cap total discount to orderAmount
-    this.totalDiscountAmount = Math.min(this.totalDiscountAmount, this.orderAmount);
-},
+                // Cap total discount to orderAmount
+                this.totalDiscountAmount = Math.min(this.totalDiscountAmount, this.orderAmount);
+            },
 
 
 
@@ -1531,6 +1551,8 @@ recomputeCouponTotals(delivery = null) {
 
             //     return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(total);
             // },
+
+            shippingDiscountLists: [],
 
             async getDeliveryFeeForMultipleDelivery(index) {
                 const delivery = this.deliveries[index];
