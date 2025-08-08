@@ -137,7 +137,7 @@
                             $saleDetail = $sales->items ? $sales->items->first() : null;
                             $deliveryDate = $saleDetail ? \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y g:i A') : 'N/A';
                         @endphp
-                        <p class="mg-b-0 tx-15">Date needed: {{$deliveryDate}}</p>
+                        <p class="mg-b-0 tx-15" style="display:none;">Date needed: {{$deliveryDate}}</p>
                     @endif
                     <p class="mg-b-0 tx-15">Contact Person: {{$sales->contact_person ?? $sales->customer_name}}</p>
                     @if ($sales->instruction)
@@ -173,6 +173,13 @@
                             </tr>
                         @endforelse
 
+                        @if($sales->delivery_fee_amount > 0)
+                            <tr>
+                                <td class="tx-left " colspan="4">Delivery Fee</td>
+                                <td class="tx-right ">{{number_format($sales->delivery_fee_amount, 2)}}</td>
+                            </tr>
+                        @endif
+
                         @if($sales->gross_amount > 0)
                             <tr>
                                 <td class="tx-left " colspan="4">Subtotal</td>
@@ -180,12 +187,7 @@
                             </tr>
                         @endif
 
-                        @if($sales->delivery_fee_amount > 0)
-                            <tr>
-                                <td class="tx-left " colspan="4">Delivery Fee</td>
-                                <td class="tx-right ">{{number_format($sales->delivery_fee_amount, 2)}}</td>
-                            </tr>
-                        @endif
+                        
 
                         @if($sales->discount_amount > 0)
 
