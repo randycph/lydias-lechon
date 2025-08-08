@@ -27,7 +27,7 @@
                 const cartItem = this.carts?.find(item => item.product_id === product.id);
 
                 if (cartItem) {
-                    this.quantity = cartItem.qty;
+                    this.quantity = 1;
                 } else {
                     this.quantity = 1;
                 }
