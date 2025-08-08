@@ -48,6 +48,14 @@
                 }, 300);
             },
             quantity: 1,
+            get productName() {
+                const withPaella = this.withPaella ? ' Boneless with Paella' : '';
+                if (this.product?.name) {
+                    return this.product.name + withPaella;
+                }
+
+                return this.product.name;
+            },
             addons: [],
             updateAddons() {
                 if (!this.product?.addon_products) return;
