@@ -608,6 +608,9 @@ class SalesController extends Controller
             if($_GET['order_status'] == 2){
                 $model = $model->where('delivery_status','=','Open Date');        
             }
+            elseif ($_GET['order_status'] == 'Cancelled') {
+                $model = $model->where('status','=','Cancelled');        
+            }
             else{
                 $model = $model->where('isConfirm','=',$_GET['order_status']);        
             }

@@ -58,6 +58,7 @@
                                         <option value="0" @if(isset($filter->order_status) && $filter->order_status == '0') selected="selected" @endif>Unconfirm</option>
                                         <option value="1" @if(isset($filter->order_status) && $filter->order_status == '1') selected="selected" @endif>Confirmed</option>
                                         <option value="2" @if(isset($filter->order_status) && $filter->order_status == '2') selected="selected" @endif>Open Date</option>
+                                        <option value="Cancelled" @if(isset($filter->order_status) && $filter->order_status == 'Cancelled') selected="selected" @endif>Cancelled</option>
                                     </select>
                                 </td>                                
                                 <td style="width:14%">
@@ -227,8 +228,8 @@
                                 @php
                                 $use = \App\EcommerceModel\SalesHeader::find($sale->id);
                                 @endphp
-                                <tr style="height:30px; @if($sale->trashed()) background-color:#FFA07A; @endif">
-                                    <td>
+                                <tr style="height:30px; @if($sale->trashed()) background-color:#FFA07A; @endif @if($sale->status == 'CANCELLED') background-color: #b87a7a; @endif">
+                                    <td>    
                                         <div class="custom-control custom-checkbox">
                                             <input type="checkbox" class="custom-control-input cb" id="cb{{ $sale->id }}" {{ $sale->isConfirm == 1 ? 'disabled' : '' }}>
                                             <label class="custom-control-label" for="cb{{ $sale->id }}"></label>
@@ -259,7 +260,15 @@
                                         @endif
                                     </td>
                                     <td>{{ $sale->delivery_type }}</td>
-                                    <td><a href="{{route('admin.report.delivery_report',$sale->id)}}" target="_blank">{{$sale->delivery_status}}</a></td>
+                                    <td>
+                                        @if ($sale->status === 'CANCELLED')
+                                            CANCELLED
+                                        @else
+                                        <a href="{{route('admin.report.delivery_report',$sale->id)}}" target="_blank">
+                                            {{$sale->delivery_status}}
+                                        </a>
+                                        @endif
+                                    </td>
                                     <td style="display:none;">{{ rtrim($payment_types,",") }}</td>
                                     <td>{{ $sale->Paymentadminstatus }} <a href="#" title="Pending payments" onclick="show_added_payments('{{$sale->id}}');"><span class="badge badge-info">{{$sale->Paymentspendingtotal}}</span></a></td>
                                     <td align="center">
@@ -296,19 +305,23 @@
                                                         <div class="dropdown-menu dropdown-menu-right">
 
                                                                 <a class="dropdown-item" title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale->id) }}">View Sales Summary</a>
-                                                            @if($sale->isConfirm != 1)
+                                                            @if($sale->isConfirm != 1 && $sale->status !== 'CANCELLED')
                                                                 @if(auth()->user()->role_id == 2 || auth()->user()->role_id == 1)
                                                                 <a class="dropdown-item"  href="javascript:void(0);" onclick="confirm_order({{$sale->id}},'{{ number_format((\App\EcommerceModel\SalesHeader::balance($sale->id)),2) }}');" title="Confirm Order" >Confirm Order</a>
                                                                 @endif
                                                             @endif
                                                             
-                                                            <a class="dropdown-item"  href="{{ route('sales.update_details',$sale->id) }}" title="Update Sales Details & Items" >Update Sales Details</a>
+                                                            @if($sale->status !== 'CANCELLED')
+                                                                <a class="dropdown-item"  href="{{ route('sales.update_details',$sale->id) }}" title="Update Sales Details & Items" >Update Sales Details</a>
+                                                            @endif
                                                             
-                                                            @if($dateneeded > date('Y-m-d H:i:s'))
+                                                            @if($dateneeded > date('Y-m-d H:i:s') && $sale->status !== 'CANCELLED')
                                                                 <a class="dropdown-item text-danger" href="javascript:void(0)" onclick="delete_sales({{$sale->id}},'{{$sale->order_number}}')" title="Delete Transaction">Delete</a>
                                                             @endif
                                                         </div>
                                                     </div>
+                                                    @if ($sale->status === 'CANCELLED')
+                                                    @else
                                                     <div class="nav-item dropdown">
                                                         <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                             <i data-feather="credit-card"></i>
@@ -369,6 +382,7 @@
                                                             @endif
                                                         </div>
                                                     </div>
+                                                    @endif
 
                                                 @endif
                                             </nav>
