@@ -283,7 +283,7 @@ class SalesHeader extends Model
 
     public function deliveryAddress()
     {
-        return $this->hasMany(ProductDeliveryAddress::class, 'sales_header_id')->orderBy('id', 'desc');
+        return $this->hasMany(ProductDeliveryAddress::class, 'sales_header_id')->orderBy('id', 'asc');
     }
 
     public function deliveryStatuses()
