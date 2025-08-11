@@ -61,6 +61,10 @@ class ListingHelper
             }
 
             $models->where($condition['field'], $condition['operator'], $condition['value']);
+
+            if ($condition['field'] === 'status') {
+                $models->orWhere('status', 'CANCELLED');
+            }
         }
 
         $models->where(function($models) use ($search, $searchFields, $customQuery, $customQueryFields) {
@@ -286,6 +290,10 @@ class ListingHelper
             }
 
             $models->where($condition['field'], $condition['operator'], $condition['value']);
+            
+            if ($condition['field'] === 'status') {
+                $models->orWhere('status', 'CANCELLED');
+            }
         }
 
         $models->where(function($models) use ($search, $searchFields, $customQuery, $customQueryFields) {
