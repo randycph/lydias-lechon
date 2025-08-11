@@ -228,7 +228,7 @@
                                 @php
                                 $use = \App\EcommerceModel\SalesHeader::find($sale->id);
                                 @endphp
-                                <tr style="height:30px; @if($sale->trashed()) background-color:#FFA07A; @endif @if($sale->status == 'CANCELLED') background-color: #b87a7a; @endif">
+                                <tr style="height:30px; @if($sale->trashed()) background-color:#FFA07A; @endif>
                                     <td>    
                                         <div class="custom-control custom-checkbox">
                                             <input type="checkbox" class="custom-control-input cb" id="cb{{ $sale->id }}" {{ $sale->isConfirm == 1 ? 'disabled' : '' }}>
