@@ -136,7 +136,8 @@
                                 <th>Date Needed</th>
                                 <th>Time Needed</th>
                                 <th>Delivery Type</th>
-                                <th>Delivery Address</th>                                
+                                <th>Delivery Address</th>
+                                                                
                                 <th>Instruction</th>
                                 <th>Type</th>
                                 <th>Production Branch</th>
@@ -147,7 +148,8 @@
                                 <th>Contact Number</th>                                
                                 <th>Category</th>
                                 <th>Order Source</th>                                 
-                                <th>Total Amount</th>                           
+                                <th>Total Amount</th>  
+                                <th>Delivery Branch</th>                         
                             </tr>
                         </thead>
                         <tbody>
@@ -171,7 +173,8 @@
                                         }
                                     @endphp
                                     
-                                </th>                                
+                                </th>                       
+                                         
                                 <th>{{$r->instruction}}</th>
                                 <th>{{$r->schedtype}}</th>
                                 <th>{{$r->prod_branch}}</th>
@@ -183,6 +186,7 @@
                                 <th>{{$r->catname}}</th>
                                 <th>{{$r->order_source}}</th> 
                                 <td>{{number_format(($r->price * $r->qty),2)}}</td>
+                                <th>{{$r->delbra}}</th>
                             </tr>
                             @empty
                             @endforelse
