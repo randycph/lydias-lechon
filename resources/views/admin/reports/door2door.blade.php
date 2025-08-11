@@ -104,7 +104,7 @@
                                     <label class="tx-13">Delivery Branch</label>
                                     <select name="delbra" id="delbra" class="form-control">
                                         <option value="">- Select Branch -</option>
-                                        @forelse(\App\EcommerceModel\Branch::where('pickup_branch','1')->sortBy('name') as $db)
+                                        @forelse(\App\EcommerceModel\Branch::where('pickup_branch','1')->orderBy('name') as $db)
                                             <option value="{{$db->name}}">{{$db->name}}</option>
                                         @empty
                                         @endforelse
