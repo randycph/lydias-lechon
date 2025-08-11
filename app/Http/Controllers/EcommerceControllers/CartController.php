@@ -614,7 +614,7 @@ class CartController extends Controller
 
                     if (!empty($cart)) {
                         $save = $cart->update([
-                            'qty' => $miscQty,
+                            'qty' => $cart->qty + $miscQty,
                             'price' => $prod->price,
                             'paella' => 0
                         ]);
@@ -622,7 +622,7 @@ class CartController extends Controller
                         $save = Cart::create([
                             'product_id' => $miscProductId,
                             'user_id' => Auth::id(),
-                            'qty' => $miscQty,
+                            'qty' => $cart->qty + $miscQty,
                             'price' => $prod->price,
                             'photo' => $image,
                             'paella_price' => 0,
@@ -693,7 +693,7 @@ class CartController extends Controller
             
                     foreach ($cart as $key => $order) {
                         if ($order->product_id == $miscProductId) {
-                            $cart[$key]->qty = $miscQty;
+                            $cart[$key]->qty += $miscQty;
                             $cart[$key]->price = $prod->price;
                             $cart[$key]->paella_price = 0;
                             $cart[$key]->photo = $image;
@@ -707,7 +707,7 @@ class CartController extends Controller
                     if (!$miscExist) {
                         $order = new Cart();
                         $order->product_id = $miscProductId;
-                        $order->qty = $miscQty;
+                        $order->qty += $miscQty;
                         $order->price = $prod->price;
                         $order->paella_price = 0;
                         $order->photo = $image;
