@@ -622,7 +622,7 @@ class CartController extends Controller
                         $save = Cart::create([
                             'product_id' => $miscProductId,
                             'user_id' => Auth::id(),
-                            'qty' => $cart->qty + $miscQty,
+                            'qty' => $miscQty,
                             'price' => $prod->price,
                             'photo' => $image,
                             'paella_price' => 0,
