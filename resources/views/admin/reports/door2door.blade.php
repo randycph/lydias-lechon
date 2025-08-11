@@ -54,7 +54,7 @@
                             </div>
                         </div>
                         <div class="row" id="adv" style="display:none;">
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="tx-13">Customer</label>
                                     <select name="customer" id="customer" class="form-control">
@@ -69,7 +69,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="tx-13">Product</label>
                                     <select name="product" id="product" class="form-control">
@@ -84,9 +84,9 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="tx-13">Branch</label>
+                                    <label class="tx-13">Order Source</label>
                                     <select name="branch" id="branch" class="form-control">
                                         <option value="">- Select Branch -</option>
                                         @forelse(\App\EcommerceModel\Branch::all() as $br)
@@ -95,6 +95,21 @@
                                         @endforelse
                                         @isset($_GET['branch'])
                                             <option value="{{$_GET['branch']}}" selected="selected">{{ $_GET['branch'] }}</option>
+                                        @endisset
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="tx-13">Delivery Branch</label>
+                                    <select name="delbra" id="delbra" class="form-control">
+                                        <option value="">- Select Branch -</option>
+                                        @forelse(\App\EcommerceModel\Branch::where('pickup_branch','1')->sortBy('name') as $db)
+                                            <option value="{{$db->name}}">{{$db->name}}</option>
+                                        @empty
+                                        @endforelse
+                                        @isset($_GET['delbra'])
+                                            <option value="{{$_GET['delbra']}}" selected="selected">{{ $_GET['delbra'] }}</option>
                                         @endisset
                                     </select>
                                 </div>
