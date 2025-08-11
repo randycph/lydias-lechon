@@ -45,7 +45,7 @@
                             @if ($sales->delivery_type == 'Door to door delivery')
                                 @if ($sales?->deliveryAddress && count($sales?->deliveryAddress) > 0)
                                 <ul>
-                                @foreach ($sales->deliveryAddress as $k => $address)
+                                @foreach ($sales->deliveryAddress->sortBy('delivery_date')->sortBy('delivery_time') as $k => $address)
                                 <li>
                                     Date Needed: {{ \Carbon\Carbon::parse(($address->delivery_date . ' ' . $address->delivery_time))->format('F d, Y') }}<br>
                                     Day: {{ \Carbon\Carbon::parse(($address->delivery_date . ' ' . $address->delivery_time))->format('l') }}<br>
