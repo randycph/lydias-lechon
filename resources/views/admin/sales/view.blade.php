@@ -148,7 +148,7 @@
                                     @if(date('H:i A',strtotime($details->delivery_date)) == '12:00 PM')
                                         {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
                                     @else
-                                        @if($sales?->deliveryAddress && count($sales?->deliveryAddress) > 0)
+                                        @if(($sales?->deliveryAddress && count($sales?->deliveryAddress) > 0) || $sales->delivery_type == 'Store Pickup')
 
                                         @else
                                             {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
