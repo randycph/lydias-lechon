@@ -368,11 +368,8 @@
                                 <th>Production Date</th>
                                 <th>Production Time</th>
                                 <th>Delivery Type</th>  
-                                <th>JO#</th>
                                 <th>Production Branch</th>
-                                <th>Status</th>                                
                                 <th>Agent</th>  
-                                <th>Order#</th>
                                 <th>Contact Person</th>                                
                                 <th>Contact Number</th>                                
                                 <th>DR#</th>
@@ -505,14 +502,11 @@
                                         
                                           
                                         
-                                        <td class="bord">{{$r->jo_number}}</td>
                                         <td class="bord">{{$r->pbname}}</td>
 
                                         @if($old_value <> $uni)
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">{{$r->delstat}}</td>
                                             
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">{{$r->agent}}</td>                                    
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top"><a target="_blank" href="{{ route('sales-transaction.view',$r->hid) }}">{{$r->order_number}}</a></td> 
                                             
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">{{$r->customer_name}}</td>
                                                                                                                           
@@ -521,8 +515,6 @@
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">&nbsp;</td>
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">{{number_format($r->delivery_fee_amount,2)}}</td>
                                         @else
-                                            <td class="wala" style="display:none;"></td>  
-                                            <td class="wala" style="display:none;"></td>         
                                             <td class="wala" style="display:none;"></td>   
                                             <td class="wala" style="display:none;"></td>  
                                             <td class="wala" style="display:none;"></td>         
@@ -624,7 +616,6 @@
                                         <td class="bord">@if(date('m-d-Y',strtotime($r->deldate)) <> '1970-01-01'){{date('h:i A',strtotime($r->deldate))}} @endif</td>
                                         <td class="bord">&nbsp;</td>   
                                          
-                                        <td class="bord">{{$r->jo_number}}</td> 
                                         <td class="bord">{{$r->pbname}}</td>
                                         <td class="bord">&nbsp;</td>
                                         <td class="bord">&nbsp;</td> 
@@ -793,7 +784,7 @@
             ],
             columnDefs: [ 
                 {
-                    targets: [2,4,5,9,10,11,13,15,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32],
+                    targets: [2,4,5,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29],
                     visible: false
                 },
                 { type: 'time-uni', targets: [7, 10] } // Time Needed, Production Time
