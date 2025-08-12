@@ -329,7 +329,8 @@ class ReportsController extends Controller
                     `branch` varchar(191) DEFAULT NULL,
                     `note` text DEFAULT NULL,
                     `sales_header_id` bigint(20) DEFAULT NULL,         
-                    `paella_price` decimal(10,2) NOT NULL DEFAULT 0.00
+                    `paella_price` decimal(10,2) NOT NULL DEFAULT 0.00,
+                    `paella` int(11) NOT NULL DEFAULT 0
                     )
 
             ");
@@ -368,6 +369,7 @@ class ReportsController extends Controller
                             'note' => $tm->note,
                             'sales_header_id' => $tm->sales_header_id,
                             'paella_price' => $tm->paella_price,
+                            'paella' => $obj->paella,
                         ]);
                     }
                 }
@@ -375,7 +377,7 @@ class ReportsController extends Controller
             //dd(DB::select("select * from temp_mrs"));
             //    IF(m.delivery_status, "YES", "NO") as delstat,
 
-            $mqry = "SELECT distinct m.product_name, m.paella_price, 
+            $mqry = "SELECT distinct m.product_name, m.paella_price, m.paella,
             m.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,m.price, m.address as customer_delivery_adress,
             h.customer_name, 
             cast(concat(m.delivery_date, ' ', m.delivery_time) as datetime)  as delivery_date,

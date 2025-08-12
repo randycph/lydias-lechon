@@ -432,7 +432,7 @@
                                     <tr style="text-align: left">
                                         
                                         <td class="bord">{{number_format($r->qty,2)}}</td>
-                                        <td class="bord">{{$r->product_name}} @if($r->paella_price > 0) Boneless with Paella @endif</td>
+                                        <td class="bord">{{$r->product_name}} @if($r->paella == 1) Boneless with Paella @endif</td>
 
                                         @if($old_value <> $uni)
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">@if(strlen($address)>15){!!$address!!}@endif</td>   
