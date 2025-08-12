@@ -228,8 +228,8 @@
                                 @php
                                 $use = \App\EcommerceModel\SalesHeader::find($sale->id);
                                 @endphp
-                                <tr style="height:30px; @if($sale->trashed()) background-color:#FFA07A; @endif>
-                                    <td>    
+                                <tr style="height:30px; @if($sale->trashed()) background-color:#FFA07A; @endif">
+                                    <td>
                                         <div class="custom-control custom-checkbox">
                                             <input type="checkbox" class="custom-control-input cb" id="cb{{ $sale->id }}" {{ $sale->isConfirm == 1 ? 'disabled' : '' }}>
                                             <label class="custom-control-label" for="cb{{ $sale->id }}"></label>
@@ -304,24 +304,23 @@
                                                         </a>
                                                         <div class="dropdown-menu dropdown-menu-right">
 
-                                                                <a class="dropdown-item" title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale->id) }}">View Sales Summary</a>
-                                                            @if($sale->isConfirm != 1 && $sale->status !== 'CANCELLED')
-                                                                @if(auth()->user()->role_id == 2 || auth()->user()->role_id == 1)
-                                                                <a class="dropdown-item"  href="javascript:void(0);" onclick="confirm_order({{$sale->id}},'{{ number_format((\App\EcommerceModel\SalesHeader::balance($sale->id)),2) }}');" title="Confirm Order" >Confirm Order</a>
+                                                            <a class="dropdown-item" title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale->id) }}">View Sales Summary</a>
+                                                            @if ($sale->status !== 'CANCELLED')
+                                                                @if($sale->isConfirm != 1)
+                                                                    @if(auth()->user()->role_id == 2 || auth()->user()->role_id == 1)
+                                                                    <a class="dropdown-item"  href="javascript:void(0);" onclick="confirm_order({{$sale->id}},'{{ number_format((\App\EcommerceModel\SalesHeader::balance($sale->id)),2) }}');" title="Confirm Order" >Confirm Order</a>
+                                                                    @endif
                                                                 @endif
-                                                            @endif
-                                                            
-                                                            @if($sale->status !== 'CANCELLED')
+                                                                
                                                                 <a class="dropdown-item"  href="{{ route('sales.update_details',$sale->id) }}" title="Update Sales Details & Items" >Update Sales Details</a>
-                                                            @endif
-                                                            
-                                                            @if($dateneeded > date('Y-m-d H:i:s') && $sale->status !== 'CANCELLED')
-                                                                <a class="dropdown-item text-danger" href="javascript:void(0)" onclick="delete_sales({{$sale->id}},'{{$sale->order_number}}')" title="Delete Transaction">Delete</a>
+                                                                
+                                                                @if($dateneeded > date('Y-m-d H:i:s'))
+                                                                    <a class="dropdown-item text-danger" href="javascript:void(0)" onclick="delete_sales({{$sale->id}},'{{$sale->order_number}}')" title="Delete Transaction">Delete</a>
+                                                                @endif
                                                             @endif
                                                         </div>
                                                     </div>
-                                                    @if ($sale->status === 'CANCELLED')
-                                                    @else
+                                                    @if ($sale->status !== 'CANCELLED')
                                                     <div class="nav-item dropdown">
                                                         <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                             <i data-feather="credit-card"></i>
