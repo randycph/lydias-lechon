@@ -363,7 +363,6 @@
                                 <th>Payment</th>
                                 <th>Delivery Address</th> 
                                 <th>Customer</th>                                
-                                <th>Date Needed</th>
                                 <th>Time Needed</th>  
                                 <th>Instruction</th>                                
                                 <th>Production Date</th>
@@ -441,7 +440,7 @@
                                         @if($old_value <> $uni)
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">@if(strlen($address)>15){!!$address!!}@endif</td>   
                                         @else        
-                                            <td class="wala" style="display:none;"></td>   
+                                            
                                         @endif  
 
                                         <td class="bord">{{number_format($r->price,2)}}</td>
@@ -479,7 +478,6 @@
                                                 @endphp
                                            
                                             </td>   
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">{{date('m-d-Y',strtotime($r->delivery_date))}}</td>
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">@if(date('h:i A',strtotime($r->delivery_date)) == '12:00 PM') 12:00 NOON @else {{date('h:i A',strtotime($r->delivery_date))}} @endif</td>
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">
                                                 @php
@@ -618,7 +616,6 @@
                                             <td class="bord" rowspan="{{$cnt}}">{{ (strlen($r->customer_name) < 2 ) ? $r->customer_delivery_adress:$r->customer_name}}</td>  
                                      
                                                                           
-                                        <td class="bord">{{date('m-d-Y',strtotime($r->delivery_date))}}</td>
                                         <td class="bord">
                                             @if(date('h:i A',strtotime($r->delivery_date)) == '12:00 PM') 12:00 NOON @else {{date('h:i A',strtotime($r->delivery_date))}} @endif
                                         </td>
@@ -796,11 +793,11 @@
             ],
             columnDefs: [ 
                 {
-                    targets: [2,4,5,10,11,12,14,16,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33],
+                    targets: [2,4,5,9,10,11,13,15,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32],
                     visible: false
                 },
-                { type: 'time-uni', targets: [8,11] }
-             ]
+                { type: 'time-uni', targets: [7, 10] } // Time Needed, Production Time
+            ]
         } );
     } );
 </script>
