@@ -369,7 +369,7 @@ class ReportsController extends Controller
                             'note' => $tm->note,
                             'sales_header_id' => $tm->sales_header_id,
                             'paella_price' => $tm->paella_price,
-                            'paella' => $obj->paella,
+                            'paella' => $obj?->paella,
                         ]);
                     }
                 }
