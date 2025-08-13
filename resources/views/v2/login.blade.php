@@ -1,4 +1,5 @@
 @extends('layouts.guest', ['page' => $page])
+@section('title', 'Sign In')
 
 @section('content')
 
