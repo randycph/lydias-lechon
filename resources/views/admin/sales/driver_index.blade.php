@@ -1018,7 +1018,7 @@
 
             $.ajax({
                 type: "GET",
-                url: "/admin/delivery-status/" + id,
+                url: "{{ route('show.delivery-status', [':id']) }}".replace(':id', id),
                 success: function( response ) {
                     if (response.status && response.status.status !== 'In Transit') {
                         $('#delivery_status').val(response.status.status);
