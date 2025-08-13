@@ -9,20 +9,22 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class DeliveryAssignedMail extends Mailable
+class DeliveryAssignedMultipleMail extends Mailable
 {
     use Queueable, SerializesModels;
 
     public $delivery;
     public $driver;
+    public $addresses;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($delivery, $driver = null)
+    public function __construct($delivery, $driver, $addresses = null)
     {
         $this->delivery = $delivery;
         $this->driver = $driver;
+        $this->addresses = $addresses;
     }
 
     /**
@@ -31,9 +33,10 @@ class DeliveryAssignedMail extends Mailable
     public function build()
     {
         return $this->subject('New Delivery Assigned')
-                    ->markdown('emails.delivery-assigned', [
+                    ->markdown('emails.delivery-assigned-multiple', [
                         'delivery' => $this->delivery,
                         'driver' => $this->driver,
+                        'addresses' => $this->addresses,
                     ]);
     }
 }

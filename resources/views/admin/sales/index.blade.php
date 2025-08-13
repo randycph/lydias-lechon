@@ -565,6 +565,14 @@
                     @csrf
                     @method('POST')
                     <div class="modal-body">
+                        <div class="form-group" id="deliveries_lists_div">
+                            <label for="deliveries_lists">Deliveries</label>
+                            <select id="deliveries_lists" class="form-control mg-b-5" name="deliveries_lists"  data-width="100%">
+                            </select>
+                            <p class="tx-10 text-danger" id="error">
+                                <x-error-message inputName="deliveries_lists" />
+                            </p>
+                        </div>
                         <div class="form-group">
                             <label for="delivery_status">Status</label>
                             <select id="delivery_status" class="form-control mg-b-5" name="delivery_status"  data-width="100%" required="required">
@@ -1156,7 +1164,7 @@
                 type: "GET",
                 url: "/admin/delivery-status/" + id,
                 success: function( response ) {
-                    if (response.status.status != 'In Transit') {
+                    if (response.status && response.status.status !== 'In Transit') {
                         $('#delivery_status').val(response.status.status);
                         $('#del_remarks').val(response.status.remarks);
 
@@ -1164,6 +1172,24 @@
                             $('#del_image').attr('src', window.base_url + '/images/proof-of-delivery/' + response.status.image).show();
                             $('#view_image').attr('href', window.base_url + '/images/proof-of-delivery/' + response.status.image).show();
                         }
+                    }
+
+                    // Populate deliveries from top-level "deliveries"
+                    if (response.deliveries && response.deliveries.length > 0) {
+                        $('#deliveries_lists_div').show();
+                        $('#deliveries_lists').empty().append('<option value="">- Select -</option>');
+                        response.deliveries.forEach(function(delivery, index) {
+                            const label = `Address ${index + 1}: ${delivery.address} (${delivery.location})`;
+                            $('#deliveries_lists').append(
+                                '<option value="' + delivery.id + '">' +
+                                    label +
+                                '</option>'
+                            );
+                        });
+                        $('#deliveries_lists').prop('required', true);
+                    } else {
+                        $('#deliveries_lists_div').hide();
+                        $('#deliveries_lists').prop('required', false);
                     }
                 }
             });

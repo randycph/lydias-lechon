@@ -35,6 +35,7 @@ use Illuminate\Support\Facades\Storage;
 use App\EcommerceModel\Branch;
 use App\EcommerceModel\JobOrder;
 use App\Mail\DeliveryAssignedMail;
+use App\Mail\DeliveryAssignedMultipleMail;
 use App\Models\ActivityLog;
 use App\Models\ProductDeliveryAddress;
 use App\Models\UserBranch;
@@ -834,9 +835,17 @@ class SalesController extends Controller
             $update_delivery_table = DeliveryStatus::create($data);
 
         } else {
-            SalesHeader::whereId($request->del_id)->update([
-                'delivery_status' => $request->delivery_status
-            ]);
+            if ($request->has('deliveries_lists') && !empty($request->deliveries_lists)) {
+                $deliveryAddress = ProductDeliveryAddress::where('id', $request->deliveries_lists)->first();
+                if ($deliveryAddress) {
+                    $deliveryAddress->delivery_status = $request->delivery_status;
+                    $deliveryAddress->save();
+                }
+            } else {
+                SalesHeader::whereId($request->del_id)->update([
+                    'delivery_status' => $request->delivery_status
+                ]);
+            }
 
             $data['order_id'] = $request->del_id;
             $data['type'] = 'sales';
@@ -872,7 +881,12 @@ class SalesController extends Controller
                     $driver = User::where('id', $request->delivered_by)->first();
 
                     if ($driver && !empty($driver->email)) {
-                        Mail::to($driver->email)->send(new DeliveryAssignedMail($order, $driver));
+                        if ($request->has('deliveries_lists') && !empty($request->deliveries_lists)) {
+                            $deliveryAddress = ProductDeliveryAddress::where('id', $request->deliveries_lists)->first();
+                            Mail::to($driver->email)->send(new DeliveryAssignedMultipleMail($order, $driver, $deliveryAddress));
+                        } else {
+                            Mail::to($driver->email)->send(new DeliveryAssignedMail($order, $driver));
+                        }
                     }
                     if ($driver && $driver->contact_mobile) {
                         $sms->send_sms($driver->contact_mobile, 'delivery_assigned', $order, $driver);
@@ -902,9 +916,11 @@ class SalesController extends Controller
     public function showDeliveryStatus($id)
     {
         $status = DeliveryStatus::where('order_id', $id)->orWhere('job_order_id', $id)->latest()->first();
+        $deliveries = ProductDeliveryAddress::where('sales_header_id', $id)->get();
 
         return response()->json([
             'status' => $status,
+            'deliveries' => $deliveries
         ]);
     }
 
