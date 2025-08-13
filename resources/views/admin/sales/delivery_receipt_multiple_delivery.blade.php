@@ -81,7 +81,11 @@
                         </li>
                         <li class="d-flex justify-content-between tx-15">
                             <span>Delivery Status</span>
+                            @if ($deliveryAddress->delivery_status)
+                            <span>{{$deliveryAddress->delivery_status}}</span>
+                            @else
                             <span>{{$sales->delivery_status}}</span>
+                            @endif
                         </li>
                     </ul>
                 </div>

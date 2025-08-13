@@ -389,7 +389,8 @@
                                 <th>Forecaster Date</th>     
                                 <th>Delivery Branch</th>
                                 <th>Encoded Date</th>  
-                                <th>Encoded Time</th>                     
+                                <th>Encoded Time</th>   
+                                <th>Delivery Status</th>                     
                             </tr>
                             </thead>
                             <tbody>
@@ -577,8 +578,11 @@
                                         @if($old_value <> $uni)
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">@if(date('m-d-Y',strtotime($r->created)) <> '1970-01-01'){{date('Y-m-d',strtotime($r->created))}} @endif</td>
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">@if(date('m-d-Y',strtotime($r->created)) <> '1970-01-01'){{date('h:i A',strtotime($r->created))}} @endif</td>
+                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">{{$r->delstat}}</td>
+
                                         @else
                                             <td class="wala" style="display:none;"></td>   
+                                            <td class="wala" style="display:none;"></td>
                                             <td class="wala" style="display:none;"></td>
                                         @endif
                                         
@@ -665,7 +669,7 @@
                                         
                                         <td class="bord">@if(date('Y-m-d',strtotime($r->created)) <> '1970-01-01'){{date('Y-m-d',strtotime($r->created))}} @endif</td>
                                          <td class="bord">@if(date('Y-m-d',strtotime($r->created)) <> '1970-01-01'){{date('h:i A',strtotime($r->created))}} @endif</td>
-                                        
+                                        <td class="bord">{{$r->delstat}}</td>
                                     </tr>
                                     @php $old_value=$r->jo_number; @endphp
 
@@ -796,7 +800,7 @@
             ],
             columnDefs: [ 
                 {
-                    targets: [2,4,5,7,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33],
+                    targets: [2,4,5,7,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34],
                     visible: false
                 },
                 { type: 'time-uni', targets: [8,11] }

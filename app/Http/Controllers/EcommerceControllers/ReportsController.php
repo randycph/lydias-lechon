@@ -323,7 +323,7 @@ class ReportsController extends Controller
                     `qty` varchar(191) DEFAULT NULL,
                     `delivery_date` date DEFAULT NULL,
                     `delivery_time` varchar(191) DEFAULT NULL,
-                    `delivery_status` int(11) NULL DEFAULT 0,
+                    `delivery_status` varchar(191) DEFAULT NULL,
                     `delivery_fee` decimal(8,2)  NULL DEFAULT 0.00,
                     `location` varchar(191) DEFAULT NULL,
                     `branch` varchar(191) DEFAULT NULL,
@@ -383,7 +383,7 @@ class ReportsController extends Controller
             cast(concat(m.delivery_date, ' ', m.delivery_time) as datetime)  as delivery_date,
             m.note as instruction, po.delivery_date as deldate, h.delivery_type, jo.jo_number, pb.name as pbname, 
         
-            IFNULL(NULLIF(m.delivery_status, 0), 'Processing Stock') as delstat,
+            IFNULL(NULLIF(m.delivery_status, ''), 'Processing Stock') as delstat,
             h.agent, 
             m.contact_tel as customer_contact_number,'' as dr, m.delivery_fee as delivery_fee_amount, d.price, '' as releasing, h.order_source, br.name as receiver, 
             c.name as catname, u.name as username, jo.jo_order_type,h.order_type as hordertype, h.id as hid, '' as jo_category, 'sales' as trantype, 
@@ -560,7 +560,7 @@ class ReportsController extends Controller
         //dd($mrs);
         //$results = collect($jo)->merge(collect($rs));
         $results = collect($mrs)->merge(collect($jo)->merge(collect($rs)));
-        //dd($results);
+        // dd($results);
         
         return view('admin.reports.forecaster',compact('rs','jo','results','wra_array','mrs'));
 
