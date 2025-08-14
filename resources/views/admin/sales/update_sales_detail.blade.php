@@ -47,7 +47,7 @@ Update Sales Details
                     <div class="order-details-place">
                         <br>
                         <input type="hidden" name="update_dateneeded_id" value="{{$salesheader->id}}">
-                        <input type="hidden" name="update_dateneeded_deliverytypexxx"
+                        <input type="hidden" name="update_dateneeded_deliverytype"
                             value="{{$salesheader->delivery_type}}">
 
                         <div class="form-group">
@@ -71,18 +71,20 @@ Update Sales Details
                         <div class="form-group divd2d" @if($salesheader->delivery_type <> 'Door to door delivery')
                                 style="display:none;" @endif>
 
-                                <label class="d-block">Delivery Branch <span class="tx-danger">*</span></label>
-                                <select class="selectpicker mg-b-5"
-                                    data-style="btn btn-outline-light btn-md btn-block tx-left"
-                                    title="Select branch to deliver" data-width="100%" name="delivery_branch"
-                                    id="delivery_branch">
-                                    <option value="">- Select Branch -</option>
-                                    @foreach($branches_store->where('pickup_branch','1')->sortBy('name') as $b)
-                                    <option @if($salesheader->delivery_branch == $b->name) selected @endif
-                                        value="{{$b->name}}">{{$b->name}}</option>
-                                    @endforeach
-                                </select>
+                        @if (count($salesheader?->deliveryAddress) == 0)
 
+                            <label class="d-block">Delivery Branch <span class="tx-danger">*</span></label>
+                            <select class="selectpicker mg-b-5"
+                                data-style="btn btn-outline-light btn-md btn-block tx-left"
+                                title="Select branch to deliver" data-width="100%" name="delivery_branch"
+                                id="delivery_branch">
+                                <option value="">- Select Branch -</option>
+                                @foreach($branches_store->where('pickup_branch','1')->sortBy('name') as $b)
+                                <option @if($salesheader->delivery_branch == $b->name) selected @endif
+                                    value="{{$b->name}}">{{$b->name}}</option>
+                                @endforeach
+                            </select>
+                        @endif
 
                             <!-- Allow Multiple Address Toggle -->
                             <div class="form-check mb-3 mt-3">
@@ -113,7 +115,7 @@ Update Sales Details
                                                         data-product-id="{{ $item->product_id }}"
                                                         data-name="product_ids"
                                                         id="item_{{ $item->product_id }}">
-                                                    <label class="form-check-label">{{ $item->product_name }}</label>
+                                                    <label class="form-check-label">{{ $item->product_name }} {{ $item->paella_price > 0 ? 'Boneless with Paella' : '' }}</label>
                                                 </div>
                                                 <div>
                                                     <select class="form-select form-select-sm mb-2 product-qty"
@@ -151,6 +153,28 @@ Update Sales Details
                                         </div>
                                     </div>
 
+                                    <input type="hidden" class="delivery-fee" name="delivery_fee[]" value="0" />
+
+                                    <div class="form-group">
+                                        <label class="control-label">Location Type</label>
+                                        <select class="form-control location">
+                                            <option value="">Select Location</option>
+                                            @foreach($locations as $location)
+                                            <option value="{{ $location->name }}">{{ $location->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="d-block">Delivery Branch <span class="tx-danger">*</span></label>
+                                        <select class="form-control branch">
+                                            <option value="">- Select Branch -</option>
+                                            @foreach($branches_store->where('pickup_branch','1')->sortBy('name') as $b)
+                                            <option value="{{ $b->name }}">{{ $b->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
                                     <div class="mb-3">
                                         <label class="form-label fw-bold note-label">Note</label>
                                         <textarea class="form-control note"></textarea>
@@ -179,6 +203,9 @@ Update Sales Details
 
                         </div>
                         @endif
+
+                        
+
 
 
                         @if(auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102)
@@ -678,10 +705,13 @@ Update Sales Details
             
             const $fieldset = $template.find('fieldset').prop('disabled', false);
 
-            $fieldset.find('.address').attr({ name: 'address[]', required: true }).val(data.address || '');
+            $fieldset.find('.address').attr({ name: 'address[]', required: true }).val(data.address || '');  // New Fields
+            $fieldset.find('.location').attr({ name: 'location[]', required: true }).val(data.location || '');
+            $fieldset.find('.branch').attr({ name: 'branch[]', required: true }).val(data.branch || '');
             $fieldset.find('.note').attr({ name: 'note[]', required: true }).val(data.note || '');
             $fieldset.find('.contact_person').attr({ name: 'contact_person[]', required: true }).val(data.contact_person || '');
             $fieldset.find('.contact_tel').attr({ name: 'contact_tel[]', required: true }).val(data.contact_tel || '');
+
             $fieldset.find('.date-field')
                 .attr({ name: 'dateneeded_date[]', required: true })
                 .val(data.date || '')
@@ -755,6 +785,48 @@ Update Sales Details
 
         }
 
+        async function updateFeeForFieldset($fieldset, location, products) {
+            try {
+                const response = await fetch('{{ route('cart.front.get_shipping_fee_for_multiple_address_new') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    },
+                    body: JSON.stringify({ locations: [location], products }),
+                });
+
+                if (!response.ok) throw new Error('Network error');
+
+                const data = await response.json();
+                const fee = parseFloat(data.fee || 0);
+
+                $fieldset.find('.delivery-fee')
+                    .attr('name', 'delivery_fee[]')
+                    .val(fee);
+
+                console.log('Set fee', fee, 'for fieldset', $fieldset.index());
+
+
+            } catch (e) {
+                console.error(`Failed to fetch delivery fee for ${location}`, e);
+            }
+        }
+
+        $(document).on('change', '.location', async function () {
+            $('.address-section').each(function (i, el) {
+                const $fieldset = $(el);
+                const location = $fieldset.find('.location').val();
+
+                if (!location) {
+                    console.warn(`Location is empty for fieldset ${i}`);
+                    return;
+                }
+                const products = $fieldset.find('[data-product-id]:checked').map((i, el) => $(el).val()).get();
+
+                updateFeeForFieldset($fieldset, location, products);
+            });
+        });
 
         // Remove block
         $(document).on('click', '.remove-address', function () {
@@ -784,8 +856,10 @@ Update Sales Details
                     note: item.note,
                     contact_tel: item.contact_tel,
                     contact_person: item.contact_person,
-                    products: item.products
-
+                    branch: item.branch,
+                    location: item.location,
+                    products: item.products,
+                    delivery_fee: item.delivery_fee
                 });
             });
 

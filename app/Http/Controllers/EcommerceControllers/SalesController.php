@@ -253,10 +253,11 @@ class SalesController extends Controller
                         'address' => $addr,
                         'delivery_date' => $request->dateneeded_date[$index] ?? null,
                         'delivery_time' => $request->dateneeded_time[$index] ?? null,
+                        'delivery_fee' => $request->delivery_fee[$index] ?? 0,
                         'user_id' => $sales->user_id,
-                        'branch' => $request->delivery_branch,
-                        'location' => $request->update_dateneeded_d2d,
-                        'note' => $request->note[$index],
+                        'branch' => $request->branch[$index] ?? null,
+                        'location' => $request->location[$index] ?? null,
+                        'note' => $request->note[$index] ?? null,
                         'contact_person' => $request->contact_person[$index] ?? null,
                         'contact_tel' => $request->contact_tel[$index] ?? null,
                         'products' => json_encode($prods),
@@ -765,6 +766,8 @@ class SalesController extends Controller
         $branches_store = Branch::orderBy('name','asc')->get();
 
         // dd($salesheader->deliveryAddress);
+
+        $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
       
         ActivityLog::create([
             'created_by' => auth()->id(),
@@ -778,7 +781,7 @@ class SalesController extends Controller
             'reference' => $salesdetail?->id
         ]);
 
-        return view('admin.sales.update_sales_detail',compact('salesheader','dateneeded','date_only','time_only','locationed','products','branches_store'));
+        return view('admin.sales.update_sales_detail',compact('salesheader','dateneeded','date_only','time_only','locationed','products','branches_store', 'locations'));
 
     }
 
