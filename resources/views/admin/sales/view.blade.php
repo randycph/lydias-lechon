@@ -71,6 +71,9 @@
                                     <br>
                                     Delivery Charge: ₱{{ number_format($address->delivery_fee, 2) }}<br>
                                     Location: {{ $address->location }}<br>
+                                    @if ($address->branch)
+                                    Delivery Branch: {{ $address->branch ? '' }}<br>
+                                    @endif
                                     Address {{ $k + 1 }}: {{ $address->address }}<br>
                                     @php
                                         $salesPayments = $sales->payments;

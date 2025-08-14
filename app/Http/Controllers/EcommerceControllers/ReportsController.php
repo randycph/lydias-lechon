@@ -379,7 +379,7 @@ class ReportsController extends Controller
 
             $mqry = "SELECT distinct m.product_name, m.paella_price, m.paella,
             m.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,m.price, m.address as customer_delivery_adress,
-            h.customer_name, 
+            h.customer_name, m.branch as mbranch, 
             cast(concat(m.delivery_date, ' ', m.delivery_time) as datetime)  as delivery_date,
             m.note as instruction, po.delivery_date as deldate, h.delivery_type, jo.jo_number, pb.name as pbname, 
         

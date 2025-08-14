@@ -570,7 +570,7 @@
                                         
                                         @if($old_value <> $uni)
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">{{ $r->forecast_dt }}</td>
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">{{ $r->del_branch }}</td>   
+                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">{{ $r?->mbranch ?? $r->del_branch }}</td>   
                                         @else        
                                             <td class="wala" style="display:none;"></td>   
                                             <td class="wala" style="display:none;"></td>   
@@ -665,7 +665,7 @@
                                         </td>
                                         
                                             <td class="bord">{{ $r->forecast_dt }}</td>
-                                            <td class="bord">{{ $r->del_branch }}</td>   
+                                            <td class="bord">{{ $r->mbranch ?? $r->del_branch }}</td>   
                                         
                                         <td class="bord">@if(date('Y-m-d',strtotime($r->created)) <> '1970-01-01'){{date('Y-m-d',strtotime($r->created))}} @endif</td>
                                          <td class="bord">@if(date('Y-m-d',strtotime($r->created)) <> '1970-01-01'){{date('h:i A',strtotime($r->created))}} @endif</td>
