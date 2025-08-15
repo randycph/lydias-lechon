@@ -60,6 +60,7 @@
 
 </head>
 <body 
+    id="body"
     x-cloak 
     class="bg-gray-100 text-gray-900 mx-auto" 
     x-data="{ 
@@ -253,9 +254,21 @@
 
         loadMoreStores() {
             this.storeLimit += 5;
-        }
+        },
+
+        showGoTop: false,
+
+        scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        },
+
+        updateGoTop() {
+            this.showGoTop = window.scrollY > (window.innerHeight / 2) || window.scrollY > 1900;
+        },
     }"
     x-init="
+        updateGoTop();
+        window.addEventListener('scroll', () => updateGoTop(), { passive: true });
         const lockScroll = () => {
             const scrollY = window.scrollY;
             document.body.style.position = 'fixed';
@@ -379,5 +392,16 @@
 
     {!! $globalAnalytics !!}
 
+    <button 
+        x-show="showGoTop"
+        @click="goToAnchor('body')"
+        x-transition
+        class="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-primary text-white shadow-lg hover:bg-primary-dark focus:outline-none"
+        title="Go to Top"
+    >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+            <path fill-rule="evenodd" d="M10 17a.75.75 0 0 1-.75-.75V5.612L5.29 9.77a.75.75 0 0 1-1.08-1.04l5.25-5.5a.75.75 0 0 1 1.08 0l5.25 5.5a.75.75 0 1 1-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0 1 10 17Z" clip-rule="evenodd" />
+        </svg>
+    </button>
 </body>
 </html>
