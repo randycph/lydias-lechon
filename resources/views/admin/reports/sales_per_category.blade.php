@@ -23,6 +23,27 @@
 @endsection
 
 
+@php
+    $date_display='';
+    if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
+        $date_display=date('M d, Y',strtotime($_GET['startdate']))." to ".date('M d, Y',strtotime($_GET['enddate']));
+    }
+@endphp
+@section('pagetitle')
+    <table width="100%" style="font-size:18px;font-weight:bold;">
+        <tr>
+            <td class="bord" align="center">
+                <br>
+                Product Category Report <br>
+                {{$date_display}}
+                <br><br>
+            </td>
+        </tr>
+    </table>
+    
+@endsection
+
+
 @section('content')
 <div class="container">
     <div class="text-center mg-b-20">
@@ -106,12 +127,16 @@
                 },
                 {
                     extend: 'csv',
+                    filename: 'ProductCategoryReport',
+                    title: 'Product Category Report ({{$date_display}})',
                     exportOptions: {
                         columns: ':visible'
                     }
                 },
                 {
                     extend: 'excel',
+                    filename: 'ProductCategoryReport',
+                    title: 'Product Category Report ({{$date_display}})',
                     exportOptions: {
                         columns: ':visible'
                     }

@@ -30,12 +30,40 @@
     </style>
 @endsection
 
+
+@php
+    $branch_display='';
+    if(isset($_GET['pb']) && strlen($_GET['pb'])>=1){
+        $b = \App\EcommerceModel\ProductionBranch::whereId($_GET['pb'])->first();
+        $branch_display=$b->name;
+    }
+    
+    $date_display='';
+    if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
+        $date_display=date('M d, Y',strtotime($_GET['startdate']))." to ".date('M d, Y',strtotime($_GET['enddate']));
+    }
+@endphp
+@section('pagetitle')
+    <table width="100%" style="font-size:18px;font-weight:bold;">
+        <tr>
+            <td class="bord" align="center">
+                <br>
+                Pickup Orders Per Production Branch <br>
+                {{ $branch_display }}<br>
+                {{$date_display}}
+                <br><br>
+            </td>
+        </tr>
+    </table>
+    
+@endsection
+
 @section('content')
 
 
         <div class="container-fluid">
             <div class="text-center mg-b-20"><img height="100px" src="{{ asset('images/lydias1965.png') }}" alt="">
-            <h4 class="mg-b-0 tx-spacing--1">Delivery per Production Branch</h4></div>
+            <h4 class="mg-b-0 tx-spacing--1">Pickup Orders Per Production Branch</h4></div>
           
 
             <div class="row-sm">
@@ -399,18 +427,24 @@
                 },
                 {
                     extend: 'csv',
+                    filename: 'PickupOrdersPerProductionBranch',
+                    title: 'Pickup Orders Per Production Branch ({{ $branch_display }} | {{$date_display}})',
                     exportOptions: {
                         columns: ':visible'
                     }
                 },
                 {
                     extend: 'excel',
+                    filename: 'PickupOrdersPerProductionBranch',
+                    title: 'Pickup Orders Per Production Branch ({{ $branch_display }} | {{$date_display}})',
                     exportOptions: {
                         columns: ':visible'
                     }
                 },
                 {
                     extend: 'pdf',
+                    filename: 'PickupOrdersPerProductionBranch',
+                    title: 'Pickup Orders Per Production Branch ({{ $branch_display }} | {{$date_display}})',
                     orientation: 'landscape',
                     pageSize: 'LEGAL',
                     exportOptions: {

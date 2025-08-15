@@ -23,6 +23,32 @@
     </style>
 @endsection
 
+@php
+    $status_display='';
+    if(isset($_GET['status']) && strlen($_GET['status'])>=2){
+        $status_display=$_GET['status'];
+    }
+    
+    $date_display='';
+    if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
+        $date_display=date('M d, Y',strtotime($_GET['startdate']))." to ".date('M d, Y',strtotime($_GET['enddate']));
+    }
+@endphp
+@section('pagetitle')
+    <table width="100%" style="font-size:18px;font-weight:bold;">
+        <tr>
+            <td class="bord" align="center">
+                <br>
+                Leftover Report <br>
+                {{ $status_display }}<br>
+                {{$date_display}}
+                <br><br>
+            </td>
+        </tr>
+    </table>
+    
+@endsection
+
 
 @section('content')
     <div class="container">
@@ -126,18 +152,24 @@
                 },
                 {
                     extend: 'csv',
+                    filename: 'LeftoverReport',
+                    title: 'Leftover Report ({{ $status_display }} | {{$date_display}})',
                     exportOptions: {
                         columns: ':visible'
                     }
                 },
                 {
                     extend: 'excel',
+                    filename: 'LeftoverReport',
+                    title: 'Leftover Report ({{ $status_display }} | {{$date_display}})',
                     exportOptions: {
                         columns: ':visible'
                     }
                 },
                 {
                     extend: 'pdf',
+                    filename: 'LeftoverReport',
+                    title: 'Leftover Report ({{ $status_display }} | {{$date_display}})',
                     orientation: 'landscape',
                     pageSize: 'LEGAL',
                     exportOptions: {

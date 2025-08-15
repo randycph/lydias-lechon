@@ -24,6 +24,34 @@
 @endsection
 
 
+@php
+    $branch_display='';
+    if(isset($_GET['branch']) && strlen($_GET['branch'])>=1){
+        $b=\App\EcommerceModel\Branch::find($_GET['branch']);
+        $branch_display=$b->name;
+    }
+    
+    $date_display='';
+    if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
+        $date_display=date('M d, Y',strtotime($_GET['startdate']))." to ".date('M d, Y',strtotime($_GET['enddate']));
+    }
+@endphp
+@section('pagetitle')
+    <table width="100%" style="font-size:18px;font-weight:bold;">
+        <tr>
+            <td class="bord" align="center">
+                <br>
+                Leftover Report <br>
+                {{ $branch_display }}<br>
+                {{$date_display}}
+                <br><br>
+            </td>
+        </tr>
+    </table>
+    
+@endsection
+
+
 @section('content')
     <div class="container">
         <div class="text-center mg-b-10">
@@ -186,18 +214,24 @@
                 },
                 {
                     extend: 'csv',
+                    filename: 'LeftoverReport',
+                    title: 'Leftover Report ({{ $branch_display }} | {{$date_display}})',
                     exportOptions: {
                         columns: ':visible'
                     }
                 },
                 {
                     extend: 'excel',
+                    filename: 'LeftoverReport',
+                    title: 'Leftover Report ({{ $branch_display }} | {{$date_display}})',
                     exportOptions: {
                         columns: ':visible'
                     }
                 },
                 {
                     extend: 'pdf',
+                    filename: 'LeftoverReport',
+                    title: 'Leftover Report ({{ $branch_display }} | {{$date_display}})',
                     orientation: 'landscape',
                     pageSize: 'LEGAL',
                     exportOptions: {
