@@ -111,11 +111,6 @@
         (() => {
             const params = new URLSearchParams(window.location.search);
     
-            const query = params.get('product');
-            if (query) {
-                console.log('query:', query);
-            }
-    
             const anchor = params.get('s');
             if (anchor) {
                 setTimeout(() => goToAnchor(anchor), 100);

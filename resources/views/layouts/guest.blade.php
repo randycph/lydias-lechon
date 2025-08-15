@@ -205,6 +205,7 @@
         errorMessage: '',
         productLimit: 5,
         articleLimit: 5,
+        storeLimit: 5,
         async submitSearch() {
             if (!this.search.trim()) {
                 this.errorMessage = 'Please enter a search term.';
@@ -215,6 +216,7 @@
             this.results = [];
             this.productLimit = 5;
             this.articleLimit = 5;
+            this.storeLimit = 5;
 
             try {
                 let response = await fetch('{{ route('global.search') }}?searchTerm=' + encodeURIComponent(this.search));
@@ -239,6 +241,10 @@
 
         loadMoreArticles() {
             this.articleLimit += 5;
+        },
+
+        loadMoreStores() {
+            this.storeLimit += 5;
         }
     }"
     x-init="
