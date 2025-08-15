@@ -7,9 +7,54 @@
         <h1 class="text-4xl lg:text-7xl font-cubao font-medium text-primary text-center ">Roast to perfection</h1>
     </div>
 
-    <div class="relative mx-auto pb-12">
+    <div class="relative mx-auto pb-12" x-data="{
+        page: 1,
+        loaded: false,
+        hasMore: true,
+        hasData: true,
+        async init() {
+            if (this.loaded) return;
+            this.loaded = true;
+            console.log('[Alpine] init triggered once');
+            await this.loadArticles();
+        },
+        async loadArticles() {
+            await this.fetchArticles();
+        },
+        async loadMore() {
+            this.page++;
+            this.loading = true;
+            await this.fetchArticles();
+            this.loading = false;
+        },
+        async fetchArticles() {
+            let category = '{{ $category->slug }}';
+            try {
+                const response = await fetch(`{{ route('articles-category.load-more') }}?page=${this.page}&category=${category}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
 
-        <div class="bg-tertiary container">
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const data = await response.json();
+
+                if (data.html === '') {
+                    this.hasData = false;
+                }
+
+                document.getElementById('blogs').insertAdjacentHTML('beforeend', data.html);
+                this.hasMore = data.hasMore;
+            } catch (error) {
+                console.error('Fetch error:', error);
+            }
+        }
+    }"
+    x-init="$nextTick(() => init())">
+
+        <div class="bg-tertiary container" x-show="hasData">
             <div class="flex flex-col lg:flex-row">
                 <img class="w-full lg:w-1/2" src="{{ $featuredArticle?->image_url ?? $featuredArticle?->thumbnail_url }}" alt="Lydiandary the story of how a little girl’s idea became the world famous Lydia’s Lechon">
                 <div class="w-full lg:w-1/2 p-2 lg:p-10">
@@ -56,54 +101,7 @@
                 </div>
             </div>
 
-            <div class="px-4"
-                    x-data="{
-                    page: 1,
-                    loaded: false,
-                    hasMore: true,
-                    hasData: true,
-                    async init() {
-                        if (this.loaded) return;
-                        this.loaded = true;
-                        console.log('[Alpine] init triggered once');
-                        await this.loadArticles();
-                    },
-                    async loadArticles() {
-                        await this.fetchArticles();
-                    },
-                    async loadMore() {
-                        this.page++;
-                        this.loading = true;
-                        await this.fetchArticles();
-                        this.loading = false;
-                    },
-                    async fetchArticles() {
-                        let category = '{{ $category->slug }}';
-                        try {
-                            const response = await fetch(`{{ route('articles-category.load-more') }}?page=${this.page}&category=${category}`, {
-                                method: 'GET',
-                                headers: {
-                                    'X-Requested-With': 'XMLHttpRequest'
-                                }
-                            });
-
-                            if (!response.ok) throw new Error('Network response was not ok');
-
-                            const data = await response.json();
-
-                            if (data.html === '') {
-                                this.hasData = false;
-                            }
-
-                            document.getElementById('blogs').insertAdjacentHTML('beforeend', data.html);
-                            this.hasMore = data.hasMore;
-                        } catch (error) {
-                            console.error('Fetch error:', error);
-                        }
-                    }
-                }"
-                x-init="$nextTick(() => init())"
-            >
+            <div class="px-4">
        
                 <h2 class="font-cubao text-3xl lg:text-5xl text-center text-primary mt-12">latest blogs</h2>
                 <div id="blogs" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
