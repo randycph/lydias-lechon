@@ -63,6 +63,14 @@
     x-cloak 
     class="bg-gray-100 text-gray-900 mx-auto" 
     x-data="{ 
+        goToAnchor(anchor) {
+            const element = document.getElementById(anchor);
+            if (element) {
+                const yOffset = -160;
+                const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+        },
         open: false, 
         openCart: false, 
         marketingPopup: false, 
