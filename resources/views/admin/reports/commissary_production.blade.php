@@ -30,6 +30,34 @@
     </style>
 @endsection
 
+
+@php
+    $branch_display='';
+    if(isset($_GET['pb']) && strlen($_GET['pb'])>=1){
+        $b = \App\EcommerceModel\ProductionBranch::whereId($_GET['pb'])->first();
+        $branch_display=$b->name;
+    }
+    
+    $date_display='';
+    if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
+        $date_display=date('M d, Y',strtotime($_GET['startdate']))." to ".date('M d, Y',strtotime($_GET['enddate']));
+    }
+@endphp
+@section('pagetitle')
+    <table width="100%" style="font-size:18px;font-weight:bold;">
+        <tr>
+            <td class="bord" align="center">
+                <br>
+                Commissary Production <br>
+                {{ $branch_display }}<br>
+                {{$date_display}}
+                <br><br>
+            </td>
+        </tr>
+    </table>
+    
+@endsection
+
 @section('content')
 
 
@@ -392,18 +420,24 @@
                 },
                 {
                     extend: 'csv',
+                    filename: 'CommissaryProduction',
+                    title: 'Commissary Production ({{ $branch_display }} | {{$date_display}})',
                     exportOptions: {
                         columns: ':visible'
                     }
                 },
                 {
                     extend: 'excel',
+                    filename: 'CommissaryProduction',
+                    title: 'Commissary Production ({{ $branch_display }} | {{$date_display}})',
                     exportOptions: {
                         columns: ':visible'
                     }
                 },
                 {
                     extend: 'pdf',
+                    filename: 'CommissaryProduction',
+                    title: 'Commissary Production ({{ $branch_display }} | {{$date_display}})',
                     orientation: 'landscape',
                     pageSize: 'LEGAL',
                     exportOptions: {

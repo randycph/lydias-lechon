@@ -355,7 +355,7 @@
                 {
                     extend: 'pdf',
                     filename: 'SalesReport',
-                    title: 'Sales Report  ({{$date_display}})',
+                    title: 'Sales Report ({{$date_display}})',
                     orientation: 'landscape',
                     pageSize: 'LEGAL',
                     exportOptions: {

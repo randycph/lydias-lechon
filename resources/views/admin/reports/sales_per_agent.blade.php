@@ -23,6 +23,33 @@
     </style>
 @endsection
 
+
+@php
+    $agent_display='';
+    if(isset($_GET['agent']) && strlen($_GET['agent'])>=1){
+        $agent_display=$_GET['agent'];
+    }
+    
+    $date_display='';
+    if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
+        $date_display=date('M d, Y',strtotime($_GET['startdate']))." to ".date('M d, Y',strtotime($_GET['enddate']));
+    }
+@endphp
+@section('pagetitle')
+    <table width="100%" style="font-size:18px;font-weight:bold;">
+        <tr>
+            <td class="bord" align="center">
+                <br>
+                Sales per Agent Report <br>
+                {{ $agent_display }}<br>
+                {{$date_display}}
+                <br><br>
+            </td>
+        </tr>
+    </table>
+    
+@endsection
+
 @section('content')
     
     <div class="container">
@@ -121,18 +148,24 @@
                 },
                 {
                     extend: 'csv',
+                    filename: 'SalesPerAgentReport',
+                    title: 'Sales per Agent Report ({{ $agent_display }} | {{$date_display}})',
                     exportOptions: {
                         columns: ':visible'
                     }
                 },
                 {
                     extend: 'excel',
+                    filename: 'SalesPerAgentReport',
+                    title: 'Sales per Agent Report ({{ $agent_display }} | {{$date_display}})',
                     exportOptions: {
                         columns: ':visible'
                     }
                 },
                 {
                     extend: 'pdf',
+                    filename: 'SalesPerAgentReport',
+                    title: 'Sales per Agent Report ({{ $agent_display }} | {{$date_display}})',
                     orientation: 'landscape',
                     pageSize: 'LEGAL',
                     exportOptions: {
