@@ -38,16 +38,22 @@ class GlobalSearchController extends Controller
                 'fields' => ['name', 'contents', 'teaser'],
                 'status' => 'Published',
             ],
+            'Store' => [
+                'class' => \App\EcommerceModel\Branch::class,
+                'fields' => ['name', 'address', 'contact_nos','hotline'],
+            ],
         ];
 
         foreach ($models as $modelName => $settings) {
             $modelClass = $settings['class'];
             $fields = $settings['fields'];
-            $status = $settings['status'];
+            $status = $settings['status'] ?? null;
         
             $query = $modelClass::query();
-        
-            $query->where('status', $status);
+            
+            if ($status !== null) {
+                $query->where('status', $status);
+            }
         
             $query->where(function($q) use ($fields, $searchTerm) {
                 foreach ($fields as $field) {
@@ -91,6 +97,15 @@ class GlobalSearchController extends Controller
                     $category->product_category_url = route('lechon-menu') . '?s=' . urlencode($slug);
                     $category->photo_url = $category->image ? asset('images/category/' . $category->image)  : null;
                     return $category;
+                });
+            }
+
+            if ($modelName === 'Store' && $modelResults->isNotEmpty()) {
+                $modelResults = $modelResults->map(function ($branch) {
+                    $slug = Str::slug($branch->name, '-');
+                    $branch->store_url = route('page', ['slug' => 'stores']) . '?s=' . urlencode($slug);
+                    $branch->photo_url = null;
+                    return $branch;
                 });
             }
         

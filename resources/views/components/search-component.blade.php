@@ -128,6 +128,26 @@
                             </div>
                         </div>
                     </template>
+
+                    <template x-if="results['Store']">
+                        <div class="mb-5">
+                            <h2 class="font-bold text-lg mb-2">Stores and Outlets</h2>
+                            <template x-for="(item, index) in results['Store'].slice(0, storeLimit)" :key="item.id">
+                                <a :href="item.store_url" class="flex justify-between gap-x-6 py-2 hover:bg-gray-100 cursor-pointer rounded-md">
+                                    <div class="flex min-w-0 gap-x-4">
+                                        <div class="min-w-0 flex-auto">
+                                            <p class="text-base font-semibold text-gray-900" x-text="item.title || item.name"></p>
+                                            <p class="lg:text-sm text-xs text-gray-500" x-text="item.teaser || ''"></p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </template>
+                    
+                            <div class="flex justify-center mt-4" x-show="results['Store'].length > storeLimit">
+                                <button @click="loadMoreStores" class="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark">Load More Stores</button>
+                            </div>
+                        </div>
+                    </template>
                 </div>
                 
             </div>

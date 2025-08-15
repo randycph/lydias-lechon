@@ -1,5 +1,30 @@
 
-<div class="bg-cream">
+<div class="bg-cream" x-data="{
+    goToAnchor(anchor) {
+        const element = document.getElementById(anchor);
+        if (element) {
+            const yOffset = -160;
+            const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+    },
+}"
+
+x-init="
+    (() => {
+        const params = new URLSearchParams(window.location.search);
+
+        const anchor = params.get('s');
+        if (anchor) {
+            setTimeout(() => goToAnchor(anchor), 100);
+
+            params.delete('s');
+            const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+            history.replaceState(null, '', newUrl);
+        }
+
+    })()
+">
     <div class="px-4 pt-16 container ">
         @if ($headOffices && count($headOffices) > 0)
         <h2 class="text-3xl lg:text-7xl font-cubao font-medium text-primary text-center">Head Office</h2>
@@ -7,7 +32,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-10">
             @if ($headOffices && count($headOffices) > 0)
                 @foreach ($headOffices as $office)
-                <div>
+                <div id="{{ \Str::slug($office->name) }}">
                     <div class="mt-10">
                         <div class="font-bold text-xl">{{ $office->name }}</div>
                         <div class="">{{ $office->address }}</div>
@@ -112,7 +137,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-10">
             
             @foreach ($outlets as $office)
-            <div>
+            <div id="{{ \Str::slug($office->name) }}">
                 <div class="mt-10">
                     <div class="font-bold text-xl">{{ $office->name }}</div>
                     <div class="">{{ $office->address }}</div>
@@ -216,7 +241,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-10">
             
             @foreach ($kiosks as $office)
-            <div>
+            <div id="{{ \Str::slug($office->name) }}">
                 <div class="mt-10">
                     <div class="font-bold text-xl">{{ $office->name }}</div>
                     <div class="">{{ $office->address }}</div>
@@ -320,7 +345,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-10">
             
             @foreach ($malls as $office)
-            <div>
+            <div id="{{ \Str::slug($office->name) }}">
                 <div class="mt-10">
                     <div class="font-bold text-xl">{{ $office->name }}</div>
                     <div class="">{{ $office->address }}</div>
