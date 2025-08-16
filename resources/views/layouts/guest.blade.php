@@ -25,9 +25,19 @@
     <meta name="twitter:creator" content="@lydiaslechon">
     <meta name="twitter:url" content="{{ url()->current() }}">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hurricane&display=swap" rel="stylesheet">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
+
+        .hurricane-regular {
+            font-family: "Hurricane", cursive;
+            font-weight: 400;
+            font-style: normal;
+        }
         @font-face {
             font-family: 'Cubao';
             src: url('{{ asset("fonts/Cubao_Free_Narrow.otf") }}') format('opentype');
