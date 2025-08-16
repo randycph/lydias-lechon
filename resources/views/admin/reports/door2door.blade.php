@@ -176,7 +176,7 @@
                         <tbody>
                             @forelse($rs as $r)
                             <tr style="text-align: left">
-                                <th><a target="_blank" href="{{ route('admin.report.delivery_report',$r->hid) }}">{{$r->jnum ?? $r->ordnum}}</a></th>
+                                <th><a target="_blank" href="{{ route('sales.print',base64_encode($r->hid)) }}">{{$r->jnum ?? $r->ordnum}}</a></th>
                                 <td>{{number_format($r->qty,2)}}</td>
                                 <td>{{$r->product_name}}</td>
                                 <td>{{number_format($r->price,2)}}</td>
@@ -199,7 +199,7 @@
                                 <th>{{$r->instruction}}</th>
                                 <th>{{$r->schedtype}}</th>
                                 <th>{{$r->prod_branch}}</th>
-                                <td><a target="_blank" href="{{ route('sales-transaction.view',$r->hid) }}">{{$r->order_number}}</a></td>
+                                <td><a target="_blank" href="{{ route('sales.print',base64_encode($r->hid)) }}">{{$r->order_number}}</a></td>
                                 <td>{{date('Y-m-d',strtotime($r->hcreated))}}</td>
                                 <td>{{date('h:i A',strtotime($r->hcreated))}}</td>
                                 <th>{{$r->delivery_status}}</th>

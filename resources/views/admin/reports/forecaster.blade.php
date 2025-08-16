@@ -515,7 +515,7 @@
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">{{$r->delstat}}</td>
                                             
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">{{$r->agent}}</td>                                    
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top"><a target="_blank" href="{{ route('sales-transaction.view',$r->hid) }}">{{$r->order_number}}</a></td> 
+                                            <td class="bord" rowspan="{{$cntsales}}" valign="top"><a target="_blank" href="{{ route('sales.print',base64_encode($r->hid)) }}">{{$r->order_number}}</a></td> 
                                             
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">{{$r->customer_name}}</td>
                                                                                                                           
