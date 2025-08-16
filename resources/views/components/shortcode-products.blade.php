@@ -136,8 +136,8 @@
                     onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'">
 
                 <!-- TITLE + PRICE (fixed block so prices align) -->
-                <div class="mt-4 px-4 flex flex-col justify-between lg:min-h-[150px]">
-                    <h2 class="text-2xl lg:text-3xl leading-tight font-cubao font-medium text-primary text-left line-clamp-2 overflow-hidden">
+                <div class="mt-4 px-4 flex flex-col justify-between">
+                    <h2 class="text-2xl lg:text-3xl leading-tight font-medium text-primary text-left line-clamp-1 ">
                     {{ $product->name }}
                     </h2>
                     <div class="text-tertiary text-2xl lg:text-5xl font-semibold mt-2">

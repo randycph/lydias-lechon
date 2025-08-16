@@ -19,7 +19,8 @@ export default {
         'border': '#ECECEC'
       },
       fontFamily: {
-        cubao: ['Cubao', 'sans-serif'],
+        cubao:  ['"Hurricane"', 'cursive'],
+        cookie: ['"Cookie"', 'cursive'],
       },
       maxWidth: {
         '8xl': '1312px',

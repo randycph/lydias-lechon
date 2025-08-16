@@ -103,7 +103,7 @@
 
             <div class="px-4">
        
-                <h2 class="font-cubao text-3xl lg:text-5xl text-center text-primary mt-12">latest blogs</h2>
+                <h2 class="font-cubao text-3xl lg:text-5xl text-center text-primary mt-12">Latest blogs</h2>
                 <div id="blogs" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
                     
                 </div>
