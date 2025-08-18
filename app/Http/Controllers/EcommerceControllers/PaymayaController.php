@@ -73,6 +73,10 @@ class PaymayaController extends Controller
             $sales->sales->confirm_remarks = 'Auto confirm via Paymaya checkout';
             $sales->sales->save();
 
+            //Auto add production branch
+            $sh = new SalesHeader();
+            $sh->assign_to_production_branch($sales->sales, 1);
+
             if ($sales->sales->discount_amount && $sales->sales->discount_amount > 0) {
                 CouponCart::where('sales_header_id', $sales->sales->id)->update([
                     'status' => 1

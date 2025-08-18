@@ -5,6 +5,8 @@ namespace App\EcommerceModel;
 use App\Models\ActivityLog;
 use App\Models\ProductDeliveryAddress;
 use App\Models\User;
+use App\EcommerceModel\ProductionBranch;
+use App\EcommerceModel\JobOrder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +27,58 @@ class SalesHeader extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function assign_to_production_branch($sale, $pb = 1){
+        //dd($sale);
+        $items = $sale->items;
+        foreach($items as $salesdetail){
+
+            $current_total_order = JobOrder::whereDate('date_needed',date('Y-m-d',strtotime($salesdetail->delivery_date)))->count();
+            $insertID = $current_total_order+1;
+            
+
+            $jo = JobOrder::create([
+                'user_id' => auth()->id(),
+                'jo_number' => 'JO'.date('Ymd',strtotime($salesdetail->delivery_date)).sprintf('%04d', $insertID),
+                'sales_number' => $sale->order_number,
+                'sales_detail_id' => $salesdetail->id,
+                'order_source' => $sale->order_source,
+                'product_id' => $salesdetail->product_id,
+                'product_name' => $salesdetail->product->name,
+                'product_size' => $salesdetail->product->size,
+                'product_weight' => $salesdetail->product->weight,
+                'product_category' => $salesdetail->product->category_id,
+                'price' => $salesdetail->price,
+                'paella_qty' => $salesdetail->paella_qty,
+                'qty' => $salesdetail->qty,
+                'paella_price' => $salesdetail->paella_price,
+                'customer_name' => $sale->customer_name,
+                'date_needed' => $salesdetail->delivery_date,
+                'customer_mobile_number' => $sale->customer_contact_number,
+                'customer_tel_number' => $sale->customer_contact_number,
+                'customer_address' => $sale->customer_address,
+                'customer_delivery_adress' => $sale->customer_delivery_adress,
+                'delivery_tracking_number' => '',
+                'delivery_method' => $sale->delivery_type,
+                'pickup_branch' => $sale->outlet,
+                'delivery_status' => 'On Processed',
+                'status' => 'Active',
+                'jo_category' => 'Order',
+                'jo_order_type' => $sale->order_type ?? ' '
+
+            ]);
+
+            if($jo){
+                ProductionOrder::create([
+                    'branch_id' => $pb,
+                    'joborder_id' => $jo->id,
+                    'delivery_date' => $salesdetail->delivery_date,
+                    'schedule_type' => $sale->order_type ?? ' '
+                ]);
+            }
+
+        }
     }
 
     public function payments()

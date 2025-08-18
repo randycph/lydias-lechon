@@ -468,13 +468,16 @@ class SalesController extends Controller
     }
 
     public function confirm_order($order_id,$remarks,$confirm_by){
-        $sales = SalesHeader::whereId($order_id)->update([
+        $sales = SalesHeader::whereId($order_id)->first();
+        $sales->update([
             'isConfirm' => 1,
             'confirmed_by' => $confirm_by,
             'confirm_remarks' => $remarks,
             'confirmed_on' => date('Y-m-d H:i:s')
         ]);
 
+        $sh = new SalesHeader();
+        $sh->assign_to_production_branch($sales, 1);
     
         //$mobile = SalesHeader::whereId($order_id)->first();
         
