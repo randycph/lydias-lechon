@@ -95,7 +95,7 @@ class ProductCategory extends Model
 
     public function products()
     {
-        return $this->hasMany(Product::class, 'category_id');
+        return $this->hasMany(Product::class, 'category_id')->orderByRaw('CASE WHEN `order` = 0 THEN 1 ELSE 0 END, `order` ASC');
     }
 
     public function featured_products()
