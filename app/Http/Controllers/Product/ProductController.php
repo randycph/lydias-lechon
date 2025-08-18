@@ -109,6 +109,7 @@ class ProductController extends Controller
                 'meta_description' => $request->seo_description,
                 'created_by' => Auth::id(),
                 'sold_out' => $request->has('sold_out'),
+                'order' => $request->has('order') ? $request->order : 0,
             ]);
 
             $this->tags($product->id, $request->tags);
@@ -254,6 +255,7 @@ class ProductController extends Controller
             'meta_description' => $request->seo_description,
             'created_by' => Auth::id(),
             'sold_out' => $request->has('sold_out'),
+            'order' => $request->has('order') ? $request->order : 0,
         ]);
 
         if ($request->has('addons') && count($request->addons) > 0) {

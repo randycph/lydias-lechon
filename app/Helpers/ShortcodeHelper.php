@@ -61,6 +61,7 @@ if (!function_exists('handle_shortcode')) {
                     ])
                     ->where('category_id', $category)
                     ->where('status', 'PUBLISHED')
+                    ->orderByRaw('CASE WHEN `order` = 0 THEN 1 ELSE 0 END, `order` ASC')
                     ->take($show)
                     ->get();
 

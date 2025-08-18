@@ -74,6 +74,14 @@
                         <textarea name="short_description" rows="3" class="form-control">{{ old('short_description',$product->short_description) }}</textarea>
                         <x-error-message inputName="short_description" />
                     </div>
+                    <div class="form-group">
+                        <label class="d-block">Product Order</label>
+                        <input name="order" id="order" value="{{ old('order',$product->order) }}" type="number" class="form-control @error('order') is-invalid @enderror" min="0">
+                        <x-error-message inputName="order" />
+                        <p class="tx-10">
+                            Note: Adjust the order of the product in the category. The lower the number, the higher the priority.
+                        </p>
+                    </div>
                 </div>
                 <div class="col-lg-12">
                     <div class="form-group">
