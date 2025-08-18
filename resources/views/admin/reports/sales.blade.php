@@ -225,7 +225,7 @@
                                 <th>Item Type</th>
                                 <th>Confirmed</th>
                                 <th>Delivery Branch</th>
-                                <th>tt</th>
+                                <th>Date Needed</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -277,7 +277,7 @@
                                     </td>
                                     <td>{{$itemType}}</td>
                                     <td>@if($r->isConfirm==1) Yes @else No @endif</td>
-                                    <td>{{ $r->del_branch }}</td>  
+                                    <td>{{ $r->delivery_branch }}</td>  
                                     <td>{{date('H:i:s',strtotime($r->delivery_date))}}</td>
                                 </tr>
                             @empty
