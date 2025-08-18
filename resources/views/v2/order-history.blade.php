@@ -230,7 +230,7 @@
                                                             </li>
                                                         @endforeach
                                                     </ul>
-                                                    <div>Instruction: {{ $sale?->instruction }}</div>
+                                                    <div>Note: {{ $sale?->instruction }}</div>
                                                     @else
 
                                                     @php 
@@ -243,7 +243,7 @@
                                                         Contact #: {{ $saleDetail?->contact_tel ?? $sale->customer_contact_number }}<br>
                                                         QTY/Size: {{ count($sale->items) }} <br>
                                                         Delivery/Pickup: {{ $sale->delivery_type }}<br>
-                                                        Instruction: {{ $sale?->instruction ?? 'N/A' }}<br>
+                                                        Note: {{ $sale?->instruction ?? 'N/A' }}<br>
                                                         Payment Method: {{ $sale->payments->first()->payment_type ?? 'Coupon' }}<br>
                                                         Delivery charge: ₱{{ number_format($fee, 2) }}<br>
                                                     @endif
@@ -258,7 +258,7 @@
                                                     Contact #: {{ $saleDetail?->contact_tel ?? $sale->customer_contact_number }}<br>
                                                     QTY/Size: {{ count($sale->items) }} <br>
                                                     Delivery/Pickup: {{ $sale->delivery_type }}<br>
-                                                    Instruction: {{ $sale?->instruction ?? 'N/A' }}<br>
+                                                    Note: {{ $sale?->instruction ?? 'N/A' }}<br>
                                                     Payment Method: {{ $sale->payments->first()->payment_type ?? 'Coupon' }}<br>
                                                     Delivery charge: ₱{{ number_format($fee, 2) }}<br>
                                                 @endif

@@ -640,7 +640,7 @@ Media Item
                                                             @endif
                                                             <p class="mg-b-3">Email: {{$h->email}}</p>
                                                             <p class="mg-b-3">{{$h->delivery_type}}: {{$h->customer_delivery_adress}}</p>                        
-                                                            <p class="mg-b-3">Instruction: {{$h->instruction}}</p>
+                                                            <p class="mg-b-3">Note: {{$h->instruction}}</p>
                                                             <table class="btn green">
                                                                   <tbody><tr>
                                                                         <td>

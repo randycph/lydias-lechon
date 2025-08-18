@@ -141,7 +141,7 @@
                     @endif
                     <p class="mg-b-0 tx-15">Contact Person: {{$sales->contact_person ?? $sales->customer_name}}</p>
                     @if ($sales->instruction)
-                    <p class="mg-b-0 tx-15">Instruction: {{$sales->instruction}}</p>
+                    <p class="mg-b-0 tx-15">Note: {{$sales->instruction}}</p>
                     @endif
                 </div>
             </div>

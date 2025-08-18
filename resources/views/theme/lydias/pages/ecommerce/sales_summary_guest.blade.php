@@ -106,7 +106,7 @@
                             {{$sales->customer_delivery_adress}}
                         @endif
                     </p>
-                    <p class="mg-b-0 tx-15">Instruction: {{$sales->instruction}}</p>
+                    <p class="mg-b-0 tx-15">Note: {{$sales->instruction}}</p>
                 </div>
 
                 <div class="col-sm-6 col-lg-4 mg-t-40">

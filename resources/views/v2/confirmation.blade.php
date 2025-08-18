@@ -78,7 +78,7 @@
                         </div>
                     </div>
                     <div class="flex items-center text-sm justify-between px-4 py-3 border-b border-gray-200">
-                        <div>Instruction</div>
+                        <div>Note</div>
                         <div class="text-right">
                             <div>{{ $sales->instruction ?? 'NA' }}</div>
                         </div>

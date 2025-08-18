@@ -14,7 +14,7 @@
 
 **Email:** {{ $h->email }}  
 **{{ $h->delivery_type }}:** {{ $h->customer_delivery_adress }}  
-**Instruction:** {{ $h->instruction }}
+**Note:** {{ $h->instruction }}
 
 @component('mail::button', ['url' => route('confirmation', ['id' => $h->HashOrderNumber])])
 Click here to view and manage this order

@@ -85,7 +85,7 @@
                         <p class="mg-b-3">Contact No: {{$sales->customer_contact_number}}</p>
                         <p class="mg-b-3">Email: {{$sales->email}}</p>
                         <p class="mg-b-3">{{$sales->delivery_type}}: {{$sales->customer_delivery_adress}}</p>                        
-                        <p class="mg-b-3">Instruction: {{$sales->instruction}}</p>
+                        <p class="mg-b-3">Note: {{$sales->instruction}}</p>
                     </div>
                     <!-- col -->
                     <div class="col-sm-6 col-lg-4">
