@@ -32,30 +32,10 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
-
-        .hurricane-regular {
-            font-family: "Hurricane", cursive;
-            font-weight: 400;
-            font-style: normal;
-        }
         @font-face {
-            font-family: 'Cubao';
-            src: url('{{ asset("fonts/Cubao_Free_Narrow.otf") }}') format('opentype');
-            font-weight: 300;
-            font-style: normal;
-        }
-    
-        @font-face {
-            font-family: 'Cubao';
-            src: url('{{ asset("fonts/Cubao_Free_Regular.otf") }}') format('opentype');
+            font-family: 'Feelings';
+            src: url('{{ asset("fonts/Feelings.ttf") }}') format('opentype');
             font-weight: 500;
-            font-style: normal;
-        }
-    
-        @font-face {
-            font-family: 'Cubao';
-            src: url('{{ asset("fonts/Cubao_Free_Wide.otf") }}') format('opentype');
-            font-weight: 700;
             font-style: normal;
         }
     </style>
@@ -409,7 +389,7 @@
         class="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-primary text-white shadow-lg hover:bg-primary-dark focus:outline-none"
         title="Go to Top"
     >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-8">
             <path fill-rule="evenodd" d="M10 17a.75.75 0 0 1-.75-.75V5.612L5.29 9.77a.75.75 0 0 1-1.08-1.04l5.25-5.5a.75.75 0 0 1 1.08 0l5.25 5.5a.75.75 0 1 1-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0 1 10 17Z" clip-rule="evenodd" />
         </svg>
     </button>

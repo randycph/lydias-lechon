@@ -141,7 +141,7 @@
                                 @endphp
                             <tr>
                                 <td class="tx-nowrap">
-                                    {{ $product->product->name . (isset($product?->paella) && $product?->paella ?' Boneless with Paella' : '') ?? 'Unknown Product' }}
+                                    {{ $product->product->name . (isset($product?->paella) && $product?->paella ?' <strong>Boneless with Paella</strong>' : '') ?? 'Unknown Product' }}
                                 </td>
                                 <td class="tx-nowrap tx-center" style="display:none;">{{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('F d, Y g:i A') }}</td>
                                 <td class="tx-center">{{number_format($product->qty, 0)}}</td>

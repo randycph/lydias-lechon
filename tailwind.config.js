@@ -19,7 +19,7 @@ export default {
         'border': '#ECECEC'
       },
       fontFamily: {
-        cubao:  ['"Hurricane"', 'cursive'],
+        cubao:  ['"Feelings"', 'cursive'],
         cookie: ['"Cookie"', 'cursive'],
       },
       maxWidth: {

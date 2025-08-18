@@ -76,7 +76,7 @@
                                                 <ul>
                                                     @foreach ($products as $product)
                                                         <li>
-                                                            {{ $product->product->name . (isset($product?->paella) && $product?->paella ?' Boneless with Paella' : '') ?? 'Unknown Product' }} x {{ $product->qty }}
+                                                            {{ $product->product->name . (isset($product?->paella) && $product?->paella ?' <strong>Boneless with Paella</strong>' : '') ?? 'Unknown Product' }} x {{ $product->qty }}
                                                         </li>
                                                     @endforeach
                                                 </ul>
