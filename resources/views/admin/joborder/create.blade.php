@@ -222,7 +222,7 @@
                                 <option value=""> - Select -</option>
                                 
                                 @foreach($pbs as $pb)
-                                    <option value="{{$pb->id}}|0">{{$pb->name}}</option>
+                                    <option value="{{$pb->id}}">{{$pb->name}}</option>
                                 @endforeach
                             </select>
                         </div>

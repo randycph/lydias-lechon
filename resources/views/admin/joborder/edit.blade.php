@@ -335,6 +335,16 @@
                         </select>
                     </div>
 
+                    <div class="form-group">
+                        <label class="d-block">Production Branch <span class="tx-danger">*</span></label>
+                        <select required class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select Production Branch" data-width="100%" id="pb" name="pb">
+                                                       
+                            @foreach($pbs as $pb)
+                                <option value="{{$pb->id}}" @if($pb->id == $details->temp_prod_branch) selected @endif>{{$pb->name}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <div class="delivery-pickup-place">
                         <div class="form-group">
                             <label class="d-block">Delivery Type <span class="tx-danger">*</span></label>
