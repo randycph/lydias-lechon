@@ -183,8 +183,9 @@ class JoborderController extends Controller
         $miscelaneous = Product::where('is_misc',1)->orderBy('name','asc')->get();
         $products = Product::where('production_item',1)->orderBy('name','asc')->get();
         $branches_store = Branch::orderBy('name','asc')->get();
+        $pbs = ProductionBranch::orderBy('name','asc')->get();
         $branches  = Deliverablecities::distinct()->orderBy('name')->get(['name']);
-        return view('admin.joborder.create',compact('products','miscelaneous','branches','branches_store'));
+        return view('admin.joborder.create',compact('products','miscelaneous','branches','branches_store','pbs'));
     }
 
     /**
@@ -352,8 +353,8 @@ class JoborderController extends Controller
             'customer_location' => $customer_location,
             'agent' => $request->agent ?? Auth::user()->name,
             'delivery_branch' => $request->delivery_type == 1 ? $request->delivery_branch : NULL,
-            'contact_person' => $contact_pers
-            
+            'contact_person' => $contact_pers,
+            'temp_prod_branch' => $request->pb
         ]);
 
 
@@ -446,7 +447,7 @@ class JoborderController extends Controller
             ]);
 
             $sh = new SalesHeader();
-            $sh->assign_to_production_branch($sales, 1);
+            $sh->assign_to_production_branch($sales, $request->pb);
         }
 
         //$sms = new Sms();

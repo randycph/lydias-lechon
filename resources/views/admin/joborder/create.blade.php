@@ -215,6 +215,18 @@
                     </div>
 
                     <div class="delivery-pickup-place">
+
+                        <div class="form-group">
+                            <label class="d-block">Production Branch <span class="tx-danger">*</span></label>
+                            <select required class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select Production Branch" data-width="100%" id="pb" name="pb">
+                                <option value=""> - Select -</option>
+                                
+                                @foreach($pbs as $pb)
+                                    <option value="{{$pb->id}}|0">{{$pb->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <div class="form-group">
                             <label class="d-block">Delivery Type <span class="tx-danger">*</span></label>
                             <select required class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select delivery type" data-width="100%" id="delivery_type" name="delivery_type">
