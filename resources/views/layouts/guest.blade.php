@@ -39,6 +39,12 @@
             font-style: normal;
         }
         @font-face {
+            font-family: 'Feelings';
+            src: url('{{ asset("fonts/Feelings.ttf") }}') format('opentype');
+            font-weight: 500;
+            font-style: normal;
+        }
+        @font-face {
             font-family: 'Cubao';
             src: url('{{ asset("fonts/Cubao_Free_Narrow.otf") }}') format('opentype');
             font-weight: 300;
