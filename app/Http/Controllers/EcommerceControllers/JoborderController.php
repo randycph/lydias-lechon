@@ -444,6 +444,9 @@ class JoborderController extends Controller
                 'confirm_remarks' => 'Auto confirm after payment completion',
                 'confirmed_on' => date('Y-m-d H:i:s')
             ]);
+
+            $sh = new SalesHeader();
+            $sh->assign_to_production_branch($sales, 1);
         }
 
         //$sms = new Sms();
