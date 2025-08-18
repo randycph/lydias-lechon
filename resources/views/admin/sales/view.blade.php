@@ -87,7 +87,7 @@
                                                     @forelse($products as $product)
                                                         @php
                                                             $lineTotal = ($product->product->price * ($product->qty ?? 1))
-                                                                    + (!empty($product->paella) ? ($product->product->paella_price ?? 0) : 0);
+                                                                    + (!empty($product->paella) ? ($product->product->paella_price ?? 0) * ($product->qty ?? 1) : 0);
 
                                                             $grandTotal += $lineTotal;
                                                         @endphp
