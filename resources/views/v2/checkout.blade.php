@@ -633,6 +633,7 @@
                                         <div x-html="warningMessage"></div>
                                     </div>
                                 </div> --}}
+                                <template x-if="!allowMultiple">
                                 <div class="my-2">
                                     <label for="time"
                                         class="block mb-2 text-sm font-bold text-gray-900">Instruction</label>
@@ -642,6 +643,7 @@
                                             name="instruction" id="" cols="30" rows="10"></textarea>
                                     </div>
                                 </div>
+                                </template>
                                 
                                 @if (auth()->guest())
                                 <div class="flex items-start">
