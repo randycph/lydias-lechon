@@ -44,6 +44,12 @@ use UniSharp\LaravelFilemanager\Lfm;
 
 // Auth::routes(['verify' => true]);
 
+Route::get('/x1', function(){
+    $sh = new SalesHeader();
+    $x = SalesHeader::find(10887);
+    $sh->assign_to_production_branch($x, 1);
+});
+
 Route::get('/', [FrontendController::class, 'index'])->name('home');
 Route::get('/homsse', [FrontendController::class, 'home'])->name('index');
 Route::get('/our-storyyy', [FrontendController::class, 'our_story'])->name('our-story');
