@@ -225,7 +225,7 @@ class ReportsController extends Controller
             left join production_branches pb on pb.id = po.branch_id
             left join users u on u.id = d.created_by
             where h.id>0 and h.delivery_status<>'Open Date' and h.deleted_at is null and jo.deleted_at is null and po.deleted_at is null and (h.payment_status = 'PAID' OR h.isConfirm=1)
-            and h.id not in (select sales_header_id from product_delivery_addresses)
+            and h.id not in (select sales_header_id from product_delivery_addresses) and h.id=10887
             ";
 
             if(isset($_GET['agent']) && $_GET['agent']<>''){
@@ -401,7 +401,7 @@ class ReportsController extends Controller
             left join production_branches pb on pb.id = po.branch_id
             left join users u on u.id = d.created_by
             where h.id>0 and h.delivery_status<>'Open Date' and h.deleted_at is null and jo.deleted_at is null and po.deleted_at is null and (h.payment_status = 'PAID' OR h.isConfirm=1)
-            and h.id in (select sales_header_id from product_delivery_addresses)
+            and h.id in (select sales_header_id from product_delivery_addresses) and h.id=10887
             ";
 
             if(isset($_GET['agent']) && $_GET['agent']<>''){
@@ -502,7 +502,7 @@ class ReportsController extends Controller
             left join products p on p.id=jo.product_id
             left join product_categories c on c.id=p.category_id
             left join users u on u.id = jo.user_id
-            where jo.id>0 and jo.deleted_at is null and po.deleted_at is null and (jo.sales_detail_id=0 or jo.sales_detail_id is null)";
+            where jo.id>0 and jo.deleted_at is null and po.deleted_at is null and (jo.sales_detail_id=0 or jo.sales_detail_id is null)  and jo.id=10887";
 
             if(isset($_GET['product']) && $_GET['product']<>''){
                 $jos.= " and p.name='".$_GET['product']."'";
@@ -557,6 +557,7 @@ class ReportsController extends Controller
             
             $jo = DB::select($jos);
         // JO
+        
         //dd($mrs);
         //$results = collect($jo)->merge(collect($rs));
         $results = collect($mrs)->merge(collect($jo)->merge(collect($rs)));

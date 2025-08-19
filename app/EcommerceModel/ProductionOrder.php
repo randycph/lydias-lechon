@@ -42,8 +42,10 @@ class ProductionOrder extends Model
         foreach($orders as $order){
             if(!empty($order->jobOrder_details)){
                 if($order->jobOrder_details->sales_detail_id > 0){
-                    if(!in_array($order->jobOrder_details->sales_detail->header->delivery_status, $exclude)){
-                        $total++;
+                    if(isset($order->jobOrder_details->sales_detail_id->header)){
+                        if(!in_array($order->jobOrder_details->sales_detail->header->delivery_status, $exclude)){
+                            $total++;
+                        }
                     }
                 }
                 else{
