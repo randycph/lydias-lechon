@@ -536,7 +536,7 @@ class SalesController extends Controller
                 ],
             ];
         }
-        if(auth()->user()->role_id == 1 || auth()->user()->role_id == 3 || auth()->user()->role_id == 13 ){
+        if(auth()->user()->role_id == 1 || auth()->user()->role_id == 3 || auth()->user()->role_id == 5 || auth()->user()->role_id == 13 ){
             $model = SalesHeader::where('id','>',0);
         }else{
             $branches = UserBranch::accessBranch();

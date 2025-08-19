@@ -187,8 +187,7 @@ class CustomerFrontController extends Controller
     
                 session()->forget('cart');
             } else {
-                
-                return redirect()->route('admin');
+                return redirect()->route('sales-transaction.index');
 
             }
 

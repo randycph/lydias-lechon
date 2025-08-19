@@ -27,7 +27,7 @@
                         <h4> <br>Sales Transaction Summary</h4>
                         <h5>Order #: {{$sales->order_number}}</h5>
                         <a href="{{ route('sales.print',$sales->HashOrderNumber) }}" target="_blank" class="btn btn-xs btn-success">Print</a>
-                        @if ($sales->status != 'CANCELLED')
+                        @if ($sales->status != 'CANCELLED' && !isDispatcher())
                             <a href="{{ route('sales.update_details',$sales->id) }}" class="btn btn-xs btn-primary">Update Details</a>
                         @endif
                     </div>

@@ -55,7 +55,7 @@
             </li>
         @endif
 
-        @if (auth()->user()->has_access_to_module('reports'))
+        @if (auth()->user()->has_access_to_module('reports') && !isDispatcher())
             <li class="nav-item with-sub @if (request()->routeIs('reports*')) active show @endif">
                 <a href="#" class="nav-link"><i data-feather="pie-chart"></i> <span>Reports</span></a>
                 <ul>
@@ -174,6 +174,7 @@
                 </ul>
             </li>
         @endif
+        @if (!isDispatcher())
         <li class="nav-item with-sub @if (request()->routeIs('account*') || request()->routeIs('settings*') || request()->routeIs('audit*')) active show @endif">
             <a href="" class="nav-link"><i data-feather="settings"></i> <span>Settings</span></a>
             <ul>
@@ -186,6 +187,7 @@
                 @endif --}}
             </ul>
         </li>
+        @endif
         @if (auth()->user()->has_access_to_user_module())
             <li class="nav-item with-sub @if (request()->routeIs('users*')) active show @endif">
                 <a href="" class="nav-link"><i data-feather="users"></i> <span>Users</span></a>
@@ -243,6 +245,7 @@
             </li>
         @endif
 
+        @if (!isDispatcher())
         <li class="nav-item with-sub @if (request()->routeIs('popup-message*')) active show @endif">
             <a href="" class="nav-link"><i data-feather="users"></i> <span>Popup Message</span></a>
             <ul>
@@ -250,6 +253,7 @@
                 <li @if (\Route::current()->getName() == 'popup-message.create') class="active" @endif><a href="{{ route('popup-message.create') }}">Create a Popup Message</a></li>
             </ul>
         </li>
+        @endif
 
         @if (auth()->user()->has_access_to_module('products') || auth()->user()->has_access_to_module('product_category') ||
             auth()->user()->has_access_to_module('production_branch') || auth()->user()->has_access_to_module('gift_certificate') ||
@@ -257,9 +261,11 @@
             auth()->user()->has_access_to_module('sales_transaction'))
             <li class="nav-label mg-t-25">E-Commerce</li>
             
+            @if (!isDispatcher())
             <li class="nav-item @if (url()->current() == route('ecom-dashboard')) active @endif">
                 <a href="{{ route('ecom-dashboard') }}" class="nav-link"><i data-feather="home"></i><span>Dashboard</span></a>
             </li>
+            @endif
 
             @if (auth()->user()->has_access_to_module('product') || auth()->user()->has_access_to_module('product_category'))
                 <li class="nav-item with-sub @if (request()->routeIs('products*') || request()->routeIs('product-categories*')) active show @endif">
@@ -293,6 +299,7 @@
                 </li>
             @endif
 
+            @if (!isDispatcher())
             <li class="nav-item with-sub @if (request()->routeIs('coupons*')) active show @endif">
                 <a href="" class="nav-link"><i data-feather="users"></i> <span>Coupons</span></a>
                 <ul>
@@ -300,6 +307,7 @@
                     <li @if (\Route::current()->getName() == 'coupons.create') class="active" @endif><a href="{{ route('coupons.create') }}">Create a Coupon</a></li>
                 </ul>
             </li>
+            @endif
 
             @if (auth()->user()->has_access_to_module('gift_certificate'))
                 <li class="nav-item with-sub @if (request()->routeIs('gift-certificate*')) active show @endif">
@@ -344,12 +352,14 @@
                     <ul>
                         <li @if (\Route::current()->getName() == 'sales-transaction.create') class="active" @endif><a href="{{ route('sales-transaction.index') }}">Manage Sales Transaction</a></li>
 
+                        @if (!isDispatcher())
                         <li @if (\Route::current()->getName() == 'sales-transaction.payments') class="active" @endif><a href="{{ route('sales-transaction.payments') }}">Sales Transaction Payments</a></li>
-                        
+                        @endif
                     </ul>
                 </li>
             @endif
             
+            @if (!isDispatcher())
             <li class="nav-item with-sub @if (request()->routeIs('shareable-links*')) active show @endif">
                 <a href="" class="nav-link"><i data-feather="users"></i> <span>Social Media Shareable Links</span></a>
                 <ul>
@@ -359,7 +369,7 @@
                     @endif
                 </ul>
             </li>
-            
+            @endif
         @endif
     @endif
 </ul>
