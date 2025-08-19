@@ -311,16 +311,17 @@
                                                                     <a class="dropdown-item"  href="javascript:void(0);" onclick="confirm_order({{$sale->id}},'{{ number_format((\App\EcommerceModel\SalesHeader::balance($sale->id)),2) }}');" title="Confirm Order" >Confirm Order</a>
                                                                     @endif
                                                                 @endif
-                                                                
+                                                                @if (!isDispatcher())
                                                                 <a class="dropdown-item"  href="{{ route('sales.update_details',$sale->id) }}" title="Update Sales Details & Items" >Update Sales Details</a>
-                                                                
-                                                                @if($dateneeded > date('Y-m-d H:i:s'))
+                                                                @endif
+                                                                @if($dateneeded > date('Y-m-d H:i:s') && !isDispatcher())
                                                                     <a class="dropdown-item text-danger" href="javascript:void(0)" onclick="delete_sales({{$sale->id}},'{{$sale->order_number}}')" title="Delete Transaction">Delete</a>
                                                                 @endif
                                                             @endif
                                                         </div>
                                                     </div>
                                                     @if ($sale->status !== 'CANCELLED')
+                                                    @if (!isDispatcher())
                                                     <div class="nav-item dropdown">
                                                         <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                             <i data-feather="credit-card"></i>
@@ -354,6 +355,7 @@
 
                                                         </div>
                                                     </div>
+                                                    @endif
                                                     <div class="nav-item dropdown">
                                                         <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                             <i data-feather="truck"></i>
@@ -577,12 +579,16 @@
                             <label for="delivery_status">Status</label>
                             <select id="delivery_status" class="form-control mg-b-5" name="delivery_status"  data-width="100%" required="required">
                                 <option value="">- Select -</option>
+                                @if (!isDispatcher())
                                 <option value="Open Date">Open Date</option>
                                 <option value="Scheduled for Processing">Scheduled for Processing</option>
                                 <option value="Processing">Processing</option>
+                                @endif
                                 <option value="In Transit">In Transit</option>
+                                @if (!isDispatcher())
                                 <option value="Delivered/Picked Up">Delivered/Picked Up</option>
                                 <option value="Returned/Rejected">Returned/Rejected</option>
+                                @endif
                             </select>
                             <p class="tx-10 text-danger" id="error">
                                 <x-error-message inputName="delivery_status" />
@@ -1147,10 +1153,14 @@
           
             }
             else{
+                @if (isDispatcher())
+                $("#delivery_status").val('In Transit').trigger('change');
+                @else
                 var optionExists = ($("#delivery_status option[value='Delivered/Picked Up']").length > 0);
                 if(!optionExists){
                     $("#delivery_status").append(new Option("Delivered/Picked Up", "Delivered/Picked Up"));
                 }
+                @endif
             }
             $('#prompt-change-delivery-status').modal('show');
             $('#del_id').val(id);

@@ -22,3 +22,19 @@ if (!function_exists('format_price')) {
         return '₱' . number_format($price, 2);
     }
 }
+
+if (!function_exists('isDispatcher')) {
+    function isDispatcher()
+    {
+        return auth()->user()->role_id == 5;
+    }
+}
+
+if (!function_exists('isForecaster')) {
+    function isForecaster()
+    {
+        return auth()->user()->role_id == 3;
+    }
+}
+
+
