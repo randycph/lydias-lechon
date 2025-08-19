@@ -28,7 +28,7 @@
             </li>
         @endif
 
-        @if (auth()->user()->has_access_to_module('job_order'))
+        @if (auth()->user()->has_access_to_module('job_order') && !isForecaster())
             <li class="nav-item with-sub @if (request()->routeIs('job-orders*')) active show @endif">
                 <a href="#" class="nav-link"><i data-feather="list"></i> <span>Job Orders</span></a>
                 <ul>
@@ -49,7 +49,7 @@
             </li>
         @endif
 
-        @if(auth()->user()->has_access_to_module('left_over') && !auth()->user()->is_an_admin())
+        @if(auth()->user()->has_access_to_module('left_over') && !auth()->user()->is_an_admin() && !isForecaster())
             <li class="nav-item @if (request()->routeIs('leftover*')) active show @endif">
                 <a href="{{route('leftover.index')}}" class="nav-link"><i data-feather="bar-chart"></i> <span>Daily Leftover</span></a>
             </li>
@@ -65,32 +65,32 @@
                     {{--                @if(auth()->user()->has_access_to_route('admin.report.sales'))--}}
                     {{--                    <li><a target="_blank" href="{{route('admin.report.sales')}}" style="display:none;">Branch Sales Summary</a></li>--}}
                     {{--                @endif--}}
-                    @if(auth()->user()->has_access_to_route('admin.report.sales_payment'))
+                    @if(auth()->user()->has_access_to_route('admin.report.sales_payment') && !isForecaster())
                         <li><a target="_blank" href="{{route('admin.report.sales_payment')}}">Sales Payment Report</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.delivery_status'))
+                    @if(auth()->user()->has_access_to_route('admin.report.delivery_status') && !isForecaster())
                         <li><a target="_blank" href="{{route('admin.report.delivery_status')}}">Delivery Status Report</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.joborder'))
+                    @if(auth()->user()->has_access_to_route('admin.report.joborder') && !isForecaster())
                         <li><a target="_blank" href="{{route('admin.report.joborder')}}">Job Order Report</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.leftover'))
+                    @if(auth()->user()->has_access_to_route('admin.report.leftover') && !isForecaster())
                         <li><a target="_blank" href="{{route('admin.report.leftover')}}">Leftover Report</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.sales-per-agent'))
+                    @if(auth()->user()->has_access_to_route('admin.report.sales-per-agent') && !isForecaster())
                         <li><a target="_blank" href="{{route('admin.report.sales-per-agent')}}">Sales per Agent</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.sales-per-customer'))
+                    @if(auth()->user()->has_access_to_route('admin.report.sales-per-customer') && !isForecaster())
                         <li><a target="_blank" href="{{route('admin.report.sales-per-customer')}}">Sales per Customer</a></li>
                     @endif
                     @if(auth()->user()->has_access_to_route('admin.report.forecaster'))
                         <li><a target="_blank" href="{{route('admin.report.forecaster')}}">Forecaster Report</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.door2door_report'))
+                    @if(auth()->user()->has_access_to_route('admin.report.door2door_report') && !isForecaster())
                         <li><a target="_blank" href="{{route('admin.report.door2door_report')}}">Delivery Report</a></li>
                     @endif
                     
-                    
+                    @if (!isForecaster())
                     {{--<li><a target="_blank" href="{{route('admin.report.door2door_report')}}">Dispatcher Report</a></li>--}}
                     <li><a target="_blank" href="{{route('admin.report.sales_category')}}">Sales by Category Report</a></li>
                     <li><a target="_blank" href="{{route('admin.report.sales-per-branch')}}">Sales by Branch Report</a></li>
@@ -107,12 +107,13 @@
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.commissary_production')}}">Commissary Production</a></li>
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.customer-details')}}">Customer Details Report</a></li>
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.gift_cert')}}">Gift Cert Report</a></li>
-                 
+                    @endif
                 </ul>
             </li>
         @endif
-
+        @if (!isForecaster() && !isDispatcher())
         <li class="nav-label mg-t-25">CMS</li>
+        @endif
         @if (auth()->user()->has_access_to_pages_module())
             <li class="nav-item with-sub @if (request()->routeIs('pages*')) active show @endif">
                 <a href="" class="nav-link"><i data-feather="layers"></i> <span>Pages</span></a>
@@ -174,7 +175,7 @@
                 </ul>
             </li>
         @endif
-        @if (!isDispatcher())
+        @if (!isDispatcher() && !isForecaster())
         <li class="nav-item with-sub @if (request()->routeIs('account*') || request()->routeIs('settings*') || request()->routeIs('audit*')) active show @endif">
             <a href="" class="nav-link"><i data-feather="settings"></i> <span>Settings</span></a>
             <ul>
@@ -245,7 +246,7 @@
             </li>
         @endif
 
-        @if (!isDispatcher())
+        @if (!isDispatcher() && !isForecaster())
         <li class="nav-item with-sub @if (request()->routeIs('popup-message*')) active show @endif">
             <a href="" class="nav-link"><i data-feather="users"></i> <span>Popup Message</span></a>
             <ul>
@@ -259,9 +260,10 @@
             auth()->user()->has_access_to_module('production_branch') || auth()->user()->has_access_to_module('gift_certificate') ||
             auth()->user()->has_access_to_module('delivery_rate') || auth()->user()->has_access_to_module('branch') ||
             auth()->user()->has_access_to_module('sales_transaction'))
+            @if (!isForecaster())
             <li class="nav-label mg-t-25">E-Commerce</li>
-            
-            @if (!isDispatcher())
+            @endif
+            @if (!isDispatcher() && !isForecaster())
             <li class="nav-item @if (url()->current() == route('ecom-dashboard')) active @endif">
                 <a href="{{ route('ecom-dashboard') }}" class="nav-link"><i data-feather="home"></i><span>Dashboard</span></a>
             </li>
@@ -281,7 +283,7 @@
                             <li @if (\Route::current()->getName() == 'product-categories.index' || \Route::current()->getName() == 'product-categories.edit') class="active" @endif><a href="{{ route('product-categories.index') }}">Manage Categories</a></li>
                             @if(auth()->user()->has_access_to_route('product-categories.create'))
                                 <li @if (\Route::current()->getName() == 'product-categories.create') class="active" @endif><a href="{{ route('product-categories.create') }}">Create a Category</a></li>
-                            @endif]
+                            @endif
                         @endif
                     </ul>
                 </li>
@@ -299,7 +301,7 @@
                 </li>
             @endif
 
-            @if (!isDispatcher())
+            @if (!isDispatcher() && !isForecaster())
             <li class="nav-item with-sub @if (request()->routeIs('coupons*')) active show @endif">
                 <a href="" class="nav-link"><i data-feather="users"></i> <span>Coupons</span></a>
                 <ul>
@@ -346,7 +348,7 @@
                 </li>
             @endif
 
-            @if (auth()->user()->has_access_to_module('sales_transaction'))
+            @if (auth()->user()->has_access_to_module('sales_transaction') && !isForecaster())
                 <li class="nav-item with-sub @if (request()->routeIs('sales-transaction*')) active show @endif">
                     <a href="" class="nav-link"><i data-feather="users"></i> <span>Sales Transaction</span></a>
                     <ul>
@@ -359,7 +361,7 @@
                 </li>
             @endif
             
-            @if (!isDispatcher())
+            @if (!isDispatcher() && !isForecaster())
             <li class="nav-item with-sub @if (request()->routeIs('shareable-links*')) active show @endif">
                 <a href="" class="nav-link"><i data-feather="users"></i> <span>Social Media Shareable Links</span></a>
                 <ul>
