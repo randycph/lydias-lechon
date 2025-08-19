@@ -48,7 +48,17 @@
             <div class="text-center">
                 <img style="height:100px;" src="{{asset('images/lydias-lechon-logo-small.jpg')}}" alt="">
                 <h4><strong>Sales Transaction Summary</strong></h4>
-                <h5>Order #: {{$sales->order_number}}</h5>
+                @php
+                    $cntr = 0;
+                    foreach(\App\Models\ProductDeliveryAddress::where('sales_header_id',$sales->id)->get() as $si){
+                        $cntr++;
+                        if($si->id == $deliveryAddress->id)
+                            break;
+                    }
+                    $char = chr(ord('A') + $cntr - 1);
+
+                @endphp
+                <h5>Order #: {{$sales->order_number}}{{$char}}</h5>
             </div>
         </div>
     </div>
