@@ -114,6 +114,17 @@
                         <x-error-message inputName="branches" />
                     </div>
 
+                    <div class="form-group {{ old('role') == 5 ? 'd-block' : 'd-none' }}" id="production_branches_div">
+                        <label class="d-block">Production Branch *</label>
+                        <select name="production_branch_id" id="production_branch_id" class="form-control select2">
+                            <option label="Choose one"></option>
+                            @foreach($production_branches as $branch)
+                                <option value="{{ $branch->id }}" {{ (old("production_branch_id") == $branch->id ? "selected":"") }}>{{ ucwords($branch->name) }}</option>
+                            @endforeach
+                        </select>
+                        <x-error-message inputName="production_branch_id" />
+                    </div>
+
                     <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Create User</button>
                     <a class="btn btn-outline-secondary btn-sm btn-uppercase" href="{{ route('users.index') }}">Cancel</a>
                 </form>
@@ -154,9 +165,17 @@
                 $('#branches_div').addClass('d-block');
                 $('#branches').removeAttr('disabled');
                 $('#branches').prop('required',true);
+            } else if (role == 5) {
+                $('#production_branches_div').removeClass('d-none');
+                $('#production_branches_div').addClass('d-block');
+                $('#production_branch_id').removeAttr('disabled');
+                $('#production_branch_id').prop('required',true);
             } else {
                 $('#branches_div').removeClass('d-block');
                 $('#branches_div').addClass('d-none');
+
+                $('#production_branches_div').removeClass('d-block');
+                $('#production_branches_div').addClass('d-none');
 
                 $('#branches').attr('disabled','disabled');
                 $('#branches').prop('required',false);

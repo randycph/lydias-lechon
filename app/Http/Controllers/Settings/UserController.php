@@ -68,8 +68,9 @@ class UserController extends Controller
     {
         $branches = Branch::orderBy('name','asc')->get();
         $roles = Role::orderBy('name','asc')->get();
+        $production_branches = ProductionBranch::orderBy('name','asc')->get();
 
-        return view('admin.users.create',compact('roles','branches'));
+        return view('admin.users.create',compact('roles','branches', 'production_branches'));
     }
 
     public function store(UserRequest $request)
@@ -90,11 +91,17 @@ class UserController extends Controller
                 'regex:/^[A-Za-z\s\-]+$/'
             ],
             'email' => 'required|email|max:191|unique:users,email',
-            'role' => 'required|exists:role,id'
+            'role' => 'required|exists:role,id',
+            'production_branch_id' => 'nullable|exists:production_branches,id',
         ]);
 
         $data = $request->all();
 
+        if ($request->role == 5) {
+            $request->validate([
+                'production_branch_id' => 'required|exists:production_branches,id',
+            ]);
+        }
 
             $user = User::create([
                 'firstname'      => $request->fname,
@@ -111,6 +118,7 @@ class UserController extends Controller
                 'address_municipality' => ' ',
                 'address_city' => ' ',
                 'address_region' => ' ',
+                'production_branch_id' => $request->production_branch_id ?? null,
             ]);
 
             if($user){
@@ -138,8 +146,9 @@ class UserController extends Controller
         $userbranch=UserBranch::where('user_id',$id)->get();
         $roles    = Role::orderBy('name','asc')->get();
         $user     = User::where('id',$id)->first();
+        $production_branches = ProductionBranch::orderBy('name','asc')->get();
 
-        return view('admin.users.edit',compact('user','roles','branches','userbranch'));
+        return view('admin.users.edit',compact('user','roles','branches','userbranch', 'production_branches'));
     }
 
     public function update(Request $request, User $user)
@@ -156,8 +165,15 @@ class UserController extends Controller
                 'regex:/^[A-Za-z\s\-]+$/'
             ],
             'email' => 'required|email|max:191|unique:users,email,'.$user->id,
-            'role' => 'required|exists:role,id'
+            'role' => 'required|exists:role,id',
+            'production_branch_id' => 'nullable|exists:production_branches,id',
         ]);
+
+        if ($request->role == 5) {
+            $request->validate([
+                'production_branch_id' => 'required|exists:production_branches,id',
+            ]);
+        }
 
         $paytypes='';
         if(isset($request->payment_types)){
@@ -173,6 +189,7 @@ class UserController extends Controller
             'allowed_payments'  => $paytypes,
             'user_id'  => Auth::id(),
             'user_type'      => 'cms',
+            'production_branch_id' => $request->production_branch_id ?? null,
         ]);
         UserBranch::where('user_id',$user->id)->delete();
         if($user){

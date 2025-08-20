@@ -106,6 +106,20 @@
                     @enderror
                 </div>
 
+                <div class="form-group {{ old('role') == 5 || $user->role_id == 5 ? 'd-block' : 'd-none' }}" id="production_branches_div">
+                    <label class="d-block">Production Branch *</label>
+                    <select name="production_branch_id" class="form-control select2-no-search" required>
+                        @foreach($production_branches as $branch)
+                            <option value="{{ $branch->id }}" {{ (old("production_branch_id", $user->production_branch_id) == $branch->id ? "selected":"") }}>{{ $branch->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('production_branch_id')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message ?? '' }}</strong>
+                        </span>
+                    @enderror
+                </div>
+
                 @php
                     $arr = array();
                     foreach($userbranch as $ub){
@@ -177,14 +191,22 @@
 
         function user_role(role){
 
-            if(role == 2 || role == 4 || role == 12){
+            if(role == 2 || role == 4 || role == 12){ // check if selected user type is branch manager, staff, Cashier
                 $('#branches_div').removeClass('d-none');
                 $('#branches_div').addClass('d-block');
                 $('#branches').removeAttr('disabled');
                 $('#branches').prop('required',true);
+            } else if (role == 5) {
+                $('#production_branches_div').removeClass('d-none');
+                $('#production_branches_div').addClass('d-block');
+                $('#production_branch_id').removeAttr('disabled');
+                $('#production_branch_id').prop('required',true);
             } else {
                 $('#branches_div').removeClass('d-block');
                 $('#branches_div').addClass('d-none');
+
+                $('#production_branches_div').removeClass('d-block');
+                $('#production_branches_div').addClass('d-none');
 
                 $('#branches').attr('disabled','disabled');
                 $('#branches').prop('required',false);
