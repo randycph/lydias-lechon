@@ -27,7 +27,7 @@ class NavigationComponent extends Component
         $menu = Menu::with(['navigation' => function ($query) {
             $query->orderBy('page_order', 'asc');
         }])
-        ->where('name', 'Main Menu')
+        ->where('is_active', 1)
         ->first();
 
         return view('components.navigation-component', compact('menu'));
