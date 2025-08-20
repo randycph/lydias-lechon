@@ -1206,7 +1206,7 @@ class CartController extends Controller
             SalesDetail::create([
                 'sales_header_id' => $salesHeader->id,
                 'product_id' => $product->id,
-                'product_name' => $product->name,
+                'product_name' => $product->name . ($cart->paella_price > 0 ? ' Boneless with Paella' : ''),
                 'product_category' => $product->category_id,
                 'price' => $product->price,
                 'cost' => 0,

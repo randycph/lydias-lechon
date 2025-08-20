@@ -1688,7 +1688,8 @@
                         paella: order.paella_price > 0 ? true : false,
                         product_id: order.product_id,
                         qty: 1,
-                        product: order.product
+                        product: order.product,
+                        product_name: order.paella_price > 0 ? order.product.name + ' Boneless with Paella' : order.product.name,
                     });
                 }
                 
@@ -1824,7 +1825,8 @@
                         is_free_product: isFree,
                         product_id: order.product_id,
                         qty: 1,
-                        product: order.product
+                        product: order.product,
+                        product_name: isPaella ? order.product.name + ' Boneless with Paella' : order.product.name,
                     });
                 } else if (!isChecked && existingIndex !== -1) {
                     delivery.orders.splice(existingIndex, 1);
@@ -2013,7 +2015,8 @@
                         paella: isPaella,
                         product_id: order.product_id,
                         qty: parseInt(newQty) || 0,
-                        product: order.product
+                        product: order.product,
+                        product_name: isPaella ? order.product.name + ' Boneless with Paella' : order.product.name,
                     });
                 }
 
