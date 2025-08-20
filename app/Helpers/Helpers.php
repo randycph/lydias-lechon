@@ -37,4 +37,13 @@ if (!function_exists('isForecaster')) {
     }
 }
 
+if (!function_exists('highlightPaella')) {
+    function highlightPaella($name)
+    {
+        $highlight = 'Boneless with Paella';
+        return str_replace($highlight, "<b>{$highlight}</b>", $name);
+    }
+}
+
+
 

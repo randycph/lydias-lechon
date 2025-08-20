@@ -537,7 +537,31 @@ class SalesController extends Controller
             ];
         }
         if(auth()->user()->role_id == 1 || auth()->user()->role_id == 3 || auth()->user()->role_id == 5 || auth()->user()->role_id == 13 ){
-            $model = SalesHeader::where('id','>',0);
+            // $model = SalesHeader::where('id','>',0);
+
+            if (auth()->user()->role_id == 5) {
+                $branchId = auth()->user()->role_id == 5 ? auth()->user()->production_branch_id : null;
+
+                $eligible = DB::table('ecommerce_sales_details as d')
+                    ->join('job_orders as jo', 'jo.sales_detail_id', '=', 'd.id')
+                    ->join('production_orders as po', 'po.joborder_id', '=', 'jo.id')
+                    ->when($branchId, function ($query) use ($branchId) {
+                        return $query->where('po.branch_id', $branchId);
+                    })
+                    ->select('d.sales_header_id');
+
+                // $model = DB::table('ecommerce_sales_headers')
+                //     ->joinSub($eligible, 'eh', function ($j) {
+                //         $j->on('eh.sales_header_id', '=', 'ecommerce_sales_headers.id');
+                //     });
+
+                $model = SalesHeader::where(function ($query) use($eligible) {
+                    $query->whereIn('id', $eligible);
+                });
+            } else {
+                $model = SalesHeader::where('id','>',0);
+            }
+
         }else{
             $branches = UserBranch::accessBranch();
 
@@ -557,11 +581,6 @@ class SalesController extends Controller
         }
         $model = $this->additional_filters($model);
       
-        
-
-        //dd($model->get());
-
-
 
         $selectFields = ['id','order_source','delivery_type','instruction','customer_delivery_adress','outlet','customer_location','order_number', 'customer_name', 'customer_location', 'isConfirm', 'created_at', 'status', 'delivery_status', 'payment_status', 'net_amount', 'gross_amount','deleted_at', DB::raw('(SELECT ecommerce_sales_details.delivery_date From ecommerce_sales_details WHERE ecommerce_sales_headers.id=ecommerce_sales_details.sales_header_id GROUP BY ecommerce_sales_details.sales_header_id) as date_needed')];
 
