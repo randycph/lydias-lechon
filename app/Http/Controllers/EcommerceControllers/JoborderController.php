@@ -181,7 +181,7 @@ class JoborderController extends Controller
     public function create()
     {
         $miscelaneous = Product::where('is_misc',1)->orderBy('name','asc')->get();
-        $products = Product::where('production_item',1)->orderBy('name','asc')->get();
+        $products = Product::where('production_item',1)->where('status','PUBLISHED')->orderBy('name','asc')->get();
         $branches_store = Branch::orderBy('name','asc')->get();
         $pbs = ProductionBranch::orderBy('name','asc')->get();
         $branches  = Deliverablecities::distinct()->orderBy('name')->get(['name']);
