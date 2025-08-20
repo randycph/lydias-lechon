@@ -55,7 +55,7 @@
                         if($si->id == $deliveryAddress->id)
                             break;
                     }
-                    $char = chr(ord('A') + $cntr - 1);
+                    $char = "-".chr(ord('A') + $cntr - 1);
 
                 @endphp
                 <h5>Order #: {{$sales->order_number}}{{$char}}</h5>
