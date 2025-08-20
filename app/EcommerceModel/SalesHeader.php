@@ -38,13 +38,18 @@ class SalesHeader extends Model
             $insertID = $current_total_order+1;
             
 
-            $jo = JobOrder::create([
+            $jo = JobOrder::updateOrCreate(
+                [
+                    'sales_detail_id' => $salesdetail->id,
+                    'product_id' => $salesdetail->product_id
+                ],
+                [
                 'user_id' => auth()->id(),
                 'jo_number' => 'JO'.date('Ymd',strtotime($salesdetail->delivery_date)).sprintf('%04d', $insertID),
                 'sales_number' => $sale->order_number,
-                'sales_detail_id' => $salesdetail->id,
+          
                 'order_source' => $sale->order_source,
-                'product_id' => $salesdetail->product_id,
+         
                 'product_name' => $salesdetail->product->name,
                 'product_size' => $salesdetail->product->size,
                 'product_weight' => $salesdetail->product->weight,
@@ -69,14 +74,17 @@ class SalesHeader extends Model
 
             ]);
 
-            if($jo){
-                ProductionOrder::create([
-                    'branch_id' => $pb,
-                    'joborder_id' => $jo->id,
+            //if($jo){
+                ProductionOrder::updateOrCreate(
+                [
+                    'joborder_id' => $jo->id
+                ],
+                [
+                    'branch_id' => $pb,                    
                     'delivery_date' => $salesdetail->delivery_date,
                     'schedule_type' => $sale->order_type ?? ' '
                 ]);
-            }
+            //}
 
         }
     }
