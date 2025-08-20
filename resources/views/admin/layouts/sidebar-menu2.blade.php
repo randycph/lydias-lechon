@@ -55,42 +55,42 @@
             </li>
         @endif
 
-        @if (auth()->user()->has_access_to_module('reports') && !isDispatcher())
+        @if (auth()->user()->has_access_to_module('reports'))
             <li class="nav-item with-sub @if (request()->routeIs('reports*')) active show @endif">
                 <a href="#" class="nav-link"><i data-feather="pie-chart"></i> <span>Reports</span></a>
                 <ul>
-                    @if(auth()->user()->has_access_to_route('admin.report.sales'))
+                    @if(auth()->user()->has_access_to_route('admin.report.sales') && !isDispatcher())
                         <li><a target="_blank" href="{{route('admin.report.sales')}}">Sales Summary Report</a></li>
                     @endif
                     {{--                @if(auth()->user()->has_access_to_route('admin.report.sales'))--}}
                     {{--                    <li><a target="_blank" href="{{route('admin.report.sales')}}" style="display:none;">Branch Sales Summary</a></li>--}}
                     {{--                @endif--}}
-                    @if(auth()->user()->has_access_to_route('admin.report.sales_payment') && !isForecaster())
+                    @if(auth()->user()->has_access_to_route('admin.report.sales_payment') && !isForecaster() && !isDispatcher())
                         <li><a target="_blank" href="{{route('admin.report.sales_payment')}}">Sales Payment Report</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.delivery_status') && !isForecaster())
+                    @if(auth()->user()->has_access_to_route('admin.report.delivery_status') && !isForecaster() && !isDispatcher())
                         <li><a target="_blank" href="{{route('admin.report.delivery_status')}}">Delivery Status Report</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.joborder') && !isForecaster())
+                    @if(auth()->user()->has_access_to_route('admin.report.joborder') && !isForecaster() && !isDispatcher())
                         <li><a target="_blank" href="{{route('admin.report.joborder')}}">Job Order Report</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.leftover') && !isForecaster())
+                    @if(auth()->user()->has_access_to_route('admin.report.leftover') && !isForecaster() && !isDispatcher())
                         <li><a target="_blank" href="{{route('admin.report.leftover')}}">Leftover Report</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.sales-per-agent') && !isForecaster())
+                    @if(auth()->user()->has_access_to_route('admin.report.sales-per-agent') && !isForecaster() && !isDispatcher())
                         <li><a target="_blank" href="{{route('admin.report.sales-per-agent')}}">Sales per Agent</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.sales-per-customer') && !isForecaster())
+                    @if(auth()->user()->has_access_to_route('admin.report.sales-per-customer') && !isForecaster() && !isDispatcher())
                         <li><a target="_blank" href="{{route('admin.report.sales-per-customer')}}">Sales per Customer</a></li>
                     @endif
                     @if(auth()->user()->has_access_to_route('admin.report.forecaster'))
                         <li><a target="_blank" href="{{route('admin.report.forecaster')}}">Forecaster Report</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.door2door_report') && !isForecaster())
+                    @if(auth()->user()->has_access_to_route('admin.report.door2door_report') && !isForecaster() && !isDispatcher())
                         <li><a target="_blank" href="{{route('admin.report.door2door_report')}}">Delivery Report</a></li>
                     @endif
                     
-                    @if (!isForecaster())
+                    @if (!isForecaster() && !isDispatcher())
                     {{--<li><a target="_blank" href="{{route('admin.report.door2door_report')}}">Dispatcher Report</a></li>--}}
                     <li><a target="_blank" href="{{route('admin.report.sales_category')}}">Sales by Category Report</a></li>
                     <li><a target="_blank" href="{{route('admin.report.sales-per-branch')}}">Sales by Branch Report</a></li>
