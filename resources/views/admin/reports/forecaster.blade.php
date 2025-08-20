@@ -365,7 +365,7 @@
                                 <th>Customer</th>                                
                                 <th>Date Needed</th>
                                 <th>Time Needed</th>  
-                                <th>Instruction</th>                                
+                                <th>Note</th>                                
                                 <th>Production Date</th>
                                 <th>Production Time</th>
                                 <th>Delivery Type</th>  
@@ -432,12 +432,17 @@
                                             $itemType = 'WRA';
                                         }
                                         $uni=$r->order_number."".$r->delivery_date;
+
+                                        $pname = $r->product_name;
+                                        if (strpos($r->product_name, 'Boneless with Paella') !== false) {                                            
+                                            $pname = str_replace('Boneless with Paella', '<strong>Boneless with Paella</strong>', $r->product_name);                                            
+                                        }
                                     @endphp
                                     @if($isAllowed == 1)
                                     <tr style="text-align: left">
                                         
                                         <td class="bord">{{number_format($r->qty,2)}}</td>
-                                        <td class="bord">{{$r->product_name}} @if(isset($r?->paella) && $r?->paella == 1) Boneless with Paella @endif</td>
+                                        <td class="bord" style="font-weight:normal">{!!$pname!!}</td>
 
                                         @if($old_value <> $uni)
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">@if(strlen($address)>15){!!$address!!}@endif</td>   
@@ -607,6 +612,7 @@
                                         }
 
                                         $itemType = $r->product_name; // added due to new request 08312022
+                                        
                                     @endphp
                                     <tr style="text-align: left">                                    
                                         <td class="bord">{{number_format($r->qty,2)}}</td>
