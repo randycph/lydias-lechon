@@ -93,7 +93,7 @@
                                                         @endphp
                                                         <tr>
                                                             <td class="tx-nowrap">
-                                                                {!! highlightPaella($product?->product_name) !!}
+                                                                {!! highlightPaella($product?->product_name ?? '') !!}
                                                             </td>
                                                             <th class="tx-center">{{ $product->product->no_of_pax }}</th>                                
                                                             <td class="tx-nowrap">
