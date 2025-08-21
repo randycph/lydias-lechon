@@ -271,7 +271,7 @@
                                     <td>{{date('h:i A',strtotime($r->delivery_date))}}</td>
                                     <td>{{number_format($r->price,2)}}</td>
                                     <td>{{number_format($r->qty,2)}}</td>
-                                    <td>{{number_format(($r->price * $r->qty),2)}}</td>
+                                    <td>{{number_format((($r->price + $r->paella_price) * $r->qty),2)}}</td>
                                     <td>
                                         {!!$pays!!}
                                     </td>
