@@ -107,7 +107,7 @@
                                                 <ul>
                                                     @foreach ($products as $product)
                                                         <li>
-                                                            {!! highlightPaella($address->product_name) !!} x {{ $product->qty }}
+                                                            {!! highlightPaella($address?->product_name) !!} x {{ $product->qty }}
                                                         </li>
                                                     @endforeach
                                                 </ul>
@@ -194,7 +194,7 @@
                                 
                                 <div class="flex flex-col">
                                     <div class="flex gap-2 items-center">
-                                        <div class="font-bold">{!! highlightPaella($details['product_name']) !!}</div>
+                                        <div class="font-bold">{!! highlightPaella($details['product_name'] ?? '') !!}</div>
                                         @if ($details['price'] == 0)
                                         <span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">FREE</span>
                                         @endif
@@ -314,7 +314,7 @@
                                 {{ $details->product->code }}
                             </th>
                             <td class="px-6 py-4">
-                                {!! highlightPaella($details->product_name) !!}
+                                {!! highlightPaella($details?->product_name) !!}
                             </td>
                             <td class="px-6 py-4">
                                 {{ $details->no_of_pax }}

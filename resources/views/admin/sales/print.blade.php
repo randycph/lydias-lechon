@@ -110,7 +110,7 @@
                                         @if(is_array($products) || is_object($products))
                                             <ul>
                                                 @foreach ($products as $product)
-                                                        <li>{!! highlightPaella($address->product_name) !!} x {{ $product->qty }}</li>
+                                                        <li>{!! highlightPaella($address?->product_name) !!} x {{ $product->qty }}</li>
                                                 @endforeach
                                             </ul>
                                         @endif
@@ -159,7 +159,7 @@
                     <tbody>
                         @forelse($salesDetails as $details)
                             <tr>
-                                <td class="tx-nowrap">{!! highlightPaella($details->product_name) !!}</td>                
+                                <td class="tx-nowrap">{!! highlightPaella($details?->product_name) !!}</td>                
                                 <td class="tx-nowrap tx-center">{{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y H:i A') }}</td>
                                 <td class="tx-center">{{number_format($details->qty, 0)}}</td>
                                 <td class="tx-center">{{number_format($details->price, 2)}}</td>

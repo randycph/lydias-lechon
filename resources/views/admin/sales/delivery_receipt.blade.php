@@ -162,7 +162,7 @@
                             @forelse($salesDetails as $details)
                             <tr>
                                 <td class="tx-nowrap">{{$details->product->code}}</td>
-                                <td class="tx-nowrap">{!! highlightPaella($details->product_name) !!}</td>
+                                <td class="tx-nowrap">{!! highlightPaella($details?->product_name) !!}</td>
                                 <th class="tx-center">{{$details->no_of_pax}}</th>
                                 <td class="tx-nowrap">{{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y H:i A') }}</td>
                                 <td class="tx-center">{{number_format($details->qty, 0)}}</td>

@@ -72,7 +72,7 @@ Click here to view and manage this order
 | Code | Product | Qty | Price | Total |
 |:---- |:--------| ---:| ----:| ----:|
 @forelse($h->items as $details)
-| {{ $details->product->code }} | {!! highlightPaella($details->product_name) !!} | {{ number_format($details->qty, 0) }} | {{ number_format($details->paella_price + $details->price, 2) }} | {{ number_format($details->gross_amount, 2) }} |
+| {{ $details->product->code }} | {!! highlightPaella($details?->product_name) !!} | {{ number_format($details->qty, 0) }} | {{ number_format($details->paella_price + $details->price, 2) }} | {{ number_format($details->gross_amount, 2) }} |
 @empty
 | *No items found* |  |  |  |  |
 @endforelse
