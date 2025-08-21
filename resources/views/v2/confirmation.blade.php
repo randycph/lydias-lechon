@@ -107,7 +107,7 @@
                                                 <ul>
                                                     @foreach ($products as $product)
                                                         <li>
-                                                            {!! highlightPaella($address?->product_name) !!} x {{ $product->qty }}
+                                                            {!! highlightPaella($address?->product_name ?? '') !!} x {{ $product->qty }}
                                                         </li>
                                                     @endforeach
                                                 </ul>
