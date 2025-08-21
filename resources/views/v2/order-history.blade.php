@@ -74,7 +74,7 @@
                                                 class="w-20 h-20 object-cover">
                                         </div>
                                         <div class="flex flex-col">
-                                            <div class="font-bold">{{ $cart->product->name }} {{ isset($cart?->paella_price) && $cart?->paella_price > 0 ?' Boneless with Paella' : '' }} @if ($cart->price == 0)<span class="text-green-600 font-semibold text-sm">(Free)</span>@endif</div>
+                                            <div class="font-bold">{!! highlightPaella($cart->product_name) !!} @if ($cart->price == 0)<span class="text-green-600 font-semibold text-sm">(Free)</span>@endif</div>
                                             <div class="text-sm text-gray-600 font-medium">Price: ₱{{ number_format($cart->price, 2) }} <span class="italic">{{ isset($cart?->paella_price) && $cart?->paella_price > 0 ? '+ ₱' . number_format($cart?->paella_price, 2) : '' }}</span></div>
                                             <div class="text-sm text-gray-600 font-medium">QTY: {{ number_format($cart->qty, 0) }}</div>
                                         </div>
@@ -214,7 +214,7 @@
                                                                             <ul class="list-disc pl-10">
                                                                                 @foreach ($products as $product)
                                                                                     <li>
-                                                                                        {{ $product->product->name . (isset($product?->paella) && $product?->paella ?' Boneless with Paella' : '') ?? 'Unknown Product' }} x {{ $product->qty }}
+                                                                                        {!! highlightPaella($address->product_name) !!} x {{ $product->qty }}
                                                                                     </li>
                                                                                 @endforeach
                                                                             </ul>

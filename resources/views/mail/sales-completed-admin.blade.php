@@ -697,8 +697,8 @@ Media Item
                                                                                     <tr>
                                                                                     <td align="left" style="font-size:11px;padding: 3px;">{{$details->product->code}}</td>    
                                                                                     <td align="left" style="font-size:11px;padding: 3px;">
-                                                                                          {{$details->product_name}} @if($details->paella_price > 0) Boneless with Paella @endif
-                                                                                    </td> 
+                                                                                          {!! highlightPaella($details->product_name) !!}
+                                                                                    </td>
                                                                                     <td align="left" style="font-size:11px;padding: 3px;">{{$details->no_of_pax}}</td>                         
                                                                                     <td align="left" style="font-size:11px;padding: 3px;">{{number_format($details->qty, 0)}}</td>
                                                                                     <td align="left" style="font-size:11px;padding: 3px;">{{number_format(($details->paella_price + $details->price),2)}}</td>
@@ -790,7 +790,7 @@ Media Item
                                                                                     @forelse($h->items as $details)                                                      
                                                                                     <tr>
                                                                                           <td align="left" style="font-size:11px;padding: 3px;">{{$details->product->code}}</td>    
-                                                                                          <td align="left" style="font-size:11px;padding: 3px;">{{$details->product_name}} @if($details->paella_price > 0) Boneless with Paella @endif </td> 
+                                                                                          <td align="left" style="font-size:11px;padding: 3px;">{!! highlightPaella($details->product_name) !!}</td> 
                                                                                           <td align="left" style="font-size:11px;padding: 3px;">{{$details->no_of_pax}}</td>                         
                                                                                           <td align="left" style="font-size:11px;padding: 3px;">{{date('F d, Y H:i A',strtotime($details->delivery_date))}}</td>
                                                                                           <td align="left" style="font-size:11px;padding: 3px;">{{number_format($details->qty, 0)}}</td>

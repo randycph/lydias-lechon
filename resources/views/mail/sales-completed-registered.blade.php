@@ -692,10 +692,10 @@ Media Item
                                                                                     <td colspan="5"></td>
                                                                               </tr>
 
-                                                                              @forelse($h->items as $details)                                                      
+                                                                              @forelse($h->items as $details)
                                                                               <tr>
                                                                                     <td align="left" style="font-size:11px;padding: 3px;">{{$details->product->code}}</td>    
-                                                                                    <td align="left" style="font-size:11px;padding: 3px;">{{$details->product_name}} @if($details->paella_price > 0) Boneless with Paella @endif </td> 
+                                                                                    <td align="left" style="font-size:11px;padding: 3px;">{!! highlightPaella($details->product_name) !!}</td> 
                                                                                     <td align="left" style="font-size:11px;padding: 3px;">{{$details->no_of_pax}}</td>                         
                                                                                     <td align="left" style="font-size:11px;padding: 3px;">{{date('F d, Y H:i A',strtotime($details->delivery_date))}}</td>
                                                                                     <td align="left" style="font-size:11px;padding: 3px;">{{number_format($details->qty, 0)}}</td>

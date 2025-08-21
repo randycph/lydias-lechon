@@ -115,7 +115,7 @@ Update Sales Details
                                                         data-product-id="{{ $item->product_id }}"
                                                         data-name="product_ids"
                                                         id="item_{{ $item->product_id }}">
-                                                    <label class="form-check-label">{{ $item->product_name }} {{ $item->paella_price > 0 ? 'Boneless with Paella' : '' }}</label>
+                                                    <label class="form-check-label">{!! highlightPaella($item->product_name) !!}</label>
                                                 </div>
                                                 <div>
                                                     <select class="form-select form-select-sm mb-2 product-qty"

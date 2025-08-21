@@ -76,7 +76,7 @@
                                                 <ul>
                                                     @foreach ($products as $product)
                                                         <li>
-                                                            {{ $product->product->name . (isset($product?->paella) && $product?->paella ?' <strong>Boneless with Paella</strong>' : '') ?? 'Unknown Product' }} x {{ $product->qty }}
+                                                            {!! highlightPaella($address->product_name) !!} x {{ $product->qty }}
                                                         </li>
                                                     @endforeach
                                                 </ul>
@@ -162,8 +162,8 @@
                             @forelse($salesDetails as $details)
                             <tr>
                                 <td class="tx-nowrap">{{$details->product->code}}</td>
-                                <td class="tx-nowrap">{{$details->product_name}} @if($details->paella_price > 0) Boneless with Paella @endif</td>
-                                <th class="tx-center">{{$details->no_of_pax}}</th>                                
+                                <td class="tx-nowrap">{!! highlightPaella($details->product_name) !!}</td>
+                                <th class="tx-center">{{$details->no_of_pax}}</th>
                                 <td class="tx-nowrap">{{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y H:i A') }}</td>
                                 <td class="tx-center">{{number_format($details->qty, 0)}}</td>
                                 <td class="tx-right">{{number_format(($details->paella_price),2)}}</td>

@@ -247,7 +247,7 @@ class PaymayaController extends Controller
 
         foreach ($sale->items as $i) {
             $items[] = [
-                "name" => $i->product_name . ' ' . ($i?->paella_price > 0 ? ' (Boneless with Paella)' : ''),
+                "name" => $i->product_name,
                 "quantity" => (int) $i->qty,
                 "code" => (string) $i->product_id,
                 "description" => "",
