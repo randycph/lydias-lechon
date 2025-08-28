@@ -151,9 +151,9 @@
                                 @endphp
                             <tr>
                                 <td class="tx-nowrap">
-                                    {!! highlightPaella($deliveryAddress?->product_name) !!}
+                                    {!! highlightPaella($product?->product_name) !!}
                                 </td>
-                                <td class="tx-nowrap tx-center" style="display:none;">{{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('F d, Y g:i A') }}</td>
+                                <td class="tx-nowrap tx-center" style="display:none;">{{ \Carbon\Carbon::parse($product->delivery_date . ' ' . $product->delivery_time)->format('F d, Y g:i A') }}</td>
                                 <td class="tx-center">{{number_format($product->qty, 0)}}</td>
                                 <td class="tx-center">₱{{number_format($product->product->price, 2)}}</td>
                                 <td class="tx-right">
@@ -173,10 +173,10 @@
                             @endforeach
                             @endif
 
-                            @if($deliveryAddress->delivery_fee > 0)
+                            @if($product->delivery_fee > 0)
                                 <tr>
                                     <td class="tx-left " colspan="4">Delivery Fee</td>
-                                    <td class="tx-right ">₱{{number_format($deliveryAddress->delivery_fee, 2)}}</td>
+                                    <td class="tx-right ">₱{{number_format($product->delivery_fee, 2)}}</td>
                                 </tr>
                             @endif
 
