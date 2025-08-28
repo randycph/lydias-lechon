@@ -23,15 +23,45 @@
 
                     <div class="form-group" id="region_div">
                         <label class="d-block">Location *</label>
-                        <input type="text" class="form-control" name="name" value="{{$rate->name}}">                                       
+                        <input type="text" class="form-control" name="name" value="{{$rate->name}}">        
+                        @if ($errors->has('name'))
+                            <span class="text-danger">{{ $errors->first('name') }}</span>
+                        @endif                               
                     </div>
                     <div class="form-group" id="region_div">
                         <label class="d-block">Area *</label>
-                        <input type="text" class="form-control" name="area" placeholder="North or South" value="{{$rate->area}}">                                       
+                        <input type="text" class="form-control" name="area" placeholder="North or South" value="{{$rate->area}}">      
+                        @if ($errors->has('area'))
+                            <span class="text-danger">{{ $errors->first('area') }}</span>
+                        @endif                                 
+                    </div>
+                    <div class="form-group" id="region_div">
+                        <label class="d-block">Province *</label>
+                        <input type="text" class="form-control" name="province" placeholder="Metro Manila" value="{{$rate->province}}">    
+                        @if ($errors->has('province'))
+                            <span class="text-danger">{{ $errors->first('province') }}</span>
+                        @endif                                   
+                    </div>
+                    <div class="form-group" id="region_div">
+                        <label class="d-block">City *</label>
+                        <input type="text" class="form-control" name="city" placeholder="Quezon City" value="{{$rate->city}}">
+                        @if ($errors->has('city'))
+                            <span class="text-danger">{{ $errors->first('city') }}</span>
+                        @endif
+                    </div>
+                    <div class="form-group" id="region_div">
+                        <label class="d-block">Municipality </label>
+                        <input type="text" class="form-control" name="municipality" placeholder="" value="{{$rate->municipality}}">    
+                        @if ($errors->has('municipality'))
+                            <span class="text-danger">{{ $errors->first('municipality') }}</span>
+                        @endif                                   
                     </div>
                     <div class="form-group" id="region_div">
                         <label class="d-block">Rate *</label>
-                        <input type="number" class="form-control" name="rate" min="0" step="0.01" value="{{$rate->rate}}">                                       
+                        <input type="number" class="form-control" name="rate" min="0" step="0.01" value="{{$rate->rate}}">         
+                        @if ($errors->has('rate'))
+                            <span class="text-danger">{{ $errors->first('rate') }}</span>
+                        @endif                              
                     </div>    
                     <div class="form-group" id="region_div">
                         <label class="d-block">Item Type *</label>
@@ -40,6 +70,9 @@
                             <option value="misc" @if($rate->item_type == 'misc') selected="selected" @endif>Miscellaneous</option>
                             <option value="lechon" @if($rate->item_type == 'lechon') selected="selected" @endif>Lechon</option>
                         </select>                                   
+                        @if ($errors->has('item_type'))
+                            <span class="text-danger">{{ $errors->first('item_type') }}</span>
+                        @endif
                     </div>    
                     <div class="form-group">
                         <label class="d-block">Outside or Within Manila</label>

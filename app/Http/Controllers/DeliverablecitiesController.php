@@ -56,11 +56,24 @@ class DeliverablecitiesController extends Controller
      */
     public function store(Request $request)
     {
-        $save = Deliverablecities::create([
+        $validate = $request->validate([
+            'name' => 'required',
+            'rate' => 'required|numeric',
+            'area' => 'required',
+            'province' => 'required',
+            'city' => 'required',
+            'municipality' => 'nullable',
+            'item_type' => 'required'
+        ]);
+
+        Deliverablecities::create([
             'name' => $request->name,
             'rate' => $request->rate,
             'area' => $request->area,
             'item_type' => $request->item_type,
+            'province' => $request->province,
+            'city' => $request->city,
+            'municipality' => $request->municipality,
             'outside_manila' => ($request->has('outside_manila') ? '1' : '0'),
             'user_id' => Auth::id()
         ]);
@@ -100,14 +113,28 @@ class DeliverablecitiesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $save = Deliverablecities::findOrFail($id)->update([
+        $validate = $request->validate([
+            'name' => 'required',
+            'rate' => 'required|numeric',
+            'area' => 'required',
+            'province' => 'required',
+            'city' => 'required',
+            'municipality' => 'nullable',
+            'item_type' => 'required'
+        ]);
+
+        Deliverablecities::findOrFail($id)->update([
             'name' => $request->name,
             'rate' => $request->rate,
             'area' => $request->area,
+            'province' => $request->province,
+            'city' => $request->city,
+            'municipality' => $request->municipality,
             'item_type' => $request->item_type,
             'outside_manila' => ($request->has('outside_manila') ? '1' : '0'),
             'user_id' => Auth::id()
         ]);
+        
 //        $address = Deliverablecities::all();
 //        return view('admin.deliverablelocations.index',compact('address'))->with('success','Successfully updated delivery rate!');
 

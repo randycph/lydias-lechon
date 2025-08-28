@@ -186,7 +186,31 @@ class FrontendController extends Controller
 
         $deliveryBranches = Branch::orderBy('name', 'asc')->where('delivery_branch', 1)->get();
 
-        $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
+        // $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
+
+        $table = (new Deliverablecities)->getTable();
+
+        $pickOnePerName = Deliverablecities::selectRaw('MAX(id) AS id')
+            ->groupBy('name');
+
+        $locations = Deliverablecities::query()
+            ->joinSub($pickOnePerName, 'p', "$table.id", '=', 'p.id')
+            ->orderBy("$table.name")
+            ->get(); // full rows, unique by name
+
+        $provinces = Deliverablecities::query()
+            ->select('province')
+            ->whereNotNull('province')->where('province', '!=', '')
+            ->distinct()
+            ->orderBy('province')
+            ->pluck('province');
+
+        $cities = Deliverablecities::query()
+            ->select('city')
+            ->whereNotNull('city')->where('city', '!=', '')
+            ->distinct()
+            ->orderBy('city')
+            ->pluck('city');
 
         $setting = Setting::first();
 
@@ -209,7 +233,7 @@ class FrontendController extends Controller
 
         $dataPrivacyRender = view('v2.data-privacy', compact('dataPrivacy'))->render();
 
-        return view('v2.checkout', compact('page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc'));
+        return view('v2.checkout', compact('provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc'));
     }
 
     public function confirmation($id)

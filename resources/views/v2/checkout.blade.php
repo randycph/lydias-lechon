@@ -290,9 +290,33 @@
                                             <h4 class="font-bold mb-2">Delivery Address <span x-text="index + 1"></span></h4>
                         
                                             <div class="flex flex-col gap-4">
+                                                <div class="w-full flex gap-4 md:flex-row flex-col">
+                                                    <div class="w-full md:w-1/2">
+                                                        <label for="delivery_address" class="block mb-2 font-bold text-gray-900">City <span class="text-red-700">*</span></label>
+                                                        <select @change="applyMultipleCityProvince(index)" :id="'city'+index" x-model="delivery.city" required
+                                                            class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                                            <option selected value="">Choose a City</option>
+                                                            <template x-for="c in _cities" :key="c">
+                                                                <option :value="c" x-text="c"></option>
+                                                            </template>
+                                                        </select>
+                                                    </div>
+                                                    
+                                                    <div class="w-full md:w-1/2">
+                                                        <label for="delivery_address" class="block mb-2 font-bold text-gray-900">Province <span class="text-red-700">*</span></label>
+                                                        <select @change="applyMultipleCityProvince(index)" :id="'province'+index" x-model="delivery.province" required
+                                                            class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                                            <option selected value="">Choose a province</option>
+                                                            <template x-for="p in _provinces" :key="p">
+                                                                <option :value="p" x-text="p"></option>
+                                                            </template>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
                                                 <div class="w-full">
-                                                    <label class="font-bold block text-sm mb-1">Address</label>
-                                                    <textarea x-model="delivery.address" @change="validateDeliveryAddress(delivery, 'address', index)"
+                                                    <label class="font-bold block text-sm mb-1">Address <small>Street Name, Building, House No., Municipality</small></label>
+                                                    <textarea @input="onAddressInput(index, $event.target.value)" @blur="applyMultipleCityProvince(index)" x-model="delivery.address" @change="validateDeliveryAddress(delivery, 'address', index)"
                                                         class="w-full border border-gray-300 p-2 rounded-md" placeholder="Enter address" :class="{'border-red-500': errors[index]?.address}"></textarea>
                                                     <template x-if="errors[index]?.address">
                                                         <div class="text-red-500 text-xs mt-1" x-text="errors[index]?.address"></div>
@@ -438,13 +462,13 @@
                                                 <div class="w-full flex gap-4">
                                                     <div class="w-full">
                                                         <label :for="'locations' + index" class="font-bold">Select Location <span
-                                                                class="text-red-700">*</span></label>
+                                                                class="text-red-700">* </span></label>
                                                         <select :disabled="!delivery.orders || delivery.orders.length === 0" x-model="delivery.location" :id="'locations' + index" name="location" @change="getDeliveryFeeForMultipleDelivery(index); validateDeliveryAddress(delivery, 'location', index);" required
                                                             class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                                             <option selected value="">Choose a location</option>
-                                                            @foreach ($locations as $location)
-                                                                <option value="{{ $location->name }}">{{ $location->name }}</option>
-                                                            @endforeach
+                                                            <template x-for="loc in filteredMultipleLocations(index)" :key="loc.id">
+                                                                <option :value="loc.name" x-text="loc.name"></option>
+                                                            </template>
                                                         </select>
                                                         <p
                                                             x-show="(!delivery.orders || delivery.orders.length === 0) && delivery.location"
@@ -486,13 +510,40 @@
                             </template>
                             <template x-if="!allowMultiple && method === 'delivery'">
                                 <div>
+                                    
+                                    <div class="font-bold mb-4">Delivery Information</div>
+
+                                    <div class="w-full flex gap-4 mb-4 md:flex-row flex-col">
+                                        <div class="w-full md:w-1/2">
+                                            <label for="cities" class="block mb-2 font-bold text-gray-900">City <span class="text-red-700">*</span></label>
+                                            <select @change="applyCityProvince" id="cities" name="city" x-model="city" required
+                                                class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                                <option selected value="">Choose a City</option>
+                                                @foreach ($cities as $city)
+                                                    <option value="{{ $city }}">{{ $city }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="w-full md:w-1/2">
+                                            <label for="locations" class="block mb-2 font-bold text-gray-900">Province <span class="text-red-700">*</span></label>
+                                            <select @change="applyCityProvince" id="locations" name="province" x-model="province" required
+                                                class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                                <option selected value="">Choose a province</option>
+                                                @foreach ($provinces as $province)
+                                                    <option value="{{ $province }}">{{ $province }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     <div class="w-full">
                                         <label for="delivery_address"
-                                        class="block mb-2 font-bold text-gray-900">Delivery Address <span
+                                        class="block mb-2 font-bold text-gray-900">Address <small>Street Name, Building, House No., Municipality</small> <span
                                             class="text-red-700">*</span></label>
-                                        <input type="text" id="delivery_address" name="delivery_address" x-model="delivery_address" value="{{ auth()->check() ? auth()->user()->address_street : '' }}"
+                                        <textarea  @blur="applyCityProvince" id="delivery_address" name="delivery_address" x-model="delivery_address" value="{{ auth()->check() ? auth()->user()->address_street : '' }}"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                                            placeholder="" />
+                                            placeholder=""></textarea>
                                         <div x-show="noDeliveryAddress" class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
                                             Please add delivery address
                                         </div>
@@ -504,9 +555,9 @@
                                         <select id="locations" name="location" @change="getDeliveryFee" x-ref="location" required
                                             class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                             <option selected value="">Choose a location</option>
-                                            @foreach ($locations as $location)
-                                                <option value="{{ $location->name }}">{{ $location->name }}</option>
-                                            @endforeach
+                                            <template x-for="(loc, index) in filteredLocations" :key="loc.id">
+                                                <option :value="loc.name" x-text="loc.name"></option>
+                                            </template>
                                         </select>
                                     </div>
                                 </div>
@@ -863,6 +914,8 @@
                     sms: false, 
                     qty: 1, 
                     location: '', 
+                    city: '',
+                    province: '',
                     order: '', 
                     need_date: this.minDate,
                     need_time: '',
@@ -883,6 +936,8 @@
                     sms: false,
                     qty: 1,
                     location: '',
+                    city: '',
+                    province: '',
                     order: '',
                     need_date: this.minDate(),
                     need_time: '',
@@ -1174,9 +1229,58 @@
             emailValidationMessage: '',
             noDeliveryAddress: false,
             delivery_address: '',
+            city: '',
+            province: '',
             privacy: window.privacy || false,
             errors: {
                 privacy: null,
+            },
+
+            get filteredLocations() {
+                let rows = @json($locations);
+
+                if (this.city) {
+                    const c = this.city.toLowerCase();
+                    rows = rows.filter(r => (r.city ?? '').toLowerCase() === c);
+                }
+                if (this.province) {
+                    const p = this.province.toLowerCase();
+                    rows = rows.filter(r => (r.province ?? '').toLowerCase() === p);
+                }
+
+                // de-duplicate by name in case there are repeats
+                const seen = new Set();
+                return rows.filter(r => {
+                    const k = (r.name ?? '').toLowerCase();
+                    if (seen.has(k)) return false;
+                    seen.add(k);
+                    return true;
+                });
+            },
+
+            _norm(s){ return (s ?? '').trim().toLowerCase(); },
+            _filterByCP(rows, city, province){
+                const c = this._norm(city), p = this._norm(province);
+                return rows.filter(r =>
+                    (!c || this._norm(r.city)     === c) &&
+                    (!p || this._norm(r.province) === p)
+                );
+            },
+            _uniqueByName(rows){
+                const seen = new Set(), out = [];
+                for (const r of rows) {
+                    const k = this._norm(r.name);
+                    if (!k || seen.has(k)) continue;
+                    seen.add(k); out.push(r);
+                }
+                return out;
+            },
+
+            filteredMultipleLocations(i) {
+                const location = @json($locations);
+                const d = this.deliveries[i] || {};
+                const rows = this._filterByCP(location, d.city, d.province);
+                return this._uniqueByName(rows).sort((a,b)=>a.name.localeCompare(b.name));
             },
 
             submitForm() {
@@ -1630,8 +1734,143 @@
                 if (!this.allowMultiple) {
                     this.validateDateTime();
                 }
+
+                this.$watch('city',     () => { this.location = ''; this._rebuildAddress(); });
+                this.$watch('province', () => { this.location = ''; this._rebuildAddress(); });
+
+                this.$watch('delivery_address', (val) => {
+                    if (this._syncing) return;
+                    this._addressCore = this._stripCityProvince(val);
+                });
+
+                this.deliveries.forEach((_, i) => this._wireCPWatchers(i));
+
+            },
+            _addressCore: '',
+            _syncing: false,
+            _cities: @json($cities),
+            _provinces: @json($provinces),
+
+            _wireDelivery(i) {
+                this.$watch(`deliveries[${i}].city`,     () => { this.deliveries[i].location = ''; this._rebuildMultipleAddress(i); });
+                this.$watch(`deliveries[${i}].province`, () => { this.deliveries[i].location = ''; this._rebuildMultipleAddress(i); });
+                this.$watch(`deliveries[${i}].address`, (val) => {
+                    if (this._syncing) return;
+                    // keep only the user-typed core (strip any current city/province)
+                    const { city, province } = this.deliveries[i];
+                    this.deliveries[i]._core = this._stripParts(val, city, province);
+                });
             },
 
+            applyCityProvince() {
+                this._inferFromText();
+                this._rebuildAddress();
+            },
+
+            _wireCPWatchers(i) {
+                this.$watch(`deliveries[${i}].city`,     () => { const d = this.deliveries[i]; if (!d) return; d.location = ''; this._rebuildMultipleAddress(i); });
+                this.$watch(`deliveries[${i}].province`, () => { const d = this.deliveries[i]; if (!d) return; d.location = ''; this._rebuildMultipleAddress(i); });
+            },
+
+            onAddressInput(i, val) {
+                if (this._syncing) return;
+                const d = this.deliveries[i]; if (!d) return;
+                d._core = this._stripParts(val, d.city, d.province);   // keep only user-typed core
+            },
+
+            _citySet: new Set(),
+            _provinceSet: new Set(),
+
+            applyMultipleCityProvince(index) {
+                const d = this.deliveries[index]; if (!d) return;
+                this._inferFromCore(index);
+                this._rebuildMultipleAddress(index);
+            },
+
+            _stripParts(text, city, province) {
+                const toks = (text || '').split(',').map(t => t.trim()).filter(Boolean);
+                const eq = (a,b) => (a||'').toLowerCase() === (b||'').toLowerCase();
+                return toks.filter(t => !(city && eq(t, city)) && !(province && eq(t, province))).join(', ');
+            },
+
+            _rebuildMultipleAddress(i) {
+                const d = this.deliveries[i]; if (!d) return;
+                const core = (d._core || '').trim();
+
+                // ⛔ do nothing if user hasn't typed core yet—don't blank the field
+                if (!core) return;
+
+                this._syncing = true;
+                const parts = [core];
+                if (d.city)     parts.push(d.city);
+                if (d.province) parts.push(d.province);
+                d.address = parts.join(', ');
+                this._syncing = false;
+            },
+
+            _inferFromCore(i) {
+                const d = this.deliveries[i]; if (!d) return;
+                const core = (d._core || '').trim(); if (!core) return;
+
+                const toks = core.split(',').map(t => t.trim()).filter(Boolean);
+
+                if (!d.city && this._citySet.size) {
+                    const hit = toks.find(t => this._citySet.has(t.toLowerCase()));
+                    if (hit) {
+                        d.city  = hit;
+                        d._core = toks.filter(t => t.toLowerCase() !== hit.toLowerCase()).join(', ');
+                    }
+                }
+                if (!d.province && this._provinceSet.size) {
+                    const toks2 = (d._core || '').split(',').map(t => t.trim()).filter(Boolean);
+                    const hit = toks2.find(t => this._provinceSet.has(t.toLowerCase()));
+                    if (hit) {
+                        d.province = hit;
+                        d._core    = toks2.filter(t => t.toLowerCase() !== hit.toLowerCase()).join(', ');
+                    }
+                }
+            },
+
+            _stripCityProvince(text) {
+                const toks = text.split(',').map(t => t.trim()).filter(Boolean);
+                const isCity = (t) => this.city && t.toLowerCase() === this.city.toLowerCase();
+                const isProv = (t) => this.province && t.toLowerCase() === this.province.toLowerCase();
+                return toks.filter(t => !isCity(t) && !isProv(t)).join(', ');
+            },
+
+            _rebuildAddress() {
+                this._syncing = true;
+
+                const core = (this._addressCore || '').trim();
+
+                if (!core) {
+                    this.delivery_address = '';
+                    this._syncing = false;
+                    return;
+                }
+
+                const parts = [core];
+                if (this.city)     parts.push(this.city);
+                if (this.province) parts.push(this.province);
+
+                this.delivery_address = parts.join(', ');
+                this._syncing = false;
+            },
+
+            _inferFromText() {
+                const toks = (this._addressCore || '').split(',').map(t => t.trim()).filter(Boolean);
+
+                if (!this.city) {
+                    const fCity = toks.find(t => this._cities.some(c => c.toLowerCase() === t.toLowerCase()));
+                    if (fCity) { this.city = fCity; this._addressCore = toks.filter(t => t !== fCity).join(', '); }
+                }
+
+                if (!this.province) {
+                    const fProv = toks.find(t => this._provinces.some(p => p.toLowerCase() === t.toLowerCase()));
+                    if (fProv) { this.province = fProv; this._addressCore = toks.filter(t => t !== fProv).join(', '); }
+                }
+            },
+            
             checkMultipleDeliveries() {
                 let multipleItems = this.orders.length > 1;
                 let multipleQty = this.orders.some(order => order.qty > 1);
@@ -2112,31 +2351,31 @@
                 return this.orders.map(o => ({ ...o }));
             },
 
-canAddMoreDeliveries() {
-    // Loop through each unique order (product_id + paella)
-    for (const order of this.orders) {
-        const totalQty = parseInt(order.qty) || 0;
-        const hasPaella = parseFloat(order.paella_price) > 0;
+            canAddMoreDeliveries() {
+                // Loop through each unique order (product_id + paella)
+                for (const order of this.orders) {
+                    const totalQty = parseInt(order.qty) || 0;
+                    const hasPaella = parseFloat(order.paella_price) > 0;
 
-        // Sum qty used across all deliveries for this exact product + paella combo
-        const usedQty = this.deliveries.reduce((sum, delivery) => {
-            const matches = delivery.orders?.filter(o =>
-                o.product_id === order.product_id &&
-                !!o.paella === hasPaella
-            ) || [];
+                    // Sum qty used across all deliveries for this exact product + paella combo
+                    const usedQty = this.deliveries.reduce((sum, delivery) => {
+                        const matches = delivery.orders?.filter(o =>
+                            o.product_id === order.product_id &&
+                            !!o.paella === hasPaella
+                        ) || [];
 
-            return sum + matches.reduce((sub, o) => sub + (parseInt(o.qty) || 0), 0);
-        }, 0);
+                        return sum + matches.reduce((sub, o) => sub + (parseInt(o.qty) || 0), 0);
+                    }, 0);
 
-        // If this specific version still has unassigned qty, allow adding delivery
-        if (usedQty < totalQty) {
-            return true;
-        }
-    }
+                    // If this specific version still has unassigned qty, allow adding delivery
+                    if (usedQty < totalQty) {
+                        return true;
+                    }
+                }
 
-    // All order variants are fully assigned
-    return false;
-},
+                // All order variants are fully assigned
+                return false;
+            },
 
 
             validateBeforeAddDelivery() {
@@ -2210,6 +2449,8 @@ canAddMoreDeliveries() {
                     name: '',
                     phone: '',
                     orders: [],
+                    city: '',
+                    province: '',
                     location: '',
                     paella: false,
                     need_date: this.minDate(),
@@ -2460,7 +2701,9 @@ canAddMoreDeliveries() {
                     if (!this.errors[index]) this.errors[index] = {};
                     this.errors[index].need_time = '';
                 }
-            }
+            },
+
+            hasSelectedAddress: false
         }
     }
 </script>
