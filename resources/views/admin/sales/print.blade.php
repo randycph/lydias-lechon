@@ -102,19 +102,81 @@
                                 Location: {{ $address->location }}<br>
                                 Delivery Date and time: {{ \Carbon\Carbon::parse(($address->delivery_date . ' ' . $address->delivery_time))->format('F d, Y g:i A') }}<br>
                                 Order/s:
-                                    @if ($address->products)
-                                        @php
-                                            $products = json_decode($address->products);
-                                        @endphp
+                                        @if ($address->products)
+                                            @php
+                                                $products = json_decode($address->products);
+                                            @endphp
 
-                                        @if(is_array($products) || is_object($products))
-                                            <ul>
-                                                @foreach ($products as $product)
-                                                        <li>{!! highlightPaella($address?->product_name) !!} x {{ $product->qty }}</li>
-                                                @endforeach
-                                            </ul>
+                                            @if(is_array($products) || is_object($products))
+                                                <table class="table table-invoice bd-b">
+                                                    <thead>
+                                                    <tr>
+                                                        <th class="wd-30p">Product Name</th>                                
+                                                        <th class="tx-center">No. of Pax</th>
+                                                        <th class="tx-center">Date Needed</th>
+                                                        <th class="tx-center">Job Order#</th>
+                                                        <th class="tx-center">Quantity</th>
+                                                        <th class="tx-center">Paella</th>
+                                                        <th class="tx-right">Price</th>
+                                                        <th class="tx-right">Total</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+
+                                                    @php
+                                                        $grandTotal = 0;
+                                                    @endphp
+
+                                                    @forelse($products as $product)
+                                                        @php
+                                                            $lineTotal = ($product->product->price * ($product->qty ?? 1))
+                                                                    + (!empty($product->paella) ? ($product->product->paella_price ?? 0) * ($product->qty ?? 1) : 0);
+
+                                                            $grandTotal += $lineTotal;
+                                                        @endphp
+                                                        <tr>
+                                                            <td class="tx-nowrap">
+                                                                {!! highlightPaella($product?->product_name ?? '') !!}
+                                                            </td>
+                                                            <th class="tx-center">{{ $product->product->no_of_pax }}</th>                                
+                                                            <td class="tx-nowrap">
+                                                                {{ \Carbon\Carbon::parse(($address->delivery_date . ' ' . $address->delivery_time))->format('F d, Y g:i A') }}
+                                                            </td>
+                                                            <td></td>
+                                                            <td class="tx-center">{{ number_format((int) ($product->qty ?? 0), 0) }}</td>
+                                                            <td class="tx-right">
+                                                                ₱{{ number_format(!empty($product->paella) ? ($product->product->paella_price ?? 0) : 0, 2) }}
+                                                            </td>
+                                                            <td class="tx-right">
+                                                                ₱{{ number_format($product->product->price ?? 0, 2) }}
+                                                            </td>
+                                                            <td class="tx-right">
+                                                                ₱{{ number_format($lineTotal, 2) }}
+                                                            </td>
+                                                        </tr>
+                                                    @empty
+                                                        <tr><td colspan="8" class="tx-center">No products</td></tr>
+                                                    @endforelse
+
+                                                    @if(isset($address->delivery_fee) && $address->delivery_fee > 0)
+                                                        @php
+                                                            $grandTotal += $address->delivery_fee;
+                                                        @endphp
+                                                        <tr>
+                                                            <td class="tx-left" colspan="7">Delivery Fee</td>
+                                                            <td class="tx-right">₱{{ number_format($address->delivery_fee, 2) }}</td>
+                                                        </tr>
+                                                    @endif
+
+                                                    <tr>
+                                                        <td class="tx-left" colspan="7"><strong>Total</strong></td>
+                                                        <td class="tx-right"><strong>₱{{ number_format($grandTotal, 2) }}</strong></td>
+                                                    </tr>
+
+                                                    </tbody>
+                                                </table>
+                                            @endif
                                         @endif
-                                    @endif
                                 <br>
                                 @if ( $address->note)
                                 Instruction: {{ $address->note }}<br>
