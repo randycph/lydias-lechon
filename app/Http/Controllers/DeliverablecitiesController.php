@@ -62,7 +62,6 @@ class DeliverablecitiesController extends Controller
             'area' => 'required',
             'province' => 'required',
             'city' => 'required',
-            'municipality' => 'nullable',
             'item_type' => 'required'
         ]);
 
@@ -73,7 +72,6 @@ class DeliverablecitiesController extends Controller
             'item_type' => $request->item_type,
             'province' => $request->province,
             'city' => $request->city,
-            'municipality' => $request->municipality,
             'outside_manila' => ($request->has('outside_manila') ? '1' : '0'),
             'user_id' => Auth::id()
         ]);
@@ -119,7 +117,6 @@ class DeliverablecitiesController extends Controller
             'area' => 'required',
             'province' => 'required',
             'city' => 'required',
-            'municipality' => 'nullable',
             'item_type' => 'required'
         ]);
 
@@ -129,7 +126,6 @@ class DeliverablecitiesController extends Controller
             'area' => $request->area,
             'province' => $request->province,
             'city' => $request->city,
-            'municipality' => $request->municipality,
             'item_type' => $request->item_type,
             'outside_manila' => ($request->has('outside_manila') ? '1' : '0'),
             'user_id' => Auth::id()
