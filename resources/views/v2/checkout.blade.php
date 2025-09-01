@@ -288,9 +288,8 @@
                                     <template x-for="(delivery, index) in deliveries" :key="index">
                                         <div class="p-4 bg-gray-100 rounded-md border">
                                             <h4 class="font-bold mb-2">Delivery Address <span x-text="index + 1"></span></h4>
-                        
-                                            <div class="flex flex-col gap-4">
 
+                                            <div class="flex flex-col gap-4">
                                                 <div class="w-full">
                                                     <label class="font-bold block text-sm mb-1">Address <small>Street Name, Building, House No., Municipality</small></label>
                                                     <textarea @input="onAddressInput(index, $event.target.value)" @blur="applyMultipleCityProvince(index)" x-model="delivery.address" @change="validateDeliveryAddress(delivery, 'address', index)"
@@ -299,7 +298,7 @@
                                                         <div class="text-red-500 text-xs mt-1" x-text="errors[index]?.address"></div>
                                                     </template>
                                                 </div>
-                                                
+
                                                 <div class="w-full flex gap-4 md:flex-row flex-col">
                                                     <div class="w-full md:w-1/2">
                                                         <label for="delivery_address" class="block mb-2 font-bold text-gray-900">City <span class="text-red-700">*</span></label>
@@ -319,19 +318,6 @@
                                                             <option selected value="">Choose a province</option>
                                                             <template x-for="p in _provinces" :key="p">
                                                                 <option :value="p" x-text="p"></option>
-                                                            </template>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                
-                                                <div class="w-full flex gap-4 md:flex-row flex-col">
-                                                    <div class="w-full ">
-                                                        <label for="delivery_address" class="block mb-2 font-bold text-gray-900">Barangay </label>
-                                                        <select @change="applyMultipleCityProvince(index)" :id="'barangay'+index" x-model="delivery.barangay"
-                                                            class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                                                            <option selected value="">Choose a Barangay</option>
-                                                            <template x-for="c in _barangays" :key="c">
-                                                                <option :value="c" x-text="c"></option>
                                                             </template>
                                                         </select>
                                                     </div>
@@ -476,7 +462,7 @@
 
                                                 <div class="w-full flex gap-4">
                                                     <div class="w-full">
-                                                        <label :for="'locations' + index" class="font-bold">Select Location <span
+                                                        <label :for="'locations' + index" class="font-bold">Barangay <span
                                                                 class="text-red-700">* </span></label>
                                                         <select :disabled="!delivery.orders || delivery.orders.length === 0" x-model="delivery.location" :id="'locations' + index" name="location" @change="getDeliveryFeeForMultipleDelivery(index); validateDeliveryAddress(delivery, 'location', index);" required
                                                             class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
@@ -564,21 +550,8 @@
                                         </div>
                                     </div>
 
-                                    <div class="w-full flex gap-4 mb-4 md:flex-row flex-col">
-                                        <div class="w-full">
-                                            <label for="cities" class="block mb-2 font-bold text-gray-900">Barangay </label>
-                                            <select @change="applyCityProvince" id="cities" name="barangay" x-model="barangay" 
-                                                class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                                                <option selected value="">Choose a Barangay</option>
-                                                @foreach ($barangays as $barangay)
-                                                    <option value="{{ $barangay }}">{{ $barangay }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-
                                     <div class="mt-4">	
-                                        <label for="locations" class="font-bold">Select Location <span
+                                        <label for="locations" class="font-bold">Barangay <span
                                                 class="text-red-700">*</span></label>
                                         <select id="locations" name="location" @change="getDeliveryFee" x-ref="location" required
                                             class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
@@ -944,7 +917,6 @@
                     location: '', 
                     city: '',
                     province: '',
-                    barangay: '',
                     order: '', 
                     need_date: this.minDate,
                     need_time: '',
@@ -967,7 +939,6 @@
                     location: '',
                     city: '',
                     province: '',
-                    barangay: '',
                     order: '',
                     need_date: this.minDate(),
                     need_time: '',
@@ -1261,7 +1232,6 @@
             delivery_address: '',
             city: '',
             province: '',
-            barangay: '',
             privacy: window.privacy || false,
             errors: {
                 privacy: null,
@@ -1270,10 +1240,6 @@
             get filteredLocations() {
                 let rows = @json($locations);
 
-                if (this.barangay) {
-                    const b = this.barangay.toLowerCase();
-                    rows = rows.filter(r => (r.barangay ?? '').toLowerCase() === b);
-                }
                 if (this.city) {
                     const c = this.city.toLowerCase();
                     rows = rows.filter(r => (r.city ?? '').toLowerCase() === c);
@@ -1294,10 +1260,9 @@
             },
 
             _norm(s){ return (s ?? '').trim().toLowerCase(); },
-            _filterByCP(rows, barangay, city, province){
-                const b = this._norm(barangay), c = this._norm(city), p = this._norm(province);
+            _filterByCP(rows, city, province){
+                const c = this._norm(city), p = this._norm(province);
                 return rows.filter(r =>
-                    (!b || this._norm(r.barangay) === b) &&
                     (!c || this._norm(r.city)     === c) &&
                     (!p || this._norm(r.province) === p)
                 );
@@ -1315,7 +1280,7 @@
             filteredMultipleLocations(i) {
                 const location = @json($locations);
                 const d = this.deliveries[i] || {};
-                const rows = this._filterByCP(location, d.barangay, d.city, d.province);
+                const rows = this._filterByCP(location, d.city, d.province);
                 return this._uniqueByName(rows).sort((a,b)=>a.name.localeCompare(b.name));
             },
 
@@ -1771,7 +1736,6 @@
                     this.validateDateTime();
                 }
 
-                this.$watch('barangay',     () => { this.location = ''; this._rebuildAddress(); });
                 this.$watch('city',     () => { this.location = ''; this._rebuildAddress(); });
                 this.$watch('province', () => { this.location = ''; this._rebuildAddress(); });
 
@@ -1787,17 +1751,15 @@
             _syncing: false,
             _cities: @json($cities),
             _provinces: @json($provinces),
-            _barangays: @json($barangays),
 
             _wireDelivery(i) {
-                this.$watch(`deliveries[${i}].barangay`, () => { this.deliveries[i].location = ''; this._rebuildMultipleAddress(i); });
                 this.$watch(`deliveries[${i}].city`,     () => { this.deliveries[i].location = ''; this._rebuildMultipleAddress(i); });
                 this.$watch(`deliveries[${i}].province`, () => { this.deliveries[i].location = ''; this._rebuildMultipleAddress(i); });
                 this.$watch(`deliveries[${i}].address`, (val) => {
                     if (this._syncing) return;
                     // keep only the user-typed core (strip any current city/province)
-                    const { barangay, city, province } = this.deliveries[i];
-                    this.deliveries[i]._core = this._stripParts(val, barangay, city, province);
+                    const { city, province } = this.deliveries[i];
+                    this.deliveries[i]._core = this._stripParts(val, city, province);
                 });
             },
 
@@ -1807,7 +1769,6 @@
             },
 
             _wireCPWatchers(i) {
-                this.$watch(`deliveries[${i}].barangay`, () => { const d = this.deliveries[i]; if (!d) return; d.location = ''; this._rebuildMultipleAddress(i); });
                 this.$watch(`deliveries[${i}].city`,     () => { const d = this.deliveries[i]; if (!d) return; d.location = ''; this._rebuildMultipleAddress(i); });
                 this.$watch(`deliveries[${i}].province`, () => { const d = this.deliveries[i]; if (!d) return; d.location = ''; this._rebuildMultipleAddress(i); });
             },
@@ -1815,10 +1776,9 @@
             onAddressInput(i, val) {
                 if (this._syncing) return;
                 const d = this.deliveries[i]; if (!d) return;
-                d._core = this._stripParts(val, d.barangay, d.city, d.province);   // keep only user-typed core
+                d._core = this._stripParts(val, d.city, d.province);   // keep only user-typed core
             },
 
-            _barangaySet: new Set(),
             _citySet: new Set(),
             _provinceSet: new Set(),
 
@@ -1828,21 +1788,21 @@
                 this._rebuildMultipleAddress(index);
             },
 
-            _stripParts(text, barangay, city, province) {
+            _stripParts(text, city, province) {
                 const toks = (text || '').split(',').map(t => t.trim()).filter(Boolean);
                 const eq = (a,b) => (a||'').toLowerCase() === (b||'').toLowerCase();
-                return toks.filter(t => !(barangay && eq(t, barangay)) && !(city && eq(t, city)) && !(province && eq(t, province))).join(', ');
+                return toks.filter(t => !(city && eq(t, city)) && !(province && eq(t, province))).join(', ');
             },
 
             _rebuildMultipleAddress(i) {
                 const d = this.deliveries[i]; if (!d) return;
                 const core = (d._core || '').trim();
 
+                // ⛔ do nothing if user hasn't typed core yet—don't blank the field
                 if (!core) return;
 
                 this._syncing = true;
                 const parts = [core];
-                if (d.barangay) parts.push(d.barangay);
                 if (d.city)     parts.push(d.city);
                 if (d.province) parts.push(d.province);
                 d.address = parts.join(', ');
@@ -1870,22 +1830,13 @@
                         d._core    = toks2.filter(t => t.toLowerCase() !== hit.toLowerCase()).join(', ');
                     }
                 }
-                if (!d.barangay && this._barangaySet.size) {
-                    const toks3 = (d._core || '').split(',').map(t => t.trim()).filter(Boolean);
-                    const hit = toks3.find(t => this._barangaySet.has(t.toLowerCase()));
-                    if (hit) {
-                        d.barangay = hit;
-                        d._core    = toks3.filter(t => t.toLowerCase() !== hit.toLowerCase()).join(', ');
-                    }
-                }
             },
 
             _stripCityProvince(text) {
                 const toks = text.split(',').map(t => t.trim()).filter(Boolean);
-                const isBrgy = (t) => this.barangay && t.toLowerCase() === this.barangay.toLowerCase();
                 const isCity = (t) => this.city && t.toLowerCase() === this.city.toLowerCase();
                 const isProv = (t) => this.province && t.toLowerCase() === this.province.toLowerCase();
-                return toks.filter(t => !isBrgy(t) && !isCity(t) && !isProv(t)).join(', ');
+                return toks.filter(t => !isCity(t) && !isProv(t)).join(', ');
             },
 
             _rebuildAddress() {
@@ -1900,7 +1851,6 @@
                 }
 
                 const parts = [core];
-                if (this.barangay) parts.push(this.barangay);
                 if (this.city)     parts.push(this.city);
                 if (this.province) parts.push(this.province);
 
@@ -1910,11 +1860,6 @@
 
             _inferFromText() {
                 const toks = (this._addressCore || '').split(',').map(t => t.trim()).filter(Boolean);
-
-                if (!this.barangay) {
-                    const fBrgy = toks.find(t => this._barangays.some(b => b.toLowerCase() === t.toLowerCase()));
-                    if (fBrgy) { this.barangay = fBrgy; this._addressCore = toks.filter(t => t !== fBrgy).join(', '); }
-                }
 
                 if (!this.city) {
                     const fCity = toks.find(t => this._cities.some(c => c.toLowerCase() === t.toLowerCase()));
@@ -2507,7 +2452,6 @@
                     orders: [],
                     city: '',
                     province: '',
-                    barangay: '',
                     location: '',
                     paella: false,
                     need_date: this.minDate(),

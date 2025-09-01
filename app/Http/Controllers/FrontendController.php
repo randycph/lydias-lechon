@@ -196,7 +196,7 @@ class FrontendController extends Controller
         $locations = Deliverablecities::query()
             ->joinSub($pickOnePerName, 'p', "$table.id", '=', 'p.id')
             ->orderBy("$table.name")
-            ->get();
+            ->get(); // full rows, unique by name
 
         $provinces = Deliverablecities::query()
             ->select('province')
@@ -211,13 +211,6 @@ class FrontendController extends Controller
             ->distinct()
             ->orderBy('city')
             ->pluck('city');
-
-        $barangays = Deliverablecities::query()
-            ->select('barangay')
-            ->whereNotNull('barangay')->where('barangay', '!=', '')
-            ->distinct()
-            ->orderBy('barangay')
-            ->pluck('barangay');
 
         $setting = Setting::first();
 
@@ -240,7 +233,7 @@ class FrontendController extends Controller
 
         $dataPrivacyRender = view('v2.data-privacy', compact('dataPrivacy'))->render();
 
-        return view('v2.checkout', compact('provinces', 'barangays', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc'));
+        return view('v2.checkout', compact('provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc'));
     }
 
     public function confirmation($id)
