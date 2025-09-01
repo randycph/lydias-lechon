@@ -212,6 +212,14 @@ class FrontendController extends Controller
             ->orderBy('city')
             ->pluck('city');
 
+        $triples = Deliverablecities::query()
+            ->select('city', 'province')
+            ->whereNotNull('city')->where('city', '!=', '')
+            ->whereNotNull('province')->where('province', '!=', '')
+            ->distinct()
+            ->orderBy('city')->orderBy('province')->orderBy('barangay')
+            ->get();
+
         $setting = Setting::first();
 
         $disabledPickupDates = explode(',', $setting->disable_pickup_dates ?? '');
@@ -233,7 +241,7 @@ class FrontendController extends Controller
 
         $dataPrivacyRender = view('v2.data-privacy', compact('dataPrivacy'))->render();
 
-        return view('v2.checkout', compact('provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc'));
+        return view('v2.checkout', compact('triples', 'provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc'));
     }
 
     public function confirmation($id)
