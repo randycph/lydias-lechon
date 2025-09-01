@@ -43,18 +43,11 @@
                         @endif                                   
                     </div>
                     <div class="form-group" id="region_div">
-                        <label class="d-block">City *</label>
+                        <label class="d-block">City/Municipality *</label>
                         <input type="text" class="form-control" name="city" placeholder="Quezon City" value="{{$rate->city}}">
                         @if ($errors->has('city'))
                             <span class="text-danger">{{ $errors->first('city') }}</span>
                         @endif
-                    </div>
-                    <div class="form-group" id="region_div">
-                        <label class="d-block">Municipality </label>
-                        <input type="text" class="form-control" name="municipality" placeholder="" value="{{$rate->municipality}}">    
-                        @if ($errors->has('municipality'))
-                            <span class="text-danger">{{ $errors->first('municipality') }}</span>
-                        @endif                                   
                     </div>
                     <div class="form-group" id="region_div">
                         <label class="d-block">Rate *</label>
