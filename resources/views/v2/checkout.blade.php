@@ -401,7 +401,11 @@
                                             <div class="flex flex-col gap-4">
                                                 <div class="w-full">
                                                     <label class="font-bold block text-sm mb-1">Address <small>Street Name, Building, House No., Municipality</small></label>
-                                                    <textarea @input="onAddressInput(index, $event.target.value)" @blur="applyMultipleCityProvince(index)" x-model="delivery.address" @change="validateDeliveryAddress(delivery, 'address', index)"
+                                                    <textarea 
+                                                        @focus="onMultiAddressFocus(index)"
+                                                        @blur="applyMultipleCityProvince(index)" 
+                                                        x-model="delivery.address" 
+                                                        @change="validateDeliveryAddress(delivery, 'address', index)"
                                                         class="w-full border border-gray-300 p-2 rounded-md" placeholder="Enter address" :class="{'border-red-500': errors[index]?.address}"></textarea>
                                                     <template x-if="errors[index]?.address">
                                                         <div class="text-red-500 text-xs mt-1" x-text="errors[index]?.address"></div>
@@ -436,13 +440,20 @@
                                                     <div class="w-full">
                                                         <label :for="'locations' + index" class="font-bold text-gray-900">Barangay <span
                                                                 class="text-red-700">* </span></label>
-                                                        <select :disabled="!delivery.orders || delivery.orders.length === 0" x-model="delivery.location" :id="'locations' + index" name="location" @change="getDeliveryFeeForMultipleDelivery(index); validateDeliveryAddress(delivery, 'location', index);" required
+                                                        <select
+                                                            :disabled="!delivery.orders || delivery.orders.length === 0"
+                                                            x-model="delivery.location"
+                                                            :id="'locations' + index"
+                                                            name="location"
+                                                            @change="getDeliveryFeeForMultipleDelivery(index); validateDeliveryAddress(delivery, 'location', index); applyMultipleCityProvince(index)"
+                                                            required
                                                             class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                                                            <option selected value="">Choose a Barangay</option>
+                                                            <option value="">Choose a Barangay</option>
                                                             <template x-for="loc in filteredMultipleLocations(index)" :key="loc.id">
                                                                 <option :value="loc.name" x-text="loc.name"></option>
                                                             </template>
                                                         </select>
+
                                                         <p
                                                             x-show="(!delivery.orders || delivery.orders.length === 0) && delivery.location"
                                                             class="mt-1 text-red-600"
@@ -1695,69 +1706,70 @@
                 }
 
 
-  // Build lookup sets once (you already do this)
-  this._citySet      = new Set(this._cities.map(s => (s ?? '').toLowerCase()));
-  this._provinceSet  = new Set(this._provinces.map(s => (s ?? '').toLowerCase()));
-  this._locationSet  = new Set(this.locationsAll.map(l => (l.name ?? '').toLowerCase()));
+                // Build lookup sets once (you already do this)
+                this._citySet      = new Set(this._cities.map(s => (s ?? '').toLowerCase()));
+                this._provinceSet  = new Set(this._provinces.map(s => (s ?? '').toLowerCase()));
+                this._locationSet  = new Set(this.locationsAll.map(l => (l.name ?? '').toLowerCase()));
 
 
-const hasCore = () => (this._addressCore || '').trim().length > 0;
+                const hasCore = () => (this._addressCore || '').trim().length > 0;
 
-  // Keep core synced with what the user sees (without current tokens)
-  this.$watch('delivery_address', (val) => {
-    if (this._syncing) return;
-    this._addressCore = this._stripCurrentPlaces(val);
-  });
+                // Keep core synced with what the user sees (without current tokens)
+                this.$watch('delivery_address', (val) => {
+                    if (this._syncing) return;
+                    this._addressCore = this._stripCurrentPlaces(val);
+                });
 
-  // CITY changed
-  this.$watch('city', (val, old) => {
-    // 1) remove old city (if any) and current location from the field
-    if (old)            this.delivery_address = this._removePlace(this.delivery_address, old);
-    if (this.location)  this.delivery_address = this._removePlace(this.delivery_address, this.location);
+                // CITY changed
+                this.$watch('city', (val, old) => {
+                    // 1) remove old city (if any) and current location from the field
+                    if (old)            this.delivery_address = this._removePlace(this.delivery_address, old);
+                    if (this.location)  this.delivery_address = this._removePlace(this.delivery_address, this.location);
 
-    // 2) clear location because city changed
-    this.location = '';
+                    // 2) clear location because city changed
+                    this.location = '';
 
-    // 3) recompute core from the cleaned field and rebuild
-    this._addressCore = this._stripCurrentPlaces(this.delivery_address);
-    if (hasCore()) this._rebuildAddress();
-  });
+                    // 3) recompute core from the cleaned field and rebuild
+                    this._addressCore = this._stripCurrentPlaces(this.delivery_address);
+                    if (hasCore()) this._rebuildAddress();
+                });
 
-  // PROVINCE changed
-  this.$watch('province', (val, old) => {
-    // 1) remove old province and current location from the field
-    if (old)            this.delivery_address = this._removePlace(this.delivery_address, old);
-    if (this.location)  this.delivery_address = this._removePlace(this.delivery_address, this.location);
+                // PROVINCE changed
+                this.$watch('province', (val, old) => {
+                    // 1) remove old province and current location from the field
+                    if (old)            this.delivery_address = this._removePlace(this.delivery_address, old);
+                    if (this.location)  this.delivery_address = this._removePlace(this.delivery_address, this.location);
 
-    // 2) clear location because province changed
-    this.location = '';
+                    // 2) clear location because province changed
+                    this.location = '';
 
-    // 3) recompute core from the cleaned field and rebuild
-    this._addressCore = this._stripCurrentPlaces(this.delivery_address);
-    if (hasCore()) this._rebuildAddress();
-  });
+                    // 3) recompute core from the cleaned field and rebuild
+                    this._addressCore = this._stripCurrentPlaces(this.delivery_address);
+                    if (hasCore()) this._rebuildAddress();
+                });
 
-  // LOCATION (barangay) changed
-  this.$watch('location', (val, old) => {
-    if (this._syncing) return;
+                // LOCATION (barangay) changed
+                this.$watch('location', (val, old) => {
+                    if (this._syncing) return;
 
-    // 1) remove the OLD location from the field (if present)
-    if (old) this.delivery_address = this._removePlace(this.delivery_address, old);
+                    // 1) remove the OLD location from the field (if present)
+                    if (old) this.delivery_address = this._removePlace(this.delivery_address, old);
 
-    // 2) recompute core from what’s visible now (no current tokens)
-    this._addressCore = this._stripCurrentPlaces(this.delivery_address);
+                    // 2) recompute core from what’s visible now (no current tokens)
+                    this._addressCore = this._stripCurrentPlaces(this.delivery_address);
 
-    // 3) append the NEW location (and city/province) only if there’s user-typed core
-    if (hasCore()) this._rebuildAddress();
-  });
+                    // 3) append the NEW location (and city/province) only if there’s user-typed core
+                    if (hasCore()) this._rebuildAddress();
+                });
 
-  // Keep core synced if something else edits the field
-  this.$watch('delivery_address', (val) => {
-    if (this._syncing) return;
-    this._addressCore = this._stripCurrentPlaces(val);
-  });
+                // Keep core synced if something else edits the field
+                this.$watch('delivery_address', (val) => {
+                    if (this._syncing) return;
+                    this._addressCore = this._stripCurrentPlaces(val);
+                });
 
-                this.deliveries.forEach((_, i) => this._wireCPWatchers(i));
+                // for multi delivery
+                this.deliveries.forEach((_, i) => this._wireDelivery(i));
 
             },
             _addressCore: '',
@@ -1765,7 +1777,6 @@ const hasCore = () => (this._addressCore || '').trim().length > 0;
             _cities: @json($cities),
             _provinces: @json($provinces),
 
-            // Show ONLY user-typed core while editing
             onSingleAddressFocus() {
                 if (this._syncing) return;
                 this.delivery_address = this._stripCurrentPlaces(this.delivery_address);
@@ -1787,19 +1798,24 @@ const hasCore = () => (this._addressCore || '').trim().length > 0;
 
             _escapeRe(s){ return String(s ?? '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); },
 
-            // remove exactly one place segment (works even if it has commas)
+            // remove exactly one place segment
             _removePlace(addr, place){
                 if (!place) return String(addr || '');
                 const p  = this._escapeRe(String(place).trim());
                 const re = new RegExp(`(^|\\s*,\\s*)${p}(?=\\s*,|$)`, 'gi');
                 let out  = String(addr || '').replace(re, (m, pre) => (pre && pre.trim() ? pre : ''));
-                return out
-                    .replace(/\s*,\s*,/g, ', ')
-                    .replace(/^\s*,\s*|\s*,\s*$/g, '')
-                    .trim();
+                return out.replace(/\s*,\s*,/g, ', ').replace(/^\s*,\s*|\s*,\s*$/g, '').trim();
             },
 
-            // strip ONLY the currently selected tokens from a text
+            _stripRowTail(addr, tail){
+                let out = String(addr || '');
+                if (!tail) return out;
+                if (tail.location) out = this._removePlace(out, tail.location);
+                if (tail.city)     out = this._removePlace(out, tail.city);
+                if (tail.province) out = this._removePlace(out, tail.province);
+                return out;
+            },
+            
             _stripCurrentPlaces(text){
                 let out = String(text || '');
                 out = this._removePlace(out, this.location);
@@ -1808,18 +1824,68 @@ const hasCore = () => (this._addressCore || '').trim().length > 0;
                 return out;
             },
 
+            _stripRowCurrentPlaces(text, d){
+                let out = String(text || '');
+                out = this._removePlace(out, d.location); // barangay
+                out = this._removePlace(out, d.city);
+                out = this._removePlace(out, d.province);
+                return out;
+            },
+
             _ic(s){ return String(s ?? '').toLowerCase(); },
             _includesIC(hay, needle){ return needle && this._ic(hay).includes(this._ic(needle)); },
 
-            _wireDelivery(i) {
-                this.$watch(`deliveries[${i}].city`,     () => { this.deliveries[i].location = ''; this._rebuildMultipleAddress(i); });
-                this.$watch(`deliveries[${i}].province`, () => { this.deliveries[i].location = ''; this._rebuildMultipleAddress(i); });
+            _wireDelivery(i){
+                const hasCore = () => (this.deliveries[i]?._core || '').trim().length > 0;
+
                 this.$watch(`deliveries[${i}].address`, (val) => {
                     if (this._syncing) return;
-                    // keep only the user-typed core (strip any current city/province)
-                    const { city, province } = this.deliveries[i];
-                    this.deliveries[i]._core = this._stripParts(val, city, province);
+                    const d = this.deliveries[i]; if (!d) return;
+                    d._core = this._stripRowTail(val, d._lastTail);
                 });
+
+                this.$watch(`deliveries[${i}].city`, (val, old) => {
+                    const d = this.deliveries[i]; if (!d) return;
+                    d.address   = this._stripRowTail(d.address, d._lastTail);
+                    d._lastTail = null; 
+                    d.location  = '';
+                    d._core     = d.address;
+                    if (hasCore()) this._rebuildMultipleAddress(i);
+                });
+
+                // Province changed
+                this.$watch(`deliveries[${i}].province`, (val, old) => {
+                    const d = this.deliveries[i]; if (!d) return;
+                    d.address   = this._stripRowTail(d.address, d._lastTail);
+                    d._lastTail = null;
+                    d.location  = '';
+                    d._core     = d.address;
+                    if (hasCore()) this._rebuildMultipleAddress(i);
+                });
+
+                // Barangay/Location changed 
+                this.$watch(`deliveries[${i}].location`, (val, old) => {
+                    if (this._syncing) return;
+                    const d = this.deliveries[i]; if (!d) return;
+                    d.address   = this._stripRowTail(d.address, d._lastTail);
+                    d._lastTail = null;
+                    d._core     = d.address;
+                    if (hasCore()) this._rebuildMultipleAddress(i);
+                });
+            },
+
+            applyMultipleCityProvince(index){
+                const d = this.deliveries[index]; if (!d) return;
+                d.address   = this._stripRowTail(d.address, d._lastTail); // drop previous tail
+                d._lastTail = null;
+                d._core     = d.address;
+                if ((d._core || '').trim()) this._rebuildMultipleAddress(index);
+            },
+
+            onMultiAddressFocus(i){
+                const d = this.deliveries[i]; if (!d) return;
+                d.address = this._stripRowTail(d.address, d._lastTail);
+                d._core   = d.address;
             },
 
             applyCityProvince() {
@@ -1842,30 +1908,39 @@ const hasCore = () => (this._addressCore || '').trim().length > 0;
             _provinceSet: new Set(),
             _locationSet: new Set(),
 
-            applyMultipleCityProvince(index) {
-                const d = this.deliveries[index]; if (!d) return;
-                this._inferFromCore(index);
-                this._rebuildMultipleAddress(index);
-            },
-
-            _stripParts(text, city, province) {
-                const toks = (text || '').split(',').map(t => t.trim()).filter(Boolean);
-                const eq = (a,b) => (a||'').toLowerCase() === (b||'').toLowerCase();
-                return toks.filter(t => !(city && eq(t, city)) && !(province && eq(t, province))).join(', ');
-            },
-
-            _rebuildMultipleAddress(i) {
+            _rebuildMultipleAddress(i){
                 const d = this.deliveries[i]; if (!d) return;
-                const core = (d._core || '').trim();
 
-                // ⛔ do nothing if user hasn't typed core yet—don't blank the field
-                if (!core) return;
+                const start = this._stripRowTail(d.address, d._lastTail);
+                const core  = String(d._core || start || '').trim();
+                if (!core) return; 
 
                 this._syncing = true;
+
                 const parts = [core];
-                if (d.city)     parts.push(d.city);
-                if (d.province) parts.push(d.province);
-                d.address = parts.join(', ');
+                const addOnce = (token) => {
+                    if (!token) return;
+                    const t = String(token).toLowerCase();
+                    if (!parts.some(p => String(p||'').toLowerCase() === t)) parts.push(token);
+                };
+
+                addOnce(d.location);
+
+                const includesIC = (h, n) => n && String(h||'').toLowerCase().includes(String(n||'').toLowerCase());
+                if (d.city && !(d.location && includesIC(d.location, d.city))) addOnce(d.city);
+
+                const provinceCovered =
+                    (d.location && includesIC(d.location, d.province)) ||
+                    (d.city     && includesIC(d.city,     d.province));
+                if (d.province && !provinceCovered) addOnce(d.province);
+
+                d.address   = parts.join(', ');
+                d._lastTail = {
+                    location: d.location || '',
+                    city:     (d.city && !(d.location && includesIC(d.location, d.city))) ? d.city : '',
+                    province: (d.province && !provinceCovered) ? d.province : ''
+                };
+
                 this._syncing = false;
             },
 
@@ -1896,9 +1971,9 @@ const hasCore = () => (this._addressCore || '').trim().length > 0;
                 const toks = (text || '').split(',').map(t => t.trim()).filter(Boolean);
                 return toks.filter(t => {
                     const tl = t.toLowerCase();
-                    return !this._locationSet.has(tl)   // any barangay known
-                        && !this._citySet.has(tl)       // any city known
-                        && !this._provinceSet.has(tl);  // any province known
+                    return !this._locationSet.has(tl)   // barangay 
+                        && !this._citySet.has(tl)       // city 
+                        && !this._provinceSet.has(tl);  // province 
                 }).join(', ');
             },
 
