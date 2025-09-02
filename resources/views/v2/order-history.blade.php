@@ -209,12 +209,19 @@
                                                                 Order/s:
                                                                     @if ($address->products)
 
-
                                                                         @if(is_array($products) || is_object($products))
                                                                             <ul class="list-disc pl-10">
                                                                                 @foreach ($products as $product)
+
+                                                                                    @php 
+                                                                                        $price = $product->product->price ?? 0;
+                                                                                        if (!empty($product->paella)) {
+                                                                                            $price += $product->product->paella_price ?? 0;
+                                                                                        }
+                                                                                    @endphp
+
                                                                                     <li>
-                                                                                        {!! highlightPaella($address?->product_name ?? '') !!} x {{ $product->qty }}
+                                                                                        {!! highlightPaella($product?->product_name ?? '') !!} x {{ $product->qty }} - ₱{{ number_format($price, 2) }}
                                                                                     </li>
                                                                                 @endforeach
                                                                             </ul>

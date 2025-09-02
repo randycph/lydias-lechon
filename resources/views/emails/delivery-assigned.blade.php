@@ -38,7 +38,15 @@ You have been assigned a new delivery. Please see the details below:
 
 @if (is_iterable($products))
 @foreach ($products as $product)
-- {{ $product->product->name ?? 'Unknown Product' }} x {{ $product->qty }}
+
+@php 
+    $price = $product->product->price ?? 0;
+    if (!empty($product->paella)) {
+        $price += $product->product->paella_price ?? 0;
+    }
+@endphp
+
+- {{ $product->product->name ?? 'Unknown Product' }} x {{ $product->qty }} - ₱{{ number_format($price, 2) }}
 @endforeach
 @endif
 @endif
