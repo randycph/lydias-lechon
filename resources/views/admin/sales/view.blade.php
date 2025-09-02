@@ -236,16 +236,16 @@
                                     <td class="tx-center " colspan="8">No transaction found.</td>
                                 </tr>
                             @endforelse
-                            @if($salesDetails->sum('gross_amount') > 0)
-                                <tr>
-                                    <td class="tx-left" colspan="8">Subtotal</td>
-                                    <td class="tx-right">₱{{number_format($sales->gross_amount, 2)}}</td> 
-                                </tr>
-                            @endif
                             @if($sales->delivery_fee_amount > 0)
                                 <tr>
                                     <td class="tx-left " colspan="8">Delivery Fee</td>
                                     <td class="tx-right ">₱{{number_format($sales->delivery_fee_amount, 2)}}</td>
+                                </tr>
+                            @endif
+                            @if($salesDetails->sum('gross_amount') > 0)
+                                <tr>
+                                    <td class="tx-left" colspan="8">Subtotal</td>
+                                    <td class="tx-right">₱{{number_format($sales->gross_amount, 2)}}</td> 
                                 </tr>
                             @endif
                             @if($sales->discount_amount > 0)
