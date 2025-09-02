@@ -75,6 +75,10 @@ You have been assigned a new delivery. Please see the details below:
 
 Please ensure a safe and timely delivery.
 
+@component('mail::button', ['url' => route('login')])
+Manage Deliveries
+@endcomponent
+
 Thanks,  
 **{{ config('app.name') }}
 @endcomponent
