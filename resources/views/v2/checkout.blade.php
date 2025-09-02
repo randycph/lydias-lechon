@@ -414,7 +414,7 @@
 
                                                 <div class="w-full flex gap-4 md:flex-row flex-col">
                                                     <div class="w-full md:w-1/2">
-                                                        <label for="delivery_address" class="block mb-2 font-bold text-gray-900">City/ Municipality <span class="text-red-700">*</span></label>
+                                                        <label for="delivery_address" class="block mb-2 font-bold text-gray-900">City/Municipalities <span class="text-red-700">*</span></label>
                                                         <select @change="applyMultipleCityProvince(index)" :id="'city'+index" x-model="delivery.city" required
                                                             class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                                             <option selected value="">Choose a City</option>
@@ -555,7 +555,7 @@
                                         </div>
 
                                         <div class="w-full md:w-1/2">
-                                            <label for="cities" class="block mb-2 font-bold text-gray-900">City/ Municipality <span class="text-red-700">*</span></label>
+                                            <label for="cities" class="block mb-2 font-bold text-gray-900">City / Municipalities <span class="text-red-700">*</span></label>
                                             <select @change="applyCityProvince" id="cities" name="city" x-model="city" required
                                                 class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                                 <option selected value="">Choose a City</option>
