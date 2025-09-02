@@ -28,7 +28,7 @@
             </li>
         @endif
 
-        @if (auth()->user()->has_access_to_module('job_order') && !isForecaster())
+        @if (auth()->user()->has_access_to_module('job_order'))
             <li class="nav-item with-sub @if (request()->routeIs('job-orders*')) active show @endif">
                 <a href="#" class="nav-link"><i data-feather="list"></i> <span>Job Orders</span></a>
                 <ul>
