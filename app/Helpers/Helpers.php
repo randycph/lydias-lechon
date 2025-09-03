@@ -83,7 +83,6 @@ if (!function_exists('unreadTransactions')) {
                 ->whereHas('deliveryStatuses', function ($q) use ($userName) {
                     $q->where('delivered_by', $userName);
                 })
-                ->whereColumn('created_at', 'updated_at')
                 ->get()
                 ->map(function ($sale) {
                     return [
@@ -147,7 +146,11 @@ if (!function_exists('unreadTransactions')) {
 
             // Step 4: Filter and count unread
             return $merged->filter(function ($item) use ($from) {
-                return $item['created_at'] == $item['updated_at'] && $item['delivery_type'] != 'Store Pickup';
+                $latestStatus = $item['delivery_status'];
+                if (!in_array($latestStatus, ['Delivered/Picked Up', 'Returned/Rejected']) && $item['delivery_type'] != 'Store Pickup') {
+                    return true;
+                }
+                return false;
             })->count();
         } else {
             return SalesHeader::query()
@@ -160,9 +163,33 @@ if (!function_exists('unreadTransactions')) {
 if (!function_exists('isUnreadTransaction')) {
     function isUnreadTransaction($transactionId, int $days = 1): int
     {
-        return SalesHeader::query()
-            ->whereKey($transactionId)
-            ->whereColumn('created_at', 'updated_at') // unread = never updated
-            ->exists() ? 1 : 0;
+        if (auth()->user()->role_id == 15) {
+            $sales = SalesHeader::with(['deliveryStatuses'])
+                ->whereKey($transactionId)
+
+                ->first();
+
+            if (!$sales) {
+                return false;
+            }
+
+            $latestStatus = optional($sales->deliveryStatuses->last())->status;
+            if (in_array($latestStatus, ['Delivered/Picked Up', 'Returned/Rejected']) && $sales->delivery_type != 'Store Pickup') {
+                return false;
+            } else {
+                return true;
+            }
+
+            // return SalesHeader::query()
+            //     ->whereKey($transactionId)
+            //     ->where('delivery_type', '!=', 'Store Pickup')
+            //     ->whereIn('delivery_status', ['Delivered/Picked Up', 'Returned/Rejected'])
+            //     ->exists() ? 1 : 0;
+        } else {
+            return SalesHeader::query()
+                ->whereKey($transactionId)
+                ->whereColumn('created_at', 'updated_at') // unread = never updated
+                ->exists() ? 1 : 0;
+        }
     }
 }
