@@ -64,11 +64,14 @@
                     <div class="form-group">
                         <label class="d-block">Category <span class="tx-danger">*</span></label>
                         <select class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Choose category" data-width="100%" name="jo_category">
-                            <option value="Belly Pantaga">Belly Pantaga</option>
-                            <option value="Pantaga">Pantaga</option>
-                            <option value="Display">Display</option>
-                            <option value="Alpha Size">Alpha Size</option>
+                            <option value="Belly Pantaga" {{ old('jo_category') == 'Belly Pantaga' ? 'selected' : '' }}>Belly Pantaga</option>
+                            <option value="Pantaga" {{ old('jo_category') == 'Pantaga' ? 'selected' : '' }}>Pantaga</option>
+                            <option value="Display" {{ old('jo_category') == 'Display' ? 'selected' : '' }}>Display</option>
+                            <option value="Alpha Size" {{ old('jo_category') == 'Alpha Size' ? 'selected' : '' }}>Alpha Size</option>
                         </select>
+                        @error('jo_category')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
                     </div>
                     <input type="hidden" name="order_type" value="Whole">
                     <input type="hidden" name="product_id" value="37">
@@ -94,9 +97,12 @@
                         <label class="d-block">Production Branch <span class="tx-danger">*</span></label>
                         <select class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select production branch" data-width="100%" name="prodbranch_id">
                             @foreach($prod_branches as $branch)
-                                <option value="{{$branch->id}}">{{$branch->name}}</option>
+                                <option value="{{$branch->id}}" {{ old('prodbranch_id') == $branch->id ? 'selected' : '' }}>{{$branch->name}}</option>
                             @endforeach
                         </select>
+                        @error('prodbranch_id')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
                     </div>
 
                     <div class="form-group">
@@ -104,17 +110,23 @@
                         <select class="selectpicker mg-b-5" multiple="multiple" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select branch" data-width="100%" name="branch_id[]">
                             @foreach($prod_stores as $store)
                                 @if(!in_array($store->name,['Globe: +63917 538 0304', 'Globe: +63917 820 2989', 'Smart: +6918 967 5213']))
-                                    <option value="{{$store->id}}">{{$store->name}}</option>
+                                    <option value="{{$store->id}}" {{ old('branch_id') && in_array($store->id, old('branch_id')) ? 'selected' : '' }}>{{$store->name}}</option>
                                 @endif
                             @endforeach
                         </select>
+                        @error('branch_id')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
                     </div>
 
                     <div class="form-row">
                         <div class="col-md-8">
                             <div class="form-group">
                                 <label class="d-block">Production Time <i class="text-danger">*</i></label>
-                                <input type="text" name="production_date" class="form-control" placeholder="Choose date" id="date2">
+                                <input type="text" name="production_date" class="form-control" placeholder="Choose date" id="date2" value="{{ old('production_date') }}">
+                                @error('production_date')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -148,6 +160,9 @@
                                         <option value="23:00">11:00 PM</option>
                                     </select>
                                 </div>
+                                @error('production_time')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>
                         </div>
                     </div>
@@ -156,7 +171,10 @@
                         <div class="col-md-8">
                             <div class="form-group">
                                 <label class="d-block">Date Needed <i class="text-danger">*</i></label>
-                                <input type="text" name="date_needed" class="form-control" placeholder="Choose date" id="date1">
+                                <input type="text" name="date_needed" class="form-control" placeholder="Choose date" id="date1" value="{{ old('date_needed') }}">
+                                @error('date_needed')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -190,13 +208,19 @@
                                         <option value="23:00">11:00 PM</option>
                                     </select>
                                 </div>
+                                @error('time_needed')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
                             </div>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label class="d-block">Additional Instruction <span class="tx-danger">*</span></label>
-                        <textarea name="remarks" class="form-control"></textarea>
+                        <textarea name="remarks" class="form-control">{{ old('remarks') }}</textarea>
+                        @error('remarks')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
                     </div>
                 </form>
             </div>
@@ -245,28 +269,94 @@
 
 @section('customjs')
 
-    <script>
-    /** page level plugins **/
-        $('.select2').select2({
-          placeholder: 'Choose one',
-          searchInputPlaceholder: 'Search options'
-        });
-        
-        $(function() {
-            $('.selectpicker').selectpicker();
-        });
+<script>
+  $(function () {
+    'use strict';
 
-        var dateToday = new Date(); 
+    const fmt = 'yy-mm-dd';
+    const today = new Date();
+    const $need = $('#date1');
+    const $prod = $('#date2');
 
-        $(function(){
-            'use strict'
+    function parse(str) {
+      try { return $.datepicker.parseDate(fmt, str); } catch { return null; }
+    }
 
-            $('#date1,#date2').datepicker({
-                minDate: dateToday,
-                dateFormat: 'yy-mm-dd',
-            });
-        });
-    /** page level plugins **/
-    </script>
+    function plusDays(d, n)  { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+    function minusDays(d, n) { const x = new Date(d); x.setDate(x.getDate() - n); return x; }
+
+    function syncNeedMin(prodDate) {
+      if (prodDate) {
+        $need.datepicker('option', 'minDate', plusDays(prodDate, 1));
+      } else {
+        $need.datepicker('option', 'minDate', today);
+      }
+    }
+
+    function syncProdMax(needDate) {
+      if (needDate) {
+        $prod.datepicker('option', 'maxDate', minusDays(needDate, 1));
+      } else {
+        $prod.datepicker('option', 'maxDate', null); // relax when no needDate
+      }
+    }
+
+    $prod.datepicker({
+      minDate: today,
+      dateFormat: fmt,
+
+      beforeShow: function () {
+        const needDate = parse($need.val());
+        syncProdMax(needDate);
+
+        $prod.datepicker('option', 'minDate', today);
+      },
+
+      onSelect: function (str) {
+        const prodDate = parse(str);
+        syncNeedMin(prodDate);
+
+        const needDate = parse($need.val());
+        if (needDate && needDate <= prodDate) $need.val('');
+      },
+
+      onClose: function () {
+        const prodDate = parse($prod.val());
+        syncNeedMin(prodDate);
+      }
+    });
+
+    $need.datepicker({
+      minDate: today,
+      dateFormat: fmt,
+
+      beforeShow: function () {
+        const prodDate = parse($prod.val());
+        syncNeedMin(prodDate);
+      },
+
+      onSelect: function (str) {
+        const needDate = parse(str);
+        syncProdMax(needDate);
+
+        const prodDate = parse($prod.val());
+        if (prodDate && prodDate >= needDate) $prod.val('');
+      },
+
+      onClose: function () {
+        const needDate = parse($need.val());
+        syncProdMax(needDate);
+      }
+    });
+
+    // Initial sync for edit forms
+    (function initSync() {
+      syncNeedMin(parse($prod.val()));
+      syncProdMax(parse($need.val()));
+    })();
+  });
+</script>
+
+
 
 @endsection

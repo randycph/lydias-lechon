@@ -716,10 +716,23 @@ class JoborderController extends Controller
     public function store_pantaga_or_display(Request $request)
     {
 
+        $validated = $request->validate([
+            'jo_category' => 'required',
+            'prodbranch_id' => 'required',
+            'production_date' => 'required',
+            'production_time' => 'required',
+            'date_needed' => 'required',
+            'time_needed' => 'required',
+            'remarks' => 'required',
+        ]);
       
         $product = Product::whereId($request->product_id)->withTrashed()->first();
         $x=0;
         $current_total_order = JobOrder::whereDate('date_needed',$request->production_date)->count();
+
+        if ($request->branch_id == null) {
+            return back()->with('error', 'Please select at least one branch.')->withInput();
+        }
 
         foreach($request->branch_id as $br){
             $x++;
