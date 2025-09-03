@@ -8,7 +8,7 @@
     </li>
     @if (auth()->user()->role_id == env('DRIVER_ROLE_ID'))
         <li class="nav-item">
-            <a href="{{ route('sales-transaction.index') }}" class="nav-link"><i data-feather="align-justify"></i> <span>My Deliveries @if (unreadTransactions())<span class="badge badge-light">{{ unreadTransactions() }}</span>@endif</span></a>           
+            <a href="{{ route('sales-transaction.index') }}" class="nav-link"><i data-feather="align-justify"></i> <span>My Deliveries @if (unreadTransactions() > 0)<span class="badge badge-light">{{ unreadTransactions() }}</span>@endif</span></a>           
         </li>
     @else
         <li class="nav-label mg-t-25">PORTAL</li>
@@ -350,7 +350,7 @@
 
             @if (auth()->user()->has_access_to_module('sales_transaction') && !isForecaster())
                 <li class="nav-item with-sub @if (request()->routeIs('sales-transaction*')) active show @endif">
-                    <a href="" class="nav-link"><i data-feather="users"></i> <span>Sales Transaction @if (unreadTransactions())<span class="badge badge-light">{{ unreadTransactions() }}</span>@endif</span></a>
+                    <a href="" class="nav-link"><i data-feather="users"></i> <span>Sales Transaction @if (unreadTransactions() > 0)<span class="badge badge-light">{{ unreadTransactions() }}</span>@endif</span></a>
                     <ul>
                         <li @if (\Route::current()->getName() == 'sales-transaction.create') class="active" @endif><a href="{{ route('sales-transaction.index') }}">Manage Sales Transaction</a></li>
 
