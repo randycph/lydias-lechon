@@ -1,6 +1,7 @@
 <?php
 
 use App\EcommerceModel\SalesHeader;
+use Illuminate\Support\Facades\DB;
 
 if(!function_exists('isImageBroken')) {
     function isImageBroken($imageUrl) {
@@ -55,9 +56,30 @@ if (!function_exists('unreadTransactions')) {
     {
         $from = now()->subDays($days)->startOfDay();
 
-        return SalesHeader::query()
-            ->whereColumn('created_at', 'updated_at') // unread = never updated
-            ->count();
+        if (auth()->user()->role_id == 5) {
+
+            $branchId = auth()->user()->role_id == 5 ? auth()->user()->production_branch_id : null;
+
+            $eligible = DB::table('ecommerce_sales_details as d')
+                ->join('job_orders as jo', 'jo.sales_detail_id', '=', 'd.id')
+                ->join('production_orders as po', 'po.joborder_id', '=', 'jo.id')
+                ->when($branchId, function ($query) use ($branchId) {
+                    return $query->where('po.branch_id', $branchId);
+                })
+                ->whereColumn('created_at', 'updated_at') // unread = never updated
+                ->select('d.sales_header_id');
+
+            $sales = SalesHeader::where(function ($query) use($eligible) {
+                $query->whereIn('id', $eligible);
+            });
+
+            return $sales->count();
+
+        } else {
+            return SalesHeader::query()
+                ->whereColumn('created_at', 'updated_at') // unread = never updated
+                ->count();
+        }
     }
 }
 
