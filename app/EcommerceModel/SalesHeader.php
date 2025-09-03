@@ -172,15 +172,15 @@ class SalesHeader extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public static function payment_status($order_num){
-        $data = SalesHeader::where('order_number',$order_num)->first();
+    // public static function payment_status($order_num){
+    //     $data = SalesHeader::where('order_number',$order_num)->first();
 
-        if($data->payment_status == 'Completed'){
-            return 'PAID';
-        } else {
-            return 'UNPAID';
-        }
-    }
+    //     if($data->payment_status == 'Completed'){
+    //         return 'PAID';
+    //     } else {
+    //         return 'UNPAID';
+    //     }
+    // }
 
     public static function status(){
         $data = SalesHeader::where('status','PAID')->first();
@@ -192,19 +192,36 @@ class SalesHeader extends Model
 
     }
 
-    public function getPaymentstatusAttribute(){
-        $paid = SalesPayment::where('sales_header_id',$this->id)->whereStatus('PAID')->sum('amount');
+    public function getPaymentStatusAttribute($value)
+    {
+        $paid = SalesPayment::where('sales_header_id', $this->id)
+            ->where('status', 'PAID') 
+            ->sum('amount');
 
-        if($paid >= $this->net_amount){
-            $tag_as_paid = SalesHeader::whereId($this->id)->update(['payment_status' => 'PAID', 'updated_at' => $this->created_at]);
-            if($this->delivery_status == 'Waiting for Payment' || $this->delivery_status == '' ){
-                $update_delivery_status = SalesHeader::whereId($this->id)->update(['delivery_status' => 'Processing Stock', 'updated_at' => $this->created_at]);
+        // Use the raw/current saved status to avoid recursion
+        $current = $value ?? $this->getRawOriginal('payment_status');
+
+        if ($paid >= $this->net_amount && $current !== 'PAID') {
+            static::whereKey($this->id)->update([
+                'payment_status' => 'PAID',
+                'updated_at'     => $this->created_at,
+            ]);
+
+            if (
+                ($this->delivery_status === 'Waiting for Payment' || $this->delivery_status === '') &&
+                $this->delivery_status !== 'Processing Stock'
+            ) {
+                static::whereKey($this->id)->update([
+                    'delivery_status' => 'Processing Stock',
+                    'updated_at'      => $this->created_at,
+                ]);
             }
+
             return 'PAID';
-        }else{
-            return 'UNPAID';
         }
 
+        // Normalize legacy 'Completed' to PAID
+        return in_array($current, ['PAID', 'Completed'], true) ? 'PAID' : 'UNPAID';
     }
     
     public static function media_color($media) {
