@@ -151,7 +151,7 @@
                                 @endphp
                             <tr>
                                 <td class="tx-nowrap">
-                                    {!! highlightPaella($product?->product_name) !!}
+                                    {!! highlightPaella($product?->product_name ?? '') !!}
                                 </td>
                                 <td class="tx-nowrap tx-center" style="display:none;">{{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('F d, Y g:i A') }}</td>
                                 <td class="tx-center">{{number_format($product->qty, 0)}}</td>
