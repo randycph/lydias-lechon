@@ -149,15 +149,17 @@
                                             <label class="custom-control-label" for="cb{{ $sale['type'] }}_{{ $sale['id'] }}"></label>
                                         </div>
                                     </td>
-                                    <th> <strong @if($sale['trashed']) style="text-decoration:line-through;" @endif> 
-                                        @if ($sale['type'] == 'job')
-                                            {{$sale['order_number'] }}
-                                        @else
-                                            <a title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale['id']) }}">{{$sale['order_number'] }}</a>
-                                        @endif
-                                        <br></strong>
+                                    <th class="{{ isUnreadTransaction($sale['id']) ? 'font-weight-bold' : '' }}">
+                                        <div @if($sale['trashed']) style="text-decoration:line-through;" @endif> 
+                                            @if ($sale['type'] == 'job')
+                                                {{$sale['order_number'] }}
+                                            @else
+                                                <a title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale['id']) }}">{{$sale['order_number'] }}</a>
+                                            @endif
+                                            <br>
+                                        </div>
                                     </th>
-                                    <td>{{ $sale['customer_name'] }}</td>
+                                    <td class="{{ isUnreadTransaction($sale['id']) ? 'font-weight-bold' : '' }}">{{ $sale['customer_name'] }}</td>
                                     <td>{{ $sale['order_source'] }}</td>
                                     <td>{{ \Carbon\Carbon::parse($sale['created_at'])->format('Y-m-d H:i A') }}</td>
 

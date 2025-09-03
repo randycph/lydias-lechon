@@ -1,5 +1,7 @@
 <?php
 
+use App\EcommerceModel\DeliveryStatus;
+use App\EcommerceModel\JobOrder;
 use App\EcommerceModel\SalesHeader;
 use Illuminate\Support\Facades\DB;
 
@@ -66,15 +68,87 @@ if (!function_exists('unreadTransactions')) {
                 ->when($branchId, function ($query) use ($branchId) {
                     return $query->where('po.branch_id', $branchId);
                 })
-                ->whereColumn('created_at', 'updated_at') // unread = never updated
                 ->select('d.sales_header_id');
 
             $sales = SalesHeader::where(function ($query) use($eligible) {
-                $query->whereIn('id', $eligible);
+                $query->whereIn('id', $eligible)->whereColumn('created_at', 'updated_at');
             });
 
             return $sales->count();
 
+        } elseif (auth()->user()->role_id == 15) {
+            $userName = auth()->user()->id;
+            // Step 1: SalesHeader
+            $salesHeaders = SalesHeader::with(['user', 'items', 'deliveryAddress', 'deliveryStatuses'])
+                ->whereHas('deliveryStatuses', function ($q) use ($userName) {
+                    $q->where('delivered_by', $userName);
+                })
+                ->whereColumn('created_at', 'updated_at')
+                ->get()
+                ->map(function ($sale) {
+                    return [
+                        'type' => 'sales',
+                        'id' => $sale->id,
+                        'delivery_status' => optional($sale->deliveryStatuses->last())->status,
+                        'status' => $sale->status,
+                        'customer_name' => $sale->customer_name,
+                        'date_needed' => optional($sale->items->first())->delivery_date,
+                        'qty' => optional($sale->items->first())->qty,
+                        'product_id' => optional($sale->items->first())->product_id,
+                        'price' => optional($sale->items->first())->price,
+                        'delivery_type' => $sale->delivery_type,
+                        'trashed' => $sale->trashed() ? true : false,
+                        'order_number' => $sale->order_number,
+                        'created_at' => $sale->created_at,
+                        'order_source' => $sale->order_source,
+                        'isConfirm' => $sale->isConfirm,
+                        'gross_amount' => $sale->gross_amount,
+                        'delivery_address' => $sale->deliveryAddress,
+                        'updated_at' => $sale->updated_at,
+                        'created_at' => $sale->created_at,
+                    ];
+                });
+
+            // Step 2: JobOrders
+            $jobOrderIds = DeliveryStatus::where('delivered_by', $userName)
+                ->whereNotNull('job_order_id')
+                ->distinct()
+                ->pluck('job_order_id');
+
+            $jobOrders = JobOrder::with('deliveryStatuses')
+                ->whereIn('id', $jobOrderIds)
+                ->get()
+                ->map(function ($job) {
+                    return [
+                        'type' => 'job',
+                        'id' => $job->id,
+                        'delivery_status' => optional($job->deliveryStatuses->last())->status,
+                        'status' => $job->status,
+                        'customer_name' => $job->customer_name,
+                        'date_needed' => $job->date_needed,
+                        'qty' => $job->qty,
+                        'product_id' => $job->product_id,
+                        'price' => $job->price,
+                        'delivery_type' => $job->delivery_method,
+                        'trashed' => $job->trashed() ? true : false,
+                        'order_number' => $job->jo_number,
+                        'created_at' => $job->created_at,
+                        'order_source' => 'NA',
+                        'isConfirm' => null,
+                        'gross_amount' => ($job->price * $job->qty) + ($job->paella_price * $job->paella_qty),
+                        'delivery_address' => [],
+                        'updated_at' => $job->updated_at,
+                        'created_at' => $job->created_at,
+                    ];
+                });
+
+            // Step 3: Merge collections
+            $merged = collect()->merge($salesHeaders)->merge($jobOrders);
+
+            // Step 4: Filter and count unread
+            return $merged->filter(function ($item) use ($from) {
+                return $item['created_at'] == $item['updated_at'] && $item['delivery_type'] != 'Store Pickup';
+            })->count();
         } else {
             return SalesHeader::query()
                 ->whereColumn('created_at', 'updated_at') // unread = never updated

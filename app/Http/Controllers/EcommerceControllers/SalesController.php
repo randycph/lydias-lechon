@@ -1256,6 +1256,7 @@ class SalesController extends Controller
             ->whereHas('deliveryStatuses', function ($q) use ($userName) {
                 $q->where('delivered_by', $userName);
             })
+            ->where('delivery_type', '!=', 'Store Pickup')
             ->get()
             ->map(function ($sale) {
                 return [
