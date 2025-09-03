@@ -350,7 +350,7 @@
 
             @if (auth()->user()->has_access_to_module('sales_transaction') && !isForecaster())
                 <li class="nav-item with-sub @if (request()->routeIs('sales-transaction*')) active show @endif">
-                    <a href="" class="nav-link"><i data-feather="users"></i> <span>Sales Transaction</span></a>
+                    <a href="" class="nav-link"><i data-feather="users"></i> <span>Sales Transaction <span class="badge badge-light">{{ unreadTransactions() }}</span></span></a>
                     <ul>
                         <li @if (\Route::current()->getName() == 'sales-transaction.create') class="active" @endif><a href="{{ route('sales-transaction.index') }}">Manage Sales Transaction</a></li>
 

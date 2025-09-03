@@ -71,6 +71,7 @@ class PaymayaController extends Controller
             $sales->sales->confirmed_by = 'Customer';
             $sales->sales->confirmed_on = date('Y-m-d H:i:s');
             $sales->sales->confirm_remarks = 'Auto confirm via Paymaya checkout';
+            $sales->sales->updated_at = $sales->sales->created_at;
             $sales->sales->save();
 
             //Auto add production branch

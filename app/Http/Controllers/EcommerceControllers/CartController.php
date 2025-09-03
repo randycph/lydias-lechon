@@ -1004,7 +1004,8 @@ class CartController extends Controller
                 'contact_person' => $contact_person,
                 'outlet' => $outlet,
                 'origin' => $origin,
-                'forecast_date' => $forecast_date
+                'forecast_date' => $forecast_date,
+                'updated_at' => $salesHeader->created_at
             ]);
             $salesHeader = SalesHeader::find($salesHeader->id);
             if (!$salesHeader) {
@@ -1077,6 +1078,7 @@ class CartController extends Controller
             $salesHeader->confirmed_by = 'Customer';
             $salesHeader->confirmed_on = date('Y-m-d H:i:s');
             $salesHeader->confirm_remarks = 'Auto confirm via Checkout';
+            $salesHeader->updated_at = $salesHeader->created_at;
             $salesHeader->save();
         }
 
@@ -1108,6 +1110,7 @@ class CartController extends Controller
         $formattedOrderNumber = sprintf('%07d', $salesHeader->id);
         $salesHeader->update(['order_number' => $formattedOrderNumber]);
         $salesHeader->order_number = $formattedOrderNumber;
+        $salesHeader->updated_at = $salesHeader->created_at;
         $salesHeader->save();
 
         if ($request->has('deliveries')) {

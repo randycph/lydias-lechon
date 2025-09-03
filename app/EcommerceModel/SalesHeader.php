@@ -20,7 +20,7 @@ class SalesHeader extends Model
     protected $keyType = 'int';
 
     protected $table = 'ecommerce_sales_headers';
-    protected $fillable = ['user_id', 'order_number', 'response_code', 'customer_name', 'customer_contact_number', 'customer_address', 'customer_delivery_adress', 'delivery_tracking_number', 'delivery_fee_amount',
+    protected $fillable = ['updated_at', 'created_at', 'user_id', 'order_number', 'response_code', 'customer_name', 'customer_contact_number', 'customer_address', 'customer_delivery_adress', 'delivery_tracking_number', 'delivery_fee_amount',
         'gross_amount', 'tax_amount', 'net_amount', 'discount_amount', 'payment_status',
         'delivery_status', 'status', 'currency','order_source','payment_type','delivery_type','order_type','outlet','receipt_number','instruction','agent','customer_location','email','payment_used','payment_remarks','contact_person','isConfirm','confirmed_by','confirmed_on','confirm_remarks','origin','delivery_branch','forecast_date', 'is_multiple_address'];
 
@@ -44,7 +44,7 @@ class SalesHeader extends Model
                     'product_id' => $salesdetail->product_id
                 ],
                 [
-                'user_id' => auth()->id(),
+                'user_id' => auth()->check() ? auth()->id() : 1,
                 'jo_number' => 'JO'.date('Ymd',strtotime($salesdetail->delivery_date)).sprintf('%04d', $insertID),
                 'sales_number' => $sale->order_number,
           
@@ -196,9 +196,9 @@ class SalesHeader extends Model
         $paid = SalesPayment::where('sales_header_id',$this->id)->whereStatus('PAID')->sum('amount');
 
         if($paid >= $this->net_amount){
-            $tag_as_paid = SalesHeader::whereId($this->id)->update(['payment_status' => 'PAID']);
+            $tag_as_paid = SalesHeader::whereId($this->id)->update(['payment_status' => 'PAID', 'updated_at' => $this->created_at]);
             if($this->delivery_status == 'Waiting for Payment' || $this->delivery_status == '' ){
-                $update_delivery_status = SalesHeader::whereId($this->id)->update(['delivery_status' => 'Processing Stock']);
+                $update_delivery_status = SalesHeader::whereId($this->id)->update(['delivery_status' => 'Processing Stock', 'updated_at' => $this->created_at]);
             }
             return 'PAID';
         }else{

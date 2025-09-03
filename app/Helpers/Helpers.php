@@ -1,4 +1,6 @@
-<?php 
+<?php
+
+use App\EcommerceModel\SalesHeader;
 
 if(!function_exists('isImageBroken')) {
     function isImageBroken($imageUrl) {
@@ -48,5 +50,23 @@ if (!function_exists('highlightPaella')) {
     }
 }
 
+if (!function_exists('unreadTransactions')) {
+    function unreadTransactions(int $days = 1): int
+    {
+        $from = now()->subDays($days)->startOfDay();
 
+        return SalesHeader::query()
+            ->whereColumn('created_at', 'updated_at') // unread = never updated
+            ->count();
+    }
+}
 
+if (!function_exists('isUnreadTransaction')) {
+    function isUnreadTransaction($transactionId, int $days = 1): int
+    {
+        return SalesHeader::query()
+            ->whereKey($transactionId)
+            ->whereColumn('created_at', 'updated_at') // unread = never updated
+            ->exists() ? 1 : 0;
+    }
+}

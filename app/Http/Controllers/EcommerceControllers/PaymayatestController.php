@@ -70,6 +70,7 @@ class PaymayatestController extends Controller
             $sales->sales->confirmed_by = 'Customer';
             $sales->sales->confirmed_on = date('Y-m-d H:i:s');
             $sales->sales->confirm_remarks = 'Auto confirm via Paymaya checkout';
+            $sales->sales->updated_at = $sales->sales->created_at;
             $sales->sales->save();
 
             if ($sales->sales->discount_amount && $sales->sales->discount_amount > 0) {
