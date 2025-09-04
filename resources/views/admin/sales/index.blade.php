@@ -364,8 +364,6 @@
                                                         </a>
                                                         <div class="dropdown-menu dropdown-menu-right">
                                                             @if (auth()->user()->has_access_to_route('sales-transaction.quick_update') && ($sale->isConfirm == 1 || $sale->Paymentadminstatus == 'PAID'))
-                                                                {{-- hide if its a dispatcher and if date need is alread passed --}}
-
 @php
 
     $dates = collect($sale->deliveryAddress ?? [])
