@@ -417,12 +417,12 @@
                                                     
                                                     <div class="w-full md:w-1/2">
                                                         <label for="delivery_address" class="block mb-2 font-bold text-gray-900">Province <span class="text-red-700">*</span></label>
-                                                        <select @change="applyMultipleCityProvince(index); getDeliveryFeeForMultipleDelivery(index); validateDeliveryAddress(delivery, 'province', index)" :id="'province'+index" x-model="delivery.province" name="province" required
-                                                            class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                                        <select :disabled="!delivery.address" @change="applyMultipleCityProvince(index); getDeliveryFeeForMultipleDelivery(index); validateDeliveryAddress(delivery, 'province', index)" :id="'province'+index" x-model="delivery.province" name="province" required
+                                                            class="bg-gray-50 disabled:bg-gray-100 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                                             <option selected value="">Choose a province</option>
-                                                            <template x-for="p in _provinces" :key="p">
-                                                                <option :value="p" x-text="p"></option>
-                                                            </template>
+                                                            @foreach ($provinces as $province)
+                                                                <option value="{{ $province }}" >{{ $province }}</option>
+                                                            @endforeach
                                                         </select>
 
                                                         <template x-if="errors[index] && errors[index].location">
@@ -432,11 +432,11 @@
                                                     
                                                     <div class="w-full md:w-1/2">
                                                         <label for="delivery_address" class="block mb-2 font-bold text-gray-900">City / Municipalities <span class="text-red-700">*</span></label>
-                                                        <select @change="applyMultipleCityProvince(index); getDeliveryFeeForMultipleDelivery(index); validateDeliveryAddress(delivery, 'city', index)" :id="'city'+index" x-model="delivery.city" name="city" required
-                                                            class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                                        <select :disabled="!delivery.address" @change="applyMultipleCityProvince(index); getDeliveryFeeForMultipleDelivery(index); validateDeliveryAddress(delivery, 'city', index)" :id="'city'+index" x-model="delivery.city" name="city" required
+                                                            class="bg-gray-50 disabled:bg-gray-100 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                                             <option selected value="">Choose a City</option>
-                                                            <template x-for="c in _cities" :key="c">
-                                                                <option :value="c" x-text="c"></option>
+                                                            <template x-for="(c, i) in multipleFilteredCities(index)" :key="i">
+                                                                <option :value="c.city" x-text="c.city"></option>
                                                             </template>
                                                         </select>
 
@@ -450,12 +450,13 @@
                                                     <div class="w-full">
                                                         <label :for="'locations' + index" class="font-bold text-gray-900">Barangay</label>
                                                         <textarea
+                                                            :disabled="!delivery.city || !delivery.province"
                                                             x-model="delivery.location"
                                                             :id="'locations' + index"
                                                             name="location"
                                                             @change="validateDeliveryAddress(delivery, 'location', index); applyMultipleCityProvince(index)"
                                                             required
-                                                            class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                                            class="disabled:bg-gray-100 bg-gray-50 mt-2 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                                         </textarea>
 
                                                         <p
@@ -545,31 +546,31 @@
                                         
                                         <div class="w-full md:w-1/2">
                                             <label for="locations" class="block mb-2 font-bold text-gray-900">Province <span class="text-red-700">*</span></label>
-                                            <select @change="applyCityProvince; getDeliveryFee()" id="locations" name="province" x-model="province" required
-                                                class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                            <select :disabled="!delivery_address" @change="applyCityProvince; getDeliveryFee()" id="locations" name="province" x-model="province" required
+                                                class="bg-gray-50 mt-2 border disabled:bg-gray-100 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                                 <option selected value="">Choose a province</option>
                                                 @foreach ($provinces as $province)
-                                                    <option value="{{ $province }}">{{ $province }}</option>
+                                                    <option value="{{ $province }}" >{{ $province }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
 
                                         <div class="w-full md:w-1/2">
                                             <label for="cities" class="block mb-2 font-bold text-gray-900">City / Municipalities <span class="text-red-700">*</span></label>
-                                            <select @change="applyCityProvince; getDeliveryFee()" id="cities" name="city" x-model="city" required
-                                                class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                            <select :disabled="!delivery_address" @change="applyCityProvince; getDeliveryFee()" id="cities" name="city" x-model="city" required
+                                                class="bg-gray-50 mt-2 border disabled:bg-gray-100 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                                 <option selected value="">Choose a City</option>
-                                                @foreach ($cities as $city)
-                                                    <option value="{{ $city }}">{{ $city }}</option>
-                                                @endforeach
+                                                <template x-for="(c, i) in filteredCities" :key="i">
+                                                    <option :value="c.city" x-text="c.city"></option>
+                                                </template>
                                             </select>
                                         </div>
                                     </div>
 
                                     <div class="mt-4">	
                                         <label for="locations" class="font-bold">Barangay</label>
-                                        <textarea id="locations" name="location"  x-ref="location" x-model="location"
-                                            class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                        <textarea :disabled="!city || !province" id="locations" name="location"  x-ref="location" x-model="location"
+                                            class="disabled:bg-gray-100 bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                         </textarea>
                                     </div>
                                 </div>
@@ -2022,6 +2023,84 @@
             },
             
             locationsAll: @js($locations),
+
+            multipleFilteredCities(index) {
+                let rows = this.locationsAll;
+                const d = this.deliveries[index] || {};
+
+                rows = rows.filter(r => r.city && r.city.trim().length > 0);
+
+                if (d.province) {
+                    const p = d.province.toLowerCase();
+                    rows = rows.filter(r => (r.province ?? '').toLowerCase() === p);
+                }
+
+                const seen = new Set();
+                return rows.filter(r => {
+                    const k = (r.city ?? '').toLowerCase();
+                    if (seen.has(k)) return false;
+                    seen.add(k);
+                    return true;
+                });
+            },
+
+            multipleFilteredProvinces(index) {
+                let rows = this.locationsAll;
+                const d = this.deliveries[index] || {};
+
+                rows = rows.filter(r => r.province && r.province.trim().length > 0);
+
+                if (d.city) {
+                    const c = d.city.toLowerCase();
+                    rows = rows.filter(r => (r.city ?? '').toLowerCase() === c);
+                }
+
+                const seen = new Set();
+                return rows.filter(r => {
+                    const k = (r.province ?? '').toLowerCase();
+                    if (seen.has(k)) return false;
+                    seen.add(k);
+                    return true;
+                });
+            },
+
+            get filteredCities() {
+                let rows = this.locationsAll;
+
+                rows = rows.filter(r => r.city && r.city.trim().length > 0);
+
+                if (this.province) {
+                    const p = this.province.toLowerCase();
+                    rows = rows.filter(r => (r.province ?? '').toLowerCase() === p);
+                }
+
+                const seen = new Set();
+                return rows.filter(r => {
+                    const k = (r.city ?? '').toLowerCase();
+                    if (seen.has(k)) return false;
+                    seen.add(k);
+                    return true;
+                });
+            },
+
+            get filteredProvinces() {
+                let rows = this.locationsAll;
+
+                rows = rows.filter(r => r.province && r.province.trim().length > 0);
+
+                if (this.city) {
+                    const c = this.city.toLowerCase();
+                    rows = rows.filter(r => (r.city ?? '').toLowerCase() === c);
+                }
+
+                const seen = new Set();
+                return rows.filter(r => {
+                    const k = (r.province ?? '').toLowerCase();
+                    if (seen.has(k)) return false;
+                    seen.add(k);
+                    return true;
+                });
+            },
 
             get filteredLocations() {
                 let rows = this.locationsAll;
