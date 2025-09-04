@@ -7,6 +7,7 @@ use App\EcommerceModel\GiftCertificate;
 use App\EcommerceModel\SalesDetail;
 use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\SalesPayment;
+use App\Exports\DeliverablecitiesExport;
 use App\Helpers\ListingHelper;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
@@ -41,6 +42,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use UniSharp\LaravelFilemanager\Lfm;
+use Maatwebsite\Excel\Facades\Excel;
 
 // Auth::routes(['verify' => true]);
 
@@ -807,6 +809,11 @@ Route::get('tests/sms', function() {
     $sms = new Sms();
     $salesHeader = SalesHeader::latest()->first();
     $sms->send_sms('+639174128392', 'new_order', $salesHeader);
+});
+
+Route::get('export-delivery-location', function() {
+    $filename = 'deliverable_cities_' . now()->format('Y-m-d_His') . '.xlsx';
+    return Excel::download(new DeliverablecitiesExport, $filename);
 });
 
 Route::get('/{slug}', [FrontendController::class, 'page'])->name('page');
