@@ -941,11 +941,11 @@ class CartController extends Controller
             if ($request->location == 'Other') {
                 $customer_delivery_adress = $request->delivery_address;
             } else {
-                $customer_delivery_adress = ($request->delivery_address).", ".$request->location;  
+                $customer_delivery_adress = $request->delivery_address;  
             }
                      
             $customer_contact_number = $request->mobile;
-            $customer_location = $request->location;
+            $customer_location = $request->delivery_address;
             $contact_person = $request->name;
             $outlet = '';
         }
@@ -1124,7 +1124,7 @@ class CartController extends Controller
                             'contact_person' => $delivery->name,
                             'contact_tel' => $delivery->phone,
                             'qty' => array_sum(array_column($delivery->orders, 'qty')),
-                            'location' => $delivery->location,
+                            'location' => $delivery->city . ', ' . $delivery->province,
                             'delivery_fee' => $delivery->delivery_fee,
                             'delivery_date' => $delivery->need_date,
                             'delivery_time' => $delivery->need_time,
@@ -1618,7 +1618,7 @@ class CartController extends Controller
             logger('Single location fee calculation', ['location' => $locations]);
             $fee = $this->calculateRate($locations, $carts, $check_customer);
             $fees[] = [
-                'location' => $locations,
+                'location' => $locations['city'] . ', ' . $locations['province'],
                 'fee' => $fee
             ];
             $totalFee = $fee;
@@ -1630,7 +1630,7 @@ class CartController extends Controller
             foreach ($locations as $loc) {
                 $fee = $this->calculateRate($loc, $carts, $check_customer);
                 $fees[] = [
-                    'location' => $loc,
+                    'location' => $loc['city'] . ', ' . $loc['province'],
                     'fee' => $fee
                 ];
                 $totalFee += $fee;
@@ -1679,8 +1679,8 @@ class CartController extends Controller
         $baka = 0;
         $check_product = 0;
 
-        $location_lechon = Deliverablecities::whereName($location)->where('item_type', 'lechon')->first();
-        $location_misc = Deliverablecities::whereName($location)->where('item_type', 'misc')->first();
+        $location_lechon = Deliverablecities::where('city', $location['city'])->where('province', $location['province'])->where('item_type', 'lechon')->first();
+        $location_misc = Deliverablecities::where('city', $location['city'])->where('province', $location['province'])->where('item_type', 'misc')->first();
 
         if (!empty($location_misc)) {
             $rate = $location_misc->rate;
@@ -1720,16 +1720,25 @@ class CartController extends Controller
     }
 
     public function get_shipping_fee(Request $request){
+        $province = $request->province;
+        $city = $request->city;
+
+        if (!$province || !$city) {
+            return response()->json([
+                'fee' => 0,
+                'location' => $request->city .', '.$request->province
+            ]);
+        }
 
         $rate=0;
         $baka = 0;
         $check_product = 0;
         $check_customer = 0;
         //$baka_with_fee = ['Imus Cavite','Molino'];
-        $location_lechon = Deliverablecities::whereName($request->location)->where('item_type','lechon')->first();
-        $location_misc = Deliverablecities::whereName($request->location)->where('item_type','misc')->first();
-        
-        if (Auth::user()) { 
+        $location_lechon = Deliverablecities::where('province', $province)->where('city', $city)->where('item_type','lechon')->first();
+        $location_misc = Deliverablecities::where('province', $province)->where('city', $city)->where('item_type','misc')->first();
+
+        if (Auth::user()) {
             $carts = Cart::where('user_id',Auth::id())->get();
             $check_customer_promo = \App\Models\DeliveryFeePromo::check_customer(Auth::id());
             if($check_customer_promo == 1){
@@ -1779,7 +1788,7 @@ class CartController extends Controller
         
         return response()->json([
             'fee' => $rate,
-            'location' => $request->location,
+            'location' => $request->city .', '.$request->province
         ]);
     }  
 

@@ -24,7 +24,7 @@ class DeliverablecitiesController extends Controller
 
     public function index()
     {
-        $searchFields = ['name'];
+        $searchFields = ['city', 'province', 'item_type', 'barangay'];
 
         $listing = new ListingHelper();
 
@@ -57,18 +57,17 @@ class DeliverablecitiesController extends Controller
     public function store(Request $request)
     {
         $validate = $request->validate([
-            'name' => 'required',
+            'name' => 'nullable',
             'rate' => 'required|numeric',
-            'area' => 'required',
+            'area' => 'nullable',
+            'barangay' => 'nullable',
             'province' => 'required',
             'city' => 'required',
             'item_type' => 'required'
         ]);
 
         Deliverablecities::create([
-            'name' => $request->name,
             'rate' => $request->rate,
-            'area' => $request->area,
             'item_type' => $request->item_type,
             'province' => $request->province,
             'city' => $request->city,
@@ -112,18 +111,17 @@ class DeliverablecitiesController extends Controller
     public function update(Request $request, $id)
     {
         $validate = $request->validate([
-            'name' => 'required',
+            'name' => 'nullable',
             'rate' => 'required|numeric',
-            'area' => 'required',
+            'area' => 'nullable',
+            'barangay' => 'nullable',
             'province' => 'required',
             'city' => 'required',
             'item_type' => 'required'
         ]);
 
         Deliverablecities::findOrFail($id)->update([
-            'name' => $request->name,
             'rate' => $request->rate,
-            'area' => $request->area,
             'province' => $request->province,
             'city' => $request->city,
             'item_type' => $request->item_type,

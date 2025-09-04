@@ -105,8 +105,8 @@
                         <table class="table mg-b-0 table-light table-hover">
                             <thead>
                             <tr class="d-flex">
-                                <th class="col-4">Location</th>
-                                <th class="col-2">Area</th>
+                                <th class="col-4">Province</th>
+                                <th class="col-2">City</th>
                                 <th class="col-1">Item Type</th>
                                 <th class="col-1">Outside Manila</th>
                                 <th class="col-2">Rate</th>
@@ -116,8 +116,8 @@
                             <tbody>
                                 @forelse($address as $add)
                                     <tr class="d-flex">
-                                        <td class="col-4">{{ $add->name }}</td>
-                                        <td class="col-2">{{ $add->area }}</td>
+                                        <td class="col-4">{{ $add->province }}</td>
+                                        <td class="col-2">{{ $add->city }}</td>
                                         <td class="col-1">{{ $add->item_type }}</td>
                                         <td class="col-1">{{ ($add->outside_manila == '1') ? 'Yes' : 'No' }}</td>
                                         <td class="col-2">{{ number_format($add->rate,2) }}</td>

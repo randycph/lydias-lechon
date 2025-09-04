@@ -402,6 +402,7 @@
                                                 <div class="w-full">
                                                     <label class="font-bold block text-sm mb-1">Address <small>Street Name, Building, House No.,</small></label>
                                                     <textarea 
+                                                        name="delivery_address"
                                                         @focus="onMultiAddressFocus(index)"
                                                         @blur="applyMultipleCityProvince(index)" 
                                                         x-model="delivery.address" 
@@ -416,44 +417,46 @@
                                                     
                                                     <div class="w-full md:w-1/2">
                                                         <label for="delivery_address" class="block mb-2 font-bold text-gray-900">Province <span class="text-red-700">*</span></label>
-                                                        <select @change="applyMultipleCityProvince(index)" :id="'province'+index" x-model="delivery.province" required
+                                                        <select @change="applyMultipleCityProvince(index); getDeliveryFeeForMultipleDelivery(index); validateDeliveryAddress(delivery, 'province', index)" :id="'province'+index" x-model="delivery.province" name="province" required
                                                             class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                                             <option selected value="">Choose a province</option>
                                                             <template x-for="p in _provinces" :key="p">
                                                                 <option :value="p" x-text="p"></option>
                                                             </template>
                                                         </select>
+
+                                                        <template x-if="errors[index] && errors[index].location">
+                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index].location"></div>
+                                                        </template>
                                                     </div>
                                                     
                                                     <div class="w-full md:w-1/2">
-                                                        <label for="delivery_address" class="block mb-2 font-bold text-gray-900">City/Municipalities <span class="text-red-700">*</span></label>
-                                                        <select @change="applyMultipleCityProvince(index)" :id="'city'+index" x-model="delivery.city" required
+                                                        <label for="delivery_address" class="block mb-2 font-bold text-gray-900">City / Municipalities <span class="text-red-700">*</span></label>
+                                                        <select @change="applyMultipleCityProvince(index); getDeliveryFeeForMultipleDelivery(index); validateDeliveryAddress(delivery, 'city', index)" :id="'city'+index" x-model="delivery.city" name="city" required
                                                             class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                                             <option selected value="">Choose a City</option>
                                                             <template x-for="c in _cities" :key="c">
                                                                 <option :value="c" x-text="c"></option>
                                                             </template>
                                                         </select>
+
+                                                        <template x-if="errors[index] && errors[index].location">
+                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index].location"></div>
+                                                        </template>
                                                     </div>
                                                 </div>
 
                                                 <div class="w-full flex gap-4">
                                                     <div class="w-full">
-                                                        <label :for="'locations' + index" class="font-bold text-gray-900">Barangay <span
-                                                                class="text-red-700">* </span></label>
-                                                        <select
-                                                            :disabled="!delivery.orders || delivery.orders.length === 0"
+                                                        <label :for="'locations' + index" class="font-bold text-gray-900">Barangay</label>
+                                                        <textarea
                                                             x-model="delivery.location"
                                                             :id="'locations' + index"
                                                             name="location"
-                                                            @change="getDeliveryFeeForMultipleDelivery(index); validateDeliveryAddress(delivery, 'location', index); applyMultipleCityProvince(index)"
+                                                            @change="validateDeliveryAddress(delivery, 'location', index); applyMultipleCityProvince(index)"
                                                             required
                                                             class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                                                            <option value="">Choose a Barangay</option>
-                                                            <template x-for="loc in filteredMultipleLocations(index)" :key="loc.id">
-                                                                <option :value="loc.name" x-text="loc.name"></option>
-                                                            </template>
-                                                        </select>
+                                                        </textarea>
 
                                                         <p
                                                             x-show="(!delivery.orders || delivery.orders.length === 0) && delivery.location"
@@ -461,10 +464,6 @@
                                                         >
                                                             Order is required to get delivery fee. Please select at least one order for this delivery address.
                                                         </p>
-
-                                                        <template x-if="errors[index] && errors[index].location">
-                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index].location"></div>
-                                                        </template>
                                                     </div>
                                                 </div>
 
@@ -546,7 +545,7 @@
                                         
                                         <div class="w-full md:w-1/2">
                                             <label for="locations" class="block mb-2 font-bold text-gray-900">Province <span class="text-red-700">*</span></label>
-                                            <select @change="applyCityProvince" id="locations" name="province" x-model="province" required
+                                            <select @change="applyCityProvince; getDeliveryFee()" id="locations" name="province" x-model="province" required
                                                 class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                                 <option selected value="">Choose a province</option>
                                                 @foreach ($provinces as $province)
@@ -557,7 +556,7 @@
 
                                         <div class="w-full md:w-1/2">
                                             <label for="cities" class="block mb-2 font-bold text-gray-900">City / Municipalities <span class="text-red-700">*</span></label>
-                                            <select @change="applyCityProvince" id="cities" name="city" x-model="city" required
+                                            <select @change="applyCityProvince; getDeliveryFee()" id="cities" name="city" x-model="city" required
                                                 class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                                 <option selected value="">Choose a City</option>
                                                 @foreach ($cities as $city)
@@ -568,15 +567,10 @@
                                     </div>
 
                                     <div class="mt-4">	
-                                        <label for="locations" class="font-bold">Barangay <span
-                                                class="text-red-700">*</span></label>
-                                        <select :disabled="!city || !province" id="locations" name="location" @change="getDeliveryFee" x-ref="location" x-model="location" required
+                                        <label for="locations" class="font-bold">Barangay</label>
+                                        <textarea id="locations" name="location"  x-ref="location" x-model="location"
                                             class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                                            <option selected value="">Choose a Barangay</option>
-                                            <template x-for="(loc, index) in filteredLocations" :key="loc.id">
-                                                <option :value="loc.name" x-text="loc.name"></option>
-                                            </template>
-                                        </select>
+                                        </textarea>
                                     </div>
                                 </div>
                             </template>
@@ -1461,7 +1455,7 @@
                 const location = this.$refs?.location?.value;
                 const branch = this.$refs?.branch?.value;
 
-                if (location) {
+                if (this.province && this.city) {
                     try {
                         let response = await fetch('{{route('cart.front.get_shipping_fee')}}', {
                             method: 'POST',
@@ -1470,7 +1464,8 @@
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                             },
                             body: JSON.stringify({
-                                location: location,
+                                province: this.province,
+                                city: this.city,
                             }),
                         }).then((response) => {
                             return response;
@@ -1633,11 +1628,13 @@
 
             async getDeliveryFeeForMultipleDelivery(index) {
                 const delivery = this.deliveries[index];
-                const location = delivery.location;
+                const city = delivery.city;
+                const province = delivery.province;
                 const products = delivery?.orders?.map(o => o.product_id);
 
                 if (!delivery?.orders && !delivery?.orders?.length) {
-                    delivery.location = '';
+                    delivery.city = '';
+                    delivery.province = '';
 
                     if (this.errors[index]) {
                         this.errors[index].location = 'Please select at least one product for this delivery.';
@@ -1649,7 +1646,7 @@
                     return;
                 }
 
-                if (!location || products?.length === 0 || products == undefined) return;
+                if (!city || !province || products?.length === 0 || products == undefined) return;
 
                 try {
                     const response = await fetch('{{ route('cart.front.get_shipping_fee_for_multiple_address_new') }}', {
@@ -1658,7 +1655,7 @@
                             'Content-Type': 'application/json',
                             'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         },
-                        body: JSON.stringify({ locations: [location], products }),
+                        body: JSON.stringify({ locations: [{ city, province }], products }),
                     });
 
                     if (!response.ok) throw new Error('Network error');
@@ -1669,7 +1666,7 @@
                     delivery.delivery_fee = fee;
 
                     // Always store by index — 1 entry per row
-                    this.deliveryFees[index] = { location, fee };
+                    this.deliveryFees[index] = { location: city + ', ' + province, fee };
 
                     // this.deliveryFee += fee;
 
@@ -1681,7 +1678,7 @@
                     this.recomputeCouponTotals(delivery);
 
                 } catch (e) {
-                    console.error(`Failed to fetch delivery fee for ${location}`, e);
+                    console.error(`Failed to fetch delivery fee for ${city + ', ' + province}`, e);
                     delivery.delivery_fee = 0;
                 }
             },
@@ -2890,6 +2887,14 @@
                 } else if (type === 'name' && delivery.name) {
                     if (!this.errors[index]) this.errors[index] = {};
                     this.errors[index].name = '';
+                } else if (type === 'city' && delivery.city) {
+                    if (!this.errors[index]) this.errors[index] = {};
+                    this.errors[index].city = '';
+                    this.errors[index].location = '';
+                } else if (type === 'province' && delivery.province) {
+                    if (!this.errors[index]) this.errors[index] = {};
+                    this.errors[index].province = '';
+                    this.errors[index].location = '';
                 } else if (type === 'phone' && delivery.phone) {
                     if (!this.errors[index]) this.errors[index] = {};
                     this.errors[index].phone = '';
