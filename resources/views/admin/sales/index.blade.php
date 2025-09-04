@@ -287,17 +287,17 @@
                                             CANCELLED
                                         @else
                                             @if ($addrStatusLinks->isNotEmpty())
-                                                {!! $addrStatusLinks->implode(', ') !!}
+                                                {!! $addrStatusLinks->implode(',<br> ') !!}
                                             @else
                                                 @if (!empty($sale->delivery_status) && $firstAddressId)
                                                     <a target="_blank" href="{{ url("admin/report/delivery_report/{$sale->id}/multiple/{$firstAddressId}") }}"
                                                     class="text-blue-600 hover:underline">
-                                                    {{ $sale->delivery_status }}
+                                                        {{ $sale->delivery_status }}
                                                     </a>
                                                 @else
                                                     <a target="_blank" href="{{ route('admin.report.delivery_report', ['id' => $sale->id]) }}"
                                                     class="text-blue-600 hover:underline">
-                                                    {{ $sale->delivery_status }}
+                                                        {{ $sale->delivery_status ?? 'No status' }}
                                                     </a>
                                                 @endif
                                             @endif
