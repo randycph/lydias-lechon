@@ -264,13 +264,43 @@
                                         @endif
                                     </td>
                                     <td>{{ $sale->delivery_type }}</td>
-                                    <td>
+                                    <td style="font-size:11px;">
+                                        @php
+                                            $addresses      = collect($sale->deliveryAddress ?? []);
+                                            $firstAddressId = data_get($sale, 'deliveryAddress.0.id');
+
+                                            $addrStatusLinks = $addresses
+                                                ->map(function ($addr) use ($sale) {
+                                                    $addressId = $addr->id ?? null;
+                                                    if (!$addressId) return null;
+
+                                                    $status = trim((string)($addr->delivery_status ?? $sale->delivery_status ?? ''));
+                                                    $label  = $status !== '' ? $status : 'No status';
+
+                                                    $href = url("admin/report/delivery_report/{$sale->id}/multiple/{$addressId}");
+                                                    return '<a href="'.$href.'" class="text-blue-600 hover:underline">'.e($label).'</a>';
+                                                })
+                                                ->filter();
+                                        @endphp
+
                                         @if ($sale->status === 'CANCELLED')
                                             CANCELLED
                                         @else
-                                        <a href="{{route('admin.report.delivery_report',$sale->id)}}" target="_blank">
-                                            {{$sale->delivery_status}}
-                                        </a>
+                                            @if ($addrStatusLinks->isNotEmpty())
+                                                {!! $addrStatusLinks->implode(', ') !!}
+                                            @else
+                                                @if (!empty($sale->delivery_status) && $firstAddressId)
+                                                    <a target="_blank" href="{{ url("admin/report/delivery_report/{$sale->id}/multiple/{$firstAddressId}") }}"
+                                                    class="text-blue-600 hover:underline">
+                                                    {{ $sale->delivery_status }}
+                                                    </a>
+                                                @else
+                                                    <a target="_blank" href="{{ route('admin.report.delivery_report', ['id' => $sale->id]) }}"
+                                                    class="text-blue-600 hover:underline">
+                                                    {{ $sale->delivery_status }}
+                                                    </a>
+                                                @endif
+                                            @endif
                                         @endif
                                     </td>
                                     <td style="display:none;">{{ rtrim($payment_types,",") }}</td>
@@ -364,35 +394,35 @@
                                                         </a>
                                                         <div class="dropdown-menu dropdown-menu-right">
                                                             @if (auth()->user()->has_access_to_route('sales-transaction.quick_update') && ($sale->isConfirm == 1 || $sale->Paymentadminstatus == 'PAID'))
-@php
+                                                                @php
 
-    $dates = collect($sale->deliveryAddress ?? [])
-        ->map(function ($addr) {
-            $date = $addr->delivery_date ?? null;
-            $time = $addr->delivery_time ?? '00:00';
-            if (!$date) return null;
+                                                                    $dates = collect($sale->deliveryAddress ?? [])
+                                                                        ->map(function ($addr) {
+                                                                            $date = $addr->delivery_date ?? null;
+                                                                            $time = $addr->delivery_time ?? '00:00';
+                                                                            if (!$date) return null;
 
-            // Parse with app timezone (set this in config/app.php)
-            return \Carbon\Carbon::parse(trim($date.' '.$time), config('app.timezone'));
-        })
-        ->filter(); // remove nulls
+                                                                            // Parse with app timezone (set this in config/app.php)
+                                                                            return \Carbon\Carbon::parse(trim($date.' '.$time), config('app.timezone'));
+                                                                        })
+                                                                        ->filter(); // remove nulls
 
-    $dateneeded = $dates->map->format('M-d H:i')->implode(', ');
+                                                                    $dateneeded = $dates->map->format('M-d H:i')->implode(', ');
 
-    $allPast = $dates->isNotEmpty()
-        ? $dates->every(fn ($dt) => $dt->lt(\Carbon\Carbon::now(config('app.timezone'))))
-        : true;
-@endphp
+                                                                    $allPast = $dates->isNotEmpty()
+                                                                        ? $dates->every(fn ($dt) => $dt->lt(\Carbon\Carbon::now(config('app.timezone'))))
+                                                                        : true;
+                                                                @endphp
 
-@if (!isDispatcher() || !$allPast)
-    <a class="dropdown-item"
-       href="javascript:void(0);"
-       onclick="change_delivery_status({{ $sale->id }}, {{ $is_allowed_delivered }})"
-       title="Update Order Status"
-       data-id="{{ $sale->id }}">
-        Update Order Status
-    </a>
-@endif
+                                                                @if (!isDispatcher() || !$allPast)
+                                                                    <a class="dropdown-item"
+                                                                    href="javascript:void(0);"
+                                                                    onclick="change_delivery_status({{ $sale->id }}, {{ $is_allowed_delivered }})"
+                                                                    title="Update Order Status"
+                                                                    data-id="{{ $sale->id }}">
+                                                                        Update Order Status
+                                                                    </a>
+                                                                @endif
                                                             @endif
                                                                 @if ($sale->delivery_type == 'Door to door delivery' && ($sale->deliveryAddress && count($sale->deliveryAddress) > 0))
                                                                 <div class="printReceipt" data-addresses="{{ json_encode($sale->deliveryAddress) }}" data-saleid="{{ $sale->id }}">
