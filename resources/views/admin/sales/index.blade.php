@@ -364,7 +364,37 @@
                                                         </a>
                                                         <div class="dropdown-menu dropdown-menu-right">
                                                             @if (auth()->user()->has_access_to_route('sales-transaction.quick_update') && ($sale->isConfirm == 1 || $sale->Paymentadminstatus == 'PAID'))
-                                                                <a class="dropdown-item" href="javascript:void(0);" onclick="change_delivery_status({{$sale->id}}, {{$is_allowed_delivered}})" title="Update Order Status" data-id="{{$sale->id}}">Update Order Status</a>
+                                                                {{-- hide if its a dispatcher and if date need is alread passed --}}
+
+@php
+
+    $dates = collect($sale->deliveryAddress ?? [])
+        ->map(function ($addr) {
+            $date = $addr->delivery_date ?? null;
+            $time = $addr->delivery_time ?? '00:00';
+            if (!$date) return null;
+
+            // Parse with app timezone (set this in config/app.php)
+            return \Carbon\Carbon::parse(trim($date.' '.$time), config('app.timezone'));
+        })
+        ->filter(); // remove nulls
+
+    $dateneeded = $dates->map->format('M-d H:i')->implode(', ');
+
+    $allPast = $dates->isNotEmpty()
+        ? $dates->every(fn ($dt) => $dt->lt(\Carbon\Carbon::now(config('app.timezone'))))
+        : true;
+@endphp
+
+@if (!isDispatcher() || !$allPast)
+    <a class="dropdown-item"
+       href="javascript:void(0);"
+       onclick="change_delivery_status({{ $sale->id }}, {{ $is_allowed_delivered }})"
+       title="Update Order Status"
+       data-id="{{ $sale->id }}">
+        Update Order Status
+    </a>
+@endif
                                                             @endif
                                                                 @if ($sale->delivery_type == 'Door to door delivery' && ($sale->deliveryAddress && count($sale->deliveryAddress) > 0))
                                                                 <div class="printReceipt" data-addresses="{{ json_encode($sale->deliveryAddress) }}" data-saleid="{{ $sale->id }}">
