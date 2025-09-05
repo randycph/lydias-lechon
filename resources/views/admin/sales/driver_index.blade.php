@@ -183,13 +183,49 @@
                                     </td>
 
                                     <td>{{ $sale['delivery_type'] }}</td>
-                                    <td>
+                                    {{-- <td>
                                         @if ($sale['type'] == 'job')
                                             {{ $sale['delivery_status'] }}
                                         @else
                                             <a href="{{route('admin.report.delivery_report',$sale['id'])}}" target="_blank">{{$sale['delivery_status']}}</a>
                                         @endif
+                                    </td> --}}
+                                    <td style="font-size:11px;">
+                                        @php
+                                            $addresses      = collect($sale['delivery_address'] ?? []);
+                                            $firstAddressId = data_get($sale, 'delivery_address.0.id');
+
+                                            $addrStatusLinks = $addresses
+                                                ->map(function ($addr) use ($sale) {
+                                                    $addressId = $addr['id'] ?? null;
+                                                    if (!$addressId) return null;
+
+                                                    $status = trim((string)($addr['delivery_status'] ?? $sale['delivery_status'] ?? ''));
+                                                    $label  = $status !== '' ? $status : 'No status';
+
+                                                    $href = url("admin/report/delivery_report/{$sale['id']}/multiple/{$addressId}");
+                                                    return '<a href="'.$href.'" class="text-blue-600 hover:underline">'.e($label).'</a>';
+                                                })
+                                                ->filter();
+                                        @endphp
+
+                                        @if ($addrStatusLinks->isNotEmpty())
+                                            {!! $addrStatusLinks->implode(',<br> ') !!}
+                                        @else
+                                            @if (!empty($sale['delivery_status']) && $firstAddressId)
+                                                <a target="_blank" href="{{ url("admin/report/delivery_report/{$sale['id']}/multiple/{$firstAddressId}") }}"
+                                                class="text-blue-600 hover:underline">
+                                                    {{ $sale['delivery_status'] }}
+                                                </a>
+                                            @else
+                                                <a target="_blank" href="{{ route('admin.report.delivery_report', ['id' => $sale['id']]) }}"
+                                                class="text-blue-600 hover:underline">
+                                                    {{ $sale['delivery_status'] ?? 'No status' }}
+                                                </a>
+                                            @endif
+                                        @endif
                                     </td>
+
                                     <td style="display:none;">{{ rtrim($payment_types,",") }}</td>
                                     <td>
                                         {{ number_format($sale['gross_amount'],2) }}

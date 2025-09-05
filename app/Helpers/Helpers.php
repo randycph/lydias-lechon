@@ -81,7 +81,8 @@ if (!function_exists('unreadTransactions')) {
             // Step 1: SalesHeader
             $salesHeaders = SalesHeader::with(['user', 'items', 'deliveryAddress', 'deliveryStatuses'])
                 ->whereHas('deliveryStatuses', function ($q) use ($userName) {
-                    $q->where('delivered_by', $userName);
+                    $q->where('delivered_by', $userName)
+                    ->whereIn('delivery_status', ['In Transit', 'Returned/Rejected', 'Delivered/Picked Up']);
                 })
                 ->get()
                 ->map(function ($sale) {
