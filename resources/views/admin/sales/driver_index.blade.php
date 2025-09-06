@@ -1073,12 +1073,14 @@
                         $('#deliveries_lists_div').show();
                         $('#deliveries_lists').empty().append('<option value="">- Select -</option>');
                         response.deliveries.forEach(function(delivery, index) {
-                            const label = `Address ${index + 1}: ${delivery.address} (${delivery.location})`;
-                            $('#deliveries_lists').append(
-                                '<option value="' + delivery.id + '">' +
-                                    label +
-                                '</option>'
-                            );
+                            if (delivery.delivery_status === 'In Transit') {
+                                const label = `Address ${index + 1}: ${delivery.address} (${delivery.location})`;
+                                $('#deliveries_lists').append(
+                                    '<option value="' + delivery.id + '">' +
+                                        label +
+                                    '</option>'
+                                );
+                            }
                         });
                         $('#deliveries_lists').prop('required', true);
                     } else {
