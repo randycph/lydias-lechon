@@ -259,7 +259,7 @@
                                 <td class="tx-left">{{$delivery->created_at}}</td>
                                 <td class="tx-center">{{$delivery->status}}</td>
                                 <td class="tx-center">{{$delivery->remarks}}</td>
-                                <td class="tx-center">{{$delivery->delivered_by}}</td> 
+                                <td class="tx-center">{{$delivery?->user?->name ?? ''}}</td> 
                             </tr>
                         @empty
                             <tr>

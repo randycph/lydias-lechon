@@ -617,8 +617,7 @@ class ReportsController extends Controller
 
         $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
         $salesDetails  = SalesDetail::where('sales_header_id',$id)->get();
-        $deliveries    = DeliveryStatus::where('order_id',$id)->get();
-
+        $deliveries    = DeliveryStatus::with('user')->where('order_id',$id)->where('product_delivery_address_id', $address)->get();
         $deliveryAddress = ProductDeliveryAddress::with('product')->where('id', $address)->where('sales_header_id', $sales->id)->first();
 
         if (!$deliveryAddress) {
