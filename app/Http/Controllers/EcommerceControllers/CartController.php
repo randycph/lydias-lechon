@@ -1005,7 +1005,8 @@ class CartController extends Controller
                 'outlet' => $outlet,
                 'origin' => $origin,
                 'forecast_date' => $forecast_date,
-                'updated_at' => $salesHeader->created_at
+                'updated_at' => $salesHeader->created_at,
+                'is_multiple_address' => $request->has('deliveries') && count(json_decode($request->deliveries)) > 1 ? 1 : 0
             ]);
             $salesHeader = SalesHeader::find($salesHeader->id);
             if (!$salesHeader) {
@@ -1069,7 +1070,8 @@ class CartController extends Controller
                 'contact_person' => $contact_person,
                 'outlet' => $outlet,
                 'origin' => $origin,
-                'forecast_date' => $forecast_date
+                'forecast_date' => $forecast_date,
+                'is_multiple_address' => $request->has('deliveries') && count(json_decode($request->deliveries)) > 1 ? 1 : 0
             ]);
         }
 
