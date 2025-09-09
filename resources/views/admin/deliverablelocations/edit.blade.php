@@ -57,16 +57,6 @@
                     @endif
                 </div>
 
-                <div class="form-group">
-                    <label class="d-block">Barangay</label>
-                    <select class="form-control" id="barangay_select" name="barangay" style="width:100%" disabled>
-                        <option value="">Select Barangay</option>
-                    </select>
-                    @if ($errors->has('barangay'))
-                    <span class="text-danger">{{ $errors->first('barangay') }}</span>
-                    @endif
-                </div>
-
                 <div class="form-group" id="region_div">
                     <label class="d-block">Rate *</label>
                     <input type="number" class="form-control" name="rate" min="0" step="0.01"
