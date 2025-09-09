@@ -446,7 +446,30 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="w-full flex gap-4">
+                                                <div class="mt-4">	
+                                                    <label :for="'locations' + index" class="font-bold text-gray-900">Barangay</label>
+                                                    <select
+                                                            @change="validateDeliveryAddress(delivery, 'location', index); applyMultipleCityProvince(index)"
+                                                            :disabled="!delivery.city || !delivery.province"
+                                                            x-model="delivery.location"
+                                                            :id="'locations' + index"
+                                                            name="location"
+                                                            class="bg-gray-50 mt-2 border disabled:bg-gray-100 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                                        <option selected value="">Choose a Barangay</option>
+                                                        <template x-for="(c, i) in filteredMultipleBarangay(index)" :key="i">
+                                                            <option :value="c.barangay" x-text="c.barangay"></option>
+                                                        </template>
+                                                    </select>
+                                                    <p
+                                                        x-show="(!delivery.orders || delivery.orders.length === 0) && delivery.location"
+                                                        class="mt-1 text-red-600"
+                                                    >
+                                                        Order is required to get delivery fee. Please select at least one order for this delivery address.
+                                                    </p>
+                                                </div>
+
+
+                                                {{-- <div class="w-full flex gap-4">
                                                     <div class="w-full">
                                                         <label :for="'locations' + index" class="font-bold text-gray-900">Barangay</label>
                                                         <textarea
@@ -466,7 +489,7 @@
                                                             Order is required to get delivery fee. Please select at least one order for this delivery address.
                                                         </p>
                                                     </div>
-                                                </div>
+                                                </div> --}}
 
                                                 <div class="w-full flex gap-4">
                                                     <div class="w-full lg:w-1/2">
@@ -556,7 +579,7 @@
                                         </div>
 
                                         <div class="w-full md:w-1/2">
-                                            <label for="cities" class="block mb-2 font-bold text-gray-900">City / Municipalities <span class="text-red-700">*</span></label>
+                                            <label for="cities" class="block mb-2 font-bold text-gray-900">City / Municipalitiesss <span class="text-red-700">*</span></label>
                                             <select :disabled="!delivery_address" @change="applyCityProvince; getDeliveryFee()" id="cities" name="city" x-model="city" required
                                                 class="bg-gray-50 mt-2 border disabled:bg-gray-100 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                                 <option selected value="">Choose a City</option>
@@ -568,10 +591,19 @@
                                     </div>
 
                                     <div class="mt-4">	
-                                        <label for="locations" class="font-bold">Barangay</label>
-                                        <textarea :disabled="!city || !province" id="locations" name="location"  x-ref="location" x-model="location"
-                                            class="disabled:bg-gray-100 bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                                        </textarea>
+                                        <label for="locations" class="block mb-2 font-bold text-gray-900">Barangay</label>
+                                        <select :disabled="!city || !province"
+                                                id="locations"
+                                                name="location"
+                                                x-ref="location"
+                                                x-model="location"
+                                                required
+                                                class="bg-gray-50 mt-2 border disabled:bg-gray-100 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                            <option selected value="">Choose a Barangay</option>
+                                            <template x-for="(c, i) in filteredBarangay()" :key="i">
+                                                <option :value="c.barangay" x-text="c.barangay"></option>
+                                            </template>
+                                        </select>
                                     </div>
                                 </div>
                             </template>
@@ -1684,7 +1716,7 @@
                 }
             },
 
-            init() {
+            async init() {
                 this.checkMultipleDeliveries();
                 
                 const cookie = document.cookie.split('; ').find(row => row.startsWith('shipping_method='));
@@ -1745,6 +1777,9 @@
                     // 3) recompute core from the cleaned field and rebuild
                     this._addressCore = this._stripCurrentPlaces(this.delivery_address);
                     if (hasCore()) this._rebuildAddress();
+
+                    this.city = '';
+                    this.deliveryFee = 0;
                 });
 
                 // LOCATION (barangay) changed
@@ -1770,11 +1805,17 @@
                 // for multi delivery
                 this.deliveries.forEach((_, i) => this._wireDelivery(i));
 
+                const res = await fetch('https://raw.githubusercontent.com/flores-jacob/philippine-regions-provinces-cities-municipalities-barangays/refs/heads/master/philippine_provinces_cities_municipalities_and_barangays_2019v2.json');
+                this.phData = await res.json();
+
             },
             _addressCore: '',
             _syncing: false,
             _cities: @json($cities),
             _provinces: @json($provinces),
+
+            
+            phData: null,
 
             onSingleAddressFocus() {
                 if (this._syncing) return;
@@ -1859,6 +1900,7 @@
                     d._lastTail = null;
                     d.location  = '';
                     d._core     = d.address;
+                    d.city      = '';
                     if (hasCore()) this._rebuildMultipleAddress(i);
                 });
 
@@ -1890,6 +1932,7 @@
             applyCityProvince() {
                 this._addressCore = this._stripCurrentPlaces(this.delivery_address);
                 this._rebuildAddress();
+                this.filteredBarangay();
             },
 
             _wireCPWatchers(i) {
@@ -2102,25 +2145,95 @@
                 });
             },
 
-            get filteredLocations() {
-                let rows = this.locationsAll;
+            filteredMultipleBarangay(index) {
+                const d = this.deliveries[index] || {};
+                if (!this.phData || !d.province || !d.city) return [];
 
-                if (this.city) {
-                    const c = this.city.toLowerCase();
-                    rows = rows.filter(r => (r.city ?? '').toLowerCase() === c);
-                }
-                if (this.province) {
-                    const p = this.province.toLowerCase();
-                    rows = rows.filter(r => (r.province ?? '').toLowerCase() === p);
+                const P = this._norm(d.province);
+                const C = this._norm(d.city);
+
+                // Scan regions → province → municipality for a flexible match
+                for (const regionCode in this.phData) {
+                    const region = this.phData[regionCode];
+                    const provs = region?.province_list || {};
+
+                    // province keys in dataset are already UPPERCASE, so direct lookup first
+                    let provinceObj = provs[P];
+
+                    // if direct lookup failed (rare), try loose find
+                    if (!provinceObj) {
+                        for (const k of Object.keys(provs)) {
+                            if (this._norm(k) === P) {
+                                provinceObj = provs[k];
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!provinceObj) continue;
+
+                    const muni = provinceObj.municipality_list || {};
+
+                    // cities/munis can be like "CITY OF PASIG", "QUEZON CITY", etc. — compare loosely
+                    for (const cityName of Object.keys(muni)) {
+                        if (this._norm(cityName) === C) {
+                            const list = muni[cityName]?.barangay_list || [];
+                            // return as [{ barangay: '...' }, ...] because your template expects object.c.barangay
+                            return list
+                            .slice()               // copy
+                            .sort((a, b) => a.localeCompare(b))
+                            .map(b => ({ barangay: b }));
+                        }
+                    }
                 }
 
-                const seen = new Set();
-                return rows.filter(r => {
-                    const k = (r.name ?? '').toLowerCase();
-                    if (seen.has(k)) return false;
-                    seen.add(k);
-                    return true;
-                });
+                // Not found
+                return [];
+            },
+
+            filteredBarangay() {
+                if (!this.phData || !this.province || !this.city) return [];
+
+                const P = this._norm(this.province);
+                const C = this._norm(this.city);
+
+                // Scan regions → province → municipality for a flexible match
+                for (const regionCode in this.phData) {
+                    const region = this.phData[regionCode];
+                    const provs = region?.province_list || {};
+
+                    // province keys in dataset are already UPPERCASE, so direct lookup first
+                    let provinceObj = provs[P];
+
+                    // if direct lookup failed (rare), try loose find
+                    if (!provinceObj) {
+                        for (const k of Object.keys(provs)) {
+                            if (this._norm(k) === P) {
+                                provinceObj = provs[k];
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!provinceObj) continue;
+
+                    const muni = provinceObj.municipality_list || {};
+
+                    // cities/munis can be like "CITY OF PASIG", "QUEZON CITY", etc. — compare loosely
+                    for (const cityName of Object.keys(muni)) {
+                        if (this._norm(cityName) === C) {
+                            const list = muni[cityName]?.barangay_list || [];
+                            // return as [{ barangay: '...' }, ...] because your template expects object.c.barangay
+                            return list
+                            .slice()               // copy
+                            .sort((a, b) => a.localeCompare(b))
+                            .map(b => ({ barangay: b }));
+                        }
+                    }
+                }
+
+                // Not found
+                return [];
             },
 
             _norm(s){ return (s ?? '').trim().toLowerCase(); },
