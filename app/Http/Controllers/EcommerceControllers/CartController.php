@@ -854,7 +854,23 @@ class CartController extends Controller
             'mobile.regex' => 'The mobile number must start with 09 or +639 and be followed by 9 digits. No spaces allowed.',
         ]);
 
-        // dd($request->all());
+        if ($request->shipping_type != 'pickup' && !$request->has('deliveries')) {
+            $request->validate([
+                'city' => 'required',
+                'province' => 'required',
+            ], [
+                'city.required' => 'The city field is required.',
+                'province.required' => 'The province field is required.',
+            ]);
+        }
+
+        if ($request->has('deliveries') && count(json_decode($request->deliveries)) > 1) {
+            $request->validate([
+                'city' => 'required',
+                'delivery_address' => 'required',
+            ]);
+        }
+
         if (auth()->guest()) {
             // $user = User::find(9999);
             // if (empty($user)) {

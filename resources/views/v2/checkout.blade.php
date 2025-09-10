@@ -425,8 +425,8 @@
                                                             @endforeach
                                                         </select>
 
-                                                        <template x-if="errors[index] && errors[index].location">
-                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index].location"></div>
+                                                        <template x-if="errors[index] && errors[index].province">
+                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index].province"></div>
                                                         </template>
                                                     </div>
                                                     
@@ -440,8 +440,8 @@
                                                             </template>
                                                         </select>
 
-                                                        <template x-if="errors[index] && errors[index].location">
-                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index].location"></div>
+                                                        <template x-if="errors[index] && errors[index].city">
+                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index].city"></div>
                                                         </template>
                                                     </div>
                                                 </div>
@@ -563,6 +563,10 @@
                                         <div x-show="noDeliveryAddress" class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
                                             Please add delivery address
                                         </div>
+
+                                        <template x-if="addressValidationMessage">
+                                            <p class="text-red-500 text-xs italic mt-2" x-text="addressValidationMessage"></p>
+                                        </template>
                                     </div>
 
                                     <div class="w-full flex gap-4 mb-4 md:flex-row flex-col">
@@ -576,10 +580,14 @@
                                                     <option value="{{ $province }}" >{{ $province }}</option>
                                                 @endforeach
                                             </select>
+
+                                            <template x-if="provinceValidationMessage">
+                                                <p class="text-red-500 text-xs italic mt-2" x-text="provinceValidationMessage"></p>
+                                            </template>
                                         </div>
 
                                         <div class="w-full md:w-1/2">
-                                            <label for="cities" class="block mb-2 font-bold text-gray-900">City / Municipalitiesss <span class="text-red-700">*</span></label>
+                                            <label for="cities" class="block mb-2 font-bold text-gray-900">City / Municipalities<span class="text-red-700">*</span></label>
                                             <select :disabled="!delivery_address" @change="applyCityProvince; getDeliveryFee()" id="cities" name="city" x-model="city" required
                                                 class="bg-gray-50 mt-2 border disabled:bg-gray-100 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
                                                 <option selected value="">Choose a City</option>
@@ -587,6 +595,10 @@
                                                     <option :value="c.city" x-text="c.city"></option>
                                                 </template>
                                             </select>
+
+                                            <template x-if="cityValidationMessage">
+                                                <p class="text-red-500 text-xs italic mt-2" x-text="cityValidationMessage"></p>
+                                            </template>
                                         </div>
                                     </div>
 
@@ -597,7 +609,6 @@
                                                 name="location"
                                                 x-ref="location"
                                                 x-model="location"
-                                                required
                                                 class="bg-gray-50 mt-2 border disabled:bg-gray-100 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                                             <option selected value="">Choose a Barangay</option>
                                             <template x-for="(c, i) in filteredBarangay()" :key="i">
@@ -1270,6 +1281,9 @@
             },
 
             mobileValidationMessage: '',
+            cityValidationMessage: '',
+            provinceValidationMessage: '',
+            addressValidationMessage: '',
             nameValidationMessage: '',
             emailValidationMessage: '',
             noDeliveryAddress: false,
@@ -1466,6 +1480,18 @@
                     if (errorMessage.errors && errorMessage.errors.email) {
                         this.emailValidationMessage = errorMessage.errors.email[0];
                     }
+
+                    if (errorMessage.errors && errorMessage.errors.city) {
+                        this.cityValidationMessage = errorMessage.errors.city[0];
+                    }
+
+                    if (errorMessage.errors && errorMessage.errors.province) {
+                        this.provinceValidationMessage = errorMessage.errors.province[0];
+                    }
+
+                    if (errorMessage.errors && errorMessage.errors.delivery_address) {
+                        this.addressValidationMessage = errorMessage.errors.delivery_address[0];
+                    }
                 });
             },
 
@@ -1478,7 +1504,8 @@
                     return (
                         delivery.need_time &&
                         delivery.need_date &&
-                        delivery.location &&
+                        delivery.city &&
+                        delivery.province &&
                         hasValidProducts
                     );
                 });
@@ -2810,17 +2837,17 @@
                 }
 
                 // Check required address fields
-                let { address, name, phone, location, need_date, need_time, sms, orders } = lastDelivery;
+                let { address, name, phone, location, need_date, need_time, sms, orders, city, province } = lastDelivery;
                 
                 if (!address) this.errors[index].address = 'Address is required.';
                 if (!name) this.errors[index].name = 'Contact person is required.';
-                if (!location) this.errors[index].location = 'Location is required.';
+                if (!city) this.errors[index].city = 'City is required.';
+                if (!province) this.errors[index].province = 'Province is required.';
                 if (!need_date) this.errors[index].need_date = 'Date is required.';
                 if (!need_time) this.errors[index].need_time = 'Time is required.';
 
-                if (!location) {
-                    location = '';
-                    this.errors[index].location = 'Location is required.';
+                if (!city) {
+                    this.errors[index].city = 'City is required.';
                     return;
                 }
 
