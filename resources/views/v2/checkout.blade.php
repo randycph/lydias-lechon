@@ -1808,7 +1808,13 @@
                 const res = await fetch('https://raw.githubusercontent.com/flores-jacob/philippine-regions-provinces-cities-municipalities-barangays/refs/heads/master/philippine_provinces_cities_municipalities_and_barangays_2019v2.json');
                 this.phData = await res.json();
 
+
+                this.allowedCitySet = new Set(
+                    (this._cities || []).map(n => this._normalizeCityKey(n))
+                );
+
             },
+            allowedCitySet: new Set(),
             _addressCore: '',
             _syncing: false,
             _cities: @json($cities),
@@ -2068,23 +2074,16 @@
             locationsAll: @js($locations),
 
             multipleFilteredCities(index) {
-                let rows = this.locationsAll;
                 const d = this.deliveries[index] || {};
+                if (!this.phData || !d.province) return [];
+                const prov = this._findProvinceObj(d.province);
+                if (!prov) return [];
+                const muni = prov.municipality_list || {};
 
-                rows = rows.filter(r => r.city && r.city.trim().length > 0);
-
-                if (d.province) {
-                    const p = d.province.toLowerCase();
-                    rows = rows.filter(r => (r.province ?? '').toLowerCase() === p);
-                }
-
-                const seen = new Set();
-                return rows.filter(r => {
-                    const k = (r.city ?? '').toLowerCase();
-                    if (seen.has(k)) return false;
-                    seen.add(k);
-                    return true;
-                });
+                return Object.keys(muni)
+                    .filter(name => this.allowedCitySet.has(this._normalizeCityKey(name)))
+                    .sort((a, b) => a.localeCompare(b))
+                    .map(name => ({ city: name }));
             },
 
             multipleFilteredProvinces(index) {
@@ -2107,23 +2106,44 @@
                 });
             },
 
-            get filteredCities() {
-                let rows = this.locationsAll;
 
-                rows = rows.filter(r => r.city && r.city.trim().length > 0);
-
-                if (this.province) {
-                    const p = this.province.toLowerCase();
-                    rows = rows.filter(r => (r.province ?? '').toLowerCase() === p);
+            _buildProvinces() {
+                const set = new Set();
+                for (const r in this.phData) {
+                    const provs = this.phData[r]?.province_list || {};
+                    for (const p of Object.keys(provs)) set.add(p);
                 }
+                this.provinces = Array.from(set).sort((a, b) => a.localeCompare(b));
+            },
 
-                const seen = new Set();
-                return rows.filter(r => {
-                    const k = (r.city ?? '').toLowerCase();
-                    if (seen.has(k)) return false;
-                    seen.add(k);
-                    return true;
-                });
+            _findProvinceObj(provinceName) {
+                const P = this._norm(provinceName);
+                for (const r in this.phData) {
+                    const provs = this.phData[r]?.province_list || {};
+                    if (provs[P]) return provs[P];
+                    for (const key of Object.keys(provs)) {
+                    if (this._norm(key) === P) return provs[key];
+                    }
+                }
+                return null;
+            },
+
+            _normalizeCityKey(name) {
+                let s = this._norm(name || '');
+                s = s.replace(/^city\s+of\s+/, '').replace(/\s+city$/, '').replace(/\s+/g, ' ').trim();
+                return s;
+            },
+
+            get filteredCities() {
+                if (!this.phData || !this.province) return [];
+                const prov = this._findProvinceObj(this.province);
+                if (!prov) return [];
+                const muni = prov.municipality_list || {};
+
+                return Object.keys(muni)
+                    .filter(name => this.allowedCitySet.has(this._normalizeCityKey(name)))
+                    .sort((a, b) => a.localeCompare(b))
+                    .map(name => ({ city: name }));
             },
 
             get filteredProvinces() {
