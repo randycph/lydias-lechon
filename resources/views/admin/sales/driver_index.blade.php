@@ -248,7 +248,7 @@
                                                             <i data-feather="truck"></i>
                                                         </a>
                                                         <div class="dropdown-menu dropdown-menu-right">
-                                                                @if($sale['delivery_status'] <> 'Delivered/Picked Up')
+                                                                @if (!in_array($sale['delivery_status'], ['Delivered/Picked Up', 'Returned/Rejected']))
                                                                     <a class="dropdown-item" href="javascript:void(0);" onclick="change_delivery_status({{$sale['id']}}, {{$is_allowed_delivered}}, '{{$sale['delivery_type']}}')" title="Update Order Status" data-id="{{$sale['id']}}">Update Order Status</a>
                                                                 @endif
                                                                 @if ($sale['delivery_type'] == 'Door to door delivery' && ($sale['delivery_address'] && count($sale['delivery_address']) > 0))
