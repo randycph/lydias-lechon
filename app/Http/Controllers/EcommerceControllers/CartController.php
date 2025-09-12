@@ -1087,7 +1087,9 @@ class CartController extends Controller
                 'outlet' => $outlet,
                 'origin' => $origin,
                 'forecast_date' => $forecast_date,
-                'is_multiple_address' => $request->has('deliveries') && count(json_decode($request->deliveries)) > 1 ? 1 : 0
+                'is_multiple_address' => $request->has('deliveries') && count(json_decode($request->deliveries)) > 1 ? 1 : 0,
+                'is_new_order' => 1,
+                'has_sub' => ($request->has('deliveries') && count(json_decode($request->deliveries)) > 0) ? 1 : 0,
             ]);
         }
 
@@ -1096,7 +1098,6 @@ class CartController extends Controller
             $salesHeader->confirmed_by = 'Customer';
             $salesHeader->confirmed_on = date('Y-m-d H:i:s');
             $salesHeader->confirm_remarks = 'Auto confirm via Checkout';
-            $salesHeader->updated_at = $salesHeader->created_at;
             $salesHeader->save();
         }
 
@@ -1128,16 +1129,63 @@ class CartController extends Controller
         $formattedOrderNumber = sprintf('%07d', $salesHeader->id);
         $salesHeader->update(['order_number' => $formattedOrderNumber]);
         $salesHeader->order_number = $formattedOrderNumber;
-        $salesHeader->updated_at = $salesHeader->created_at;
         $salesHeader->save();
 
         if ($request->has('deliveries')) {
             $deliveries = json_decode($request->deliveries ?? '');
             if ($deliveries && count($deliveries) > 0) {
-                foreach ($deliveries as $delivery) {
+                foreach ($deliveries as $k => $delivery) {
                     if (!empty($delivery->orders)) {
+
+                        $subSalesHeader = SalesHeader::create([
+                            'user_id' => $user->id,
+                            'parent_sales_header_id' => $salesHeader->id,
+                            'email' => $request->email ?? $user->email,
+                            'order_number' => $requestId,
+                            'customer_name' => $delivery->name,
+                            'customer_contact_number' => $delivery->phone,
+                            'customer_address' => $delivery->address,
+                            'customer_delivery_adress' => $delivery->address,
+                            'delivery_tracking_number' => '',
+                            'delivery_type' => 'Door to door delivery',
+                            'delivery_fee_amount' => $delivery->delivery_fee,
+                            'order_source' => 'Web',
+                            'gross_amount' => $request->order_amount,
+                            'tax_amount' => 0,
+                            'net_amount' => $netAmount,
+                            'discount_amount' => $discount,
+                            'payment_status' => $request->order_amount <= 0 ? 'PAID' : 'PENDING',
+                            'delivery_status' => '',
+                            'status' => 'active',
+                            'currency' => 'PHP',
+                            'customer_location' => $customer_location,
+                            'instruction' => $request->instruction,
+                            'agent' => $request->agent,
+                            'contact_person' => $delivery->name,
+                            'outlet' => $outlet,
+                            'origin' => $origin,
+                            'forecast_date' => $forecast_date,
+                            'is_multiple_address' => $request->has('deliveries') && count(json_decode($request->deliveries)) > 1 ? 1 : 0,
+                            'is_new_order' => 1,
+                            'is_sub' => 1,
+                            // 'date_needed' => $delivery->need_date . ' ' . $delivery->need_time,
+                            // 'delivery_fee' => $delivery->delivery_fee,
+                            // 'note' => $delivery->note,
+                        ]);
+
+                        if ($request->order_amount <= 0) {
+                            $subSalesHeader->isConfirm = 1;
+                            $subSalesHeader->confirmed_by = 'Customer';
+                            $subSalesHeader->confirmed_on = date('Y-m-d H:i:s');
+                            $subSalesHeader->confirm_remarks = 'Auto confirm via Checkout';
+                            $subSalesHeader->save();
+                        }
+
+                        $subSalesHeader->order_number = sprintf('%07d', $salesHeader->id) . '-' . ($k+1);
+                        $subSalesHeader->save();
+
                         ProductDeliveryAddress::create([
-                            'sales_header_id' => $salesHeader->id,
+                            'sales_header_id' => $subSalesHeader->id,
                             'address' => $delivery->address,
                             'contact_person' => $delivery->name,
                             'contact_tel' => $delivery->phone,
@@ -1155,6 +1203,44 @@ class CartController extends Controller
                                     ? $delivery->orders[0]->product->paella_price
                                     : 0,
                         ]);
+
+                        if (isset($delivery->orders) && count($delivery->orders) > 0) {
+                            $grand_gross = 0;
+                            $grand_tax = 0;
+                            foreach ($delivery->orders as $order) {
+
+                                $product = $order->product;
+                                $gross_amount = ((float)$product->price + ($order->paella ? $product->paella_price : 0)) * $order->qty;
+                                $tax_amount = $gross_amount - ($gross_amount/1.12);
+                                $grand_gross += $gross_amount;
+                                $grand_tax += $tax_amount;
+
+                                SalesDetail::create([
+                                    'sales_header_id' => $subSalesHeader->id,
+                                    'product_id' => $product->id,
+                                    'product_name' => $product->name . ($order->paella ? ' Boneless with Paella' : ''),
+                                    'product_category' => $product->category_id,
+                                    'price' => $product->price,
+                                    'cost' => 0,
+                                    'tax_amount' => $tax_amount,
+                                    'promo_id' => 0,
+                                    'promo_description' => '',
+                                    'discount_amount' => 0,
+                                    'gross_amount' => $gross_amount,
+                                    'net_amount' => $gross_amount,
+                                    'qty' => $order->qty,
+                                    'paella_qty' => $order->qty,
+                                    'uom' => $product->uom,
+                                    'size' => $product->size ?? "",
+                                    'no_of_pax' => $product->no_of_pax ?? "",
+                                    'paella_price' => $order->paella ? $product->paella_price : 0,
+                                    'other_cost' => 0,
+                                    'other_cost_description' => '',
+                                    'created_by' => $user->id,
+                                    'delivery_date' => $delivery->need_date . ' ' . $delivery->need_time
+                                ]);
+                            }
+                        }
                     }
                 }
             }
@@ -1250,6 +1336,19 @@ class CartController extends Controller
             ]);
             $saved_items .= $cart->qty." x ".$product->name.", ";
         }
+
+        // $salesDetails = SalesDetail::where('sales_header_id', $salesHeader->id)->get();
+
+        // foreach ($salesDetails as $detail) {
+        //     $subSales = SalesHeader::where('parent_sales_header_id', $salesHeader->id)->get();
+
+        //     if ($subSales && count($subSales) > 0) {
+        //         foreach ($subSales as $sub) {
+        //             $detail->sales_header_id = $sub->id;
+        //             $detail->save();
+        //         }
+        //     }
+        // }
 
         $recipient = $user->email ?: $request->email;
         $salesHeader = SalesHeader::with('couponUsed')->find($salesHeader->id);

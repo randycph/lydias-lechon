@@ -80,6 +80,7 @@ if (!function_exists('unreadTransactions')) {
             $userName = auth()->user()->id;
             // Step 1: SalesHeader
             $salesHeaders = SalesHeader::with(['user', 'items', 'deliveryAddress', 'deliveryStatuses'])
+                ->where('has_transited', 1)
                 ->whereHas('deliveryStatuses', function ($q) use ($userName) {
                     $q->where('delivered_by', $userName)
                     ->whereIn('delivery_status', ['In Transit', 'Returned/Rejected', 'Delivered/Picked Up']);
@@ -155,7 +156,7 @@ if (!function_exists('unreadTransactions')) {
             })->count();
         } else {
             return SalesHeader::query()
-                ->whereColumn('created_at', 'updated_at') // unread = never updated
+                ->where('is_new_order', 1)
                 ->count();
         }
     }
@@ -167,7 +168,7 @@ if (!function_exists('isUnreadTransaction')) {
         if (auth()->user()->role_id == 15) {
             $sales = SalesHeader::with(['deliveryStatuses'])
                 ->whereKey($transactionId)
-
+                ->where('has_transited', 1)
                 ->first();
 
             if (!$sales) {
@@ -189,7 +190,7 @@ if (!function_exists('isUnreadTransaction')) {
         } else {
             return SalesHeader::query()
                 ->whereKey($transactionId)
-                ->whereColumn('created_at', 'updated_at') // unread = never updated
+                ->where('is_new_order', 1)
                 ->exists() ? 1 : 0;
         }
     }

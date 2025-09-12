@@ -355,6 +355,7 @@ class FrontendController extends Controller
         $page = 'order-history';
 
         $sales = SalesHeader::where('user_id', Auth::id())
+                            ->where('is_sub', 0)
                             ->with([
                                 'couponUsed',
                                 'items.product.photos',

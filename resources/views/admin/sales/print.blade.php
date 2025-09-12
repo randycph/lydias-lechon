@@ -206,6 +206,7 @@
                 </div>
             </div>
 
+            @if (isset($salesDetails) && $salesDetails->count() > 0)
             <!-- Order Details -->
             <div class="table-responsive mg-t-40">
                 <table class="table table-bordered bd-b tx-15">
@@ -243,7 +244,7 @@
                         @if($sales->gross_amount > 0)
                             <tr>
                                 <td class="tx-left " colspan="4">Subtotal</td>
-                                <td class="tx-right ">{{number_format($sales->gross_amount, 2)}}</td>
+                                <td class="tx-right ">₱{{number_format($salesDetails->sum('gross_amount') + $sales->delivery_fee_amount, 2)}}</td>
                             </tr>
                         @endif
 
@@ -296,12 +297,13 @@
                         @if($salesDetails->sum('gross_amount') > 0)
                             <tr style="font-weight:bold;">
                                 <td colspan="4">&nbsp;</td>
-                                <td class="tx-right">Total: {{number_format($sales->net_amount < 0 ? 0 : $sales->net_amount, 2)}}</td>
+                                <td class="tx-right">Total: ₱{{number_format($salesDetails->sum('net_amount') + $sales->delivery_fee_amount - $sales->discount_amount, 2)}}</td>
                             </tr>
                         @endif
                     </tbody>
                 </table>
             </div>
+            @endif
 
             <!-- Payments -->
             @if($salesPayments->count())

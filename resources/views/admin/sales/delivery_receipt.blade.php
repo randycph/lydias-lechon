@@ -184,8 +184,9 @@
                             @if($salesDetails->sum('gross_amount') > 0)
                                 <tr style="font-weight:bold;">
                                     <td class="tx-left" colspan="7">Total</td>
-                                    <td class="tx-right">{{number_format($sales->gross_amount < 0 ? 0 : $sales->gross_amount, 2)}}</td>
+                                    <td class="tx-right">₱{{number_format($salesDetails->sum('net_amount') + $sales->delivery_fee_amount - $sales->discount_amount, 2)}}</td>
                                 </tr>
+                                
                             @endif
                             </tbody>
                         </table>

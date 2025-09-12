@@ -251,14 +251,8 @@
                                                                 @if (!in_array($sale['delivery_status'], ['Delivered/Picked Up', 'Returned/Rejected']))
                                                                     <a class="dropdown-item" href="javascript:void(0);" onclick="change_delivery_status({{$sale['id']}}, {{$is_allowed_delivered}}, '{{$sale['delivery_type']}}')" title="Update Order Status" data-id="{{$sale['id']}}">Update Order Status</a>
                                                                 @endif
-                                                                @if ($sale['delivery_type'] == 'Door to door delivery' && ($sale['delivery_address'] && count($sale['delivery_address']) > 0))
-                                                                <div class="printReceipt" data-addresses="{{ json_encode($sale['delivery_address']) }}" data-saleid="{{ $sale['id'] }}">
-                                                                    <button class="dropdown-item">Print Delivery Receipt</button>
-                                                                </div>
-                                                                @else
                                                                 @if ($sale['type'] == 'sales')
                                                                 <a class="dropdown-item" href="{{route('admin.report.delivery_report',$sale['id'])}}" target="_blank" >Print Delivery Receipt</a>
-                                                                @endif
                                                                 @endif
                                                                 <a class="dropdown-item" href="javascript:void(0);" onclick="show_delivery_history({{$sale['id']}}, '{{$sale['type']}}')" title="Order History" data-id="{{$sale['id']}}">Show Order Status History</a>
                                                             
@@ -454,14 +448,14 @@
                     @csrf
                     @method('POST')
                     <div class="modal-body">
-                        <div class="form-group" id="deliveries_lists_div">
+                        {{-- <div class="form-group" id="deliveries_lists_div">
                             <label for="deliveries_lists">Deliveries</label>
                             <select id="deliveries_lists" class="form-control mg-b-5" name="deliveries_lists"  data-width="100%">
                             </select>
                             <p class="tx-10 text-danger" id="error">
                                 <x-error-message inputName="deliveries_lists" />
                             </p>
-                        </div>
+                        </div> --}}
                         <div class="form-group">
                             <label for="delivery_status">Status</label>
                             <select id="delivery_status" class="form-control mg-b-5" name="delivery_status"  data-width="100%" required="required">

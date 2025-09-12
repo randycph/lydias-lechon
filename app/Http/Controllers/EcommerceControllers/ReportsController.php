@@ -632,9 +632,16 @@ class ReportsController extends Controller
     public function delivery_report($id)
     {
         $sales = SalesHeader::whereId($id)->first();
-        $salesPayments = \App\EcommerceModel\SalesPayment::where('sales_header_id',$id)->get();
+
+        if ($sales->is_sub) {
+            $salesPayments = \App\EcommerceModel\SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)->get();
+            $totalPayment = \App\EcommerceModel\SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)->sum('amount');
+        } else {
+            $salesPayments = \App\EcommerceModel\SalesPayment::where('sales_header_id', $id)->get();
+            $totalPayment = \App\EcommerceModel\SalesPayment::where('sales_header_id',$id)->sum('amount');
+        }
+
         $salesDetails = \App\EcommerceModel\SalesDetail::where('sales_header_id',$id)->get();
-        $totalPayment = \App\EcommerceModel\SalesPayment::where('sales_header_id',$id)->sum('amount');
         $deliveries = \App\EcommerceModel\DeliveryStatus::where('order_id',$id)->get();
         $totalNet = \App\EcommerceModel\SalesHeader::where('id',$id)->sum('net_amount');
         if($totalNet <= $totalPayment)

@@ -74,6 +74,20 @@ class PaymayaController extends Controller
             $sales->sales->updated_at = $sales->sales->created_at;
             $sales->sales->save();
 
+            $subSales = SalesHeader::where('parent_sales_header_id', $sales->sales->id)->get();
+            if ($subSales && count($subSales) > 0) {
+                foreach ($subSales as $sub) {
+                    $sub->isConfirm = 1;
+                    $sub->confirmed_by = 'Customer';
+                    $sub->confirmed_on = date('Y-m-d H:i:s');
+                    $sub->confirm_remarks = 'Auto confirm via Paymaya checkout';
+                    $sub->updated_at = $sub->created_at;
+                    $sub->save();
+
+                    $sub->assign_to_production_branch($sub, 1);
+                }
+            }
+
             //Auto add production branch
             $sh = new SalesHeader();
             $sh->assign_to_production_branch($sales->sales, 1);

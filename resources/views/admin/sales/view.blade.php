@@ -26,35 +26,7 @@
                     <div>       
                         <h4> <br>Sales Transaction Summary</h4>
                         <h5>Order #: {{$sales->order_number}}</h5>
-                        @if ($sales?->deliveryAddress && count($sales?->deliveryAddress) > 0)
-                            <div class="d-flex" style="gap: 10px;">
-                                <div class="dropdown">
-                                    <button class="btn btn-xs btn-success dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        Print
-                                    </button>
-                                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                        @foreach ($sales?->deliveryAddress as $k => $address)
-                                            @php
-                                                $addressId = $address->id ?? null;
-                                                if (!$addressId) return null;
-
-                                                $status = trim((string)($address->delivery_status ?? $sales->delivery_status ?? ''));
-                                                $label  = $status !== '' ? $status : 'No status';
-
-                                                $href = url("admin/report/delivery_report/{$sales->id}/multiple/{$addressId}");
-                                            @endphp
-
-                                            <a class="dropdown-item" href="{{ $href }}">Address {{ $k + 1 }}: {{ $address->address }}, {{ $address->location }}</a>
-                                        @endforeach
-                                    </div>
-                                </div>
-                                @if ($sales->status != 'CANCELLED' && !isDispatcher())
-                                    <a href="{{ route('sales.update_details',$sales->id) }}" class="btn btn-xs btn-primary">Update Details</a>
-                                @endif
-                            </div>
-                        @else
-                            <a href="{{ route('sales.print',$sales->HashOrderNumber) }}" target="_blank" class="btn btn-xs btn-success">Print</a>
-                        @endif
+                        <a href="{{ route('sales.print',$sales->HashOrderNumber) }}" target="_blank" class="btn btn-xs btn-success">Print</a>
                     </div>
 
                     
@@ -79,9 +51,9 @@
                                     Delivery Branch: {{ $address->branch ?? '' }}<br>
                                     @endif
                                     Address {{ $k + 1 }}: {{ $address->address }}<br>
-                                    @php
+                                    {{-- @php
                                         $salesPayments = $sales->payments;
-                                    @endphp                             
+                                    @endphp                              --}}
                                     Payment Method: {{ $salesPayments?->first()?->payment_type ?? 'None' }}<br>
                                     Order/s:
                                         @if ($address->products)
@@ -204,6 +176,7 @@
                     </div>
                     <!-- col -->
 
+                    @if (isset($salesDetails) && count($salesDetails) > 0)
                     <div class="table-responsive mg-t-20">
                         <label class="tx-sans tx-uppercase tx-10 tx-medium tx-spacing-1 tx-color-03">Order Details</label>
                         <table class="table table-invoice bd-b">
@@ -232,11 +205,7 @@
                                     @if(date('H:i A',strtotime($details->delivery_date)) == '12:00 PM')
                                         {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
                                     @else
-                                        @if(($sales?->deliveryAddress && count($sales?->deliveryAddress) > 0) || $sales->delivery_type == 'Store Pickup')
-
-                                        @else
-                                            {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
-                                        @endif
+                                        {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
                                     @endif
                                     
                                 </td>
@@ -270,7 +239,7 @@
                             @if($salesDetails->sum('gross_amount') > 0)
                                 <tr>
                                     <td class="tx-left" colspan="8">Subtotal</td>
-                                    <td class="tx-right">₱{{number_format($sales->gross_amount, 2)}}</td> 
+                                    <td class="tx-right">₱{{number_format($salesDetails->sum('gross_amount') + $sales->delivery_fee_amount, 2)}}</td>
                                 </tr>
                             @endif
                             @if($sales->discount_amount > 0)
@@ -320,12 +289,13 @@
                             @if($salesDetails->sum('net_amount') > 0)
                                 <tr style="font-weight:bold;">
                                     <td class="tx-left" colspan="8">Total</td>
-                                    <td class="tx-right">₱{{number_format($sales->net_amount <= 0 ? 0 : $sales->net_amount, 2)}}</td>
+                                    <td class="tx-right">₱{{number_format($salesDetails->sum('net_amount') + $sales->delivery_fee_amount - $sales->discount_amount, 2)}}</td>
                                 </tr>
                             @endif
                             </tbody>
                         </table>
                     </div>
+                    @endif
 
                     <div class="table-responsive mg-t-20">
                         <label class="tx-sans tx-uppercase tx-10 tx-medium tx-spacing-1 tx-color-03">Payments</label>

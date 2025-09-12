@@ -87,45 +87,66 @@
                     <div class="flex items-center text-sm justify-between px-4 py-3 border-b border-gray-200">
                         <div>Delivery Address</div>
                         <div class="text-right">
-                            @if ($sales?->deliveryAddress && count($sales?->deliveryAddress) > 0)
-                                <ul class="list-decimal pl-5 flex flex-col gap-6">
-                                @foreach ($sales->deliveryAddress as $k => $address)
-                                <li>
-                                    <strong>Address</strong> {{ $k + 1 }}: {{ $address->address }}<br>
-                                    <strong>Contact person</strong>: {{ $address->contact_person }}<br>
-                                    <strong>Contact number</strong>: {{ $address->contact_tel }}<br>
-                                    <strong>Delivery fee</strong>: ₱{{ number_format($address->delivery_fee, 2) }}<br>
-                                    <strong>Location</strong>: {{ $address->location }}<br>
-                                    <strong>Delivery Date and time</strong>: {{ date('F d, Y g:i A', strtotime($address->delivery_date . ' ' . $address->delivery_time)) }}<br>
-                                    <strong>Order/s</strong>: 
-                                        @if ($address->products)
-                                            @php
-                                                $products = json_decode($address->products);
-                                            @endphp
+                            @if ($sales->has_sub == 1)
+                                @php
+                                    $salesHeaders = \App\EcommerceModel\SalesHeader::where('parent_sales_header_id', $sales->id)->get();
+                                    $addresses = [];
 
-                                            @if(is_array($products) || is_object($products))
-                                                <ul>
-                                                    @foreach ($products as $product)
-                                                        @php 
-                                                            $price = $product->product->price ?? 0;
-                                                            if (!empty($product->paella)) {
-                                                                $price += $product->product->paella_price ?? 0;
-                                                            }
-                                                        @endphp
-                                                        <li>
-                                                            {!! highlightPaella($product?->product_name ?? '') !!} x {{ $product->qty }} - ₱{{ number_format($price, 2) }}
-                                                        </li>
-                                                    @endforeach
-                                                </ul>
+                                    foreach ($salesHeaders as $header) {
+                                        $address = json_decode($header->deliveryAddress);
+                                        if ($address) {
+                                            $addresses[] = $address;
+                                        }
+                                    }
+                                @endphp
+                                @if ($addresses && count($addresses) > 0)
+                                    <ul class="list-decimal pl-5 flex flex-col gap-6">
+                                    @foreach ($addresses as $k => $row)
+                                        @php
+                                            $address = is_array($row) ? ($row[0] ?? null) : $row;
+                                            if (!$address) continue;
+
+                                            $products = json_decode($address->products ?? '[]') ?: [];
+
+                                            $totalQty = collect($products)->sum('qty');
+                                        @endphp
+                                    <li>
+                                        <strong>Address</strong> {{ $k + 1 }}: {{ $address->address }}<br>
+                                        <strong>Contact person</strong>: {{ $address->contact_person }}<br>
+                                        <strong>Contact number</strong>: {{ $address->contact_tel }}<br>
+                                        <strong>Delivery fee</strong>: ₱{{ number_format($address->delivery_fee, 2) }}<br>
+                                        <strong>Location</strong>: {{ $address->location }}<br>
+                                        <strong>Delivery Date and time</strong>: {{ date('F d, Y g:i A', strtotime($address->delivery_date . ' ' . $address->delivery_time)) }}<br>
+                                        <strong>Order/s</strong>: 
+                                            @if ($address->products)
+                                                @php
+                                                    $products = json_decode($address->products);
+                                                @endphp
+
+                                                @if(is_array($products) || is_object($products))
+                                                    <ul>
+                                                        @foreach ($products as $product)
+                                                            @php 
+                                                                $price = $product->product->price ?? 0;
+                                                                if (!empty($product->paella)) {
+                                                                    $price += $product->product->paella_price ?? 0;
+                                                                }
+                                                            @endphp
+                                                            <li>
+                                                                {!! highlightPaella($product?->product_name ?? '') !!} x {{ $product->qty }} - ₱{{ number_format($price, 2) }}
+                                                            </li>
+                                                        @endforeach
+                                                    </ul>
+                                                @endif
                                             @endif
+                                        <br>
+                                        @if ($address->note)
+                                        <strong>Note</strong>: {{ $address->note ?? 'NA' }}<br>
                                         @endif
-                                    <br>
-                                    @if ($address->note)
-                                    <strong>Note</strong>: {{ $address->note ?? 'NA' }}<br>
-                                    @endif
-                                </li>
-                                @endforeach
-                                </ul>
+                                    </li>
+                                    @endforeach
+                                    </ul>
+                                @endif
                             @else
                                 {{ $sales->customer_delivery_adress ?? 'NA' }}
                             @endif

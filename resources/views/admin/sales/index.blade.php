@@ -196,6 +196,7 @@
                             </thead>
                             <tbody>
                             @forelse($sales as $sale)
+
                                 @php
                                     $date_needed = $sale->items->first();
                                     $dateneeded = '';
@@ -243,7 +244,7 @@
                                     <td class="{{ isUnreadTransaction($sale->id) ? 'font-weight-bold' : '' }}">{{ $sale->customer_name }}</td>
                                     <td>{{ $sale->order_source }}</td>
                                     <td>{{ \Carbon\Carbon::parse($sale->created_at)->format('Y-m-d H:i A') }}</td>
-                                    <td style="font-size:11px;">
+                                    <td>
                                         @if($sale->delivery_status <> 'Open Date')
                                             
                                             
@@ -424,13 +425,7 @@
                                                                     </a>
                                                                 @endif
                                                             @endif
-                                                                @if ($sale->delivery_type == 'Door to door delivery' && ($sale->deliveryAddress && count($sale->deliveryAddress) > 0))
-                                                                <div class="printReceipt" data-addresses="{{ json_encode($sale->deliveryAddress) }}" data-saleid="{{ $sale->id }}">
-                                                                    <button class="dropdown-item">Print Delivery Receipt</button>
-                                                                </div>
-                                                                @else
                                                                 <a class="dropdown-item" href="{{route('sales.print',$sale->HashOrderNumber)}}" target="_blank" >Print Delivery Receipt</a>
-                                                                @endif
                                                                 <a class="dropdown-item" href="javascript:void(0);" onclick="show_delivery_history({{$sale->id}})" title="Order History" data-id="{{$sale->id}}">Show Order Status History</a>
                                                             
                                                             @if (substr(strtolower($sale?->user?->email), 0, 8) == 'lydtemp_')
@@ -627,14 +622,14 @@
                     @csrf
                     @method('POST')
                     <div class="modal-body">
-                        <div class="form-group" id="deliveries_lists_div">
+                        {{-- <div class="form-group" id="deliveries_lists_div">
                             <label for="deliveries_lists">Deliveries</label>
                             <select id="deliveries_lists" class="form-control mg-b-5" name="deliveries_lists"  data-width="100%">
                             </select>
                             <p class="tx-10 text-danger" id="error">
                                 <x-error-message inputName="deliveries_lists" />
                             </p>
-                        </div>
+                        </div> --}}
                         <div class="form-group">
                             <label for="delivery_status">Status</label>
                             <select id="delivery_status" class="form-control mg-b-5" name="delivery_status"  data-width="100%" required="required">

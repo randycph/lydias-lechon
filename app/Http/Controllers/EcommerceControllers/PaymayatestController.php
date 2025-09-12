@@ -70,8 +70,21 @@ class PaymayatestController extends Controller
             $sales->sales->confirmed_by = 'Customer';
             $sales->sales->confirmed_on = date('Y-m-d H:i:s');
             $sales->sales->confirm_remarks = 'Auto confirm via Paymaya checkout';
-            $sales->sales->updated_at = $sales->sales->created_at;
             $sales->sales->save();
+
+            $subSales = SalesHeader::where('parent_sales_header_id', $sales->sales->id)->get();
+            if ($subSales && count($subSales) > 0) {
+                foreach ($subSales as $sub) {
+                    $sub->isConfirm = 1;
+                    $sub->confirmed_by = 'Customer';
+                    $sub->confirmed_on = date('Y-m-d H:i:s');
+                    $sub->confirm_remarks = 'Auto confirm via Paymaya checkout';
+                    $sub->updated_at = $sub->created_at;
+                    $sub->save();
+
+                    $sub->assign_to_production_branch($sub, 1);
+                }
+            }
 
             if ($sales->sales->discount_amount && $sales->sales->discount_amount > 0) {
                 CouponCart::where('sales_header_id', $sales->sales->id)->update([

@@ -21,7 +21,7 @@ class SalesHeader extends Model
 
     protected $table = 'ecommerce_sales_headers';
     protected $fillable = ['updated_at', 'created_at', 'user_id', 'order_number', 'response_code', 'customer_name', 'customer_contact_number', 'customer_address', 'customer_delivery_adress', 'delivery_tracking_number', 'delivery_fee_amount',
-        'gross_amount', 'tax_amount', 'net_amount', 'discount_amount', 'payment_status',
+        'gross_amount', 'parent_sales_header_id', 'has_sub', 'is_sub', 'has_dispatched', 'has_transited', 'is_new_order', 'tax_amount', 'net_amount', 'discount_amount', 'payment_status',
         'delivery_status', 'status', 'currency','order_source','payment_type','delivery_type','order_type','outlet','receipt_number','instruction','agent','customer_location','email','payment_used','payment_remarks','contact_person','isConfirm','confirmed_by','confirmed_on','confirm_remarks','origin','delivery_branch','forecast_date', 'is_multiple_address'];
 
     public function user()
@@ -129,20 +129,27 @@ class SalesHeader extends Model
 
     public function getPaymentadminstatusAttribute()
     {
-       $amount = floatval($this->net_amount);
-       $paid = (float) SalesPayment::where('sales_header_id',$this->id)->whereStatus('PAID')->sum('amount');
-       $balance = $amount - $paid;
-       if($balance <= 0){
+        $amount = floatval($this->net_amount);
+        $sale = SalesHeader::find($this->id);
+
+        if (isset($sale->parent_sales_header_id) && $sale->parent_sales_header_id != null) {
+            $paid = (float) SalesPayment::where('sales_header_id', $sale->parent_sales_header_id)->whereStatus('PAID')->sum('amount');
+        } else {
+            $paid = (float) SalesPayment::where('sales_header_id', $sale->id)->whereStatus('PAID')->sum('amount');
+        }
+       
+        $balance = $amount - $paid;
+        if($balance <= 0){
             return 'PAID';
-       }
-       else{
+        }
+        else{
             if($paid > 0){
                 return 'PARTIAL';
             }
             else{
                 return 'UNPAID';
             }
-       }
+        }
     }
 
     public static function balance($id){
@@ -194,9 +201,17 @@ class SalesHeader extends Model
 
     public function getPaymentStatusAttribute($value)
     {
-        $paid = SalesPayment::where('sales_header_id', $this->id)
-            ->where('status', 'PAID') 
-            ->sum('amount');
+        $sale = SalesHeader::find($this->id);
+
+        if (isset($sale->parent_sales_header_id) && $sale->parent_sales_header_id != null) {
+            $paid = SalesPayment::where('sales_header_id', $sale->parent_sales_header_id)
+                ->where('status', 'PAID') 
+                ->sum('amount');
+        } else {
+            $paid = SalesPayment::where('sales_header_id', $this->id)
+                ->where('status', 'PAID') 
+                ->sum('amount');
+        }
 
         // Use the raw/current saved status to avoid recursion
         $current = $value ?? $this->getRawOriginal('payment_status');

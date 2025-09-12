@@ -556,10 +556,10 @@ class SalesController extends Controller
                 //     });
 
                 $model = SalesHeader::where(function ($query) use($eligible) {
-                    $query->whereIn('id', $eligible);
+                    $query->whereIn('id', $eligible)->where('has_sub', 0);
                 });
             } else {
-                $model = SalesHeader::where('id','>',0);
+                $model = SalesHeader::where('id','>',0)->where('has_sub', 0);
             }
 
         }else{
@@ -735,14 +735,23 @@ class SalesController extends Controller
     public function show($id)
     {
         $sales = SalesHeader::with(['deliveryAddress', 'couponUsed', 'user', 'items'])->where('id',$id)->first();
+
+        if ($sales->is_sub == 1) {
+            $subSales = SalesHeader::where('id', $sales->parent_sales_header_id)->first();
+            $salesPayments = $subSales->payments ?? collect();
+            $totalPayment = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)->sum('amount');
+        } else {
+            $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
+            $totalPayment = SalesPayment::where('sales_header_id',$id)->sum('amount');
+        }
+
         if (!$sales) {
             return redirect()->route('sales-transaction.index')->with('error', 'Sales record not found.');
         }
+        
 
-        $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
         $gc = GiftCertificate::where('sales_header_id',$id)->get();
         $salesDetails = SalesDetail::where('sales_header_id',$id)->get();
-        $totalPayment = SalesPayment::where('sales_header_id',$id)->sum('amount');
         $deliveries = DeliveryStatus::where('order_id',$id)->get();
         $deliveries = DeliveryStatus::where('order_id',$id)->get();
         $totalNet = SalesHeader::where('id',$id)->sum('net_amount');
@@ -898,11 +907,15 @@ class SalesController extends Controller
 
             $sms = new Sms();
             $order =  SalesHeader::where('id',$request->del_id)->with('deliveryAddress', 'items', 'couponUsed', 'user')->first();
+            $order->is_new_order = 0;
+            $order->save();
             if($order->customer_contact_number && ($request->delivery_status == 'Ready For delivery' || $request->delivery_status == 'Delivered/Picked Up' || $request->delivery_status == 'In Transit')){
                 
                 $sms->send_sms($order->customer_contact_number, 'delivery_update', $order);
 
                 if ($request->delivery_status == 'In Transit') {
+                    $order->has_transited = 1;
+                    $order->save();
                     $driver = User::where('id', $request->delivered_by)->first();
 
                     if ($driver && !empty($driver->email)) {
@@ -1149,8 +1162,14 @@ class SalesController extends Controller
     public function display_payments(Request $request){
         $input = $request->all();
 
-        $payments = SalesPayment::where('sales_header_id',$request->id)->get();
+        $sale = SalesHeader::where('id', $request->id)->first();
 
+        if (isset($sale->is_sub) && $sale->is_sub == 1) {
+            $parentSale = SalesHeader::where('id', $sale->parent_sales_header_id)->first();
+            $payments = SalesPayment::where('sales_header_id', $parentSale->id)->get();
+        } else {
+            $payments = SalesPayment::where('sales_header_id',$request->id)->get();
+        }
 
         return view('admin.sales.added-payments-result',compact('payments'));
     }
@@ -1177,11 +1196,17 @@ class SalesController extends Controller
         
         $sales = \App\EcommerceModel\SalesHeader::with('couponUsed')->where('id',$id)->first();
 
+        if ($sales->is_sub == 1) {
+            $subSales = SalesHeader::where('id', $sales->parent_sales_header_id)->first();
+            $salesPayments = $subSales->payments ?? collect();
+        } else {
+            $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
+        }
+
         if (!$sales) {
             return redirect()->route('sales-transaction.index')->with('error', 'Sales record not found.');
         }
 
-        $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
         $salesDetails  = SalesDetail::where('sales_header_id',$id)->get();
         $deliveries    = DeliveryStatus::where('order_id',$id)->get();
 
