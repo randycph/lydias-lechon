@@ -205,8 +205,10 @@
                 },
                 'colvis'
             ],
+            order: [[13, 'desc'], [14, 'asc']],
+
             columnDefs: [ {
-                targets: [1,2,7,9,10,11,13],
+                targets: [1,2,7,9,10,11],
                 visible: false
             },
             { type: 'time-uni', targets: [2,14] } ]
