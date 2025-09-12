@@ -242,7 +242,7 @@
                                     <td class="tx-right">₱{{number_format($salesDetails->sum('gross_amount') + $sales->delivery_fee_amount, 2)}}</td>
                                 </tr>
                             @endif
-                            @if($sales->discount_amount > 0 && $sales->has_sub == 0)
+                            @if($sales->discount_amount > 0 && $sales->is_sub == 0)
 
                                     @if($sales->couponUsed && count($sales->couponUsed) > 0)
                                         <tr>
@@ -289,7 +289,7 @@
                             @if($salesDetails->sum('net_amount') > 0)
                                 <tr style="font-weight:bold;">
                                     <td class="tx-left" colspan="8">Total</td>
-                                    <td class="tx-right">₱{{number_format($salesDetails->sum('net_amount') + $sales->delivery_fee_amount - ($sales->has_sub == 0 ? $sales->discount_amount : 0), 2)}}</td>
+                                    <td class="tx-right">₱{{number_format($salesDetails->sum('net_amount') + $sales->delivery_fee_amount - ($sales->is_sub == 0 ? $sales->discount_amount : 0), 2)}}</td>
                                 </tr>
                             @endif
                             </tbody>
