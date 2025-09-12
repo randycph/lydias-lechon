@@ -851,7 +851,7 @@ class ReportsController extends Controller
             left join job_orders jo on jo.sales_detail_id = d.id
             left join production_orders po on po.joborder_id = jo.id
             left join production_branches pb on pb.id = po.branch_id
-         where h.delivery_type='Door to door delivery' and h.deleted_at is null and h.isConfirm=1";
+         where h.delivery_type='Door to door delivery' and h.deleted_at is null and h.isConfirm=1 AND h.has_sub = 0";
 
          // $qry = "SELECT po.schedule_type as schedtype,pb.name as prod_branch,j.jo_number as jnum,h.*,d.*,h.created_at as hcreated,h.id as hid,p.category_id,c.name as catname,d.id as did, h.instruction, h.payment_status, h.order_number as ordnum
          //        FROM `production_orders` po
