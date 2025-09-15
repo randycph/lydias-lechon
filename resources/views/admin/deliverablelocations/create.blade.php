@@ -106,7 +106,7 @@
     $(function () {
     const urls = [
         '{{ asset("addresses/addresses.json") }}',
-        '{{ asset("philippine_provinces_cities_municipalities_and_barangays_2019v2.json") }}'
+        '{{ asset("addresses/philippine_provinces_cities_municipalities_and_barangays_2019v2.json") }}'
     ];
 
     const DEFAULT_REGION_NAME = 'NCR';
