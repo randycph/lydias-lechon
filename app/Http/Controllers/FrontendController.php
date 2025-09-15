@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\EcommerceModel\Branch;
 use App\EcommerceModel\Cart;
+use App\EcommerceModel\Coupon;
+use App\EcommerceModel\CouponCart;
 use App\EcommerceModel\DeliveryStatus;
 use App\EcommerceModel\GiftCertificate;
 use App\EcommerceModel\SalesDetail;
@@ -20,6 +22,7 @@ use App\Models\ProductCategory;
 use App\Models\Setting;
 use App\Models\Sms;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -325,6 +328,44 @@ class FrontendController extends Controller
         }
 
         return view('v2.my-account', compact('page'));
+    }
+
+    public function my_coupons(Request $request)
+    {
+        $page = 'my-coupons';
+
+        $request->session()->forget('redirect_after_login');
+
+        if (!Auth::check()) {
+            return redirect()->route('login', ['redirect' => $request->fullUrl()]);
+        }
+
+        $now = now()->toDateTimeString();
+        $uid = Auth::id();
+
+        $eligibleCoupons = Coupon::query()
+            ->where('activation_type', 'auto')
+            ->where('status', 'ACTIVE')
+            ->whereRaw("CONCAT(start_date, ' ', start_time) <= ?", [$now])
+            ->whereRaw("CONCAT(end_date, ' ', end_time) >= ?", [$now])
+            ->where(function ($q) use ($uid) {
+                // visible to everyone
+                $q->whereNull('customer_scope')->orWhere('customer_scope', 'all')
+                // visible only if user's ID is in the list
+                ->orWhere(function ($x) use ($uid) {
+                    $x->where('customer_scope', 'specific')
+                        ->whereRaw(
+                            "FIND_IN_SET(?, REPLACE(REPLACE(scope_customer_id, ' ', ''), '|', ','))",
+                            [$uid]
+                        );
+                });
+            })
+            ->get();
+
+
+        // dd($eligibleCoupons);
+
+        return view('v2.my-coupons', compact('page', 'eligibleCoupons'));
     }
 
     public function my_cart(Request $request)
