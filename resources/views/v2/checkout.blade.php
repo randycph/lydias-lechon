@@ -1832,7 +1832,7 @@
                 // for multi delivery
                 this.deliveries.forEach((_, i) => this._wireDelivery(i));
 
-                const res = await fetch('https://raw.githubusercontent.com/flores-jacob/philippine-regions-provinces-cities-municipalities-barangays/refs/heads/master/philippine_provinces_cities_municipalities_and_barangays_2019v2.json');
+                const res = await fetch('{{ asset("philippine_provinces_cities_municipalities_and_barangays_2019v2.json") }}');
                 this.phData = await res.json();
 
 

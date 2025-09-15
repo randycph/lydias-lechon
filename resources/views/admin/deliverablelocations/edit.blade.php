@@ -115,8 +115,7 @@
     $(function () {
     const urls = [
         '{{ asset("addresses/addresses.json") }}',
-        'https://raw.githubusercontent.com/flores-jacob/philippine-regions-provinces-cities-municipalities-barangays/refs/heads/master/philippine_provinces_cities_municipalities_and_barangays_2019v2.json',
-        'https://cdn.jsdelivr.net/gh/flores-jacob/philippine-regions-provinces-cities-municipalities-barangays@master/philippine_provinces_cities_municipalities_and_barangays_2019v2.json'
+        '{{ asset("philippine_provinces_cities_municipalities_and_barangays_2019v2.json") }}',
     ];
 
     const DEFAULT_REGION_NAME = 'NCR';
