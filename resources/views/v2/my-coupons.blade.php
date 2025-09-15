@@ -48,7 +48,7 @@
                                 open:false, active:{},
                                 openModal(c){ this.active=c; this.open=true; document.body.classList.add('overflow-hidden') },
                                 close(){ this.open=false; document.body.classList.remove('overflow-hidden') }
-                            }" @keydown.escape.window="close()" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                            }" @keydown.escape.window="close()" class="max-w-7xl">
                             <!-- GRID: 1 / 2 / 3 columns -->
                             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2">
 
