@@ -181,6 +181,7 @@
                                 </th>
                                 <th>Order Number</th>
                                 <th>Customer</th>
+                                <th>Ordered By</th>
                                 <th>Source</th>
                                 <th>Order Date</th>
                                 <th>Date Needed</th>
@@ -241,7 +242,8 @@
                                             <a title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale->id) }}">{{$sale->order_number }}</a><br>
                                         </div>
                                     </th>
-                                    <td class="{{ isUnreadTransaction($sale->id) ? 'font-weight-bold' : '' }}">{{ $sale->customer_name }}</td>
+                                    <td class="{{ isUnreadTransaction($sale->id) ? 'font-weight-bold' : '' }}">{{ $sale->contact_person ?? $sale->customer_name }}</td>
+                                    <td>{{ $sale->customer_name }}</td>
                                     <td>{{ $sale->order_source }}</td>
                                     <td>{{ \Carbon\Carbon::parse($sale->created_at)->format('Y-m-d H:i A') }}</td>
                                     <td>

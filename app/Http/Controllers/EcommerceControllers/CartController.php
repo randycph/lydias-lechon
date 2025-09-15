@@ -1142,7 +1142,7 @@ class CartController extends Controller
                             'parent_sales_header_id' => $salesHeader->id,
                             'email' => $request->email ?? $user->email,
                             'order_number' => $requestId,
-                            'customer_name' => $delivery->name,
+                            'customer_name' => $customer_name,
                             'customer_contact_number' => $delivery->phone,
                             'customer_address' => $delivery->address,
                             'customer_delivery_adress' => $delivery->address,
