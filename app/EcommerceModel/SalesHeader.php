@@ -153,7 +153,14 @@ class SalesHeader extends Model
     }
 
     public static function balance($id){
-        $amount = SalesHeader::whereId($id)->sum('net_amount');
+        $sales = SalesHeader::whereId($id)->first();
+
+        if ($sales->is_sub == 1) {
+            $amount = SalesHeader::where('parent_sales_header_id', $id)->sum('net_amount');
+        } else {
+            $amount = SalesHeader::whereId($id)->sum('net_amount');
+        }
+
         $paid = (float) SalesPayment::where('sales_header_id',$id)->whereStatus('PAID')->sum('amount');
         $total = $amount - $paid;
         if($total < 0){
@@ -163,7 +170,15 @@ class SalesHeader extends Model
     }
 
     public static function paid($id){
-        $paid = SalesPayment::where('sales_header_id',$id)->whereStatus('PAID')->sum('amount');
+        $sales = SalesHeader::whereId($id)->first();
+
+        if ($sales->is_sub == 1) {
+            $paid = SalesPayment::where('sales_header_id',$sales->parent_sales_header_id)->whereStatus('PAID')->sum('amount');
+        } else {
+            $paid = SalesPayment::where('sales_header_id',$id)->whereStatus('PAID')->sum('amount');
+        }
+
+        // $paid = SalesPayment::where('sales_header_id',$id)->whereStatus('PAID')->sum('amount');
         return $paid;
     }
 
