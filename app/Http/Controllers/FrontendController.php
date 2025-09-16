@@ -244,7 +244,30 @@ class FrontendController extends Controller
 
         $dataPrivacyRender = view('v2.data-privacy', compact('dataPrivacy'))->render();
 
-        return view('v2.checkout', compact('triples', 'provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc'));
+        $now = now()->toDateTimeString();
+        $uid = Auth::id();
+
+        $eligibleCoupons = Coupon::query()
+            ->where('status', 'ACTIVE')
+            ->whereRaw("CONCAT(start_date, ' ', start_time) <= ?", [$now])
+            ->whereRaw("CONCAT(end_date, ' ', end_time) >= ?", [$now])
+            ->where(function ($q) use ($uid) {
+                // visible to everyone
+                $q->whereNull('customer_scope')->orWhere('customer_scope', 'all')
+                // visible only if user's ID is in the list
+                ->orWhere(function ($x) use ($uid) {
+                    $x->where('customer_scope', 'specific')
+                        ->whereRaw(
+                            "FIND_IN_SET(?, REPLACE(REPLACE(scope_customer_id, ' ', ''), '|', ','))",
+                            [$uid]
+                        );
+                });
+            })
+            ->get();
+
+        // dd($eligibleCoupons);
+
+        return view('v2.checkout', compact('triples', 'provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc', 'eligibleCoupons'));
     }
 
     public function confirmation($id)
@@ -344,7 +367,6 @@ class FrontendController extends Controller
         $uid = Auth::id();
 
         $eligibleCoupons = Coupon::query()
-            ->where('activation_type', 'auto')
             ->where('status', 'ACTIVE')
             ->whereRaw("CONCAT(start_date, ' ', start_time) <= ?", [$now])
             ->whereRaw("CONCAT(end_date, ' ', end_time) >= ?", [$now])

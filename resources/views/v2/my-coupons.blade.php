@@ -62,6 +62,9 @@
                                 $locations = \Str::contains($c->location, 'all') ? 'All Stores' : ($c->location ? explode('|', $c->location) : []);
                                 $discountAmount = $c->location_discount_type === 'full' ? 100 . '% off' : ($c->location_discount_type === 'partial' ? number_format($c->location_discount_amount, 0) . '% off' : ($c->reward == 'discount-amount-optn' ? '₱' . number_format($c->amount, 0) : ($c->reward == 'discount-percentage-optn' ? number_format($c->percentage, 0) . '% off' : '0')));
                                 $headlinePct = $c->percentage ? ($c->percentage . '%') : null;
+                                $purchase_amount = $c->purchase_amount;
+                                $percentage = $c->percentage ?? 0;
+                                $amount = $c->amount ?? 0;
                                 $reward = match (trim((string)($c->reward ?? ''))) {
                                 'free-shipping-optn' => 'Free Shipping',
                                 'discount-amount-optn' => 'Discount Amount',
@@ -83,7 +86,10 @@
                                     locations: @js($locations ?? 'All stores'),
                                     logo: @js($logo),
                                     reward: @js($reward),
+                                    purchase_amount: @js($purchase_amount),
                                     discountAmount: @js($discountAmount),
+                                    percentage: @js($percentage),
+                                    amount: @js($amount),
                                     })" class="relative w-full text-left">
 
                                     <!-- card shell -->
@@ -123,7 +129,15 @@
 
                                                     </p>
 
-                                                    <div class="mt-3">
+                                                    <div class="mt-1">
+                                                        <p class="text-[11px] uppercase tracking-wide text-gray-400">
+                                                            Min.</p>
+                                                        <p class="text-sm font-semibold text-gray-900">{{ $purchase_amount >
+                                                            0 ? '₱' . number_format($purchase_amount, 0) : 'N/A' }}
+                                                        </p>
+                                                    </div>
+
+                                                    <div class="mt-1">
                                                         <p class="text-[11px] uppercase tracking-wide text-gray-400">
                                                             Expires</p>
                                                         <p class="text-sm font-semibold text-gray-900">{{ $expires }}
@@ -145,7 +159,6 @@
                                 @endforeach
                             </div>
 
-                            <!-- MODAL: Ticket poster (orange), dashed cut, barcode -->
                             <div x-cloak x-show="open" class="fixed inset-0 z-50">
                                 <!-- backdrop -->
                                 <div class="fixed inset-0 bg-black/50" @click="close()"></div>
@@ -170,13 +183,24 @@
                                                 style="background: radial-gradient(120% 90% at 20% -10%, rgba(255,255,255,.15) 0%, rgba(255,255,255,0) 60%), linear-gradient(180deg,#ff8545 0%, #f4672b 100%);">
                                                 <div class="text-center">
                                                     <p class="text-xl/5 opacity-90 py-5" x-text="active.reward"></p>
+                                                    <template x-if="active.discountAmount > 0">
                                                     <h2 class="mt-2 text-5xl font-extrabold font-cubao"
-                                                        x-text="active.discountAmount"></h2>
+                                                        x-text="active.discountAmount || active.purchase_amount"></h2>
+                                                    </template>
+                                                    <template x-if="active.percentage > 0">
+                                                    <h2 class="mt-2 text-5xl font-extrabold font-cubao"
+                                                        x-text="active.percentage + '%'"></h2>
+                                                    </template>
+                                                    <template x-if="active.amount > 0">
+                                                    <h2 class="mt-2 text-5xl font-extrabold font-cubao"
+                                                        x-text="'₱' + active.amount"></h2>
+                                                    </template>
                                                     <p class="mt-3 opacity-90"
                                                         x-text="active.desc || 'Get this limited-time discount in-store or online.'">
                                                     </p>
-                                                    <div>Applicable locations: <span x-text="active.locations"></span>
-                                                    </div>
+                                                    <template x-if="active.locations != ''">
+                                                    <div>Applicable locations: <span x-text="active.locations"></span></div>
+                                                    </template>
                                                 </div>
 
                                                 <div class="flex justify-center mt-10">

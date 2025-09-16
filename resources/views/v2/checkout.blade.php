@@ -1,88 +1,97 @@
 @extends('layouts.guest', ['page' => $page])
 
 @section('title', 'Checkout')
-@section('meta_description', 'Complete your order at Lydia\'s Lechon. Review your cart, choose delivery or pickup, and finalize your purchase for a delicious meal.')
+@section('meta_description', 'Complete your order at Lydia\'s Lechon. Review your cart, choose delivery or pickup, and
+finalize your purchase for a delicious meal.')
 
 @section('content')
 
 @php
-    $deliveryFee = 0;
-    $total = 0;
+$deliveryFee = 0;
+$total = 0;
 
-    foreach ($carts as $cart) {
-        $qty = $cart['qty'] ?? 1;
-        $paella_price = $cart['paella_price'] > 0 ? $cart['product']['paella_price'] : 0;
-        $price = $cart['price'] ?? 0;
+foreach ($carts as $cart) {
+$qty = $cart['qty'] ?? 1;
+$paella_price = $cart['paella_price'] > 0 ? $cart['product']['paella_price'] : 0;
+$price = $cart['price'] ?? 0;
 
-        $isFree = $cart['is_free_product'] ?? false;
+$isFree = $cart['is_free_product'] ?? false;
 
-        $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
-    }                 
+$total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
+}
 @endphp
 
+<style>
+    :root {
+        --page-bg: #fff;
+    }
+
+    [x-cloak] {
+        display: none;
+    }
+
+    .vertical-rl {
+        writing-mode: vertical-rl;
+    }
+</style>
+
 <div class="bg-cream">
-    <div 
-        x-data="checkoutForm" 
-        init="init()" 
-        class="container">
-        <form
-            action="{{ route('cart.temp_sales') }}" 
-            method="POST" 
-            id="checkoutForm"
-            enctype="multipart/form-data"
+    <div x-data="checkoutForm" init="init()" class="container">
+        <form action="{{ route('cart.temp_sales') }}" method="POST" id="checkoutForm" enctype="multipart/form-data"
             @submit.prevent="submitForm" class="pb-20 px-4">
             <div class="pt-20 pb-5 px-4">
                 <h1 class="text-4xl lg:text-7xl font-cubao font-medium text-primary text-center mt-10">Checkout</h1>
                 @if ($carts && count($carts) > 0)
-                <h3 class="font-medium lg:text-2xl text-center">You're almost there! Review your order details, choose your payment
+                <h3 class="font-medium lg:text-2xl text-center">You're almost there! Review your order details, choose
+                    your payment
                     method, and finalize your purchase to enjoy your Lydia's Lechon meal.</h3>
                 @endif
             </div>
 
             @if (session('success'))
-                <div class="bg-green-100 text-green-800 p-4 rounded-md mb-4">
-                    <strong>Success!</strong> {{ session('success') }}
-                </div>
+            <div class="bg-green-100 text-green-800 p-4 rounded-md mb-4">
+                <strong>Success!</strong> {{ session('success') }}
+            </div>
             @endif
 
             @if ($carts->isEmpty())
-                <div class="flex flex-col items-center justify-center h-96">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-20">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                    </svg>
-                    <h2 class="text-xl font-semibold mt-4">Your cart is empty</h2>
-                    <p class="text-gray-500">Looks like you haven't added anything to your cart yet.</p>
-                    <a href="{{ route('lechon-menu') }}" class="mt-4 bg-primary text-white px-4 py-2 rounded-md">Start Shopping</a>
-                </div>
+            <div class="flex flex-col items-center justify-center h-96">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="size-20">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                </svg>
+                <h2 class="text-xl font-semibold mt-4">Your cart is empty</h2>
+                <p class="text-gray-500">Looks like you haven't added anything to your cart yet.</p>
+                <a href="{{ route('lechon-menu') }}" class="mt-4 bg-primary text-white px-4 py-2 rounded-md">Start
+                    Shopping</a>
+            </div>
             @else
             <div class="flex flex-col lg:flex-row gap-4 w-full mt-10">
-                
+
                 @csrf
                 <div class="w-full order-1 lg:order-2 rounded-lg border bg-white border-[#DFDFDF] shadow-md ">
                     <div class="px-4 py-3 border-b border-[#DFDFDF]">
                         <h2 class="text-lg lg:text-3xl font-semibold text-left">Order Summary</h2>
                     </div>
-                    <div class="flex items-center text-sm lg:text-base justify-between px-4 py-3 border-b border-[#DFDFDF]">
+                    <div
+                        class="flex items-center text-sm lg:text-base justify-between px-4 py-3 border-b border-[#DFDFDF]">
                         <div x-text="carts.length + ' items'"></div>
-                        <div class="font-bold" 
-                            x-text="'₱' + carts.reduce((sum, item) => 
+                        <div class="font-bold" x-text="'₱' + carts.reduce((sum, item) => 
                                 sum + 
                                 ((Number((item?.paella_price > 0 ? item?.product?.paella_price : 0)) || 0) * (Number(item.qty) || 1)) + 
                                 (item.is_free_product ? 0 : (Number(item.price) || 0) * (Number(item.qty) || 1))
-                            , 0).toLocaleString(undefined, { minimumFractionDigits: 2 })"
-
-                            {{-- x-text="'₱' + carts.reduce((sum, item) => sum + item.paella_price + (item.is_free_product ? 0 : item.price * item.qty), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })" --}}
-                        ></div>
+                            , 0).toLocaleString(undefined, { minimumFractionDigits: 2 })" {{--
+                            x-text="'₱' + carts.reduce((sum, item) => sum + item.paella_price + (item.is_free_product ? 0 : item.price * item.qty), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })"
+                            --}}></div>
                     </div>
-    
+
                     <div class="flex flex-col items-center gap-4 px-4 py-3 border-b border-[#DFDFDF] w-full">
                         <template x-for="(item, index) in carts" :key="index">
                             <div class="flex gap-4 items-start w-full relative  border-gray-200 py-3">
                                 <!-- Image -->
                                 <div class="w-20 h-20 min-w-20 min-h-20 bg-center rounded-md overflow-hidden">
-                                    <img
-                                        x-ref="productImage"
-                                        x-init="
+                                    <img x-ref="productImage" x-init="
                                             let img = $refs.productImage;
                                             img.onerror = () => {
                                                 img.src = '{{ asset('images/no-image.jpg') }}';
@@ -90,27 +99,30 @@
                                             img.src = item?.product?.photos?.length > 0
                                                 ? item.product.photos[item.product.photos.length - 1]?.url
                                                 : '{{ asset('images/no-image.jpg') }}';
-                                        "
-                                        :alt="item?.product?.name"
-                                        class="w-20 h-20 object-cover rounded-md scale-110"
-                                    />
+                                        " :alt="item?.product?.name"
+                                        class="w-20 h-20 object-cover rounded-md scale-110" />
                                 </div>
 
                                 <!-- Info -->
                                 <div class="flex flex-col flex-grow">
                                     <div class="">
-                                        <span class="font-bold" x-text="item?.product?.name"></span> <span class="italic" x-text="parseFloat(item.paella_price) > 0 ? 'Boneless with Paella' : ''"></span>
+                                        <span class="font-bold" x-text="item?.product?.name"></span> <span
+                                            class="italic"
+                                            x-text="parseFloat(item.paella_price) > 0 ? 'Boneless with Paella' : ''"></span>
                                         <template x-if="item.is_free_product">
-                                            <span class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">FREE</span>
+                                            <span
+                                                class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">FREE</span>
                                         </template>
                                     </div>
                                     <div class="text-sm text-gray-600 font-medium">
                                         Price:
-                                        <span x-text="item.is_free_product 
+                                        <span
+                                            x-text="item.is_free_product 
                                             ? '₱0.00' 
                                             : '₱' + parseFloat(item.price).toLocaleString(undefined, { minimumFractionDigits: 2 })">
                                         </span>
-                                        <span class="italic" x-text="item?.paella_price > 0 ? '+ ₱' + parseFloat(item?.product?.paella_price).toLocaleString(undefined, { minimumFractionDigits: 2 }) : ''"></span>
+                                        <span class="italic"
+                                            x-text="item?.paella_price > 0 ? '+ ₱' + parseFloat(item?.product?.paella_price).toLocaleString(undefined, { minimumFractionDigits: 2 }) : ''"></span>
                                     </div>
                                     <div class="text-sm text-gray-600 font-medium">
                                         QTY: <span x-text="item.qty"></span>
@@ -118,8 +130,10 @@
                                 </div>
 
                                 <!-- Total -->
-                                <div class="absolute right-0 bottom-2 text-sm lg:text-base font-bold text-black text-right">
-                                    <span x-text="item.is_free_product 
+                                <div
+                                    class="absolute right-0 bottom-2 text-sm lg:text-base font-bold text-black text-right">
+                                    <span
+                                        x-text="item.is_free_product 
                                         ? '₱0.00' 
                                         : '₱' + ((parseFloat(item.price) + parseFloat(item?.paella_price > 0 ? item?.product?.paella_price || 0 : 0)) * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2 })">
                                     </span>
@@ -128,41 +142,53 @@
                         </template>
 
                     </div>
-    
+
                     <!-- Coupon Code Section -->
                     <div class="bg-white rounded-md mt-2 text-sm">
-                        <div class="flex items-center border mx-3 border-gray-200 rounded-md overflow-hidden">
-                            <input @input="couponCode = $event.target.value.toUpperCase()" x-model="couponCode" type="text" placeholder="Have a coupon code?"
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-2 p-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                                    class="size-6 fill-[#ff8545]">
+                                    <path fill-rule="evenodd"
+                                        d="M1.5 6.375c0-1.036.84-1.875 1.875-1.875h17.25c1.035 0 1.875.84 1.875 1.875v3.026a.75.75 0 0 1-.375.65 2.249 2.249 0 0 0 0 3.898.75.75 0 0 1 .375.65v3.026c0 1.035-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 17.625v-3.026a.75.75 0 0 1 .374-.65 2.249 2.249 0 0 0 0-3.898.75.75 0 0 1-.374-.65V6.375Zm15-1.125a.75.75 0 0 1 .75.75v.75a.75.75 0 0 1-1.5 0V6a.75.75 0 0 1 .75-.75Zm.75 4.5a.75.75 0 0 0-1.5 0v.75a.75.75 0 0 0 1.5 0v-.75Zm-.75 3a.75.75 0 0 1 .75.75v.75a.75.75 0 0 1-1.5 0v-.75a.75.75 0 0 1 .75-.75Zm.75 4.5a.75.75 0 0 0-1.5 0V18a.75.75 0 0 0 1.5 0v-.75ZM6 12a.75.75 0 0 1 .75-.75H12a.75.75 0 0 1 0 1.5H6.75A.75.75 0 0 1 6 12Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"
+                                        clip-rule="evenodd" />
+                                </svg>
+                                <span>Shop Coupon</span>
+                            </div>
+                            <div class="cursor-pointer flex items-center justify-between p-3 text-[#ff8545] font-bold"
+                                @click="couponModal = true">
+                                Select Coupon
+                            </div>
+                        </div>
+
+                        {{-- <div class="flex items-center border mx-3 border-gray-200 rounded-md overflow-hidden">
+                            <input @input="couponCode = $event.target.value.toUpperCase()" x-model="couponCode"
+                                type="text" placeholder="Have a coupon code?"
                                 class="w-full p-3 outline-none border-none text-gray-700">
-                            <button @click="submitCouponCode" type="button" class="bg-primary hover:bg-primary-dark text-white px-6 py-3 text-sm">Apply</button>
-                        </div>
-                        <div x-show="couponMessage" class="mx-5 py-2 text-sm"
-                            :class="{
-                                'text-green-600': couponMessageType === 'success',
-                                'text-red-600': couponMessageType === 'error'
-                            }"
-                            x-text="couponMessage">
-                        </div>
-    
+                            <button @click="submitCouponCode" type="button"
+                                class="bg-primary hover:bg-primary-dark text-white px-6 py-3 text-sm">Apply</button>
+                        </div> --}}
+
                         <!-- Subtotal Section -->
-                        <div class="border-t border-gray-200 mt-2 pt-3 pb-1 gap-1 flex flex-col text-sm lg:text-base px-3">
+                        <div
+                            class="border-t border-gray-200 mt-2 pt-3 pb-1 gap-1 flex flex-col text-sm lg:text-base px-3">
                             <div class="flex justify-between">
                                 <span class="font-medium text-gray-800">Subtotal</span>
-                                <span class="font-medium" 
-                                        x-text="'₱' + carts.reduce((sum, item) => 
+                                <span class="font-medium" x-text="'₱' + carts.reduce((sum, item) => 
                                             sum + 
                                             ((Number((item?.paella_price > 0 ? item?.product?.paella_price : 0)) || 0) * (Number(item.qty) || 1)) + 
                                             (item.is_free_product ? 0 : (Number(item.price) || 0) * (Number(item.qty) || 1))
-                                        , 0).toLocaleString(undefined, { minimumFractionDigits: 2 })"
-
-                                    {{-- x-text="'₱' + carts.reduce((sum, item) => sum + item.paella_price + (item.is_free_product ? 0 : item.price * item.qty), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })" --}}
-                                 ></span>
+                                        , 0).toLocaleString(undefined, { minimumFractionDigits: 2 })" {{--
+                                    x-text="'₱' + carts.reduce((sum, item) => sum + item.paella_price + (item.is_free_product ? 0 : item.price * item.qty), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })"
+                                    --}}></span>
                             </div>
-                            <template x-if="deliveryFees.length == 0 && !allowMultiple && method == 'delivery'">
+                            <template
+                                x-if="deliveryFees.length == 0 && !allowMultiple && method == 'delivery' && shippingDiscountLists.length == 0">
                                 <div>
                                     <div class="flex justify-between lg:mt-2">
                                         <span class="font-medium text-gray-800">Delivery Fee</span>
-                                        <span class="font-medium" x-text="deliveryFee > 0 ? '₱' + deliveryFee : 'Free'"></span>
+                                        <span class="font-medium"
+                                            x-text="deliveryFee > 0 ? '₱' + deliveryFee : 'Free'"></span>
                                     </div>
                                 </div>
                             </template>
@@ -173,64 +199,104 @@
                                             <span x-text="'Delivery Fee (' + item.location + ')'"></span>
                                             <div class="flex items-center gap-1">
                                                 <template x-if="item.discount && item.discount > 0">
-                                                    <span class="line-through text-red-700 italic" x-text="'₱' + item.fee.toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+                                                    <span class="line-through text-red-700 italic"
+                                                        x-text="'₱' + item.fee.toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
                                                 </template>
-                                                <span x-text="'₱' + (item.fee - (item.discount || 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+                                                <span
+                                                    x-text="'₱' + (item.fee - (item.discount || 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
                                             </div>
                                         </div>
                                     </template>
                                 </div>
                             </template>
+                            <template
+                                x-if="coupons.length > 0 && !allowMultiple && method == 'delivery' && deliveryFee > 0">
+                                <div class="flex flex-col gap-1 mt-2">
+                                    <div class="flex justify-between text-gray-500">
+                                        <span class="font-medium text-gray-800">Delivery Fee</span>
+                                        <div class="flex items-center gap-1">
+                                            <template x-if="deliveryFee > 0">
+                                                <span class="line-through text-red-700 italic"
+                                                    x-text="'₱' + deliveryFee.toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+                                            </template>
+                                            <span
+                                                x-text="'- ₱' + shippingDiscountLists.reduce((acc, curr) => acc + curr.discount, 0).toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
 
-                        <template x-if="coupons.length > 0">
-                            <template x-for="(item, i) in coupons" :key="i">
-                                <div class="flex justify-between lg:mt-2">
-                                    <span class="font-medium text-red-700 italic flex items-center flex-wrap" x-show="item.free_shipping && shippingDiscountAmount > 0">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 text-green-600 mr-1">
-                                            <path fill-rule="evenodd" d="M4.5 2A2.5 2.5 0 0 0 2 4.5v2.879a2.5 2.5 0 0 0 .732 1.767l4.5 4.5a2.5 2.5 0 0 0 3.536 0l2.878-2.878a2.5 2.5 0 0 0 0-3.536l-4.5-4.5A2.5 2.5 0 0 0 7.38 2H4.5ZM5 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
-                                        </svg>
-                                        Coupon (<span x-text="item.code"></span>) 
-                                        <span class="text-xs ml-1 underline cursor-pointer" @click="removeCoupon(i)">Remove Coupon</span>
-                                    </span>
-                                    
-                                    <span class="font-medium text-red-700 italic flex items-center flex-wrap" x-show="!item.free_shipping">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4 text-green-600 mr-1">
-                                            <path fill-rule="evenodd" d="M4.5 2A2.5 2.5 0 0 0 2 4.5v2.879a2.5 2.5 0 0 0 .732 1.767l4.5 4.5a2.5 2.5 0 0 0 3.536 0l2.878-2.878a2.5 2.5 0 0 0 0-3.536l-4.5-4.5A2.5 2.5 0 0 0 7.38 2H4.5ZM5 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd" />
-                                        </svg>
-                                        Coupon (<span x-text="item.code"></span>) 
-                                        <span class="text-xs ml-1 underline cursor-pointer" @click="removeCoupon(i)">Remove Coupon</span>
-                                    </span>
+                            <template x-if="coupons.length > 0 ">
+                                <template x-for="(item, i) in coupons" :key="i">
+                                    <div class="flex justify-between lg:mt-2">
+                                        <span class="font-medium text-red-700 italic flex items-center flex-wrap"
+                                            x-show="item.free_shipping && shippingDiscountAmount > 0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                                fill="currentColor" class="size-4 text-green-600 mr-1">
+                                                <path fill-rule="evenodd"
+                                                    d="M4.5 2A2.5 2.5 0 0 0 2 4.5v2.879a2.5 2.5 0 0 0 .732 1.767l4.5 4.5a2.5 2.5 0 0 0 3.536 0l2.878-2.878a2.5 2.5 0 0 0 0-3.536l-4.5-4.5A2.5 2.5 0 0 0 7.38 2H4.5ZM5 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            Coupon (<span x-text="item.code"></span>)
+                                            <span class="text-xs ml-1 underline cursor-pointer"
+                                                @click="removeCoupon(i)">Remove Coupon</span>
+                                        </span>
 
-                                    <span class="font-medium italic text-red-700 text-right">
-                                        <template x-if="item.free_shipping && shippingDiscountLists.length > 0">
-                                            <div class="mt-2 space-y-1">
-                                                <template x-for="(shippingList, key) in shippingDiscountLists" :key="key">
-                                                    <div>
-                                                        <span x-text="'- ₱' + shippingList.discount.toLocaleString(undefined, { minimumFractionDigits: 2 }) + ' Shipping Discount (' + shippingList.location + ')'"></span>
-                                                    </div>
-                                                </template>
+                                        <span class="font-medium text-red-700 italic flex items-center flex-wrap"
+                                            x-show="!item.free_shipping">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                                fill="currentColor" class="size-4 text-green-600 mr-1">
+                                                <path fill-rule="evenodd"
+                                                    d="M4.5 2A2.5 2.5 0 0 0 2 4.5v2.879a2.5 2.5 0 0 0 .732 1.767l4.5 4.5a2.5 2.5 0 0 0 3.536 0l2.878-2.878a2.5 2.5 0 0 0 0-3.536l-4.5-4.5A2.5 2.5 0 0 0 7.38 2H4.5ZM5 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
+                                                    clip-rule="evenodd" />
+                                            </svg>
+                                            Coupon (<span x-text="item.code"></span>)
+                                            <span class="text-xs ml-1 underline cursor-pointer"
+                                                @click="removeCoupon(i)">Remove Coupon</span>
+                                        </span>
 
-                                                <div class="">Total discount: <span x-text="'- ₱' + shippingDiscountLists.reduce((acc, curr) => acc + curr.discount, 0).toLocaleString(undefined, { minimumFractionDigits: 2 })"></span></div>
-                                            </div>
-                                        </template>
+                                        <span class="font-medium italic text-red-700 text-right">
+                                            <template x-if="item.free_shipping && shippingDiscountLists.length > 0">
+                                                <div class="mt-2 space-y-1">
+                                                    <template x-for="(shippingList, key) in shippingDiscountLists"
+                                                        :key="key">
+                                                        <template
+                                                            x-if="shippingList.discount && shippingList.discount > 0">
+                                                            <div>
+                                                                <span
+                                                                    x-text="'- ₱' + shippingList.discount.toLocaleString(undefined, { minimumFractionDigits: 2 }) + ' Shipping Discount (' + shippingList.location + ')'"></span>
+                                                            </div>
+                                                        </template>
+                                                    </template>
+                                                    <template
+                                                        x-if="shippingDiscountLists.reduce((acc, curr) => acc + curr.discount, 0) > 0">
+                                                        <div class="">Total discount: <span
+                                                                x-text="'- ₱' + shippingDiscountLists.reduce((acc, curr) => acc + curr.discount, 0).toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </template>
 
-                                        <template x-if="!item.free_shipping && (item.free_products == null || item.free_products.length == 0)">
-                                            <span x-text="'- ₱' + (
+                                            <template
+                                                x-if="!item.free_shipping && (item.free_products == null || item.free_products.length == 0)">
+                                                <span
+                                                    x-text="'- ₱' + (
                                                 item.discount_type === 'amount' 
                                                     ? parseFloat(item.discount) 
                                                     : (orderAmount * parseFloat(item.discount) / 100)
                                             ).toLocaleString(undefined, { minimumFractionDigits: 2 }) + ' (Order Discount)'"></span>
-                                        </template>
-                                        <template x-if="!item.free_shipping && (item.free_products && item.free_products.length > 0)">
-                                            <span>Free Products</span>
-                                        </template>
-                                    </span>
-                                </div>
+                                            </template>
+                                            <template
+                                                x-if="!item.free_shipping && (item.free_products && item.free_products.length > 0)">
+                                                <span>Free Products</span>
+                                            </template>
+                                        </span>
+                                    </div>
+                                </template>
                             </template>
-                        </template>
 
                         </div>
-    
+
                         <div class="border-t border-gray-200 mt-2 py-4 gap-1 flex flex-col text-sm lg:text-base px-3">
                             <div class="flex justify-between">
                                 <span class="font-medium text-gray-800">Total</span>
@@ -239,13 +305,13 @@
                         </div>
                     </div>
                 </div>
-    
+
                 <div class="w-full  order-2 lg:order-1 rounded-lg border bg-white border-[#DFDFDF] shadow-md">
                     <div>
                         <div class="px-4 py-3 border-b border-[#DFDFDF]">
                             <h2 class="text-lg lg:text-3xl font-semibold text-left">Delivery Information</h2>
                         </div>
-    
+
                         <div class="my-3 px-4 ">
                             <div class="font-bold my-2">Choose Pickup or Delivery</div>
                             <div class="flex items-center gap-4 mt-2">
@@ -254,385 +320,445 @@
                                     @click="changeMethod('pickup')">
                                     Pickup
                                 </button>
-    
+
                                 <button type="button" class="px-6 py-3 rounded-md w-full transition border-2"
                                     :class="method === 'delivery' ? 'bg-green-700 text-white' : 'bg-gray-100 text-gray-700'"
                                     @click="changeMethod('delivery')">
                                     Delivery
                                 </button>
                             </div>
-                            
+
                             <template x-if="method === 'pickup'">
-                            <div class="mt-4">	
-                                <label for="branches" class="font-bold">Select Branch <span
-                                        class="text-red-700">*</span></label>
-                                <select id="branches" name="delivery_branch" @change="getDeliveryFee" x-ref="branch" required
-                                    class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                                    <option selected value="">Choose a branch</option>
-                                    @foreach ($pickupBranches as $branch)
+                                <div class="mt-4">
+                                    <label for="branches" class="font-bold">Select Branch <span
+                                            class="text-red-700">*</span></label>
+                                    <select id="branches" name="delivery_branch" @change="getDeliveryFee" x-ref="branch"
+                                        required
+                                        class="bg-gray-50 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                        <option selected value="">Choose a branch</option>
+                                        @foreach ($pickupBranches as $branch)
                                         <option value="{{ $branch->name }}">{{ $branch->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </template>
-                            
+
                             <div x-show="method === 'delivery'" class="space-y-4">
-                        
-                            <div class="flex items-center me-4 my-4">
-                                <input @change="onChangeMultipleAddress()" x-model="allowMultiple" checked id="multiple-address" type="checkbox" value="" class="w-5 h-5 text-primary bg-gray-100 border-gray-300 rounded-sm focus:ring-primary-dark focus:ring-2">
-                                <label for="multiple-address" class="ms-2 text-base font-medium text-gray-900">Allow multiple delivery address</label>
-                            </div>
 
-                            <template x-if="allowMultiple">
-                                <div class="space-y-6">
-                                    <template x-for="(delivery, index) in deliveries" :key="index">
-                                        <div class="p-4 bg-gray-100 rounded-md border">
-                                            <div class="w-full">
-                                                <label class="font-bold block text-sm mb-1">Orders</label>
-                                                <div class="flex flex-col gap-2">
-                                                <template x-for="(order, index2) in getAvailableOrders()" :key="index2">
-                                                    <template x-if="getRemainingQty(order) > 0 || isOrderChecked(delivery, order)">
+                                <div class="flex items-center me-4 my-4">
+                                    <input @change="onChangeMultipleAddress()" x-model="allowMultiple" checked
+                                        id="multiple-address" type="checkbox" value=""
+                                        class="w-5 h-5 text-primary bg-gray-100 border-gray-300 rounded-sm focus:ring-primary-dark focus:ring-2">
+                                    <label for="multiple-address" class="ms-2 text-base font-medium text-gray-900">Allow
+                                        multiple delivery address</label>
+                                </div>
 
-                                                        <div class="flex items-center gap-2 mb-2 justify-between">
-                                                            <!-- Product checkbox -->
-                                                            <div class="flex items-center gap-2">
-                                                                <input
-                                                                    type="checkbox"
-                                                                    :id="'order-' + order.id + '-' + index + '-' + index2 + '-' + (order.paella_price > 0 ? 'paella' : 'nopaella')"
-                                                                    {{-- x-model="order.checked" --}}
-                                                                    :checked="isOrderChecked(delivery, order)"
-                                                                    @change="onOrderCheckToggle(delivery, order, $event.target.checked)"
-                                                                    :disabled="getRemainingQty(order) <= 0 && !isOrderChecked(delivery, order)"
-                                                                />
-                                                                <label :for="'order-' + order.id + '-' + index + '-' + index2 + '-' + (order.paella_price > 0 ? 'paella' : 'nopaella')" class="flex-1">
-                                                                    <span x-text="order.product.name + (order.paella_price > 0 ? ' Boneless with Paella' : '') + (getRemainingQty(order) <= 0 && !isOrderChecked(delivery, order) ? ' (Fully Assigned)' : '')"></span>
-                                                                    <span x-show="order.is_free_product" class="text-green-600 font-semibold text-sm">(Free)</span>
-                                                                </label>
-                                                            </div>
-
-                                                            <!-- Quantity dropdown -->
-                                                            <select
-                                                                class="border rounded px-2 py-1"
-                                                                :disabled="!isOrderChecked(delivery, order)"
-                                                                :value="getSelectedQty(delivery, order)"
-                                                                @change="updateSelectedQty(delivery, order, $event.target.value)">
-                                                                <template x-for="i in getAvailableQtyForDropdown(delivery, order)">
-
-                                                                    <option :value="i" x-text="i"></option>
-                                                                </template>
-                                                            </select>
-                                                        </div>
-                                                    </template>
-                                                </template>
-
-                                                </div>
-                                            </div>
-
-                                            <div x-show="qtyValidationMessage" class="text-red-600 bg-red-100 border border-red-300 rounded p-3 mt-3">
-                                                <p x-text="qtyValidationMessage"></p>
-                                            </div>
-
-                                            <input type="hidden" x-model="delivery.delivery_fee" />
-                                            
-                                            <div class="w-full flex gap-4">
-                                                <div class="w-full lg:w-1/2">
-                                                    <label class="font-bold block text-sm mb-1">Select Date</label>
-                                                    <div class="relative">
-                                                        <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-                                                        <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                                            <path d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z"/>
-                                                        </svg>
-                                                        </div>
-                                                        <input 
-                                                            :class="{'border-red-500': errors[index]?.need_date}"
-                                                            onkeydown="return false"
-                                                            :min="minimumDate"
-                                                            @change="validateDeliveryDateTime(delivery)"
-                                                            x-model="delivery.need_date" name="need_date" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3" placeholder="Select date">
-                                                    
-                                                        <template x-if="errors[index]?.need_date">
-                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index]?.need_date"></div>
-                                                        </template>
-                                                    </div>
-                                                </div>
-                                                <div class="w-full lg:w-1/2">
-                                                    <label class="font-bold block text-sm mb-1">Select Time</label>
-                                                    <div class="relative">
-                                                        <div class="absolute inset-y-0 end-0 top-0 flex items-center pe-3.5 pointer-events-none">
-                                                            <svg class="w-4 h-4 text-gray-500 " aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                                                                <path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z" clip-rule="evenodd"/>
-                                                            </svg>
-                                                        </div>
-                                                        <select
-                                                            :class="{'border-red-500': errors[index]?.need_time}"
-                                                            name="need_time"
-                                                            id="need_time"
-                                                            x-model="delivery.need_time"
-                                                            @change="validateDeliveryDateTime(delivery);"
-                                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                                                        >
-                                                            <option value="">Select Hour</option>
-                                                            <template x-for="hour in getAvailableHours(delivery)" :key="hour">
-                                                                <template x-if="!isTimeDisabledForDelivery(hour)(delivery)">
-                                                                    <option 
-                                                                        :value="(hour < 10 ? '0' + hour : hour) + ':00'" 
-                                                                        x-text="formatAMPM(hour)">
-                                                                    </option>
-                                                                </template>
-                                                            </template>
-                                                        </select>
-
-                                                        <template x-if="errors[index]?.need_time">
-                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index]?.need_time"></div>
-                                                        </template>
-                                                    </div>
-                                                    <div x-show="noNeededTime" class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
-                                                        Please select a time.
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
-                                                <div>We've pre-selected the earliest available time for your order. You’re welcome to adjust the date and time to your preference.</div>
-                                            </div>
-
-                                            <h4 class="font-bold mb-2 mt-2">Delivery Address <span x-text="index + 1"></span></h4>
-
-                                            <div class="flex flex-col gap-4">
+                                <template x-if="allowMultiple">
+                                    <div class="space-y-6">
+                                        <template x-for="(delivery, index) in deliveries" :key="index">
+                                            <div class="p-4 bg-gray-100 rounded-md border">
                                                 <div class="w-full">
-                                                    <label class="font-bold block text-sm mb-1">Address <small>Street Name, Building, House No.,</small></label>
-                                                    <textarea 
-                                                        name="delivery_address"
-                                                        @focus="onMultiAddressFocus(index)"
-                                                        @blur="applyMultipleCityProvince(index)" 
-                                                        x-model="delivery.address" 
-                                                        @change="validateDeliveryAddress(delivery, 'address', index)"
-                                                        class="w-full border border-gray-300 p-2 rounded-md" placeholder="Enter address" :class="{'border-red-500': errors[index]?.address}"></textarea>
-                                                    <template x-if="errors[index]?.address">
-                                                        <div class="text-red-500 text-xs mt-1" x-text="errors[index]?.address"></div>
-                                                    </template>
-                                                </div>
+                                                    <label class="font-bold block text-sm mb-1">Orders</label>
+                                                    <div class="flex flex-col gap-2">
+                                                        <template x-for="(order, index2) in getAvailableOrders()"
+                                                            :key="index2">
+                                                            <template
+                                                                x-if="getRemainingQty(order) > 0 || isOrderChecked(delivery, order)">
 
-                                                <div class="w-full flex gap-4 md:flex-row flex-col">
-                                                    
-                                                    <div class="w-full md:w-1/2">
-                                                        <label for="delivery_address" class="block mb-2 font-bold text-gray-900">Province <span class="text-red-700">*</span></label>
-                                                        <select :disabled="!delivery.address" @change="applyMultipleCityProvince(index); getDeliveryFeeForMultipleDelivery(index); validateDeliveryAddress(delivery, 'province', index)" :id="'province'+index" x-model="delivery.province" name="province" required
-                                                            class="bg-gray-50 disabled:bg-gray-100 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                                                            <option selected value="">Choose a province</option>
-                                                            @foreach ($provinces as $province)
-                                                                <option value="{{ $province }}" >{{ $province }}</option>
-                                                            @endforeach
-                                                        </select>
+                                                                <div
+                                                                    class="flex items-center gap-2 mb-2 justify-between">
+                                                                    <!-- Product checkbox -->
+                                                                    <div class="flex items-center gap-2">
+                                                                        <input type="checkbox"
+                                                                            :id="'order-' + order.id + '-' + index + '-' + index2 + '-' + (order.paella_price > 0 ? 'paella' : 'nopaella')"
+                                                                            {{-- x-model="order.checked" --}}
+                                                                            :checked="isOrderChecked(delivery, order)"
+                                                                            @change="onOrderCheckToggle(delivery, order, $event.target.checked)"
+                                                                            :disabled="getRemainingQty(order) <= 0 && !isOrderChecked(delivery, order)" />
+                                                                        <label
+                                                                            :for="'order-' + order.id + '-' + index + '-' + index2 + '-' + (order.paella_price > 0 ? 'paella' : 'nopaella')"
+                                                                            class="flex-1">
+                                                                            <span
+                                                                                x-text="order.product.name + (order.paella_price > 0 ? ' Boneless with Paella' : '') + (getRemainingQty(order) <= 0 && !isOrderChecked(delivery, order) ? ' (Fully Assigned)' : '')"></span>
+                                                                            <span x-show="order.is_free_product"
+                                                                                class="text-green-600 font-semibold text-sm">(Free)</span>
+                                                                        </label>
+                                                                    </div>
 
-                                                        <template x-if="errors[index] && errors[index].province">
-                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index].province"></div>
-                                                        </template>
-                                                    </div>
-                                                    
-                                                    <div class="w-full md:w-1/2">
-                                                        <label for="delivery_address" class="block mb-2 font-bold text-gray-900">City / Municipalities <span class="text-red-700">*</span></label>
-                                                        <select :disabled="!delivery.address" @change="applyMultipleCityProvince(index); getDeliveryFeeForMultipleDelivery(index); validateDeliveryAddress(delivery, 'city', index)" :id="'city'+index" x-model="delivery.city" name="city" required
-                                                            class="bg-gray-50 disabled:bg-gray-100 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                                                            <option selected value="">Choose a City</option>
-                                                            <template x-for="(c, i) in multipleFilteredCities(index)" :key="i">
-                                                                <option :value="c.city" x-text="c.city"></option>
+                                                                    <!-- Quantity dropdown -->
+                                                                    <select class="border rounded px-2 py-1"
+                                                                        :disabled="!isOrderChecked(delivery, order)"
+                                                                        :value="getSelectedQty(delivery, order)"
+                                                                        @change="updateSelectedQty(delivery, order, $event.target.value)">
+                                                                        <template
+                                                                            x-for="i in getAvailableQtyForDropdown(delivery, order)">
+
+                                                                            <option :value="i" x-text="i"></option>
+                                                                        </template>
+                                                                    </select>
+                                                                </div>
                                                             </template>
-                                                        </select>
-
-                                                        <template x-if="errors[index] && errors[index].city">
-                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index].city"></div>
                                                         </template>
+
                                                     </div>
                                                 </div>
 
-                                                <div class="mt-4">	
-                                                    <label :for="'locations' + index" class="font-bold text-gray-900">Barangay</label>
-                                                    <select
-                                                            @change="validateDeliveryAddress(delivery, 'location', index); applyMultipleCityProvince(index)"
-                                                            :disabled="!delivery.city || !delivery.province"
-                                                            x-model="delivery.location"
-                                                            :id="'locations' + index"
-                                                            name="location"
-                                                            class="bg-gray-50 mt-2 border disabled:bg-gray-100 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                                                        <option selected value="">Choose a Barangay</option>
-                                                        <template x-for="(c, i) in filteredMultipleBarangay(index)" :key="i">
-                                                            <option :value="c.barangay" x-text="c.barangay"></option>
-                                                        </template>
-                                                    </select>
-                                                    <p
-                                                        x-show="(!delivery.orders || delivery.orders.length === 0) && delivery.location"
-                                                        class="mt-1 text-red-600"
-                                                    >
-                                                        Order is required to get delivery fee. Please select at least one order for this delivery address.
-                                                    </p>
+                                                <div x-show="qtyValidationMessage"
+                                                    class="text-red-600 bg-red-100 border border-red-300 rounded p-3 mt-3">
+                                                    <p x-text="qtyValidationMessage"></p>
                                                 </div>
 
-
-                                                {{-- <div class="w-full flex gap-4">
-                                                    <div class="w-full">
-                                                        <label :for="'locations' + index" class="font-bold text-gray-900">Barangay</label>
-                                                        <textarea
-                                                            :disabled="!delivery.city || !delivery.province"
-                                                            x-model="delivery.location"
-                                                            :id="'locations' + index"
-                                                            name="location"
-                                                            @change="validateDeliveryAddress(delivery, 'location', index); applyMultipleCityProvince(index)"
-                                                            required
-                                                            class="disabled:bg-gray-100 bg-gray-50 mt-2 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                                                        </textarea>
-
-                                                        <p
-                                                            x-show="(!delivery.orders || delivery.orders.length === 0) && delivery.location"
-                                                            class="mt-1 text-red-600"
-                                                        >
-                                                            Order is required to get delivery fee. Please select at least one order for this delivery address.
-                                                        </p>
-                                                    </div>
-                                                </div> --}}
+                                                <input type="hidden" x-model="delivery.delivery_fee" />
 
                                                 <div class="w-full flex gap-4">
                                                     <div class="w-full lg:w-1/2">
-                                                        <label class="font-bold block mb-1">Contact Person</label>
-                                                        <input type="text" x-model="delivery.name" @change="validateDeliveryAddress(delivery, 'name', index)"
-                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors[index]?.name}" />
-                                                        <template x-if="errors[index]?.name">
-                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index]?.name"></div>
-                                                        </template>
+                                                        <label class="font-bold block text-sm mb-1">Select Date</label>
+                                                        <div class="relative">
+                                                            <div
+                                                                class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                                                <svg class="w-4 h-4 text-gray-500" aria-hidden="true"
+                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                    fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path
+                                                                        d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+                                                                </svg>
+                                                            </div>
+                                                            <input :class="{'border-red-500': errors[index]?.need_date}"
+                                                                onkeydown="return false" :min="minimumDate"
+                                                                @change="validateDeliveryDateTime(delivery)"
+                                                                x-model="delivery.need_date" name="need_date"
+                                                                type="date"
+                                                                class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3"
+                                                                placeholder="Select date">
+
+                                                            <template x-if="errors[index]?.need_date">
+                                                                <div class="text-red-500 text-xs mt-1"
+                                                                    x-text="errors[index]?.need_date"></div>
+                                                            </template>
+                                                        </div>
                                                     </div>
                                                     <div class="w-full lg:w-1/2">
-                                                        <label class="font-bold block mb-1">Contact Number</label>
-                                                        <input type="tel" x-model="delivery.phone" @change="validateDeliveryAddress(delivery, 'phone', index)"
-                                                            class="w-full border border-gray-300 p-2 rounded-md" placeholder="" :class="{'border-red-500': errors[index]?.phone}" />
-                                                        <template x-if="errors[index]?.phone">
-                                                            <div class="text-red-500 text-xs mt-1" x-text="errors[index]?.phone"></div>
-                                                        </template>
+                                                        <label class="font-bold block text-sm mb-1">Select Time</label>
+                                                        <div class="relative">
+                                                            <div
+                                                                class="absolute inset-y-0 end-0 top-0 flex items-center pe-3.5 pointer-events-none">
+                                                                <svg class="w-4 h-4 text-gray-500 " aria-hidden="true"
+                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                    fill="currentColor" viewBox="0 0 24 24">
+                                                                    <path fill-rule="evenodd"
+                                                                        d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm11-4a1 1 0 1 0-2 0v4a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V8Z"
+                                                                        clip-rule="evenodd" />
+                                                                </svg>
+                                                            </div>
+                                                            <select
+                                                                :class="{'border-red-500': errors[index]?.need_time}"
+                                                                name="need_time" id="need_time"
+                                                                x-model="delivery.need_time"
+                                                                @change="validateDeliveryDateTime(delivery);"
+                                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                                                <option value="">Select Hour</option>
+                                                                <template x-for="hour in getAvailableHours(delivery)"
+                                                                    :key="hour">
+                                                                    <template
+                                                                        x-if="!isTimeDisabledForDelivery(hour)(delivery)">
+                                                                        <option
+                                                                            :value="(hour < 10 ? '0' + hour : hour) + ':00'"
+                                                                            x-text="formatAMPM(hour)">
+                                                                        </option>
+                                                                    </template>
+                                                                </template>
+                                                            </select>
+
+                                                            <template x-if="errors[index]?.need_time">
+                                                                <div class="text-red-500 text-xs mt-1"
+                                                                    x-text="errors[index]?.need_time"></div>
+                                                            </template>
+                                                        </div>
+                                                        <div x-show="noNeededTime"
+                                                            class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
+                                                            Please select a time.
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div class="w-full flex gap-2">
-                                                    <input
-                                                        :id="'sms-' + index"
-                                                        type="checkbox"
-                                                        x-model="delivery.sms"
-                                                        class="border border-gray-300 p-2"
-                                                    />
-                                                    <label class="block text-sm mb-1" :for="'sms-' + index">Notify recipient through SMS?</label>
+
+                                                <div
+                                                    class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
+                                                    <div>We've pre-selected the earliest available time for your order.
+                                                        You’re welcome to adjust the date and time to your preference.
+                                                    </div>
                                                 </div>
 
-                                                <div class="w-full">
-                                                    <label class="font-bold block mb-1">Note</label>
-                                                    <textarea x-model="delivery.note"
-                                                        class="w-full border border-gray-300 p-2 rounded-md" placeholder="Add instructions or notes about your delivery."></textarea>
+                                                <h4 class="font-bold mb-2 mt-2">Delivery Address <span
+                                                        x-text="index + 1"></span></h4>
+
+                                                <div class="flex flex-col gap-4">
+                                                    <div class="w-full">
+                                                        <label class="font-bold block text-sm mb-1">Address
+                                                            <small>Street Name, Building, House No.,</small></label>
+                                                        <textarea name="delivery_address"
+                                                            @focus="onMultiAddressFocus(index)"
+                                                            @blur="applyMultipleCityProvince(index)"
+                                                            x-model="delivery.address"
+                                                            @change="validateDeliveryAddress(delivery, 'address', index)"
+                                                            class="w-full border border-gray-300 p-2 rounded-md"
+                                                            placeholder="Enter address"
+                                                            :class="{'border-red-500': errors[index]?.address}"></textarea>
+                                                        <template x-if="errors[index]?.address">
+                                                            <div class="text-red-500 text-xs mt-1"
+                                                                x-text="errors[index]?.address"></div>
+                                                        </template>
+                                                    </div>
+
+                                                    <div class="w-full flex gap-4 md:flex-row flex-col">
+
+                                                        <div class="w-full md:w-1/2">
+                                                            <label for="delivery_address"
+                                                                class="block mb-2 font-bold text-gray-900">Province
+                                                                <span class="text-red-700">*</span></label>
+                                                            <select :disabled="!delivery.address"
+                                                                @change="applyMultipleCityProvince(index); getDeliveryFeeForMultipleDelivery(index); validateDeliveryAddress(delivery, 'province', index)"
+                                                                :id="'province'+index" x-model="delivery.province"
+                                                                name="province" required
+                                                                class="bg-gray-50 disabled:bg-gray-100 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                                                <option selected value="">Choose a province</option>
+                                                                @foreach ($provinces as $province)
+                                                                <option value="{{ $province }}">{{ $province }}</option>
+                                                                @endforeach
+                                                            </select>
+
+                                                            <template x-if="errors[index] && errors[index].province">
+                                                                <div class="text-red-500 text-xs mt-1"
+                                                                    x-text="errors[index].province"></div>
+                                                            </template>
+                                                        </div>
+
+                                                        <div class="w-full md:w-1/2">
+                                                            <label for="delivery_address"
+                                                                class="block mb-2 font-bold text-gray-900">City /
+                                                                Municipalities <span
+                                                                    class="text-red-700">*</span></label>
+                                                            <select :disabled="!delivery.address"
+                                                                @change="applyMultipleCityProvince(index); getDeliveryFeeForMultipleDelivery(index); validateDeliveryAddress(delivery, 'city', index)"
+                                                                :id="'city'+index" x-model="delivery.city" name="city"
+                                                                required
+                                                                class="bg-gray-50 disabled:bg-gray-100 mt-2 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                                                <option selected value="">Choose a City</option>
+                                                                <template
+                                                                    x-for="(c, i) in multipleFilteredCities(index)"
+                                                                    :key="i">
+                                                                    <option :value="c.city" x-text="c.city"></option>
+                                                                </template>
+                                                            </select>
+
+                                                            <template x-if="errors[index] && errors[index].city">
+                                                                <div class="text-red-500 text-xs mt-1"
+                                                                    x-text="errors[index].city"></div>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="mt-4">
+                                                        <label :for="'locations' + index"
+                                                            class="font-bold text-gray-900">Barangay</label>
+                                                        <select
+                                                            @change="validateDeliveryAddress(delivery, 'location', index); applyMultipleCityProvince(index)"
+                                                            :disabled="!delivery.city || !delivery.province"
+                                                            x-model="delivery.location" :id="'locations' + index"
+                                                            name="location"
+                                                            class="bg-gray-50 mt-2 border disabled:bg-gray-100 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                                            <option selected value="">Choose a Barangay</option>
+                                                            <template x-for="(c, i) in filteredMultipleBarangay(index)"
+                                                                :key="i">
+                                                                <option :value="c.barangay" x-text="c.barangay">
+                                                                </option>
+                                                            </template>
+                                                        </select>
+                                                        <p x-show="(!delivery.orders || delivery.orders.length === 0) && delivery.location"
+                                                            class="mt-1 text-red-600">
+                                                            Order is required to get delivery fee. Please select at
+                                                            least one order for this delivery address.
+                                                        </p>
+                                                    </div>
+
+
+                                                    {{-- <div class="w-full flex gap-4">
+                                                        <div class="w-full">
+                                                            <label :for="'locations' + index"
+                                                                class="font-bold text-gray-900">Barangay</label>
+                                                            <textarea :disabled="!delivery.city || !delivery.province"
+                                                                x-model="delivery.location" :id="'locations' + index"
+                                                                name="location"
+                                                                @change="validateDeliveryAddress(delivery, 'location', index); applyMultipleCityProvince(index)"
+                                                                required
+                                                                class="disabled:bg-gray-100 bg-gray-50 mt-2 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                                        </textarea>
+
+                                                            <p x-show="(!delivery.orders || delivery.orders.length === 0) && delivery.location"
+                                                                class="mt-1 text-red-600">
+                                                                Order is required to get delivery fee. Please select at
+                                                                least one order for this delivery address.
+                                                            </p>
+                                                        </div>
+                                                    </div> --}}
+
+                                                    <div class="w-full flex gap-4">
+                                                        <div class="w-full lg:w-1/2">
+                                                            <label class="font-bold block mb-1">Contact Person</label>
+                                                            <input type="text" x-model="delivery.name"
+                                                                @change="validateDeliveryAddress(delivery, 'name', index)"
+                                                                class="w-full border border-gray-300 p-2 rounded-md"
+                                                                placeholder=""
+                                                                :class="{'border-red-500': errors[index]?.name}" />
+                                                            <template x-if="errors[index]?.name">
+                                                                <div class="text-red-500 text-xs mt-1"
+                                                                    x-text="errors[index]?.name"></div>
+                                                            </template>
+                                                        </div>
+                                                        <div class="w-full lg:w-1/2">
+                                                            <label class="font-bold block mb-1">Contact Number</label>
+                                                            <input type="tel" x-model="delivery.phone"
+                                                                @change="validateDeliveryAddress(delivery, 'phone', index)"
+                                                                class="w-full border border-gray-300 p-2 rounded-md"
+                                                                placeholder=""
+                                                                :class="{'border-red-500': errors[index]?.phone}" />
+                                                            <template x-if="errors[index]?.phone">
+                                                                <div class="text-red-500 text-xs mt-1"
+                                                                    x-text="errors[index]?.phone"></div>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+                                                    <div class="w-full flex gap-2">
+                                                        <input :id="'sms-' + index" type="checkbox"
+                                                            x-model="delivery.sms" class="border border-gray-300 p-2" />
+                                                        <label class="block text-sm mb-1" :for="'sms-' + index">Notify
+                                                            recipient through SMS?</label>
+                                                    </div>
+
+                                                    <div class="w-full">
+                                                        <label class="font-bold block mb-1">Note</label>
+                                                        <textarea x-model="delivery.note"
+                                                            class="w-full border border-gray-300 p-2 rounded-md"
+                                                            placeholder="Add instructions or notes about your delivery."></textarea>
+                                                    </div>
+
                                                 </div>
-                                                
-                                            </div>
-                        
-                                            <div class="text-right mt-3">
-                                                <button type="button" @click="removeDelivery(index)"
-                                                    x-show="deliveries.length > 1"
-                                                    class="text-red-600 text-sm underline">Remove</button>
-                                            </div>
-                                        </div>
-                                    </template>
-                        
-                                    <div x-show="canAddMoreDeliveries()">
-                                        <button type="button" 
-                                            @click="validateBeforeAddDelivery"
-                                            class="bg-green-700 text-white px-4 py-2 rounded-md text-sm">
-                                            Add Another Delivery
-                                        </button>
-                                    </div>
-                                </div>
-                            </template>
-                            <template x-if="!allowMultiple && method === 'delivery'">
-                                <div>
-                                    
-                                    <div class="font-bold mb-4">Delivery Information</div>
 
-                                    <div class="w-full mb-4">
-                                        <label for="delivery_address"
-                                        class="block mb-2 font-bold text-gray-900">Address <small>Street Name, Building, House No.,</small> <span
-                                            class="text-red-700">*</span></label>
-                                        <textarea  
-                                            @focus="delivery_address = _stripCurrentPlaces(delivery_address); _addressCore = delivery_address"
-                                            @input="onSingleAddressInput($event.target.value)"
-                                            @blur="_rebuildAddress"     
-                                            id="delivery_address" name="delivery_address" x-model="delivery_address" value="{{ auth()->check() ? auth()->user()->address_street : '' }}"
-                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                                            placeholder=""></textarea>
-                                        <div x-show="noDeliveryAddress" class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
-                                            Please add delivery address
-                                        </div>
-
-                                        <template x-if="addressValidationMessage">
-                                            <p class="text-red-500 text-xs italic mt-2" x-text="addressValidationMessage"></p>
+                                                <div class="text-right mt-3">
+                                                    <button type="button" @click="removeDelivery(index)"
+                                                        x-show="deliveries.length > 1"
+                                                        class="text-red-600 text-sm underline">Remove</button>
+                                                </div>
+                                            </div>
                                         </template>
+
+                                        <div x-show="canAddMoreDeliveries()">
+                                            <button type="button" @click="validateBeforeAddDelivery"
+                                                class="bg-green-700 text-white px-4 py-2 rounded-md text-sm">
+                                                Add Another Delivery
+                                            </button>
+                                        </div>
                                     </div>
+                                </template>
+                                <template x-if="!allowMultiple && method === 'delivery'">
+                                    <div>
 
-                                    <div class="w-full flex gap-4 mb-4 md:flex-row flex-col">
-                                        
-                                        <div class="w-full md:w-1/2">
-                                            <label for="locations" class="block mb-2 font-bold text-gray-900">Province <span class="text-red-700">*</span></label>
-                                            <select :disabled="!delivery_address" @change="applyCityProvince; getDeliveryFee()" id="locations" name="province" x-model="province" required
-                                                class="bg-gray-50 mt-2 border disabled:bg-gray-100 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                                                <option selected value="">Choose a province</option>
-                                                @foreach ($provinces as $province)
-                                                    <option value="{{ $province }}" >{{ $province }}</option>
-                                                @endforeach
-                                            </select>
+                                        <div class="font-bold mb-4">Delivery Information</div>
 
-                                            <template x-if="provinceValidationMessage">
-                                                <p class="text-red-500 text-xs italic mt-2" x-text="provinceValidationMessage"></p>
+                                        <div class="w-full mb-4">
+                                            <label for="delivery_address"
+                                                class="block mb-2 font-bold text-gray-900">Address <small>Street Name,
+                                                    Building, House No.,</small> <span
+                                                    class="text-red-700">*</span></label>
+                                            <textarea
+                                                @focus="delivery_address = _stripCurrentPlaces(delivery_address); _addressCore = delivery_address"
+                                                @input="onSingleAddressInput($event.target.value)"
+                                                @blur="_rebuildAddress" id="delivery_address" name="delivery_address"
+                                                x-model="delivery_address"
+                                                value="{{ auth()->check() ? auth()->user()->address_street : '' }}"
+                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                                                placeholder=""></textarea>
+                                            <div x-show="noDeliveryAddress"
+                                                class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
+                                                Please add delivery address
+                                            </div>
+
+                                            <template x-if="addressValidationMessage">
+                                                <p class="text-red-500 text-xs italic mt-2"
+                                                    x-text="addressValidationMessage"></p>
                                             </template>
                                         </div>
 
-                                        <div class="w-full md:w-1/2">
-                                            <label for="cities" class="block mb-2 font-bold text-gray-900">City / Municipalities<span class="text-red-700">*</span></label>
-                                            <select :disabled="!delivery_address" @change="applyCityProvince; getDeliveryFee()" id="cities" name="city" x-model="city" required
-                                                class="bg-gray-50 mt-2 border disabled:bg-gray-100 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                                                <option selected value="">Choose a City</option>
-                                                <template x-for="(c, i) in filteredCities" :key="i">
-                                                    <option :value="c.city" x-text="c.city"></option>
+                                        <div class="w-full flex gap-4 mb-4 md:flex-row flex-col">
+
+                                            <div class="w-full md:w-1/2">
+                                                <label for="locations"
+                                                    class="block mb-2 font-bold text-gray-900">Province <span
+                                                        class="text-red-700">*</span></label>
+                                                <select :disabled="!delivery_address"
+                                                    @change="applyCityProvince; getDeliveryFee()" id="locations"
+                                                    name="province" x-model="province" required
+                                                    class="bg-gray-50 mt-2 border disabled:bg-gray-100 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                                    <option selected value="">Choose a province</option>
+                                                    @foreach ($provinces as $province)
+                                                    <option value="{{ $province }}">{{ $province }}</option>
+                                                    @endforeach
+                                                </select>
+
+                                                <template x-if="provinceValidationMessage">
+                                                    <p class="text-red-500 text-xs italic mt-2"
+                                                        x-text="provinceValidationMessage"></p>
+                                                </template>
+                                            </div>
+
+                                            <div class="w-full md:w-1/2">
+                                                <label for="cities" class="block mb-2 font-bold text-gray-900">City /
+                                                    Municipalities<span class="text-red-700">*</span></label>
+                                                <select :disabled="!delivery_address"
+                                                    @change="applyCityProvince; getDeliveryFee()" id="cities"
+                                                    name="city" x-model="city" required
+                                                    class="bg-gray-50 mt-2 border disabled:bg-gray-100 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
+                                                    <option selected value="">Choose a City</option>
+                                                    <template x-for="(c, i) in filteredCities" :key="i">
+                                                        <option :value="c.city" x-text="c.city"></option>
+                                                    </template>
+                                                </select>
+
+                                                <template x-if="cityValidationMessage">
+                                                    <p class="text-red-500 text-xs italic mt-2"
+                                                        x-text="cityValidationMessage"></p>
+                                                </template>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-4">
+                                            <label for="locations"
+                                                class="block mb-2 font-bold text-gray-900">Barangay</label>
+                                            <select :disabled="!city || !province" id="locations" name="location"
+                                                x-ref="location" x-model="location"
+                                                class="bg-gray-50 mt-2 border disabled:bg-gray-100 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                                <option selected value="">Choose a Barangay</option>
+                                                <template x-for="(c, i) in filteredBarangay()" :key="i">
+                                                    <option :value="c.barangay" x-text="c.barangay"></option>
                                                 </template>
                                             </select>
-
-                                            <template x-if="cityValidationMessage">
-                                                <p class="text-red-500 text-xs italic mt-2" x-text="cityValidationMessage"></p>
-                                            </template>
                                         </div>
                                     </div>
+                                </template>
+                            </div>
 
-                                    <div class="mt-4">	
-                                        <label for="locations" class="block mb-2 font-bold text-gray-900">Barangay</label>
-                                        <select :disabled="!city || !province"
-                                                id="locations"
-                                                name="location"
-                                                x-ref="location"
-                                                x-model="location"
-                                                class="bg-gray-50 mt-2 border disabled:bg-gray-100 border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                                            <option selected value="">Choose a Barangay</option>
-                                            <template x-for="(c, i) in filteredBarangay()" :key="i">
-                                                <option :value="c.barangay" x-text="c.barangay"></option>
-                                            </template>
-                                        </select>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                        
                         </div>
                     </div>
-    
+
                     <div>
                         <div class="px-4 py-3 border-b border-[#DFDFDF]">
                             <div class="font-bold">Contact Information</div>
-    
+
                             <div class="mt-3">
                                 <div class="my-2">
-                                    <label for="name"
-                                        class="block mb-2 text-sm font-bold text-gray-900">Name<span
+                                    <label for="name" class="block mb-2 text-sm font-bold text-gray-900">Name<span
                                             class="text-red-700">*</span></label>
-                                    <input type="text" id="name" name="name" value="{{ auth()->check() ? (auth()->user()->is_org == 1 ? auth()->user()->contact_person : auth()->user()->name) : '' }}"
+                                    <input type="text" id="name" name="name"
+                                        value="{{ auth()->check() ? (auth()->user()->is_org == 1 ? auth()->user()->contact_person : auth()->user()->name) : '' }}"
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                                         placeholder="" required />
 
@@ -641,22 +767,23 @@
                                     </template>
                                 </div>
                                 <div class="my-2">
-                                    <label for="mobile"
-                                        class="block mb-2 text-sm font-bold text-gray-900">Mobile Number
+                                    <label for="mobile" class="block mb-2 text-sm font-bold text-gray-900">Mobile Number
                                         <span class="text-red-700">*</span></label>
-                                    <input type="tel" id="mobile" name="mobile" value="{{ auth()->check() ? auth()->user()->contact_mobile : '' }}"
+                                    <input type="tel" id="mobile" name="mobile"
+                                        value="{{ auth()->check() ? auth()->user()->contact_mobile : '' }}"
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                                         required />
 
                                     <template x-if="mobileValidationMessage">
-                                        <p class="text-red-500 text-xs italic mt-2" x-text="mobileValidationMessage"></p>
+                                        <p class="text-red-500 text-xs italic mt-2" x-text="mobileValidationMessage">
+                                        </p>
                                     </template>
                                 </div>
                                 <div class="my-2">
-                                    <label for="email"
-                                        class="block mb-2 text-sm font-bold text-gray-900">Email <span
+                                    <label for="email" class="block mb-2 text-sm font-bold text-gray-900">Email <span
                                             class="text-red-700">*</span></label>
-                                    <input type="email" id="email" name="email" value="{{ auth()->check() ? auth()->user()->email : '' }}"
+                                    <input type="email" id="email" name="email"
+                                        value="{{ auth()->check() ? auth()->user()->email : '' }}"
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                                         placeholder="" required />
 
@@ -665,102 +792,97 @@
                                     </template>
                                 </div>
                                 <div class="my-2">
-                                    <label for="agent"
-                                        class="block mb-2 text-sm font-bold text-gray-900">Agent Code</label>
+                                    <label for="agent" class="block mb-2 text-sm font-bold text-gray-900">Agent
+                                        Code</label>
                                     <input type="text" id="agent" name="agent" value=""
                                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                                         placeholder="" />
 
                                     @error('agent')
-                                        <div class="text-red-500 text-sm mt-1">
-                                            {{ $message }}
-                                        </div>
+                                    <div class="text-red-500 text-sm mt-1">
+                                        {{ $message }}
+                                    </div>
                                     @enderror
                                 </div>
                                 <template x-if="!allowMultiple">
-                                <div class="w-full flex gap-4">
-                                    <div class="my-2 w-full lg:w-1/2">
-                                        <label for="date"
-                                            class="block mb-2 text-sm font-bold text-gray-900">Select Date <span
-                                                class="text-red-700">*</span></label>
-                                        <div class="relative">
-                                            <div
-                                                class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-                                                <svg class="w-4 h-4 text-gray-500 " aria-hidden="true"
-                                                    xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path
-                                                        d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
-                                                </svg>
+                                    <div class="w-full flex gap-4">
+                                        <div class="my-2 w-full lg:w-1/2">
+                                            <label for="date" class="block mb-2 text-sm font-bold text-gray-900">Select
+                                                Date <span class="text-red-700">*</span></label>
+                                            <div class="relative">
+                                                <div
+                                                    class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
+                                                    <svg class="w-4 h-4 text-gray-500 " aria-hidden="true"
+                                                        xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                                                        viewBox="0 0 20 20">
+                                                        <path
+                                                            d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
+                                                    </svg>
+                                                </div>
+                                                <input onkeydown="return false" :min="minDate"
+                                                    @change="validateDateTime" x-model="need_date" type="date"
+                                                    name="need_date"
+                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 "
+                                                    placeholder="Select date">
                                             </div>
-                                            <input 
-                                                onkeydown="return false"
-                                                :min="minDate" @change="validateDateTime" 
-                                                x-model="need_date" type="date" name="need_date"
-                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 "
-                                                placeholder="Select date">
+                                            <div x-show="noNeededDate"
+                                                class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
+                                                Please select a date.
+                                            </div>
                                         </div>
-                                        <div x-show="noNeededDate" class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
-                                            Please select a date.
-                                        </div>
-                                    </div>
-                                    <div class="my-2 w-full lg:w-1/2">
-                                        <div class="relative">
-                                            <label for="need_time" class="block mb-2 text-sm font-bold text-gray-900">Select Time <span class="text-red-700">*</span></label>
-                                            <select 
-                                                id="need_time" 
-                                                name="need_time" 
-                                                x-model="need_time" 
-                                                @change="validateDateTime"
-                                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                                            >
-                                                <option value="">Select Hour</option>
-                                                <template x-for="hour in allHours" :key="hour">
-                                                    <template x-if="!isTimeDisabled(hour)">
-                                                        <option 
-                                                            :value="(hour < 10 ? '0' + hour : hour) + ':00'" 
-                                                            x-text="formatAMPM(hour)"
-                                                        ></option>
+                                        <div class="my-2 w-full lg:w-1/2">
+                                            <div class="relative">
+                                                <label for="need_time"
+                                                    class="block mb-2 text-sm font-bold text-gray-900">Select Time <span
+                                                        class="text-red-700">*</span></label>
+                                                <select id="need_time" name="need_time" x-model="need_time"
+                                                    @change="validateDateTime"
+                                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                                    <option value="">Select Hour</option>
+                                                    <template x-for="hour in allHours" :key="hour">
+                                                        <template x-if="!isTimeDisabled(hour)">
+                                                            <option :value="(hour < 10 ? '0' + hour : hour) + ':00'"
+                                                                x-text="formatAMPM(hour)"></option>
+                                                        </template>
                                                     </template>
-                                                </template>
-                                            </select>
-                                        </div>
-                                        <div x-show="noNeededTime" class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
-                                            Please select a time.
+                                                </select>
+                                            </div>
+                                            <div x-show="noNeededTime"
+                                                class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
+                                                Please select a time.
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
                                 </template>
                                 <template x-if="!allowMultiple">
-                                    <div class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
-                                        <div>We've pre-selected the earliest available time for your order. You’re welcome to adjust the date and time to your preference.</div>
+                                    <div
+                                        class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
+                                        <div>We've pre-selected the earliest available time for your order. You’re
+                                            welcome to adjust the date and time to your preference.</div>
                                     </div>
                                 </template>
                                 {{-- <div x-show="warningMessage">
-                                    <div class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
+                                    <div
+                                        class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
                                         <div x-html="warningMessage"></div>
                                     </div>
                                 </div> --}}
                                 <template x-if="!allowMultiple">
-                                <div class="my-2">
-                                    <label for="time"
-                                        class="block mb-2 text-sm font-bold text-gray-900">Note</label>
-                                    <div class="relative">
-                                        <textarea
-                                            class="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                                            name="instruction" id="" cols="30" rows="10"></textarea>
+                                    <div class="my-2">
+                                        <label for="time"
+                                            class="block mb-2 text-sm font-bold text-gray-900">Note</label>
+                                        <div class="relative">
+                                            <textarea
+                                                class="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                                                name="instruction" id="" cols="30" rows="10"></textarea>
+                                        </div>
                                     </div>
-                                </div>
                                 </template>
-                                
+
                                 @if (auth()->guest())
                                 <div class="flex items-start">
                                     <label @click="onCheckboxChange" class="flex items-center space-x-2">
-                                        <input
-                                            x-model="privacy" 
-                                            name="privacy" 
-                                            type="checkbox"
-                                            disabled="true"
-                                        >
+                                        <input x-model="privacy" name="privacy" type="checkbox" disabled="true">
                                         <span>I agree Lydia’s Lechon’s Privacy Protection Policy</span>
                                     </label>
                                 </div>
@@ -769,14 +891,20 @@
                                 </template>
                                 @endif
                             </div>
-                            <div x-show="hasErrorMessage" class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
-                                We are not able to accommodate your order base on your preferred date and time. Kindly refer to the warning message that appeared on your order screen or call our hotline at 89391221 / 89394665.  Thank you.
+                            <div x-show="hasErrorMessage"
+                                class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
+                                We are not able to accommodate your order base on your preferred date and time. Kindly
+                                refer to the warning message that appeared on your order screen or call our hotline at
+                                89391221 / 89394665. Thank you.
                             </div>
-                            <button :disable="isSubmitting" type="submit" class="bg-primary custom-btn btn-primary-dark text-center text-white px-6 py-4 mt-4 w-full rounded-md">
+                            <button :disable="isSubmitting" type="submit"
+                                class="bg-primary custom-btn btn-primary-dark text-center text-white px-6 py-4 mt-4 w-full rounded-md">
                                 <span x-show="!isSubmitting">Place Order</span>
                                 <span x-show="isSubmitting" class="flex items-center justify-center gap-2">
-                                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
+                                        fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                            stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
                                     </svg>
                                     Processing...
@@ -790,119 +918,271 @@
 
         </form>
 
-    <div x-show="showModal" x-transition.opacity class="fixed inset-0 bg-black/50 z-40 overflow-y-auto py-10 px-4"
-        @click.self="showModal = false">
-        <div x-show="showModal" 
-            class="relative m-auto bg-white text-black z-50 w-full max-w-2xl rounded-md">
-            <div id="data-privacy-render">
-                {!! $dataPrivacyRender !!}
-            </div>
+        <div x-cloak x-show="couponModal" class="fixed inset-0 z-50">
+            <!-- backdrop -->
+            <div class="fixed inset-0 bg-black/50" @click="close()"></div>
 
-            <div class="flex justify-end p-4">
-                <button type="button" @click="agreePrivacy" class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark">
-                    Agree
-                </button>
+            <!-- panel -->
+            <div class="fixed inset-0 flex items-center justify-center p-4">
+                <div x-show="couponModal" x-transition class="w-full max-w-xl">
+                    <div class="relative rounded-2xl bg-white shadow-2xl overflow-hidden">
+                        <!-- close -->
+                        <button @click="couponModal = false" type="button"
+                            class="absolute right-3 top-3 z-10 rounded-full bg-black/10 p-1 text-white hover:bg-black/20"
+                            aria-label="Close">
+                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M4.293 4.293 10 10l5.707-5.707 1.414 1.414L11.414 11.414l5.707 5.707-1.414 1.414L10 12.828l-5.707 5.707-1.414-1.414 5.707-5.707-5.707-5.707 1.414-1.414z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </button>
+
+                        <!-- Wrap the whole modal content with selectedCoupon state -->
+                        <div class="relative px-8 pt-12 pb-20 text-black">
+                            <!-- Coupon code input -->
+                            <div class="flex items-center border border-gray-150 rounded-md overflow-hidden mt-5 mb-3">
+                                <input @input="couponCode = $event.target.value.toUpperCase()" x-model="couponCode"
+                                    type="text" placeholder="Have a coupon code?"
+                                    class="w-full p-3 outline-none border-none text-gray-700">
+                                <button @click="submitCouponCode" type="button"
+                                    class="bg-tertiary hover:bg-tertiary-light text-white px-6 py-3 text-sm">
+                                    Apply
+                                </button>
+                            </div>
+
+                            <div x-show="couponMessage" class="pb-2 text-sm" :class="{
+        'text-green-600': couponMessageType === 'success',
+        'text-red-600': couponMessageType === 'error'
+    }" x-text="couponMessage">
+                            </div>
+
+                            <!-- List -->
+                            <div class="grid grid-cols-1 gap-4">
+                                @foreach ($eligibleCoupons as $c)
+                                @php
+                                $expires = \Carbon\Carbon::parse(($c->end_date ?? '') . ' ' . ($c->end_time ??
+                                '00:00'))->format('d M Y');
+                                $reward = match (trim((string)($c->reward ?? ''))) {
+                                'free-shipping-optn' => 'Free Shipping',
+                                'discount-amount-optn' => 'Discount Amount',
+                                'discount-percentage-optn' => 'Discount Percent',
+                                'free-product-optn' => 'Free Product',
+                                '' => 'Special Offer',
+                                default => $c->reward,
+                                };
+                                @endphp
+
+                                <!-- CARD -->
+                                <div class="relative w-full text-left">
+                                    <div
+                                        class="relative overflow-visible rounded-2xl border border-gray-200 bg-white shadow-sm cursor-pointer">
+                                        <!-- left strip -->
+                                        <div class="absolute inset-y-0 left-0 w-12 rounded-l-2xl overflow-hidden">
+                                            <div class="h-full w-full bg-gradient-to-b from-indigo-600 to-violet-600">
+                                            </div>
+                                            <div
+                                                class="absolute inset-y-0 left-0 flex w-12 items-center justify-center">
+                                                <span
+                                                    class="vertical-rl rotate-180 text-white/90 tracking-widest text-[11px] font-bold uppercase ml-2">
+                                                    {{ $reward }}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- left hole -->
+                                        <div class="pointer-events-none absolute top-1/2 -left-3 -translate-y-1/2 h-6 w-6 rounded-full border border-white"
+                                            style="background:var(--page-bg);"></div>
+
+                                        <!-- content -->
+                                        <div class="pl-16 pr-28 py-4">
+                                            <div class="flex items-start gap-3">
+                                                <div class="min-w-0 flex-1">
+                                                    <p class="text-sm leading-5 text-gray-800 flex flex-col gap-1">
+                                                        <span class="font-semibold">{{ $c->name }}</span>
+                                                        {!! $c->description
+                                                        ?
+                                                        \Illuminate\Support\Str::of($c->description)->replace('%','<span
+                                                            class="font-extrabold">%</span>')
+                                                        : ($c->name ?? 'Special offer') !!}
+                                                    </p>
+                                                    @php
+                                                    $combi = explode('|', $c->purchase_combination ?? '');
+                                                    $purchaseAmount = in_array('amount', $combi) ?
+                                                    number_format($c->purchase_amount, 2) : null;
+                                                    @endphp
+                                                    @if ($purchaseAmount)
+                                                    <p class="text-[11px] uppercase tracking-wide text-gray-400">Min.
+                                                        spend</p>
+                                                    <div class="mt-1">₱{{ $purchaseAmount }}</div>
+                                                    @endif
+                                                    <div class="mt-1">
+                                                        <p class="text-[11px] uppercase tracking-wide text-gray-400">
+                                                            Expires</p>
+                                                        <p class="text-sm font-semibold text-gray-900">{{ $expires }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- single-select control -->
+                                        <!-- single-select control (checkbox UI, radio behavior) -->
+                                        <div class="absolute right-4 top-1/2 -translate-y-1/2">
+                                            <div class="flex items-center">
+                                                <input type="checkbox" name="coupon_pick" :id="'coupon-{{ $c->id }}'"
+                                                    :checked="selectedCoupon === {{ $c->id }}" @change.stop="
+        if ($event.target.checked) {
+          // selecting this one: becomes the only checked
+          selectedCoupon = {{ $c->id }};
+          couponCode = @js($c->coupon_code ?? '').toUpperCase();
+        } else if (selectedCoupon === {{ $c->id }}) {
+          // unchecking the currently selected one: clear
+          selectedCoupon = null;
+          couponCode = '';
+        }
+      " class="h-5 w-5 rounded-full text-tertiary focus:ring-tertiary border-gray-300">
+                                                <label :for="'coupon-{{ $c->id }}'" class="sr-only">Select coupon {{
+                                                    $c->id }}</label>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div x-show="depositModal"
-        x-transition
-        class="relative z-50"
-        aria-labelledby="modal-title"
-        role="dialog"
-        aria-modal="true"
-        style="display: none;">
-        <!-- Backdrop -->
-        <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
 
-        <!-- Modal content -->
-        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-            <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
-                <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg pb-5">
-                    <!-- Modal body -->
-                    <div class="">
+        <div x-show="showModal" x-transition.opacity class="fixed inset-0 bg-black/50 z-40 overflow-y-auto py-10 px-4"
+            @click.self="showModal = false">
+            <div x-show="showModal" class="relative m-auto bg-white text-black z-50 w-full max-w-2xl rounded-md">
+                <div id="data-privacy-render">
+                    {!! $dataPrivacyRender !!}
+                </div>
 
-                        <div class="flex justify-between items-center px-3 pt-3">
-                            <div class="flex gap-2 items-center">
-                                <div class="text-2xl font-bold">Amount to pay</div>
+                <div class="flex justify-end p-4">
+                    <button type="button" @click="agreePrivacy"
+                        class="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark">
+                        Agree
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="depositModal" x-transition class="relative z-50" aria-labelledby="modal-title" role="dialog"
+            aria-modal="true" style="display: none;">
+            <!-- Backdrop -->
+            <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
+
+            <!-- Modal content -->
+            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+                    <div
+                        class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg pb-5">
+                        <!-- Modal body -->
+                        <div class="">
+
+                            <div class="flex justify-between items-center px-3 pt-3">
+                                <div class="flex gap-2 items-center">
+                                    <div class="text-2xl font-bold">Amount to pay</div>
+                                </div>
+                                <button @click="closeDepositModal()" class="self-end text-2xl text-gray-800">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="size-7">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
                             </div>
-                            <button @click="closeDepositModal()" class="self-end text-2xl text-gray-800">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-            
-                        <div class="text-gray-600 font-medium px-4 mt-4">
-                            To complete your order, please enter the amount you wish to pay.
-                        </div>
-            
-                        <div class="px-4 mt-5">
-                            <div>
-                                <form
-                                    x-data="{ isFormSubmitting: false }"
-                                    @submit="isFormSubmitting = true; setTimeout(() => { this.depositModal = true}, 3000)"
-                                    action="{{ route('paymaya.paytest') }}" method="POST" enctype="multipart/form-data" class="flex flex-col">
-                                    
-                                    {{-- action="{{ route('paymaya.pay') }}" method="POST" enctype="multipart/form-data" class="flex flex-col"> --}}
-                                    @csrf
-                                    <input type="hidden" name="sales_header_id" :value="paymentDetails.order_number">
-                        
-                                    <div class="pb-4">
-                                        <img src="{{ asset('images/payment/pay-maya.jpg') }}">
-                                    </div>
 
-                                    <!-- GCash / PayMaya -->
-                                    <div>
-                                        <label class="font-semibold block mb-1">PayMaya:</label>
-                                        <select name="pamenty_mode" id="pamenty_mode_gpay" x-model="paymentMode" @change="gcash_paymaya_change" required class="border-gray-300 rounded-md w-full p-2">
-                                            <option value="PayMaya">PayMaya</option>
-                                        </select>
-                                    </div>
-                        
-                                    <!-- GCash QR Code -->
-                                    <div x-show="paymentMode === 'GCash'" class="text-center">
-                                        <p class="font-semibold">GCash</p>
-                                        <p class="text-sm">Scan the QR Code below</p>
-                                        <img src="{{ asset('images/gcash.png') }}" alt="GCash QR" class="mx-auto mt-2 w-40 h-40 object-contain">
-                                    </div>
+                            <div class="text-gray-600 font-medium px-4 mt-4">
+                                To complete your order, please enter the amount you wish to pay.
+                            </div>
 
-                                    <input type="hidden" id="payment_dt" name="payment_dt">
-                                    <input type="hidden" id="ref_no" name="ref_no">
-                        
-                                    <!-- Amount -->
-                                    <div class="mt-4">
-                                        <label class="font-semibold block mb-1">Amount to Pay:</label>
-                                        <div class="flex">
-                                            <span class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 border-e-0 rounded-s-md">
-                                                ₱
-                                            </span>
-                                            <input readonly required name="amount" :value="paymentDetails.amount" type="text" id="money" class="rounded-none rounded-e-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full border-gray-300 p-2.5  " placeholder="">
+                            <div class="px-4 mt-5">
+                                <div>
+                                    <form x-data="{ isFormSubmitting: false }"
+                                        @submit="isFormSubmitting = true; setTimeout(() => { this.depositModal = true}, 3000)"
+                                        action="{{ route('paymaya.paytest') }}" method="POST"
+                                        enctype="multipart/form-data" class="flex flex-col">
+
+                                        {{-- action="{{ route('paymaya.pay') }}" method="POST"
+                                        enctype="multipart/form-data" class="flex flex-col"> --}}
+                                        @csrf
+                                        <input type="hidden" name="sales_header_id"
+                                            :value="paymentDetails.order_number">
+
+                                        <div class="pb-4">
+                                            <img src="{{ asset('images/payment/pay-maya.jpg') }}">
                                         </div>
-                                    </div>
-                        
-                                    <!-- Submit Button -->
-                                    <div class="text-right mt-4">
-                                        <button :disabled="isFormSubmitting" type="submit" class="bg-primary hover:bg-primary-dark text-white font-semibold px-6 py-2 rounded-md">
-                                            <span x-show="!isFormSubmitting">Submit</span>
-                                            <span x-show="isFormSubmitting" class="flex items-center justify-center gap-2">
-                                                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                                                </svg>
-                                                Submitting...
-                                            </span>
-                                        </button>
-                                    </div>
-                                </form>
+
+                                        <!-- GCash / PayMaya -->
+                                        <div>
+                                            <label class="font-semibold block mb-1">PayMaya:</label>
+                                            <select name="pamenty_mode" id="pamenty_mode_gpay" x-model="paymentMode"
+                                                @change="gcash_paymaya_change" required
+                                                class="border-gray-300 rounded-md w-full p-2">
+                                                <option value="PayMaya">PayMaya</option>
+                                            </select>
+                                        </div>
+
+                                        <!-- GCash QR Code -->
+                                        <div x-show="paymentMode === 'GCash'" class="text-center">
+                                            <p class="font-semibold">GCash</p>
+                                            <p class="text-sm">Scan the QR Code below</p>
+                                            <img src="{{ asset('images/gcash.png') }}" alt="GCash QR"
+                                                class="mx-auto mt-2 w-40 h-40 object-contain">
+                                        </div>
+
+                                        <input type="hidden" id="payment_dt" name="payment_dt">
+                                        <input type="hidden" id="ref_no" name="ref_no">
+
+                                        <!-- Amount -->
+                                        <div class="mt-4">
+                                            <label class="font-semibold block mb-1">Amount to Pay:</label>
+                                            <div class="flex">
+                                                <span
+                                                    class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border rounded-e-0 border-gray-300 border-e-0 rounded-s-md">
+                                                    ₱
+                                                </span>
+                                                <input readonly required name="amount" :value="paymentDetails.amount"
+                                                    type="text" id="money"
+                                                    class="rounded-none rounded-e-lg bg-gray-50 border text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full border-gray-300 p-2.5  "
+                                                    placeholder="">
+                                            </div>
+                                        </div>
+
+                                        <!-- Submit Button -->
+                                        <div class="text-right mt-4">
+                                            <button :disabled="isFormSubmitting" type="submit"
+                                                class="bg-primary hover:bg-primary-dark text-white font-semibold px-6 py-2 rounded-md">
+                                                <span x-show="!isFormSubmitting">Submit</span>
+                                                <span x-show="isFormSubmitting"
+                                                    class="flex items-center justify-center gap-2">
+                                                    <svg class="animate-spin h-5 w-5 text-white"
+                                                        xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                        viewBox="0 0 24 24">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                                            stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor"
+                                                            d="M4 12a8 8 0 018-8v8z"></path>
+                                                    </svg>
+                                                    Submitting...
+                                                </span>
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
     </div>
 </div>
 
@@ -947,6 +1227,7 @@
                 signature: '',
                 saved_items: ''
             },
+            couponModal: false,
             disabledDeliveryDates: window.disabledDeliveryDates,
             disabledPickupDates: window.disabledPickupDates,
             paymentMode: '',
@@ -1026,6 +1307,7 @@
             coupon: null,
             coupons: [],
             couponCode: '',
+            selectedCoupon: null,
             couponMessage: '',
             couponMessageType: '',
             totalDiscountAmount: 0,
@@ -1120,82 +1402,108 @@
 
             clearToProceed: true,
 
-            recomputeCouponTotals(delivery = null) {
-                this.totalDiscountAmount = 0;
-                this.shippingDiscountAmount = 0;
-                this.shippingDiscountLists = [];
+recomputeCouponTotals(delivery = null) {
+    this.totalDiscountAmount = 0;
+    this.shippingDiscountAmount = 0;
+    this.shippingDiscountLists = [];
 
-                const deliveryList = delivery ? [delivery] : this.deliveries;
+    const isMulti = this.method === 'delivery' && this.allowMultiple;
 
-                // Reset per-row delivery fee discounts
-                this.deliveryFees = this.deliveryFees.map(row => ({
-                    ...row,
-                    discount: 0
-                }));
+    if (isMulti) {
+        // Reset per-row delivery fee discounts
+        this.deliveryFees = this.deliveryFees.map(row => ({
+            ...row,
+            discount: 0
+        }));
+    }
 
-                // Re-filter coupons
-                this.coupons = this.coupons.filter(coupon => {
-                    if (coupon.free_shipping && coupon.location) {
-                        // If it applies to at least 1 delivery, keep it
-                        const allowedLocations = coupon.location
-                            .split('|')
-                            .map(l => l.trim())
-                            .filter(l => l !== '');
+    // Re-filter coupons (only needed for multi)
+    this.coupons = this.coupons.filter(coupon => {
+        if (coupon.free_shipping && coupon.location) {
+            const allowedLocations = coupon.location
+                .split('|')
+                .map(l => l.trim())
+                .filter(l => l !== '');
 
-                        return this.deliveries.some(d =>
-                            allowedLocations.includes(d.location) || allowedLocations.includes('all')
-                        );
-                    }
-                    return true;
-                });
+            if (isMulti) {
+                return this.deliveries.some(d =>
+                    allowedLocations.includes(d.location) || allowedLocations.includes('all')
+                );
+            } else {
+                return (
+                    allowedLocations.includes(this.location) || allowedLocations.includes('all')
+                );
+            }
+        }
+        return true;
+    });
 
-                // Apply per-coupon logic
-                this.coupons.forEach(coupon => {
-                    if (coupon.free_shipping) {
-                        const allowedLocations = coupon.location
-                            ?.split('|')
-                            .map(l => l.trim())
-                            .filter(l => l !== '') || [];
+    // Apply per-coupon logic
+    this.coupons.forEach(coupon => {
+        if (coupon.free_shipping && this.method !== 'pickup') {
+            const allowedLocations = coupon.location
+                ?.split('|')
+                .map(l => l.trim())
+                .filter(l => l !== '') || [];
 
-                        this.deliveryFees.forEach((feeRow, idx) => {
-                            if (
-                                allowedLocations.includes(feeRow.location) ||
-                                allowedLocations.includes('all')
-                            ) {
-                                const fee = feeRow.fee || 0;
-                                const discount = parseFloat(coupon.free_shipping_discount_amount || 0);
+            if (isMulti) {
+                this.deliveryFees.forEach((feeRow, idx) => {
+                    if (
+                        allowedLocations.includes(feeRow.location) ||
+                        allowedLocations.includes('all')
+                    ) {
+                        const fee = feeRow.fee || 0;
+                        const discount = parseFloat(coupon.free_shipping_discount_amount || 0);
 
-                                const discountAmount =
-                                    discount === 100
-                                        ? fee
-                                        : (fee * discount) / 100;
+                        const discountAmount =
+                            discount === 100
+                                ? fee
+                                : (fee * discount) / 100;
 
-                                // Assign discount to that delivery
-                                this.deliveryFees[idx].discount = discountAmount;
+                        this.deliveryFees[idx].discount = discountAmount;
+                        this.shippingDiscountAmount += discountAmount;
 
-                                this.shippingDiscountAmount += discountAmount;
-                                
-                                // Track itemized shipping discount per location/index
-                                this.shippingDiscountLists.push({
-                                    location: feeRow.location,
-                                    index: idx,
-                                    discount: parseFloat(discountAmount.toFixed(2))
-                                });
-                            }
+                        this.shippingDiscountLists.push({
+                            location: feeRow.location,
+                            index: idx,
+                            discount: parseFloat(discountAmount.toFixed(2))
                         });
-                    } else {
-                        // Handle order discount
-                        if (coupon.discount_type === 'amount') {
-                            this.totalDiscountAmount += parseFloat(coupon.discount ?? 0);
-                        } else if (coupon.discount_type === 'percent') {
-                            this.totalDiscountAmount += (this.orderAmount * parseFloat(coupon.discount ?? 0)) / 100;
-                        }
                     }
                 });
+            } else {
+                // Single delivery flow
+                const fee = this.deliveryFee || 0;
 
-                // Cap total discount to orderAmount
-                this.totalDiscountAmount = Math.min(this.totalDiscountAmount, this.orderAmount);
-            },
+                if (
+                    allowedLocations.includes(this.location) ||
+                    allowedLocations.includes('all')
+                ) {
+                    const discount = parseFloat(coupon.free_shipping_discount_amount || 0);
+                    const discountAmount =
+                        discount === 100 ? fee : (fee * discount) / 100;
+
+                    this.shippingDiscountAmount += discountAmount;
+
+                    this.shippingDiscountLists.push({
+                        location: this.province + '' + this.city,
+                        index: 0,
+                        discount: parseFloat(discountAmount.toFixed(2))
+                    });
+                }
+            }
+        } else {
+            // Handle order discount
+            if (coupon.discount_type === 'amount') {
+                this.totalDiscountAmount += parseFloat(coupon.discount ?? 0);
+            } else if (coupon.discount_type === 'percent') {
+                this.totalDiscountAmount += (this.orderAmount * parseFloat(coupon.discount ?? 0)) / 100;
+            }
+        }
+    });
+
+    // Cap total discount to orderAmount
+    this.totalDiscountAmount = Math.min(this.totalDiscountAmount, this.orderAmount);
+},
 
 
 
@@ -1278,6 +1586,8 @@
                 if (!this.allowMultiple) {
                     this.validateDateTime();
                 }
+
+                this.recomputeCouponTotals()
             },
 
             mobileValidationMessage: '',
@@ -3163,7 +3473,7 @@
 </script>
 
 @section('alpine.plugins')
-    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/mask@3.x.x/dist/cdn.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/mask@3.x.x/dist/cdn.min.js"></script>
 @endsection
 
 @endsection
