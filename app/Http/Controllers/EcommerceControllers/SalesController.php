@@ -799,6 +799,10 @@ class SalesController extends Controller
         // dd($salesheader->deliveryAddress);
 
         $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
+
+        $locations = $locations->filter(function ($value) {
+            return !is_null($value->name) && $value->name !== '';
+        })->values();
       
         ActivityLog::create([
             'created_by' => auth()->id(),

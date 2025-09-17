@@ -218,8 +218,7 @@ Update Sales Details
                                             data-style="btn btn-outline-light btn-md btn-block tx-left"
                                             title="Choose New Location" data-width="100%" name="update_dateneeded_d2d"
                                             id="update_dateneeded_d2d">
-                                            @foreach(\App\Models\Deliverablecities::select('name')->distinct()->orderBy('name')->get()
-                                            as $b)
+                                            @foreach($locations as $b)
                                             <option @if($b->name == $locationed) selected @endif
                                                 value="{{$b->name}}">{{$b->name}}</option>
                                             @endforeach
