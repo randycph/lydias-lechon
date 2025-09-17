@@ -260,20 +260,20 @@
                                                         @php
                                                             $paella_price = 0.00;
                                                             $delivery_fee = 0.00;
-                                                            $total_price = number_format(($jo->qty*$jo->price)+$paella_price,2);
+                                                            $total_price = number_format(($jo?->qty*$jo?->price)+$paella_price,2);
                                                             if($jo->paella_qty > 0){
                                                                 $paella_price = $jo->paella_qty * $jo->paella_price;
                                                             }
 
                                                             if($jo->sales_detail_id > 0){
                                                                 $delivery_fee = number_format($jo->sales_detail?->header?->delivery_fee_amount,2);
-                                                                $total_price = number_format(($jo->sales_detail->qty*$jo->sales_detail->price)+$paella_price+$jo->sales_detail?->header?->delivery_fee_amount,2);
+                                                                $total_price = number_format(($jo->sales_detail?->qty*$jo->sales_detail?->price)+$paella_price+$jo->sales_detail?->header?->delivery_fee_amount,2);
                                                             }
 
                                                         @endphp
                                                         @if($jo->sales_detail_id > 0)
                                                             <p>Qty: {{ number_format($jo->qty,2) }}</p>
-                                                            <p>Price: &#8369; {{ number_format($jo->price,2) }}</p>
+                                                            <p>Price: &#8369; {{ number_format($jo?->price,2) }}</p>
                                                             <p>Delivery Fee: &#8369; {{ $delivery_fee }}</p>
                                                             <p>Total Price: &#8369; {{ $total_price }}</p>
                                                         @endif
@@ -288,7 +288,9 @@
                                                         <p>Instruction: {{ $jo->remarks }}</p>
                                                         @if($jo->sales_detail_id > 0)
                                                         <p>Sales #: {{ $jo->sales_number }}</p>
-                                                        <p><a target="_blank" class="btn btn-xs btn-success" href="{{ route('sales-transaction.view',$jo->sales_detail->sales_header_id) }}">View Order Summary</a></p>
+                                                        @if ($jo?->sales_detail?->sales_header_id)
+                                                        <p><a target="_blank" class="btn btn-xs btn-success" href="{{ route('sales-transaction.view',$jo?->sales_detail?->sales_header_id) }}">View Order Summary</a></p>
+                                                        @endif
                                                         @endif
                                                     </div>
                                                 </div>
