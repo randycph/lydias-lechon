@@ -266,8 +266,8 @@
                                                             }
 
                                                             if($jo->sales_detail_id > 0){
-                                                                $delivery_fee = number_format($jo->sales_detail->header->delivery_fee_amount,2);
-                                                                $total_price = number_format(($jo->sales_detail->qty*$jo->sales_detail->price)+$paella_price+$jo->sales_detail->header->delivery_fee_amount,2);
+                                                                $delivery_fee = number_format($jo->sales_detail?->header?->delivery_fee_amount,2);
+                                                                $total_price = number_format(($jo->sales_detail->qty*$jo->sales_detail->price)+$paella_price+$jo->sales_detail?->header?->delivery_fee_amount,2);
                                                             }
 
                                                         @endphp
