@@ -442,7 +442,7 @@
                                     <tr style="text-align: left">
                                         
                                         <td class="bord">{{number_format($r->qty,2)}}</td>
-                                        <td class="bord" style="font-weight:normal">{!!$pname!!}</td>
+                                        <td class="bord" style="font-weight:normal">{!! highlightPaella($r->product_name) !!}</td>
 
                                         @if($old_value <> $uni)
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">@if(strlen($address)>15){!!$address!!}@endif</td>   
