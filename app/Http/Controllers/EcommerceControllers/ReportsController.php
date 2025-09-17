@@ -888,6 +888,9 @@ class ReportsController extends Controller
                 $qry.= " and h.delivery_branch='".$_GET['delbra']."'";
             }
 
+            if(isset($_GET['order_number']) && $_GET['order_number']<>''){
+                $qry.= " and h.order_number like '%".$_GET['order_number']."%'";
+            }
 
             if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
                 $qry.= " and d.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and d.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
@@ -898,7 +901,12 @@ class ReportsController extends Controller
         // end conditions
 
         $rs = DB::select($qry);
+        
+        // only return unique ordnum
 
+        $rs = collect($rs)
+                ->unique('jnum')
+                ->values();
 
         return view('admin.reports.door2door',compact('rs'));
 
