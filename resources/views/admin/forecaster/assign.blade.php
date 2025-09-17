@@ -132,30 +132,9 @@
                             <label class="d-block">&nbsp;</label>
                             <div class="input-group timepicker">
                                 <select class="selectpicker" data-style="btn btn-outline-light btn-md btn-block tx-left" required="required" title="Select delivery time" data-width="100%" name="delivery_time" id="delivery_time">
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '07:00') selected @endif value="07:00">07:00 AM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '12:00') selected @endif value="12:00">12:00 NN</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '14:00') selected @endif value="14:00">02:00 PM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '17:00') selected @endif value="17:00">05:00 PM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '01:00') selected @endif value="01:00">01:00 AM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '02:00') selected @endif value="02:00">02:00 AM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '03:00') selected @endif value="03:00">03:00 AM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '04:00') selected @endif value="04:00">04:00 AM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '05:00') selected @endif value="05:00">05:00 AM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '06:00') selected @endif value="06:00">06:00 AM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '08:00') selected @endif value="08:00">08:00 AM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '09:00') selected @endif value="09:00">09:00 AM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '10:00') selected @endif value="10:00">10:00 AM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '11:00') selected @endif value="11:00">11:00 AM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '13:00') selected @endif value="13:00">01:00 PM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '15:00') selected @endif value="15:00">03:00 PM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '16:00') selected @endif value="16:00">04:00 PM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '17:00') selected @endif value="17:00">05:00 PM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '18:00') selected @endif value="18:00">06:00 PM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '19:00') selected @endif value="19:00">07:00 PM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '20:00') selected @endif value="20:00">08:00 PM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '21:00') selected @endif value="21:00">09:00 PM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '22:00') selected @endif value="22:00">10:00 PM</option>
-                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == '23:00') selected @endif value="23:00">11:00 PM</option>
+                                    @foreach (['07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'] as $time)
+                                    <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == $time) selected @endif value="{{$time}}">{{ date("h:i A", strtotime($time)) }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>
