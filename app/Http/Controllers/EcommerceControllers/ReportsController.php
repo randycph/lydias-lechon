@@ -894,6 +894,9 @@ class ReportsController extends Controller
 
             if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
                 $qry.= " and d.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and d.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
+
+
+                // $qry.= " and d.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and d.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
             }
             else{
                 $qry.= " and d.delivery_date >='2051-01-01 00:00:00.000' and d.delivery_date <='2051-01-01 23:59:59.999'";
@@ -904,9 +907,9 @@ class ReportsController extends Controller
         
         // only return unique ordnum
 
-        $rs = collect($rs)
-                ->unique('jnum')
-                ->values();
+        // $rs = collect($rs)
+        //         ->unique('jnum')
+        //         ->values();
 
         return view('admin.reports.door2door',compact('rs'));
 
