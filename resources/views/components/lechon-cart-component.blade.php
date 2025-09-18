@@ -140,18 +140,18 @@
                     </div>
 
                     <div>
-                        <div class="font-bold">Description</div>
+                        <div x-show="product?.description || product?.weight || product?.no_of_pax" class="font-bold">Description</div>
                         <div class="flex flex-col text-gray-600 mt-2">
-                            <div class="flex gap-4">
+                            <div class="flex gap-4" x-show="product?.weight">
                                 <div class="text-gray-500">Weight</div>
                                 <div class="font-bold" x-text="product?.weight"></div>
                             </div>
-                            <div class="flex gap-4">
+                            <div class="flex gap-4" x-show="product?.no_of_pax">
                                 <div class="text-gray-500">Serves:</div>
                                 <div class="font-bold" x-text="product?.no_of_pax"></div>
                             </div>
                         </div>
-                        <div class="mt-3 text-sm" x-html="product?.description"></div>
+                        <div x-show="product?.description" class="mt-3 text-sm" x-html="product?.description"></div>
                     </div>
 
                     {{-- <div>
