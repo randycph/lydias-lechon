@@ -845,7 +845,7 @@ class ReportsController extends Controller
         $qry = "SELECT po.schedule_type as schedtype,pb.name as prod_branch,jo.jo_number as jnum,h.*,d.*,h.created_at as hcreated,h.id as hid,p.category_id,c.name as catname,d.id as did, 
         h.instruction, h.payment_status, h.order_number as ordnum, h.delivery_branch as delbra
             FROM  `ecommerce_sales_details` d
-            left join ecommerce_sales_headers h on h.id=d.sales_header_id
+            left join ecommerce_sales_headers h on h.id = d.sales_header_id
             left join products p on p.id=d.product_id
             left join product_categories c on c.id=p.category_id
             left join job_orders jo on jo.sales_detail_id = d.id
@@ -905,11 +905,9 @@ class ReportsController extends Controller
 
         $rs = DB::select($qry);
         
-        // only return unique ordnum
-
-        // $rs = collect($rs)
-        //         ->unique('jnum')
-        //         ->values();
+        $rs = collect($rs)
+            ->unique(fn ($row) => ($row->jnum ?? '') . '|' . ($row->product_name ?? ''))
+            ->values();
 
         return view('admin.reports.door2door',compact('rs'));
 
