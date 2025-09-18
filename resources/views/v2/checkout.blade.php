@@ -833,7 +833,7 @@ $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
                                         <div class="my-2 w-full lg:w-1/2">
                                             <div class="relative">
                                                 <label for="need_time"
-                                                    class="block mb-2 text-sm font-bold text-gray-900">Select Time <span
+                                                    class="block mb-2 text-sm font-bold text-gray-900">Select Timesss <span
                                                         class="text-red-700">*</span></label>
                                                 <select id="need_time" name="need_time" x-model="need_time"
                                                     @change="validateDateTime"
@@ -870,7 +870,7 @@ $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
                                 <template x-if="!allowMultiple">
                                     <div class="my-2">
                                         <label for="time"
-                                            class="block mb-2 text-sm font-bold text-gray-900">Note</label>
+                                            class="block mb-2 text-sm font-bold text-gray-900">Notesss</label>
                                         <div class="relative">
                                             <textarea
                                                 class="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
@@ -1296,7 +1296,7 @@ $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
             showMessage: false,
             need_date: '',
             need_time: '',
-            allHours: Array.from({ length: 21 }, (_, i) => i),
+            allHours: Array.from({ length: 14 }, (_, i) => i + 7),
             warningMessage: '',
             errorMessage: '',
             hasErrorMessage: false,
