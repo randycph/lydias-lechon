@@ -686,7 +686,7 @@ class CouponController extends Controller
 
             // Total Amount Condition
             if ($coupon->purchase_amount && $coupon->purchase_amount > 0) {
-                if ($coupon->purchase_amount_type === 'min' && $cartTotal < $coupon->purchase_amount) {
+                if ($cartTotal < $coupon->purchase_amount) {
                     return response()->json([
                         'success' => false,
                         'status' => 'amount_requirement_failed',
@@ -799,9 +799,10 @@ class CouponController extends Controller
                 }
 
                 // Amount Condition
+                $combi = explode('|', $coupon->purchase_combination ?? '');
                 if ($coupon->purchase_amount && $coupon->purchase_amount > 0) {
-                    if ($coupon->purchase_amount_type === 'min' && $cartTotal < $coupon->purchase_amount) continue;
-                    if ($coupon->purchase_amount_type === 'max' && $cartTotal > $coupon->purchase_amount) continue;
+                    if ($cartTotal < $coupon->purchase_amount) continue;
+                    // if ($coupon->purchase_amount_type === 'max' && $cartTotal > $coupon->purchase_amount) continue;
                 }
 
                 // Product Condition
