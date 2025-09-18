@@ -665,6 +665,20 @@ class CouponController extends Controller
             $cartQty = $cartItems->sum('qty');
             $cartTotal = $cartItems->sum(fn ($item) => ($item['price'] ?? 0) * ($item['qty'] ?? 0));
 
+            $cartProductIds = $cartItems->pluck('product_id')->map(fn($id) => (string)$id)->toArray();
+            // return empty coupon if cart product has category id of 1.
+            $cartHasExcludedCategory = Product::whereIn('id', $cartProductIds)
+                ->where('category_id', 1)
+                ->exists();
+
+            if ($cartHasExcludedCategory) {
+                return response()->json([
+                    'success' => true,
+                    'status' => 'excluded_category',
+                    'coupons' => []
+                ]);
+            }
+            
             // Total Quantity Condition
             if ($coupon->purchase_qty && $coupon->purchase_qty > 0) {
                 if ($coupon->purchase_qty_type === 'min' && $cartQty < $coupon->purchase_qty) {
@@ -779,6 +793,18 @@ class CouponController extends Controller
         $cartQty = $cartItems->sum('qty');
         $cartTotal = $cartItems->sum(fn($item) => ($item['price'] ?? 0) * ($item['qty'] ?? 0));
         $cartProductIds = $cartItems->pluck('product_id')->map(fn($id) => (string)$id)->toArray();
+
+        // return empty coupon if cart product has category id of 1.
+        $cartHasExcludedCategory = Product::whereIn('id', $cartProductIds)
+            ->where('category_id', 1)
+            ->exists();
+
+        if ($cartHasExcludedCategory) {
+            return response()->json([
+                'success' => true,
+                'coupons' => []
+            ]);
+        }
 
         foreach ($eligibleCoupons as $coupon) {
             // Check usage limits

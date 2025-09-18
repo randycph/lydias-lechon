@@ -442,7 +442,7 @@
                                     <tr style="text-align: left">
                                         
                                         <td class="bord">{{number_format($r->qty,2)}}</td>
-                                        <td class="bord" style="font-weight:normal">{!! highlightPaella($r->product_name) !!}</td>
+                                        <td class="bord" style="font-weight:normal">{!! highlightPaella($r->dproduct_name ?? $r->product_name) !!}</td>
 
                                         @if($old_value <> $uni)
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">@if(strlen($address)>15){!!$address!!}@endif</td>   
@@ -477,7 +477,7 @@
                                             </td>                                      
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">
                                                 @php
-                                                    $text_array = explode(" ", $r->customer_name);
+                                                    $text_array = explode(" ", $r->contact_person ?? $r->customer_name);
                                                     $chunks = array_chunk($text_array, 3);
                                                     foreach ($chunks as $chunk) {
                                                         echo implode(" ", $chunk)."<br>";                                          
