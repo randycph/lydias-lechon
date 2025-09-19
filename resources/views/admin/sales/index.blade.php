@@ -1230,36 +1230,70 @@
             $.ajax({
                 type: "GET",
                 url: "{{ route('show.delivery-status', [':id']) }}".replace(':id', id),
-                success: function( response ) {
-                    if (response.status && response.status.status !== 'In Transit') {
-                        $('#delivery_status').val(response.status.status);
-                        $('#del_remarks').val(response.status.remarks);
+                success: function(response) {
+                    setDeliveryStatus(response.status.status); 
+                    $('#del_remarks').val(response.status.remarks || '');
 
-                        if (response.status.image) {
-                            $('#del_image').attr('src', window.base_url + '/images/proof-of-delivery/' + response.status.image).show();
-                            $('#view_image').attr('href', window.base_url + '/images/proof-of-delivery/' + response.status.image).show();
-                        }
+                    if (response.status.image) {
+                        const src = window.base_url + '/images/proof-of-delivery/' + response.status.image;
+                        $('#del_image').attr('src', src).show();
+                        $('#view_image').attr('href', src).show();
                     }
 
-                    // Populate deliveries from top-level "deliveries"
-                    if (response.deliveries && response.deliveries.length > 0) {
-                        $('#deliveries_lists_div').show();
-                        $('#deliveries_lists').empty().append('<option value="">- Select -</option>');
-                        response.deliveries.forEach(function(delivery, index) {
-                            const label = `Address ${index + 1}: ${delivery.address} (${delivery.location})`;
-                            $('#deliveries_lists').append(
-                                '<option value="' + delivery.id + '">' +
-                                    label +
-                                '</option>'
-                            );
-                        });
-                        $('#deliveries_lists').prop('required', true);
+                    if (response.status.delivered_by) {
+                        $('#delivered_by').val(response.status.delivered_by);
+                        $('#delivered_by_div').show();
                     } else {
-                        $('#deliveries_lists_div').hide();
-                        $('#deliveries_lists').prop('required', false);
+                        $('#delivered_by').val('');
+                        $('#delivered_by_div').hide();
+                    }
+
+                    // deliveries dropdown (unchanged)
+                    if (response.deliveries && response.deliveries.length > 0) {
+                    $('#deliveries_lists_div').show();
+                    $('#deliveries_lists').empty().append('<option value="">- Select -</option>');
+                    response.deliveries.forEach(function (delivery, index) {
+                        const label = `Address ${index + 1}: ${delivery.address} (${delivery.location})`;
+                        $('#deliveries_lists').append('<option value="' + delivery.id + '">' + label + '</option>');
+                    });
+                    $('#deliveries_lists').prop('required', true);
+                    } else {
+                    $('#deliveries_lists_div').hide();
+                    $('#deliveries_lists').prop('required', false);
                     }
                 }
             });
+
+        }
+
+        function setDeliveryStatus(raw) {
+            const $sel = $('#delivery_status');
+            if (!raw) return;
+
+            // Normalize incoming value
+            const norm = String(raw).trim().toLowerCase();
+            const map = {
+                'open date': 'Open Date',
+                'scheduled for processing': 'Scheduled for Processing',
+                'processing': 'Processing',
+                'in transit': 'In Transit',
+                'delivered/picked up': 'Delivered/Picked Up',
+                'returned/rejected': 'Returned/Rejected',
+            };
+            const target = map[norm] ?? String(raw).trim();
+
+            // Find by value or text
+            let $opt = $sel.find('option').filter(function () {
+                return $(this).val().trim() === target || $(this).text().trim() === target;
+            }).first();
+
+            // If option doesn't exist (e.g., dispatcher role), append it so .val() will work
+            if ($opt.length === 0) {
+                $opt = $(new Option(target, target));
+                $sel.append($opt);
+            }
+
+            $sel.val($opt.val()).trigger('change'); // needed for Select2 / bootstrap-select
         }
 
         $('#delivery_status').change(function(){
