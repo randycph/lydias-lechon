@@ -561,6 +561,10 @@ class ReportsController extends Controller
         //$results = collect($jo)->merge(collect($rs));
         $results = collect($mrs)->merge(collect($jo)->merge(collect($rs)));
         // dd($results);
+
+        $results = collect($results)
+            ->unique(fn ($row) =>   ($row->product_name ?? '') . '|' . ($row->hid ?? ''))
+            ->values();
         
         return view('admin.reports.forecaster',compact('rs','jo','results','wra_array','mrs'));
 
