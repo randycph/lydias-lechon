@@ -687,10 +687,7 @@ class ReportsController extends Controller
 
         $qry .= " ORDER BY d.delivery_date DESC, d.id ASC";
 
-        $rs = collect(DB::select($qry, $bind))
-            ->sortBy(fn($r) => strtotime($r->delivery_date))
-            ->unique('order_number')
-            ->values();
+        $rs = collect(DB::select($qry, $bind));
 
         return view('admin.reports.delivery_status', compact('rs'));
     }
