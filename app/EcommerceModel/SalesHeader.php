@@ -114,8 +114,17 @@ class SalesHeader extends Model
 
     public function getPaymentspendingtotalAttribute()
     {
+        $sale = SalesHeader::whereId($this->id)->first();
+
+        if (isset($sale->is_sub) && $sale->is_sub == 1) {
+            $parentSale = SalesHeader::where('id', $sale->parent_sales_header_id)->first();
+            $payments = SalesPayment::where('sales_header_id', $parentSale->id)->get();
+        } else {
+            $payments = SalesPayment::where('sales_header_id', $sale->id)->get();
+        }
+
         $cntr=0;
-        foreach($this->payments as $p){
+        foreach($payments as $p){
             if(strtoupper($p->status)=='PENDING')
                 $cntr++;
         }
