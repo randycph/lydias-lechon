@@ -216,11 +216,8 @@
                                                                 Name: {{ $address->contact_person ?? $sale->customer_name }}<br>
                                                                 Contact #: {{ $address->contact_tel ?? $sale->customer_contact_number }}<br>
                                                                 QTY/Size: {{ $totalQty }}<br>
-                                                                Delivery Date and time:
-                                                                {{ \Carbon\Carbon::parse($address->delivery_date.' '.$address->delivery_time)->format('F d, Y h:i A') }}<br>
                                                                 Delivery/Pickup: {{ $sale->delivery_type }}<br>
                                                                 Note: {{ $address->note ?? '' }}<br>
-                                                                Payment Method: {{ optional($sale->payments->first())->payment_type ?? 'N/A' }}<br>
                                                                 Address: {{ $address->address }}<br>
                                                                 Location: {{ $address->location }}<br>
                                                                 Delivery charge: ₱{{ number_format((float)$address->delivery_fee, 2) }}<br>
@@ -265,7 +262,6 @@
                                                             QTY/Size: {{ count($sale->items) }} <br>
                                                             Delivery/Pickup: {{ $sale->delivery_type }}<br>
                                                             Note: {{ $sale?->instruction ?? 'N/A' }}<br>
-                                                            Payment Method: {{ $sale->payments->first()->payment_type ?? 'Coupon' }}<br>
                                                             Delivery charge: ₱{{ number_format($fee, 2) }}<br>
                                                     @endif
                                                 @else 
@@ -280,7 +276,6 @@
                                                     QTY/Size: {{ count($sale->items) }} <br>
                                                     Delivery/Pickup: {{ $sale->delivery_type }}<br>
                                                     Note: {{ $sale?->instruction ?? 'N/A' }}<br>
-                                                    Payment Method: {{ $sale->payments->first()->payment_type ?? 'Coupon' }}<br>
                                                     Delivery charge: ₱{{ number_format($fee, 2) }}<br>
                                                 @endif
                                                 </div>
