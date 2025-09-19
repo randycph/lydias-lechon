@@ -906,7 +906,7 @@ class ReportsController extends Controller
         $rs = DB::select($qry);
         
         $rs = collect($rs)
-            ->unique(fn ($row) => ($row->jnum ?? '') . '|' . ($row->product_name ?? '') . '|' . ($row->order_number ?? ''))
+            ->unique(fn ($row) => ($row->jnum ?? '') . '|' . ($row->product_name ?? '') . '|' . ($row->hid ?? ''))
             ->values();
 
         return view('admin.reports.door2door',compact('rs'));
