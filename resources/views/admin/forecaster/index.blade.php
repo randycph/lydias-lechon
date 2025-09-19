@@ -195,7 +195,9 @@ Manage Customer
                                 <th style="width: 20%;">Date Needed</th>
                                 <th style="width: 30%;">Delivery Address</th>
                                 <th style="width: 15%;">Total</th>
+                                @if (auth()->user()->has_access_to_route('joborder.assign') || auth()->user()->has_access_to_route('forecaster.cancel-order') || auth()->user()->has_access_to_route('joborder.cancel-order'))
                                 <th style="width: 15%;">Options</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
