@@ -536,6 +536,8 @@ class SalesController extends Controller
                 ],
             ];
         }
+        $today = now();
+        
         if(auth()->user()->role_id == 1 || auth()->user()->role_id == 3 || auth()->user()->role_id == 5 || auth()->user()->role_id == 13 ){
             // $model = SalesHeader::where('id','>',0);
 
@@ -548,6 +550,7 @@ class SalesController extends Controller
                     ->when($branchId, function ($query) use ($branchId) {
                         return $query->where('po.branch_id', $branchId);
                     })
+                    ->where('d.delivery_date', '>=', $today->startOfDay()->toDateTimeString())
                     ->select('d.sales_header_id');
 
                 // $model = DB::table('ecommerce_sales_headers')
@@ -557,7 +560,14 @@ class SalesController extends Controller
 
                 $model = SalesHeader::where(function ($query) use($eligible) {
                     $query->whereIn('id', $eligible)->where('has_sub', 0);
-                });
+                })->with('items', function($q) {
+                    $q->orderBy('delivery_date', 'asc');
+                })->orderBy(
+                    SalesDetail::select('delivery_date')
+                        ->whereColumn('sales_header_id', 'ecommerce_sales_headers.id')
+                        ->orderBy('delivery_date', 'asc')
+                        ->limit(1)
+                );
             } else {
                 $model = SalesHeader::where('id','>',0)->where('has_sub', 0);
             }
