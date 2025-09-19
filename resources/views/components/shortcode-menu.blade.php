@@ -43,7 +43,9 @@
         close() {
             this.withPaella = false;
             this.lechonCart = false;
-            this.product = null;
+            setTimeout(() => {
+                this.product = null;
+            }, 300);
         },
         quantity: 1,
         get productName() {
