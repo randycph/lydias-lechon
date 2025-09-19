@@ -307,20 +307,34 @@
                                         @endif
                                     </td>
                                     <td style="display:none;">{{ rtrim($payment_types,",") }}</td>
-                                    <td>{{ $sale->Paymentadminstatus }} <a href="#" title="Pending payments" onclick="show_added_payments('{{$sale->id}}');"><span class="badge badge-info">{{$sale->Paymentspendingtotal}}</span></a></td>
+                                    <td>
+                                        @if ($sale->Paymentadminstatus == 'UNPAID' && isForecaster())
+
+                                        @else
+                                        {{ $sale->Paymentadminstatus }} <a href="#" title="Pending payments" onclick="show_added_payments('{{$sale->id}}');"><span class="badge badge-info">{{$sale->Paymentspendingtotal}}</span></a>
+                                        @endif
+                                    </td>
                                     <td align="center">
                                         @if($sale->isConfirm==1)
                                             <i data-feather="check-square"></i>
                                         @endif
                                     </td>
                                     <td>
-                                        @if(\App\EcommerceModel\SalesPayment::check_if_has_added_payments($sale->id) == 1)
-                                            <a href="javascript:;" onclick="show_added_payments('{{$sale->id}}');">{{ number_format($sale->net_amount <= 0 ? 0 : $sale->net_amount, 2) }}</a>
+                                        @if ($sale->Paymentadminstatus == 'UNPAID' && isForecaster())
                                         @else
-                                            {{ number_format($sale->net_amount <= 0 ? 0 : $sale->net_amount, 2) }}
+                                            @if(\App\EcommerceModel\SalesPayment::check_if_has_added_payments($sale->id) == 1)
+                                                <a href="javascript:;" onclick="show_added_payments('{{$sale->id}}');">{{ number_format($sale->net_amount <= 0 ? 0 : $sale->net_amount, 2) }}</a>
+                                            @else
+                                                {{ number_format($sale->net_amount <= 0 ? 0 : $sale->net_amount, 2) }}
+                                            @endif
                                         @endif
                                     </td>
-                                     <td>{{ number_format((\App\EcommerceModel\SalesHeader::balance($sale->id)),2) }}</td>
+                                     <td>
+                                        @if ($sale->Paymentadminstatus == 'UNPAID' && isForecaster())
+                                        @else
+                                            {{ number_format((\App\EcommerceModel\SalesHeader::balance($sale->id)),2) }}
+                                        @endif
+                                    </td>
                                     <td width="10%">
                                         <!-- 10102 -->
                                          @php $forecasters = [3,13]; $forecasters = [13]; @endphp
