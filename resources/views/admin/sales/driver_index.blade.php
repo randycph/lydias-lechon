@@ -1054,9 +1054,12 @@
                 type: "GET",
                 url: "{{ route('show.delivery-status', [':id']) }}".replace(':id', id),
                 success: function( response ) {
-                    setDeliveryStatus(response.status.status); 
-                    $('#del_remarks').val(response.status.remarks || '');
+                    if (response.status.status != 'In Transit') {
+                        setDeliveryStatus(response.status.status); 
 
+                        $('#del_remarks').val(response.status.remarks || '');
+                    }
+                    
                     if (response.status.image) {
                         const src = window.base_url + '/images/proof-of-delivery/' + response.status.image;
                         $('#del_image').attr('src', src).show();
@@ -1064,8 +1067,10 @@
                     }
 
                     if (response.status.delivered_by) {
-                        $('#delivered_by').val(response.status.delivered_by);
-                        $('#delivered_by_div').show();
+                        if (response.status.status != 'In Transit') {
+                            $('#delivered_by').val(response.status.delivered_by);
+                            $('#delivered_by_div').show();
+                        }
                     } else {
                         $('#delivered_by').val('');
                         $('#delivered_by_div').hide();
@@ -1076,14 +1081,14 @@
                         $('#deliveries_lists_div').show();
                         $('#deliveries_lists').empty().append('<option value="">- Select -</option>');
                         response.deliveries.forEach(function(delivery, index) {
-                            if (delivery.delivery_status === 'In Transit') {
-                                const label = `Address ${index + 1}: ${delivery.address} (${delivery.location})`;
-                                $('#deliveries_lists').append(
-                                    '<option value="' + delivery.id + '">' +
-                                        label +
-                                    '</option>'
-                                );
-                            }
+                            // if (delivery.delivery_status === 'In Transit') {
+                            //     const label = `Address ${index + 1}: ${delivery.address} (${delivery.location})`;
+                            //     $('#deliveries_lists').append(
+                            //         '<option value="' + delivery.id + '">' +
+                            //             label +
+                            //         '</option>'
+                            //     );
+                            // }
                         });
                         $('#deliveries_lists').prop('required', true);
                     } else {
