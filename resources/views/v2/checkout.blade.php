@@ -145,7 +145,7 @@ $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
 
                     <!-- Coupon Code Section -->
                     <div class="bg-white rounded-md mt-2 text-sm">
-                        <div class="flex justify-between items-center">
+                        {{-- <div class="flex justify-between items-center">
                             <div class="flex items-center gap-2 p-3">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
                                     class="size-6 fill-[#ff8545]">
@@ -159,7 +159,7 @@ $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
                                 @click="couponModal = true">
                                 Select Coupon
                             </div>
-                        </div>
+                        </div> --}}
 
                         {{-- <div class="flex items-center border mx-3 border-gray-200 rounded-md overflow-hidden">
                             <input @input="couponCode = $event.target.value.toUpperCase()" x-model="couponCode"
@@ -870,7 +870,7 @@ $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
                                 <template x-if="!allowMultiple">
                                     <div class="my-2">
                                         <label for="time"
-                                            class="block mb-2 text-sm font-bold text-gray-900">Notesss</label>
+                                            class="block mb-2 text-sm font-bold text-gray-900">Note</label>
                                         <div class="relative">
                                             <textarea
                                                 class="bg-gray-50 border leading-none border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
@@ -1581,7 +1581,7 @@ recomputeCouponTotals(delivery = null) {
                 this.deliveryFees = [];
                 this.removeCoupon();
 
-                this.loadAutoCoupons();
+                // this.loadAutoCoupons();
 
                 if (!this.allowMultiple) {
                     this.validateDateTime();
@@ -1855,7 +1855,7 @@ recomputeCouponTotals(delivery = null) {
                         
                         this.recomputeCouponTotals();
                         
-                        this.loadAutoCoupons();
+                        // this.loadAutoCoupons();
                         
                     } catch (error) {
                         console.error('There was a problem with the fetch operation:', error);
@@ -2043,7 +2043,7 @@ recomputeCouponTotals(delivery = null) {
                     // Update total delivery fee
                     this.deliveryFee = this.deliveries.reduce((sum, d) => sum + parseFloat(d.delivery_fee || 0), 0);
 
-                    await this.loadAutoCoupons(true);
+                    // await this.loadAutoCoupons(true);
 
                     this.recomputeCouponTotals(delivery);
 
@@ -2061,7 +2061,7 @@ recomputeCouponTotals(delivery = null) {
 
                 this.need_date = this.minDate();
 
-                this.loadAutoCoupons();
+                // this.loadAutoCoupons();
 
                 this.$watch('need_date', value => {
                     this.checkAndAdvanceDateIfNoHours();

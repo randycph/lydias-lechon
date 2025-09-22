@@ -32,11 +32,11 @@
         </a>
         @endif
         
-        @if (Auth::check() && Auth()->user()->role_id == 6)
+        {{-- @if (Auth::check() && Auth()->user()->role_id == 6)
         <a href="{{ route('my-coupons') }}" class="group relative items-center flex pl-6 hover:text-tertiary cursor-pointer {{ route('my-coupons') == request()->url() ? 'text-tertiary' : '' }}">
             <div class="absolute left-0 top-0 h-10 w-1 bg-orange-500 group-hover:opacity-100 transition duration-200 {{ route('my-coupons') == request()->url() ? 'opacity-100' : 'opacity-0' }}"></div>
             <div class="py-2">Coupons</div>
         </a>
-        @endif
+        @endif --}}
     </div>
 </div>
