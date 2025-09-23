@@ -777,6 +777,13 @@ class SalesController extends Controller
             }
         }
 
+        if (auth()->user()->role_id == 15) {
+            $sales->has_transited = 0;
+            $sales->save();
+        } else {
+            $sales->is_new_order = 0;
+            $sales->save();
+        }
 
         return view('admin.sales.view',compact('sales','salesPayments','salesDetails','status','deliveries','gc'));
     }
