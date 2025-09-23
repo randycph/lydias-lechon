@@ -2149,6 +2149,10 @@ recomputeCouponTotals(delivery = null) {
                 this.allowedCitySet = new Set(
                     (this._cities || []).map(n => this._normalizeCityKey(n))
                 );
+                
+                if (!this.privacy && this.carts.length > 0) {
+                    this.showModal = true;
+                }
 
             },
             allowedCitySet: new Set(),
