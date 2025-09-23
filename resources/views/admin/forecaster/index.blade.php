@@ -211,7 +211,7 @@ Manage Customer
                                         </div>
                                     </th>
                                     <td>
-                                        <strong> <a target="_blank" href="{{ route('sales-transaction.view',$order->sales_header_id) }}">{{ $order->product_name }} {{ $order->weight }} @if($order->paella_qty > 0) Boneless @endif  {{ $order->no_of_pax }} </a></strong>
+                                        <strong> <a target="_blank" href="{{ route('sales-transaction.view',$order->sales_header_id) }}">{{ $order->product_name }} {{ $order->weight }} {{ $order->no_of_pax }} </a></strong>
                                     </td>
                                     <td>{{$order->header->order_number}}</td>
                                     <td>{{$order->header->customer_name}}</td>
