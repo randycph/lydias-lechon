@@ -53,6 +53,17 @@ if (!function_exists('highlightPaella')) {
     }
 }
 
+if (!function_exists('hasPealla')) {
+    function hasPealla($name)
+    {
+        if (empty($name)) {
+            return false;
+        }
+        return str_contains($name, 'Paella');
+    }
+}
+
+
 if (!function_exists('unreadTransactions')) {
     function unreadTransactions(int $days = 1): int
     {

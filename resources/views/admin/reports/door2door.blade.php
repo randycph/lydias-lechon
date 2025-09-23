@@ -179,7 +179,7 @@
                                 <th><a target="_blank" href="{{ route('sales.print',base64_encode($r->hid)) }}">{{$r->jnum ?? $r->ordnum}}</a></th>
                                 <td>{{number_format($r->qty,2)}}</td>
                                 <td>{!! highlightPaella($r->product_name) !!}</td>
-                                <td>{{number_format($r->price,2)}}</td>
+                                <td>{{number_format(hasPealla($r->product_name) ? ($r->price + $r->paella_price) : $r->price, 2)}}</td>
                                 <td>{{$r->payment_status}}</td>
                                 <td>{{$r->customer_name}}</td>
                                 <td>{{date('Y-m-d',strtotime($r->delivery_date))}}</td>
@@ -206,7 +206,7 @@
                                 <th>{{$r->customer_contact_number}}</th>                                
                                 <th>{{$r->catname}}</th>
                                 <th>{{$r->order_source}}</th> 
-                                <td>{{number_format(($r->price * $r->qty),2)}}</td>
+                                <td>{{number_format(((hasPealla($r->product_name) ? ($r->price + $r->paella_price) : $r->price)  * $r->qty),2)}}</td>
                                 <th>{{$r->delbra}}</th>
                             </tr>
                             @empty
