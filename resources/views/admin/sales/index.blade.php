@@ -680,12 +680,14 @@
                         </div>
                         <div class="form-group">
                             <label for="image">Attachment</label>
-                            <input type="file" name="image" class="form-control" id="image">
+                            <input type="file" name="image[]" class="form-control" id="image" multiple>
                         </div>
                         <div class="form-group">
-                            <a href="" target="_blank" id="view_image" style="display: none;">
+                            <div id="view_image"></div>
+
+                            {{-- <a href="" target="_blank" id="view_image" style="display: none;">
                                 <img id="del_image" src="" alt="Delivery Image" style="max-width: 200px; display: none;">
-                            </a>
+                            </a> --}}
                         </div>
                     </div>
                     <input type="hidden" id="del_id" name="del_id" value="">
@@ -1241,6 +1243,11 @@
             //     post_form("{{route('sales-transaction.delivery_status')}}",sales,id)
             // });
 
+            $('#view_image').hide().empty();
+            $('#del_remarks').val('');
+            $('#delivered_by').val('');
+            $('#delivery_status').val('').trigger('change');
+
             $.ajax({
                 type: "GET",
                 url: "{{ route('show.delivery-status', [':id']) }}".replace(':id', id),
@@ -1248,10 +1255,18 @@
                     setDeliveryStatus(response.status.status); 
                     $('#del_remarks').val(response.status.remarks || '');
 
-                    if (response.status.image) {
-                        const src = window.base_url + '/images/proof-of-delivery/' + response.status.image;
-                        $('#del_image').attr('src', src).show();
-                        $('#view_image').attr('href', src).show();
+                    if (response.status.images) {
+                        const images = response.status.images;
+
+                        let imgHtml = '';
+                        images.forEach(function(img) {
+                            const src = window.base_url + '/images/proof-of-delivery/' + img.image;
+                            imgHtml += '<a href="' + src + '" target="_blank" style="margin-right: 10px;">' +
+                                       '<img src="' + src + '" alt="Delivery Image" style="max-width: 100px; margin-top: 5px;">' +
+                                       '</a>';
+                        });
+
+                        $('#view_image').html(imgHtml).show();
                     }
 
                     if (response.status.delivered_by) {

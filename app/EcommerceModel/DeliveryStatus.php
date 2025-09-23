@@ -3,6 +3,7 @@
 namespace App\EcommerceModel;
 use App\Models\User;
 use App\EcommerceModel\JobOrder;
+use App\Models\DeliveriesImage;
 use Illuminate\Database\Eloquent\Model;
 
 class DeliveryStatus extends Model
@@ -30,5 +31,10 @@ class DeliveryStatus extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function images()
+    {
+        return $this->hasMany(DeliveriesImage::class, 'delivery_status_id');
     }
 }

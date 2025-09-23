@@ -37,6 +37,7 @@ use App\EcommerceModel\JobOrder;
 use App\Mail\DeliveryAssignedMail;
 use App\Mail\DeliveryAssignedMultipleMail;
 use App\Models\ActivityLog;
+use App\Models\DeliveriesImage;
 use App\Models\ProductDeliveryAddress;
 use App\Models\UserBranch;
 use Carbon\Carbon;
@@ -865,22 +866,27 @@ class SalesController extends Controller
                 'delivery_status' => $request->delivery_status
             ]);
 
-            if ($request->has('image')) {
-                if($request->hasFile('image')){
-                    $image = $request->file('image');
-                    $imageName = time().'.'.$image->getClientOriginalExtension();
+            $update_delivery_table = DeliveryStatus::create($data);
 
-                    if (!file_exists(public_path('/images/proof-of-delivery'))) {
-                        mkdir(public_path('/images/proof-of-delivery'), 0777, true);
-                    }
-                    $destinationPath = public_path('/images/proof-of-delivery');
-                    $image->move($destinationPath, $imageName);
+            if ($request->hasFile('image')) {
+                $dest = public_path('images/proof-of-delivery');
 
-                    $data['image'] = $imageName;
+                if (!is_dir($dest)) {
+                    mkdir($dest, 0755, true);
+                }
+
+                foreach ($request->file('image') as $file) {
+                    $ext  = $file->getClientOriginalExtension();
+                    $name = now()->format('YmdHis') . '-' . Str::random(8) . '.' . $ext;
+                    $file->move($dest, $name);
+
+                    DeliveriesImage::create([
+                        'delivery_status_id' => $update_delivery_table->id,
+                        'image' => $name,
+                        'user_id' => Auth::id() ?? null
+                    ]);
                 }
             }
-
-            $update_delivery_table = DeliveryStatus::create($data);
 
         } else {
             if ($request->has('deliveries_lists') && !empty($request->deliveries_lists)) {
@@ -898,22 +904,27 @@ class SalesController extends Controller
             $data['order_id'] = $request->del_id;
             $data['type'] = 'sales';
 
-            if ($request->has('image')) {
-                if($request->hasFile('image')){
-                    $image = $request->file('image');
-                    $imageName = time().'.'.$image->getClientOriginalExtension();
+            $update_delivery_table = DeliveryStatus::create($data);
 
-                    if (!file_exists(public_path('/images/proof-of-delivery'))) {
-                        mkdir(public_path('/images/proof-of-delivery'), 0777, true);
-                    }
-                    $destinationPath = public_path('/images/proof-of-delivery');
-                    $image->move($destinationPath, $imageName);
+            if ($request->hasFile('image')) {
+                $dest = public_path('images/proof-of-delivery');
 
-                    $data['image'] = $imageName;
+                if (!is_dir($dest)) {
+                    mkdir($dest, 0755, true);
+                }
+
+                foreach ($request->file('image') as $file) {
+                    $ext  = $file->getClientOriginalExtension();
+                    $name = now()->format('YmdHis') . '-' . Str::random(8) . '.' . $ext;
+                    $file->move($dest, $name);
+
+                    DeliveriesImage::create([
+                        'delivery_status_id' => $update_delivery_table->id,
+                        'image' => $name,
+                        'user_id' => Auth::id() ?? null
+                    ]);
                 }
             }
-
-            $update_delivery_table = DeliveryStatus::create($data);
 
             if(!empty($update_delivery_table->sales->email)){
                 Mail::to($update_delivery_table->sales->email)->send(new DeliveryMovement($update_delivery_table));
@@ -967,7 +978,7 @@ class SalesController extends Controller
 
     public function showDeliveryStatus($id)
     {
-        $status = DeliveryStatus::where('order_id', $id)->orWhere('job_order_id', $id)->latest()->first();
+        $status = DeliveryStatus::with('images')->where('order_id', $id)->orWhere('job_order_id', $id)->latest()->first();
         $deliveries = ProductDeliveryAddress::where('sales_header_id', $id)->get();
 
         return response()->json([
@@ -1196,9 +1207,9 @@ class SalesController extends Controller
         $type = $request->has('type') ? $request->type : 'sales';
 
         if ($type === 'job') {
-            $delivery = DeliveryStatus::where('job_order_id',$request->id)->where('type', 'joborder')->get();
+            $delivery = DeliveryStatus::with('images')->where('job_order_id',$request->id)->where('type', 'joborder')->get();
         } else {
-            $delivery = DeliveryStatus::where('order_id',$request->id)->where('type', 'sales')->get();
+            $delivery = DeliveryStatus::with('images')->where('order_id',$request->id)->where('type', 'sales')->get();
         }
 
         return view('admin.sales.delivery_history',compact('delivery'));
