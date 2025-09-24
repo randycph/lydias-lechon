@@ -216,7 +216,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="d-block">Additional Instruction <span class="tx-danger">*</span></label>
+                        <label class="d-block">Additional Instruction </label>
                         <textarea name="remarks" class="form-control">{{ old('remarks') }}</textarea>
                         @error('remarks')
                             <span class="text-danger">{{ $message }}</span>

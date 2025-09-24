@@ -723,7 +723,6 @@ class JoborderController extends Controller
             'production_time'  => ['required','date_format:H:i'],
             'date_needed'      => ['required','date','date_format:Y-m-d','after:production_date'],
             'time_needed'      => ['required','date_format:H:i'],
-            'remarks'          => ['required'],
         ], [
             'production_date.before' => 'Production Date must be before Date Needed.',
             'date_needed.after'      => 'Date Needed must be after Production Date.',
