@@ -295,7 +295,7 @@
 
     function syncProdMax(needDate) {
       if (needDate) {
-        $prod.datepicker('option', 'maxDate', minusDays(needDate, 1));
+        $prod.datepicker('option', 'maxDate', minusDays(needDate, 0));
       } else {
         $prod.datepicker('option', 'maxDate', null); // relax when no needDate
       }
