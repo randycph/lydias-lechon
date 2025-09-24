@@ -159,12 +159,10 @@ class JoborderController extends Controller
             $model = $model->where('created_at','<=',$_GET['end_date'].' 23:59:59');        
         }
         if(isset($_GET['dn_start_date']) && strlen($_GET['dn_start_date']) > 1){
-            $d = SalesDetail::where('date_needed','>=',$_GET['dn_start_date'].' 00:00:00')->select('sales_header_id')->get();
-            $model = $model->whereIn('id',$d);        
+            $model = $model->where('date_needed','>=',$_GET['dn_start_date'].' 00:00:00');
         }
         if(isset($_GET['dn_end_date']) && strlen($_GET['dn_end_date']) > 1){
-            $d = SalesDetail::where('date_needed','<=',$_GET['dn_end_date'].' 23:59:59')->select('sales_header_id')->get();
-            $model = $model->whereIn('id',$d);              
+            $model= $model->where('date_needed','<=',$_GET['dn_end_date'].' 23:59:59');
         }
 
         if(isset($_GET['delivery_method']) && strlen($_GET['delivery_method']) > 0){
