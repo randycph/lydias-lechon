@@ -880,11 +880,11 @@ $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
                                 </template>
 
                                 @if (auth()->guest())
-                                <div class="flex items-start">
-                                    <label @click="onCheckboxChange" class="flex items-center space-x-2">
-                                        <input x-model="privacy" name="privacy" type="checkbox" disabled="true">
-                                        <span>I agree Lydia’s Lechon’s Privacy Protection Policy</span>
+                                <div class="flex items-center space-x-2">
+                                    <label  class="flex items-center space-x-2">
+                                        <input x-model="privacy" name="privacy" type="checkbox">
                                     </label>
+                                    <span class="cursor-pointer" @click="onCheckboxChange">I agree Lydia’s Lechon’s Privacy Protection Policy</span>
                                 </div>
                                 <template x-if="errors.privacy">
                                     <p class="text-red-500 text-xs mt-1" x-text="errors.privacy[0]"></p>
