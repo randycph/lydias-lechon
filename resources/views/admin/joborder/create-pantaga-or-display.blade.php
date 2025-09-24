@@ -287,7 +287,7 @@
 
     function syncNeedMin(prodDate) {
       if (prodDate) {
-        $need.datepicker('option', 'minDate', plusDays(prodDate, 1));
+        $need.datepicker('option', 'minDate', minusDays(prodDate, 1));
       } else {
         $need.datepicker('option', 'minDate', today);
       }
