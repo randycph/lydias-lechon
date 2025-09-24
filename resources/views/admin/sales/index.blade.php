@@ -308,11 +308,7 @@
                                     </td>
                                     <td style="display:none;">{{ rtrim($payment_types,",") }}</td>
                                     <td>
-                                        @if ($sale->Paymentadminstatus == 'UNPAID' && isForecaster())
-
-                                        @else
                                         {{ $sale->Paymentadminstatus }} <a href="#" title="Pending payments" onclick="show_added_payments('{{$sale->id}}');"><span class="badge badge-info">{{$sale->Paymentspendingtotal}}</span></a>
-                                        @endif
                                     </td>
                                     <td align="center">
                                         @if($sale->isConfirm==1)

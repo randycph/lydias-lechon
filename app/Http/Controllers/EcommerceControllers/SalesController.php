@@ -569,6 +569,24 @@ class SalesController extends Controller
                         ->orderBy('delivery_date', 'asc')
                         ->limit(1)
                 );
+            } elseif (auth()->user()->role_id == 3) {
+
+                $eligible = DB::table('ecommerce_sales_details as d')
+                    ->join('job_orders as jo', 'jo.sales_detail_id', '=', 'd.id')
+                    ->join('production_orders as po', 'po.joborder_id', '=', 'jo.id')
+                    ->where('d.delivery_date', '>=', $today->startOfDay()->toDateTimeString())
+                    ->select('d.sales_header_id');
+
+                $model = SalesHeader::where(function ($query) use($eligible) {
+                    $query->whereIn('id', $eligible)->where('has_sub', 0)->where('payment_status', '!=', 'PENDING');
+                })->with('items', function($q) {
+                    $q->orderBy('delivery_date', 'asc');
+                })->orderBy(
+                    SalesDetail::select('delivery_date')
+                        ->whereColumn('sales_header_id', 'ecommerce_sales_headers.id')
+                        ->orderBy('delivery_date', 'asc')
+                        ->limit(1)
+                );
             } else {
                 $model = SalesHeader::where('id','>',0)->where('has_sub', 0);
             }
