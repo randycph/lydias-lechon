@@ -226,6 +226,7 @@
                                 <th>Confirmed</th>
                                 <th>Delivery Branch</th>
                                 <th>Date Needed</th>
+                                <th>Encoded By</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -279,6 +280,10 @@
                                     <td>@if($r->isConfirm==1) Yes @else No @endif</td>
                                     <td>{{ $r->delivery_branch }}</td>  
                                     <td>{{date('H:i:s',strtotime($r->delivery_date))}}</td>
+                                    @php 
+                                        $user = \App\Models\User::whereId($r->created_by)->first();
+                                    @endphp
+                                    <td>{{$user->name }}</td>
                                 </tr>
                             @empty
                             @endforelse
@@ -365,7 +370,7 @@
                 'colvis'
             ],
             columnDefs: [ {
-                targets: [4,5,6,7,10,11,12,13,20],
+                targets: [4,5,6,7,10,11,12,13,20,23],
                 visible: false,
                 orderable: false
             },{ type: 'time-uni', targets: [2,14] } ]
