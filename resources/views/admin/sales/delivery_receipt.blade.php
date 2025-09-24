@@ -76,7 +76,7 @@
                                                 <ul>
                                                     @foreach ($products as $product)
                                                         <li>
-                                                            {!! highlightPaella($address->product_name) !!} x {{ $product->qty }}
+                                                            {!! highlightPaella($product->product_name) !!} x {{ $product->qty }}
                                                         </li>
                                                     @endforeach
                                                 </ul>
@@ -147,7 +147,6 @@
                             
                             <thead>
                             <tr>
-                                <th class="wd-10p">Product Code</th>
                                 <th class="wd-30p">Product Name</th>                                
                                 <th class="tx-center">No. of Pax</th>
                                 <th class="tx-center">Date Needed</th>
@@ -161,7 +160,6 @@
 
                             @forelse($salesDetails as $details)
                             <tr>
-                                <td class="tx-nowrap">{{$details->product->code}}</td>
                                 <td class="tx-nowrap">{!! highlightPaella($details?->product_name) !!}</td>
                                 <th class="tx-center">{{$details->no_of_pax}}</th>
                                 <td class="tx-nowrap">{{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y H:i A') }}</td>
@@ -177,13 +175,13 @@
                             @endforelse
                             @if($sales->delivery_fee_amount > 0)
                                 <tr>
-                                    <td class="tx-left " colspan="7">Delivery Fee</td>
+                                    <td class="tx-left " colspan="6">Delivery Fee</td>
                                     <td class="tx-right ">{{number_format($sales->delivery_fee_amount, 2)}}</td>
                                 </tr>
                             @endif
                             @if($salesDetails->sum('gross_amount') > 0)
                                 <tr style="font-weight:bold;">
-                                    <td class="tx-left" colspan="7">Total</td>
+                                    <td class="tx-left" colspan="6">Total</td>
                                     <td class="tx-right">₱{{number_format($salesDetails->sum('net_amount') + $sales->delivery_fee_amount - $sales->discount_amount, 2)}}</td>
                                 </tr>
                                 
