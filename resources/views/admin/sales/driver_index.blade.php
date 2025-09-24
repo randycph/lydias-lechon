@@ -130,7 +130,7 @@
                                         $is_allowed_delivered = 1;
                                     }
                                     if ($dateneeded != '') {
-                                        $dateneeded = \Carbon\Carbon::parse($date_needed)->format('Y-m-d H:i A');
+                                        $dateneeded = \Carbon\Carbon::parse($date_needed)->format('M-d H:i');
                                     }
                                 @endphp
                                 @php
@@ -163,7 +163,7 @@
                                     <td class="{{ isUnreadTransaction($sale['id']) ? 'font-weight-bold' : '' }}">{{ $sale['contact_person'] ?? $sale['customer_name'] }}</td>
                                     <td>{{ $sale['customer_name'] }}</td>
                                     <td>{{ $sale['order_source'] }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($sale['created_at'])->format('Y-m-d H:i A') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($sale['created_at'])->format('Y-m-d g:i A') }}</td>
 
                                     <td>
                                         @if($sale['delivery_status'] <> 'Open Date')
@@ -174,7 +174,7 @@
                                                         if ($dateneeded != '') {
                                                             $dateneeded .= ', ';
                                                         }
-                                                        $dateneeded .= \Carbon\Carbon::parse($address['delivery_date'])->format('Y-m-d H:i A');
+                                                        $dateneeded .= \Carbon\Carbon::parse($address->delivery_date . ' ' . $address->delivery_time)->format('Y-m-d g:i A');
                                                     }
                                                 @endphp
                                                     {{ $dateneeded }}
