@@ -616,8 +616,13 @@ $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
                                                         </div>
                                                         <div class="w-full lg:w-1/2">
                                                             <label class="font-bold block mb-1">Contact Number</label>
-                                                            <input type="tel" x-model="delivery.phone" pattern="^[0-9]{1,11}$" maxlength="13"
+                                                            <input type="tel" x-model="delivery.phone"
                                                                 @change="validateDeliveryAddress(delivery, 'phone', index)"
+                                                                placeholder="e.g. 09171234567"
+                                                                x-mask:dynamic="
+                                                                    $input.startsWith('34') || $input.startsWith('37')
+                                                                        ? '9999 999 9999' : '9999 999 9999'
+                                                                "
                                                                 class="w-full border border-gray-300 p-2 rounded-md"
                                                                 placeholder=""
                                                                 :class="{'border-red-500': errors[index]?.phone}" />
@@ -769,10 +774,14 @@ $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
                                 <div class="my-2">
                                     <label for="mobile" class="block mb-2 text-sm font-bold text-gray-900">Mobile Number
                                         <span class="text-red-700">*</span></label>
-                                    <input type="tel" id="mobile" name="mobile" pattern="^[0-9]{1,11}$" maxlength="13"
-                                        value="{{ auth()->check() ? auth()->user()->contact_mobile : '' }}"
-                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                                        required />
+                                        <input type="tel" id="mobile" name="mobile" placeholder="e.g. 09171234567"
+                                                x-mask:dynamic="
+                                                    $input.startsWith('34') || $input.startsWith('37')
+                                                        ? '9999 999 9999' : '9999 999 9999'
+                                                "
+                                            value="{{ auth()->check() ? auth()->user()->contact_mobile : '' }}"
+                                            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                                            required>
 
                                     <template x-if="mobileValidationMessage">
                                         <p class="text-red-500 text-xs italic mt-2" x-text="mobileValidationMessage">
