@@ -249,9 +249,6 @@
                                                             </li>
                                                         @endforeach
                                                     </ul>
-                                                    @if ($sale?->instruction)
-                                                    <div>Note: {{ $sale?->instruction }}</div>
-                                                    @endif
                                                     @else
                                                         @php 
                                                             $saleDetail = $sale->items ? $sale->items->first() : null;
