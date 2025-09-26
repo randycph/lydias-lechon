@@ -265,7 +265,7 @@ class Sms
 		$message = "Hi $order->customer_name. Thank you for choosing Lydia's Lechon! Your order #".$order->order_number." is currently being process, kindly wait for order confirmation upon validation of your payment.";
 		$ch = curl_init();
 
-		curl_setopt($ch, CURLOPT_URL, 'https://api.wavecell.com/sms/v1/Lydia_MKT/single');
+		curl_setopt($ch, CURLOPT_URL, 'https://sms.8x8.com/api/v1/subaccounts/Lydia_MKT/messages');
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_POST, 1);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, "{\"source\":\"Lydias\",\"destination\":\"$receiver\",\"text\":\"$message\"}");
@@ -277,7 +277,7 @@ class Sms
 
 		$result = curl_exec($ch);
 		if (curl_errno($ch)) {
-		    //echo 'Error:' . curl_error($ch);
+		    // echo 'Error:' . curl_error($ch);
 		}
 		curl_close($ch);
 	}
