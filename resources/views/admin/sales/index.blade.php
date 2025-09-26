@@ -224,7 +224,7 @@
                                         $is_allowed_delivered = 1;
                                     }
                                     if ($dateneeded != '') {
-                                        $dateneeded = \Carbon\Carbon::parse($date_needed->delivery_date)->format('M-d H:i');
+                                        $dateneeded = \Carbon\Carbon::parse($date_needed->delivery_date)->format('Y-m-d g:i A');
                                     }
                                 @endphp
                                 @php
@@ -425,9 +425,23 @@
                                                                     $allPast = $dates->isNotEmpty()
                                                                         ? $dates->every(fn ($dt) => $dt->lt(\Carbon\Carbon::now(config('app.timezone'))))
                                                                         : true;
+
+                                                                    
+                                                                    $date_needed = $sale->items->first();
+
+                                                                    $deliveryDate = $date_needed?->delivery_date;
+
+                                                                    $isPast = true;
+
+                                                                    if ($deliveryDate) {
+                                                                        $isPast = \Carbon\Carbon::parse($deliveryDate)->isPast();
+                                                                    }
+
                                                                 @endphp
 
-                                                                @if (!isDispatcher() || !$allPast)
+                                                                @if (isDispatcher())
+
+                                                                @elseif (!$isPast)
                                                                     <a class="dropdown-item"
                                                                     href="javascript:void(0);"
                                                                     onclick="change_delivery_status({{ $sale->id }}, {{ $is_allowed_delivered }})"

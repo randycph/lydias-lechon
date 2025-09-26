@@ -130,7 +130,7 @@
                                         $is_allowed_delivered = 1;
                                     }
                                     if ($dateneeded != '') {
-                                        $dateneeded = \Carbon\Carbon::parse($date_needed)->format('M-d H:i');
+                                        $dateneeded = \Carbon\Carbon::parse($date_needed)->format('Y-m-d g:i A');
                                     }
                                 @endphp
                                 @php
