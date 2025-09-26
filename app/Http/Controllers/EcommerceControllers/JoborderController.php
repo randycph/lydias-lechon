@@ -24,6 +24,7 @@ use App\Models\UserBranch;
 use Illuminate\Support\Facades\Auth;
 use DateTime;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Validation\ValidationException;
 
@@ -714,17 +715,43 @@ class JoborderController extends Controller
     public function store_pantaga_or_display(Request $request)
     {
 
-        $validated = $request->validate([
-            'jo_category'      => ['required'],
-            'prodbranch_id'    => ['required'],
-            'production_date'  => ['required','date','date_format:Y-m-d','before:date_needed'],
-            'production_time'  => ['required','date_format:H:i'],
-            'date_needed'      => ['required','date','date_format:Y-m-d','after:production_date'],
-            'time_needed'      => ['required','date_format:H:i'],
+        $validator = Validator::make($request->all(), [
+            'jo_category'     => ['required'],
+            'prodbranch_id'   => ['required'],
+
+            // basic date/time formats only
+            'production_date' => ['required','date','date_format:Y-m-d'],
+            'production_time' => ['required','date_format:H:i'],
+
+            'date_needed'     => ['required','date','date_format:Y-m-d'],
+            'time_needed'     => ['required','date_format:H:i'],
         ], [
-            'production_date.before' => 'Production Date must be before Date Needed.',
-            'date_needed.after'      => 'Date Needed must be after Production Date.',
+            'production_date.required' => 'Production Date is required.',
+            'production_time.required' => 'Production Time is required.',
+            'date_needed.required'     => 'Date Needed is required.',
+            'time_needed.required'     => 'Time Needed is required.',
         ]);
+
+        $validator->after(function ($v) use ($request) {
+            // Only run if basic rules passed for these fields
+            if ($v->errors()->isEmpty()) {
+                try {
+                    $prodAt = Carbon::createFromFormat('Y-m-d H:i', $request->production_date.' '.$request->production_time);
+                    $needAt = Carbon::createFromFormat('Y-m-d H:i', $request->date_needed.' '.$request->time_needed);
+
+                    // Disallow "before": need_at must be same or after prod_at
+                    if ($needAt->lt($prodAt)) {
+                        // attach the error to the time_needed field (or both if you prefer)
+                        $v->errors()->add('time_needed', 'Date Needed must be the same as, or after, the Production Date & Time.');
+                    }
+                } catch (\Exception $e) {
+                    // fallback if parsing fails (optional)
+                    $v->errors()->add('time_needed', 'Invalid date/time combination.');
+                }
+            }
+        });
+
+        $validator->validate();
       
         $product = Product::whereId($request->product_id)->withTrashed()->first();
         $x=0;
