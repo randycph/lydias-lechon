@@ -41,6 +41,7 @@ Update Sales Details
     <div class="row row-sm">
         <div class="col-lg-6">
             @if(auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102)
+
                 @if($dateneeded > date('Y-m-d H:i:s') || $salesheader->delivery_status == 'Open Date')
                 <form method="post" action="{{route('update_dateneeded')}}" id="updatefrm">
                     @csrf
@@ -155,7 +156,7 @@ Update Sales Details
 
                                     <input type="hidden" class="delivery-fee" name="delivery_fee[]" value="0" />
 
-                                    <div class="form-group">
+                                    {{-- <div class="form-group">
                                         <label class="control-label">Location Type</label>
                                         <select class="form-control location">
                                             <option value="">Select Location</option>
@@ -163,6 +164,46 @@ Update Sales Details
                                             <option value="{{ $location->name }}">{{ $location->name }}</option>
                                             @endforeach
                                         </select>
+                                    </div> --}}
+
+                                    <div class="form-group d-none">
+                                        <label class="d-block">Region *</label>
+                                        <select class="form-control region" id="region_select" style="width:100%">
+                                            <option value="">Select Region</option>
+                                        </select>
+                                        @if ($errors->has('region'))
+                                        <span class="text-danger">{{ $errors->first('region') }}</span>
+                                        @endif
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="d-block">Province *</label>
+                                        <select class="form-control province" id="province_select" style="width:100%">
+                                            <option value="">Select Province</option>
+                                        </select>
+                                        @if ($errors->has('province'))
+                                        <span class="text-danger">{{ $errors->first('province') }}</span>
+                                        @endif
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="d-block">City/Municipality *</label>
+                                        <select class="form-control city" id="city_select" style="width:100%" disabled>
+                                            <option value="">Select City/Municipality</option>
+                                        </select>
+                                        @if ($errors->has('city'))
+                                        <span class="text-danger">{{ $errors->first('city') }}</span>
+                                        @endif
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="d-block">Barangay *</label>
+                                        <select class="form-control barangay" id="barangay_select" style="width:100%" disabled>
+                                            <option value="">Select Barangay</option>
+                                        </select>
+                                        @if ($errors->has('barangay'))
+                                        <span class="text-danger">{{ $errors->first('barangay') }}</span>
+                                        @endif
                                     </div>
 
                                     <div class="form-group">
@@ -208,7 +249,7 @@ Update Sales Details
 
 
 
-                        @if(auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102)
+                        {{-- @if(auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102)
                             <div class="form-group">
                                 <label class="d-block">Location <span class="tx-danger">*</span></label>
 
@@ -303,7 +344,7 @@ Update Sales Details
                                     </div>
                                 </div>
                             </div>
-                            @else
+                        @else
                             <div class="form-group">
                                 <label class="d-block">Location <span class="tx-danger">*</span></label>
 
@@ -338,10 +379,10 @@ Update Sales Details
                                     </div>
                                 </div>
                             </div>
-                            @endif
+                        @endif --}}
 
 
-                            <div class="form-group divd2d" @if($salesheader->delivery_type <> 'Door to door delivery')
+                            {{-- <div class="form-group divd2d" @if($salesheader->delivery_type <> 'Door to door delivery')
                                     style="display:none;" @endif>
                                     <label class="d-block">Delivery Address <span class="tx-danger">*</span></label>
                                     <textarea name="new_delivery_address" class="form-control" rows="5"
@@ -353,11 +394,11 @@ Update Sales Details
                                 <label class="d-block">Note <span class="tx-danger">*</span></label>
                                 <textarea name="new_instruction" class="form-control"
                                     @if(auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102) @else style="pointer-events: none;background-color:#E9ECEF" @endif>{{ $salesheader->instruction }}</textarea>
-                            </div>
+                            </div>--}}
 
                             <div class="form-group">
                                 <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Save Changes</button>
-                            </div>
+                            </div> 
                     </div>
                 </form>
                 @endif
@@ -711,6 +752,10 @@ Update Sales Details
             $fieldset.find('.contact_person').attr({ name: 'contact_person[]', required: true }).val(data.contact_person || '');
             $fieldset.find('.contact_tel').attr({ name: 'contact_tel[]', required: true }).val(data.contact_tel || '');
 
+            $fieldset.find('.province').attr({ name: 'province[]', required: true }).val(data.province || '');
+            $fieldset.find('.city').attr({ name: 'city[]', required: true }).val(data.city || '');
+            $fieldset.find('.barangay').attr({ name: 'barangay[]', required: true }).val(data.barangay || '');
+
             $fieldset.find('.date-field')
                 .attr({ name: 'dateneeded_date[]', required: true })
                 .val(data.date || '')
@@ -858,7 +903,10 @@ Update Sales Details
                     branch: item.branch,
                     location: item.location,
                     products: item.products,
-                    delivery_fee: item.delivery_fee
+                    delivery_fee: item.delivery_fee,
+                    province: item.province,
+                    city: item.city,
+                    barangay: item.barangay,
                 });
             });
 
@@ -949,7 +997,241 @@ Update Sales Details
                 $checkbox.prop('checked', true).trigger('change');
             }
         });
+
+    const urls = [
+        '{{ asset("addresses/addresses.json") }}',
+        '{{ asset("addresses/philippine_provinces_cities_municipalities_and_barangays_2019v2.json") }}',
+    ];
+
+    const DEFAULT_REGION_NAME = 'NCR';
+
+    const deliveriess = @json($salesheader->deliveryAddress ?? []);
+
+    // Pull old() (and/or $rate) values from Blade
+    const initial = {
+        region:        deliveriess.length > 0 ? deliveriess[0].region : @json(old('region',        $rate->region        ?? '')),
+        region_code:   deliveriess.length > 0 ? deliveriess[0].region_code : @json(old('region_code',   $rate->region_code   ?? '')),
+        province:      deliveriess.length > 0 ? deliveriess[0].province : @json(old('province',      $rate->province      ?? '')),
+        city:          deliveriess.length > 0 ? deliveriess[0].city : @json(old('city',          $rate->city          ?? '')),
+        barangay:      deliveriess.length > 0 ? deliveriess[0].barangay : @json(old('barangay',      $rate->barangay      ?? '')),
+    };
+
+    const $region   = $('#region_select');
+    const $province = $('#province_select');
+    const $city     = $('#city_select');
+    const $barangay = $('#barangay_select');
+
+    // Init Select2 shells
+    initSelect2($region,   'Select Region');
+    initSelect2($province, 'Select Province');
+    initSelect2($city,     'Select City/Municipality');
+    initSelect2($barangay, 'Select Barangay');
+
+    let DATA = null;
+
+    loadJSONWithFallbacks(urls).then(json => {
+        DATA = json || {};
+        populateRegions();
+
+        // --- Resolve which region to use ---
+        let useRegionCode = null;
+
+        // 1) If old region_code exists AND is in DATA, use it
+        if (initial.region_code && DATA[initial.region_code]) {
+            useRegionCode = initial.region_code;
+        }
+        // 2) Else if old region (name) exists, map to region_code
+        else if (initial.region) {
+            useRegionCode = findRegionCodeByName(initial.region) || null;
+        }
+        // 3) Else if old city exists, derive region+province from city
+        else if (initial.city) {
+            const found = findByCity(initial.city);
+            if (found) {
+                useRegionCode   = found.regionCode;
+                initial.province = found.provinceName; // ensure province aligns with city
+            }
+        }
+        // 4) Else if old province exists, derive region from province
+        else if (initial.province) {
+            useRegionCode = findRegionByProvince(initial.province) || null;
+        }
+        // 5) Else default to NCR
+        if (!useRegionCode) {
+            useRegionCode = findRegionCodeByName(DEFAULT_REGION_NAME) || Object.keys(DATA)[0] || '';
+        }
+
+        console.log('Using region_code:', useRegionCode, 'for initial region:', initial.region);
+
+        // Preselect region
+        if (useRegionCode) {
+            $region.val(useRegionCode).trigger('change.select2');
+            onRegionChange(false); // populate provinces without clearing
+        }
+
+        // Preselect province (if available)
+            setSelectByText($province, initial.province);
+            onProvinceChange(false); // populate cities without clearing
+        
+
+        // Preselect city (if available)
+        if (initial.city) {
+            setSelectByText($city, initial.city);
+            onCityChange(false); // populate barangays without clearing
+        }
+
+        // Preselect barangay (if available)
+        if (initial.barangay) {
+            setSelectByText($barangay, initial.barangay);
+        }
+
+    }).catch(err => {
+        console.error('Failed to load LGU JSON:', err);
+        alert('Location list failed to load. Ensure /public/addresses/2019v2.json is present.');
     });
+
+    // Events
+    $region.on('change', () => onRegionChange(true));
+    $province.on('change', () => onProvinceChange(true));
+    $city.on('change', () => onCityChange(true));
+
+    // ---------- Select2 helpers ----------
+    function initSelect2($el, placeholder){
+        $el.select2({ placeholder, allowClear: true, width: '100%' });
+    }
+    async function loadJSONWithFallbacks(list){
+        let lastErr;
+        for (const u of list){
+        try { return await $.getJSON(u, { cache: true }); }
+            catch (e){ lastErr = e; console.warn('JSON load failed for', u, e); }
+        }
+        throw lastErr || new Error('All sources failed');
+    }
+
+    // ---------- Populate ----------
+    function populateRegions(){
+        const regions = Object.keys(DATA).map(code => ({
+            code, name: String(DATA[code]?.region_name || '')
+        })).sort((a,b)=> a.name.localeCompare(b.name));
+
+        $region.empty().append(new Option('', '', false, false));
+        regions.forEach(r => $region.append(new Option(r.name, r.code, false, false)));
+        $region.prop('disabled', regions.length === 0).trigger('change.select2');
+    }
+    function populateProvinces(regionCode){
+        const provObj = DATA?.[regionCode]?.province_list || {};
+        const provinces = Object.keys(provObj).sort((a,b)=> a.localeCompare(b));
+        $province.empty().append(new Option('', '', false, false));
+        provinces.forEach(p => $province.append(new Option(p, p, false, false)));
+        $province.prop('disabled', provinces.length === 0).trigger('change.select2');
+    }
+    function populateCities(regionCode, provinceName){
+        const muniObj = DATA?.[regionCode]?.province_list?.[provinceName]?.municipality_list || {};
+        const cities = Object.keys(muniObj).sort((a,b)=> a.localeCompare(b));
+        $city.empty().append(new Option('', '', false, false));
+        cities.forEach(c => $city.append(new Option(c, c, false, false)));
+        $city.prop('disabled', cities.length === 0).trigger('change.select2');
+    }
+    function populateBarangays(regionCode, provinceName, cityName){
+        const brgys = (DATA?.[regionCode]?.province_list?.[provinceName]?.municipality_list?.[cityName]?.barangay_list || [])
+        .slice().sort((a,b)=> a.localeCompare(b));
+        $barangay.empty().append(new Option('', '', false, false));
+        brgys.forEach(b => $barangay.append(new Option(b, b, false, false)));
+        $barangay.prop('disabled', brgys.length === 0).trigger('change.select2');
+    }
+
+    // ---------- Cascades ----------
+    function onRegionChange(clearDownstream){
+        const regionCode = $region.val() || null;
+        if (!regionCode){ return disableBelowRegion(); }
+        populateProvinces(regionCode);
+        if (clearDownstream){
+            $province.val(null).trigger('change.select2');
+            disableBelowProvince();
+        }
+    }
+    function onProvinceChange(clearDownstream){
+        const regionCode = $region.val();
+        const provinceName = $province.val();
+        if (!regionCode || !provinceName){ return disableBelowProvince(); }
+        populateCities(regionCode, provinceName);
+        if (clearDownstream){
+            $city.val(null).trigger('change.select2');
+            disableBelowCity();
+        }
+    }
+    function onCityChange(clearDownstream){
+        const regionCode = $region.val();
+        const provinceName = $province.val();
+        const cityName = $city.val();
+        if (!regionCode || !provinceName || !cityName){ return disableBelowCity(); }
+        populateBarangays(regionCode, provinceName, cityName);
+        if (clearDownstream){
+            $barangay.val(null).trigger('change.select2');
+        }
+    }
+
+    // ---------- Resets ----------
+    function disableBelowRegion(){
+        $province.empty().append(new Option('', '', false, false)).trigger('change.select2');
+        disableBelowProvince();
+    }
+    function disableBelowProvince(){
+        $city.empty().append(new Option('', '', false, false)).prop('disabled', true).trigger('change.select2');
+        disableBelowCity();
+    }
+    function disableBelowCity(){
+        $barangay.empty().append(new Option('', '', false, false)).prop('disabled', true).trigger('change.select2');
+    }
+
+    // ---------- Finders / setters ----------
+    function findRegionCodeByName(regionName){
+        const target = (regionName||'').toString().trim().toLowerCase();
+        for (const code of Object.keys(DATA)){
+            const name = (DATA[code]?.region_name || '').toString().trim().toLowerCase();
+            if (name === target) return code;
+        }
+        return null;
+    }
+    function findRegionByProvince(provinceName){
+        const p = (provinceName||'').toString().trim().toLowerCase();
+        for (const code of Object.keys(DATA)){
+            const provObj = DATA[code]?.province_list || {};
+            for (const prov of Object.keys(provObj)){
+                if (prov.toLowerCase() === p) return code;
+            }
+        }
+        return null;
+    }
+    function findByCity(cityName){
+        const c = (cityName||'').toString().trim().toLowerCase();
+        for (const code of Object.keys(DATA)){
+            const provObj = DATA[code]?.province_list || {};
+            for (const prov of Object.keys(provObj)){
+                const muniObj = provObj[prov]?.municipality_list || {};
+                for (const muni of Object.keys(muniObj)){
+                    if (muni.toLowerCase() === c) return { regionCode: code, provinceName: prov };
+                }
+            }
+        }
+        return null;
+    }
+    function setSelectByText($el, text){
+        const target = (text||'').toString().trim().toLowerCase();
+        let found = null;
+        $el.find('option').each(function(){
+            if ($(this).text().trim().toLowerCase() === target) { found = $(this).val(); return false; }
+        });
+        if (found !== null) { $el.val(found).trigger('change.select2'); }
+    }
+
+
+
+
+
+
+    });
+
 
 
 

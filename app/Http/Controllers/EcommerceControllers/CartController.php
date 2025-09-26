@@ -1202,7 +1202,15 @@ class CartController extends Controller
                                 (isset($delivery->orders[0]->paella) && $delivery->orders[0]->paella === true && !empty($delivery->orders[0]->product->paella_price))
                                     ? $delivery->orders[0]->product->paella_price
                                     : 0,
+                            'province' => $delivery->province,
+                            'city' => $delivery->city,
+                            'barangay' => $delivery->location ?? '',
                         ]);
+
+                        if ($delivery->phone) {
+                            $sms = new Sms();
+                            $sms->send_sms($delivery->phone, 'new_order', $subSalesHeader);
+                        }
 
                         if (isset($delivery->orders) && count($delivery->orders) > 0) {
                             $grand_gross = 0;

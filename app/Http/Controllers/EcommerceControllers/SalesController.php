@@ -226,9 +226,6 @@ class SalesController extends Controller
             'delivery_status' => ''
         ]);
 
-        $update_date_needed = SalesDetail::where('sales_header_id',$request->update_dateneeded_id)->update([
-            'delivery_date' => $request->update_dateneeded_date." ".$request->update_dateneeded_time
-        ]);
 
         // Insert new addresses
         if ($request->filled('address')) {
@@ -239,6 +236,10 @@ class SalesController extends Controller
                 $prods = [];
 
                 $products = Product::whereIn('id', $request->product_ids[$index])->get();
+
+                SalesDetail::where('sales_header_id',$request->update_dateneeded_id)->update([
+                    'delivery_date' => $request->dateneeded_date[$index]." ".$request->dateneeded_time[$index]
+                ]);
 
                 foreach ($products as $product) {
                     $prods[] = [
@@ -257,11 +258,16 @@ class SalesController extends Controller
                         'delivery_fee' => $request->delivery_fee[$index] ?? 0,
                         'user_id' => $sales->user_id,
                         'branch' => $request->branch[$index] ?? null,
-                        'location' => $request->location[$index] ?? null,
+                        'location' => $request->city[$index] . ', ' . $request->province[$index] ?? null,
                         'note' => $request->note[$index] ?? null,
                         'contact_person' => $request->contact_person[$index] ?? null,
                         'contact_tel' => $request->contact_tel[$index] ?? null,
                         'products' => json_encode($prods),
+                        'province' => $request->province[$index] ?? null,
+                        'city' => $request->city[$index] ?? null,
+                        'barangay' => $request->barangay[$index] ?? null,
+                        'qty' => array_sum($request->product_qty[$index] ?? []),
+                        'paella_price' => 0,
                     ]);
                 }
             }
@@ -823,6 +829,8 @@ class SalesController extends Controller
             $dateneeded = Carbon::parse($salesdetail->delivery_date)->addDays(2)->format('Y-m-d h:i A');
         }
 
+        // dd($dateneeded);
+
         if($salesheader->delivery_type == 'Door to door delivery'){
             $locationed = $salesheader->customer_location;
         }
@@ -852,7 +860,17 @@ class SalesController extends Controller
             'reference' => $salesdetail?->id
         ]);
 
-        return view('admin.sales.update_sales_detail',compact('salesheader','dateneeded','date_only','time_only','locationed','products','branches_store', 'locations'));
+        $provinces = Deliverablecities::query()
+            ->select('province')
+            ->whereNotNull('province')->where('province', '!=', '')
+            ->distinct()
+            ->orderBy('province')
+            ->pluck('province');
+
+            // dd($salesheader);
+            // dateneeded_date
+
+        return view('admin.sales.update_sales_detail',compact('salesheader','dateneeded','date_only','time_only','locationed','products','branches_store', 'locations', 'provinces'));
 
     }
 

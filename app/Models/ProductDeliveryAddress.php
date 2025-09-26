@@ -28,7 +28,11 @@ class ProductDeliveryAddress extends Model
         'note',
         'products',
         'receive_sms',
-        'paella_price'
+        'paella_price',
+        'province',
+        'region',
+        'city',
+        'barangay',
     ];
 
     public function user()
