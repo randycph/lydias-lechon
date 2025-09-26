@@ -807,9 +807,13 @@ Route::get('unpaid-transaction-reminder', function () {
 });
 
 Route::get('tests/sms', function() {
-    $sms = new Sms();
-    $salesHeader = SalesHeader::latest()->first();
-    $sms->send_sms('+639174128392', 'new_order', $salesHeader);
+    try {
+        $sms = new Sms();
+        $salesHeader = SalesHeader::latest()->first();
+        $sms->send_sms('+639174128392', 'new_order', $salesHeader);
+    } catch (\Throwable $th) {
+        throw $th;
+    }
 });
 
 Route::get('export-delivery-location', function() {
