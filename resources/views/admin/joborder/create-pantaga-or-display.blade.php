@@ -270,74 +270,107 @@
 @section('customjs')
 
 <script>
-$(function () {
-  'use strict';
+document.addEventListener('DOMContentLoaded', function () {
+  // Elements
+  const $prodDate = document.getElementById('date2');                  // Production date
+  const $needDate = document.getElementById('date1');                  // Date Needed date
+  const $prodTime = document.querySelector('select[name="production_time"]');
+  const $needTime = document.querySelector('select[name="time_needed"]');
 
-  const fmt = 'yy-mm-dd';
-  const today = new Date();
-  const $need = $('#date1');
-  const $prod = $('#date2');
+  // Helpers
+  const parseYMD = (s) => {
+    if (!s) return null;
+    const [y,m,d] = s.split('-').map(Number);
+    if (!y || !m || !d) return null;
+    return new Date(y, m - 1, d);
+  };
+  const sameYMD = (a, b) =>
+    !!(a && b) &&
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
 
-  const parse = (str) => { try { return $.datepicker.parseDate(fmt, str); } catch { return null; } };
-  const plusDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  const toMinutes = (hhmm) => {
+    if (!hhmm) return null;
+    const [h, m] = hhmm.split(':').map(Number);
+    return h * 60 + (m || 0);
+  };
 
-  function applyNeedMin(prodDate) {
-    $need.datepicker('option', 'minDate', prodDate ? prodDate : today);
+  function refreshSelectpicker(sel) {
+    if (sel && sel.classList.contains('selectpicker') && typeof $().selectpicker === 'function') {
+      $(sel).selectpicker('refresh');
+    }
   }
 
-  function applyProdMax(needDate) {
-    $prod.datepicker('option', 'maxDate', needDate || null);
+  function enforceNeedTimeBounds() {
+    const prodD = parseYMD($prodDate.value);
+    const needD = parseYMD($needDate.value);
+    const pMins = toMinutes($prodTime.value);
+
+    // Reset: show/enable all times first
+    Array.from($needTime.options).forEach(opt => {
+      opt.hidden = false;
+      opt.disabled = false;
+    });
+
+    if (prodD && needD && sameYMD(prodD, needD) && pMins != null) {
+      Array.from($needTime.options).forEach(opt => {
+        const m = toMinutes(opt.value);
+        if (m != null && m < pMins) {
+          opt.hidden = true;      // hide earlier times
+          opt.disabled = true;    // and disable for safety
+        }
+      });
+    }
+
+    // If selected is invalid, pick the first visible valid option
+    const selected = $needTime.selectedOptions[0];
+    if (!selected || selected.disabled || selected.hidden) {
+      const firstValid = Array.from($needTime.options).find(o => !o.disabled && !o.hidden);
+      $needTime.value = firstValid ? firstValid.value : '';
+    }
+    refreshSelectpicker($needTime);
   }
 
-  $prod.datepicker({
-    minDate: today,
-    dateFormat: fmt,
-    beforeShow: function () {
-      applyProdMax(parse($need.val()));
-    },
-    onSelect: function (str) {
-      const prodDate = parse(str);
-      applyNeedMin(prodDate);
+  function enforceDateBounds() {
+    const prodD = parseYMD($prodDate.value);
+    // Update Need Date min to Production Date (or today if none)
+    needPicker.set('minDate', prodD || new Date());
 
-      // If current needDate is now below min, snap it to min instead of clearing
-      const needDate = parse($need.val());
-      if (needDate && needDate < prodDate) {
-        $need.val($.datepicker.formatDate(fmt, prodDate));
-      }
-    },
-    onClose: function () {
-      applyNeedMin(parse($prod.val()));
+    // If Need Date < Prod Date, snap to Prod Date
+    const needD = parseYMD($needDate.value);
+    if (prodD && needD && needD < prodD) {
+      needPicker.setDate(prodD, true); // triggerChange = true
     }
+
+    enforceNeedTimeBounds();
+  }
+
+  // Flatpickr init
+  const common = {
+    dateFormat: 'Y-m-d',
+    allowInput: true,
+    disableMobile: false
+  };
+
+  const prodPicker = flatpickr($prodDate, {
+    ...common,
+    minDate: new Date(),
+    onChange: function () { enforceDateBounds(); }
   });
 
-  $need.datepicker({
-    minDate: today,
-    dateFormat: fmt,
-    beforeShow: function () {
-      applyNeedMin(parse($prod.val()));
-    },
-    onSelect: function (str) {
-      const needDate = parse(str);
-      applyProdMax(needDate);
-
-      // If current prodDate is now above max, snap it to max instead of clearing
-      const prodDate = parse($prod.val());
-      if (prodDate && needDate && prodDate > needDate) {
-        $prod.val($.datepicker.formatDate(fmt, needDate));
-      }
-    },
-    onClose: function () {
-      applyProdMax(parse($need.val()));
-    }
+  const needPicker = flatpickr($needDate, {
+    ...common,
+    minDate: new Date(),
+    onChange: function () { enforceNeedTimeBounds(); }
   });
 
-  // Initial sync (for edit forms / old() values)
-  (function initSync() {
-    const prodDate = parse($prod.val());
-    const needDate = parse($need.val());
-    applyNeedMin(prodDate);
-    applyProdMax(needDate);
-  })();
+  // Events for time selects
+  $prodTime.addEventListener('change', enforceNeedTimeBounds);
+
+  // Initial pass (handles old() values)
+  enforceDateBounds();
+  enforceNeedTimeBounds();
 });
 </script>
 
