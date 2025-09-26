@@ -270,92 +270,77 @@
 @section('customjs')
 
 <script>
-  $(function () {
-    'use strict';
+$(function () {
+  'use strict';
 
-    const fmt = 'yy-mm-dd';
-    const today = new Date();
-    const $need = $('#date1');
-    const $prod = $('#date2');
+  const fmt = 'yy-mm-dd';
+  const today = new Date();
+  const $need = $('#date1');
+  const $prod = $('#date2');
 
-    function parse(str) {
-      try { return $.datepicker.parseDate(fmt, str); } catch { return null; }
+  const parse = (str) => { try { return $.datepicker.parseDate(fmt, str); } catch { return null; } };
+  const plusDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+
+  function applyNeedMin(prodDate) {
+    $need.datepicker('option', 'minDate', prodDate ? prodDate : today);
+  }
+
+  function applyProdMax(needDate) {
+    $prod.datepicker('option', 'maxDate', needDate || null);
+  }
+
+  $prod.datepicker({
+    minDate: today,
+    dateFormat: fmt,
+    beforeShow: function () {
+      applyProdMax(parse($need.val()));
+    },
+    onSelect: function (str) {
+      const prodDate = parse(str);
+      applyNeedMin(prodDate);
+
+      // If current needDate is now below min, snap it to min instead of clearing
+      const needDate = parse($need.val());
+      if (needDate && needDate < prodDate) {
+        $need.val($.datepicker.formatDate(fmt, prodDate));
+      }
+    },
+    onClose: function () {
+      applyNeedMin(parse($prod.val()));
     }
-
-    function plusDays(d, n)  { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
-    function minusDays(d, n) { const x = new Date(d); x.setDate(x.getDate() - n); return x; }
-
-    function syncNeedMin(prodDate) {
-      if (prodDate) {
-        $need.datepicker('option', 'minDate', minusDays(prodDate, 1));
-      } else {
-        $need.datepicker('option', 'minDate', today);
-      }
-    }
-
-    function syncProdMax(needDate) {
-      if (needDate) {
-        $prod.datepicker('option', 'maxDate', minusDays(needDate, 0));
-      } else {
-        $prod.datepicker('option', 'maxDate', null); // relax when no needDate
-      }
-    }
-
-    $prod.datepicker({
-      minDate: today,
-      dateFormat: fmt,
-
-      beforeShow: function () {
-        const needDate = parse($need.val());
-        syncProdMax(needDate);
-
-        $prod.datepicker('option', 'minDate', today);
-      },
-
-      onSelect: function (str) {
-        const prodDate = parse(str);
-        syncNeedMin(prodDate);
-
-        const needDate = parse($need.val());
-        if (needDate && needDate <= prodDate) $need.val('');
-      },
-
-      onClose: function () {
-        const prodDate = parse($prod.val());
-        syncNeedMin(prodDate);
-      }
-    });
-
-    $need.datepicker({
-      minDate: today,
-      dateFormat: fmt,
-
-      beforeShow: function () {
-        const prodDate = parse($prod.val());
-        syncNeedMin(prodDate);
-      },
-
-      onSelect: function (str) {
-        const needDate = parse(str);
-        syncProdMax(needDate);
-
-        const prodDate = parse($prod.val());
-        if (prodDate && prodDate >= needDate) $prod.val('');
-      },
-
-      onClose: function () {
-        const needDate = parse($need.val());
-        syncProdMax(needDate);
-      }
-    });
-
-    // Initial sync for edit forms
-    (function initSync() {
-      syncNeedMin(parse($prod.val()));
-      syncProdMax(parse($need.val()));
-    })();
   });
+
+  $need.datepicker({
+    minDate: today,
+    dateFormat: fmt,
+    beforeShow: function () {
+      applyNeedMin(parse($prod.val()));
+    },
+    onSelect: function (str) {
+      const needDate = parse(str);
+      applyProdMax(needDate);
+
+      // If current prodDate is now above max, snap it to max instead of clearing
+      const prodDate = parse($prod.val());
+      if (prodDate && needDate && prodDate > needDate) {
+        $prod.val($.datepicker.formatDate(fmt, needDate));
+      }
+    },
+    onClose: function () {
+      applyProdMax(parse($need.val()));
+    }
+  });
+
+  // Initial sync (for edit forms / old() values)
+  (function initSync() {
+    const prodDate = parse($prod.val());
+    const needDate = parse($need.val());
+    applyNeedMin(prodDate);
+    applyProdMax(needDate);
+  })();
+});
 </script>
+
 
 
 
