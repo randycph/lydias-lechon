@@ -52,8 +52,6 @@
                 document.getElementById("contact-form").submit();
             }
         </script>
-        {{-- <div class="g-recaptcha" data-sitekey="6LcQlLoZAAAAACFNGgNr2u7TXJrxCZyWA2Xk1QQ4"></div> --}}
-        <div class="g-recaptcha" data-sitekey="6Lecd9YrAAAAAG-81NlE2FlYsGiXLrkcL0D1HEC3"></div>
 
         @error('g-recaptcha-response')
             <div class="text-red-500 mt-1">{{ $message }}</div>
