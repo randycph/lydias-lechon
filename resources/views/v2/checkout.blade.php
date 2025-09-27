@@ -621,7 +621,7 @@ $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
                                                                 placeholder="e.g. 09171234567"
                                                                 x-mask:dynamic="
                                                                     $input.startsWith('34') || $input.startsWith('37')
-                                                                        ? '9999 999 9999' : '9999 999 9999'
+                                                                        ? '99999999999' : '99999999999'
                                                                 "
                                                                 class="w-full border border-gray-300 p-2 rounded-md"
                                                                 placeholder=""
@@ -777,7 +777,7 @@ $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
                                         <input type="tel" id="mobile" name="mobile" placeholder="e.g. 09171234567"
                                                 x-mask:dynamic="
                                                     $input.startsWith('34') || $input.startsWith('37')
-                                                        ? '9999 999 9999' : '9999 999 9999'
+                                                        ? '99999999999' : '99999999999'
                                                 "
                                             value="{{ auth()->check() ? auth()->user()->contact_mobile : '' }}"
                                             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
