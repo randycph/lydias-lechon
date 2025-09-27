@@ -867,10 +867,17 @@ class SalesController extends Controller
             ->orderBy('province')
             ->pluck('province');
 
+        $cities = Deliverablecities::query()
+            ->select('city')
+            ->whereNotNull('city')->where('city', '!=', '')
+            ->distinct()
+            ->orderBy('city')
+            ->pluck('city');
+
             // dd($salesheader);
             // dateneeded_date
 
-        return view('admin.sales.update_sales_detail',compact('salesheader','dateneeded','date_only','time_only','locationed','products','branches_store', 'locations', 'provinces'));
+        return view('admin.sales.update_sales_detail',compact('salesheader','dateneeded','date_only','time_only','locationed','products','branches_store', 'locations', 'provinces', 'cities'));
 
     }
 
