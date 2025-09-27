@@ -483,9 +483,7 @@ $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
 
                                                 <div
                                                     class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
-                                                    <div>We've pre-selected the earliest available time for your order.
-                                                        You’re welcome to adjust the date and time to your preference.
-                                                    </div>
+                                                    <div>We've pre-selected the earliest available time for your order. You may adjust the date and time to your preference. For bookings earlier that our pre-selected schedule, please contact our Hotline directly.</div>
                                                 </div>
 
                                                 <h4 class="font-bold mb-2 mt-2">Delivery Address <span
@@ -866,8 +864,7 @@ $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
                                 <template x-if="!allowMultiple">
                                     <div
                                         class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
-                                        <div>We've pre-selected the earliest available time for your order. You’re
-                                            welcome to adjust the date and time to your preference.</div>
+                                        <div>We've pre-selected the earliest available time for your order. You may adjust the date and time to your preference. For bookings earlier that our pre-selected schedule, please contact our Hotline directly.</div>
                                     </div>
                                 </template>
                                 {{-- <div x-show="warningMessage">

@@ -5,7 +5,11 @@
 @component('mail::message')
 # Don't Forget Your Cart!
 
-You still have items waiting in your cart. Here’s a quick summary:
+You still have items waiting in your cart.
+
+Please complete your order <strong>at least 24 hours before your preferred delivery or pick-up-time.</strong> Otherwise, the system will automatically close your pending order.
+
+Here's a quick summary of your cart:
 
 @component('mail::table')
 | Product | Quantity | Price | Total |
