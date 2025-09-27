@@ -16,7 +16,7 @@
         </div>
     @endif
 
-    <form class="mx-auto mt-3" action="{{ route('contact-us') }}" method="POST">
+    <form class="mx-auto mt-3" id="contact-form" action="{{ route('contact-us') }}" method="POST">
         @csrf
         <div class="mb-5">
             <label for="name" class="block mb-2 font-medium text-gray-900">Name</label>
@@ -47,6 +47,11 @@
             @enderror
         </div>
         <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+        <script>
+        function onSubmit(token) {
+            document.getElementById("contact-form").submit();
+        }
+        </script>
         {{-- <div class="g-recaptcha" data-sitekey="6LcQlLoZAAAAACFNGgNr2u7TXJrxCZyWA2Xk1QQ4"></div> --}}
         <div class="g-recaptcha" data-sitekey="6Lecd9YrAAAAAG-81NlE2FlYsGiXLrkcL0D1HEC3"></div>
 
@@ -54,6 +59,6 @@
             <div class="text-red-500 mt-1">{{ $message }}</div>
         @enderror
 
-        <button type="submit" class="text-white bg-primary mt-4 hover:bg-primary-dark focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg w-full sm:w-auto px-5 py-3 text-center ">Submit</button>
+        <button class="g-recaptcha text-white bg-primary mt-4 hover:bg-primary-dark focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg w-full sm:w-auto px-5 py-3 text-center" data-sitekey="6Lecd9YrAAAAAG-81NlE2FlYsGiXLrkcL0D1HEC3" data-callback="onSubmit">Submit</button>
     </form>
 </div>
