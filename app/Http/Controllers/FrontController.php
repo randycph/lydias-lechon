@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Http;
 
 class FrontController extends Controller
 {
@@ -107,30 +108,48 @@ class FrontController extends Controller
 public function contact_us(Request $request)
 {
     try {
+        // Basic validation (without captcha first)
         $request->validate([
-            'g-recaptcha-response' => ['required', new \App\Rules\RecaptchaRule()],
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
+            'name'    => 'required|string|max:255',
+            'email'   => 'required|email|max:255',
             'contact' => 'required|string|max:255',
             'message' => 'required|string|max:5000',
+            'g-recaptcha-response' => 'required|string',
         ]);
 
-        $client = $request->all();
+        // Verify captcha with Google
+        $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+            'secret'   => config('services.recaptcha.secret'),
+            'response' => $request->input('g-recaptcha-response'),
+            'remoteip' => $request->ip(),
+        ]);
+
+        $body = $response->json();
+
+        if (!($body['success'] ?? false)) {
+            throw ValidationException::withMessages([
+                'g-recaptcha-response' => ['Captcha verification failed. Please try again.'],
+            ]);
+        }
+
+        // Continue with sending emails
+        $client = $request->only(['name', 'email', 'contact', 'message']);
 
         Mail::to($client['email'])->send(new InquiryMail(Setting::info(), $client));
 
         $admin = (object) ['firstname' => 'Lydias Support'];
-
         Mail::to(Setting::info()->email)->send(new InquiryAdminMail(Setting::info(), $client, $admin));
 
-        return redirect()->to(url()->previous())->with('form_success', 'Email sent!');
+        return back()->with('form_success', 'Email sent!');
     } catch (ValidationException $e) {
-        return redirect()->back()
+        return back()
             ->withErrors($e->errors())
             ->withInput()
             ->with('contact_form_has_error', true);
     } catch (\Exception $e) {
-        return redirect()->to(url()->previous())->withInput()->with('form_error', 'Something went wrong. Please try again later.');
+        return back()
+            ->withInput()
+            ->with('form_error', 'Something went wrong. Please try again later.');
     }
 }
 
