@@ -119,7 +119,10 @@ class JoborderController extends Controller
 
      
         if(auth()->user()->role_id == 1 || auth()->user()->role_id == 3){
-            $model = Joborder::where('id','>',0);
+            $model = Joborder::where('id','>',0)
+                                ->whereHas('sales_detail.header', function ($q) {
+                                    $q->where('has_sub', 0);
+                                });
                //logger($model->get());
         }else{
             $branches = UserBranch::accessBranch();
@@ -132,6 +135,9 @@ class JoborderController extends Controller
                                 ->where(function ($query) use($locations) {
                                     $query->whereIn('customer_address', $locations)
                                           ->orWhereIn('order_source', $locations);
+                                })
+                                ->whereHas('sales_detail.header', function ($q) {
+                                    $q->where('has_sub', 0);
                                 });
 
         }
