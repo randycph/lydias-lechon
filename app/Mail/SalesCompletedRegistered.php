@@ -28,7 +28,7 @@ class SalesCompletedRegistered extends Mailable
      */
     public function build()
     {
-        if ($this->h?->deliveryAddress && count($this->h->deliveryAddress) > 0) {
+        if ($this->h?->is_multiple_address == 1) {
             return $this->markdown('mail.sales-completed-mutiple')
                 ->subject('Sales Transaction');
         } else {

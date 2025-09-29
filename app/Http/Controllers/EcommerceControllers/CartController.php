@@ -1022,7 +1022,9 @@ class CartController extends Controller
                 'origin' => $origin,
                 'forecast_date' => $forecast_date,
                 'updated_at' => $salesHeader->created_at,
-                'is_multiple_address' => $request->has('deliveries') && count(json_decode($request->deliveries)) > 1 ? 1 : 0
+                'is_multiple_address' => $request->has('deliveries') && count(json_decode($request->deliveries)) > 0 ? 1 : 0,
+                'is_new_order' => 1,
+                'has_sub' => ($request->has('deliveries') && count(json_decode($request->deliveries)) > 0) ? 1 : 0,
             ]);
             $salesHeader = SalesHeader::find($salesHeader->id);
             if (!$salesHeader) {
@@ -1087,7 +1089,7 @@ class CartController extends Controller
                 'outlet' => $outlet,
                 'origin' => $origin,
                 'forecast_date' => $forecast_date,
-                'is_multiple_address' => $request->has('deliveries') && count(json_decode($request->deliveries)) > 1 ? 1 : 0,
+                'is_multiple_address' => $request->has('deliveries') && count(json_decode($request->deliveries)) > 0 ? 1 : 0,
                 'is_new_order' => 1,
                 'has_sub' => ($request->has('deliveries') && count(json_decode($request->deliveries)) > 0) ? 1 : 0,
             ]);
