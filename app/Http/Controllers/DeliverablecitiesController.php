@@ -124,6 +124,8 @@ class DeliverablecitiesController extends Controller
             'item_type' => 'required'
         ]);
 
+        dd($request->all());
+
         Deliverablecities::findOrFail($id)->update([
             'rate' => $request->rate,
             'province' => $request->province,
