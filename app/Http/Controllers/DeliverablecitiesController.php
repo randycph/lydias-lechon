@@ -97,18 +97,7 @@ class DeliverablecitiesController extends Controller
      */
     public function edit($id)
     {
-
-        Deliverablecities::query()
-            ->whereNull('region') // remove this line if you want to overwrite existing values
-            ->where(function ($q) {
-                $q->where('province', 'LIKE', '%NATIONAL CAPITAL REGION%')
-                ->orWhere('province', 'LIKE', '%TAGUIG%'); // covers TAGUIG / TAGUIG CITY
-            })
-            ->update(['region' => 'NCR']);
-
-
         $rate = Deliverablecities::findOrFail($id);
-        // dd($rate->toArray());
         return view('admin.deliverablelocations.edit',compact('rate'));
     }
 
