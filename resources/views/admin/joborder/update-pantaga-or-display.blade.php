@@ -93,7 +93,7 @@
                             @foreach($prod_stores as $store)
                                 @if(!in_array($store->name,['Globe: +63917 538 0304', 'Globe: +63917 820 2989', 'Smart: +6918 967 5213']))
                                     <option value="{{$store->id}}"
-                                        @if($store->id == $jo->pickup_branch) selected="selected" @endif
+                                        @if($store->name == $jo->customer_address) selected="selected" @endif
                                     >{{$store->name}}</option>
                                 @endif
                             @endforeach
