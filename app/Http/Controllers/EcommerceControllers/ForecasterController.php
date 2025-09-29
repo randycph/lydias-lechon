@@ -40,13 +40,15 @@ class ForecasterController extends Controller
 
     public function index($param = null)
     {
-        
         $branches = ProductionBranch::orderBy('name','asc')->get();
         //$orders = SalesDetail::whereIN('product_id', function($query){ $query->select('id')->from('products')->where('production_item',1); } )
+        
+        $sorting = $param['sorting'] ?? 'desc';
+        
         $orders = SalesDetail::whereIN('sales_header_id', function($query){ $query->select('id')->from('ecommerce_sales_headers')->where('status','active')->where('has_sub', 0)->where('isConfirm','1')->whereNull('deleted_at'); } )          
             ->where('Joborder_id',0)
             ->where('delivery_date','>=',date('Y-m-d', strtotime(' - 2 days')))
-            ->orderBy('delivery_date','desc')
+            ->orderBy('delivery_date', $sorting)
             ->paginate();
 
             //->where('delivery_date','>=',date('Y-m-d 00:00:00'))

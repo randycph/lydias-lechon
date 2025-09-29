@@ -146,32 +146,46 @@ Manage Customer
     <!-- End Pages -->
 
     <!-- Start Pages -->
-    <div class="row row-sm">
+    <div class="row row-sm w-100">
 
-            <!-- Start Filters -->
-        <div class="col-md-4">
-            @if (auth()->user()->has_access_to_route('forecaster.order.multiple.delete'))
-                <div class="list-search d-inline mg-b-5">
-                    <div class="dropdown d-inline mg-r-10">
-                        <button class="btn btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Actions
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            <a class="dropdown-item tx-danger" href="javascript:void(0)" onclick="multiple_cancel_orders()">Cancel Order</a>
+        <div class="d-flex justify-content-between w-100 align-items-center">
+            <div class="d-flex align-items-center">
+                <div class="">
+                    @if (auth()->user()->has_access_to_route('forecaster.order.multiple.delete'))
+                        <div class="list-search">
+                            <div class="dropdown d-inline mg-r-10">
+                                <button class="btn btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Actions
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    <a class="dropdown-item tx-danger" href="javascript:void(0)" onclick="multiple_cancel_orders()">Cancel Order</a>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+                <div class="" style="position: relative; top: 3px;">
+                    <div class="ml-auto ">
+                        <div class="search-form mg-r-10">
+                            <input name="forecast_searchtxt" type="text" id="forecast_searchtxt" class="form-control"  placeholder="Search">
+                            <button class="btn filter" type="button" id="btnSearch"><i data-feather="search"></i></button>
                         </div>
                     </div>
                 </div>
-            @endif
-        </div>
-        <div class="col-md-8">
-            <div class="ml-auto bd-highlight mg-t-10 mg-r-10">
-                <div class="search-form mg-r-10">
-                    <input name="forecast_searchtxt" type="text" id="forecast_searchtxt" class="form-control"  placeholder="Search">
-                    <button class="btn filter" type="button" id="btnSearch"><i data-feather="search"></i></button>
+            </div>
+
+            <div class="">
+                <div class="dropdown">
+                    <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" data-toggle="dropdown" aria-expanded="false">
+                        Filters
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                        <li><a class="dropdown-item sort" data-sorting="asc"  href="#">Sort by Date Needed ASC</a></li>
+                        <li><a class="dropdown-item sort" data-sorting="desc" href="#">Sort by Date Needed DESC</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
-
     </div>
 
         <div class="col-md-12">
@@ -191,7 +205,7 @@ Manage Customer
                                 <th style="width: 10%;">Order no.</th>
                                 <th style="width: 10%;">Customer</th>
                                 <th style="width: 10%;">Qty</th>
-                                <th style="width: 15%;">Price</th>
+                                <th style="width: 15%;">Price </th>
                                 <th style="width: 20%;">Date Needed</th>
                                 <th style="width: 30%;">Delivery Address</th>
                                 <th style="width: 15%;">Total</th>
@@ -432,6 +446,20 @@ Manage Customer
                     $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
                 });
             });
+
+            const baseUrl = @json(route('forecaster.show-deliveries'));
+
+            $(document).on('click', '.dropdown-menu .sort', function (e) {
+                e.preventDefault();
+
+                const sorting   = $(this).data('sorting');
+                const searchtxt = $('#forecast_searchtxt').val() || '';
+
+                // Build a properly encoded query string
+                const qs = $.param({ searchtxt, sorting });
+
+                window.location.assign(`${baseUrl}?${qs}`);
+            });
         });
     </script>
     <script>
@@ -559,5 +587,13 @@ Manage Customer
                 $('#delivered_by_div').modal('hide');
             }
         })
+
+        document.querySelectorAll('.dropdown-toggle').forEach(el => {
+            const dd = bootstrap.Dropdown.getOrCreateInstance(el);
+            el.addEventListener('click', e => {
+                e.preventDefault();           // optional
+                dd.toggle();                  // toggles open/close
+            });
+        });
     </script>
 @endsection
