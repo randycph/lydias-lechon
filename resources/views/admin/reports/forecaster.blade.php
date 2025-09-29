@@ -77,6 +77,8 @@
     <link rel="stylesheet" href="{{ asset('css/skin.deepblue.css') }}">
     <link rel="stylesheet" href="{{ asset('css/custom-admin.css') }}">
 
+    <link href="{{ asset('lib/select2/css/select2.min.css') }}" rel="stylesheet">
+
     <link href="{{ asset('lib/ion-rangeslider/css/ion.rangeSlider.min.css') }}" rel="stylesheet">
     <style>
         @page {
@@ -84,6 +86,13 @@
         }
         .bords{
             border: 2px solid red;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #0168fa;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            position: static;
+            color: #fff;
         }
     </style>
 @endsection
@@ -157,10 +166,16 @@
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13" style="font-size:15px;font-weight:bold;">Receiver Branch</label>
-                                    <select name="receiver[]" id="receiver" class="form-control" multiple>
-                                        <option value="">- Select Receiver -</option>
+                                    <select class="receiver-branch-multiple" name="receiver[]" multiple="multiple">
+                                        @php
+                                            $selectedReceivers = collect(old('receiver', request('receiver', [])))->map(fn($v) => (string)$v)->all();
+                                        @endphp
+
                                         @forelse(\App\EcommerceModel\Branch::orderBy('name')->get() as $cus)
-                                            <option @isset($_GET['receiver']) @if(app('request')->input('receiver') == $cus->id) selected @endif @endif value="{{$cus->id}}">{{$cus->name}}</option>
+                                            <option value="{{ $cus->id }}"
+                                                {{ in_array((string)$cus->id, $selectedReceivers, true) ? 'selected' : '' }}>
+                                                {{ $cus->name }}
+                                            </option>
                                         @empty
                                         @endforelse
                                     </select>
@@ -703,6 +718,7 @@
 @endsection
 
 @section('pagejs')
+    <script src="{{ asset('lib/select2/js/select2.min.js') }}"></script>
     <script src="{{ asset('lib/bselect/dist/js/bootstrap-select.js') }}"></script>
     <script src="{{ asset('lib/bselect/dist/js/i18n/defaults-en_US.js') }}"></script>
     <script src="{{ asset('lib/prismjs/prism.js') }}"></script>
@@ -723,6 +739,11 @@
     });
 
     $(document).ready(function() {
+        $(document).ready(function() {
+            $('.receiver-branch-multiple').select2({
+                placeholder: "Select a branch",
+            });
+        });
         $('#example').DataTable( {            
             dom: 'Bfrtip',
             pageLength: 28,
