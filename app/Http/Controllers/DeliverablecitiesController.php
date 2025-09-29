@@ -101,6 +101,7 @@ class DeliverablecitiesController extends Controller
     public function edit($id)
     {
         $rate = Deliverablecities::findOrFail($id);
+        // dd($rate);
         return view('admin.deliverablelocations.edit',compact('rate'));
     }
 
@@ -124,7 +125,7 @@ class DeliverablecitiesController extends Controller
             'item_type' => 'required'
         ]);
 
-        dd($request->all());
+        // dd($request->all());
 
         Deliverablecities::findOrFail($id)->update([
             'rate' => $request->rate,
