@@ -63,7 +63,8 @@ class DeliverablecitiesController extends Controller
             'barangay' => 'nullable',
             'province' => 'required',
             'city' => 'required',
-            'item_type' => 'required'
+            'item_type' => 'required',
+            'region' => 'required',
         ]);
 
         Deliverablecities::create([
@@ -71,6 +72,8 @@ class DeliverablecitiesController extends Controller
             'item_type' => $request->item_type,
             'province' => $request->province,
             'city' => $request->city,
+            'barangay' => $request->barangay,
+            'region' => $request->region,
             'outside_manila' => ($request->has('outside_manila') ? '1' : '0'),
             'user_id' => Auth::id()
         ]);
