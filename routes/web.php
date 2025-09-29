@@ -673,138 +673,138 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
 //Route::get('/{slug}', 'FrontController@page');
 //Route::get('{all}','FrontController@page');
 
-Route::get('/test', function(){
-    phpinfo();
-});
+// Route::get('/test', function(){
+//     phpinfo();
+// });
 
 
-Route::get('/test/test-email-1', function(){
-    try {
-        $salesHeader = SalesHeader::first();
+// Route::get('/test/test-email-1', function(){
+//     try {
+//         $salesHeader = SalesHeader::first();
 
-        Mail::to('evilryok@gmail.com')->send(new SalesCompleted($salesHeader));
+//         Mail::to('evilryok@gmail.com')->send(new SalesCompleted($salesHeader));
 
-        return response()->json([
-            'message' => 'Email sent successfully!'
-        ]);
-    } catch (\Throwable $th) {
-        throw $th;
-    }
-});
+//         return response()->json([
+//             'message' => 'Email sent successfully!'
+//         ]);
+//     } catch (\Throwable $th) {
+//         throw $th;
+//     }
+// });
 
-Route::get('/test/test-email-2', function(){
-    try {
-        $salesHeader = SalesHeader::with('couponUsed')->where('id', '18080')->first();
+// Route::get('/test/test-email-2', function(){
+//     try {
+//         $salesHeader = SalesHeader::with('couponUsed')->where('id', '18080')->first();
 
-        Mail::to('evilryok@gmail.com')->send(new SalesCompletedRegistered($salesHeader));
+//         Mail::to('evilryok@gmail.com')->send(new SalesCompletedRegistered($salesHeader));
 
-        return response()->json([
-            'message' => 'Email sent successfully!'
-        ]);
-    } catch (\Throwable $th) {
-        throw $th;
-    }
-});
+//         return response()->json([
+//             'message' => 'Email sent successfully!'
+//         ]);
+//     } catch (\Throwable $th) {
+//         throw $th;
+//     }
+// });
 
-Route::get('/test/test-email-3', function(){
-    try {
-        $salesHeader = SalesHeader::first();
+// Route::get('/test/test-email-3', function(){
+//     try {
+//         $salesHeader = SalesHeader::first();
 
-        Mail::to(config('app.email'))->send(new SalesCompletedAdmin($salesHeader));
+//         Mail::to(config('app.email'))->send(new SalesCompletedAdmin($salesHeader));
 
-        return response()->json([
-            'message' => 'Email sent successfully!'
-        ]);
-    } catch (\Throwable $th) {
-        throw $th;
-    }
-});
+//         return response()->json([
+//             'message' => 'Email sent successfully!'
+//         ]);
+//     } catch (\Throwable $th) {
+//         throw $th;
+//     }
+// });
 
-Route::get('/test/test-email', function () {
-    Mail::raw('This is a test email from Gmail SMTP via App Password', function ($message) {
-        $message->to('evilryok@gmail.com')
-                ->subject('Gmail SMTP Test');
-    });
+// Route::get('/test/test-email', function () {
+//     Mail::raw('This is a test email from Gmail SMTP via App Password', function ($message) {
+//         $message->to('evilryok@gmail.com')
+//                 ->subject('Gmail SMTP Test');
+//     });
 
-    return 'Email sent!';
-});
+//     return 'Email sent!';
+// });
 
-Route::get('/test-cart-reminder', function () {
-    $now = Carbon::now();
+// Route::get('/test-cart-reminder', function () {
+//     $now = Carbon::now();
 
-    $carts = Cart::where('user_id', auth()->id())->with('user', 'product')->get();
+//     $carts = Cart::where('user_id', auth()->id())->with('user', 'product')->get();
 
-    $cartsByUser = $carts->groupBy('user_id');
+//     $cartsByUser = $carts->groupBy('user_id');
 
-    foreach ($cartsByUser as $userId => $userCarts) {
-        $user = $userCarts->first()->user;
+//     foreach ($cartsByUser as $userId => $userCarts) {
+//         $user = $userCarts->first()->user;
 
-        if (!$user || !$user->email) {
-            continue;
-        }
+//         if (!$user || !$user->email) {
+//             continue;
+//         }
 
-        // Find the oldest cart item
-        $oldestCart = $userCarts->sortBy('created_at')->first();
-        $created = Carbon::parse($oldestCart->created_at);
-        $diffInMinutes = $created->diffInMinutes($now);
-        $diffInHours = $created->diffInHours($now);
+//         // Find the oldest cart item
+//         $oldestCart = $userCarts->sortBy('created_at')->first();
+//         $created = Carbon::parse($oldestCart->created_at);
+//         $diffInMinutes = $created->diffInMinutes($now);
+//         $diffInHours = $created->diffInHours($now);
 
-        if ($diffInMinutes >= 1 && $diffInHours < 6) {
-            // Send reminder email if older than 10 minutes but not yet 6 hours
-            Mail::to($user->email)->send(new CartReminderMail($userCarts));
-            logger('Reminder sent to ' . $user->email);
-        } 
+//         if ($diffInMinutes >= 1 && $diffInHours < 6) {
+//             // Send reminder email if older than 10 minutes but not yet 6 hours
+//             Mail::to($user->email)->send(new CartReminderMail($userCarts));
+//             logger('Reminder sent to ' . $user->email);
+//         } 
 
-        if ($diffInHours >= 6) {
-            // Delete all their cart items
-            foreach ($userCarts as $cart) {
-                $cart->delete();
-            }
-            logger('Deleted carts for user ID ' . $userId);
-        }
-    }
+//         if ($diffInHours >= 6) {
+//             // Delete all their cart items
+//             foreach ($userCarts as $cart) {
+//                 $cart->delete();
+//             }
+//             logger('Deleted carts for user ID ' . $userId);
+//         }
+//     }
 
-    return response()->json([
-        'message' => 'Cart reminder check completed!'
-    ]);
-});
+//     return response()->json([
+//         'message' => 'Cart reminder check completed!'
+//     ]);
+// });
 
-Route::get('unpaid-transaction-reminder', function () {
-    $now = Carbon::now();
+// Route::get('unpaid-transaction-reminder', function () {
+//     $now = Carbon::now();
 
-    // Remind if unpaid for more than 10 minutes but less than 1 hour
-    $remind = SalesHeader::where('payment_status', '!=', 'PAID')
-        ->where('user_id', auth()->id())
-        ->where('created_at', '<=', $now->copy()->subMinutes(10))
-        ->where('created_at', '>', $now->copy()->subHour())
-        ->get();
+//     // Remind if unpaid for more than 10 minutes but less than 1 hour
+//     $remind = SalesHeader::where('payment_status', '!=', 'PAID')
+//         ->where('user_id', auth()->id())
+//         ->where('created_at', '<=', $now->copy()->subMinutes(10))
+//         ->where('created_at', '>', $now->copy()->subHour())
+//         ->get();
 
-    foreach ($remind as $order) {
-        if ($order->user && $order->user->email) {
-            Mail::to($order->user->email)->send(new UnpaidReminderMail($order));
-            logger('Unpaid reminder sent to ' . $order->user->email);
-        }
-    }
+//     foreach ($remind as $order) {
+//         if ($order->user && $order->user->email) {
+//             Mail::to($order->user->email)->send(new UnpaidReminderMail($order));
+//             logger('Unpaid reminder sent to ' . $order->user->email);
+//         }
+//     }
 
-    // Cancel if unpaid for 1 hour or more
-    $cancel = SalesHeader::where('payment_status', '!=', 'PAID')
-        ->where('user_id', auth()->id())
-        ->where('created_at', '<=', $now->copy()->subHour())
-        ->get();
+//     // Cancel if unpaid for 1 hour or more
+//     $cancel = SalesHeader::where('payment_status', '!=', 'PAID')
+//         ->where('user_id', auth()->id())
+//         ->where('created_at', '<=', $now->copy()->subHour())
+//         ->get();
 
-    foreach ($cancel as $order) {
-        $order->update(['status' => 'CANCELLED']);
+//     foreach ($cancel as $order) {
+//         $order->update(['status' => 'CANCELLED']);
 
-        if ($order->user && $order->user->email) {
-            Mail::to($order->user->email)->send(new OrderCancelledMail($order));
-            logger('Order cancelled and email sent to ' . $order->user->email);
-        }
-    }
+//         if ($order->user && $order->user->email) {
+//             Mail::to($order->user->email)->send(new OrderCancelledMail($order));
+//             logger('Order cancelled and email sent to ' . $order->user->email);
+//         }
+//     }
 
-    return response()->json([
-        'message' => 'Unpaid transaction reminder and cancellation check completed!'
-    ]);
-});
+//     return response()->json([
+//         'message' => 'Unpaid transaction reminder and cancellation check completed!'
+//     ]);
+// });
 
 Route::get('tests/sms', function() {
     try {
