@@ -117,7 +117,7 @@
         '{{ asset("addresses/philippine_provinces_cities_municipalities_and_barangays_2019v2.json") }}',
     ];
 
-    const DEFAULT_REGION_NAME = 'NCR';
+    const DEFAULT_REGION_NAME = '';
 
     // Pull old() (and/or $rate) values from Blade
     const initial = {
