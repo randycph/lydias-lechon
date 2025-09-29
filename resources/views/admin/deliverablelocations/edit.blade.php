@@ -114,6 +114,7 @@
 <script>
     $(function () {
     const urls = [
+        '{{ asset("addresses/addresses.json") }}',
         '{{ asset("addresses/philippine_provinces_cities_municipalities_and_barangays_2019v2.json") }}',
     ];
 
@@ -122,7 +123,7 @@
     // Pull old() (and/or $rate) values from Blade
     const initial = {
         region:        @json(old('region',        $rate->region        ?? '')),
-        region_code:   @json(old('region_code',   $rate->region_code   ?? '')), 
+        region_code:   @json(old('region_code',   $rate->region   ?? '')), 
         province:      @json(old('province',      $rate->province      ?? '')),
         city:          @json(old('city',          $rate->city          ?? '')),
         barangay:      @json(old('barangay',      $rate->barangay      ?? '')),
