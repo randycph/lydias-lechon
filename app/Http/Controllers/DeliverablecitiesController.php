@@ -97,7 +97,18 @@ class DeliverablecitiesController extends Controller
      */
     public function edit($id)
     {
+
+        Deliverablecities::query()
+            ->whereNull('region') // remove this line if you want to overwrite existing values
+            ->where(function ($q) {
+                $q->where('province', 'LIKE', '%NATIONAL CAPITAL REGION%')
+                ->orWhere('province', 'LIKE', '%TAGUIG%'); // covers TAGUIG / TAGUIG CITY
+            })
+            ->update(['region' => 'NCR']);
+
+
         $rate = Deliverablecities::findOrFail($id);
+        // dd($rate->toArray());
         return view('admin.deliverablelocations.edit',compact('rate'));
     }
 
@@ -113,6 +124,7 @@ class DeliverablecitiesController extends Controller
         $validate = $request->validate([
             'name' => 'nullable',
             'rate' => 'required|numeric',
+            'region' => 'required',
             'area' => 'nullable',
             'barangay' => 'nullable',
             'province' => 'required',
@@ -124,6 +136,8 @@ class DeliverablecitiesController extends Controller
             'rate' => $request->rate,
             'province' => $request->province,
             'city' => $request->city,
+            'barangay' => $request->barangay,
+            'region' => $request->region,
             'item_type' => $request->item_type,
             'outside_manila' => ($request->has('outside_manila') ? '1' : '0'),
             'user_id' => Auth::id()
