@@ -47,4 +47,8 @@ return [
         'site'   => env('RECAPTCHA_SITE_KEY'),
         'secret' => env('RECAPTCHA_SECRET_KEY'),
     ],
+
+    'sms' => [
+        'api_key' => env('SMS_API_KEY')
+    ]
 ];

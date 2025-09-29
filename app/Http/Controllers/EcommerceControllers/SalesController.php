@@ -1053,7 +1053,7 @@ class SalesController extends Controller
 			curl_setopt($ch, CURLOPT_POSTFIELDS, "{\"source\":\"Lydias\",\"destination\":\"$receiver\",\"text\":\"$message\"}");
 
 			$headers = array();
-			$headers[] = 'Authorization: Bearer dwD2PXjYKV9kQv6KAI1l4ohYEjuOEwIoeoTPtwrEkU';
+			$headers[] = 'Authorization: Bearer ' . config('services.sms.api_key');
 			$headers[] = 'Content-Type: application/json';
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
