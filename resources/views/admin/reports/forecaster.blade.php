@@ -94,6 +94,15 @@
             position: static;
             color: #fff;
         }
+
+
+        .select2-dropdown,
+        .select2-results__options { overflow-x: hidden; } 
+        .select2-results__option {
+            white-space: normal; 
+            line-height: 1.25;
+        }
+
     </style>
 @endsection
 
@@ -166,7 +175,7 @@
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13" style="font-size:15px;font-weight:bold;">Receiver Branch</label>
-                                    <select class="receiver-branch-multiple" name="receiver[]" multiple="multiple">
+                                    <select class="receiver-branch-multiple w-100" name="receiver[]" multiple="multiple" >
                                         @php
                                             $selectedReceivers = collect(old('receiver', request('receiver', [])))->map(fn($v) => (string)$v)->all();
                                         @endphp
@@ -742,6 +751,8 @@
         $(document).ready(function() {
             $('.receiver-branch-multiple').select2({
                 placeholder: "Select a branch",
+                width: '300px',
+                dropdownAutoWidth: true
             });
         });
         $('#example').DataTable( {            
