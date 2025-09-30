@@ -1061,6 +1061,8 @@ class CartController extends Controller
                     $sale->delete();
                 }
             }
+
+            session()->forget('edit_sales_header_id')
         } else {
             $salesHeader = SalesHeader::create([
                 'user_id' => $user->id,
