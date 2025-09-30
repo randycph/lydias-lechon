@@ -1211,7 +1211,7 @@ class CartController extends Controller
                             'barangay' => $delivery->location ?? '',
                         ]);
 
-                        if ($delivery->phone) {
+                        if ($delivery->phone && $delivery->sms) {
                             $sms = new Sms();
                             $sms->send_sms($delivery->phone, 'new_order', $subSalesHeader);
                         }
