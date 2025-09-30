@@ -2,6 +2,7 @@
 
 use App\EcommerceModel\DeliveryStatus;
 use App\EcommerceModel\JobOrder;
+use App\EcommerceModel\SalesDetail;
 use App\EcommerceModel\SalesHeader;
 use Illuminate\Support\Facades\DB;
 
@@ -204,5 +205,20 @@ if (!function_exists('isUnreadTransaction')) {
                 ->where('is_new_order', 1)
                 ->exists() ? 1 : 0;
         }
+    }
+}
+
+if (!function_exists('unreadForecastersTransactions')) {
+    function unreadForecastersTransactions(int $days = 1): int
+    {
+        $salesDetails = SalesDetail::whereIN('sales_header_id', function($query){ $query->select('id')->from('ecommerce_sales_headers')->where('status','active')->where('has_sub', 0)->where('isConfirm','1')->whereNull('deleted_at'); } )          
+            ->where('Joborder_id',0)
+            ->where('delivery_date','>=',date('Y-m-d', strtotime(' - 2 days')))
+            ->whereHas('header', function ($q) {
+                $q->where('is_new_order', 1);
+            })
+            ->get();
+
+        return $salesDetails->count();
     }
 }

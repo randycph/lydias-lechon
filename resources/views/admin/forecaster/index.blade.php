@@ -225,7 +225,7 @@ Manage Customer
                                         </div>
                                     </th>
                                     <td>
-                                        <strong> <a target="_blank" href="{{ route('sales-transaction.view',$order->sales_header_id) }}">{{ $order->product_name }} {{ $order->weight }} {{ $order->no_of_pax }} </a></strong>
+                                        <a class="{{ $order->header->is_new_order == 1 ? 'font-weight-bold' : '' }}" target="_blank" href="{{ route('sales-transaction.view',$order->sales_header_id) }}">{{ $order->product_name }} {{ $order->weight }} {{ $order->no_of_pax }} </a>
                                     </td>
                                     <td>{{$order->header->order_number}}</td>
                                     <td>{{$order->header->customer_name}}</td>
