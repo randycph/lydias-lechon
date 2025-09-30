@@ -434,13 +434,11 @@
                             @forelse($results as $r)                           
                                 @if($r->trantype == 'sales')
 
-                                    @php
-                                           
+                                    @php                                   
                                         $address = trim($r->address_street)."<br>".trim($r->address_municipality).",<br>".trim($r->address_city).", ".trim($r->address_region);
-                                        $cntsales = (collect($rs)->where('order_number',$r->order_number)->where('delivery_date',$r->delivery_date)->count())
-                                                    +
-                                                    (collect($mrs)->where('order_number',$r->order_number)->where('delivery_date',$r->delivery_date)->count())
-                                                    ;
+                                        
+                                        $cntsales = collect($results)->where('order_number',$r->order_number)->where('delivery_date',$r->delivery_date)
+                                                    ->where('contact_person',$r->contact_person)->where('customer_name',$r->customer_name)->count();
                                         $isAllowed = 0;
                                      
                                         
