@@ -188,6 +188,9 @@ class ForecasterController extends Controller
         $receivers = Branch::orderBy('name','asc')->get();
         $sales_detail = SalesDetail::find($id);
 
+        $sales_detail->header->is_new_order = 0;
+        $sales_detail->header->save();
+
         return view('admin.forecaster.assign',compact('sales_detail','branches','receivers'));
     }
 
