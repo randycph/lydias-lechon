@@ -77,9 +77,11 @@ Manage Customer
                                 $date = new \Carbon\Carbon(app('request')->input('from'));
                                 echo date('m/d/Y',strtotime($date->startOfWeek())).' - '.date('m/d/Y',strtotime($date->endOfWeek()));
                             } else {
+                                $date = new \Carbon\Carbon(app('request')->input('from'));
                                 echo \Carbon\Carbon::today()->startOfWeek()->format('m/d/Y').' - '.\Carbon\Carbon::today()->endOfWeek()->format('m/d/Y');
                             }
                         @endphp
+                        <div class="fromDate" data-from='@json(["date" => date('Y-m-d',strtotime($date->startOfWeek()))])'></div>
                     </div>
 
                     <div class="ml-auto bd-highlight">
@@ -452,11 +454,14 @@ Manage Customer
             $(document).on('click', '.dropdown-menu .sort', function (e) {
                 e.preventDefault();
 
+                const fromDate = $('.fromDate').data('from');
+                const date = fromDate.date;
+
                 const sorting   = $(this).data('sorting');
-                const searchtxt = $('#forecast_searchtxt').val() || '';
+                const from = date;
 
                 // Build a properly encoded query string
-                const qs = $.param({ searchtxt, sorting });
+                const qs = $.param({ sorting, from });
 
                 window.location.assign(`${baseUrl}?${qs}`);
             });
