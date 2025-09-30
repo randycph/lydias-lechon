@@ -28,6 +28,9 @@ class SalesCompleted extends Mailable
      */
     public function build()
     {
+        
+        logger($this->h);
+        logger('íms Multiple address: ' . $this->h?->is_multiple_address);
         if ($this->h?->is_multiple_address == 1) {
             return $this->markdown('mail.sales-completed-mutiple')
                 ->subject('Sales Transaction');
