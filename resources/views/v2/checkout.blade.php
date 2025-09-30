@@ -63,7 +63,7 @@ $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
                 </svg>
                 <h2 class="text-xl font-semibold mt-4">Your cart is empty</h2>
                 <p class="text-gray-500">Looks like you haven't added anything to your cart yet.</p>
-                <a href="{{ route('lechon-menu') }}" class="mt-4 bg-primary text-white px-4 py-2 rounded-md">Start
+                <a href="menu" class="mt-4 bg-primary text-white px-4 py-2 rounded-md">Start
                     Shopping</a>
             </div>
             @else

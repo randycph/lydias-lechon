@@ -20,9 +20,20 @@
 Click here to view and manage this order
 @endcomponent
 
+@php
+    $salesHeaders = \App\EcommerceModel\SalesHeader::where('parent_sales_header_id', $h->id)->get();
+    $addresses = [];
+
+    foreach ($salesHeaders as $header) {
+        $address = json_decode($header->deliveryAddress);
+        if ($address) {
+            $addresses[] = $address;
+        }
+    }
+@endphp
 
 @component('mail::panel')
-@if ($h?->deliveryAddress && count($h->deliveryAddress) > 0)
+@if ($addresses && count($addresses) > 0)
 @else
 @if ($h?->items && $h->items->count() > 0)
 @php ($items = $h->items->first()) @endphp
@@ -30,10 +41,14 @@ Click here to view and manage this order
 @endif
 @endif
 
-@if ($h?->deliveryAddress && count($h->deliveryAddress) > 0)
+@if ($addresses && count($addresses) > 0)
 ---
 
-@foreach ($h->deliveryAddress as $k => $address)
+@foreach ($addresses as $k => $row)
+
+@php $address = is_array($row) ? ($row[0] ?? null) : $row;
+if (!$address) continue;
+@endphp
 ### Address {{ $k + 1 }}
 
 - **Address:** {{ $address->address }}  
