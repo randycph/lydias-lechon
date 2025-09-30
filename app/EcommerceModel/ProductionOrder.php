@@ -36,28 +36,34 @@ class ProductionOrder extends Model
     }
     public static function total_order_forecast($branch_id,$date)
     {
-        $orders = ProductionOrder::where('branch_id',$branch_id)->whereDate('delivery_date',$date)->get();
-        $total = 0;
-        $exclude = ['Delivered/Picked Up'];
-        foreach($orders as $order){
-            if(!empty($order->jobOrder_details)){
-                if($order->jobOrder_details->sales_detail_id > 0){
-                    if(isset($order->jobOrder_details->sales_detail_id->header)){
-                        if(!in_array($order->jobOrder_details->sales_detail->header->delivery_status, $exclude)){
-                            $total++;
-                        }
-                    }
-                }
-                else{
-                    $total++;
-                }
-            }else{
-                $total++;
-            }
+        $orders = ProductionOrder::where('branch_id',$branch_id)
+                    ->whereDate('delivery_date',$date)
+                    ->whereHas('jobOrder_details.sales_detail.header', function($query) {
+                        $query->where('delivery_status', '!=', 'Delivered/Picked Up');
+                    })
+                    ->get()->count();
+        // $orders = ProductionOrder::where('branch_id',$branch_id)->whereDate('delivery_date',$date)->get();
+        // $total = 0;
+        // $exclude = ['Delivered/Picked Up'];
+        // foreach($orders as $order){
+        //     if(!empty($order->jobOrder_details)){
+        //         if($order->jobOrder_details->sales_detail_id > 0){
+        //             if(isset($order->jobOrder_details->sales_detail_id->header)){
+        //                 if(!in_array($order->jobOrder_details->sales_detail->header->delivery_status, $exclude)){
+        //                     $total++;
+        //                 }
+        //             }
+        //         }
+        //         else{
+        //             $total++;
+        //         }
+        //     }else{
+        //         $total++;
+        //     }
          
-        }
+        // }
 
-        return $total;
+        return $orders;
     }
 
     // public static function get_remaining_qty($order_id)
