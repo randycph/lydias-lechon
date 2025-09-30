@@ -42,38 +42,38 @@
             @foreach($orders as $order)
             @php
                 $del_status = '';
-                if($order->jobOrder_details->sales_detail_id > 0){
-                    $del_status == $order->jobOrder_details->sales_detail->header->delivery_status;
+                if($order->jobOrder_details?->sales_detail_id > 0){
+                    $del_status == $order->jobOrder_details?->sales_detail?->header->delivery_status;
                 }
             @endphp
             @if($del_status <> 'Delivered/Picked Up')
                 <tr style="font-size:12px !important;">
                     <td>
-                        @if($order->jobOrder_details->sales_detail_id == '0'){{ $order->jobOrder_details->customer_address ?? '' }} @else {{ $order->jobOrder_details->customer_name ?? '' }} @endif
+                        @if($order->jobOrder_details?->sales_detail_id == '0'){{ $order->jobOrder_details->customer_address ?? '' }} @else {{ $order->jobOrder_details->customer_name ?? '' }} @endif
                        
                     </td>
                  
                     <td>
-                        <strong class="tx-12 tx-rubik">{{ $order->jobOrder_details->product_name }} 
-                            @if($order->jobOrder_details->sales_detail_id > 0)
-                                {{ $order->jobOrder_details->sales_detail->weight }} 
-                                @if($order->jobOrder_details->sales_detail->paella_qty > 0) 
+                        <strong class="tx-12 tx-rubik">{{ $order->jobOrder_details?->product_name }} 
+                            @if($order->jobOrder_details?->sales_detail_id > 0)
+                                {{ $order->jobOrder_details->sales_detail?->weight }} 
+                                @if($order->jobOrder_details->sales_detail?->paella_qty > 0) 
                                     Boneless 
                                 @endif  
-                                {{ $order->jobOrder_details->sales_detail->no_of_pax }} 
+                                {{ $order->jobOrder_details->sales_detail?->no_of_pax }} 
                             @endif
                         </strong>
                     </td>
-                    <td>{{number_format($order->jobOrder_details->qty,2)}}</td>
+                    <td>{{number_format($order->jobOrder_details?->qty,2)}}</td>
                     <td>
-                        @if($order->jobOrder_details->sales_detail_id > 0)
-                            {{number_format($order->jobOrder_details->sales_detail->gross_amount,2)}}
+                        @if($order->jobOrder_details?->sales_detail_id > 0)
+                            {{number_format($order->jobOrder_details->sales_detail?->gross_amount,2)}}
                         @endif
                     </td>
                  
                     <td>{{ date('Y-m-d h:i A',strtotime($order->delivery_date)) }}</td>
                     <td>
-                        {{ date('Y-m-d h:i A',strtotime($order->jobOrder_details->date_needed)) }}
+                        {{ date('Y-m-d h:i A',strtotime($order->jobOrder_details?->date_needed)) }}
                         <form action="" style="display:none;" id="update_tym_frm">
                             <table width="100%">
                                 <tr>
@@ -110,14 +110,16 @@
                             
                         </form>
                     </td>
-                    <td>{{$order->jobOrder_details->jo_category}}</td>
+                    <td>{{$order->jobOrder_details?->jo_category}}</td>
                     
-                    <td>@if($order->jobOrder_details->sales_detail_id > 0) {{$order->jobOrder_details->sales_detail->header->delivery_status }} @endif</td>
+                    <td>@if($order->jobOrder_details?->sales_detail_id > 0) {{$order->jobOrder_details->sales_detail?->header?->delivery_status }} @endif</td>
                     <td width="20%">
-                    @if($order->jobOrder_details->sales_detail_id > 0)
-                        <a target="_blank" title="View Order Summary" href="{{route('sales-transaction.view',$order->jobOrder_details->sales_detail->sales_header_id)}}"><i class="fa fa-eye"></i></a>
-                        <a href="javascript:void(0);" onclick="change_delivery_status({{$order->jobOrder_details->sales_detail->sales_header_id }})" title="Update Delivery Status" data-id="{{$order->jobOrder_details->sales_detail->sales_header_id }}"><i class="fa fa-edit"></i></a>
-                        <a href="javascript:void(0);" onclick="change_production_time({{date('Y-m-d',strtotime($order->jobOrder_details->date_needed)) }},'{{ date('h:i A',strtotime($order->jobOrder_details->date_needed)) }}')" title="Change Production Time" data-id="{{$order->jobOrder_details->sales_detail->sales_header_id }}"><i class="fa fa-clock"></i></a>
+                    @if($order->jobOrder_details?->sales_detail_id > 0)
+                        @if ($order->jobOrder_details?->sales_detail?->sales_header_id)
+                        <a target="_blank" title="View Order Summary" href="{{route('sales-transaction.view',$order->jobOrder_details?->sales_detail?->sales_header_id)}}"><i class="fa fa-eye"></i></a>
+                        @endif
+                        <a href="javascript:void(0);" onclick="change_delivery_status({{$order->jobOrder_details?->sales_detail?->sales_header_id }})" title="Update Delivery Status" data-id="{{$order->jobOrder_details->sales_detail?->sales_header_id }}"><i class="fa fa-edit"></i></a>
+                        <a href="javascript:void(0);" onclick="change_production_time({{date('Y-m-d',strtotime($order->jobOrder_details?->date_needed)) }},'{{ date('h:i A',strtotime($order->jobOrder_details?->date_needed)) }}')" title="Change Production Time" data-id="{{$order->jobOrder_details->sales_detail?->sales_header_id }}"><i class="fa fa-clock"></i></a>
                     @endif
                         <a title="Cancel this job order" href="{{route('forecaster.remove.order',$order->id)}}"><i class="fa fa-trash"></i></a>
                     </td>
