@@ -1363,7 +1363,7 @@ class CartController extends Controller
         // }
 
         $recipient = $user->email ?: $request->email;
-        $salesHeader = SalesHeader::with('couponUsed')->find($salesHeader->id);
+        $salesHeader = SalesHeader::with(['couponUsed', 'deliveryAddress'])->find($salesHeader->id);
         if (auth()->guest()) {
             try {
                 Mail::to($recipient)->send(new SalesCompleted($salesHeader));
