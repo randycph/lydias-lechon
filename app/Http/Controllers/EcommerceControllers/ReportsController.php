@@ -566,7 +566,10 @@ class ReportsController extends Controller
             ->unique(fn ($row) =>   ($row->dproduct_name ?? '') . '|' . ($row->hid ?? ''))
             ->values();
         //logger($results);
-        return view('admin.reports.forecaster',compact('rs','jo','results','wra_array','mrs'));
+        if(isset($_GET['toexcel']))
+            return view('admin.reports.forecaster_excel',compact('rs','jo','results','wra_array','mrs'));
+        else
+            return view('admin.reports.forecaster',compact('rs','jo','results','wra_array','mrs'));
 
     }
 

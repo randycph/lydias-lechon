@@ -737,6 +737,8 @@
 <script src="{{ asset('js/datatables/Buttons-1.6.1/js/buttons.colVis.min.js') }}"></script>
 <script src="https://cdn.datatables.net/plug-ins/1.10.21/sorting/time.js"></script>
 <script>
+   
+ 
     $(function() {
         'use strict'
 
@@ -744,6 +746,36 @@
 
         $('#datepicker2').datepicker();
     });
+
+    function flattenRowspans($table) {
+        $table.find('tr').each(function (rowIndex) {
+            const cells = $(this).children('td, th');
+            cells.each(function (cellIndex) {
+                const $cell = $(this);
+                const rowspan = parseInt($cell.attr('rowspan'));
+
+                if (rowspan && rowspan > 1) {
+                    // Remove rowspan attribute
+                    $cell.removeAttr('rowspan');
+
+                    // Duplicate cell into next rows
+                    for (let i = 1; i < rowspan; i++) {
+                        const nextRow = $table.find('tr').eq(rowIndex + i);
+                        const targetCells = nextRow.children();
+
+                        // Insert cloned cell at the correct index
+                        const $clonedCell = $cell.clone();
+                        if (targetCells.length < cellIndex) {
+                            nextRow.append($clonedCell);
+                        } else {
+                            $clonedCell.insertBefore(targetCells.eq(cellIndex));
+                        }
+                    }
+                }
+            });
+        });
+    }
+
 
     $(document).ready(function() {
         $(document).ready(function() {
@@ -816,13 +848,13 @@
                         columns: ':visible'
                     }
                 },
-                {
-                    extend: 'excel',
-                    title: '{{date('Ymd')}}',
-                    exportOptions: {
-                        columns: ':visible'
-                    }
-                },
+                // {
+                //     extend: 'excel',
+                //     title: '{{date('Ymd')}}',
+                //     exportOptions: {
+                //         columns: ':visible'
+                //     }
+                // },
                 {
                     extend: 'pdf',
                     orientation: 'landscape',
@@ -830,6 +862,32 @@
                     title: '{{date('Ymd')}}',
                     exportOptions: {
                         columns: ':visible'
+                    }
+                },
+                
+                {
+                    extend: 'excelHtml5',
+                    text: 'Export to Excel',
+                    title: 'Forecast Report', 
+                    customize: function (xlsx) {
+                        // No direct access to rowspan here.
+                        // We will "flatten" the table before DataTables exports it.
+                    },
+                    action: function (e, dt, button, config) {
+                        // Clone table and flatten rowspan before export
+                        const tableClone = $('#example').clone();
+
+                        flattenRowspans(tableClone);
+
+                        // Temporarily replace the original table with the flattened version
+                        const originalTable = $('#example').html();
+                        $('#example').html(tableClone.html());
+
+                        // Proceed with default export action
+                        $.fn.dataTable.ext.buttons.excelHtml5.action.call(this, e, dt, button, config);
+
+                        // Restore original table
+                        $('#example').html(originalTable);
                     }
                 },
                 'colvis'
@@ -843,5 +901,7 @@
              ]
         } );
     } );
+
+    
 </script>
 @endsection
