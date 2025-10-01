@@ -438,9 +438,8 @@
     $results = $results->sort(function($a, $b) {
         $ad = strtotime((string)($a->delivery_date ?? '')) ?: 0;
         $bd = strtotime((string)($b->delivery_date ?? '')) ?: 0;
-        if ($ad !== $bd) return $ad <=> $bd;
+        if ($ad !== $bd) return $bd <=> $ad;
 
-        // keep sales-group rows contiguous; JO will still interleave across different dates
         return strcmp((string)$a->trantype, (string)$b->trantype)
             ?: strcmp((string)$a->order_number, (string)$b->order_number)
             ?: strcmp((string)($a->contact_person ?? ''), (string)($b->contact_person ?? ''))
