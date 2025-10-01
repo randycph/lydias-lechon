@@ -36,12 +36,21 @@ class ProductionOrder extends Model
     }
     public static function total_order_forecast($branch_id,$date)
     {
-        $orders = ProductionOrder::where('branch_id',$branch_id)
-                    ->whereDate('delivery_date',$date)
-                    ->whereHas('jobOrder_details.sales_detail.header', function($query) {
-                        $query->where('delivery_status', '!=', 'Delivered/Picked Up');
-                    })
-                    ->get()->count();
+        $orders = ProductionOrder::where('branch_id', $branch_id)
+            ->whereDate('delivery_date', $date)
+            ->where(function ($q) {
+                $q->whereHas('jobOrder_details', function ($q) {
+                    $q->where(function ($q) {
+                        $q->where('sales_detail_id', 0)
+                        ->orWhereNull('sales_detail_id');
+                    });
+                })
+                ->orWhereHas('jobOrder_details.sales_detail.header', function ($q) {
+                    $q->where('delivery_status', '!=', 'Delivered/Picked Up');
+                });
+            })
+            ->count();
+
         // $orders = ProductionOrder::where('branch_id',$branch_id)->whereDate('delivery_date',$date)->get();
         // $total = 0;
         // $exclude = ['Delivered/Picked Up'];
