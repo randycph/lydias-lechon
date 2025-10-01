@@ -562,9 +562,12 @@ class ReportsController extends Controller
         $results = collect($mrs)->merge(collect($jo)->merge(collect($rs)));
         //logger($results);
 
-        $results = collect($results)
-            ->unique(fn ($row) =>   ($row->dproduct_name ?? '') . '|' . ($row->hid ?? ''))
-            ->values();
+        $results = collect($results)->unique(function ($row, $key) {
+            return (int)($row->hid ?? 0) === 0
+                ? $key
+                : (($row->dproduct_name ?? '') . '|' . ($row->hid ?? ''));
+        })->values();
+
         //logger($results);
         if(isset($_GET['toexcel']))
             return view('admin.reports.forecaster_excel',compact('rs','jo','results','wra_array','mrs'));
