@@ -309,6 +309,7 @@ class ReportsController extends Controller
             $qry.= " order by d.delivery_date,customer_name,order_number";
             
             $rs = DB::select($qry);
+            // logger($qry);
         // Sales
 
         // Sales with multiple deliveries
@@ -485,12 +486,12 @@ class ReportsController extends Controller
             $mqry.= " order by m.delivery_date,customer_name,order_number";
             //return $mqry;
             $mrs = DB::select($mqry);
-            //dd($mrs);
+            // logger($mqry);
         // Sales Multiple
         
         // JO
             $jos = "
-                SELECT jo.jo_category as product_name, '' as paella_price,'' as hordertype,
+                SELECT jo.jo_category as product_name, '' as paella_price,'' as hordertype, jo.jo_category as dproduct_name,
             jo.qty as qty, '' as order_number, u.address_street, u.address_municipality, u.address_city, u.address_region, jo.price, jo.customer_address as customer_delivery_adress,
             jo.customer_name, jo.date_needed as delivery_date,jo.remarks as instruction, po.delivery_date as deldate,'' as delivery_type, jo.jo_number, pb.name as pbname, jo.created_at as created,
 
@@ -514,13 +515,13 @@ class ReportsController extends Controller
                 $jos.= " and pb.id='".$_GET['production_branch']."'";
             }
             if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-                $jos.= " and po.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and po.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
+                $jos.= " and jo.date_needed >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and jo.date_needed <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
             }
             else{
-                $jos.= " and po.delivery_date >='2051-01-01 00:00:00.000' and po.delivery_date <='2051-01-01 23:59:59.999'";
+                $jos.= " and jo.date_needed >='2051-01-01 00:00:00.000' and jo.date_needed <='2051-01-01 23:59:59.999'";
             }
             if(isset($_GET['start_time']) && $_GET['start_time']<>''){
-                $jos.= " and time(po.delivery_date)='".$_GET['start_time']."'";
+                $jos.= " and time(jo.date_needed)='".$_GET['start_time']."'";
             }
 
             
@@ -557,14 +558,13 @@ class ReportsController extends Controller
             
             $jo = DB::select($jos);
         // JO
-        //dd($mrs);
+        // dd($jo);
         //$results = collect($jo)->merge(collect($rs));
         $results = collect($mrs)->merge(collect($jo)->merge(collect($rs)));
         //logger($results);
-
         $results = collect($results)->unique(function ($row, $key) {
             return (int)($row->hid ?? 0) === 0
-                ? $key
+                ? (($row->product_name ?? '') . '|' . ($row->customer_delivery_adress ?? ''))
                 : (($row->dproduct_name ?? '') . '|' . ($row->hid ?? ''));
         })->values();
 
@@ -572,8 +572,8 @@ class ReportsController extends Controller
         if(isset($_GET['toexcel']))
             return view('admin.reports.forecaster_excel',compact('rs','jo','results','wra_array','mrs'));
         else
-            return view('admin.reports.forecaster',compact('rs','jo','results','wra_array','mrs'));
-
+            // return view('admin.reports.forecaster',compact('rs','jo','results','wra_array','mrs'));
+            return view('admin.reports.forecaster-test',compact('rs','jo','results','wra_array','mrs'));
     }
 
     public function sales_payment(Request $request)
