@@ -12,6 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('coupon_cart', function (Blueprint $table) {
+            if (Schema::hasColumn('coupon_cart', 'coupon_code')) {
+                return;
+            }
             $table->string('coupon_code')->nullable()->after('coupon_id');
         });
     }
