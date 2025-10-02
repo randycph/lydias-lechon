@@ -54,15 +54,15 @@
                     </td>
                  
                     <td>
-                        <strong class="tx-12 tx-rubik">{{ $order->jobOrder_details?->product_name }} 
-                            @if($order->jobOrder_details?->sales_detail_id > 0)
+                        <div class="tx-12 tx-rubik">{!! highlightPaella($order->jobOrder_details?->sales_detail?->product_name ?? $order->jobOrder_details?->product_name) !!} 
+                            {{-- @if($order->jobOrder_details?->sales_detail_id > 0)
                                 {{ $order->jobOrder_details->sales_detail?->weight }} 
                                 @if($order->jobOrder_details->sales_detail?->paella_qty > 0) 
                                     Boneless 
                                 @endif  
                                 {{ $order->jobOrder_details->sales_detail?->no_of_pax }} 
-                            @endif
-                        </strong>
+                            @endif --}}
+                        </div>
                     </td>
                     <td>{{number_format($order->jobOrder_details?->qty,2)}}</td>
                     <td>
