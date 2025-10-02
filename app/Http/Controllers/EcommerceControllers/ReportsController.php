@@ -1440,8 +1440,8 @@ class ReportsController extends Controller
         
         $rs = ActivityLog::when($start && $end, function ($query) use ($start, $end) {
                         $query->whereBetween('activity_date', [
-                            date('Y-m-d 00:00:00', strtotime($start)),
-                            date('Y-m-d 23:59:59', strtotime($end))
+                            Carbon::parse($start)->startOfDay(),
+                            Carbon::parse($end)->endOfDay()
                         ]);
                     })
                     ->when($pb, function ($query) use ($pb) {
@@ -1449,6 +1449,8 @@ class ReportsController extends Controller
                     })
                     ->orderBy('activity_date', 'desc')
                     ->get();
+
+                    // dd($rs);
 
         $users = User::where('role_id','<>',env('CUSTOMER_ROLE_ID'))->orderBy('name')->get();
         return view('admin.reports.audit_trail_per_user',compact('rs','users'));

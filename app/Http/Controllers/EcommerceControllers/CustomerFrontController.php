@@ -134,14 +134,6 @@ class CustomerFrontController extends Controller
 
     public function customer_login(Request $request)
     {
-        $insert_logs = ActivityLog::create([
-            'created_by' => $request->email ?? 'no record',
-            'activity_type' => 'login',
-            'dashboard_activity' => 'login',
-            'activity_desc' => $request->ip(),
-            'activity_date' => date('Y-m-d H:i:s'),
-            'reference' => url()->current()
-        ]);
     
         $userCredentials = $request->validate([
             'email' => ['required', 'email'],
@@ -190,6 +182,17 @@ class CustomerFrontController extends Controller
                 return redirect()->route('sales-transaction.index');
 
             }
+
+
+            ActivityLog::create([
+                'created_by' => Auth::id(),
+                'activity_type' => 'login',
+                'dashboard_activity' => 'login',
+                'activity_desc' => $request->ip(),
+                'activity_date' => date('Y-m-d H:i:s'),
+                'reference' => url()->current()
+            ]);
+
 
             $redirectTo = $request->input('redirect') ?? route('my-account');
             return redirect()->intended($redirectTo);

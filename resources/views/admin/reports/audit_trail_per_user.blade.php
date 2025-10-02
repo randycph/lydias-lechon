@@ -131,9 +131,9 @@
                             </thead>
                             <tbody>
                          
-                            @forelse($rs as $r) 
+                            @foreach($rs as $r) 
                                 <tr style="text-align: left">
-                                    <td>@if(date('Y-m-d',strtotime($r->activity_date)) <> '1970-01-01'){{date('m-d-Y H:i:s',strtotime($r->activity_date))}} @endif</td>
+                                    <td>@if(date('Y-m-d',strtotime($r->activity_date)) <> '1970-01-01'){{date('m-d-Y g:i A',strtotime($r->activity_date))}} @endif</td>
                                     <td>{{$r->activity_type}}</td>
                                     <td>{{$r->dashboard_activity}}</td>
                                     <td>{{$r->activity_desc}}</td>
@@ -141,8 +141,7 @@
                                     <td>{{$r->old_value}}</td>
                                     <td>{{$r->new_value}}</td>
                                 </tr>
-                            @empty
-                            @endforelse
+                            @endforeach
                         
 
                             </tbody>
@@ -206,6 +205,7 @@
         $('#example').DataTable( {
             dom: 'Bfrtip',
             pageLength: 20,
+            sorting: [[ 0, "desc" ]],
             buttons: [
                 {
                     extend: 'print',
