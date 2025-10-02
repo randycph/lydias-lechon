@@ -673,9 +673,9 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
 //Route::get('/{slug}', 'FrontController@page');
 //Route::get('{all}','FrontController@page');
 
-// Route::get('/test', function(){
-//     phpinfo();
-// });
+Route::get('/test', function(){
+    phpinfo();
+});
 
 
 // Route::get('/test/test-email-1', function(){
