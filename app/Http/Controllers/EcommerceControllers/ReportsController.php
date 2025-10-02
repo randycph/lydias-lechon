@@ -15,6 +15,7 @@ use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\SalesDetail;
 use App\EcommerceModel\JobOrder;
 use App\EcommerceModel\Branch;
+use App\Models\ActivityLog;
 use App\Models\ProductCategory;
 use App\Models\Permission;
 use App\Models\Product;
@@ -1411,27 +1412,44 @@ class ReportsController extends Controller
     }
 
     public function audit_trail_per_user(Request $request){
-        $rs = '';
-        $qry = "SELECT * FROM `cms_activity_logs` where id>0 ";
-        // conditions
-            if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-                $qry .= " and activity_date >= '" . date('Y-m-d 00:00:00', strtotime($_GET['startdate'])) . "' and activity_date <= '" . date('Y-m-d 23:59:59', strtotime($_GET['enddate'])) . "'";
-            }
-            else{
-                $qry.= " and activity_date >='".date('Y-m-d 00:00:00')."' and activity_date <='".date('Y-m-d 23:59:59')."'";
-            }
+        // $rs = '';
+        // $qry = "SELECT * FROM `cms_activity_logs` where id>0 ";
+        // // conditions
+        //     if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
+        //         $qry .= " and activity_date >= '" . date('Y-m-d 00:00:00', strtotime($_GET['startdate'])) . "' and activity_date <= '" . date('Y-m-d 23:59:59', strtotime($_GET['enddate'])) . "'";
+        //     }
+        //     else{
+        //         $qry.= " and activity_date >='".date('Y-m-d 00:00:00')."' and activity_date <='".date('Y-m-d 23:59:59')."'";
+        //     }
 
-            if(isset($_GET['pb']) && strlen($_GET['pb'])>=1){
-                $ex = $_GET['pb'];
-                $qry.= " and (created_by ='".$ex."')";
-            }
-            else{
-                $qry.= " and created_by ='1111111111111111111111111111111111111'";
-            }
-            $qry.=" order by id desc";
-        // end conditions
-           //dd($qry);
-        $rs = DB::select($qry);
+        //     if(isset($_GET['pb']) && strlen($_GET['pb'])>=1){
+        //         $ex = $_GET['pb'];
+        //         $qry.= " and (created_by ='".$ex."')";
+        //     }
+        //     else{
+        //         $qry.= " and created_by ='1111111111111111111111111111111111111'";
+        //     }
+        //     $qry.=" order by id desc";
+        // // end conditions
+        //    //dd($qry);
+        // $rs = DB::select($qry);
+
+        $start = $request->input('startdate') ?? Carbon::now()->format('Y-m-d');
+        $end = $request->input('enddate') ?? Carbon::now()->format('Y-m-d');
+        $pb = $request->input('pb') ?? null; 
+        
+        $rs = ActivityLog::when($start && $end, function ($query) use ($start, $end) {
+                        $query->whereBetween('activity_date', [
+                            date('Y-m-d 00:00:00', strtotime($start)),
+                            date('Y-m-d 23:59:59', strtotime($end))
+                        ]);
+                    })
+                    ->when($pb, function ($query) use ($pb) {
+                        $query->where('created_by', $pb);
+                    })
+                    ->orderBy('activity_date', 'desc')
+                    ->get();
+
         $users = User::where('role_id','<>',env('CUSTOMER_ROLE_ID'))->orderBy('name')->get();
         return view('admin.reports.audit_trail_per_user',compact('rs','users'));
     }
@@ -1454,7 +1472,7 @@ class ReportsController extends Controller
 
         return response()->json([
             'results' => $users->map(fn($user) => [
-                'id' => $user->name,
+                'id' => $user->id,
                 'text' => $user->name." (".$user->email.")"
             ])
         ]);
