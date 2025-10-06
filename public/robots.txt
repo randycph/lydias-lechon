@@ -1,2 +1,12 @@
 User-agent: *
-Disallow:
+Disallow: /admin/login
+Disallow: /my-account
+Disallow: /coupons
+Disallow: /my-cart
+Disallow: /order-history
+Disallow: /confirmation
+
+Allow: /
+
+# Sitemap locations
+Sitemap: https://lydias-lechon.com/sitemap.xml
