@@ -122,7 +122,7 @@ class GenerateSitemap extends Command
             $sitemap->add($tag);
         }
 
-        $pages = Page::where('status', 'PUBLISHED')->where('page_type', 'standard')->where('is_page', 1)->get();
+        $pages = Page::where('status', 'PUBLISHED')->where('is_page', 1)->get();
 
         foreach ($pages as $page) {
             $pageUrl = LaravelURL::to(($page->slug ?? $page->id));
