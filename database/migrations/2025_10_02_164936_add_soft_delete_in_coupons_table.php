@@ -12,7 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('coupons', function (Blueprint $table) {
-            $table->softDeletes();
+            // check if it has soft deletes column
+            if (!Schema::hasColumn('coupons', 'deleted_at')) {
+                $table->softDeletes();
+            }
         });
     }
 
