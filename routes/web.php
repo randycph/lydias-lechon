@@ -36,6 +36,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -819,6 +820,11 @@ Route::get('tests/sms', function() {
 Route::get('export-delivery-location', function() {
     $filename = 'deliverable_cities_' . now()->format('Y-m-d_His') . '.xlsx';
     return Excel::download(new DeliverablecitiesExport, $filename);
+});
+
+Route::get('generate-sitemaps', function() {
+    Artisan::call('sitemap:generate');
+    return "Sitemap generated successfully!";
 });
 
 Route::get('/{slug}', [FrontendController::class, 'page'])->name('page');
