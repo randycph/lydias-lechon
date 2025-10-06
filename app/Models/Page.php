@@ -11,7 +11,7 @@ class Page extends Model
     use SoftDeletes;
 
     protected $table = 'pages';
-    protected $fillable = ['parent_page_id', 'album_id', 'slug', 'name', 'label', 'contents', 'status', 'page_type', 'image_url', 'meta_title', 'meta_keyword', 'meta_description', 'user_id', 'template','deleted_at'];
+    protected $fillable = ['is_page', 'parent_page_id', 'album_id', 'slug', 'name', 'label', 'contents', 'status', 'page_type', 'image_url', 'meta_title', 'meta_keyword', 'meta_description', 'user_id', 'template','deleted_at'];
 
     // public function album()
     // {

@@ -83,7 +83,7 @@ class GlobalSearchController extends Controller
             if ($modelName === 'Product' && $modelResults->isNotEmpty()) {
                 $modelResults = $modelResults->map(function ($product) {
                     $slug = Str::slug($product->slug ?? $product->name, '-');
-                    $product->product_url = route('lechon-menu') . '?product=' . urlencode($slug);
+                    $product->product_url = 'menu/' . '?product=' . urlencode($slug);
                     $product->photo_url = $product->photos->last()?->path 
                         ? asset('storage/products/' . $product->photos->last()->path) 
                         : null;
@@ -94,7 +94,7 @@ class GlobalSearchController extends Controller
             if ($modelName === 'ProductCategory' && $modelResults->isNotEmpty()) {
                 $modelResults = $modelResults->map(function ($category) {
                     $slug = Str::slug($category->slug ?? $category->name, '-');
-                    $category->product_category_url = route('lechon-menu') . '?s=' . urlencode($slug);
+                    $category->product_category_url = 'menu/' . '?s=' . urlencode($slug);
                     $category->photo_url = $category->image ? asset('images/category/' . $category->image)  : null;
                     return $category;
                 });

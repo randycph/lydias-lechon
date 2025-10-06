@@ -124,6 +124,7 @@ class PageController extends Controller
             'meta_keyword' => $request->seo_keywords,
             'meta_description' => $request->seo_description,
             'user_id' => Auth::id(),
+            'is_page' => $request->has('is_page') ? 1 : 0
         ]);
 
 //        if ($this->login_user_is_a_contributor()) {
@@ -198,7 +199,6 @@ class PageController extends Controller
             }
         }
 
-
         /** End of Banner Handling **/
 
         if ($page->page_type == "default") {
@@ -216,6 +216,7 @@ class PageController extends Controller
                 'meta_keyword' => $request->seo_keywords,
                 'meta_description' => $request->seo_description,
                 'user_id' => Auth::id(),
+                'is_page' => $request->has('is_page') ? 1 : 0
             ]);
         } else {
             $old_page = Page::whereId($page->id)->first();
@@ -238,6 +239,7 @@ class PageController extends Controller
                 'meta_keyword' => $request->seo_keywords,
                 'meta_description' => $request->seo_description,
                 'user_id' => Auth::id(),
+                'is_page' => $request->has('is_page') ? 1 : 0
             ]);
         }
 

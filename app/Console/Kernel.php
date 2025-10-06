@@ -15,6 +15,8 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')->hourly();
         // $schedule->command('cart:check')->daily();
         // $schedule->command('transactions:check-unpaid')->daily();
+
+        $schedule->command('sitemap:generate')->dailyAt('02:00');
     }
 
     /**

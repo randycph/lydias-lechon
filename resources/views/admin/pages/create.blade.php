@@ -122,6 +122,13 @@
 						<label class="custom-control-label" id="label_visibility" for="customSwitch1">Private</label>
 					</div>
 				</div>
+				<div class="form-group">
+					<label class="d-block">Is Page?</label>
+					<div class="custom-control custom-switch @error('is_page') is-invalid @enderror">
+						<input type="checkbox" class="custom-control-input" name="is_page" {{ (old("is_page") ? "checked":"") }} id="customSwitch2">
+						<label class="custom-control-label" id="label_is_page" for="customSwitch2">Yes</label>
+					</div>
+				</div>
 			</div>
 
 			<div class="col-lg-12 mg-t-30">

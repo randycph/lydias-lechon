@@ -157,6 +157,14 @@
                         </div>
                     @endif
 				</div>
+				<div class="form-group">
+					<label class="d-block">Is Page?</label>
+                    <div class="custom-control custom-switch @error('is_page') is-invalid @enderror">
+                        <input type="checkbox" class="custom-control-input" name="is_page" {{ (old("is_page", $page->is_page) ? "checked":"") }} id="customSwitch2">
+                        <label class="custom-control-label" id="label_is_page" for="customSwitch2">Yes</label>
+                        <x-error-message inputName="is_page" />
+                    </div>
+				</div>
 			</div>
             @endif
 			<div class="col-lg-12 mg-t-30">
