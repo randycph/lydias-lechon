@@ -827,16 +827,14 @@ Route::get('generate-sitemaps', function() {
     return "Sitemap generated successfully!";
 });
 
-Route::get('/.well-known/pki-validation/4894E08C5B3BB0864A05ED5FFC530999.txt', function () {
-    $body = "356503FC23744B19C8913C4FD5829BBC19809CAF9A8ECAE1E17D3569AE6BAC82\n".
+Route::get('/.well-known/pki-validation/BF10D48DD225686F4F228F10FEBFD876.txt', function () {
+    $body = "19C142F8329A1733A63CF1F826F8D4EF0622187085A73E946C92AA5A157256B0\n".
             "comodoca.com\n".
-            "613221cd361ed54\n";
+            "6a290c56fbe0163\n";
 
     return response($body, 200)
         ->header('Content-Type', 'text/plain; charset=utf-8');
 });
 
 Route::get('/{slug}', [FrontendController::class, 'page'])->name('page');
-
-
 
