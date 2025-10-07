@@ -827,12 +827,13 @@ Route::get('generate-sitemaps', function() {
     return "Sitemap generated successfully!";
 });
 
-Route::get('.well-known/pki-validation/4894E08C5B3BB0864A05ED5FFC530999.txt', function() {
-// 356503FC23744B19C8913C4FD5829BBC19809CAF9A8ECAE1E17D3569AE6BAC82
-// comodoca.com
-// 613221cd361ed54
+Route::get('/.well-known/pki-validation/4894E08C5B3BB0864A05ED5FFC530999.txt', function () {
+    $body = "356503FC23744B19C8913C4FD5829BBC19809CAF9A8ECAE1E17D3569AE6BAC82\n".
+            "comodoca.com\n".
+            "613221cd361ed54\n";
 
-    return response('356503FC23744B19C8913C4FD5829BBC19809CAF9A8ECAE1E17D3569AE6BAC82')->header('Content-Type', 'text/plain');
+    return response($body, 200)
+        ->header('Content-Type', 'text/plain; charset=utf-8');
 });
 
 Route::get('/{slug}', [FrontendController::class, 'page'])->name('page');
