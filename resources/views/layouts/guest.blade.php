@@ -9,6 +9,7 @@
     <meta name="author" content="Lydia's Lechon">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#018441">
+    <link rel="canonical" href="{{ url()->current() }}">
 
     <meta property="og:title" content="@yield('title', 'Lydia\'s Lechon')">
     <meta property="og:description" content="@yield('meta_description', 'Lydia\'s Lechon - The Best Lechon in the Philippines')">
