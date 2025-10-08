@@ -210,20 +210,20 @@
                                     
                                 </td>
                                 <td>
-                                    @forelse($details->joborders as $jo)
+                                    @forelse($details?->joborders as $jo)
                                         @if($jo->status=='Active')
                                             {{$jo->jo_number}} 
                                             @if($jo->prodOrder->joborder_id > 0)
-                                                ({{$jo->prodOrder->prodBranch->name}})
+                                                ({{$jo->prodOrder?->prodBranch?->name}})
                                             @endif
                                         @endif
                                     @empty
                                     @endforelse
                                 </td>
-                                <td class="tx-center">{{number_format($details->qty, 0)}}</td>
-                                <td class="tx-right">₱{{number_format(($details->paella_price),2)}}</td>
-                                <td class="tx-right">₱{{number_format($details->price, 2)}}</td>
-                                <td class="tx-right">₱{{number_format($details->gross_amount, 2)}}</td>                               
+                                <td class="tx-center">{{number_format($details?->qty, 0)}}</td>
+                                <td class="tx-right">₱{{number_format(($details?->paella_price),2)}}</td>
+                                <td class="tx-right">₱{{number_format($details?->price, 2)}}</td>
+                                <td class="tx-right">₱{{number_format($details?->gross_amount, 2)}}</td>                               
                             </tr>
                             @empty
                                 <tr>
