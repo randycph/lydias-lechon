@@ -93,17 +93,21 @@ if (!function_exists('handle_shortcode')) {
                 return View::make('components.shortcode-products', compact('products'))->render();
 
             case 'shortcodes_menu':
-                $categories = ProductCategory::with(['products' => function ($query) {
-                    $query->where('status', 'PUBLISHED')
-                        ->with([
-                            'photos',
-                            'addonProducts' => function ($q) {
-                                $q->with(['photos']);
-                            }
-                        ]);
-                }])
-                ->where('status', 'PUBLISHED')
-                ->get();
+                $categories = ProductCategory::query()
+                    ->where('status', 'PUBLISHED')
+                    ->whereHas('products', function ($q) {
+                        $q->where('status', 'PUBLISHED');
+                    })
+                    ->with([
+                        'products' => function ($q) {
+                            $q->where('status', 'PUBLISHED')
+                            ->with([
+                                'photos',
+                                'addonProducts.photos',
+                            ]);
+                        },
+                    ])
+                    ->get();
 
                 foreach ($categories as $category) {
                     foreach ($category->products as $product) {
