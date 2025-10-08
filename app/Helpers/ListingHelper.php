@@ -235,7 +235,7 @@ class ListingHelper
     private function get_count_per_page()
     {
         $perPage = request()->has('perPage') && is_numeric(request('perPage')) ? request('perPage') : $this->defaultPerPage;
-        return ($perPage > 15) ? 15 : $perPage;
+        return ($perPage > 15) ? $perPage : 15;
     }
 
     private function get_selected_order_by($searchFields)
