@@ -109,7 +109,7 @@ class BranchController extends Controller
             'is_head_office' => $request->has('is_head_office') ? 1 : 0,
         ]);
 
-        $branch->numbers()->delete();
+        BranchNumbers::where('branch_id', $branch->id)->get()->each->delete();
 
         if ($request->has('branches')) {
             foreach ($request->branches as $b) {
