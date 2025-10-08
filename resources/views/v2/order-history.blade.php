@@ -181,7 +181,7 @@
                                         <div class="mt-5">
                                             <div class="text-sm text-slate-500 font-bold mb-3">Order Details</div>
                                             <p class="mg-b-3 tx-semibold">@if($sale->user_id == 9999) {{$sale->customer_name}} @else {{$sale->user->FullName}} @endif</p>                  
-                                            <p class="mg-b-3">Mobile No: {{$sale->customer_contact_number ?? $sale->user->contact_mobile }} @if(!empty($sale->user->contact_tel)) | Tel no: {{$sale->user->contact_tel}} @endif</p>
+                                            <p class="mg-b-3">Mobile No: {{$sale->customer_contact_number ?? $sale->user->contact_mobile }}</p>
                                             <p class="mg-b-3">Email: {{$sale->email ?? $sale->user->email}}</p>
                                             <p class="mg-b-3 mt-5">
                                                 <div class="mt-1">

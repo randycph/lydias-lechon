@@ -54,7 +54,7 @@
                     <div class="col-sm-6 col-lg-8">
                         <label class="tx-sans tx-uppercase tx-10 tx-medium tx-spacing-1 tx-color-03">Customer Details</label>
                         <p class="mg-b-3 tx-semibold">{{$sales->customer_name}}</p>                  
-                        <p class="mg-b-3">Tel No: {{$sales->customer_contact_number}}</p>
+                        <p class="mg-b-3">Phone No: {{$sales->customer_contact_number}}</p>
                         <p class="mg-b-3">Email: {{$sales->email}}</p>
                         <p class="mg-b-3">{{$sales->delivery_type}}: 
                             @if ($sales->delivery_type == 'Door to door delivery')
