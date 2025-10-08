@@ -147,7 +147,11 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         $token = app('auth.password.broker')->createToken($this);
 
-        $this->notify(new NewUserResetPasswordNotification($token));
+        try {
+            $this->notify(new NewUserResetPasswordNotification($token));
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
     }
 
     public function has_access_to_route($route)

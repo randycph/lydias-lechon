@@ -134,7 +134,11 @@ class UserController extends Controller
                 }
             }
 
-            $user->send_reset_temporary_password_email();
+            try {
+                $user->send_reset_temporary_password_email();
+            } catch (\Exception $e) {
+                return redirect()->route('users.index')->with('error', 'Failed to send email. Please contact the administrator.');
+            }
 
             return redirect()->route('users.index')->with('success', 'Pending for activation. Please remind the user to check the email and activate the account.');
 //        }

@@ -121,7 +121,11 @@ class CustomerController extends Controller
             'agent_code'            => $request->agent_code
         ]);
 
-        $user->send_reset_temporary_password_email();
+        try {
+            $user->send_reset_temporary_password_email();
+        } catch (\Exception $e) {
+            return redirect()->route('customers.index')->with('error', 'Failed to send email. Please contact the administrator.');
+        }
 
         return redirect()->route('customers.index')->with('success', 'Pending for activation. Please remind the user to check the email and activate the account.');
     }
