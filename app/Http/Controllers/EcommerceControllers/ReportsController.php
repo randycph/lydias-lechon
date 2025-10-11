@@ -251,7 +251,7 @@ class ReportsController extends Controller
             if(isset($_GET['production_branch']) && $_GET['production_branch']<>''){
                 $qry.= " and pb.id='".$_GET['production_branch']."'";
             } else {
-                $qry.= " and pbname='Tandang Sora'";
+                $qry.= " and pb.name='Tandang Sora'";
             }
             
             if(isset($_GET['receiver']) && $_GET['receiver']<>''){
@@ -430,7 +430,7 @@ class ReportsController extends Controller
             if(isset($_GET['production_branch']) && $_GET['production_branch']<>''){
                 $mqry.= " and pb.id='".$_GET['production_branch']."'";
             } else {
-                $qry.= " and pbname='Tandang Sora'";
+                $qry.= " and pb.name='Tandang Sora'";
             }
             
             if(isset($_GET['receiver']) && $_GET['receiver']<>''){
@@ -519,7 +519,7 @@ class ReportsController extends Controller
             if(isset($_GET['production_branch']) && $_GET['production_branch']<>''){
                 $jos.= " and pb.id='".$_GET['production_branch']."'";
             } else {
-                $qry.= " and pbname='Tandang Sora'";
+                $jos.= " and pb.name='Tandang Sora'";
             }
             if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
                 $jos.= " and jo.date_needed >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and jo.date_needed <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
