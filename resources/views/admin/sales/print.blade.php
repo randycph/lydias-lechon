@@ -60,7 +60,7 @@
                 <div class="col-sm-6 col-lg-6 mg-t-20">
                     <label class="tx-sans tx-uppercase tx-16 tx-bold">Customer Details</label>
                     <h6 class="tx-15 mg-b-10">@if($sales->user_id == 9999) {{$sales->customer_name}} @else {{$sales->user->FullName}} @endif</h6>
-                    <p class="mg-b-0 tx-15">Contact No: {{$sales->customer_contact_number}} @if(!empty($sales->user->contact_tel))</p>
+                    <p class="mg-b-0 tx-15">Contact No: {{$sales->customer_contact_number}}</p>
                     <p class="mg-b-0 tx-15">Email: {{$sales->email}}</p>
                 </div>
 
