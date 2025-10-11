@@ -80,7 +80,6 @@
 				@endphp
                     <div class="form-group">
                         <label class="d-block">Page Banner</label>
-                        @if ($page->page_type != "default")
                         <div class="btn-group" role="group" aria-label="Basic example">
                             <button type="button" id="banner_slider" class="btn page_banner_btn btn-secondary {{ $album_active }}">Slider</button>
                             <button type="button" id="banner_image" class="btn page_banner_btn btn-secondary {{ $image_active }}">Image</button>
@@ -104,23 +103,18 @@
                             <img src="{{ old('page_image', $page->image_url) }}" height="100" width="300" id="img_temp" alt="">  <br /><br />
                             <a href="javascript:void(0)" class="btn btn-sm btn-danger remove-upload" >Remove Image</a>
                         </div>
-                        @endif
                     </div>
 
 				<div class="form-group banner-slider" style="{{($banner_type == 'banner_image' ? 'display:none;':'')}}">
 					<div class="row">
 						<div class="col-md-10">
-                            @if ($page->slug == "home")
-                                <label> Home Banner </label>
-                            @else
-                                <select class="selectpicker mg-b-5 @error('page_banner') is-invalid @enderror" id="page_banner" name="page_banner" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select album" data-width="100%">
-                                    <option value="0" @if (empty($page->album_id)) selected @endif>- None -</option>
-                                    @forelse($albums as $album)
-                                        <option value="{{$album->id}}" {{ (old("page_banner",$page->album_id) == $album->id ? "selected":"") }}> {{$album->name}} </option>
-                                    @empty
-                                    @endforelse
-                                </select>
-                            @endif
+                            <select class="selectpicker mg-b-5 @error('page_banner') is-invalid @enderror" id="page_banner" name="page_banner" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select album" data-width="100%">
+                                <option value="0" @if (empty($page->album_id)) selected @endif>- None -</option>
+                                @forelse($albums as $album)
+                                    <option value="{{$album->id}}" {{ (old("page_banner",$page->album_id) == $album->id ? "selected":"") }}> {{$album->name}} </option>
+                                @empty
+                                @endforelse
+                            </select>
 						</div>
 						<div class="col-md-2">
 							<div class="col-md-2" id="preview_btn_div" @if(!$page->has_slider() || empty($page->album_id)) style="display:none;" @endif>
@@ -247,8 +241,8 @@
     <script src="{{ asset('lib/owl.carousel/owl.carousel.js') }}"></script>
     {{--    Image validation--}}
     <script>
-        let BANNER_WIDTH = "{{ env('SUB_BANNER_WIDTH') }}";
-        let BANNER_HEIGHT =  "{{ env('SUB_BANNER_HEIGHT') }}";
+        let BANNER_WIDTH = 1920;
+        let BANNER_HEIGHT = 1077;
     </script>
     <script src="{{ asset('js/image-upload-validation.js') }}"></script>
     {{--    End Image validation--}}
@@ -279,7 +273,9 @@
         function has_none_option(objectId, currentValue)
         {
             if (currentValue == "0" || currentValue == "" || currentValue == "null") {
-                document.getElementById(objectId).selectedIndex = -1;
+                if (document.getElementById(objectId)) {
+                    document.getElementById(objectId).selectedIndex = -1;
+                }
             }
             $('#'+objectId).on('change', function() {
                 if ($(this).val() == 0) {

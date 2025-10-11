@@ -204,7 +204,7 @@ class PageController extends Controller
         if ($page->page_type == "default") {
             if ($page->slug == "home") {
                 $album_id = 1;
-                $image_url = '';
+                // $image_url = '';
             }
 
             $page->update([
