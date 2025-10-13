@@ -252,7 +252,7 @@ class ReportsController extends Controller
                 $qry.= " and pb.id='".$_GET['production_branch']."'";
             }
 
-            $qry.= " and pb.name='Tandang Sora'";
+            // $qry.= " and pb.name='Tandang Sora'";
             
             if(isset($_GET['receiver']) && $_GET['receiver']<>''){
                 $br_opts = "(";
@@ -431,7 +431,7 @@ class ReportsController extends Controller
                 $mqry.= " and pb.id='".$_GET['production_branch']."'";
             }
             
-            $mqry.= " and pb.name='Tandang Sora'";
+            // $mqry.= " and pb.name='Tandang Sora'";
             
             if(isset($_GET['receiver']) && $_GET['receiver']<>''){
                 $br_opts = "(";
