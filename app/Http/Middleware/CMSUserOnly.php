@@ -16,7 +16,6 @@ class CMSUserOnly
      */
     public function handle($request, Closure $next)
     {
-        // dd(auth()->user()->assign_role->permissions);
         if (Auth::check()) {
             if(Auth::user()->is_a_cms_user()) {
                 return $next($request);

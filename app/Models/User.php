@@ -156,7 +156,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function has_access_to_route($route)
     {
-        
+        return true;
         // if ($this->is_an_admin()) {
         //     return true;
         // }
