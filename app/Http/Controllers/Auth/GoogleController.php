@@ -27,6 +27,13 @@ class GoogleController extends Controller
                     $user->update([
                         'google_id' => $googleUser->getId(),
                     ]);
+                } else {
+                    $user->update([
+                        'is_active' => 1,
+                        'registration_type' => 'registered',
+                        'registration_source' => 'web',
+                        'role_id' => 6,
+                    ]);
                 }
             } else {
                 $user = User::create([
