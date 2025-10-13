@@ -159,7 +159,7 @@
                         <div class="col-md-2">
                             <div class="form-group d-flex justify-content-end mg-t-25">
                                 <label class="d-block">&nbsp;</label>
-                                <button type="button" class="btn btn-info btn-sm" onclick="add_more_product();">+</button>
+                                <button type="button" class="btn btn-info btn-lg text-sm" onclick="add_more_product();">+ Add</button>
                             </div>
                         </div>
                     </div>
@@ -1327,8 +1327,11 @@
             var tt = parseInt(count) + parseInt(misce);
       
             if(tt <= 0){
-                alert('Please add atleast 1 item');
-                 e.preventDefault();
+                alert('Product list is empty! Add products to proceed.');
+                $('#selected_product').prop('style', 'border: 1px solid red;');
+                $('#selected_product').focus();
+                e.preventDefault();
+                return;
             }
 
             if(parseFloat(get_payment_balance()) < 0){

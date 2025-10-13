@@ -229,7 +229,7 @@
                         <div class="col-md-2">
                             <div class="form-group d-flex justify-content-end mg-t-25">
                                 <label class="d-block">&nbsp;</label>
-                                <button type="button" class="btn btn-info btn-sm" onclick="add_more_product();">+</button>
+                                <button type="button" class="btn btn-info btn-lg text-sm" onclick="add_more_product();">+ Add</button>
                             </div>
                         </div>
                     </div>
