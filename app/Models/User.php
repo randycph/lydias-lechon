@@ -157,9 +157,9 @@ class User extends Authenticatable implements MustVerifyEmail
     public function has_access_to_route($route)
     {
         
-        if ($this->is_an_admin()) {
-            return true;
-        }
+        // if ($this->is_an_admin()) {
+        //     return true;
+        // }
 
         $userPermissionRoutes = $this->get_assigned_routes();
 
@@ -172,13 +172,17 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function get_assigned_routes()
     {
-        $permission = $this->assign_role->permissions;
+        $role = $this->assign_role;
+        if (!$role) return [];
 
-        if ($permission) {
-            return $permission->pluck('routes')->flatten()->all();
-        }
-
-        return [];
+        // Only permissions where pivot isAllowed = 1
+        return $role->permissions()
+            ->wherePivot('isAllowed', 1)
+            ->pluck('routes')
+            ->flatten()
+            ->unique()
+            ->values()
+            ->all();
     }
 
     public function has_access_to_albums_module()
@@ -263,9 +267,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function has_access_to_module($module)
     {
-        if ($this->is_an_admin()) {
-            return true;
-        }
+        // if ($this->is_an_admin()) {
+        //     return true;
+        // }
 
         $routes = $this->get_module_routes($module);
 
@@ -353,7 +357,13 @@ class User extends Authenticatable implements MustVerifyEmail
     // }
 
     public function is_a_cms_user() {
-        return $this->user_type == 'cms' && ($this->role_id == 1 || $this->role_id == 3 || $this->role_id == 5 || $this->role_id == config('auth.driver_role_id'));
+        $role = auth()->user()->assign_role;
+
+        $hasAllowed = $role?->permissions()
+            ->wherePivot('isAllowed', 1)
+            ->exists();
+
+        return $this->user_type === 'cms' && $hasAllowed;
     }
 
     public function is_a_member_user() {

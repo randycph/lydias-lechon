@@ -175,7 +175,7 @@
                 </ul>
             </li>
         @endif
-        @if (!isDispatcher() && !isForecaster())
+        @if (!isDispatcher() && !isForecaster() && auth()->user()->has_access_to_route('settings.index'))
         <li class="nav-item with-sub @if (request()->routeIs('account*') || request()->routeIs('settings*') || request()->routeIs('audit*')) active show @endif">
             <a href="" class="nav-link"><i data-feather="settings"></i> <span>Settings</span></a>
             <ul>
@@ -245,8 +245,7 @@
                 </ul>
             </li>
         @endif
-
-        @if (!isDispatcher() && !isForecaster())
+        @if (!isDispatcher() && !isForecaster() && auth()->user()->has_access_to_module('popup_message') && auth()->user()->has_access_to_route('popup-message.index'))
         <li class="nav-item with-sub @if (request()->routeIs('popup-message*')) active show @endif">
             <a href="" class="nav-link"><i data-feather="users"></i> <span>Popup Message</span></a>
             <ul>

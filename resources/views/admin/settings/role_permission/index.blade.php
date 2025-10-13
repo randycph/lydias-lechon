@@ -44,9 +44,9 @@
                             <thead class="thead-primary">
                             <td>Module</td>
                             @foreach($roles as $role)
-                                @if ($role->is_not_admin())
+                                {{-- @if ($role->is_not_admin()) --}}
                                     <td>{{ $role->name }}</td>
-                                @endif
+                                {{-- @endif --}}
                             @endforeach
                             </thead>
                             <tbody>
@@ -54,7 +54,7 @@
                                 <tr>
                                     <td><p class="mg-0 pd-t-5 pd-b-5 tx-uppercase tx-semibold tx-primary">{{ $module->module }} module</p></td>
                                     @foreach($roles as $role)
-                                        @if ($role->is_not_admin())
+                                        {{-- @if ($role->is_not_admin()) --}}
                                             @php
                                                 $moduleKey = $module->module;
                                                 $permissionCount = $permissions->filter(function ($permission) use($moduleKey) {
@@ -69,7 +69,7 @@
                                                     <label class="custom-control-label" for="{{$moduleKey}}_{{ $loop->iteration }}"></label>
                                                 </div>
                                             </td>
-                                        @endif
+                                        {{-- @endif --}}
                                     @endforeach
                                 </tr>
                                 @forelse($permissions as $permission)
@@ -79,7 +79,7 @@
                                             <td>{{ $permission->description }}</td>
 
                                             @foreach($roles as $role)
-                                                @if ($role->is_not_admin())
+                                                {{-- @if ($role->is_not_admin()) --}}
                                                     @php
                                                         $roleId = $role->id;
                                                         $permissionId = $permission->id;
@@ -94,7 +94,7 @@
                                                             <label class="custom-control-label" for="{{$permission->name}}_{{ $loop->iteration }}"></label>
                                                         </div>
                                                     </td>
-                                                @endif
+                                                {{-- @endif --}}
                                             @endforeach
 
                                         @endif
