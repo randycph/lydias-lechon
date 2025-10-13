@@ -227,6 +227,8 @@ class SalesHeader extends Model
     {
         $sale = SalesHeader::find($this->id);
 
+        $paid = 0;
+
         if (isset($sale->parent_sales_header_id) && $sale->parent_sales_header_id != null) {
             $paid = SalesPayment::where('sales_header_id', $sale->parent_sales_header_id)
                 ->where('status', 'PAID') 
