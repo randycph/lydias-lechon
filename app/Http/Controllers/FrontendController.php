@@ -432,6 +432,9 @@ class FrontendController extends Controller
                                 'deliveryStatus' => function ($query) {
                                     $query->orderBy('created_at', 'asc');
                                 },
+                                'subHeaders' => function ($query) {
+                                    $query->with(['deliveryStatus']);
+                                }
                             ])
                             ->orderBy('created_at', 'desc')
                             ->get();

@@ -306,15 +306,47 @@
                                 </div>
                             
                                 {{-- Right side: Pay Now and Track Order --}}
-                                <div class="flex flex-col lg:flex-row gap-2 order-1 lg:order-2 justify-end w-full lg:w-auto">
+                                <div class="flex flex-col lg:flex-row gap-2 order-1 lg:order-2 justify-end w-full lg:w-auto" x-data="{ dropdownOpen: false }">
                                     @if (strtolower($sale->payment_status) == 'paid')
-                                        <button @click="trackOrder({{ $sale }})" type="button"
-                                            class="custom-btn btn-primary-dark text-primary border hover:text-white border-primary bg-white hover:bg-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
+                                        @if ($sale->subHeaders && count($sale->subHeaders) > 0)
+                                        <div class="relative inline-block">
+                                            <button
+                                                type="button"
+                                                @click="dropdownOpen = !dropdownOpen;"
+                                                class="custom-btn btn-primary-dark text-primary border hover:text-white border-primary bg-white hover:bg-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center"
+                                            >
                                             Track Order
-                                        </button>
+                                            </button>
+
+                                            <!-- Dropdown menu -->
+                                            <div
+                                                x-cloak
+                                                x-show="dropdownOpen"
+                                                @click.outside="dropdownOpen = false"
+                                                x-transition
+                                                class="absolute right-0 mt-2 z-10 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-60"
+                                            >
+                                                <ul class="py-2 text-sm text-gray-700">
+                                                    @foreach ($sale->subHeaders as $subHeader)
+                                                    <li>
+                                                        <button @click="trackOrder({{ $subHeader }})" class="block w-full text-left px-4 py-2 hover:bg-gray-100">#{{ $subHeader->order_number }} -  {{ $subHeader->customer_address }}</button>
+                                                    </li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        @else 
+                                            <button
+                                                type="button"
+                                                @click="trackOrder({{ $sale }})"
+                                                class="custom-btn btn-primary-dark text-primary border hover:text-white border-primary bg-white hover:bg-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center"
+                                            >
+                                            Track Order
+                                            </button>
+                                        @endif
                                     @endif
-                                    <a href="{{ route('confirmation', ['id' => $sale->id ])}}" type="button"
-                                        class="text-white bg-slate-500 custom-btn btn-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
+                                    <a href="{{ route('confirmation', ['id' => $sale->id ])}}"
+                                        class="text-white bg-slate-500 custom-btn btn-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center self-start">
                                         View
                                     </a>
                                     @if (strtolower($sale->payment_status) != 'paid')
@@ -827,6 +859,8 @@
                 this.trackOrderModal = true;
                 this.saleId = sale.order_number;
                 this.saleDate = this.formatDate(sale.created_at);
+
+                console.log(sale);
 
                 this.deliveryStatuses = sale.delivery_status;
             },

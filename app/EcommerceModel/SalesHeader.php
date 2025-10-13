@@ -413,4 +413,9 @@ class SalesHeader extends Model
     {
         return $this->hasMany(CouponCart::class, 'sales_header_id');
     }
+
+    public function subHeaders()
+    {
+        return $this->hasMany(self::class, 'parent_sales_header_id', 'id');
+    }
 }
