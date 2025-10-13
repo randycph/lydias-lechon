@@ -351,7 +351,7 @@ class JoborderController extends Controller
             'tax_amount' => 0,
             'discount_amount' => $discount_amount,
             'net_amount' => $request->gross,
-            'payment_status' => $request->payment_method == 'Deposit' ? 'UNPAID' : 'PAID',
+            'payment_status' => 'UNPAID',
             'delivery_status' => '',
             'status' => 'active',
             'payment_date' => Carbon::today(),
