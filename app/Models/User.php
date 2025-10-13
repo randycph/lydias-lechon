@@ -356,6 +356,9 @@ class User extends Authenticatable implements MustVerifyEmail
     // }
 
     public function is_a_cms_user() {
+
+        return $this->user_type == 'cms' && ($this->role_id == 1 || $this->role_id == 3 || $this->role_id == 5 || $this->role_id == config('auth.driver_role_id'));
+
         $role = auth()->user()->assign_role;
 
         $hasAllowed = $role?->permissions()
