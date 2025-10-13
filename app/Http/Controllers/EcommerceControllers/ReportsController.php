@@ -213,7 +213,7 @@ class ReportsController extends Controller
         $no_jo = 0;
 
         // Sales
-            $qry = "SELECT d.product_name, d.paella_price, h.contact_person, d.product_name as dproduct_name, h.has_sub,
+            $qry = "SELECT d.product_name, d.paella_price, h.contact_person, d.product_name as dproduct_name, h.has_sub, '' as jo_category, d.id as idd,
             d.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,d.price, h.customer_delivery_adress,
             h.customer_name, d.delivery_date as delivery_date, h.instruction, po.delivery_date as deldate, h.delivery_type, jo.jo_number, pb.name as pbname, h.delivery_status as delstat,h.agent, h.customer_contact_number,'' as dr, h.delivery_fee_amount, d.price, '' as releasing, h.order_source, br.name as receiver, c.name as catname, u.name as username, jo.jo_order_type,h.order_type as hordertype, h.id as hid, '' as jo_category, 'sales' as trantype, DATE_FORMAT(d.delivery_date,'%H:%i:%s') as timeneeded, DATE_FORMAT(d.delivery_date, '%Y-%m-%d') as dateneeded, p.is_misc, p.production_item, h.isConfirm as isConfirm, h.gross_amount as gros, h.forecast_date as forecast_dt, h.delivery_branch as del_branch,p.id as prodid,h.created_at as created
             FROM `ecommerce_sales_details` d
@@ -318,6 +318,7 @@ class ReportsController extends Controller
         // Sales with multiple deliveries
             DB::statement("DROP TEMPORARY TABLE IF EXISTS temp_mrs");
             DB::statement("CREATE TEMPORARY TABLE temp_mrs ( 
+                    `id` bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
                     `product_id` bigint(20) DEFAULT NULL,
                     `product_name` varchar(191) DEFAULT NULL,
                     `price` decimal(15,2) DEFAULT NULL,
@@ -381,7 +382,7 @@ class ReportsController extends Controller
             //dd(DB::select("select * from temp_mrs"));
             //    IF(m.delivery_status, "YES", "NO") as delstat,
 
-            $mqry = "SELECT distinct m.product_name, m.paella_price, m.paella, m.contact_person, h.has_sub,
+            $mqry = "SELECT distinct m.product_name, m.paella_price, m.paella, m.contact_person, h.has_sub, m.id as idd,
             m.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,m.price, m.address as customer_delivery_adress,
             h.customer_name, m.branch as mbranch, 
             cast(concat(m.delivery_date, ' ', m.delivery_time) as datetime)  as delivery_date,
@@ -496,7 +497,7 @@ class ReportsController extends Controller
         
         // JO
             $jos = "
-                SELECT jo.jo_category as product_name, '' as paella_price,'' as hordertype, jo.jo_category as dproduct_name,
+                SELECT jo.jo_category as product_name, '' as paella_price,'' as hordertype, jo.jo_category as dproduct_name, jo.id as idd,
             jo.qty as qty, '' as order_number, u.address_street, u.address_municipality, u.address_city, u.address_region, jo.price, jo.customer_address as customer_delivery_adress,
             jo.customer_name, jo.date_needed as delivery_date,jo.remarks as instruction, po.delivery_date as deldate,'' as delivery_type, jo.jo_number, pb.name as pbname, jo.created_at as created,
 
@@ -572,8 +573,8 @@ class ReportsController extends Controller
         //logger($results);
         $results = collect($results)->unique(function ($row, $key) {
             return (int)($row->hid ?? 0) === 0
-                ? (($row->product_name ?? '') . '|' . ($row->customer_delivery_adress ?? ''))
-                : (($row->dproduct_name ?? '') . '|' . ($row->hid ?? ''));
+                ? (($row->product_name ?? '') . '|' . ($row->customer_delivery_adress ?? '') . '|' . ($row->idd ?? ''))
+                : (($row->dproduct_name ?? '') . '|' . ($row->hid ?? '') . '|' . ($row->idd ?? ''));
         })->values();
 
         //logger($results);
