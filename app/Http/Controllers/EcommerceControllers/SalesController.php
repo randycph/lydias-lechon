@@ -753,7 +753,7 @@ class SalesController extends Controller
         ]);
 
         $sales = SalesHeader::where('id',$request->id)->first();
-        $totalPayment = SalesPayment::where('sales_header_id',$request->id)->sum('amount');
+        $totalPayment = SalesPayment::where('sales_header_id',$request->id)->where('status', 'PAID')->sum('amount');
         $total = $totalPayment + $request->amount;
         if($total >= $sales->net_amount)
             $status = 'PAID';
