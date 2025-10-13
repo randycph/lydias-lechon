@@ -156,9 +156,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function has_access_to_route($route)
     {
-        if ($this->is_an_admin()) {
-            return true;
-        }
+        // if ($this->is_an_admin()) {
+        //     return true;
+        // }
 
         $userPermissionRoutes = $this->get_assigned_routes();
 
@@ -176,7 +176,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
         // Only permissions where pivot isAllowed = 1
         return $role->permissions()
-            // ->wherePivot('isAllowed', 1)
+            ->wherePivot('isAllowed', 1)
             ->pluck('routes')
             ->flatten()
             ->unique()
@@ -266,9 +266,9 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function has_access_to_module($module)
     {
-        if ($this->is_an_admin()) {
-            return true;
-        }
+        // if ($this->is_an_admin()) {
+        //     return true;
+        // }
 
         $routes = $this->get_module_routes($module);
 
@@ -356,9 +356,7 @@ class User extends Authenticatable implements MustVerifyEmail
     // }
 
     public function is_a_cms_user() {
-
-        return $this->user_type == 'cms' && ($this->role_id == 1 || $this->role_id == 3 || $this->role_id == 5 || $this->role_id == config('auth.driver_role_id'));
-
+        
         $role = auth()->user()->assign_role;
 
         $hasAllowed = $role?->permissions()
