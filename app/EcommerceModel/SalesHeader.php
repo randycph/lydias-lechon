@@ -227,16 +227,14 @@ class SalesHeader extends Model
     {
         $sale = SalesHeader::find($this->id);
 
-        $paid = 0;
-
         if (isset($sale->parent_sales_header_id) && $sale->parent_sales_header_id != null) {
             $paid = SalesPayment::where('sales_header_id', $sale->parent_sales_header_id)
                 ->where('status', 'PAID') 
-                ->sum('amount');
+                ->sum('amount') ?? 0;
         } else {
             $paid = SalesPayment::where('sales_header_id', $this->id)
                 ->where('status', 'PAID') 
-                ->sum('amount');
+                ->sum('amount') ?? 0;
         }
 
         // Use the raw/current saved status to avoid recursion
