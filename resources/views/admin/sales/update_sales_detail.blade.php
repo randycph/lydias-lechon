@@ -265,9 +265,78 @@
 
                                     </div>
                                 @endif
+                                
+                                @if ($salesheader->deliveryAddress->count() == 0)
+                                    <div class="form-row datetime_field">
+                                        <div class="col-md-8">
+                                            <div class="form-group">
+                                                <label class="d-block">Date & Time Needed <i class="text-danger">*</i></label>
+                                                <input type="text" name="update_dateneeded_date" class="form-control"
+                                                    placeholder="Choose Date" id="date2" value="{{$date_only}}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label class="d-block">&nbsp;</label>
+                                                <div class="input-group timepicker">
+                                                    <select class="selectpicker"
+                                                        data-style="btn btn-outline-light btn-md btn-block tx-left tx-black"
+                                                        title="Choose Time" data-width="100%" name="update_dateneeded_time">
+                                                        <option @if ($time_only == '05:00') selected @endif value="05:00">05:00 AM
+                                                        </option>
+                                                        <option @if ($time_only == '06:00') selected @endif value="06:00">06:00 AM
+                                                        </option>
+                                                        <option @if ($time_only == '07:00') selected @endif value="07:00">07:00 AM
+                                                        </option>
+                                                        <option @if ($time_only == '08:00') selected @endif value="08:00">08:00 AM
+                                                        </option>
+                                                        <option @if ($time_only == '09:00') selected @endif value="09:00">09:00 AM
+                                                        </option>
+                                                        <option @if ($time_only == '10:00') selected @endif value="10:00">10:00 AM
+                                                        </option>
+                                                        <option @if ($time_only == '11:00') selected @endif value="11:00">11:00 AM
+                                                        </option>
+                                                        <option @if ($time_only == '12:00') selected @endif value="12:00">12:00 NN
+                                                        </option>
+                                                        <option @if ($time_only == '13:00') selected @endif value="13:00">01:00 PM
+                                                        </option>
+                                                        <option @if ($time_only == '14:00') selected @endif value="14:00">02:00 PM
+                                                        </option>
+                                                        <option @if ($time_only == '15:00') selected @endif value="15:00">03:00 PM
+                                                        </option>
+                                                        <option @if ($time_only == '16:00') selected @endif value="16:00">04:00 PM
+                                                        </option>
+                                                        <option @if ($time_only == '17:00') selected @endif value="17:00">05:00 PM
+                                                        </option>
+                                                        <option @if ($time_only == '18:00') selected @endif value="18:00">06:00 PM
+                                                        </option>
+                                                        <option @if ($time_only == '19:00') selected @endif value="19:00">07:00 PM
+                                                        </option>
+                                                        <option @if ($time_only == '20:00') selected @endif value="20:00">08:00 PM
+                                                        </option>
+                                                        <option @if ($time_only == '21:00') selected @endif value="21:00">09:00 PM
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group divd2d" @if ($salesheader->delivery_type !=
+                                        'Door to door delivery')
+                                            style="display:none;" @endif>
+                                            <label class="d-block">Delivery Address <span class="tx-danger">*</span></label>
+                                            <textarea name="new_delivery_address" class="form-control" rows="5"
+                                                @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102) @else style="pointer-events: none;background-color:#E9ECEF" @endif>{{ $salesheader->customer_delivery_adress }}</textarea>
+                                    </div>
 
 
-
+                                    <div class="form-group">
+                                        <label class="d-block">Note <span class="tx-danger">*</span></label>
+                                        <textarea name="new_instruction" class="form-control"
+                                            @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102) @else style="pointer-events: none;background-color:#E9ECEF" @endif>{{ $salesheader->instruction }}</textarea>
+                                    </div>
+                                @endif
 
 
                                 {{-- @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102)
