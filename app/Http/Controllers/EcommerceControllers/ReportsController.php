@@ -520,7 +520,7 @@ class ReportsController extends Controller
                 $jos.= " and pb.id='".$_GET['production_branch']."'";
             } 
             
-            $jos.= " and pb.name='Tandang Sora'";
+            // $jos.= " and pb.name='Tandang Sora'";
 
             if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
                 $jos.= " and jo.date_needed >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and jo.date_needed <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
