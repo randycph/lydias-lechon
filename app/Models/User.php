@@ -156,7 +156,17 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function has_access_to_route($route)
     {
-        // if ($this->is_an_admin()) return true;
+        // // if ($this->is_an_admin()) {
+        // //     return true;
+        // // }
+
+        // $userPermissionRoutes = $this->get_assigned_routes();
+
+        // if (in_array($route, $userPermissionRoutes)) {
+        //     return true;
+        // }
+
+        // return false;
 
         $routes = $this->get_assigned_routes();
 
