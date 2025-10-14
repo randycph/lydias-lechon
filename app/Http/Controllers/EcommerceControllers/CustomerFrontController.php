@@ -179,8 +179,11 @@ class CustomerFrontController extends Controller
     
                 session()->forget('cart');
             } else {
-                return redirect()->route('sales-transaction.index');
+                if (Auth::user()->role_id == config('auth.driver_role_id') ) {
+                    return redirect()->route('sales-transaction.driver_sales_transaction');
+                }
 
+                return redirect()->route('dashboard');
             }
 
 
