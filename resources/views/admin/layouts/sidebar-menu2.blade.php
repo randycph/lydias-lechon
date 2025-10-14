@@ -256,7 +256,7 @@
 
         @if (auth()->user()->has_access_to_module('products') || auth()->user()->has_access_to_module('product_category') ||
             auth()->user()->has_access_to_module('production_branch') || auth()->user()->has_access_to_module('gift_certificate') ||
-            auth()->user()->has_access_to_module('delivery_rate') || auth()->user()->has_access_to_module('branch') ||
+            auth()->user()->has_access_to_module('delivery_rate') || auth()->user()->has_access_to_module('branch') || auth()->user()->has_access_to_module('coupon') ||
             auth()->user()->has_access_to_module('sales_transaction'))
             @if (!isForecaster())
             <li class="nav-label mg-t-25">E-Commerce</li>
@@ -298,6 +298,7 @@
                     </ul>
                 </li>
             @endif
+            @if (auth()->user()->has_access_to_module('coupon'))
             <li class="nav-item with-sub @if (request()->routeIs('coupons*')) active show @endif">
                 <a href="" class="nav-link"><i data-feather="users"></i> <span>Coupons</span></a>
                 <ul>
@@ -305,6 +306,7 @@
                     <li @if (\Route::current()->getName() == 'coupons.create') class="active" @endif><a href="{{ route('coupons.create') }}">Create a Coupon</a></li>
                 </ul>
             </li>
+            @endif
 
             @if (auth()->user()->has_access_to_module('gift_certificate'))
                 <li class="nav-item with-sub @if (request()->routeIs('gift-certificate*')) active show @endif">
