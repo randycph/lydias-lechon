@@ -20,7 +20,7 @@ class CampaignController extends Controller
 
     public function __construct()
     {
-        Permission::module_init($this, 'campaign');
+        Permission::module_init($this, 'mailing_list');
     }
 
     /**

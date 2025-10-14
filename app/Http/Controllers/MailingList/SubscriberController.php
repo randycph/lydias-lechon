@@ -16,7 +16,7 @@ class SubscriberController extends Controller
 
     public function __construct()
     {
-        Permission::module_init($this, 'subscriber');
+        Permission::module_init($this, 'mailing_list');
     }
 
     /**

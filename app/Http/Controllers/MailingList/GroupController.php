@@ -15,7 +15,7 @@ class GroupController extends Controller
 
     public function __construct()
     {
-        Permission::module_init($this, 'subscriber_group');
+        Permission::module_init($this, 'mailing_list');
     }
 
     /**
