@@ -261,11 +261,11 @@
             @if (!isForecaster())
             <li class="nav-label mg-t-25">E-Commerce</li>
             @endif
-            @if (!isDispatcher() && !isForecaster())
+            {{-- @if (!isDispatcher() && !isForecaster())
             <li class="nav-item @if (url()->current() == route('ecom-dashboard')) active @endif">
                 <a href="{{ route('ecom-dashboard') }}" class="nav-link"><i data-feather="home"></i><span>Dashboard</span></a>
             </li>
-            @endif
+            @endif --}}
 
             @if (auth()->user()->has_access_to_module('product') || auth()->user()->has_access_to_module('product_category'))
                 <li class="nav-item with-sub @if (request()->routeIs('products*') || request()->routeIs('product-categories*')) active show @endif">
@@ -358,7 +358,7 @@
                 </li>
             @endif
             
-            @if (!isDispatcher() && !isForecaster())
+            @if (auth()->user()->has_access_to_module('shareable_link'))
             <li class="nav-item with-sub @if (request()->routeIs('shareable-links*')) active show @endif">
                 <a href="" class="nav-link"><i data-feather="users"></i> <span>Social Media Shareable Links</span></a>
                 <ul>
