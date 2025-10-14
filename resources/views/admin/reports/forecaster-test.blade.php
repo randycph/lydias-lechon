@@ -851,7 +851,13 @@
                 title: 'Forecast Report',
                 exportOptions: {
                     columns: ':visible',
-                    format: { body: (data, r, c, node) => $(node).attr('data-value') ?? data }
+                    stripHtml: true,
+                    format: {
+                        body: function (data/*, row, column, node */) {
+                            // extra safety: remove any remaining tags
+                            return (data || '').toString().replace(/<[^>]*>/g, '');
+                        }
+                    }
                 }
             },
             'colvis'
