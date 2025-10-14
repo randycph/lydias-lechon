@@ -215,25 +215,24 @@
             </li>
         @endif
 
-        @if (auth()->user()->has_access_to_module('sent_item') || auth()->user()->has_access_to_module('subscriber') ||
-            auth()->user()->has_access_to_module('campaign') || auth()->user()->has_access_to_module('subscriber_group'))
+        @if (auth()->user()->has_access_to_module('mailing_list'))
             <li class="nav-item with-sub @if (request()->routeIs('mailing-list*')) active show @endif">
                 <a href="" class="nav-link"><i data-feather="credit-card"></i> <span>Mailing List</span></a>
                 <ul>
-                    @if (auth()->user()->has_access_to_module('subscriber'))
+                    @if (auth()->user()->has_access_to_route('mailing-list.subscribers.index'))
                         <li @if (\Route::current()->getName() == 'mailing-list.subscribers.index' || \Route::current()->getName() == 'mailing-list.subscribers.edit') class="active" @endif><a href="{{ route('mailing-list.subscribers.index') }}">Manage Subscribers</a></li>
                         @if(auth()->user()->has_access_to_route('mailing-list.subscribers.create'))
                             <li @if (\Route::current()->getName() == 'mailing-list.subscribers.create') class="active" @endif><a href="{{ route('mailing-list.subscribers.create') }}">Create a Subscriber</a></li>
                         @endif
                         <li @if (\Route::current()->getName() == 'mailing-list.subscribers.unsubscribe') class="active" @endif><a href="{{ route('mailing-list.subscribers.unsubscribe') }}">Cancelled Subscription</a></li>
                     @endif
-                    @if (auth()->user()->has_access_to_module('subscriber_group'))
+                    @if (auth()->user()->has_access_to_route('mailing-list.groups.index'))
                         <li @if (\Route::current()->getName() == 'mailing-list.groups.index' || \Route::current()->getName() == 'mailing-list.groups.edit') class="active" @endif><a href="{{ route('mailing-list.groups.index') }}">Manage Groups</a></li>
                         @if(auth()->user()->has_access_to_route('mailing-list.groups.create'))
                             <li @if (\Route::current()->getName() == 'mailing-list.groups.create') class="active" @endif><a href="{{ route('mailing-list.groups.create') }}">Create a Group</a></li>
                         @endif
                     @endif
-                    @if (auth()->user()->has_access_to_module('campaign'))
+                    @if (auth()->user()->has_access_to_route('mailing-list.campaigns.index'))
                         <li @if (\Route::current()->getName() == 'mailing-list.campaigns.index' || \Route::current()->getName() == 'mailing-list.campaigns.edit') class="active" @endif><a href="{{ route('mailing-list.campaigns.index') }}">Manage Campaigns</a></li>
                         @if(auth()->user()->has_access_to_route('mailing-list.campaigns.create'))
                             <li @if (\Route::current()->getName() == 'mailing-list.campaigns.create') class="active" @endif><a href="{{ route('mailing-list.campaigns.create') }}">Create a Campaign</a></li>
