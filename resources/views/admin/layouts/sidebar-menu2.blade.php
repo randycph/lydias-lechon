@@ -215,7 +215,7 @@
             </li>
         @endif
 
-        @if (auth()->user()->has_access_to_route('mailing-list.subscribers.index') || auth()->user()->has_access_to_route('mailing-list.groups.index') || auth()->user()->has_access_to_route('mailing-list.campaigns.index'))
+        @if (auth()->user()->has_access_to_module('mailing_list'))
             <li class="nav-item with-sub @if (request()->routeIs('mailing-list*')) active show @endif">
                 <a href="" class="nav-link"><i data-feather="credit-card"></i> <span>Mailing List</span></a>
                 <ul>
