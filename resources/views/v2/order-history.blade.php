@@ -324,12 +324,12 @@
                                                 x-show="dropdownOpen"
                                                 @click.outside="dropdownOpen = false"
                                                 x-transition
-                                                class="absolute right-0 mt-2 z-10 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-60"
+                                                class="absolute right-0 mt-2 z-10 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-80"
                                             >
                                                 <ul class="py-2 text-sm text-gray-700">
                                                     @foreach ($sale->subHeaders as $subHeader)
                                                     <li>
-                                                        <button @click="trackOrder({{ $subHeader }})" class="block w-full text-left px-4 py-2 hover:bg-gray-100">#{{ $subHeader->order_number }} -  {{ $subHeader->customer_address }}</button>
+                                                        <button @click="trackOrder({{ $subHeader }})" class="block w-full text-left px-4 py-2 hover:bg-gray-100"><strong>#{{ $subHeader->order_number }}</strong> -  {{ $subHeader->customer_address }}</button>
                                                     </li>
                                                     @endforeach
                                                 </ul>
@@ -339,7 +339,7 @@
                                             <button
                                                 type="button"
                                                 @click="trackOrder({{ $sale }})"
-                                                class="custom-btn btn-primary-dark text-primary border hover:text-white border-primary bg-white hover:bg-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center"
+                                                class="custom-btn btn-primary-dark text-primary border hover:text-white shadow-lg border-primary bg-white hover:bg-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center"
                                             >
                                             Track Order
                                             </button>
