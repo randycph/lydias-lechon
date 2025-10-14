@@ -183,7 +183,9 @@
 
 
                     <div class="col-lg-12 mg-t-30">
-                        <input class="btn btn-primary btn-sm btn-uppercase" type="submit" value="Update Branch">
+                        <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="updateBranchBtn">
+                            Update Branch
+                        </button>
                         <a href="{{ route('branch.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
                     </div>
                 </div>
@@ -233,20 +235,18 @@
                 $(this).closest('tr').remove();
             });
 
-            $('#branchForm').submit(function (e) {
-                $.ajax({
-                    url: '{{ route("branch.update", $branches->id) }}',
-                    method: 'POST',
-                    data: $(this).serialize(),
-                    success: function (res) {
-                        //
-                    },
-                    error: function (err) {
-                        console.error(err);
-                        alert('Something went wrong.');
-                    }
-                });
-            });
+            // $('#branchForm').submit(function (e) {
+            //     const $btn = $('#updateBranchBtn');
+            //     $btn.prop('disabled', true);
+            //     $.ajax({
+            //         url: '{{ route("branch.update", $branches->id) }}',
+            //         method: 'POST',
+            //         data: $(this).serialize(),
+            //         complete: function () { $btn.prop('disabled', false); },
+            //         success: function () { /* ... */ },
+            //         error: function (err) { console.error(err); alert('Something went wrong.'); }
+            //     });
+            // });
         });
     </script>
     <script>

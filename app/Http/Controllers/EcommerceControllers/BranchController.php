@@ -9,6 +9,7 @@ use App\EcommerceModel\Branch;
 use App\Helpers\ListingHelper;
 use App\Models\BranchNumbers;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BranchController extends Controller
 {
@@ -88,47 +89,48 @@ class BranchController extends Controller
 
     public function update(Request $request, $id)
     {
-        $branch = Branch::findOrFail($id);
+        $branch = Branch::with('numbers')->findOrFail($id);
 
-        $branch->update([
-            'name' => $request->name,
-            'code' => $request->code,
-            'address' => $request->address,
-            'contact_nos' => $request->contact_nos,
-            'contact_person' => $request->contact_person ?? ' ',
-            'email_address' => $request->email_address,
-            'hotline' => $request->hotline,
-            'branch_type' => $request->branch_type,
-            'pickup_branch' => (isset($request->pickup_branch) ? 1 : 0),
-            'delivery_branch' => (isset($request->delivery_branch) ? 1 : 0),
-            'token' => $request->token,
-            'user_id' => Auth::id(),
-            'commissary' => $request->commissary,
-            'direction_link' => $request->direction_link ?? '',
-            'google_map_link' => $request->google_map_link ?? '',
-            'is_head_office' => $request->has('is_head_office') ? 1 : 0,
-        ]);
+        DB::transaction(function () use ($branch, $request) {
+            $branch->update([
+                'name' => $request->name,
+                'code' => $request->code,
+                'address' => $request->address,
+                'contact_nos' => $request->contact_nos,
+                'contact_person' => $request->contact_person ?? ' ',
+                'email_address' => $request->email_address,
+                'hotline' => $request->hotline,
+                'branch_type' => $request->branch_type,
+                'pickup_branch' => (isset($request->pickup_branch) ? 1 : 0),
+                'delivery_branch' => (isset($request->delivery_branch) ? 1 : 0),
+                'token' => $request->token,
+                'user_id' => Auth::id(),
+                'commissary' => $request->commissary,
+                'direction_link' => $request->direction_link ?? '',
+                'google_map_link' => $request->google_map_link ?? '',
+                'is_head_office' => $request->has('is_head_office') ? 1 : 0,
+            ]);
 
-        $numbers = BranchNumbers::where('branch_id', $branch->id)->get();
+            $incoming = collect($request->input('branches', []))
+                ->filter(fn ($b) => !empty($b['type']) && !empty($b['number']))
+                ->map(function ($b) use ($branch) {
+                    return [
+                        'branch_id'  => $branch->id,
+                        'type'       => $b['type'],
+                        'number'     => trim($b['number']),
+                        'name'       => $b['name'] ?? '',
+                    ];
+                })
 
-        if ($numbers->isNotEmpty()) {
-            foreach ($numbers as $num) {
-                $num->delete();
+                ->unique(fn ($b) => $b['type'].'|'.$b['number'].'|'.$b['name'])
+                ->values();
+
+            $branch->numbers()->delete();
+
+            if ($incoming->isNotEmpty()) {
+                $branch->numbers()->insert($incoming->all());
             }
-        }
-
-        if ($request->has('branches')) {
-            foreach ($request->branches as $b) {
-                if (!empty($b['type']) && !empty($b['number'])) {
-                    BranchNumbers::create([
-                        'branch_id' => $branch->id,
-                        'type' => $b['type'],
-                        'number' => $b['number'],
-                        'name' => $b['name'] ?? '',
-                    ]);
-                }
-            }
-        }
+        });
 
         return redirect()->route('branch.index')->with('success','Successfully updated branch!');
     }
