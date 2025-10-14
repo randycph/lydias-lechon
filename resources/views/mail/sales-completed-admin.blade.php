@@ -841,7 +841,7 @@ Media Item
                                                                   <tr>
                                                                         <td class="wrapper last">
                                                                               <span style="font-size:12px;">
-                                                                                    <i>This ia a system generated email and reply is not required.</i> 
+                                                                                    <i>This is a system generated email and reply is not required.</i> 
                                                                               </span>
                                                                         </td>
                                                                   </tr>
