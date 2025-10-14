@@ -298,6 +298,7 @@
                     </ul>
                 </li>
             @endif
+            {{ auth()->user()->has_access_to_module('coupon') }}
             @if (auth()->user()->has_access_to_module('coupon'))
             <li class="nav-item with-sub @if (request()->routeIs('coupons*')) active show @endif">
                 <a href="" class="nav-link"><i data-feather="users"></i> <span>Coupons</span></a>
