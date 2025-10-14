@@ -832,7 +832,22 @@
                 title: '{{ date('Ymd') }}',
                 exportOptions: {
                     columns: ':visible',
-                    format: { body: (data, r, c, node) => $(node).attr('data-value') ?? data }
+                    stripHtml: true,
+                    format: {
+                        body: function (data) {
+                        const txt = (data || '').toString();
+                        // 1) remove any leftover tags
+                        // 2) decode &nbsp; to spaces
+                        // 3) replace Unicode NBSP (\u00A0) with normal spaces
+                        // 4) collapse runs of whitespace
+                        return txt
+                            .replace(/<[^>]*>/g, '')
+                            .replace(/&nbsp;/gi, ' ')
+                            .replace(/\u00A0/g, ' ')
+                            .replace(/\s+/g, ' ')
+                            .trim();
+                        }
+                    }
                 }
             },
             {
@@ -842,7 +857,22 @@
                 title: '{{ date('Ymd') }}',
                 exportOptions: {
                     columns: ':visible',
-                    format: { body: (data, r, c, node) => $(node).attr('data-value') ?? data }
+                    stripHtml: true,
+                    format: {
+                        body: function (data) {
+                        const txt = (data || '').toString();
+                        // 1) remove any leftover tags
+                        // 2) decode &nbsp; to spaces
+                        // 3) replace Unicode NBSP (\u00A0) with normal spaces
+                        // 4) collapse runs of whitespace
+                        return txt
+                            .replace(/<[^>]*>/g, '')
+                            .replace(/&nbsp;/gi, ' ')
+                            .replace(/\u00A0/g, ' ')
+                            .replace(/\s+/g, ' ')
+                            .trim();
+                        }
+                    }
                 }
             },
             {
@@ -853,9 +883,18 @@
                     columns: ':visible',
                     stripHtml: true,
                     format: {
-                        body: function (data/*, row, column, node */) {
-                            // extra safety: remove any remaining tags
-                            return (data || '').toString().replace(/<[^>]*>/g, '');
+                        body: function (data) {
+                        const txt = (data || '').toString();
+                        // 1) remove any leftover tags
+                        // 2) decode &nbsp; to spaces
+                        // 3) replace Unicode NBSP (\u00A0) with normal spaces
+                        // 4) collapse runs of whitespace
+                        return txt
+                            .replace(/<[^>]*>/g, '')
+                            .replace(/&nbsp;/gi, ' ')
+                            .replace(/\u00A0/g, ' ')
+                            .replace(/\s+/g, ' ')
+                            .trim();
                         }
                     }
                 }
