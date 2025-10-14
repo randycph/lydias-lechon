@@ -178,7 +178,7 @@
 	                                                @if (auth()->user()->has_access_to_route('coupons.edit'))
 	                                                <a class="nav-link" href="{{ route('coupons.edit',$coupon->id) }}" title="Edit Coupon"><i data-feather="edit"></i></a>
 	                                                @endif
-	                                                @if (auth()->user()->has_access_to_route('promo.single.delete'))
+	                                                @if (auth()->user()->has_access_to_route('coupons.destroy'))
 	                                                <a class="nav-link" href="javascript:void(0)" onclick="delete_one_coupon('{{$coupon->id}}')" title="Delete Coupon"><i data-feather="trash"></i></a>
 	                                                @endif
 

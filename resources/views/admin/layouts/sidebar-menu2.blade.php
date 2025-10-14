@@ -300,7 +300,7 @@
                 </li>
             @endif
 
-            @if (!isDispatcher() && !isForecaster())
+            @if (!isDispatcher() && !isForecaster() && auth()->user()->has_access_to_module('coupons'))
             <li class="nav-item with-sub @if (request()->routeIs('coupons*')) active show @endif">
                 <a href="" class="nav-link"><i data-feather="users"></i> <span>Coupons</span></a>
                 <ul>
