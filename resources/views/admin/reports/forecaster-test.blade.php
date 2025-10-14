@@ -435,18 +435,41 @@
     $results = $results->filter(fn($r) => ($r->trantype ?? '') !== 'sales' || (int)($r->isConfirm ?? 0) === 1);
 
     /** 2) Sort unified list by delivery_date ASC (then stable tie-breakers incl. order_number) */
-    $results = $results->sort(function($a, $b) {
-        $ad = strtotime((string)($a->delivery_date ?? '')) ?: 0;
-        $bd = strtotime((string)($b->delivery_date ?? '')) ?: 0;
-        if ($ad !== $bd) return $bd <=> $ad;
+    // $results = $results->sort(function($a, $b) {
+    //     $ad = strtotime((string)($a->delivery_date ?? '')) ?: 0;
+    //     $bd = strtotime((string)($b->delivery_date ?? '')) ?: 0;
+    //     if ($ad !== $bd) return $bd <=> $ad;
+
+    //     return strcmp((string)$a->trantype, (string)$b->trantype)
+    //         ?: strcmp((string)$a->order_number, (string)$b->order_number)
+    //         ?: strcmp((string)($a->contact_person ?? ''), (string)($b->contact_person ?? ''))
+    //         ?: strcmp((string)$a->customer_name, (string)$b->customer_name)
+    //         ?: strcmp((string)$a->timeneeded, (string)$b->timeneeded)
+    //         ?: strcmp((string)$a->dateneeded, (string)$b->dateneeded);
+    // })->values();
+
+    // Date DESC (by day), then TIME ASC (within the same day), then stable tie-breakers
+    $results = $results->sort(function ($a, $b) {
+        $ta = strtotime((string)($a->delivery_date ?? '')) ?: 0;
+        $tb = strtotime((string)($b->delivery_date ?? '')) ?: 0;
+
+        $da = $ta ? date('Y-m-d', $ta) : '';
+        $db = $tb ? date('Y-m-d', $tb) : '';
+        if ($da !== $db) {
+            return strcmp($db, $da); // newer date first
+        }
+
+        $ha = $ta ? date('H:i:s', $ta) : '00:00:00';
+        $hb = $tb ? date('H:i:s', $tb) : '00:00:00';
+        $tcmp = strcmp($ha, $hb);
+        if ($tcmp !== 0) return $tcmp;
 
         return strcmp((string)$a->trantype, (string)$b->trantype)
             ?: strcmp((string)$a->order_number, (string)$b->order_number)
             ?: strcmp((string)($a->contact_person ?? ''), (string)($b->contact_person ?? ''))
-            ?: strcmp((string)$a->customer_name, (string)$b->customer_name)
-            ?: strcmp((string)$a->timeneeded, (string)$b->timeneeded)
-            ?: strcmp((string)$a->dateneeded, (string)$b->dateneeded);
+            ?: strcmp((string)$a->customer_name, (string)$b->customer_name);
     })->values();
+
 
     /** 3) Preload payments for sales */
     $allHids = $results->filter(fn($r) => ($r->trantype ?? '') === 'sales')
@@ -455,7 +478,7 @@
         ? \App\EcommerceModel\SalesPayment::whereIn('sales_header_id', $allHids)->get()->groupBy('sales_header_id')
         : collect();
 
-    /** Helpers */
+    // Helpers
     $formatAddress = function($r) {
         $street = trim((string)($r->address_street ?? ''));
         $mun    = trim((string)($r->address_municipality ?? ''));
