@@ -17,7 +17,7 @@ use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\User;
 use App\Models\Deliverablecities;
-
+use App\Models\Permission;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -25,6 +25,11 @@ use Illuminate\Support\Facades\DB;
 class CouponController extends Controller
 {
     private $searchFields = ['name'];
+    public function __construct()
+    {
+        Permission::module_init($this, 'coupon');
+    }
+
     /**
      * Display a listing of the resource.
      *
