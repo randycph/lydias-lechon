@@ -9,6 +9,8 @@
     <link href="{{ asset('lib/ion-rangeslider/css/ion.rangeSlider.min.css') }}" rel="stylesheet">
     <link href="{{ asset('lib/owl.carousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
     <link href="{{ asset('lib/owl.carousel/assets/owl.theme.default.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/swiper-bundle.min.css') }}">
+
     <style>
         .row-selected {
             background-color: #92b7da !important;
@@ -271,25 +273,29 @@
     </div>
 </div>
 
+<!-- Modal -->
 <div class="modal fade" id="preview-banner" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel3" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
-        <div class="modal-content tx-14">
-            <div class="modal-header">
-                <h6 class="modal-title" id="exampleModalLabel3">Preview</h6>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="owl-carousel owl-theme" id="previewCarousel">
+  <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+    <div class="modal-content tx-14">
+      <div class="modal-header">
+        <h6 class="modal-title" id="exampleModalLabel3">Preview</h6>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
 
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary tx-13" data-dismiss="modal">Close</button>
-            </div>
+      <div class="modal-body">
+        <div class="swiper admin-swiper" id="previewSwiper" style="width:100%;">
+          <div class="swiper-wrapper"></div>
+
         </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary tx-13" data-dismiss="modal">Close</button>
+      </div>
     </div>
+  </div>
 </div>
 
 <div class="modal effect-scale" id="prompt-delete-many" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
@@ -357,6 +363,7 @@
     <script src="{{ asset('lib/bselect/dist/js/i18n/defaults-en_US.js') }}"></script>
     <script src="{{ asset('lib/ion-rangeslider/js/ion.rangeSlider.min.js') }}"></script>
     <script src="{{ asset('lib/owl.carousel/owl.carousel.js') }}"></script>
+    <script src="{{ asset('js/swiper-bundle.min.js') }}"></script>
     <script>
         let listingUrl = "{{ route('albums.index') }}";
         let advanceListingUrl = "";
@@ -437,49 +444,147 @@
             $('#albumForm'+albumId).submit();
         });
 
-        $('#preview-banner').on('show.bs.modal', function (e) {
-            let album = e.relatedTarget;
-            let albumId = $(album).data('id');
-            $('#previewCarousel').html('');
-            $.ajax({
-                type: "POST",
-                data: { _token: "{{ csrf_token() }}"},
-                url: "{{ route('albums.banners', '') }}/" + albumId,
-                success: function(returnData) {
-                    let pathHTML = '';
-                    $.each(returnData['banner_paths'], function(index, path) {
-                        pathHTML += `<div class="item">
-                            <img src="`+path+`">
-                        </div>`;
-                    });
-                    $('#previewCarousel').trigger('destroy.owl.carousel');
+        // $('#preview-banner').on('show.bs.modal', function (e) {
+        //     let album = e.relatedTarget;
+        //     let albumId = $(album).data('id');
+        //     $('#previewCarousel').html('');
+        //     $.ajax({
+        //         type: "POST",
+        //         data: { _token: "{{ csrf_token() }}"},
+        //         url: "{{ route('albums.banners', '') }}/" + albumId,
+        //         success: function(returnData) {
+        //             let pathHTML = '';
+        //             $.each(returnData['banner_paths'], function(index, path) {
+        //                 pathHTML += `<div class="item">
+        //                     <img src="`+path+`">
+        //                 </div>`;
+        //             });
+        //             $('#previewCarousel').trigger('destroy.owl.carousel');
 
-                    $('#previewCarousel').html(pathHTML);
+        //             $('#previewCarousel').html(pathHTML);
 
-                    $('#previewCarousel').owlCarousel({
-                        animateOut: returnData['transition_out'],
-                        animateIn: returnData['transition_in'],
-                        loop: true,
-                        dots: false,
-                        margin: 0,
-                        autoplay: true,
-                        autoplayTimeout: (returnData['transition']*1000),
-                        autoplayHoverPause: false,
-                        nav: false,
-                        responsive: {
-                            0: {
-                                items: 1
-                            },
-                            600: {
-                                items: 1
-                            },
-                            1000: {
-                                items: 1
-                            }
-                        }
-                    });
-                }
-            });
-        });
+        //             $('#previewCarousel').owlCarousel({
+        //                 animateOut: returnData['transition_out'],
+        //                 animateIn: returnData['transition_in'],
+        //                 loop: true,
+        //                 dots: false,
+        //                 margin: 0,
+        //                 autoplay: true,
+        //                 autoplayTimeout: (returnData['transition']*1000),
+        //                 autoplayHoverPause: false,
+        //                 nav: false,
+        //                 responsive: {
+        //                     0: {
+        //                         items: 1
+        //                     },
+        //                     600: {
+        //                         items: 1
+        //                     },
+        //                     1000: {
+        //                         items: 1
+        //                     }
+        //                 }
+        //             });
+        //         }
+        //     });
+        // });
     </script>
+
+<script>
+(function () {
+  let previewSwiper = null;
+
+  // Build Swiper options based on effect + speed (ms)
+  function buildOptions(effect, speedMs) {
+    const opts = {
+      effect,
+      slidesPerView: 1,
+      loop: false,
+      speed: speedMs,
+      autoplay: { delay: speedMs, disableOnInteraction: false },
+      navigation: { nextEl: '#previewSwiper .swiper-button-next', prevEl: '#previewSwiper .swiper-button-prev' },
+      pagination: { el: '#previewSwiper .swiper-pagination', clickable: true }
+    };
+
+    switch (effect) {
+      case 'fade':
+        opts.fadeEffect = { crossFade: true };
+        break;
+      case 'cube':
+        opts.cubeEffect = { shadow: true, slideShadows: true, shadowOffset: 20, shadowScale: 0.94 };
+        break;
+      case 'coverflow':
+        opts.centeredSlides = true;
+        opts.coverflowEffect = { rotate: 0, stretch: 0, depth: 120, modifier: 1, slideShadows: true };
+        break;
+      case 'flip':
+        opts.flipEffect = { slideShadows: true, limitRotation: true };
+        break;
+      case 'cards':
+        opts.grabCursor = true;
+        break;
+      case 'creative':
+        opts.creativeEffect = {
+          prev: { translate: ['-20%', 0, -1], opacity: 0.6, scale: 0.85 },
+          next: { translate: ['20%', 0, -1],  opacity: 0.6, scale: 0.85 }
+        };
+        break;
+      // 'slide' uses defaults
+    }
+    return opts;
+  }
+
+  // Open modal → fetch banners → populate → init Swiper
+  $('#preview-banner').on('show.bs.modal', function (e) {
+    const albumId = $(e.relatedTarget).data('id');
+    const $wrapper = $('#previewSwiper .swiper-wrapper');
+
+    // clear previous slides
+    $wrapper.empty();
+
+    // destroy previous instance (if any)
+    if (previewSwiper) {
+      previewSwiper.destroy(true, true);
+      previewSwiper = null;
+    }
+
+    $.ajax({
+      type: "POST",
+      url: "{{ route('albums.banners', '') }}/" + albumId,
+      data: { _token: "{{ csrf_token() }}" },
+      success: function (res) {
+        // Expecting payload like:
+        // { banner_paths: [..], effect: "cube"|"fade"|..., transition: 4 }
+        const paths = Array.isArray(res.banner_paths) ? res.banner_paths : [];
+        const effect = (res.effect || 'slide').toLowerCase();
+        const speedMs = 1000;
+
+        // render slides
+        const slides = paths.map(p => `
+          <div class="swiper-slide">
+            <img src="${p}" style="width:100%;height:100%;object-fit:cover" onerror="this.src='{{ asset('images/no-image.jpg') }}'">
+          </div>`).join('');
+        $wrapper.html(slides);
+
+        // init
+        previewSwiper = new Swiper('#previewSwiper', buildOptions(effect, speedMs));
+      },
+      error: function () {
+        $wrapper.html('<div class="p-4 text-center text-muted">Unable to load preview.</div>');
+      }
+    });
+  });
+
+  // Optional: destroy on hide to free memory
+  $('#preview-banner').on('hidden.bs.modal', function () {
+    if (previewSwiper) {
+      previewSwiper.destroy(true, true);
+      previewSwiper = null;
+    }
+    $('#previewSwiper .swiper-wrapper').empty();
+  });
+})();
+</script>
+
+
 @endsection

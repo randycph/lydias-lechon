@@ -11,7 +11,7 @@ class Album extends Model
     use SoftDeletes;
 
     protected $table = 'albums';
-    protected $fillable = ['name', 'transition_in', 'transition_out', 'transition', 'type', 'banner_type', 'user_id'];
+    protected $fillable = ['name', 'transition_in', 'transition_out', 'transition', 'type', 'banner_type', 'user_id', 'effect'];
 
     public function pages()
     {
@@ -51,9 +51,10 @@ class Album extends Model
     {
         return Validator::make(request()->all(), [
             'name' => 'required|max:150',
-            'transition_in' => 'required',
-            'transition_out' => 'required',
-            'transition' => 'required|numeric|min:2|max:10',
+            'effect' => 'required',
+            // 'transition_in' => 'required',
+            // 'transition_out' => 'required',
+            // 'transition' => 'required|numeric|min:2|max:10',
             'banners' => 'required|array'
         ], [
             'banners.required' => 'Please upload at least one banner.',
@@ -66,9 +67,10 @@ class Album extends Model
     {
         return Validator::make(request()->all(), [
             'name' => 'required|max:150',
-            'transition_in' => 'required',
-            'transition_out' => 'required',
-            'transition' => 'required|numeric|min:2|max:10'
+            'effect' => 'required',
+            // 'transition_in' => 'required',
+            // 'transition_out' => 'required',
+            // 'transition' => 'required|numeric|min:2|max:10'
         ]);
     }
 

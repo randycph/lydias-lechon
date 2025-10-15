@@ -46,29 +46,14 @@
                         @error('name')
                         @enderror
                     </div>
+
                     <div class="form-group">
-                        <label class="d-block">Transition In *</label>
-                        <select name="transition_in"  class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-sm btn-block tx-left" title="Select transition" data-width="100%" required @error('transition_in') @htmlValidationMessage({{__('standard.banner.empty_transition')}}) @enderror >
-                            @foreach ($animations as $animation)
-                                @if ($animation->is_entrance_field_type())
-                                    <option value="{{ $animation->id }}" {{ (old("transition_in") == $animation->id ? "selected":"") }}>{{ $animation->name }}</option>
-                                @endif
+                        <label class="d-block">Effect *</label>
+                        <select name="effect" class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-sm btn-block tx-left" title="Select effect" data-width="100%">
+                            @foreach (['slide', 'fade', 'cube', 'coverflow', 'flip', 'creative', 'cards'] as $effect)
+                                <option value="{{ $effect }}">{{ ucfirst($effect) }}</option>
                             @endforeach
                         </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="d-block">Transition Out *</label>
-                        <select name="transition_out" class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-sm btn-block tx-left" title="Select transition" data-width="100%" required @error('transition_out') @htmlValidationMessage({{__('standard.banner.empty_transition')}}) @enderror >
-                            @foreach ($animations as $animation)
-                                @if ($animation->is_exit_field_type())
-                                    <option value="{{ $animation->id }}" {{ (old("transition_out") == $animation->id ? "selected":"") }}>{{ $animation->name }}</option>
-                                @endif
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="d-block">Transition Duration (seconds) *</label>
-                        <input name="transition" type="integer" class="js-range-slider" value="{{ old('transition') }}" required @error('transition') is-invalid @enderror/>
                     </div>
                     <div class="form-group mg-b-0">
                         <input type="file" id="upload_image" class="image_path" accept="image/*" multiple>

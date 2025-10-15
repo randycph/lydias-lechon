@@ -151,7 +151,7 @@ class AlbumController extends Controller
      */
     public function update(Request $request, Album $album)
     {
-
+    
         if (Album::has_invalid_data() || Banner::has_invalid_data()) {
             $errors = Album::get_error_messages()
                 ->merge(Banner::get_error_messages());
@@ -265,6 +265,7 @@ class AlbumController extends Controller
             'transition_in' => $album->animationIn->value,
             'transition_out' => $album->animationOut->value,
             'transition' => $album->transition,
+            'effect' => $album->effect
         ];
 
         return response()->json($returnData);

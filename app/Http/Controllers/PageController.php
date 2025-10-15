@@ -160,7 +160,10 @@ class PageController extends Controller
         $albums = Album::where('type', 'sub_banner')->get();
         $parentPages = Page::where('id', '!=', $page->id)->where('page_type', '!=', 'uneditable')->get();
         $pageAlbum = $page->album;
-        return view('admin.pages.edit', compact('page', 'parentPages', 'albums', 'pageAlbum'));
+
+        $banners = $pageAlbum->banners ?? [];
+
+        return view('admin.pages.edit', compact('page', 'parentPages', 'albums', 'pageAlbum', 'banners'));
     }
 
 

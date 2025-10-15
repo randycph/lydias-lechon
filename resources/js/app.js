@@ -1,9 +1,16 @@
 // Import Swiper and required modules
 import Swiper from 'swiper';
-import { Navigation, Pagination, EffectCoverflow } from 'swiper/modules';
+
+import { Navigation, Pagination, Autoplay,
+  EffectFade, EffectCube, EffectCoverflow, EffectFlip, EffectCards, EffectCreative } from 'swiper/modules';
 
 // Import Swiper and modules styles
 import 'swiper/css';
+import 'swiper/css/effect-fade';
+import 'swiper/css/effect-cube';
+import 'swiper/css/effect-coverflow';
+import 'swiper/css/effect-flip';
+import 'swiper/css/effect-cards';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
@@ -151,4 +158,72 @@ document.addEventListener("DOMContentLoaded", function () {
             },
         });
     }, 100);
+
+ 
+const el = document.querySelector('.page-sliders');
+if (el) {
+    const effect = (el.dataset.effect || 'slide').toLowerCase();
+    const speedS = 1; 
+    const speedMs = Math.max(100, speedS * 1000);
+
+    // base options
+    const options = {
+        modules: [Navigation, Pagination, Autoplay,
+                EffectFade, EffectCube, EffectCoverflow, EffectFlip, EffectCards, EffectCreative],
+        effect,
+        slidesPerView: 1,
+        loop: false,
+        speed: speedMs,
+        autoplay: { delay: speedMs, disableOnInteraction: false },
+        navigation: {
+        nextEl: '.swiper-button-next-custom',
+        prevEl: '.swiper-button-prev-custom',
+        },
+        pagination: { el: '.swiper-pagination', clickable: true },
+    };
+
+    // effect-specific tuning
+    switch (effect) {
+        case 'fade':
+        options.fadeEffect = { crossFade: true };
+        break;
+        case 'cube':
+        options.cubeEffect = {
+            shadow: true,
+            slideShadows: true,
+            shadowOffset: 20,
+            shadowScale: 0.94
+        };
+        break;
+        case 'coverflow':
+        options.centeredSlides = true;
+        options.coverflowEffect = {
+            rotate: 0,      // subtle; bump if you want more tilt
+            stretch: 0,
+            depth: 120,
+            modifier: 1,
+            slideShadows: true
+        };
+        break;
+        case 'flip':
+        options.flipEffect = { slideShadows: true, limitRotation: true };
+        break;
+        case 'cards':
+        options.grabCursor = true; // feels nicer for cards
+        break;
+        case 'creative':
+        // mimic a classy zoom/opacity transition
+        options.creativeEffect = {
+            prev: { translate: ['-20%', 0, -1], opacity: 0.6, scale: 0.85 },
+            next: { translate: ['20%', 0, -1],  opacity: 0.6, scale: 0.85 }
+        };
+        break;
+        // 'slide' uses defaults
+    }
+
+    new Swiper(el, options);
+}
+
+
+
 });

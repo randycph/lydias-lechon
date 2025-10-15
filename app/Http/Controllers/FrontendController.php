@@ -900,11 +900,13 @@ class FrontendController extends Controller
 
     public function page($slug)
     {
-        $page = Page::where('slug', $slug)->first();
+        $page = Page::with('album.banners')->where('slug', $slug)->first();
 
         if (!$page) {
             abort(404);
         }
+
+        // dd($page);
 
         $albums = Album::with('banners')->where('name', 'Home Banner')->first();
 

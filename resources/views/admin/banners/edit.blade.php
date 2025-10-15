@@ -9,6 +9,7 @@
     <link href="{{ asset('lib/ion-rangeslider/css/ion.rangeSlider.min.css') }}" rel="stylesheet">
     <link href="{{ asset('lib/owl.carousel/assets/owl.carousel.min.css') }}" rel="stylesheet">
     <link href="{{ asset('lib/owl.carousel/assets/owl.theme.default.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('css/swiper-bundle.min.css') }}">
     <style>
         #errorMessage {
             list-style-type: none;
@@ -63,28 +64,12 @@
                     @enderror
                 </div>
                 <div class="form-group">
-                    <label class="d-block">Transition In *</label>
-                    <select name="transition_in" class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-sm btn-block tx-left" title="Select transition" data-width="100%">
-                        @foreach ($animations as $animation)
-                            @if ($animation->is_entrance_field_type())
-                                <option {{ (old("transition_in",$album->transition_in) == $animation->id ? "selected":"") }} value="{{ $animation->id }}">{{ $animation->name }}</option>
-                            @endif
+                    <label class="d-block">Effect *</label>
+                    <select name="effect" class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-sm btn-block tx-left" id="effectSelect" title="Select effect" data-width="100%">
+                        @foreach (['slide', 'fade', 'cube', 'coverflow', 'flip', 'creative', 'cards'] as $effect)
+                            <option {{ (old("effect", $album->effect) == $effect ? "selected":"") }} value="{{ $effect }}">{{ ucfirst($effect) }}</option>
                         @endforeach
                     </select>
-                </div>
-                <div class="form-group">
-                    <label class="d-block">Transition Out *</label>
-                    <select name="transition_out" class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-sm btn-block tx-left" title="Select transition" data-width="100%">
-                        @foreach ($animations as $animation)
-                            @if ($animation->is_exit_field_type())
-                                <option {{ (old("transition_out",$album->transition_out) == $animation->id ? "selected":"") }} value="{{ $animation->id }}">{{ $animation->name }}</option>
-                            @endif
-                        @endforeach
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label class="d-block">Transition Duration (seconds) *</label>
-                    <input name="transition" type="text" class="js-range-slider" name="my_range" value="{{ old('transition',$album->transition) }}" />
                 </div>
                 <div class="form-group mg-b-0">
                     <input type="file" name="banner" class="d-none" id="upload_image" accept="image/*" multiple>
@@ -177,13 +162,17 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div class="owl-carousel owl-theme" id="previewCarousel">
-                    @foreach ($banners as $key => $banner)
-                        <div class="item">
-                            <img src="{{$banner->image_path}}">
-                        </div>
-                    @endforeach
+                @if (count($banners) > 0)
+                <div class="swiper admin-swiper" style="width:100%;">
+                    <div class="swiper-wrapper">
+                        @foreach ($banners as $key => $banner)
+                            <div class="swiper-slide">
+                                <img src="{{$banner['image_path']}}" style="width:100%; height:100%; object-fit:cover">
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
+                @endif
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary tx-13" data-dismiss="modal">Close</button>
@@ -199,6 +188,8 @@
     <script src="{{ asset('lib/ion-rangeslider/js/ion.rangeSlider.min.js') }}"></script>
     <script src="{{ asset('lib/jqueryui/jquery-ui.min.js') }}"></script>
     <script src="{{ asset('lib/owl.carousel/owl.carousel.js') }}"></script>
+    <script src="{{ asset('js/swiper-bundle.min.js') }}"></script>
+
     {{--    Image validation--}}
     <script>
         const IS_MAIN_BANNER = "{{ $album->is_main_banner() }}";
@@ -344,5 +335,60 @@
             dragInit();
             /* End Draggable */
         });
+    </script>
+    <script>
+    (function () {
+    const effectSelect = document.getElementById('effectSelect');
+    const el = document.querySelector('.admin-swiper');
+
+    let swiper;
+
+    function buildOptions(effect, speedMs) {
+        const opts = {
+        effect,
+        slidesPerView: 1,
+        loop: false,
+        speed: speedMs,
+        autoplay: false,
+        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+        pagination: { el: '.swiper-pagination', clickable: true }
+        };
+
+        switch (effect) {
+        case 'fade':
+            opts.fadeEffect = { crossFade: true };
+            break;
+        case 'cube':
+            opts.cubeEffect = { shadow: true, slideShadows: true, shadowOffset: 20, shadowScale: 0.94 };
+            break;
+        case 'coverflow':
+            opts.centeredSlides = true;
+            opts.coverflowEffect = { rotate: 0, stretch: 0, depth: 120, modifier: 1, slideShadows: true };
+            break;
+        case 'flip':
+            opts.flipEffect = { slideShadows: true, limitRotation: true };
+            break;
+        case 'cards':
+            opts.grabCursor = true;
+            break;
+        case 'creative':
+            opts.creativeEffect = {
+            prev: { translate: ['-20%', 0, -1], opacity: 0.6, scale: 0.85 },
+            next: { translate: ['20%', 0, -1],  opacity: 0.6, scale: 0.85 }
+            };
+            break;
+        }
+        return opts;
+    }
+
+    function init() {
+        const effect = effectSelect.value.toLowerCase();
+
+        if (swiper) swiper.destroy(true, true);
+        swiper = new Swiper(el, buildOptions(effect, 1000));
+    }
+
+    init(); // first load
+    })();
     </script>
 @endsection
