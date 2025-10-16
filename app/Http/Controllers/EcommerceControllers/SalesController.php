@@ -483,12 +483,14 @@ class SalesController extends Controller
 
     public function confirm_order($order_id,$remarks,$confirm_by){
         $sales = SalesHeader::whereId($order_id)->first();
+        $payment = SalesPayment::where('sales_header_id', $order_id)->latest()->first();
+        
         $sales->update([
             'isConfirm' => 1,
             'confirmed_by' => $confirm_by,
             'confirm_remarks' => $remarks,
             'confirmed_on' => date('Y-m-d H:i:s'),
-            'payment_status' => 'PAID'
+            'payment_status' => $payment && $payment?->payment_type == 'COD' ? 'PAID' : 'UNPAID'
         ]);
 
         $sh = new SalesHeader();
