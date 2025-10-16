@@ -16,24 +16,50 @@
             </svg>
         </button>
 
+        @php
+            $grouped = $menu->navigation->groupBy('parent_id');
+        @endphp
+
         <!-- Drawer Content -->
-        <div class="mt-10 space-y-4 text-left">
+        <div class="mt-5 text-left">
 
-            <a href="#" class="block text-2xl font-medium font-cubao uppercase border-[#DFDFDF] text-primary pl-10">Hi, juan!</a>
-            <ul class="flex flex-col gap-4 pl-10">
-                <li class="uppercase font-light"><a href="{{ route('my-account') }}" class="link-tertiary">Manage account</a></li>
-                <li class="uppercase font-light"><a href="{{ route('change-password') }}" class="link-tertiary">Change password</a></li>
-                <li class="uppercase font-light"><a href="{{ route('order-history') }}" class="link-tertiary">Order History</a></li>
-                <li class="uppercase font-light"><a href="{{ route('login') }}" class="link-tertiary">Sign out</a></li>
-            </ul>
+            @if (Auth::check())
+            <div class="mb-10">
+                <a href="#" class="block text-2xl font-medium font-cubao uppercase border-[#DFDFDF] text-primary pl-10">Hi, {{ auth()->check() && auth()->user()?->is_org ? auth()->user()->organization : auth()->user()?->name }}</a>
 
-            <a href="{{ route('our-story') }}" class="hover:bg-tertiary hover:text-white block text-2xl font-medium font-cubao uppercase py-5 border-y border-[#DFDFDF] pl-10">Our Story</a>
+                <ul class="flex flex-col gap-4 pl-10 mt-5">
+                    <li class="uppercase font-light"><a href="{{ route('my-account') }}" class="link-tertiary">Manage account</a></li>
+                    <li class="uppercase font-light"><a href="{{ route('change-password') }}" class="link-tertiary">Change password</a></li>
+                    <li class="uppercase font-light"><a href="{{ route('order-history') }}" class="link-tertiary">Order History</a></li>
+                    <li class="uppercase font-light"><a href="{{ route('login') }}" class="link-tertiary">Sign out</a></li>
+                </ul>
+            </div>
+            @endif
+
+
+            @foreach ($grouped->get(0, collect()) as $item)
+                @php
+                    $url = '#';
+
+                    if ($item->page_id > 0 && $item->page) {
+                        $url = $item->page->slug ? route('page', ['slug' => $item->page->slug]) : '#';
+                    } elseif (!empty($item->uri)) {
+                        $url = $item->uri;
+                    }
+
+                    $hasChildren = $grouped->has($item->id);
+                @endphp
+                <a href="{{ $url }}" class="hover:bg-tertiary hover:text-white block text-2xl text-primary-dark font-medium font-cubao uppercase py-5 border-y border-[#DFDFDF] pl-10">{{ $item->label }}</a>
+            @endforeach
+
+            {{-- <a href="{{ route('our-story') }}" class="hover:bg-tertiary hover:text-white block text-2xl font-medium font-cubao uppercase py-5 border-y border-[#DFDFDF] pl-10">Our Story</a>
             <a href="{{ route('our-stores') }}" class="hover:bg-tertiary hover:text-white block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Our Stores</a>
             <a href="{{ route('lechon-menu') }}" class="hover:bg-tertiary hover:text-white block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Menu</a>
             <a href="{{ route('lechon-pricelist') }}" class="hover:bg-tertiary hover:text-white block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Lechon Pricelist</a>
             <!-- <button @click="open = false; openHotline = true; " class="hover:bg-tertiary hover:text-white w-full text-left block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Hotline</button> -->
              <a href="{{ env('APP_URL') }}/call-hotline" class="hover:bg-tertiary hover:text-white block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Hotline</a>
-            <a href="{{ route('careers.v2') }}" class="hover:bg-tertiary hover:text-white block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Careers</a>
+            <a href="{{ route('careers.v2') }}" class="hover:bg-tertiary hover:text-white block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Careers</a> --}}
+        
         </div>
     </div>
 </div>

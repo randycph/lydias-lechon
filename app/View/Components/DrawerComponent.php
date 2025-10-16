@@ -2,6 +2,7 @@
 
 namespace App\View\Components;
 
+use App\Models\Menu;
 use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
@@ -21,6 +22,14 @@ class DrawerComponent extends Component
      */
     public function render(): View|Closure|string
     {
-        return view('components.drawer-component');
+        $menu = Menu::with(['navigation' => function ($query) {
+            $query->orderBy('page_order', 'asc');
+        }])
+        ->where('is_active', 1)
+        ->first();
+
+        // dd($menu);
+
+        return view('components.drawer-component', compact('menu'));
     }
 }
