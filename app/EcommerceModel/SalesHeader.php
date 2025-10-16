@@ -142,11 +142,20 @@ class SalesHeader extends Model
         $sale = SalesHeader::find($this->id);
 
         if (isset($sale->parent_sales_header_id) && $sale->parent_sales_header_id != null) {
-            $paid = (float) SalesPayment::where('sales_header_id', $sale->parent_sales_header_id)->whereStatus('PAID')->sum('amount');
+            $payment = SalesPayment::where('sales_header_id', $sale->parent_sales_header_id)->whereStatus('PAID')->get();
+            $paid = (float) $payment->sum('amount');
         } else {
-            $paid = (float) SalesPayment::where('sales_header_id', $sale->id)->whereStatus('PAID')->sum('amount');
+            $payment = SalesPayment::where('sales_header_id', $sale->id)->whereStatus('PAID')->get();
+            $paid = (float) $payment->sum('amount');
         }
-       
+
+        if ($payment->isNotEmpty()) {
+            $payment_type = $payment->first() != null ? $payment->first()->payment_type : null;
+            
+            if ($sale->isConfirm == 1 && $payment_type == 'COD') {
+                return 'PAID';
+            }
+        }
         $balance = $amount - $paid;
         if($balance <= 0){
             return 'PAID';
