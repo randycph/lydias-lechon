@@ -149,7 +149,13 @@ class SalesHeader extends Model
             $paid = (float) $payment->sum('amount');
         }
 
-        if ($sale->payment_status == 'PAID') {
+        if (isset($sale->parent_sales_header_id) && $sale->parent_sales_header_id != null) {
+            $newSale = SalesHeader::where('id', $sale->parent_sales_header_id)->first();
+        } else {
+            $newSale = SalesHeader::where('id', $sale->id)->first();
+        }
+
+        if ($newSale->payment_status == 'PAID') {
             return 'PAID';
         }
         $balance = $amount - $paid;
