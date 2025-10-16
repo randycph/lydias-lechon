@@ -480,7 +480,8 @@ class SalesController extends Controller
             'isConfirm' => 1,
             'confirmed_by' => $confirm_by,
             'confirm_remarks' => $remarks,
-            'confirmed_on' => date('Y-m-d H:i:s')
+            'confirmed_on' => date('Y-m-d H:i:s'),
+            'payment_status' => 'PAID'
         ]);
 
         $sh = new SalesHeader();
