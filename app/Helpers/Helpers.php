@@ -77,6 +77,8 @@ if (!function_exists('unreadTransactions')) {
             if ($branchId == null) {
                 return 0;
             }
+            
+            $today = now();
 
             $eligible = DB::table('ecommerce_sales_details as d')
                 ->join('job_orders as jo', 'jo.sales_detail_id', '=', 'd.id')
@@ -84,6 +86,7 @@ if (!function_exists('unreadTransactions')) {
                 ->when($branchId, function ($query) use ($branchId) {
                     return $query->where('po.branch_id', $branchId);
                 })
+                ->where('d.delivery_date', '>=', $today->startOfDay()->toDateTimeString())
                 ->select('d.sales_header_id');
 
             $sales = SalesHeader::where(function ($query) use($eligible) {
