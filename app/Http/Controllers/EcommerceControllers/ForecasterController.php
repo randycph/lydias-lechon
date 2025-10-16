@@ -264,16 +264,14 @@ class ForecasterController extends Controller
 
         // $orders = ProductionOrder::where('branch_id',$request->branch_id)->whereDate('delivery_date',$request->date_needed)->orderBy('delivery_date','desc')->get();
 
-        $orders = ProductionOrder::with('jobOrder_details.sales_detail')
+        $orders = ProductionOrder::with(['jobOrder_details.sales_detail' => function ($q) {
+                $q->select('id','sales_header_id','product_name','qty','price','net_amount'); // pick what you need
+            }])
             ->where('branch_id', $request->branch_id)
             ->whereDate('delivery_date', $request->date_needed)
             ->orderByDesc('delivery_date')
             ->get()
-            // keep rows that actually have a sales_header_id
-            ->filter(fn ($o) => optional($o->jobOrder_details?->sales_detail)->sales_header_id)
-            // make them unique by that key
-            ->unique(fn ($o) => $o->jobOrder_details->sales_detail->sales_header_id)
-            ->values();
+            ->filter(fn ($o) => $o->jobOrder_details?->sales_detail?->sales_header_id);
 
 
         return view('admin.forecaster.display-assigned-orders',compact('orders'));
