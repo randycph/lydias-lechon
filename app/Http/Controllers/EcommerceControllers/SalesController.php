@@ -453,13 +453,13 @@ class SalesController extends Controller
         $new_gross = $dets + $sales->delivery_fee_amount;
         $new_net = ($dets + $sales->delivery_fee_amount) - $sales->discount_amount;
 
-        $update_gross_and_net = SalesHeader::whereId($request->delfee_sales_id)->update([
+        SalesHeader::whereId($request->delfee_sales_id)->update([
             'gross_amount' => $new_gross,
             'net_amount' => $new_net
         ]);
 
         if ($sales->payment_status == 'PAID' && $new_net > SalesHeader::paid($sales->id)) {
-            $update_payment_status = SalesHeader::whereId($request->delfee_sales_id)->update([
+            SalesHeader::whereId($request->delfee_sales_id)->update([
                 'payment_status' => 'PENDING'
             ]);
         }
