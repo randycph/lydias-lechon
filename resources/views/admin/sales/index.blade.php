@@ -328,7 +328,11 @@
                                      <td>
                                         @if ($sale->Paymentadminstatus == 'UNPAID' && isForecaster())
                                         @else
-                                            {{ number_format((\App\EcommerceModel\SalesHeader::balance($sale->id)),2) }}
+                                            @if ($sale->payment_status == 'PAID')
+                                                0.00
+                                            @else
+                                                {{ number_format((\App\EcommerceModel\SalesHeader::balance($sale->id)),2) }}
+                                            @endif
                                         @endif
                                     </td>
                                     <td width="10%">
