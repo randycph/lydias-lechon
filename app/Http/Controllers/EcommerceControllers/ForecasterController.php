@@ -14,8 +14,7 @@ use App\EcommerceModel\SalesDetail;
 use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\JobOrder;
 use App\Models\Product;
-use Carbon\Carbon;
-use Illuminate\Support\Str;
+
 
 class ForecasterController extends Controller
 {
@@ -88,6 +87,16 @@ class ForecasterController extends Controller
         $insertID = $current_total_order+1;
         //dd($current_total_order." aa ".$insertID." bb ".'JO'.date('Ymd',strtotime($request->delivery_date)).sprintf('%04d', $insertID));
 
+        $existingJo = JobOrder::where('sales_detail_id', $salesdetail->id)
+            ->where('sales_number', $salesdetail->header->order_number)
+            ->where('date_needed', $request->delivery_date.' '.$request->delivery_time)
+            ->where('qty', $salesdetail->qty)
+            ->first();
+
+        if ($existingJo) {
+            return redirect()->route('forecaster.index')->with('error', __('standard.forecaster.job_order_exists'));
+        }
+
         $jo = JobOrder::create([
             'user_id' => auth()->id(),
             'jo_number' => 'JO'.date('Ymd',strtotime($request->delivery_date)).sprintf('%04d', $insertID),
@@ -130,18 +139,6 @@ class ForecasterController extends Controller
 
     public function assign_to_production_branch($joId,$request)
     {
-
-        // // update or create
-
-        // ProductionOrder::updateOrCreate([
-        //     'joborder_id' => $joId
-        // ],
-        // [
-        //     'branch_id' => $request->branch_id,
-        //     'delivery_date' => $request->delivery_date.' '.$request->delivery_time,
-        //     'schedule_type' => $request->schedule_type
-        // ]);
-
         ProductionOrder::create([
             'branch_id' => $request->branch_id,
             'joborder_id' => $joId,
@@ -263,46 +260,7 @@ class ForecasterController extends Controller
     public function display_orders(Request $request){
         $input = $request->all();
 
-        // $orders = ProductionOrder::where('branch_id',$request->branch_id)->whereDate('delivery_date',$request->date_needed)->orderBy('delivery_date','desc')->get();
-
-        $orders = ProductionOrder::with([
-                'jobOrder_details:id,qty,product_name,sales_detail_id',
-                'jobOrder_details.sales_detail:id,sales_header_id,product_name'
-            ])
-            ->where('branch_id', $request->branch_id)
-            ->whereDate('delivery_date', $request->date_needed)
-            ->orderByDesc('delivery_date')
-            ->get();
-
-        $items = $orders
-            ->map(function ($o) {
-                $jo = $o->jobOrder_details;
-                $sd = $jo?->sales_detail;
-
-                // choose name from SalesDetail, else fallback to JobOrder
-                $name = trim($sd->product_name ?? $jo?->product_name ?? '');
-
-                return (object) [
-                    'product_name'    => $name,
-                    'qty'             => $jo?->qty ?? 0,
-                    'sales_header_id' => $sd?->sales_header_id,
-                    // normalize delivery date to date (or keep full timestamp if you prefer)
-                    'delivery_date'   => Carbon::parse($o->delivery_date)->toDateString(),
-                ];
-            })
-            // keep only complete rows
-            ->filter(fn ($x) => $x->product_name !== '' && $x->sales_header_id && $x->qty !== null)
-            // UNIQUE by (product_name, qty, sales_header_id, delivery_date)
-            ->unique(function ($x) {
-                return implode('|', [
-                    Str::lower(trim($x->product_name)), // case-insensitive name uniqueness
-                    (string) $x->qty,
-                    (string) $x->sales_header_id,
-                    (string) $x->delivery_date,
-                ]);
-            })
-            ->values();
-
+        $orders = ProductionOrder::where('branch_id',$request->branch_id)->whereDate('delivery_date',$request->date_needed)->orderBy('delivery_date','desc')->get();
 
         return view('admin.forecaster.display-assigned-orders',compact('orders'));
     }
