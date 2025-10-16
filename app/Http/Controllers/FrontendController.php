@@ -906,7 +906,11 @@ class FrontendController extends Controller
             abort(404);
         }
 
-        // dd($page);
+        if ($page->status == 'PRIVATE') {
+            if (!Auth::check() || (Auth::check() && Auth()->user()->user_type == 'customer')) {
+                abort(404);
+            }
+        }
 
         $albums = Album::with('banners')->where('name', 'Home Banner')->first();
 
