@@ -213,7 +213,7 @@
                                     @forelse($details?->joborders as $jo)
                                         @if($jo->status=='Active')
                                             {{$jo->jo_number}} 
-                                            @if($jo->prodOrder->joborder_id > 0)
+                                            @if($jo?->prodOrder?->joborder_id > 0)
                                                 ({{$jo->prodOrder?->prodBranch?->name}})
                                             @endif
                                         @endif
