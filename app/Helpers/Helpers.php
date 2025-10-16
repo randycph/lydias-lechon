@@ -74,6 +74,10 @@ if (!function_exists('unreadTransactions')) {
 
             $branchId = auth()->user()->role_id == 5 ? auth()->user()->production_branch_id : null;
 
+            if ($branchId == null) {
+                return 1110;
+            }
+
             $eligible = DB::table('ecommerce_sales_details as d')
                 ->join('job_orders as jo', 'jo.sales_detail_id', '=', 'd.id')
                 ->join('production_orders as po', 'po.joborder_id', '=', 'jo.id')
