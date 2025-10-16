@@ -89,8 +89,12 @@ if (!function_exists('unreadTransactions')) {
                 ->where('d.delivery_date', '>=', $today->startOfDay()->toDateTimeString())
                 ->select('d.sales_header_id');
 
+            // $sales = SalesHeader::where(function ($query) use($eligible) {
+            //     $query->whereIn('id', $eligible)->where('is_new_order', 1);
+            // });
+
             $sales = SalesHeader::where(function ($query) use($eligible) {
-                $query->whereIn('id', $eligible)->where('is_new_order', 1);
+                $query->whereIn('id', $eligible)->where('has_sub', 0)->where('is_new_order', 1);
             });
 
             return $sales->count();
