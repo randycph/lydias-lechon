@@ -96,14 +96,16 @@ class ForecasterController extends Controller
             ->where('jo_order_type', $salesdetail->header->order_type ?? ' ')
             ->first();
 
-        $existingPo = ProductionOrder::where('branch_id', $request->branch_id)
-            ->where('joborder_id', $existingJo->id)
-            ->where('delivery_date', $request->delivery_date.' '.$request->delivery_time)
-            ->where('schedule_type', $request->schedule_type)
-            ->first();
+        if ($existingJo) {
+            $existingPo = ProductionOrder::where('branch_id', $request->branch_id)
+                ->where('joborder_id', $existingJo->id)
+                ->where('delivery_date', $request->delivery_date.' '.$request->delivery_time)
+                ->where('schedule_type', $request->schedule_type)
+                ->first();
 
-        if ($existingPo) {
-            return redirect()->route('forecaster.index')->with('error', 'This sales detail already has an existing production order for the specified date and time.');
+            if ($existingPo) {
+                return redirect()->route('forecaster.index')->with('error', 'This sales detail already has an existing production order for the specified date and time.');
+            }
         }
 
         $jo = JobOrder::create([
