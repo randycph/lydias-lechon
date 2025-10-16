@@ -14,7 +14,7 @@
             <h3 class="font-bold text-lg md:text-xl uppercase">About Us</h3>
             <ul class="mt-2 flex flex-col gap-2">
                 <li><a href="{{ route('our-story') }}" class="link-underline-light">Our Story</a></li>
-                <li><a href="{{ route('our-stores') }}" class="link-underline-light">Our Stores</a></li>
+                <li><a href="/stores" class="link-underline-light">Our Stores</a></li>
                 <li><a href="{{ route('blogs') }}" class="link-underline-light">Blog</a></li>
             </ul>
         </div>
