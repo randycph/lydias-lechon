@@ -174,7 +174,7 @@ if (el) {
         slidesPerView: 1,
         loop: false,
         speed: speedMs,
-        autoplay: { delay: speedMs, disableOnInteraction: false },
+        autoplay: false,
         navigation: {
         nextEl: '.swiper-button-next-custom',
         prevEl: '.swiper-button-prev-custom',
