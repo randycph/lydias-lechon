@@ -129,6 +129,18 @@ class ForecasterController extends Controller
 
     public function assign_to_production_branch($joId,$request)
     {
+
+        // // update or create
+
+        // ProductionOrder::updateOrCreate([
+        //     'joborder_id' => $joId
+        // ],
+        // [
+        //     'branch_id' => $request->branch_id,
+        //     'delivery_date' => $request->delivery_date.' '.$request->delivery_time,
+        //     'schedule_type' => $request->schedule_type
+        // ]);
+
         ProductionOrder::create([
             'branch_id' => $request->branch_id,
             'joborder_id' => $joId,
@@ -250,7 +262,19 @@ class ForecasterController extends Controller
     public function display_orders(Request $request){
         $input = $request->all();
 
-        $orders = ProductionOrder::where('branch_id',$request->branch_id)->whereDate('delivery_date',$request->date_needed)->orderBy('delivery_date','desc')->get();
+        // $orders = ProductionOrder::where('branch_id',$request->branch_id)->whereDate('delivery_date',$request->date_needed)->orderBy('delivery_date','desc')->get();
+
+        $orders = ProductionOrder::with('jobOrder_details.sales_detail')
+            ->where('branch_id', $request->branch_id)
+            ->whereDate('delivery_date', $request->date_needed)
+            ->orderByDesc('delivery_date')
+            ->get()
+            // keep rows that actually have a sales_header_id
+            ->filter(fn ($o) => optional($o->jobOrder_details?->sales_detail)->sales_header_id)
+            // make them unique by that key
+            ->unique(fn ($o) => $o->jobOrder_details->sales_detail->sales_header_id)
+            ->values();
+
 
         return view('admin.forecaster.display-assigned-orders',compact('orders'));
     }
