@@ -83,7 +83,7 @@ if (!function_exists('unreadTransactions')) {
                 ->select('d.sales_header_id');
 
             $sales = SalesHeader::where(function ($query) use($eligible) {
-                $query->whereIn('id', $eligible)->whereColumn('created_at', 'updated_at');
+                $query->whereIn('id', $eligible)->whereColumn('created_at', 'updated_at')->where('is_new_order', 1);
             });
 
             return $sales->count();
