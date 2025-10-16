@@ -197,7 +197,23 @@ class JoborderController extends Controller
         $branches_store = Branch::orderBy('name','asc')->get();
         $pbs = ProductionBranch::orderBy('name','asc')->get();
         $branches  = Deliverablecities::distinct()->orderBy('name')->get(['name']);
-        return view('admin.joborder.create',compact('products','miscelaneous','branches','branches_store','pbs'));
+
+        $provinces = Deliverablecities::query()
+            ->select('province')
+            ->whereNotNull('province')->where('province', '!=', '')
+            ->distinct()
+            ->orderBy('province')
+            ->pluck('province');
+
+        $cities = Deliverablecities::query()
+            ->select('city')
+            ->whereNotNull('city')->where('city', '!=', '')
+            ->distinct()
+            ->orderBy('city')
+            ->pluck('city');
+
+
+        return view('admin.joborder.create',compact('products','miscelaneous','branches','branches_store','pbs','provinces','cities'));
     }
 
     /**
@@ -826,12 +842,19 @@ class JoborderController extends Controller
         ]);
     }
 
-    public function get_shipping_fee(Request $request){
+    public function get_shipping_fee(Request $request)
+    {
+
+        $province = $request->province;
+        $city = $request->city;
 
         $rate=0;
         //$baka_with_fee = ['Imus Cavite','Molino'];
-        $location_lechon = Deliverablecities::whereName($request->location)->where('item_type','lechon')->first();
-        $location_misc = Deliverablecities::whereName($request->location)->where('item_type','misc')->first();
+        // $location_lechon = Deliverablecities::whereName($request->location)->where('item_type','lechon')->first();
+        // $location_misc = Deliverablecities::whereName($request->location)->where('item_type','misc')->first();
+
+        $location_lechon = Deliverablecities::where('province', $province)->where('city', $city)->where('item_type','lechon')->first();
+        $location_misc = Deliverablecities::where('province', $province)->where('city', $city)->where('item_type','misc')->first();
 
         if($request->has_lechon == '1' || $request->has_lechon == '2'){
             if(!empty($location_lechon)){
