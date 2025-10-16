@@ -566,7 +566,7 @@ class SalesController extends Controller
                 //     });
 
                 $model = SalesHeader::where(function ($query) use($eligible) {
-                    $query->whereIn('id', $eligible)->where('has_sub', 0);
+                    $query->whereIn('id', $eligible)->whereColumn('created_at', 'updated_at')->where('has_sub', 0);
                 })->with('items', function($q) {
                     $q->orderBy('delivery_date', 'asc');
                 })->orderBy(
