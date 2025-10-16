@@ -94,7 +94,7 @@ class ForecasterController extends Controller
             ->first();
 
         if ($existingJo) {
-            return redirect()->route('forecaster.index')->with('error', __('standard.forecaster.job_order_exists'));
+            return redirect()->route('forecaster.index')->with('error', 'This sales detail already has an existing job order for the specified date and time.');
         }
 
         $jo = JobOrder::create([
