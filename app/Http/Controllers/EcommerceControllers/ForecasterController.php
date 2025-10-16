@@ -262,16 +262,16 @@ class ForecasterController extends Controller
     public function display_orders(Request $request){
         $input = $request->all();
 
-        // $orders = ProductionOrder::where('branch_id',$request->branch_id)->whereDate('delivery_date',$request->date_needed)->orderBy('delivery_date','desc')->get();
+        $orders = ProductionOrder::where('branch_id',$request->branch_id)->whereDate('delivery_date',$request->date_needed)->orderBy('delivery_date','desc')->get();
 
-        $orders = ProductionOrder::with(['jobOrder_details.sales_detail' => function ($q) {
-                $q->select('id','sales_header_id','product_name','qty','price','net_amount'); // pick what you need
-            }])
-            ->where('branch_id', $request->branch_id)
-            ->whereDate('delivery_date', $request->date_needed)
-            ->orderByDesc('delivery_date')
-            ->get()
-            ->filter(fn ($o) => $o->jobOrder_details?->sales_detail?->sales_header_id);
+        // $orders = ProductionOrder::with(['jobOrder_details.sales_detail' => function ($q) {
+        //         $q->select('id','sales_header_id','product_name','qty','price','net_amount'); // pick what you need
+        //     }])
+        //     ->where('branch_id', $request->branch_id)
+        //     ->whereDate('delivery_date', $request->date_needed)
+        //     ->orderByDesc('delivery_date')
+        //     ->get()
+        //     ->filter(fn ($o) => $o->jobOrder_details?->sales_detail?->sales_header_id);
 
 
         return view('admin.forecaster.display-assigned-orders',compact('orders'));
