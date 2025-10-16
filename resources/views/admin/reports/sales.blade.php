@@ -283,7 +283,7 @@
                                     @php 
                                         $user = \App\Models\User::whereId($r->created_by)->first();
                                     @endphp
-                                    <td>{{$user->name }}</td>
+                                    <td>{{$user?->name ?? ''}}</td>
                                 </tr>
                             @empty
                             @endforelse
