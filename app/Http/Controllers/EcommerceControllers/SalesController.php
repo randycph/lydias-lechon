@@ -457,6 +457,13 @@ class SalesController extends Controller
             'gross_amount' => $new_gross,
             'net_amount' => $new_net
         ]);
+
+        if ($sales->payment_status == 'PAID' && $new_net > SalesHeader::paid($sales->id)) {
+            $update_payment_status = SalesHeader::whereId($request->delfee_sales_id)->update([
+                'payment_status' => 'PENDING'
+            ]);
+        }
+
         //logger(SalesHeader::whereId($request->delfee_sales_id)->first());
 
         ActivityLog::create([
