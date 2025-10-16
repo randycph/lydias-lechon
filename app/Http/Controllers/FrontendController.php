@@ -79,6 +79,8 @@ class FrontendController extends Controller
 
     public function our_stores()
     {
+        return redirect()->route('home');
+        
         $headOffices = Branch::where('is_head_office', 1)->get();
         $branches = Branch::with('numbers')->where('is_head_office', 0)->get();
         $outlets = Branch::where('branch_type', 'Restaurant')->where('is_head_office', 0)->get();
