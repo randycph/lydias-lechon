@@ -149,12 +149,8 @@ class SalesHeader extends Model
             $paid = (float) $payment->sum('amount');
         }
 
-        if ($payment->isNotEmpty()) {
-            $payment_type = $payment->first() != null ? $payment->first()->payment_type : null;
-            
-            if ($sale->isConfirm == 1 && $payment_type == 'COD') {
-                return 'PAID';
-            }
+        if ($sale->payment_status == 'PAID') {
+            return 'PAID';
         }
         $balance = $amount - $paid;
         if($balance <= 0){
