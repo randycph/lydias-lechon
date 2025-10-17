@@ -29,7 +29,7 @@ class SalesHeader extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function assign_to_production_branch($sale, $pb = 1){
+    public function assign_to_production_branch($sale, $pb){
         //dd($sale);
         $items = $sale->items;
         foreach($items as $salesdetail){
@@ -80,7 +80,7 @@ class SalesHeader extends Model
                     'joborder_id' => $jo->id
                 ],
                 [
-                    'branch_id' => $pb,                    
+                    'branch_id' => $pb ?? 1,                    
                     'delivery_date' => $salesdetail->delivery_date,
                     'schedule_type' => $sale->order_type ?? ' '
                 ]);
