@@ -255,7 +255,6 @@ class JoborderController extends Controller
     public function store(Request $request)
     {
         $rdata = $request->all();
-        // dd($rdata);
         if($request->totalcoupon > 0){
             $couponCode = $rdata['couponcode'];
             foreach($couponCode as $key => $coupon){
@@ -467,7 +466,6 @@ class JoborderController extends Controller
         }
         $sales = SalesHeader::whereId($salesHeader->id)->first();
         $total_payments = SalesPayment::where('sales_header_id',$salesHeader->id)->where('status','PAID')->sum('amount');
-        // dd($total_payments, $sales->gross_amount);
         if($total_payments >= $sales->gross_amount){
             $confirm_sales = SalesHeader::whereId($salesHeader->id)->update([
                 'isConfirm' => 1,
@@ -475,10 +473,8 @@ class JoborderController extends Controller
                 'confirm_remarks' => 'Auto confirm after payment completion',
                 'confirmed_on' => date('Y-m-d H:i:s')
             ]);
-        }
 
-        $sh = new SalesHeader();
-        if ($sales->payment_status == 'PAID') {
+            $sh = new SalesHeader();
             $sh->assign_to_production_branch($sales, $request->pb);
         }
 
