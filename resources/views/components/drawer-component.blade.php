@@ -17,7 +17,7 @@
         </button>
 
         @php
-            $grouped = $menu->navigation->groupBy('parent_id');
+            $grouped = $menu?->navigation->groupBy('parent_id');
         @endphp
 
         <!-- Drawer Content -->
@@ -36,7 +36,7 @@
             </div>
             @endif
 
-
+            @if ($grouped)
             @foreach ($grouped->get(0, collect()) as $item)
                 @php
                     $url = '#';
@@ -51,6 +51,7 @@
                 @endphp
                 <a href="{{ $url }}" class="hover:bg-tertiary hover:text-white block text-2xl text-primary-dark font-medium font-cubao uppercase py-5 border-y border-[#DFDFDF] pl-10">{{ $item->label }}</a>
             @endforeach
+            @endif
 
             {{-- <a href="{{ route('our-story') }}" class="hover:bg-tertiary hover:text-white block text-2xl font-medium font-cubao uppercase py-5 border-y border-[#DFDFDF] pl-10">Our Story</a>
             <a href="{{ route('our-stores') }}" class="hover:bg-tertiary hover:text-white block text-2xl font-medium font-cubao uppercase py-5 border-b border-[#DFDFDF] pl-10">Our Stores</a>

@@ -65,12 +65,14 @@ x-data="{
         </div>
         <div class="hidden md:flex text-white text-lg gap-4">
             @php
-                $grouped = $menu->navigation->groupBy('parent_id');
+                $grouped = $menu?->navigation->groupBy('parent_id');
             @endphp
 
+            @if ($grouped)
             @foreach ($grouped->get(0, collect()) as $item)
                 @include('components.menu-item', ['item' => $item, 'grouped' => $grouped])
             @endforeach
+            @endif  
 
         </div>
         <div class="flex">
