@@ -50,5 +50,11 @@ return [
 
     'sms' => [
         'api_key' => env('SMS_API_KEY')
-    ]
+    ],
+
+    'paymaya' => [
+        'public_key' => env('PAYMAYA_PUBLIC_KEY'),
+        'secret_key' => env('PAYMAYA_SECRET_KEY'),
+        'url' => env('PAYMAYA_URL'),
+    ],
 ];
