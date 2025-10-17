@@ -836,5 +836,9 @@ Route::get('/.well-known/pki-validation/BF10D48DD225686F4F228F10FEBFD876.txt', f
         ->header('Content-Type', 'text/plain; charset=utf-8');
 });
 
+Route::get('maintenance', function() {
+    return response()->file(public_path('maintenance.html'));
+});
+
 Route::get('/{slug}', [FrontendController::class, 'page'])->name('page');
 
