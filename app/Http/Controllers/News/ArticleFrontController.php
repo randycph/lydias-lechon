@@ -47,7 +47,7 @@ class ArticleFrontController extends Controller
         $pageLimit = 6;
 
         /* Search Function */
-        if(isset($_GET['type'])){
+        if(isset($_GET['type']) && isset($_GET['criteria'])){
 
             if($_GET['type'] == 'searchbox'){
 

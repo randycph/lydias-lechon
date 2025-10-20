@@ -816,7 +816,7 @@ class CartController extends Controller
                     ]);
             }
 
-            return redirect()->route('cart.front.checkout');
+            return redirect()->route('checkout');
         } else {
             $cart = session('cart', []);
 
