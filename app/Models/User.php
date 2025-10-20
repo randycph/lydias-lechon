@@ -411,15 +411,18 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public static function customer_lookup()
     {
-       $customers = User::where('user_type','customer')->get();
-       $names = array();
-
-        foreach($customers as $customer){
-            $isGuest = (strpos($customer->email, 'lydtmp_') === 0 || empty($customer->email) || $customer->registration_type === 'guest' ? true : false);
-            $names[] = ['name' => $customer->name, 'id' => $customer->id, 'is_guest' => $isGuest];
-        }
-
-        return json_encode($names);
+        return User::where('user_type', 'customer')
+            ->select('id','name','email','registration_type')
+            ->get()
+            ->map(function ($u) {
+                $email = (string) ($u->email ?? '');
+                $isGuest = (str_starts_with($email, 'lydtmp_')
+                    || $email === ''
+                    || ($u->registration_type === 'guest'));
+                return ['id' => $u->id, 'name' => $u->name, 'is_guest' => $isGuest];
+            })
+            ->values()        // make sure it's a plain array-like structure
+            ->toArray();      // << return array, not JSON
     }
     
     public static function previous_customer_lookup()
