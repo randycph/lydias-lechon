@@ -174,7 +174,7 @@ public function contact_us(Request $request)
                 'resume' => 'required|file|mimes:pdf,doc,docx|max:5120', // 5MB max
             ]);
 
-            $emailReceiver = 'wsiprod.demo@gmail.com';
+            $emailReceiver = 'orders@lydias-lechon.com';
             $applicant = $request->all();
             $resume = $request->resume;
 
