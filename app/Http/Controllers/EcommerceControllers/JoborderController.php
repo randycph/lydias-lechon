@@ -192,6 +192,7 @@ class JoborderController extends Controller
      */
     public function create()
     {
+        dd('111');
         try {
             $miscelaneous = Product::where('is_misc',1)->orderBy('name','asc')->get();
             $products = Product::where('production_item',1)->where('status','PUBLISHED')->orderBy('name','asc')->get();
