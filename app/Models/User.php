@@ -421,8 +421,8 @@ class User extends Authenticatable implements MustVerifyEmail
                     || ($u->registration_type === 'guest'));
                 return ['id' => $u->id, 'name' => $u->name, 'is_guest' => $isGuest];
             })
-            ->values()        // make sure it's a plain array-like structure
-            ->toArray();      // << return array, not JSON
+            ->values() 
+            ->toArray(); 
     }
     
     public static function previous_customer_lookup()
