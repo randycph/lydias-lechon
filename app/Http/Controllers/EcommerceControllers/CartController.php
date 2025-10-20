@@ -879,17 +879,42 @@ class CartController extends Controller
 
             $customer_name = $request->name ?? 'Guest';
 
-            $user = User::create([
-                'name' => $request->name ?? 'Guest',
-                'contact_mobile' => $request->mobile,
-                'email' => $request->email ?? 'wsiphproduction@gmail.com',
-                'registration_type' => 'guest',
-                'registration_source' => 'Guest',
-                'password' => Hash::make(Str::random(10)),
-                'firstname' => $request->name,
-                'lastname' => $request->name,
-                'is_active' => 1
-            ]);
+            // update or create guest user based on email
+            $user = User::where('email', $request->email)->first();
+            if ($user) {
+                // update user info
+                $user->update([
+                    'name' => $request->name ?? 'Guest',
+                    'contact_mobile' => $request->mobile,
+                    'firstname' => $request->name,
+                    'lastname' => $request->name,
+                ]);
+            } else {
+                // create new guest user
+                $user = User::create([
+                    'name' => $request->name ?? 'Guest',
+                    'contact_mobile' => $request->mobile,
+                    'email' => $request->email ?? 'wsiphproduction@gmail.com',
+                    'registration_type' => 'guest',
+                    'registration_source' => 'Guest',
+                    'password' => Hash::make(Str::random(10)),
+                    'firstname' => $request->name,
+                    'lastname' => $request->name,
+                    'is_active' => 1
+                ]);
+            }
+
+            // $user = User::create([
+            //     'name' => $request->name ?? 'Guest',
+            //     'contact_mobile' => $request->mobile,
+            //     'email' => $request->email ?? 'wsiphproduction@gmail.com',
+            //     'registration_type' => 'guest',
+            //     'registration_source' => 'Guest',
+            //     'password' => Hash::make(Str::random(10)),
+            //     'firstname' => $request->name,
+            //     'lastname' => $request->name,
+            //     'is_active' => 1
+            // ]);
 
             $carts = collect(session('cart', []));
         } else {

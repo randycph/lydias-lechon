@@ -11,3 +11,4 @@ node_modules
 composer.lock
 package-lock.json
 public/hot
+index.php
