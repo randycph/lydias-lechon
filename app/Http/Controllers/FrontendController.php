@@ -36,6 +36,8 @@ class FrontendController extends Controller
 {
     public function index()
     {
+        return response()->file(public_path('maintenance.html'));
+        
         $page = Page::where('slug', 'home')->first();
 
         if (!$page) {
