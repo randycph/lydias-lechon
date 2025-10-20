@@ -214,7 +214,9 @@ class JoborderController extends Controller
                 ->orderBy('city')
                 ->pluck('city');
 
-            return view('admin.joborder.create',compact('products','miscelaneous','branches','branches_store','pbs','provinces','cities'));
+            $customersData = User::customer_lookup();
+
+            return view('admin.joborder.create',compact('products','miscelaneous','branches','branches_store','pbs','provinces','cities', 'customersData'));
         } catch (\Throwable $th) {
             throw $th;
             return back()->with('error', 'An error occurred while loading the create job order form. Please try again later.');
