@@ -199,7 +199,6 @@ class JoborderController extends Controller
             $pbs = ProductionBranch::orderBy('name','asc')->get();
             $branches  = Deliverablecities::distinct()->orderBy('name')->get(['name']);
 
-            dd($miscelaneous, $products, $branches_store, $pbs, $branches);
 
             $provinces = Deliverablecities::query()
                 ->select('province')
@@ -214,11 +213,14 @@ class JoborderController extends Controller
                 ->distinct()
                 ->orderBy('city')
                 ->pluck('city');
+
+            dd($provinces, $cities);
+
+            return view('admin.joborder.create',compact('products','miscelaneous','branches','branches_store','pbs','provinces','cities'));
         } catch (\Throwable $th) {
             throw $th;
+            return back()->with('error', 'An error occurred while loading the create job order form. Please try again later.');
         }
-
-        return view('admin.joborder.create',compact('products','miscelaneous','branches','branches_store','pbs','provinces','cities'));
     }
 
     /**
