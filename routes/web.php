@@ -100,22 +100,26 @@ Route::get('/admin/login', function() {
 })->name('admin.login');
 
 Route::post('/admin/login', function(Request $request) {
-    $credentials = $request->only('email', 'password');
+    try {
+        $credentials = $request->only('email', 'password');
 
-    if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials)) {
 
-        $user = Auth::user();
+            $user = Auth::user();
 
-        if ($user->role_id == config('auth.driver_role_id') ) {
-            return redirect()->route('sales-transaction.driver_sales_transaction');
+            if ($user->role_id == config('auth.driver_role_id') ) {
+                return redirect()->route('sales-transaction.driver_sales_transaction');
+            }
+
+            return redirect()->intended('admin/dashboard');
         }
 
-        return redirect()->intended('admin/dashboard');
+        return redirect()->back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ]);
+    } catch (\Exception $e) {
+        return redirect()->back()->withErrors(['error' => 'An error occurred during login.']);
     }
-
-    return redirect()->back()->withErrors([
-        'email' => 'The provided credentials do not match our records.',
-    ]);
     
 })->name('admin.login-post');
 
