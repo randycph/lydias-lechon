@@ -192,25 +192,29 @@ class JoborderController extends Controller
      */
     public function create()
     {
-        $miscelaneous = Product::where('is_misc',1)->orderBy('name','asc')->get();
-        $products = Product::where('production_item',1)->where('status','PUBLISHED')->orderBy('name','asc')->get();
-        $branches_store = Branch::orderBy('name','asc')->get();
-        $pbs = ProductionBranch::orderBy('name','asc')->get();
-        $branches  = Deliverablecities::distinct()->orderBy('name')->get(['name']);
+        try {
+            $miscelaneous = Product::where('is_misc',1)->orderBy('name','asc')->get();
+            $products = Product::where('production_item',1)->where('status','PUBLISHED')->orderBy('name','asc')->get();
+            $branches_store = Branch::orderBy('name','asc')->get();
+            $pbs = ProductionBranch::orderBy('name','asc')->get();
+            $branches  = Deliverablecities::distinct()->orderBy('name')->get(['name']);
 
-        $provinces = Deliverablecities::query()
-            ->select('province')
-            ->whereNotNull('province')->where('province', '!=', '')
-            ->distinct()
-            ->orderBy('province')
-            ->pluck('province');
+            $provinces = Deliverablecities::query()
+                ->select('province')
+                ->whereNotNull('province')->where('province', '!=', '')
+                ->distinct()
+                ->orderBy('province')
+                ->pluck('province');
 
-        $cities = Deliverablecities::query()
-            ->select('city')
-            ->whereNotNull('city')->where('city', '!=', '')
-            ->distinct()
-            ->orderBy('city')
-            ->pluck('city');
+            $cities = Deliverablecities::query()
+                ->select('city')
+                ->whereNotNull('city')->where('city', '!=', '')
+                ->distinct()
+                ->orderBy('city')
+                ->pluck('city');
+        } catch (\Throwable $th) {
+            throw $th;
+        }
 
 
         return view('admin.joborder.create',compact('products','miscelaneous','branches','branches_store','pbs','provinces','cities'));
