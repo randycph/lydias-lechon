@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue2'
 import laravel from 'laravel-vite-plugin'
 
 export default defineConfig({
+    base: '/',   
     plugins: [
         laravel({
             input: [
