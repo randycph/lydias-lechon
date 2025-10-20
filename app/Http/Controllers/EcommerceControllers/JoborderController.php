@@ -214,8 +214,6 @@ class JoborderController extends Controller
                 ->orderBy('city')
                 ->pluck('city');
 
-            dd($provinces, $cities);
-
             return view('admin.joborder.create',compact('products','miscelaneous','branches','branches_store','pbs','provinces','cities'));
         } catch (\Throwable $th) {
             throw $th;
