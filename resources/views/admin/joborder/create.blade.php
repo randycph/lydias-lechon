@@ -1197,40 +1197,44 @@
 
     <script>
     /** search customer and display customer details once selected **/
-        $(document).ready(function(){
-            var customersData = {!! $customersData !!};
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Safely embed as JSON
+    const customersData = @json($customersData);
 
-            var customers = new Bloodhound({
-                datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
-                queryTokenizer: Bloodhound.tokenizers.whitespace,
-                local: customersData
-            });
+    const customers = new Bloodhound({
+        datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace,
+        local: customersData
+    });
 
-            customers.initialize();
+    customers.initialize();
 
-            $('#input2').tagsinput({
-                maxTags: 1,
-                itemValue: 'id',
-                itemText: 'name',
-                typeaheadjs: [
-                    {
-                        hint: true,
-                        highlight: true,
-                        minLength: 1
-                    },
-                    {
-                        name: 'customers',
-                        displayKey: 'name',
-                        source: customers.ttAdapter(),
-                        templates: {
-                            suggestion: function (data) {
-                                return `<div>${data.name}${data.is_guest ? ' - Guest' : ''}</div>`;
-                            }
-                        }
+    $('#input2').tagsinput({
+        maxTags: 1,
+        itemValue: 'id',
+        itemText: 'name',
+        typeaheadjs: [
+            {
+                hint: true,
+                highlight: true,
+                minLength: 1
+            },
+            {
+                name: 'customers',
+                displayKey: 'name',
+                source: customers.ttAdapter(),
+                templates: {
+                    suggestion: function (data) {
+                        return `<div>${data.name}${data.is_guest ? ' - Guest' : ''}</div>`;
                     }
-                ]
-            });
-        });
+                }
+            }
+        ]
+    });
+});
+</script>
+
 
 
         function view_customer_details(id)
