@@ -1197,7 +1197,6 @@
 
     <script>
     /** search customer and display customer details once selected **/
-<script>
 document.addEventListener('DOMContentLoaded', function () {
     // Safely embed as JSON
     const customersData = @json($customersData);
@@ -1233,8 +1232,6 @@ document.addEventListener('DOMContentLoaded', function () {
         ]
     });
 });
-</script>
-
 
 
         function view_customer_details(id)
