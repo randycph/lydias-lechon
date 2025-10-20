@@ -1198,7 +1198,7 @@
     <script>
     /** search customer and display customer details once selected **/
         $(document).ready(function(){
-            var customersData = {!! \App\Models\User::customer_lookup() !!};
+            const customersData = JSON.parse(@json($customersData));
 
             var customers = new Bloodhound({
                 datumTokenizer: Bloodhound.tokenizers.obj.whitespace('name'),
