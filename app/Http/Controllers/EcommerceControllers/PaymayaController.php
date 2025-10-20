@@ -301,6 +301,8 @@ class PaymayaController extends Controller
 
         $amount = (float) $amount;
         $deliveryFee = (float) $sale->delivery_fee_amount ?? 0;
+        $firstName = explode(' ', trim($sale->customer_name))[0] ?? $sale->customer_name;
+        $lastName = trim(str_replace($firstName, '', $sale->customer_name)) ?: $firstName;
         $postData = [
             "totalAmount" => [
                 "value" => (float) $amount,
@@ -314,9 +316,9 @@ class PaymayaController extends Controller
                 ]
             ],
             "buyer" => [
-                "firstName" => $sale->customer_name,
+                "firstName" => $firstName,
                 "middleName" => null,
-                "lastName" => null,
+                "lastName" => $lastName,
                 "birthday" => "",
                 "customerSince" => "",
                 "sex" => "",
