@@ -118,6 +118,9 @@
                                 }
                             @endphp
                             @forelse($payments as $p)
+                                @if (!$p?->sales) 
+                                    @continue
+                                @endif
                                 @php
                                     $approval_code = '';
                                     $approved_by = '';
@@ -135,10 +138,10 @@
                                 <tr>
                                     
                                     <th> 
-                                        @if($p->sales->deleted_at)
-                                            <strong style="text-decoration:line-through;"> <a title="Deleted Sales" href="#" onclick="alert('This sales transaction is already cancelled.');">{{$p->sales->order_number }}</a><br></strong>
+                                        @if($p?->sales?->deleted_at)
+                                            <strong style="text-decoration:line-through;"> <a title="Deleted Sales" href="#" onclick="alert('This sales transaction is already cancelled.');">{{$p?->sales?->order_number }}</a><br></strong>
                                         @else
-                                            <strong> <a title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$p->sales->id) }}">{{$p->sales->order_number }}</a><br></strong>
+                                            <strong> <a title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$p?->sales?->id) }}">{{$p?->sales?->order_number }}</a><br></strong>
                                         @endif
                                     </th>
                                     <td>{{ $p->sales->customer_name }}</td>
