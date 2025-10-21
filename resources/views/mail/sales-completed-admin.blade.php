@@ -805,11 +805,11 @@ Media Item
                                                                                           <td class="tx-right " style="font-size:11px;">{{number_format($h->delivery_fee_amount, 2)}}</td>
                                                                                     </tr>
                                                                                     @endif
-                                                                                    @if($h->gross_amount > 0)
+                                                                                    @if($h->net_amount > 0)
                                                                                     <tr><td colspan="7"><hr></td></tr>
                                                                                     <tr style="font-weight:bold;">
                                                                                           <td class="tx-left" colspan="6" style="font-size:11px;">Total</td>
-                                                                                          <td class="tx-right" style="font-size:11px;">{{number_format($h->gross_amount, 2)}}</td> 
+                                                                                          <td class="tx-right" style="font-size:11px;">{{number_format($h->net_amount, 2)}}</td> 
                                                                                     </tr>
                                                                                     @endif      
                                                                               </table>
