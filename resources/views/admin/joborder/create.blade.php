@@ -250,7 +250,7 @@
                             </select>
                         </div>
                         
-                        {{-- <div class="form-group" id="outlet_div" style="display: none;">
+                        <div class="form-group" id="outlet_div" style="display: none;">
                             <label class="d-block">Outlet <span class="tx-danger">*</span></label>
                             <select class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select delivery/pick-up details" data-width="100%" id="outlet_rate" name="outlet_pickup">
                                 <option value="">- Select Branch -</option>
@@ -265,7 +265,7 @@
                                 @endforeach
                                
                             </select>
-                        </div> --}}
+                        </div>
 
                         <div class="form-group" id="d2d_div" style="display: none;">
                             <label class="d-block">Delivery Address <span class="tx-danger">*</span></label>
