@@ -155,6 +155,14 @@ class PaymayaController extends Controller
                             'amount' => $request->amount,
                             'status' => 'PAID'
                         ]);
+                        if ($payment->sales_header_id) {
+                            $sale = SalesHeader::find($payment->sales_header_id);
+                            $sale->isConfirm = 1;
+                            $sale->confirmed_by = 'Customer';
+                            $sale->confirmed_on = date('Y-m-d H:i:s');
+                            $sale->confirm_remarks = 'Auto confirm via Paymaya checkout';
+                            $sale->save();
+                        }
                         return response('Ok', 200);   
                     }else{
                         return response('Accepted', 202); 
