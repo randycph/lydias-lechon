@@ -819,15 +819,15 @@
                     columns: ':visible',
                     stripHtml: false,
                     format: {
-                    body: function (data, row, col, node) {
-                        const val = $(node).attr('data-value');
-                        return val !== undefined ? val : data;
-                    }
+                        body: function (data, row, col, node) {
+                            const val = $(node).attr('data-value');
+                            return val !== undefined ? val : data;
+                        }
                     }
                 },
                 customize: function (win) {
-                    $(win.document.body).css('font-size','12pt').css('font-weight','bold').prepend('Forecast Report');
-                    $(win.document.body).find('h1').css('font-weight','bold').css('font-size','14pt');
+                    $(win.document.body).css('font-size','14pt').css('font-weight','bold').prepend('Forecast Report');
+                    $(win.document.body).find('h1').css('font-weight','bold').css('font-size','15pt');
                     $(win.document.body).find('table').addClass('compact').css('font-size','inherit');
                     $(win.document.body).find('td').css('border','1px solid green');
                 }
