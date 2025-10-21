@@ -432,7 +432,7 @@
                                 @php
 
     /** 1) Filter out unconfirmed sales only (JO unaffected) */
-    $results = $results->filter(fn($r) => ($r->trantype ?? '') !== 'sales' || (int)($r->isConfirm ?? 0) === 1);
+    // $results = $results->filter(fn($r) => ($r->trantype ?? '') !== 'sales' || (int)($r->isConfirm ?? 0) === 1);
 
     /** 2) Sort unified list by delivery_date ASC (then stable tie-breakers incl. order_number) */
     // $results = $results->sort(function($a, $b) {
