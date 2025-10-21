@@ -214,7 +214,19 @@
                                     <label class="tx-13">Time Needed</label>
                                     <select name="start_time" id="start_time" class="form-control">      
                                         <option value="">- Select Time -</option>
-                                        <option value="07:00:00">07:00 AM</option>                                         
+
+                                        @foreach (range(0,23) as $hour)
+                                            @php
+                                            $timeValue = str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00:00';
+                                            $timeLabel = date('h:i A', strtotime($timeValue));
+                                            if ($timeLabel === '12:00 PM') {
+                                                $timeLabel = '12:00 NOON';
+                                            }
+                                            @endphp
+                                            <option @if(isset($_GET['start_time']) && $_GET['start_time'] == $timeValue) selected="selected" @endif value="{{ $timeValue }}">{{ $timeLabel }}</option>
+                                        @endforeach
+
+                                        {{-- <option value="07:00:00">07:00 AM</option>                                         
                                         <option value="12:00:00">12:00 NOON</option>                                        
                                         <option value="14:00:00">02:00 PM</option>
                                         <option value="17:00:00">05:00 PM</option>                             
@@ -237,10 +249,10 @@
                                         <option value="20:00:00">08:00 PM</option>
                                         <option value="21:00:00">09:00 PM</option>
                                         <option value="22:00:00">10:00 PM</option>
-                                        <option value="23:00:00">11:00 PM</option>
-                                        @isset($_GET['start_time'])
+                                        <option value="23:00:00">11:00 PM</option> --}}
+                                        {{-- @isset($_GET['start_time'])
                                             <option value="{{$_GET['start_time']}}" selected="selected">{{ $_GET['start_time'] }}</option>
-                                        @endisset
+                                        @endisset --}}
                                     </select>
                                 </div>
                             </div>
