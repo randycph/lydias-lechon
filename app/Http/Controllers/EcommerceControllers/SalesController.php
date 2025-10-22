@@ -848,7 +848,7 @@ class SalesController extends Controller
             $locationed = $salesheader->outlet;
         }
 
-        $branches_store = Branch::orderBy('name','asc')->get();
+        $branches_store = Branch::where('status', 1)->orderBy('name','asc')->get();
 
         // dd($salesheader->deliveryAddress);
 

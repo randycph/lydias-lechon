@@ -68,6 +68,14 @@
                             <input type="checkbox" name="delivery_branch" id="delivery_branch" @if($branches->delivery_branch=='1') checked="checked" @endif>
                             <label class="mg-b-5 tx-color-03" for="delivery_branch">Delivery Branch</label>                                
                         </div>
+                        <div class="form-group mg-b-20">
+                            <label class="d-block">Status</label>
+                            <div class="custom-control custom-switch @error('status') is-invalid @enderror">
+                                <input type="checkbox" class="custom-control-input" name="status" {{ (old("status", $branches->status) ? "checked":"") }} id="customSwitch13">
+                                <label class="custom-control-label" id="label_visibility13" for="customSwitch13">{{ (old("status", $branches->status) ? "Yes":"No") }}</label>
+                                <x-error-message inputName="status" />
+                            </div>
+                        </div>
                         <div class="form-group" style="display:none;">
                             <label class="d-block">Token *</label>
                             <input name="token" id="token" value="{{ old('token',$branches->token) }}" required type="text" class="form-control @error('token') is-invalid @enderror" maxlength="250">
@@ -233,6 +241,15 @@
 
             $(document).on('click', '.removeBranchRow', function () {
                 $(this).closest('tr').remove();
+            });
+
+            $("#customSwitch13").change(function() {
+                if(this.checked) {
+                    $('#label_visibility13').html('Yes');
+                }
+                else{
+                    $('#label_visibility13').html('No');
+                }
             });
 
             // $('#branchForm').submit(function (e) {

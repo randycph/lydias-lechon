@@ -12,7 +12,7 @@ class Branch extends Model
     use SoftDeletes;
 
     protected $table = 'branches';
-    protected $fillable = ['name', 'code', 'address', 'is_head_office', 'google_map_link', 'direction_link', 'contact_nos', 'contact_person','email_address','user_id', 'created_by','token','last_sync','hotline', 'branch_type','pickup_branch', 'delivery_branch', 'commissary'];
+    protected $fillable = ['name', 'code', 'address', 'status', 'is_head_office', 'google_map_link', 'direction_link', 'contact_nos', 'contact_person','email_address','user_id', 'created_by','token','last_sync','hotline', 'branch_type','pickup_branch', 'delivery_branch', 'commissary'];
 
     // Need to change every model
     static $oldModel;
@@ -88,14 +88,14 @@ class Branch extends Model
 
     public static function view(){
 
-        $pd = Branch::get();
+        $pd = Branch::where('status', 1)->get();
 
         return $pd;
     }
 
     public static function hotline(){
 
-        $pd = Branch::whereNotNull('hotline')->get();
+        $pd = Branch::where('status', 1)->whereNotNull('hotline')->get();
 
         return $pd;
     }
@@ -109,7 +109,7 @@ class Branch extends Model
 
     public static function branches()
     {
-    	$branches = Branch::orderBy('name','asc')->get();
+    	$branches = Branch::where('status', 1)->orderBy('name','asc')->get();
 
     	$output = "";
     	foreach ($branches as $branch) {

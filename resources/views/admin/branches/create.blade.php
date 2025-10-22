@@ -72,6 +72,14 @@
                                 <input type="checkbox" name="delivery_branch" id="delivery_branch">
                                 <label class="mg-b-5 tx-color-03" for="delivery_branch">Delivery Branch</label>                   
                             </div>
+                            <div class="form-group mg-b-20">
+                                <label class="d-block">Status</label>
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" name="status" id="customSwitch13">
+                                    <label class="custom-control-label" id="label_visibility13" for="customSwitch13">No</label>
+                                    <x-error-message inputName="status" />
+                                </div>
+                            </div>
                             <div class="form-group mg-b-20" style="display:none;">
                                 <label class="mg-b-5 tx-color-03">Token <i class="tx-danger">*</i></label>
                                 <input required type="text" class="form-control @error('token') is-invalid @enderror" name="token" value="{{uniqid()}}" id="token" @htmlValidationMessage({{__('standard.empty_all_field')}})>
@@ -225,6 +233,14 @@
                 branchRowIndex++;
             });
 
+            $("#customSwitch13").change(function() {
+                if(this.checked) {
+                    $('#label_visibility13').html('Yes');
+                }
+                else{
+                    $('#label_visibility13').html('No');
+                }
+            });
 
             $(document).on('click', '.removeBranchRow', function () {
                 $(this).closest('tr').remove();

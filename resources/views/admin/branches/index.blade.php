@@ -127,6 +127,7 @@
                                 <th>Name</th>
                                 <th>Code</th>
                                 <th>Address</th>
+                                <th>Status</th>
                                 <th>Contact Number</th>
                                 <th>Hotline</th>
                                 <th>Contact Person</th>
@@ -146,6 +147,13 @@
                                     <td> <strong @if($branch->trashed()) style="text-decoration:line-through;" @endif> {{$branch->name }}</strong></td>
                                     <td>{{ $branch->code }}</td>
                                     <td style="width:20%;">{{ $branch->address }}</td>
+                                    <td>
+                                        @if ($branch->status == 1)
+                                            <span class="badge badge-pill badge-success">Success</span>
+                                        @else
+                                            <span class="badge badge-pill badge-danger">Inactive</span>
+                                        @endif
+                                    </td>
                                     <td>{{ $branch->contact_nos }}</td>
                                     <td><a href="javascript:void(0)" onclick="show_numbers({{$branch->id}});">{{ $branch->numbers->count() }}</a></td>
                                     <td>{{ $branch->contact_person }}</td>

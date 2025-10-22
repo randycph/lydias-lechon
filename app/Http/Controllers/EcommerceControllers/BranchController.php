@@ -39,6 +39,8 @@ class BranchController extends Controller
 
     public function store(Request $request)
     {
+        $status = $request->has('status') ? 1 : 0;
+
         $branch = Branch::create([
             'name' => $request->name,
             'code' => $request->code,
@@ -56,6 +58,7 @@ class BranchController extends Controller
             'direction_link' => $request->direction_link ?? '',
             'google_map_link' => $request->google_map_link ?? '',
             'is_head_office' => $request->has('is_head_office') ? 1 : 0,
+            'status' => $status,
         ]);
 
         if ($request->has('branches')) {
@@ -91,7 +94,9 @@ class BranchController extends Controller
     {
         $branch = Branch::with('numbers')->findOrFail($id);
 
-        DB::transaction(function () use ($branch, $request) {
+        $status = $request->has('status') ? 1 : 0;
+
+        DB::transaction(function () use ($branch, $request, $status) {
             $branch->update([
                 'name' => $request->name,
                 'code' => $request->code,
@@ -109,6 +114,7 @@ class BranchController extends Controller
                 'direction_link' => $request->direction_link ?? '',
                 'google_map_link' => $request->google_map_link ?? '',
                 'is_head_office' => $request->has('is_head_office') ? 1 : 0,
+                'status' => $status,
             ]);
 
             $incoming = collect($request->input('branches', []))

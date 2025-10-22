@@ -14,7 +14,7 @@ class UserBranch extends Model
     public static function accessBranch(){
         
         if(Auth::user()->role_id == 1){
-        	$branches = \App\EcommerceModel\Branch::get(['id as branch_id', 'name']);   
+        	$branches = \App\EcommerceModel\Branch::where('status', 1)->get(['id as branch_id', 'name']);   
             //$branches = UserBranch::distinct()->get(['branch_id']);    	
         }
         else{
