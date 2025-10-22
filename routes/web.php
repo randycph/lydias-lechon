@@ -711,7 +711,7 @@ Route::get('/test', function(){
 //     }
 // });
 
-Route::get('/test/test-email', function(){
+Route::get('/test/customer-email', function(){
     try {
         $email = request()->get('email');
         $order_number = request()->get('order_number');
@@ -725,6 +725,29 @@ Route::get('/test/test-email', function(){
         $salesHeader = SalesHeader::where('order_number', $order_number)->first();
 
         Mail::to($email)->send(new SalesCompleted($salesHeader));
+
+        return response()->json([
+            'message' => 'Email sent successfully!'
+        ]);
+    } catch (\Throwable $th) {
+        throw $th;
+    }
+});
+
+Route::get('/test/admin-email', function(){
+    try {
+        $email = request()->get('email');
+        $order_number = request()->get('order_number');
+
+        if (!$email || !$order_number) {
+            return response()->json([
+                'message' => 'Email and order_number parameters are required.'
+            ], 400);
+        }
+
+        $salesHeader = SalesHeader::where('order_number', $order_number)->first();
+
+        Mail::to($email)->send(new SalesCompletedAdmin($salesHeader));
 
         return response()->json([
             'message' => 'Email sent successfully!'
