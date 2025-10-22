@@ -120,8 +120,8 @@
                     </div>
                     <h4 class="mg-b-0 tx-spacing--1">Contact Information</h4>
                     <div class="form-group">
-                        <label class="d-block">Email *</label>
-                        <input type="text" name="email" id="email" required="required" value="{{ old('email', $user->email)}}" class="form-control @error('email') is-invalid @enderror" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
+                        <label class="d-block">Email</label>
+                        <input type="text" name="email" id="email" value="{{ old('email', $user->email)}}" class="form-control @error('email') is-invalid @enderror" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
                         @error('email')
                         <div class="invalid-feedback">
                             {{ $message }}

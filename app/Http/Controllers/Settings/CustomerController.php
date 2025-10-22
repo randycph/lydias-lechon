@@ -76,14 +76,14 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'email' => 'required|email|max:191|unique:users,email',
+            'email' => 'nullable|email|max:191|unique:users,email',
             'contact_mobile' => 'required|max:15',
             'fname' => 'required_if:is_org,0|max:191',
             'lname' => 'required_if:is_org,0|max:191',
             'organization' => 'required_if:is_org,1|max:191',
         ]);
         
-        $email = $request->email;
+        $email = $request->email ?? '';
 
         $fname = '';
 
@@ -157,7 +157,7 @@ class CustomerController extends Controller
     public function update(Request $request, User $customer)
     {
         $request->validate([
-            'email' => 'required|email|max:191|unique:users,email,'.$customer->id,
+            'email' => 'nullable|email|max:191|unique:users,email,'.$customer->id,
             'contact_mobile' => 'required|max:15',
             'fname' => 'required_if:is_org,0|max:191',
             'lname' => 'required_if:is_org,0|max:191',
