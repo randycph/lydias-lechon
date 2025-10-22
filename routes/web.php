@@ -711,28 +711,28 @@ Route::get('/test', function(){
 //     }
 // });
 
-// Route::get('/test/test-email-3', function(){
-//     try {
-//         $salesHeader = SalesHeader::first();
+Route::get('/test/test-email', function(){
+    try {
+        $email = request()->get('email');
+        $order_number = request()->get('order_number');
 
-//         Mail::to(config('app.email'))->send(new SalesCompletedAdmin($salesHeader));
+        if (!$email || !$order_number) {
+            return response()->json([
+                'message' => 'Email and order_number parameters are required.'
+            ], 400);
+        }
 
-//         return response()->json([
-//             'message' => 'Email sent successfully!'
-//         ]);
-//     } catch (\Throwable $th) {
-//         throw $th;
-//     }
-// });
+        $salesHeader = SalesHeader::where('order_number', $order_number)->first();
 
-// Route::get('/test/test-email', function () {
-//     Mail::raw('This is a test email from Gmail SMTP via App Password', function ($message) {
-//         $message->to('evilryok@gmail.com')
-//                 ->subject('Gmail SMTP Test');
-//     });
+        Mail::to($email)->send(new SalesCompleted($salesHeader));
 
-//     return 'Email sent!';
-// });
+        return response()->json([
+            'message' => 'Email sent successfully!'
+        ]);
+    } catch (\Throwable $th) {
+        throw $th;
+    }
+});
 
 // Route::get('/test-cart-reminder', function () {
 //     $now = Carbon::now();
