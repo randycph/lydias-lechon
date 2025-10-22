@@ -163,7 +163,7 @@
                                                     <a class="nav-link" href="{{ route('branch.edit',$branch->id) }}" title="Edit Product"><i data-feather="edit"></i></a>
                                                 @endif
                                                 @if (auth()->user()->has_access_to_route('branch.single.delete'))
-                                                    <a class="nav-link" href="javascript:void(0)" onclick="delete_one_category({{$branch->id}},'{{$branch->name}}')" title="Delete Product"><i data-feather="trash"></i></a>
+                                                    <a class="nav-link" href="javascript:void(0)" onclick="delete_one_category({{$branch->id}},'{{$branch->name}}')" title="Delete Branch"><i data-feather="trash"></i></a>
                                                 @endif
                                             @endif
                                         </nav>
