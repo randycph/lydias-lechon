@@ -52,8 +52,7 @@
                                     value="{{ $salesheader->delivery_type }}">
 
                                 <div class="form-group">
-                                    <label for="shipping_type" class="control-label" id="shipping_type_label">Shipping
-                                        Type</label>
+                                    <label for="shipping_type" class="control-label" id="shipping_type_label">Shipping Type</label>
                                     <select name="shipping_type" id="shipping_type" class="form-control"
                                         required="required">
                                         <option value="d2d" @if ($salesheader->delivery_type == 'Door to door delivery') selected="selected" @endif>
@@ -87,6 +86,48 @@
                                                 @endforeach
                                             </select>
                                         @endif
+
+                                    </div>
+
+                                    <div class="form-group">    
+                                        <label class="d-block">Location <span class="tx-danger">*</span></label>
+
+                                        <div class="divd2d" @if ($salesheader->delivery_type != 'Door to door delivery')
+                                                style="display:none;" @endif>
+                                                <select class="selectpicker mg-b-5"
+                                                    data-style="btn btn-outline-light btn-md btn-block tx-left"
+                                                    title="Choose New Location" data-width="100%" name="update_dateneeded_d2d"
+                                                    id="update_dateneeded_d2d">
+                                                    @foreach ($locations as $b)
+                                                    <option @if ($b->name == $locationed) selected @endif
+                                                        value="{{$b->name}}">{{$b->name}}</option>
+                                                    @endforeach
+                                                    <option value="Other" @if ($locationed == 'Other') selected @endif>Other
+                                                    </option>
+                                                </select>
+                                                <div id="delivery_fee_amount_div" @if ($locationed != 'Other')
+                                                    style="display:none;" @endif>
+                                                    Delivery Fee:
+                                                    <input class="form-control" type="number" step="0.01" min="0.00"
+                                                        value="{{number_format($salesheader->delivery_fee_amount,2)}}"
+                                                        name="delivery_fee_amount" id="delivery_fee_amount">
+                                                </div>
+                                        </div>
+
+                                        <div class="divsp" @if ($salesheader->delivery_type != 'Store Pickup')
+                                                style="display:none;" @endif >
+                                                <select class="selectpicker mg-b-5"
+                                                    data-style="btn btn-outline-light btn-md btn-block tx-left"
+                                                    title="Choose New Location" data-width="100%" name="update_dateneeded_sp"
+                                                    id="update_dateneeded_sp">
+                                                    @foreach (\App\EcommerceModel\Branch::orderBy('name')->get() as $b)
+                                                    <option @if ($b->name == $locationed) selected @endif
+                                                        value="{{$b->name}}">{{$b->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                        </div>
+
+
 
                                         <!-- Allow Multiple Address Toggle -->
                                         <div class="form-check mb-3 mt-3">
@@ -337,6 +378,8 @@
                                             @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102) @else style="pointer-events: none;background-color:#E9ECEF" @endif>{{ $salesheader->instruction }}</textarea>
                                     </div>
                                 @endif
+
+                            
 
 
                                 {{-- @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102)
