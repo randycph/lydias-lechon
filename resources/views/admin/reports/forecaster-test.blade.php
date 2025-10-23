@@ -119,7 +119,7 @@
 
 @section('pagetitle')
     <table width="100%" style="font-size:18px;font-weight:bold;"><tr><td class="bord" align="center">Forecast Report {!! $datetxt !!} {!!$dbranch!!}</td></tr></table>
-    <table width="40%" border="1" style="font-size:14px;font-weight:bold;">
+    <table id="totals-table" width="40%" border="1" style="font-size:14px;font-weight:bold;">
         <tr>
             <td>TOTAL WHOLE LECHON ORDER:</td>
             <td align="center">{{$total_lechon_order}}</td>
@@ -826,10 +826,52 @@
                     }
                 },
                 customize: function (win) {
-                    $(win.document.body).css('font-size','14pt').css('font-weight','bold').prepend('Forecast Report');
-                    $(win.document.body).find('h1').css('font-weight','bold').css('font-size','15pt');
-                    $(win.document.body).find('table').addClass('compact').css('font-size','inherit');
-                    $(win.document.body).find('td').css('border','1px solid green');
+                    const $doc = $(win.document.body);
+
+                    $doc.css({ 'font-size':'14pt', 'font-weight':'bold' })
+                        .prepend('<div style="margin-bottom:8px;">Forecast Report</div>');
+                    $doc.find('h1').css({ 'font-weight':'bold','font-size':'15pt' });
+                    $doc.find('td').css('border','1px solid #0a0');
+
+                    const $src = $doc.find('#totals-table');
+                    if ($src.length) {
+                        const rows = [];
+                        $src.find('tr').each(function () {
+                            const $tds = $(this).find('td');
+                            rows.push({
+                                label: $tds.eq(0).text(),
+                                value: $tds.eq(1).html()
+                            });
+                        });
+
+                        const $twoCol = $(`
+                            <table id="totals-table"
+                                    style="border-collapse:collapse; margin:6px 0 12px 0; font-size:14px; font-weight:bold;
+                                            width:100%; table-layout:fixed;">
+                                <colgroup>
+                                <col style="width:25%">
+                                <col style="width:25%">
+                                <col style="width:25%">
+                                <col style="width:25%">
+                                </colgroup>
+                            </table>
+                        `);
+
+                        for (let i = 0; i < rows.length; i += 2) {
+                            const a = rows[i];
+                            const b = rows[i + 1] || { label: '', value: '' };
+
+                            $twoCol.append(`
+                                <tr>
+                                <td style="border:1px solid #0a0; padding:4px 6px; white-space:normal; word-break:break-word;">${a.label}</td>
+                                <td style="border:1px solid #0a0; padding:4px 6px; text-align:center;">${a.value ?? ''}</td>
+                                <td style="border:1px solid #0a0; padding:4px 6px; white-space:normal; word-break:break-word;">${b.label}</td>
+                                <td style="border:1px solid #0a0; padding:4px 6px; text-align:center;">${b.value ?? ''}</td>
+                                </tr>
+                            `);
+                        }
+                        $src.replaceWith($twoCol);
+                    }
                 }
             },
             {
