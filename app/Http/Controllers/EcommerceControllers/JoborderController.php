@@ -208,11 +208,10 @@ class JoborderController extends Controller
                 ->pluck('province');
 
             $cities = Deliverablecities::query()
-                ->select('city')
+                ->select('city', 'province')
                 ->whereNotNull('city')->where('city', '!=', '')
                 ->distinct()
-                ->orderBy('city')
-                ->pluck('city');
+                ->orderBy('city')->get();
 
             $customersData = User::customer_lookup();
 

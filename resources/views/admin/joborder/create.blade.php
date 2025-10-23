@@ -1399,6 +1399,19 @@
             '{{ asset("addresses/philippine_provinces_cities_municipalities_and_barangays_2019v2.json") }}'
         ];
 
+        const ALLOWED_CITY_PROVINCE = @json($cities);
+
+        const norm = s => (s || '').toString().trim().toLowerCase();
+
+        const ALLOWED_BY_PROV = new Map();
+        (ALLOWED_CITY_PROVINCE || []).forEach(item => {
+            const p = norm(item.province);
+            const c = norm(item.city);
+            if (!p || !c) return;
+            if (!ALLOWED_BY_PROV.has(p)) ALLOWED_BY_PROV.set(p, new Set());
+            ALLOWED_BY_PROV.get(p).add(c);
+        });
+
         const DEFAULT_REGION_NAME = 'NCR';
 
         const initial = {
@@ -1519,11 +1532,27 @@
         }
         function populateCities(regionCode, provinceName){
             const muniObj = DATA?.[regionCode]?.province_list?.[provinceName]?.municipality_list || {};
-            const cities = Object.keys(muniObj).sort((a,b)=> a.localeCompare(b));
+            const allCities = Object.keys(muniObj);
+
+            const allowedSet = ALLOWED_BY_PROV.get(norm(provinceName)) || new Set();
+
+            const cities = allCities
+                .filter(c => allowedSet.has(norm(c)))
+                .sort((a,b) => a.localeCompare(b));
+
             $city.empty().append(new Option('', '', false, false));
             cities.forEach(c => $city.append(new Option(c, c, false, false)));
-            $city.prop('disabled', cities.length === 0).trigger('change.select2');
+
+            const hasAny = cities.length > 0;
+            $city.prop('disabled', !hasAny).trigger('change.select2');
+
+            const current = ($city.val() || '').toString();
+            if (!cities.includes(current)) {
+                $city.val(null).trigger('change.select2');
+                disableBelowCity();
+            }
         }
+
         function populateBarangays(regionCode, provinceName, cityName){
             const brgys = (DATA?.[regionCode]?.province_list?.[provinceName]?.municipality_list?.[cityName]?.barangay_list || [])
             .slice().sort((a,b)=> a.localeCompare(b));
