@@ -649,7 +649,7 @@ class JoborderController extends Controller
         SalesDetail::create([
             'sales_header_id' => $salesHeaderID,
             'product_id' => $product->id,
-            'product_name' => $product->name,
+            'product_name' => $paella_qty > 0 ? $product->name . " Boneless with Paella" : $product->name,
             'product_category' => $product->category_id,
             'price' => $product->price,
             'paella_price' => $paella_qty > 0 ? ($product->paella_price*$paella_qty) : 0,
