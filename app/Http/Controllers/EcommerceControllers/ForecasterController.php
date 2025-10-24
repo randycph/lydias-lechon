@@ -206,7 +206,7 @@ class ForecasterController extends Controller
 
     public function assign($id){
         $branches = ProductionBranch::orderBy('name','asc')->get();
-        $receivers = Branch::orderBy('name','asc')->get();
+        $receivers = Branch::where('status', 1)->orderBy('name','asc')->get();
         $sales_detail = SalesDetail::find($id);
 
         $sales_detail->header->is_new_order = 0;
