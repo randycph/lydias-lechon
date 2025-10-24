@@ -1,6 +1,8 @@
 <div class="cs-search">
     <label class="d-block tx-semibold">Customer Details</label>
-    @php $isGuest = (strpos($details->email, 'lydtmp_') === 0 || empty($details->email) || $details->registration_type === 'guest'); @endphp
+    @php 
+        $isGuest = $details->registration_type == 'registered' ? false : (strpos($details->email, 'lydtmp_') === 0 || empty($details->email) || $details->registration_type === 'guest'); 
+    @endphp
     <div class="table-responsive">
         <table class="table table-sm table-borderless">
             <tbody>
