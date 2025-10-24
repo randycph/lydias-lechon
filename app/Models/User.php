@@ -411,7 +411,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public static function customer_lookup()
     {
-        return User::where('user_type', 'customer')
+        return User::where('is_active', 1)->where('user_type', 'customer')
             ->select('id','name','email','registration_type')
             ->get()
             ->map(function ($u) {
