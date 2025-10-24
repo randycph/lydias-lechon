@@ -39,7 +39,6 @@ class AccessController extends Controller
                     [
                         'permission_id' => $permissionId,
                         'role_id' => $roleId,
-                        'user_id' => auth()->id()
                     ],
                     [
                         'permission_id' => $permissionId,
