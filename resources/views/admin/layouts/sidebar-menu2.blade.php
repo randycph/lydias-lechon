@@ -43,7 +43,7 @@
             </li>
         @endif
 
-        @if (auth()->user()->has_access_to_module('forecaster'))
+        @if (auth()->user()->has_access_to_module('forecaster') || auth()->user()->has_access_to_route('forecaster.index'))
             <li class="nav-item @if (request()->routeIs('forecaster*')) active show @endif">
                 <a href="{{route('forecaster.index')}}" class="nav-link"><i data-feather="bar-chart"></i> <span>Forecaster @if (unreadForecastersTransactions() > 0)<span class="badge badge-light">{{ unreadForecastersTransactions() }}</span>@endif</span></a>
             </li>
