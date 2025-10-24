@@ -1222,6 +1222,7 @@
                         name: 'customers',
                         displayKey: 'name',
                         source: customers.ttAdapter(),
+                        limit: 1000,
                         templates: {
                             suggestion: function (data) {
                                 return `<div>${data.name}${data.is_guest ? ' - Guest' : ''}</div>`;
