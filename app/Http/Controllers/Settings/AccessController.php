@@ -38,7 +38,8 @@ class AccessController extends Controller
                 Rolepermission::updateOrCreate(
                     [
                         'permission_id' => $permissionId,
-                        'role_id' => $roleId
+                        'role_id' => $roleId,
+                        'user_id' => auth()->id()
                     ],
                     [
                         'permission_id' => $permissionId,
