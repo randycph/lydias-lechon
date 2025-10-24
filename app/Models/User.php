@@ -416,7 +416,7 @@ class User extends Authenticatable implements MustVerifyEmail
             ->get()
             ->map(function ($u) {
                 $email = (string) ($u->email ?? '');
-                $isGuest = (str_starts_with($email, 'lydtmp_')
+                $isGuest = $u->registration_type == 'registered' ? false : (str_starts_with($email, 'lydtmp_')
                     || $email === ''
                     || ($u->registration_type === 'guest'));
                 return ['id' => $u->id, 'name' => $u->name, 'is_guest' => $isGuest];
