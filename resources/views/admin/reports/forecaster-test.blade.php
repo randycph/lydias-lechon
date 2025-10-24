@@ -831,7 +831,7 @@
                     const css = `
                         body { font-size: 16pt !important; }
                         table, table * { font-size: 14pt !important; line-height: 1.25 !important; }
-                        table.dataTable thead th, table.dataTable thead td { font-size: 14pt !important; }
+                        table.dataTable thead th, table.dataTable thead td { font-size: 15pt !important; }
                         table.dataTable tbody td { font-size: 14pt !important; }
                         td, th { padding: 6px 8px !important; white-space: normal !important;
                                 word-break: break-word !important; vertical-align: top !important; }
@@ -858,7 +858,7 @@
 
                         const $twoCol = $(`
                             <table id="totals-table"
-                                    style="border-collapse:collapse; margin:6px 0 12px 0; font-size:15px; font-weight:bold;
+                                    style="border-collapse:collapse; margin:6px 0 12px 0; font-size:14px; font-weight:bold;
                                             width:100%; table-layout:fixed;">
                                 <colgroup>
                                 <col style="width:25%">
