@@ -828,10 +828,22 @@
                 customize: function (win) {
                     const $doc = $(win.document.body);
 
-                    $doc.css({ 'font-size':'14pt', 'font-weight':'bold' })
-                        .prepend('<div style="margin-bottom:8px;">Forecast Report</div>');
-                    $doc.find('h1').css({ 'font-weight':'bold','font-size':'15pt' });
-                    $doc.find('td').css('border','1px solid #0a0');
+                    const css = `
+                        body { font-size: 16pt !important; }
+                        table, table * { font-size: 14pt !important; line-height: 1.25 !important; }
+                        table.dataTable thead th, table.dataTable thead td { font-size: 14pt !important; }
+                        table.dataTable tbody td { font-size: 14pt !important; }
+                        td, th { padding: 6px 8px !important; white-space: normal !important;
+                                word-break: break-word !important; vertical-align: top !important; }
+                        table { width: 100% !important; table-layout: fixed !important; }
+                        @page { margin: 12mm; }
+                    `;
+                    $('<style type="text/css">' + css + '</style>').appendTo($(win.document.head));
+
+                    $doc.prepend('<div style="margin-bottom:8px; font-weight:bold;">Forecast Report</div>');
+                    $doc.find('h1').css({ 'font-weight':'bold','font-size':'18pt' });
+
+                    $doc.find('td, th').css('border','1px solid #0a0');
 
                     const $src = $doc.find('#totals-table');
                     if ($src.length) {
@@ -846,7 +858,7 @@
 
                         const $twoCol = $(`
                             <table id="totals-table"
-                                    style="border-collapse:collapse; margin:6px 0 12px 0; font-size:14px; font-weight:bold;
+                                    style="border-collapse:collapse; margin:6px 0 12px 0; font-size:15px; font-weight:bold;
                                             width:100%; table-layout:fixed;">
                                 <colgroup>
                                 <col style="width:25%">
