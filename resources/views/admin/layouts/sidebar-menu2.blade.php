@@ -345,7 +345,7 @@
                 </li>
             @endif
 
-            @if (auth()->user()->has_access_to_module('sales_transaction') || auth()->user()->has_access_to_route('sales-transaction.index'))
+            @if (auth()->user()->has_access_to_route('sales-transaction.index'))
                 <li class="nav-item with-sub @if (request()->routeIs('sales-transaction*')) active show @endif">
                     <a href="" class="nav-link"><i data-feather="users"></i> <span>Sales Transaction @if (unreadTransactions() > 0)<span class="badge badge-light">{{ unreadTransactions() }}</span>@endif</span></a>
                     <ul>
