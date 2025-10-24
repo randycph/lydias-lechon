@@ -193,9 +193,9 @@ class FrontendController extends Controller
             $carts = collect(session('cart', [])); 
         }
 
-        $pickupBranches = Branch::orderBy('name', 'asc')->where('pickup_branch', 1)->get();
+        $pickupBranches = Branch::where('status', 1)->orderBy('name', 'asc')->where('pickup_branch', 1)->get();
 
-        $deliveryBranches = Branch::orderBy('name', 'asc')->where('delivery_branch', 1)->get();
+        $deliveryBranches = Branch::where('status', 1)->orderBy('name', 'asc')->where('delivery_branch', 1)->get();
 
         // $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
 

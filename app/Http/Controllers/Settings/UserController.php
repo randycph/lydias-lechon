@@ -66,7 +66,7 @@ class UserController extends Controller
 
     public function create()
     {
-        $branches = Branch::orderBy('name','asc')->get();
+        $branches = Branch::where('status', 1)->orderBy('name','asc')->get();
         $roles = Role::orderBy('name','asc')->get();
         $production_branches = ProductionBranch::orderBy('name','asc')->get();
 
@@ -146,7 +146,7 @@ class UserController extends Controller
 
     public function edit($id)
     {
-        $branches = Branch::orderBy('name','asc')->get();
+        $branches = Branch::where('status', 1)->orderBy('name','asc')->get();
         $userbranch=UserBranch::where('user_id',$id)->get();
         $roles    = Role::orderBy('name','asc')->get();
         $user     = User::where('id',$id)->first();

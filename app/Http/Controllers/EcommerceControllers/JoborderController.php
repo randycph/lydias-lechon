@@ -706,7 +706,7 @@ class JoborderController extends Controller
     {
         $products = Product::where('production_item',1)->orderBy('name','asc')->get();
         $prod_branches = ProductionBranch::orderBy('name','asc')->get();
-        $prod_stores   = Branch::orderBy('name','asc')->get();
+        $prod_stores   = Branch::where('status', 1)->orderBy('name','asc')->get();
 
         return view('admin.joborder.create-pantaga-or-display',compact('products','prod_branches','prod_stores'));
     }
@@ -719,7 +719,7 @@ class JoborderController extends Controller
         $po = ProductionOrder::where('joborder_id',$id)->first();
         $products = Product::where('production_item',1)->orderBy('name','asc')->get();
         $prod_branches = ProductionBranch::orderBy('name','asc')->get();
-        $prod_stores   = Branch::orderBy('name','asc')->get();
+        $prod_stores   = Branch::where('status', 1)->orderBy('name','asc')->get();
 
         return view('admin.joborder.update-pantaga-or-display',compact('products','prod_branches','prod_stores','jo','po'));
     }

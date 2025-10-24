@@ -22,8 +22,8 @@ class HotlineComponent extends Component
      */
     public function render(): View|Closure|string
     {
-        $headOffices = Branch::where('is_head_office', 1)->get();
-        $branches = Branch::with('numbers')->where('is_head_office', 0)->get();
+        $headOffices = Branch::where('status', 1)->where('is_head_office', 1)->get();
+        $branches = Branch::with('numbers')->where('status', 1)->where('is_head_office', 0)->get();
 
         return view('components.hotline-component', [
             'branches' => $branches,

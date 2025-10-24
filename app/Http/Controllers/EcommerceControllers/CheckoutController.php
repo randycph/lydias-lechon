@@ -28,7 +28,7 @@ class CheckoutController extends Controller
 
         $profile = Auth::user()->profile;
         $products = Cart::where('user_id',Auth::id())->get();
-        $branches = Branch::where('pickup_branch', 1)->get();
+        $branches = Branch::where('status', 1)->where('pickup_branch', 1)->get();
         $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
         $coupon = 0;
         foreach($products as $p){
@@ -70,7 +70,7 @@ class CheckoutController extends Controller
     public function checkout_as_guest()
     {
         $products = session('cart', []); // Cart::where('user_id',Auth::id())->get();
-        $branches = Branch::where('pickup_branch', 1)->get();
+        $branches = Branch::where('status', 1)->where('pickup_branch', 1)->get();
         $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
 
         if (count($products) == 0) {
