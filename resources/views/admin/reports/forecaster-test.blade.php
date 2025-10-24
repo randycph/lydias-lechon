@@ -191,7 +191,7 @@
                                             $selectedReceivers = collect(old('receiver', request('receiver', [])))->map(fn($v) => (string)$v)->all();
                                         @endphp
 
-                                        @forelse(\App\EcommerceModel\Branch::orderBy('name')->get() as $cus)
+                                        @forelse(\App\EcommerceModel\Branch::where('status', 1)->orderBy('name')->get() as $cus)
                                             <option value="{{ $cus->id }}"
                                                 {{ in_array((string)$cus->id, $selectedReceivers, true) ? 'selected' : '' }}>
                                                 {{ $cus->name }}

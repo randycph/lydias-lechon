@@ -154,7 +154,7 @@
                                     <label class="tx-13">Production Branch</label>
                                     <select name="production_branch" id="production_branch" class="form-control">
                                         <option value="">- Select Branch -</option>
-                                        @forelse(\App\EcommerceModel\ProductionBranch::orderBy('name')->get() as $cus)
+                                        @forelse(\App\EcommerceModel\ProductionBranch::where('status', 1)->orderBy('name')->get() as $cus)
                                             <option value="{{$cus->id}}">{{$cus->name}}</option>
                                         @empty
                                         @endforelse
@@ -188,7 +188,7 @@
                                     <label class="tx-13">Receiver Branch</label>
                                     <select name="receiver" id="receiver" class="form-control">
                                         <option value="">- Select Receiver -</option>
-                                        @forelse(\App\EcommerceModel\Branch::orderBy('name')->get() as $cus)
+                                        @forelse(\App\EcommerceModel\Branch::where('status', 1)->orderBy('name')->get() as $cus)
                                             <option value="{{$cus->id}}">{{$cus->name}}</option>
                                         @empty
                                         @endforelse

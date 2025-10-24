@@ -139,7 +139,7 @@
                                     <label class="tx-13">Receiver Branch</label>
                                     <select name="receiver[]" id="receiver" class="form-control" multiple>
                                         <option value="">- Select Receiver -</option>
-                                        @forelse(\App\EcommerceModel\Branch::orderBy('name')->get() as $cus)
+                                        @forelse(\App\EcommerceModel\Branch::where('status', 1)->orderBy('name')->get() as $cus)
                                             <option @isset($_GET['receiver']) @if(app('request')->input('receiver') == $cus->id) selected @endif @endif value="{{$cus->id}}">{{$cus->name}}</option>
                                         @empty
                                         @endforelse

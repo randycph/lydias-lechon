@@ -110,7 +110,7 @@
                                     <label class="tx-13">Order Source</label>
                                     <select name="branch" id="branch" class="form-control">
                                         <option value="">- Select Branch -</option>
-                                        @forelse(\App\EcommerceModel\Branch::all() as $br)
+                                        @forelse(\App\EcommerceModel\Branch::where('status', 1)->get() as $br)
                                             <option value="{{$br->name}}">{{$br->name}}</option>
                                         @empty
                                         @endforelse
@@ -125,7 +125,7 @@
                                     <label class="tx-13">Delivery Branch</label>
                                     <select name="delbra" id="delbra" class="form-control">
                                         <option value="">- Select Branch -</option>
-                                        @forelse(\App\EcommerceModel\Branch::where('pickup_branch','1')->orderBy('name')->get() as $db)
+                                        @forelse(\App\EcommerceModel\Branch::where('pickup_branch','1')->where('status', 1)->orderBy('name')->get() as $db)
                                             <option value="{{$db->name}}">{{$db->name}}</option>
                                         @empty
                                         @endforelse

@@ -150,7 +150,7 @@
                                     <label class="tx-13">Branch</label>
                                     <select name="branch" id="branch" class="form-control">
                                         <option value="">- Select Branch -</option>
-                                        @forelse(\App\EcommerceModel\Branch::all() as $br)
+                                        @forelse(\App\EcommerceModel\Branch::where('status', 1)->get() as $br)
                                             <option value="{{$br->name}}">{{$br->name}}</option>
                                         @empty
                                         @endforelse

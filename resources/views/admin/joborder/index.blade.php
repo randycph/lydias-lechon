@@ -27,7 +27,7 @@
                                     <td style="width:14%">
                                         <select name="order_source" id="order_source" class="form-control">
                                             <option value="">Source</option>
-                                            @foreach(\App\EcommerceModel\Branch::orderBy('name','asc')->get() as $b)
+                                            @foreach(\App\EcommerceModel\Branch::where('status', 1)->orderBy('name','asc')->get() as $b)
                                                 <option value="{{$b->name}}">{{$b->name}}</option>
                                             @endforeach
                                             <option value="Web">Web</option>

@@ -27,7 +27,7 @@
                                     <ul>
                                         @php
                                             //$branches = \App\EcommerceModel\Branch::hotline();
-                                            $branches = \App\EcommerceModel\Branch::whereNotNull('hotline')
+                                            $branches = \App\EcommerceModel\Branch::where('status', 1)->whereNotNull('hotline')
                                                         ->orderByRaw("FIELD(id, 16,17,3,5,6,1,25,7,23,24,30,4,8,9,32,31,11,10)")
                                                         ->get();
 

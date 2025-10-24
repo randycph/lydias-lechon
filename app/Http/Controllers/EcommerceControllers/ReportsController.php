@@ -745,7 +745,7 @@ class ReportsController extends Controller
         $rs = DB::select($qry);
 
         //Dropdowns
-        $branches = Branch::all();
+        $branches = Branch::where('status', 1)->get();
         $products = Product::all();
         $categories = ProductCategory::all();
         return view('admin.reports.leftover',compact('rs','branches','products','categories'));
@@ -1080,7 +1080,7 @@ class ReportsController extends Controller
 
         $rs = DB::select($qry);
 
-        $branches = Branch::orderBy('name','asc')->get();
+        $branches = Branch::where('status', 1)->orderBy('name','asc')->get();
 
         return view('admin.reports.forecast',compact('rs','branches'));
     }
@@ -1103,7 +1103,7 @@ class ReportsController extends Controller
 
         $rs = DB::select($qry);
 
-        $branches = Branch::orderBy('name','asc')->get();
+        $branches = Branch::where('status', 1)->orderBy('name','asc')->get();
 
         return view('admin.reports.forecast',compact('rs','branches'));
     }
