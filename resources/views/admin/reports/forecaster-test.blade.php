@@ -828,7 +828,8 @@
                 customize: function (win) {
                     const $doc = $(win.document.body);
 
-                    const css = `
+                    // ---- Base styles (yours) ----
+                    const baseCss = `
                         body { font-size: 16pt !important; }
                         table, table * { font-size: 14pt !important; line-height: 1.25 !important; }
                         table.dataTable thead th, table.dataTable thead td { font-size: 15pt !important; }
@@ -838,49 +839,117 @@
                         table { width: 100% !important; table-layout: fixed !important; }
                         @page { margin: 12mm; }
                     `;
-                    $('<style type="text/css">' + css + '</style>').appendTo($(win.document.head));
+                    $('<style type="text/css">' + baseCss + '</style>').appendTo($(win.document.head));
 
+                    // Title & borders
                     $doc.prepend('<div style="margin-bottom:8px; font-weight:bold;">Forecast Report</div>');
                     $doc.find('h1').css({ 'font-weight':'bold','font-size':'18pt' });
-
                     $doc.find('td, th').css('border','1px solid #0a0');
 
+                    // ---- Make PRODUCT 1-line (no ellipsis), others can wrap ----
+                    // helper to find column index by header text
+                    function colIndexByName($root, headerText){
+                        let idx = -1;
+                        $root.find('table.dataTable thead th').each(function(i){
+                        if ($(this).text().trim().toLowerCase() === headerText) { idx = i + 1; return false; }
+                        });
+                        return idx;
+                    }
+
+                    const idxQty      = colIndexByName($doc, 'qty');
+                    const idxProduct  = colIndexByName($doc, 'product');
+                    const idxPrice    = colIndexByName($doc, 'price');
+                    const idxCustomer = colIndexByName($doc, 'customer');
+                    const idxTime     = colIndexByName($doc, 'time needed');
+
+                    // Let columns size naturally so Product can expand fully
+                    $('<style type="text/css">table.dataTable{table-layout:auto !important;}</style>')
+                        .appendTo($(win.document.head));
+
+                    let colCss = '';
+
+                    if (idxProduct > 0) {
+                        // Product: single line, full text (no clipping, no ellipsis)
+                        colCss += `
+                        table.dataTable thead th:nth-child(${idxProduct}),
+                        table.dataTable tbody td:nth-child(${idxProduct}) {
+                            white-space: nowrap !important;
+                            word-break: normal !important;
+                            overflow: visible !important;
+                            text-overflow: clip !important;
+                            width: 40% !important;   /* adjust as needed */
+                        }
+                        `;
+                    }
+                    if (idxQty > 0) {
+                        colCss += `
+                        table.dataTable thead th:nth-child(${idxQty}),
+                        table.dataTable tbody td:nth-child(${idxQty}) { width: 6% !important; }
+                        `;
+                    }
+                    if (idxPrice > 0) {
+                        colCss += `
+                        table.dataTable thead th:nth-child(${idxPrice}),
+                        table.dataTable tbody td:nth-child(${idxPrice}) { width: 10% !important; }
+                        `;
+                    }
+                    if (idxCustomer > 0) {
+                        colCss += `
+                        table.dataTable thead th:nth-child(${idxCustomer}),
+                        table.dataTable tbody td:nth-child(${idxCustomer}) {
+                            width: 18% !important;
+                            white-space: normal !important; /* allow wrapping here */
+                        }
+                        `;
+                    }
+                    if (idxTime > 0) {
+                        colCss += `
+                        table.dataTable thead th:nth-child(${idxTime}),
+                        table.dataTable tbody td:nth-child(${idxTime}) { width: 12% !important; }
+                        `;
+                    }
+
+                    if (colCss) {
+                        $('<style type="text/css">' + colCss + '</style>').appendTo($(win.document.head));
+                    }
+
+                    // ---- Rebuild #totals-table into compact 2-col layout (yours) ----
                     const $src = $doc.find('#totals-table');
                     if ($src.length) {
                         const rows = [];
                         $src.find('tr').each(function () {
-                            const $tds = $(this).find('td');
-                            rows.push({
-                                label: $tds.eq(0).text(),
-                                value: $tds.eq(1).html()
-                            });
+                        const $tds = $(this).find('td');
+                        rows.push({
+                            label: $tds.eq(0).text(),
+                            value: $tds.eq(1).html()
+                        });
                         });
 
                         const $twoCol = $(`
-                            <table id="totals-table"
-                                    style="border-collapse:collapse; margin:6px 0 12px 0; font-size:14px; font-weight:bold;
-                                            width:100%; table-layout:fixed;">
-                                <colgroup>
-                                <col style="width:25%">
-                                <col style="width:25%">
-                                <col style="width:25%">
-                                <col style="width:25%">
-                                </colgroup>
-                            </table>
+                        <table id="totals-table"
+                                style="border-collapse:collapse; margin:6px 0 12px 0; font-size:14px; font-weight:bold;
+                                        width:100%; table-layout:fixed;">
+                            <colgroup>
+                            <col style="width:25%">
+                            <col style="width:25%">
+                            <col style="width:25%">
+                            <col style="width:25%">
+                            </colgroup>
+                        </table>
                         `);
 
                         for (let i = 0; i < rows.length; i += 2) {
-                            const a = rows[i];
-                            const b = rows[i + 1] || { label: '', value: '' };
+                        const a = rows[i];
+                        const b = rows[i + 1] || { label: '', value: '' };
 
-                            $twoCol.append(`
-                                <tr>
-                                <td style="border:1px solid #0a0; padding:4px 6px; white-space:normal; word-break:break-word;">${a.label}</td>
-                                <td style="border:1px solid #0a0; padding:4px 6px; text-align:center;">${a.value ?? ''}</td>
-                                <td style="border:1px solid #0a0; padding:4px 6px; white-space:normal; word-break:break-word;">${b.label}</td>
-                                <td style="border:1px solid #0a0; padding:4px 6px; text-align:center;">${b.value ?? ''}</td>
-                                </tr>
-                            `);
+                        $twoCol.append(`
+                            <tr>
+                            <td style="border:1px solid #0a0; padding:4px 6px; white-space:normal; word-break:break-word;">${a.label}</td>
+                            <td style="border:1px solid #0a0; padding:4px 6px; text-align:center;">${a.value ?? ''}</td>
+                            <td style="border:1px solid #0a0; padding:4px 6px; white-space:normal; word-break:break-word;">${b.label}</td>
+                            <td style="border:1px solid #0a0; padding:4px 6px; text-align:center;">${b.value ?? ''}</td>
+                            </tr>
+                        `);
                         }
                         $src.replaceWith($twoCol);
                     }
