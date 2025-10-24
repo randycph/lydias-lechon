@@ -91,7 +91,7 @@ class ForecasterController extends Controller
             ->where('sales_number', $salesdetail->header->order_number)
             ->where('date_needed', $request->delivery_date.' '.$request->delivery_time)
             ->where('qty', $salesdetail->qty)
-            ->where('pickup_branch', $request->receiver)
+            // ->where('pickup_branch', $request->receiver)
             ->where('jo_category', 'Order')
             ->where('jo_order_type', $salesdetail->header->order_type ?? ' ')
             ->first();
@@ -106,46 +106,45 @@ class ForecasterController extends Controller
             if ($existingPo) {
                 return redirect()->route('forecaster.index')->with('error', 'This sales detail already has an existing production order for the specified date and time.');
             }
+        } else {
+            $jo = JobOrder::create([
+                'user_id' => auth()->id(),
+                'jo_number' => 'JO'.date('Ymd',strtotime($request->delivery_date)).sprintf('%04d', $insertID),
+                'sales_number' => $salesdetail->header->order_number,
+                'sales_detail_id' => $salesdetail->id,
+                'order_source' => $salesdetail->header->order_source,
+                'product_id' => $salesdetail->product_id,
+                'product_name' => $salesdetail->product->name,
+                'product_size' => $salesdetail->product->size,
+                'product_weight' => $salesdetail->product->weight,
+                'product_category' => $salesdetail->product->category_id,
+                'price' => $salesdetail->price,
+                'paella_qty' => $salesdetail->paella_qty,
+                'qty' => $salesdetail->qty,
+                'paella_price' => $salesdetail->paella_price,
+                'customer_name' => $salesdetail->header->customer_name,
+                'date_needed' => $request->delivery_date.' '.$request->delivery_time,
+                'customer_mobile_number' => $salesdetail->header->customer_contact_number,
+                'customer_tel_number' => $salesdetail->user->contact_tel,
+                'customer_address' => $salesdetail->header->customer_address,
+                'customer_delivery_adress' => $salesdetail->header->customer_delivery_adress,
+                'delivery_tracking_number' => '',
+                'delivery_method' => $salesdetail->header->delivery_type,
+                'pickup_branch' => $request->receiver,
+                'delivery_status' => 'On Processed',
+                'status' => 'Active',
+                'jo_category' => 'Order',
+                'jo_order_type' => $salesdetail->header->order_type ?? ' '
+
+            ]);
+
+            if($jo){
+                $this->assign_to_production_branch($jo->id,$request);
+            }
+
+
+            return redirect()->route('forecaster.index')->with('success', __('standard.forecaster.create_success'));
         }
-
-        $jo = JobOrder::create([
-            'user_id' => auth()->id(),
-            'jo_number' => 'JO'.date('Ymd',strtotime($request->delivery_date)).sprintf('%04d', $insertID),
-            'sales_number' => $salesdetail->header->order_number,
-            'sales_detail_id' => $salesdetail->id,
-            'order_source' => $salesdetail->header->order_source,
-            'product_id' => $salesdetail->product_id,
-            'product_name' => $salesdetail->product->name,
-            'product_size' => $salesdetail->product->size,
-            'product_weight' => $salesdetail->product->weight,
-            'product_category' => $salesdetail->product->category_id,
-            'price' => $salesdetail->price,
-            'paella_qty' => $salesdetail->paella_qty,
-            'qty' => $salesdetail->qty,
-            'paella_price' => $salesdetail->paella_price,
-            'customer_name' => $salesdetail->header->customer_name,
-            'date_needed' => $request->delivery_date.' '.$request->delivery_time,
-            'customer_mobile_number' => $salesdetail->header->customer_contact_number,
-            'customer_tel_number' => $salesdetail->user->contact_tel,
-            'customer_address' => $salesdetail->header->customer_address,
-            'customer_delivery_adress' => $salesdetail->header->customer_delivery_adress,
-            'delivery_tracking_number' => '',
-            'delivery_method' => $salesdetail->header->delivery_type,
-            'pickup_branch' => $request->receiver,
-            'delivery_status' => 'On Processed',
-            'status' => 'Active',
-            'jo_category' => 'Order',
-            'jo_order_type' => $salesdetail->header->order_type ?? ' '
-
-        ]);
-
-        if($jo){
-            $this->assign_to_production_branch($jo->id,$request);
-        }
-
-
-        return redirect()->route('forecaster.index')->with('success', __('standard.forecaster.create_success'));
-
     }
 
     public function assign_to_production_branch($joId,$request)
