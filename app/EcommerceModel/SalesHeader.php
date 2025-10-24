@@ -155,9 +155,9 @@ class SalesHeader extends Model
             $newSale = SalesHeader::where('id', $sale->id)->first();
         }
 
-        if ($newSale->payment_status == 'PAID') {
-            return 'PAID';
-        }
+        // if ($newSale->payment_status == 'PAID') {
+        //     return 'PAID';
+        // }
         $balance = $amount - $paid;
         if($balance <= 0){
             return 'PAID';
@@ -176,9 +176,9 @@ class SalesHeader extends Model
         $sales = SalesHeader::whereId($id)->first();
 
         if ($sales->is_sub == 1) {
-            $amount = SalesHeader::where('parent_sales_header_id', $id)->sum('net_amount');
+            $amount = SalesHeader::where('parent_sales_header_id', $id)->sum('gross_amount');
         } else {
-            $amount = SalesHeader::whereId($id)->sum('net_amount');
+            $amount = SalesHeader::whereId($id)->sum('gross_amount');
         }
 
         if ($sales->is_sub == 1) {
@@ -188,7 +188,10 @@ class SalesHeader extends Model
         }
 
         $total = $amount - $paid;
-        if($total < 0){
+
+        logger('$amount: '.$amount . ' ' . $id);
+
+        if($total <= 0){
             $total = 0;
         }
         return $total;
@@ -202,6 +205,8 @@ class SalesHeader extends Model
         } else {
             $paid = SalesPayment::where('sales_header_id',$id)->whereStatus('PAID')->sum('amount');
         }
+
+        logger('$paid: '.$paid);
 
         // $paid = SalesPayment::where('sales_header_id',$id)->whereStatus('PAID')->sum('amount');
         return $paid;
@@ -241,42 +246,54 @@ class SalesHeader extends Model
 
     public function getPaymentStatusAttribute($value)
     {
-        $sale = SalesHeader::find($this->id);
+        // $sale = SalesHeader::find($this->id);
 
-        if (isset($sale->parent_sales_header_id) && $sale->parent_sales_header_id != null) {
-            $paid = SalesPayment::where('sales_header_id', $sale->parent_sales_header_id)
-                ->where('status', 'PAID') 
-                ->sum('amount') ?? 0;
-        } else {
-            $paid = SalesPayment::where('sales_header_id', $this->id)
-                ->where('status', 'PAID') 
-                ->sum('amount') ?? 0;
-        }
+        // if (isset($sale->parent_sales_header_id) && $sale->parent_sales_header_id != null) {
+        //     $paid = SalesPayment::where('sales_header_id', $sale->parent_sales_header_id)
+        //         ->where('status', 'PAID') 
+        //         ->sum('amount') ?? 0;
+        // } else {
+        //     $paid = SalesPayment::where('sales_header_id', $this->id)
+        //         ->where('status', 'PAID') 
+        //         ->sum('amount') ?? 0;
+        // }
 
-        // Use the raw/current saved status to avoid recursion
-        $current = $value ?? $this->getRawOriginal('payment_status');
+        // // Use the raw/current saved status to avoid recursion
+        // $current = $value ?? $this->getRawOriginal('payment_status');
 
-        if ($paid >= $this->net_amount && $current !== 'PAID') {
-            static::whereKey($this->id)->update([
-                'payment_status' => 'PAID',
-                'updated_at'     => $this->created_at,
-            ]);
+        // if ($paid >= $this->gross_amount && $current !== 'PAID') {
+        //     static::whereKey($this->id)->update([
+        //         'payment_status' => 'PAID',
+        //         'updated_at'     => $this->created_at,
+        //     ]);
 
-            if (
-                ($this->delivery_status === 'Waiting for Payment' || $this->delivery_status === '') &&
-                $this->delivery_status !== 'Processing Stock'
-            ) {
-                static::whereKey($this->id)->update([
-                    'delivery_status' => 'Processing Stock',
-                    'updated_at'      => $this->created_at,
-                ]);
+        //     if (
+        //         ($this->delivery_status === 'Waiting for Payment' || $this->delivery_status === '') &&
+        //         $this->delivery_status !== 'Processing Stock'
+        //     ) {
+        //         static::whereKey($this->id)->update([
+        //             'delivery_status' => 'Processing Stock',
+        //             'updated_at'      => $this->created_at,
+        //         ]);
+        //     }
+
+        //     return 'PAID';
+        // }
+
+        // // Normalize legacy 'Completed' to PAID
+        // return in_array($current, ['PAID', 'Completed'], true) ? 'PAID' : 'UNPAID';
+
+        $paid = SalesPayment::where('sales_header_id',$this->id)->whereStatus('PAID')->sum('amount');
+
+        if($paid >= $this->net_amount){
+            $tag_as_paid = SalesHeader::whereId($this->id)->update(['payment_status' => 'PAID']);
+            if($this->delivery_status == 'Waiting for Payment' || $this->delivery_status == '' ){
+                $update_delivery_status = SalesHeader::whereId($this->id)->update(['delivery_status' => 'Processing Stock']);
             }
-
             return 'PAID';
+        }else{
+            return 'UNPAID';
         }
-
-        // Normalize legacy 'Completed' to PAID
-        return in_array($current, ['PAID', 'Completed'], true) ? 'PAID' : 'UNPAID';
     }
     
     public static function media_color($media) {
