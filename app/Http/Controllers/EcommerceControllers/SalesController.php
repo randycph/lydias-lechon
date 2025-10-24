@@ -215,7 +215,6 @@ class SalesController extends Controller
     }
 
     public function update_dateneeded(Request $request){
-        // dd($request->all());
         $sales = SalesHeader::whereId($request->update_dateneeded_id)->first();
     
         if(isset($request->delivery_branch)){
@@ -226,6 +225,11 @@ class SalesController extends Controller
             'delivery_status' => ''
         ]);
 
+        if ($request->has('update_dateneeded_date') && $request->has('update_dateneeded_time')) {
+            $update_date_needed = SalesDetail::where('sales_header_id',$request->update_dateneeded_id)->update([
+                'delivery_date' => $request->update_dateneeded_date." ".$request->update_dateneeded_time
+            ]);
+        }
 
         // Insert new addresses
         if ($request->filled('address')) {
