@@ -173,7 +173,7 @@
                         <table class="table mg-b-0 table-light table-hover table-striped">
                             <thead>
                             <tr>
-                                <th style="width: 10%;">
+                                <th>
                                     <div class="custom-control custom-checkbox">
                                         <input type="checkbox" class="custom-control-input" id="checkbox_all">
                                         <label class="custom-control-label" for="checkbox_all"></label>
