@@ -4,10 +4,11 @@ namespace App\EcommerceModel;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Models\Concerns\LogsActivityDiff;
 
 class SalesPayment extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, LogsActivityDiff;
 
     protected $table = 'ecommerce_sales_payments';
     protected $fillable = ['sales_header_id','payment_type','amount','status', 'payment_date', 'receipt_number','created_by'
