@@ -444,7 +444,7 @@
                         </tr>
                     </table>
 
-                    <table class="print-table" border="1" width="40%" style="font-size: 15px; font-weight:bold; ">
+                    <table class="print-table" border="1" width="40%" style="font-size: 14px; font-weight:bold; ">
                         <tr>
                             <td>TOTAL WHOLE LECHON ORDER:</td>
                             <td align="center">{{$total_lechon_order}}</td>
