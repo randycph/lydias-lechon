@@ -129,7 +129,7 @@
   table[border] { border:0 !important; }
 
   /* === FULL GRID with merge support (scoped to #example only) === */
-  #example { border-collapse: collapse !important; width:100% !important; }
+  #example { border-collapse: collapse !important; width:100% !important; font-size: 16px !important; }
   #example th, 
   #example td,
   #example td.bord, 
