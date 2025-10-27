@@ -155,7 +155,31 @@
   /* avoid broken borders on page breaks */
   #example tr, #example td, #example th { page-break-inside: avoid; }
   .d-none {
-    display: block !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+  .subtext {
+    font-size: 1rem !important;
+    /* line-height: 25px !important; */
+    position: relative; 
+    top: -20px; 
+  }
+
+  .border-print {
+    display: none;
+    border: 2px solid red;
+    padding-top: 10px;
+    padding-bottom: 5px !important;
+  }
+
+  .print-table {
+    margin-top: 3px;
+    
+  }
+
+  .print-table td {
+    border: 1px solid red !important;
+    padding: 1px !important;
   }
 }
 
@@ -206,12 +230,11 @@
 
 @section('content')
 
-         
         <div class="container-fluid">
-            <div class="text-center mg-b-20">
+            <div class="text-center mg-b-20 border-print">
                 <img height="100px" src="{{ asset('images/lydias1965.png') }}" alt="" class="no-print">
                 <h4 class="" style="font-weight:bold; line-height: 20px">Forecaster Report</h4>
-                <div style="position: relative; top: -20px">{!! $datetxt !!} {!!$dbranch!!}</div>
+                <div class="subtext" style="font-weight: bold;">{!! $datetxt !!} {!!$dbranch!!}</div>
             </div>
             <input type="hidden" id="datetxt" value="{!! $datetxt !!}">
             <input type="hidden" id="dbranch" value="{!! $dbranch !!}">
@@ -415,8 +438,13 @@
             </div>
             <div class="row row-sm">
                 <div class="col-md-12">
-                    {{-- <table class="d-none" width="100%" style="font-size:18px;font-weight:bold;"><tr><td class="bord" align="center">Forecast Report {!! $datetxt !!} {!!$dbranch!!}</td></tr></table> --}}
-                    <table id="totals-table" width="40%" border="1" style="font-size:14px;font-weight:bold;">
+                    <table class="d-none" width="100%" style="font-size:18px;font-weight:bold; border: 2px solid red;">
+                        <tr>
+                            <td style="text-align:center; width:100%;">Forecast Report {!! $datetxt !!} {!! $dbranch !!}</td>
+                        </tr>
+                    </table>
+
+                    <table class="print-table" border="1" width="40%" style="font-size: 15px; font-weight:bold; ">
                         <tr>
                             <td>TOTAL WHOLE LECHON ORDER:</td>
                             <td align="center">{{$total_lechon_order}}</td>
@@ -973,45 +1001,45 @@
                     }
 
                     // ---- Rebuild #totals-table into compact 2-col layout (yours) ----
-                    const $src = $doc.find('#totals-table');
-                    if ($src.length) {
-                        const rows = [];
-                        $src.find('tr').each(function () {
-                        const $tds = $(this).find('td');
-                        rows.push({
-                            label: $tds.eq(0).text(),
-                            value: $tds.eq(1).html()
-                        });
-                        });
+                    // const $src = $doc.find('#totals-table');
+                    // if ($src.length) {
+                    //     const rows = [];
+                    //     $src.find('tr').each(function () {
+                    //     const $tds = $(this).find('td');
+                    //     rows.push({
+                    //         label: $tds.eq(0).text(),
+                    //         value: $tds.eq(1).html()
+                    //     });
+                    //     });
 
-                        const $twoCol = $(`
-                        <table id="totals-table"
-                                style="border-collapse:collapse; margin:6px 0 12px 0; font-size:14px; font-weight:bold;
-                                        width:100%; table-layout:fixed;">
-                            <colgroup>
-                            <col style="width:25%">
-                            <col style="width:25%">
-                            <col style="width:25%">
-                            <col style="width:25%">
-                            </colgroup>
-                        </table>
-                        `);
+                    //     const $twoCol = $(`
+                    //     <table id="totals-table"
+                    //             style="border-collapse:collapse; margin:6px 0 12px 0; font-size:14px; font-weight:bold;
+                    //                     width:100%; table-layout:fixed;">
+                    //         <colgroup>
+                    //         <col style="width:25%">
+                    //         <col style="width:25%">
+                    //         <col style="width:25%">
+                    //         <col style="width:25%">
+                    //         </colgroup>
+                    //     </table>
+                    //     `);
 
-                        for (let i = 0; i < rows.length; i += 2) {
-                        const a = rows[i];
-                        const b = rows[i + 1] || { label: '', value: '' };
+                    //     for (let i = 0; i < rows.length; i += 2) {
+                    //     const a = rows[i];
+                    //     const b = rows[i + 1] || { label: '', value: '' };
 
-                        $twoCol.append(`
-                            <tr>
-                            <td style="border:1px solid #0a0; padding:4px 6px; white-space:normal; word-break:break-word;">${a.label}</td>
-                            <td style="border:1px solid #0a0; padding:4px 6px; text-align:center;">${a.value ?? ''}</td>
-                            <td style="border:1px solid #0a0; padding:4px 6px; white-space:normal; word-break:break-word;">${b.label}</td>
-                            <td style="border:1px solid #0a0; padding:4px 6px; text-align:center;">${b.value ?? ''}</td>
-                            </tr>
-                        `);
-                        }
-                        $src.replaceWith($twoCol);
-                    }
+                    //     $twoCol.append(`
+                    //         <tr>
+                    //         <td style="border:1px solid red; padding:4px 6px; white-space:normal; word-break:break-word;">${a.label}</td>
+                    //         <td style="border:1px solid red; padding:4px 6px; text-align:center;">${a.value ?? ''}</td>
+                    //         <td style="border:1px solid red; padding:4px 6px; white-space:normal; word-break:break-word;">${b.label}</td>
+                    //         <td style="border:1px solid red; padding:4px 6px; text-align:center;">${b.value ?? ''}</td>
+                    //         </tr>
+                    //     `);
+                    //     }
+                    //     $src.replaceWith($twoCol);
+                    // }
                 }
             },
             {
@@ -1271,12 +1299,12 @@ function printReport() {
     // add merge-first tags so borders print like rowspans
     tagMergeFirst();
 
-    const totalsSwap = twoColTotals_forPrint();
+    // const totalsSwap = twoColTotals_forPrint();
 
 
     const cleanup = () => {
 
-        if (totalsSwap.changed) totalsSwap.restore();
+        // if (totalsSwap.changed) totalsSwap.restore();
 
         clearMergeFirst();
         document.body.classList.remove('print-plain');
@@ -1301,55 +1329,55 @@ function printReport() {
 
 // turns the single-column totals table into 2 columns (label,val | label,val)
 function twoColTotals_forPrint() {
-  const $src = $('#totals-table');
-  if ($src.length === 0) return { restore(){}, changed:false };
+//   const $src = $('#totals-table');
+//   if ($src.length === 0) return { restore(){}, changed:false };
 
-  // save original HTML so we can put it back after printing
-  const originalHTML = $src.prop('outerHTML');
+//   // save original HTML so we can put it back after printing
+//   const originalHTML = $src.prop('outerHTML');
 
-  // read rows
-  const rows = [];
-  $src.find('tr').each(function () {
-    const $td = $(this).find('td');
-    rows.push({ label: $td.eq(0).html(), value: $td.eq(1).html() });
-  });
+//   // read rows
+//   const rows = [];
+//   $src.find('tr').each(function () {
+//     const $td = $(this).find('td');
+//     rows.push({ label: $td.eq(0).html(), value: $td.eq(1).html() });
+//   });
 
-  // build a 2-column (4-cell) layout
-  const $twoCol = $(`
-    <table id="totals-table"
-           style="border-collapse:collapse; margin:6px 0 12px 0; font-size:14px; font-weight:bold; width:100%; table-layout:fixed;">
-      <colgroup>
-        <col style="width:40%">
-        <col style="width:10%">
-        <col style="width:40%">
-        <col style="width:10%">
-      </colgroup>
-    </table>
-  `);
+//   // build a 2-column (4-cell) layout
+//   const $twoCol = $(`
+//     <table id="totals-table"
+//            style="border-collapse:collapse; margin:6px 0 12px 0; font-size:14px; font-weight:bold; width:100%; table-layout:fixed;">
+//       <colgroup>
+//         <col style="width:40%">
+//         <col style="width:10%">
+//         <col style="width:40%">
+//         <col style="width:10%">
+//       </colgroup>
+//     </table>
+//   `);
 
-  for (let i = 0; i < rows.length; i += 2) {
-    const a = rows[i];
-    const b = rows[i + 1] || { label: '&nbsp;', value: '&nbsp;' };
-    $twoCol.append(`
-      <tr>
-        <td style="border:1px solid #cbd5e1; padding:4px 6px;">${a.label}</td>
-        <td style="border:1px solid #cbd5e1; padding:4px 6px; text-align:center;">${a.value}</td>
-        <td style="border:1px solid #cbd5e1; padding:4px 6px;">${b.label}</td>
-        <td style="border:1px solid #cbd5e1; padding:4px 6px; text-align:center;">${b.value}</td>
-      </tr>
-    `);
-  }
+//   for (let i = 0; i < rows.length; i += 2) {
+//     const a = rows[i];
+//     const b = rows[i + 1] || { label: '&nbsp;', value: '&nbsp;' };
+//     $twoCol.append(`
+//       <tr>
+//         <td style="border:1px solid #cbd5e1; padding:4px 6px;">${a.label}</td>
+//         <td style="border:1px solid #cbd5e1; padding:4px 6px; text-align:center;">${a.value}</td>
+//         <td style="border:1px solid #cbd5e1; padding:4px 6px;">${b.label}</td>
+//         <td style="border:1px solid #cbd5e1; padding:4px 6px; text-align:center;">${b.value}</td>
+//       </tr>
+//     `);
+//   }
 
-  // swap in
-  $src.replaceWith($twoCol);
+//   // swap in
+//   $src.replaceWith($twoCol);
 
-  // return a restore fn
-  return {
-    changed: true,
-    restore() {
-      $('#totals-table').replaceWith(originalHTML);
-    }
-  };
+//   // return a restore fn
+//   return {
+//     changed: true,
+//     restore() {
+//       $('#totals-table').replaceWith(originalHTML);
+//     }
+//   };
 }
 
 
