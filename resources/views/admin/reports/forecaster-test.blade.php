@@ -62,6 +62,8 @@
    
 @endphp
 
+@section('pagetitle', 'Forecaster Report ' . strip_tags($datetxt) . ' ' . strip_tags($dbranch))
+
 @section('pagecss')
     <!-- vendor css -->
     <link href="{{ asset('lib/@fortawesome/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
@@ -113,13 +115,64 @@
             border-bottom: 1px solid #fff !important;
         }
 
+@media print {
+  /* unlock any scroll/height clamps */
+  html, body { height:auto !important; overflow:visible !important; }
+  .modal, .modal-dialog, .modal-content, .modal-body,
+  .content, .page-content, .wrapper, .container,
+  .dataTables_wrapper, .dataTables_scroll, .dataTables_scrollHead, .dataTables_scrollBody,
+  [style*="overflow"], [class*="scroll"], [class*="overflow"],
+  [style*="max-height"], [style*="height:"]
+  { position:static !important; overflow:visible !important; height:auto !important; max-height:none !important; }
+
+  /* neutralize HTML border="1" */
+  table[border] { border:0 !important; }
+
+  /* === FULL GRID with merge support (scoped to #example only) === */
+  #example { border-collapse: collapse !important; width:100% !important; }
+  #example th, 
+  #example td,
+  #example td.bord, 
+  #example th.bord {             /* override any .bord styles */
+    border: 1px solid #cbd5e1 !important;
+  }
+  
+/* merged blocks */
+  #example td.merge-same { border-top:    0 !important; }   /* continuation rows */
+  #example td.merge-first { border-bottom: 0 !important; }   /* first row of block */
+
+  /* keep header underline even if header cells are "merged" */
+  #example thead th { border-bottom: 1px solid #cbd5e1 !important; }
+
+  /* allow wrapping for nowrap tables */
+  #example.display.nowrap td, 
+  #example.display.nowrap th { white-space: normal !important; }
+
+  /* hide DT chrome */
+  .dataTables_filter, .dataTables_info, .dataTables_length,
+  .dataTables_paginate, .dt-buttons, .no-print { display:none !important; }
+
+  /* avoid broken borders on page breaks */
+  #example tr, #example td, #example th { page-break-inside: avoid; }
+  .d-none {
+    display: block !important;
+  }
+}
+
+
+
+
+
+
+
+
 
     </style>
 @endsection
 
 @section('pagetitle')
-    <table width="100%" style="font-size:18px;font-weight:bold;"><tr><td class="bord" align="center">Forecast Report {!! $datetxt !!} {!!$dbranch!!}</td></tr></table>
-    <table id="totals-table" width="40%" border="1" style="font-size:14px;font-weight:bold;">
+    {{-- <table width="100%" style="font-size:18px;font-weight:bold;"><tr><td class="bord" align="center">Forecast Report {!! $datetxt !!} {!!$dbranch!!}</td></tr></table> --}}
+    <table id="totals-table" width="40%" style="font-size:14px;font-weight:bold;">
         <tr>
             <td>TOTAL WHOLE LECHON ORDER:</td>
             <td align="center">{{$total_lechon_order}}</td>
@@ -156,9 +209,9 @@
          
         <div class="container-fluid">
             <div class="text-center mg-b-20">
-                <img height="100px" src="{{ asset('images/lydias1965.png') }}" alt="">
-                <h4 class="mg-b-0 tx-spacing--1">Forecaster Report</h4>
-                {!! $datetxt !!} {!!$dbranch!!}
+                <img height="100px" src="{{ asset('images/lydias1965.png') }}" alt="" class="no-print">
+                <h4 class="" style="font-weight:bold; line-height: 20px">Forecaster Report</h4>
+                <div style="position: relative; top: -20px">{!! $datetxt !!} {!!$dbranch!!}</div>
             </div>
             <input type="hidden" id="datetxt" value="{!! $datetxt !!}">
             <input type="hidden" id="dbranch" value="{!! $dbranch !!}">
@@ -168,7 +221,7 @@
                     <form action="{{route('admin.report.forecaster')}}" method="get">
                       
                         @csrf
-                        <div class="row row-sm">
+                        <div class="row row-sm no-print">
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="tx-13">Start Date (Date Needed)</label>
@@ -362,7 +415,8 @@
             </div>
             <div class="row row-sm">
                 <div class="col-md-12">
-                    <table width="40%" border="1" style="font-size:14px;font-weight:bold;">
+                    {{-- <table class="d-none" width="100%" style="font-size:18px;font-weight:bold;"><tr><td class="bord" align="center">Forecast Report {!! $datetxt !!} {!!$dbranch!!}</td></tr></table> --}}
+                    <table id="totals-table" width="40%" border="1" style="font-size:14px;font-weight:bold;">
                         <tr>
                             <td>TOTAL WHOLE LECHON ORDER:</td>
                             <td align="center">{{$total_lechon_order}}</td>
@@ -582,7 +636,7 @@
         </td>
 
         {{-- Customer Address (merged for sales, per-row for JO) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}"
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }}"
             data-value="{{ strip_tags($addressHtml) }}">
             {!! $isSales
                 ? ($isMerged ? '&nbsp;' : $addressHtml)
@@ -593,7 +647,7 @@
         <td class="bord">{{ number_format((float)($r->price ?? 0), 2) }}</td>
 
         {{-- Payment (merged for sales; blank for JO) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}"
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}"
             data-value="{{ $isSales && $payments->count() ? $payments->map(fn($p)=>$p->payment_type.': '.number_format((float)$p->amount,2))->implode(', ') : '' }}">
             @if($isSales && !$isMerged && $payments->count())
             <table>
@@ -608,34 +662,34 @@
         </td>
 
         {{-- Delivery Address (merged for sales) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ $custAddrSafe }}">
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $custAddrSafe }}">
             {!! $isSales ? ($isMerged ? '&nbsp;' : $chunkWords($r->customer_delivery_adress ?? ''))
                          : e($r->customer_delivery_adress ?? '') !!}
         </td>
 
         {{-- Customer (merged for sales) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ $isSales ? $contactMerged : (string)($r->customer_name ?? '') }}">
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $isSales ? $contactMerged : (string)($r->customer_name ?? '') }}">
             {!! $isSales ? ($isMerged ? '&nbsp;' : $chunkWords($contactMerged))
                          : e((strlen((string)($r->customer_name ?? '')) < 2) ? ($r->customer_delivery_adress ?? '') : ($r->customer_name ?? '')) !!}
         </td>
 
         {{-- Date Needed (merged for sales) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ $deliveryDate }}">{{ $isSales ? ($isMerged ? '' : $deliveryDate) : $deliveryDate }}</td>
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $deliveryDate }}">{{ $isSales ? ($isMerged ? '' : $deliveryDate) : $deliveryDate }}</td>
 
         {{-- Time Needed (merged for sales) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ $deliveryTime }}">{{ $isSales ? ($isMerged ? '' : $deliveryTime) : $deliveryTime }}</td>
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $deliveryTime }}">{{ $isSales ? ($isMerged ? '' : $deliveryTime) : $deliveryTime }}</td>
 
         {{-- Note (merged for sales) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ strip_tags($noteChunked) }}">
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ strip_tags($noteChunked) }}">
             {!! $isSales ? ($isMerged ? '&nbsp;' : $noteChunked) : e($r->instruction ?? '') !!}
         </td>
 
         {{-- Production Date / Time (merged for sales) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ $delDate }}">{{ $isSales ? ($isMerged ? '' : $delDate) : $fmtDate($r->deldate) }}</td>
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ $delTime }}">{{ $isSales ? ($isMerged ? '' : $delTime) : $fmtTime($r->deldate) }}</td>
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $delDate }}">{{ $isSales ? ($isMerged ? '' : $delDate) : $fmtDate($r->deldate) }}</td>
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $delTime }}">{{ $isSales ? ($isMerged ? '' : $delTime) : $fmtTime($r->deldate) }}</td>
 
         {{-- Delivery Type (merged for sales; JO blank) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ $isSales ? $deliveryType : '' }}">
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $isSales ? $deliveryType : '' }}">
             {{ $isSales ? ($isMerged ? '' : e($deliveryType)) : '' }}
         </td>
 
@@ -646,17 +700,17 @@
         <td class="bord">{{ e($r->pbname ?? '') }}</td>
 
         {{-- Status (merged for sales; JO per-row) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ $delstat }}">
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $delstat }}">
             {{ $isSales ? ($isMerged ? '' : e($delstat)) : e($r->delstat ?? '') }}
         </td>
 
         {{-- Agent (merged for sales; JO blank) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ $agent }}">
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $agent }}">
             {{ $isSales ? ($isMerged ? '' : e($agent)) : '' }}
         </td>
 
         {{-- Order# (merged for sales; JO blank) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ $orderNoText }}">
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $orderNoText }}">
             @if($isSales && !$isMerged)
                 @if(!empty($r->hid))
                     <a target="_blank" href="{{ route('sales.print', base64_encode($r->hid)) }}">{{ e($orderNoText) }}</a>
@@ -669,20 +723,20 @@
         </td>
 
         {{-- Contact Person / Customer Name (merged for sales; JO per-row) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ $customerName }}">
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $customerName }}">
             {{ $isSales ? ($isMerged ? '' : e($customerName)) : e($r->customer_name ?? '') }}
         </td>
 
         {{-- Contact Number (merged for sales; JO per-row) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ $contactNo }}">
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $contactNo }}">
             {{ $isSales ? ($isMerged ? '' : e($contactNo)) : e($r->customer_contact_number ?? '') }}
         </td>
 
         {{-- DR# (merged for sales, left blank) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="">{{ $isSales ? '' : '' }}</td>
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="">{{ $isSales ? '' : '' }}</td>
 
         {{-- Del Fee (merged for sales; JO per-row=0) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ $delFee }}">
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $delFee }}">
             {{ $isSales ? ($isMerged ? '' : $delFee) : '0' }}
         </td>
 
@@ -690,15 +744,15 @@
         <td class="bord">{{ number_format((float)($r->price ?? 0) * (float)($r->qty ?? 0), 2) }}</td>
 
         {{-- Releasing (merged for sales; JO blank) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="">{{ $isSales ? '' : '' }}</td>
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="">{{ $isSales ? '' : '' }}</td>
 
         {{-- Order Source (merged for sales; JO = "Forecaster") --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ $isSales ? $orderSource : 'Forecaster' }}">
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $isSales ? $orderSource : 'Forecaster' }}">
             {{ $isSales ? ($isMerged ? '' : e($orderSource)) : 'Forecaster' }}
         </td>
 
         {{-- Pickup Branch (merged for sales; JO per-row receiver) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ $isSales ? $receiver : (string)($r->receiver ?? '') }}">
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $isSales ? $receiver : (string)($r->receiver ?? '') }}">
             {{ $isSales ? ($isMerged ? '' : e($receiver)) : e($r->receiver ?? '') }}
         </td>
 
@@ -706,7 +760,7 @@
         <td class="bord">{{ e($r->catname ?? '') }}</td>
 
         {{-- Encoded By (merged for sales; JO per-row) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ $username }}">
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $username }}">
             {{ $isSales ? ($isMerged ? '' : e($username)) : e($r->username ?? '') }}
         </td>
 
@@ -723,25 +777,25 @@
         <td class="bord">{{ e($itemType) }}</td>
 
         {{-- Forecaster Date (merged for sales; JO per-row) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ $forecastDt }}">
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $forecastDt }}">
             {{ $isSales ? ($isMerged ? '' : e($forecastDt)) : e($r->forecast_dt ?? '') }}
         </td>
 
         {{-- Delivery Branch (merged for sales; JO per-row) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ $branch }}">
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $branch }}">
             {{ $isSales ? ($isMerged ? '' : e($branch)) : e(($r->mbranch ?? '') ?: ($r->del_branch ?? '')) }}
         </td>
 
         {{-- Encoded Date / Time (merged for sales; JO per-row) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ $createdDate }}">
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $createdDate }}">
             {{ $isSales ? ($isMerged ? '' : $createdDate) : $fmtDate($r->created, 'Y-m-d') }}
         </td>
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ $createdTime }}">
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $createdTime }}">
             {{ $isSales ? ($isMerged ? '' : $createdTime) : $fmtTime($r->created) }}
         </td>
 
         {{-- Delivery Status (duplicate of status; merged for sales; JO per-row) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' : '' }}" data-value="{{ $delstat }}">
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $delstat }}">
             {{ $isSales ? ($isMerged ? '' : e($delstat)) : e($r->delstat ?? '') }}
         </td>
     </tr>
@@ -805,9 +859,10 @@
         });
     })();
 
-    $('#example').DataTable({
+    let dt = $('#example').DataTable({
         dom: 'Bfrtip',
         pageLength: 28,
+        lengthMenu: [ [28, 50, 100, -1], [28, 50, 100, "All"] ],
         aaSorting: [],
         bSort: false,
         searching: false,
@@ -815,6 +870,10 @@
         buttons: [
             {
                 extend: 'print',
+                action: function (e, dt, node, config) {
+                    e.preventDefault();
+                    printReport();
+                },
                 exportOptions: {
                     columns: ':visible',
                     stripHtml: false,
@@ -832,17 +891,17 @@
                     const baseCss = `
                         body { font-size: 16pt !important; }
                         table, table * { font-size: 14pt !important; line-height: 1.25 !important; }
-                        table.dataTable thead th, table.dataTable thead td { font-size: 15pt !important; }
-                        table.dataTable tbody td { font-size: 14pt !important; }
+                        table.dataTable thead th, table.dataTable thead td { font-size: 15pt !important; border: none !important }
+                        table.dataTable tbody td { font-size: 14pt !important; border: none !important}
                         td, th { padding: 6px 8px !important; white-space: normal !important;
-                                word-break: break-word !important; vertical-align: top !important; }
+                        word-break: break-word !important; vertical-align: top !important; }
                         table { width: 100% !important; table-layout: fixed !important; }
                         @page { margin: 12mm; }
                     `;
                     $('<style type="text/css">' + baseCss + '</style>').appendTo($(win.document.head));
 
                     // Title & borders
-                    $doc.prepend('<div style="margin-bottom:8px; font-weight:bold;">Forecast Report</div>');
+                    // $doc.prepend('<div style="margin-bottom:8px; font-weight:bold;">Forecast Report</div>');
                     $doc.find('h1').css({ 'font-weight':'bold','font-size':'18pt' });
                     $doc.find('td, th').css('border','1px solid #0a0');
 
@@ -1053,6 +1112,249 @@
         });
     } );
 
-    
+
+// Helper: find scrollable ancestors and temporarily remove their scroll/height
+function unlockScrollableAncestors(rootEl) {
+  const el = (typeof rootEl === 'string') ? document.querySelector(rootEl) : rootEl;
+  if (!el) return () => {};
+
+  const changed = [];
+  let node = el.parentElement;
+
+  const isScrollable = (n) => {
+    const cs = getComputedStyle(n);
+    const ovY = cs.overflowY, ov = cs.overflow;
+    const hasScroll = (ovY === 'auto' || ovY === 'scroll' || ov === 'auto' || ov === 'scroll');
+    const fixedH = (cs.maxHeight && cs.maxHeight !== 'none') || (cs.height && cs.height !== 'auto');
+    return hasScroll || fixedH;
+  };
+
+  while (node && node !== document.body) {
+    if (isScrollable(node)) {
+      // store current inline styles so we can restore
+      changed.push({
+        node,
+        style: {
+          overflow: node.style.overflow,
+          overflowY: node.style.overflowY,
+          height: node.style.height,
+          maxHeight: node.style.maxHeight,
+          position: node.style.position
+        }
+      });
+      node.style.overflow = 'visible';
+      node.style.overflowY = 'visible';
+      node.style.height = 'auto';
+      node.style.maxHeight = 'none';
+      // some frameworks use fixed/relative with transforms; static is safest for print
+      node.style.position = 'static';
+    }
+    node = node.parentElement;
+  }
+
+  // Also clear body-level locking (e.g., Bootstrap modal adds overflow hidden)
+  changed.push({
+    node: document.body,
+    style: { overflow: document.body.style.overflow }
+  });
+  document.body.style.overflow = 'visible';
+
+  // Return a restore function
+  return function restore() {
+    for (const c of changed) {
+      const { node, style } = c;
+      node.style.overflow = style.overflow ?? '';
+      node.style.overflowY = style.overflowY ?? '';
+      node.style.height = style.height ?? '';
+      node.style.maxHeight = style.maxHeight ?? '';
+      node.style.position = style.position ?? '';
+    }
+  };
+}
+
+// Respect current ColVis (hide hidden columns only for print)
+function markHiddenColsForPrint(dt) {
+  const hiddenIdx = dt.columns(':not(:visible)').indexes().toArray();
+  hiddenIdx.forEach(i => {
+    $(dt.column(i).header()).addClass('dt-print-hidden');
+    $(dt.column(i).nodes()).addClass('dt-print-hidden');
+    const foot = dt.column(i).footer();
+    if (foot) $(foot).addClass('dt-print-hidden');
+  });
+}
+function clearHiddenColsMarks() {
+  $('#example th.dt-print-hidden, #example td.dt-print-hidden, #example tfoot .dt-print-hidden')
+    .removeClass('dt-print-hidden');
+}
+
+function printReport() {
+  const dt = $('#example').DataTable();
+
+  // remember current pagination
+  const prevLen  = dt.page.len();
+  const prevPage = dt.page();
+
+  // --- helper: unlock scrollable ancestors (returns a restore fn) ---
+  function unlockScrollableAncestors(rootSel) {
+    const el = document.querySelector(rootSel);
+    if (!el) return () => {};
+    const changed = [];
+    let node = el.parentElement;
+
+    const isScrollable = (n) => {
+      const cs = getComputedStyle(n);
+      const hasScroll = ['auto','scroll'].includes(cs.overflow) || ['auto','scroll'].includes(cs.overflowY);
+      const fixedH = (cs.maxHeight && cs.maxHeight !== 'none') || (cs.height && cs.height !== 'auto');
+      return hasScroll || fixedH;
+    };
+
+    while (node && node !== document.body) {
+      if (isScrollable(node)) {
+        changed.push({
+          node,
+          style: {
+            overflow: node.style.overflow,
+            overflowY: node.style.overflowY,
+            height: node.style.height,
+            maxHeight: node.style.maxHeight,
+            position: node.style.position
+          }
+        });
+        node.style.overflow   = 'visible';
+        node.style.overflowY  = 'visible';
+        node.style.height     = 'auto';
+        node.style.maxHeight  = 'none';
+        node.style.position   = 'static';
+      }
+      node = node.parentElement;
+    }
+    changed.push({ node: document.body, style: { overflow: document.body.style.overflow } });
+    document.body.style.overflow = 'visible';
+
+    return function restore() {
+      for (const {node, style} of changed) {
+        node.style.overflow  = style.overflow  ?? '';
+        node.style.overflowY = style.overflowY ?? '';
+        node.style.height    = style.height    ?? '';
+        node.style.maxHeight = style.maxHeight ?? '';
+        node.style.position  = style.position  ?? '';
+      }
+    };
+  }
+
+  // --- helper: mark first row of each merged block ---
+  function tagMergeFirst() {
+    const rows = $('#example tbody tr').get();
+    for (let r = 1; r < rows.length; r++) {
+      const cells = rows[r].cells;
+      for (let c = 0; c < cells.length; c++) {
+        if (cells[c].classList.contains('merge-same')) {
+          const prev = rows[r - 1];
+          if (prev && prev.cells[c]) prev.cells[c].classList.add('merge-first');
+        }
+      }
+    }
+  }
+  function clearMergeFirst() {
+    $('#example td.merge-first').removeClass('merge-first');
+  }
+
+  const restoreScroll = unlockScrollableAncestors('#example');
+
+  // show ALL rows, then print after draw
+  dt.one('draw', () => {
+    document.body.classList.add('print-plain');
+
+    // make sure DT scroll body (if any) isn't clipping
+    $('#example_wrapper .dataTables_scrollBody').css({height:'auto', maxHeight:'none', overflow:'visible'});
+
+    // add merge-first tags so borders print like rowspans
+    tagMergeFirst();
+
+    const totalsSwap = twoColTotals_forPrint();
+
+
+    const cleanup = () => {
+
+        if (totalsSwap.changed) totalsSwap.restore();
+
+        clearMergeFirst();
+        document.body.classList.remove('print-plain');
+        restoreScroll();
+        // restore pagination + page
+        dt.page.len(prevLen).draw(false).one('draw', () => dt.page(prevPage).draw(false));
+        window.removeEventListener('afterprint', cleanup);
+    };
+    window.addEventListener('afterprint', cleanup, { once: true });
+
+    // Safari / WebKit fallback
+    const mql = window.matchMedia('print');
+    const onChange = e => { if (!e.matches) { cleanup(); mql.removeEventListener?.('change', onChange); } };
+    mql.addEventListener?.('change', onChange);
+
+    window.print();
+  });
+
+  // trigger ALL rows
+  dt.page.len(-1).draw(false);
+}
+
+// turns the single-column totals table into 2 columns (label,val | label,val)
+function twoColTotals_forPrint() {
+  const $src = $('#totals-table');
+  if ($src.length === 0) return { restore(){}, changed:false };
+
+  // save original HTML so we can put it back after printing
+  const originalHTML = $src.prop('outerHTML');
+
+  // read rows
+  const rows = [];
+  $src.find('tr').each(function () {
+    const $td = $(this).find('td');
+    rows.push({ label: $td.eq(0).html(), value: $td.eq(1).html() });
+  });
+
+  // build a 2-column (4-cell) layout
+  const $twoCol = $(`
+    <table id="totals-table"
+           style="border-collapse:collapse; margin:6px 0 12px 0; font-size:14px; font-weight:bold; width:100%; table-layout:fixed;">
+      <colgroup>
+        <col style="width:40%">
+        <col style="width:10%">
+        <col style="width:40%">
+        <col style="width:10%">
+      </colgroup>
+    </table>
+  `);
+
+  for (let i = 0; i < rows.length; i += 2) {
+    const a = rows[i];
+    const b = rows[i + 1] || { label: '&nbsp;', value: '&nbsp;' };
+    $twoCol.append(`
+      <tr>
+        <td style="border:1px solid #cbd5e1; padding:4px 6px;">${a.label}</td>
+        <td style="border:1px solid #cbd5e1; padding:4px 6px; text-align:center;">${a.value}</td>
+        <td style="border:1px solid #cbd5e1; padding:4px 6px;">${b.label}</td>
+        <td style="border:1px solid #cbd5e1; padding:4px 6px; text-align:center;">${b.value}</td>
+      </tr>
+    `);
+  }
+
+  // swap in
+  $src.replaceWith($twoCol);
+
+  // return a restore fn
+  return {
+    changed: true,
+    restore() {
+      $('#totals-table').replaceWith(originalHTML);
+    }
+  };
+}
+
+
+
+
 </script>
+
 @endsection
