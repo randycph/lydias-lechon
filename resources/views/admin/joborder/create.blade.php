@@ -1276,6 +1276,7 @@
             $('#region_select').val('NCR').trigger('change');
             $('#province_select').val('').trigger('change');
             $('#city_select').val('').trigger('change');
+            $('#add_ress').val('');
 
             if(type == 1){
                 $('#set_delivery_charge').val(0);
