@@ -1273,6 +1273,7 @@
         $(document).on('change', '#delivery_type', function(){
             var type = $(this).val();
 
+            $('#region_select').val('NCR').trigger('change');
             $('#province_select').val('').trigger('change');
             $('#city_select').val('').trigger('change');
 
