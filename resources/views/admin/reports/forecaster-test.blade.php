@@ -87,7 +87,7 @@
           size: auto;
         }
         .bords{
-            border: 2px solid red;
+            border: 2px solid black;
         }
         .select2-container--default .select2-selection--multiple .select2-selection__choice {
             background-color: #0168fa;
@@ -134,7 +134,7 @@
   #example td,
   #example td.bord, 
   #example th.bord {             /* override any .bord styles */
-    border: 1px solid #cbd5e1 !important;
+    border: 1px solid #000 !important;
   }
   
 /* merged blocks */
@@ -142,7 +142,7 @@
   #example td.merge-first { border-bottom: 0 !important; }   /* first row of block */
 
   /* keep header underline even if header cells are "merged" */
-  #example thead th { border-bottom: 1px solid #cbd5e1 !important; }
+  #example thead th { border-bottom: 1px solid #000 !important; }
 
   /* allow wrapping for nowrap tables */
   #example.display.nowrap td, 
@@ -167,7 +167,7 @@
 
   .border-print {
     display: none;
-    border: 2px solid red;
+    border: 2px solid black;
     padding-top: 10px;
     padding-bottom: 5px !important;
   }
@@ -178,7 +178,7 @@
   }
 
   .print-table td {
-    border: 1px solid red !important;
+    border: 1px solid black !important;
     padding: 1px !important;
   }
 }
@@ -438,7 +438,7 @@
             </div>
             <div class="row row-sm">
                 <div class="col-md-12">
-                    <table class="d-none" width="100%" style="font-size:18px;font-weight:bold; border: 2px solid red;">
+                    <table class="d-none" width="100%" style="font-size:18px;font-weight:bold; border: 1px solid black;">
                         <tr>
                             <td style="text-align:center; width:100%;">Forecast Report {!! $datetxt !!} {!! $dbranch !!}</td>
                         </tr>
@@ -1031,10 +1031,10 @@
 
                     //     $twoCol.append(`
                     //         <tr>
-                    //         <td style="border:1px solid red; padding:4px 6px; white-space:normal; word-break:break-word;">${a.label}</td>
-                    //         <td style="border:1px solid red; padding:4px 6px; text-align:center;">${a.value ?? ''}</td>
-                    //         <td style="border:1px solid red; padding:4px 6px; white-space:normal; word-break:break-word;">${b.label}</td>
-                    //         <td style="border:1px solid red; padding:4px 6px; text-align:center;">${b.value ?? ''}</td>
+                    //         <td style="border:1px solid black; padding:4px 6px; white-space:normal; word-break:break-word;">${a.label}</td>
+                    //         <td style="border:1px solid black; padding:4px 6px; text-align:center;">${a.value ?? ''}</td>
+                    //         <td style="border:1px solid black; padding:4px 6px; white-space:normal; word-break:break-word;">${b.label}</td>
+                    //         <td style="border:1px solid black; padding:4px 6px; text-align:center;">${b.value ?? ''}</td>
                     //         </tr>
                     //     `);
                     //     }
