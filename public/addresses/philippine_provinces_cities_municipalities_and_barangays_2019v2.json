@@ -49057,5 +49057,9 @@
         }
       }
     }
+  },
+  "OTHER": {
+    "region_name": "OTHER",
+    "province_list": {}
   }
 }

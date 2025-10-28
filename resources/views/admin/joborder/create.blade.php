@@ -267,11 +267,6 @@
                             </select>
                         </div>
 
-                        <div class="form-group" id="d2d_div" style="display: none;">
-                            <label class="d-block">Delivery Address <span class="tx-danger">*</span></label>
-                           <textarea name="add_ress" class="form-control" id="add_ress" cols="30" rows="4" onchange="set_complete_address()"></textarea>
-                        </div>
-
                         {{-- New select address filters --}}
 
                         <div id="loc_div" style="display: none;">
@@ -285,7 +280,12 @@
                                 @endif
                             </div>
 
-                            <div class="form-group">
+                            <div class="form-group" id="d2d_div" style="display: none;">
+                                <label class="d-block">Delivery Address <span class="tx-danger">*</span></label>
+                                <textarea name="add_ress" class="form-control" id="add_ress" cols="30" rows="4" onchange="set_complete_address()"></textarea>
+                            </div>
+
+                            <div class="form-group non-others-region">
                                 <label class="d-block">Province *</label>
                                 <select class="form-control" id="province_select" name="province" style="width:100%" disabled onchange="set_complete_address()">
                                     <option value="">Select Province</option>
@@ -299,7 +299,7 @@
                                 @endif
                             </div>
 
-                            <div class="form-group">
+                            <div class="form-group non-others-region">
                                 <label class="d-block">City/Municipality *</label>
                                 <select class="form-control" id="city_select" name="city" style="width:100%" disabled onchange="set_complete_address()">
                                     <option value="">Select City/Municipality</option>
@@ -325,11 +325,15 @@
                         </div> --}}
                         <div id="complete_address"></div>
 
-
-                        
-                        <div class="form-group" id="other_outlet_div" style="display: none;" onkeyup="set_complete_address()">
+                        <div class="form-group" id="other_outlet_div_" style="display: none;" onkeyup="set_complete_address()">
                             <input type="text" class="form-control" name="other_outlet" id="other_outlet" placeholder="Please enter location name">    
                         </div>
+
+
+                        
+                        {{-- <div class="form-group" id="other_outlet_div" style="display: none;" onkeyup="set_complete_address()">
+                            <input type="text" class="form-control" name="other_outlet" id="other_outlet" placeholder="Please enter location name">    
+                        </div> --}}
 
                         <div class="form-group">
                             <label class="d-block">Delivery Charge <span class="tx-danger">*</span></label>
@@ -337,7 +341,7 @@
                                 <div class="input-group-prepend">
                                     <div class="input-group-text">Php</div>
                                 </div>
-                                <input type="number" name="delivery_charge" class="form-control text-right" id="set_delivery_charge" value="0" required>
+                                <input type="number" readonly name="delivery_charge" class="form-control text-right" id="set_delivery_charge" value="0" required>
                             </div>
                         </div>
                     </div>
@@ -551,7 +555,7 @@
        
         function set_complete_address(){
             if($('#delivery_type').val() == 1){
-                $('#complete_address').html('Complete Address: '+ $('#add_ress').val() +', '+ $('#province_select').val()+' '+$('#city_select').val());
+                $('#complete_address').html('Complete Address: '+ $('#add_ress').val() +', '+ $('#province_select').val()+' '+$('#city_select').val() + ' ' + $('#other_outlet').val() );
             }
             else{
                 $('#complete_address').html('');
@@ -1269,6 +1273,9 @@
         $(document).on('change', '#delivery_type', function(){
             var type = $(this).val();
 
+            $('#province_select').val('').trigger('change');
+            $('#city_select').val('').trigger('change');
+
             if(type == 1){
                 $('#set_delivery_charge').val(0);
                 $('#set_delivery_charge').prop('readonly',true);
@@ -1277,9 +1284,7 @@
                 $('#outlet_div').hide();
                 $('#d2d_div').show();
                 $('#loc_div').show();
-            }
-
-            if(type == 2){
+            } else if(type == 2) {
                 $('#delivery_branch_div').hide();
                 $('#outlet_div').show();
                 $('#d2d_div').hide();
@@ -1288,6 +1293,7 @@
                 $('#other_outlet_div').hide();
                 $('#other_outlet').prop('required',false);
 
+                $('#summary_delivery_charge').html('0.00');
                 $('#set_delivery_charge').val(0);
                 $('#outlet_rate').prop('required',false);
                 $('#set_delivery_charge').prop('readonly',true);
@@ -1310,30 +1316,37 @@
                 }
             });
 
-            $.ajax({
-                data: { has_lechon: $('#has_lechon').val(), province: $('#province_select').val(), city: $('#city_select').val() },
-                type: "post",
-                url: "{{route('cart.joborder.get_shipping_fee')}}",                
-                success: function(returnData) {
-                        $('#set_delivery_charge').val(parseFloat(returnData['fee']).toFixed(2));
-                        $('#input_delivery_charge').val(parseFloat(returnData['fee']).toFixed(2));
-                        $('#set_delivery_charge').prop('readonly',true);         
-                        $('#other_outlet_div').hide();
-                        $('#other_outlet').prop('required',false);
-                        $('#summary_delivery_charge').html(parseFloat(returnData['fee']).toFixed(2));
-                        calculate_grand_total();
-                },
-                failed: function() {
-                        $('#set_delivery_charge').val(0);
-                        $('#input_delivery_charge').val(0);
-                        $('#set_delivery_charge').prop('readonly',true);         
-                        $('#other_outlet_div').hide();
-                        $('#other_outlet').prop('required',false);
-                        $('#summary_delivery_charge').html(0.00);  
-                        calculate_grand_total();
-                }
-                
-            });
+            const isRegionOthers = $('#region_select').val() === 'OTHER';
+
+            if (isRegionOthers) {
+                $('#set_delivery_charge').prop('readonly',false);
+                $('#input_delivery_charge').val($('#set_delivery_charge').val());
+            } else {
+                $.ajax({
+                    data: { has_lechon: $('#has_lechon').val(), province: $('#province_select').val(), city: $('#city_select').val() },
+                    type: "post",
+                    url: "{{route('cart.joborder.get_shipping_fee')}}",                
+                    success: function(returnData) {
+                            $('#set_delivery_charge').val(parseFloat(returnData['fee']).toFixed(2));
+                            $('#input_delivery_charge').val(parseFloat(returnData['fee']).toFixed(2));
+                            $('#set_delivery_charge').prop('readonly',true);
+                            $('#other_outlet_div').hide();
+                            $('#other_outlet').prop('required',false);
+                            $('#summary_delivery_charge').html(parseFloat(returnData['fee']).toFixed(2));
+                            calculate_grand_total();
+                    },
+                    failed: function() {
+                            $('#set_delivery_charge').val(0);
+                            $('#input_delivery_charge').val(0);
+                            $('#set_delivery_charge').prop('readonly',true);
+                            $('#other_outlet_div').hide();
+                            $('#other_outlet').prop('required',false);
+                            $('#summary_delivery_charge').html(0.00);  
+                            calculate_grand_total();
+                    }
+                    
+                });
+            }
 
             calculate_grand_total();
         });
@@ -1562,6 +1575,15 @@
             $barangay.prop('disabled', brgys.length === 0).trigger('change.select2');
         }
 
+        function hideIfRegionIsOthers() {
+            $('.non-others-region').hide();
+            setTimeout(() => {
+                $('#set_delivery_charge').prop('readonly', false);
+                $('#other_outlet_div_').show();
+            }, 500);
+        
+        }
+
         // ---------- Cascades ----------
         function onRegionChange(clearDownstream){
             const regionCode = $region.val() || null;
@@ -1570,6 +1592,14 @@
             if (clearDownstream){
                 $province.val(null).trigger('change.select2');
                 disableBelowProvince();
+
+                if (regionCode.toLowerCase() === 'other'){
+                    hideIfRegionIsOthers();
+                } else {
+                    $('.non-others-region').show();
+                    $('#other_outlet_div_').hide();
+                    $('#set_delivery_charge').prop('readonly', true);
+                }
             }
         }
         function onProvinceChange(clearDownstream){
