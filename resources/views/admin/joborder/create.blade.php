@@ -1532,8 +1532,18 @@
         // ---------- Populate ----------
         function populateRegions(){
             const regions = Object.keys(DATA).map(code => ({
-                code, name: String(DATA[code]?.region_name || '')
-            })).sort((a,b)=> a.name.localeCompare(b.name));
+                code,
+                name: String(DATA[code]?.region_name || '')
+            })).sort((a, b) => {
+                const A = a.name.trim().toLowerCase();
+                const B = b.name.trim().toLowerCase();
+                const isOtherA = (A === 'other');
+                const isOtherB = (B === 'other');
+
+                if (isOtherA && !isOtherB) return 1;   // A goes after B
+                if (!isOtherA && isOtherB) return -1;  // A goes before B
+                return A.localeCompare(B);
+            });
 
             $region.empty().append(new Option('', '', false, false));
             regions.forEach(r => $region.append(new Option(r.name, r.code, false, false)));
