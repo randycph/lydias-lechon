@@ -176,7 +176,7 @@
                                 <td class="tx-center">{{ date('F d, Y', strtotime($payment->payment_date))}}</td>
                                 <td class="tx-center">
                                     @if($payment->payment_type == 'Ok Order' || $payment->payment_type == 'COD')
-                                        NOT PAID
+                                        UNPAID
                                     @else
                                         {{$payment->status}}
                                     @endif

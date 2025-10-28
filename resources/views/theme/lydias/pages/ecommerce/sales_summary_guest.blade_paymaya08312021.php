@@ -97,7 +97,7 @@
                             </li>                                                   
                             <li class="d-flex justify-content-between">
                                 <span>Payment Status</span>
-                                <span class="tx-success tx-semibold tx-uppercase">@if($sales->PaymentStatus == 'UNPAID') NOT PAID @else {{$sales->PaymentStatus}} @endif 
+                                <span class="tx-success tx-semibold tx-uppercase">@if($sales->PaymentStatus == 'UNPAID') UNPAID @else {{$sales->PaymentStatus}} @endif 
                                     @if($sales->PaymentStatus<>'PAID')
                                         @if($sales->net_amount > $salesPayments->sum('amount'))
                                             <a href="#" class="btn btn-xs btn-success" onclick="$('#paymentModal').modal('show')">Add Payment</a>

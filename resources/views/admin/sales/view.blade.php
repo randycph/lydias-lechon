@@ -328,7 +328,7 @@
                                         @if($payment->status == 'PAID')
                                             CONFIRMED
                                         @else
-                                            NOT PAID
+                                            UNPAID
                                         @endif
                                     @else
                                         {{$payment->status}}

@@ -74,7 +74,7 @@
                         <li class="d-flex justify-content-between tx-15">
                             <span>Payment Status</span>
                             @if($sales->PaymentStatus == 'UNPAID')
-                                <span class="tx-danger tx-semibold tx-uppercase">NOT PAID</span>
+                                <span class="tx-danger tx-semibold tx-uppercase">UNPAID</span>
                             @else
                                 <span class="tx-success tx-semibold tx-uppercase">{{$sales->PaymentStatus}}</span>
                             @endif
