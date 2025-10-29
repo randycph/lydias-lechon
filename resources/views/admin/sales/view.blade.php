@@ -165,7 +165,9 @@
                             </li>                                                   
                             <li class="d-flex justify-content-between">
                                 <span>Payment Status</span>
-                                <span class="tx-success tx-semibold tx-uppercase">{{$sales->PaymentStatus}} {!! $sales->status == 'CANCELLED' ? '<span class="badge badge-danger">CANCELLED</span>' : '' !!}</span>
+                                <span class="tx-success tx-semibold tx-uppercase">{{$sales->PaymentStatus}}
+                                    
+                                </span>
                             </li>
                             <li class="d-flex justify-content-between">
                                 <span>Delivery Status</span>
