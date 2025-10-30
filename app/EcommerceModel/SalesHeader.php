@@ -177,15 +177,19 @@ class SalesHeader extends Model
         $sales = SalesHeader::whereId($id)->first();
 
         if ($sales->is_sub == 1) {
-            $amount = SalesHeader::where('parent_sales_header_id', $id)->sum('net_amount');
+            $sale = SalesHeader::where('id', $sales->parent_sales_header_id)->first();
+            $amount = $sale->net_amount;
         } else {
-            $amount = SalesHeader::whereId($id)->sum('net_amount');
+            $sale = SalesHeader::whereId($id)->first();
+            $amount = $sale->net_amount;
         }
 
         if ($sales->is_sub == 1) {
-            $paid = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)->where('status', 'PAID')->sum('amount') ?? 0;
+            $payments = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)->where('status', 'PAID')->get();
+            $paid = (float) $payments->sum('amount');
         } else {
-            $paid = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->sum('amount') ?? 0;
+            $payments = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->get();
+            $paid = (float) $payments->sum('amount');
         }
 
         $total = $amount - $paid;
