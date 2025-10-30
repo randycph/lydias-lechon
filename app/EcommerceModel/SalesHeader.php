@@ -177,9 +177,9 @@ class SalesHeader extends Model
         $sales = SalesHeader::whereId($id)->first();
 
         if ($sales->is_sub == 1) {
-            $amount = SalesHeader::where('parent_sales_header_id', $id)->sum('gross_amount');
+            $amount = SalesHeader::where('parent_sales_header_id', $id)->sum('net_amount');
         } else {
-            $amount = SalesHeader::whereId($id)->sum('gross_amount');
+            $amount = SalesHeader::whereId($id)->sum('net_amount');
         }
 
         if ($sales->is_sub == 1) {
