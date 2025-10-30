@@ -785,6 +785,10 @@ class SalesController extends Controller
     {
         $sales = SalesHeader::with(['deliveryAddress', 'couponUsed', 'user', 'items'])->where('id',$id)->first();
 
+        if (!$sales) {
+            return redirect()->route('sales-transaction.index')->with('error', 'Sales record not found.');
+        }
+
         if ($sales->is_sub == 1) {
             $subSales = SalesHeader::where('id', $sales->parent_sales_header_id)->first();
             $salesPayments = $subSales->payments ?? collect();
