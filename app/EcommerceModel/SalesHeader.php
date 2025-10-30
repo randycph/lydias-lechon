@@ -190,8 +190,6 @@ class SalesHeader extends Model
 
         $total = $amount - $paid;
 
-        logger('$amount: '.$amount . ' ' . $id);
-
         if($total <= 0){
             $total = 0;
         }
