@@ -319,9 +319,9 @@
                                         @if ($sale->Paymentadminstatus == 'UNPAID' && isForecaster())
                                         @else
                                             @if(\App\EcommerceModel\SalesPayment::check_if_has_added_payments($sale->id) == 1)
-                                                <a href="javascript:;" onclick="show_added_payments('{{$sale->id}}');">{{ number_format($sale->net_amount <= 0 ? 0 : $sale->net_amount + $sale->delivery_fee_amount, 2) }}</a>
+                                                <a href="javascript:;" onclick="show_added_payments('{{$sale->id}}');">{{ number_format($sale->net_amount <= 0 ? 0 : $sale->items->sum('net_amount') + $sale->delivery_fee_amount, 2) }}</a>
                                             @else
-                                                {{ number_format($sale->net_amount + $sale->delivery_fee_amount ?? 0, 2) }}
+                                                {{ number_format($sale->items->sum('net_amount') + $sale->delivery_fee_amount ?? 0, 2) }}
                                             @endif
                                         @endif
                                     </td>
