@@ -18,7 +18,7 @@ class SalesPayment extends Model
     
     public static function check_if_has_added_payments($id)
     {
-        $data = SalesPayment::where('sales_header_id',$id)->whereStatus('PAID')->exists();
+        $data = SalesPayment::where('sales_header_id',$id)->where('status','PAID')->exists();
 
         if($data){
             return 1;
