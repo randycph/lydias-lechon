@@ -970,6 +970,7 @@ class CartController extends Controller
         $dn = explode(" - ", $request->need_date . ' - ' . $request->need_time);
         $date_needed = date('Y-m-d H:i:s',strtotime($dn[0]." ".$dn[1]));
         $deposit = $request->deposit;
+        $delivery_fee = 0;
         if ($request->shipping_type == 'pickup') {
             $delivery_type='Store Pickup';
             $outlet = $request->delivery_branch;
@@ -979,6 +980,7 @@ class CartController extends Controller
             $contact_person = $request->name;
         } else {
             $delivery_type='Door to door delivery';
+            $delivery_fee = $request->delivery_fee;
             if ($request->location == 'Other') {
                 $customer_delivery_adress = $request->delivery_address;
             } else {
@@ -992,7 +994,7 @@ class CartController extends Controller
         }
         $totalPrice = $request->order_amount;
         $discount = 0;
-        $delivery_fee = $request->shipping_type == 'pickup' ? 0 : $request->delivery_fee;
+        // $delivery_fee = $request->shipping_type == 'pickup' ? 0 : $request->delivery_fee;
         $netAmount = $totalPrice + $delivery_fee;
         $totalPrice = (float) $totalPrice + (float) $delivery_fee;
 
@@ -1029,7 +1031,7 @@ class CartController extends Controller
                 'customer_delivery_adress' => $customer_delivery_adress,
                 'delivery_tracking_number' => '',
                 'delivery_type' => $delivery_type,
-                'delivery_fee_amount' => $request->shipping_type == 'pickup' ? 0 : $request->delivery_fee,
+                'delivery_fee_amount' => $delivery_fee,
                 'order_source' => 'Web',
                 'gross_amount' => $totalPrice,
                 'tax_amount' => 0,
@@ -1099,7 +1101,7 @@ class CartController extends Controller
                 'customer_delivery_adress' => $customer_delivery_adress,
                 'delivery_tracking_number' => '',
                 'delivery_type' => $delivery_type,
-                'delivery_fee_amount' => $request->shipping_type == 'pickup' ? 0 : $request->delivery_fee,
+                'delivery_fee_amount' => $delivery_fee,
                 'order_source' => 'Web',
                 'gross_amount' => $request->order_amount,
                 'tax_amount' => 0,
