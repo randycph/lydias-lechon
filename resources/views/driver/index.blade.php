@@ -134,7 +134,7 @@
 
                         <!-- HERO (height shrinks on scroll) -->
                         <div class="relative w-full" :style="`height:${heroHeight}px`">
-                            <img src="https://lydias-lechon.com/storage/products/189/Lechon%20Belly%20(2).png"
+                            <img src="active.getImage()"
                                 class="absolute inset-0 w-full h-full object-cover"
                                 :style="`transform:scale(${heroScale})`" alt="" />
                             <!-- gradient for text legibility -->
