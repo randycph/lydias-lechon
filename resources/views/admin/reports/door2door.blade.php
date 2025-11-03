@@ -176,7 +176,7 @@
                         <tbody>
                             @forelse($rs as $r)
                             <tr style="text-align: left">
-                                <th><a target="_blank" href="{{ route('sales.print',base64_encode($r->hid)) }}">{{$r->jnum ?? $r->ordnum}}</a></th>
+                                <th><a target="_blank" href="{{ route('sales.print.delivery',base64_encode($r->hid)) }}">{{$r->jnum ?? $r->ordnum}}</a></th>
                                 <td>{{number_format($r->qty,2)}}</td>
                                 <td>{!! highlightPaella($r->product_name) !!}</td>
                                 <td>{{number_format(hasPealla($r->product_name) ? ($r->price + $r->paella_price) : $r->price, 2)}}</td>

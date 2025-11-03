@@ -1286,6 +1286,8 @@ class SalesController extends Controller
     public function sales_printout($id)
     {
         $id = base64_decode($id);
+
+        $title = 'Sales Transaction Summary';
         
         $sales = \App\EcommerceModel\SalesHeader::with('couponUsed')->where('id',$id)->first();
 
@@ -1305,7 +1307,34 @@ class SalesController extends Controller
 
         $gc = GiftCertificate::where('sales_header_id',$id)->get();
 
-        return view('admin.sales.print',compact('sales','salesPayments','salesDetails','deliveries','gc'));
+        return view('admin.sales.print',compact('sales','salesPayments','salesDetails','deliveries','gc', 'title'));
+    }
+    
+    public function sales_printout_delivery($id)
+    {
+        $id = base64_decode($id);
+
+        $title = 'Delivery Report';
+        
+        $sales = \App\EcommerceModel\SalesHeader::with('couponUsed')->where('id',$id)->first();
+
+        if ($sales->is_sub == 1) {
+            $subSales = SalesHeader::where('id', $sales->parent_sales_header_id)->first();
+            $salesPayments = $subSales->payments ?? collect();
+        } else {
+            $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
+        }
+
+        if (!$sales) {
+            return redirect()->route('sales-transaction.index')->with('error', 'Sales record not found.');
+        }
+
+        $salesDetails  = SalesDetail::where('sales_header_id',$id)->get();
+        $deliveries    = DeliveryStatus::where('order_id',$id)->get();
+
+        $gc = GiftCertificate::where('sales_header_id',$id)->get();
+
+        return view('admin.sales.print',compact('sales','salesPayments','salesDetails','deliveries','gc', 'title'));
     }
     
     public function update_delivery_branch(Request $request)

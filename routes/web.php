@@ -561,6 +561,7 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::get('/admin/update-sales-details/{id}', 'EcommerceControllers\SalesController@update_sales_details')->name('sales.update_details');
     // 11/18/2021 Ryan
     Route::get('/sales-printout/{id}','EcommerceControllers\SalesController@sales_printout')->name('sales.print');
+    Route::get('/sales-printout-delivery/{id}','EcommerceControllers\SalesController@sales_printout_delivery')->name('sales.print.delivery');
     Route::post('/update-delivery-branch','EcommerceControllers\SalesController@update_delivery_branch')->name('sales.update_delivery_branch');
     //
 

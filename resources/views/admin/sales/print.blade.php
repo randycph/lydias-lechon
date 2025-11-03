@@ -47,7 +47,7 @@
         <div class="container pd-x-0 pd-lg-x-10 pd-xl-x-0">
             <div class="text-center">
                 <img style="height:100px;" src="{{asset('images/lydias-lechon-logo-small.jpg')}}" alt="">
-                <h4><strong>Delivery Report</strong></h4>
+                <h4><strong>{{ $title ?? 'Sales Transaction Summary' }}</strong></h4>
                 <h5>Order #: {{$sales->order_number}}</h5>
             </div>
         </div>
