@@ -356,7 +356,7 @@
                     return 'bg-gray-100 text-gray-700';
                 },
                 getImage() {
-                    return this.active.product ? this.active.product[0] : null;
+                    return this.active.product ? this.active.product[0].url : null;
                 },
                 sheetOpen: false,
                 saving: false,
