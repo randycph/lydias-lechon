@@ -4,6 +4,7 @@ use App\EcommerceModel\Branch;
 use App\EcommerceModel\Cart;
 use App\EcommerceModel\DeliveryStatus;
 use App\EcommerceModel\GiftCertificate;
+use App\EcommerceModel\JobOrder;
 use App\EcommerceModel\SalesDetail;
 use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\SalesPayment;
@@ -866,6 +867,87 @@ Route::get('/.well-known/pki-validation/BF10D48DD225686F4F228F10FEBFD876.txt', f
 
 Route::get('maintenance', function() {
     return response()->file(public_path('maintenance.html'));
+});
+
+Route::get('/driver-deliveries', function(){
+    $userName = auth()->check() ? auth()->user()->id : null;
+    // Step 1: SalesHeader
+    $salesHeaders = SalesHeader::with(['user', 'items', 'deliveryAddress', 'deliveryStatuses'])
+        ->whereHas('deliveryStatuses', function ($q) use ($userName) {
+            $q->where('delivered_by', $userName)
+            ->whereIn('delivery_status', ['In Transit', 'Returned/Rejected', 'Delivered/Picked Up']);
+        })
+        ->where('delivery_type', '!=', 'Store Pickup')
+        ->get()
+        ->map(function ($sale) {
+            return [
+                'type' => 'sales',
+                'id' => $sale->id,
+                'delivery_status' => optional($sale->deliveryStatuses->last())->status,
+                'status' => $sale->status,
+                'customer_name' => $sale->customer_name,
+                'date_needed' => optional($sale->items->first())->delivery_date,
+                'qty' => optional($sale->items->first())->qty,
+                'product_id' => optional($sale->items->first())->product_id,
+                'price' => optional($sale->items->first())->price,
+                'delivery_type' => $sale->delivery_type,
+                'trashed' => $sale->trashed() ? true : false,
+                'order_number' => $sale->order_number,
+                'created_at' => $sale->created_at,
+                'order_source' => $sale->order_source,
+                'isConfirm' => $sale->isConfirm,
+                'gross_amount' => $sale->gross_amount,
+                'delivery_address' => $sale->customer_delivery_address ?? $sale->customer_address,
+                'contact_person' => $sale->contact_person,
+                'contact_number' => $sale->customer_contact_number ?? $sale->user->contact_mobile,
+                'sales' => $sale->items->first() ?? null,
+                'product' => optional($sale->items->first())->product->photos ?? null,
+            ];
+        });
+
+    // Step 2: JobOrders
+    $jobOrderIds = DeliveryStatus::where('delivered_by', $userName)
+        ->whereNotNull('job_order_id')
+        ->distinct()
+        ->pluck('job_order_id');
+
+    $jobOrders = JobOrder::with('deliveryStatuses')
+        ->whereIn('id', $jobOrderIds)
+        ->get()
+        ->map(function ($job) {
+            return [
+                'type' => 'job',
+                'id' => $job->id,
+                'delivery_status' => optional($job->deliveryStatuses->last())->status,
+                'sales' => $job->sales_detail->first() ?? null,
+                'contact_number' => $job->customer_mobile_number ?? $job->customer_tel_number,
+                'status' => $job->status,
+                'customer_name' => $job->customer_name,
+                'date_needed' => $job->date_needed,
+                'qty' => $job->qty,
+                'product_id' => $job->product_id,
+                'price' => $job->price,
+                'delivery_type' => $job->delivery_method,
+                'trashed' => $job->trashed() ? true : false,
+                'order_number' => $job->jo_number,
+                'created_at' => $job->created_at,
+                'order_source' => 'NA',
+                'isConfirm' => null,
+                'gross_amount' => ($job->price * $job->qty) + ($job->paella_price * $job->paella_qty),
+                'delivery_address' => $job->customer_delivery_address ?? $job->customer_address,
+                'product' => $job->product->photos ?? null,
+            ];
+        });
+
+    // Step 3: Merge collections
+    $merged = collect()->merge($salesHeaders)->merge($jobOrders);
+
+    return response()->json(['data' => $merged]);
+
+})->name('driver.deliveries');
+
+Route::get('driver', function() {
+    return view('driver.index');
 });
 
 Route::get('/{slug}', [FrontendController::class, 'page'])->name('page');
