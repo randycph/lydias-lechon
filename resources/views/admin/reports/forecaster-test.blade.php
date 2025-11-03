@@ -137,11 +137,7 @@
     border: 1px solid #000 !important;
   }
 
-  #example th, #example td {
-    outline: 1px solid #cbd5e1 !important;  /* fallback stroke */
-    outline-offset: -1px !important;        /* align with border */
-  }
-  
+
 /* merged blocks */
   #example td.merge-same { border-top:    0 !important; }   /* continuation rows */
   #example td.merge-first { border-bottom: 0 !important; }   /* first row of block */
