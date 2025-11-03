@@ -134,7 +134,7 @@
 
                         <!-- HERO (height shrinks on scroll) -->
                         <div class="relative w-full" :style="`height:${heroHeight}px`">
-                            <img :src="active.getImage()"
+                            <img :src="getImage()"
                                 class="absolute inset-0 w-full h-full object-cover"
                                 :style="`transform:scale(${heroScale})`" alt="" />
                             <!-- gradient for text legibility -->
