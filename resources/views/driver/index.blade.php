@@ -89,15 +89,12 @@
             <div class="space-y-3" x-show="!loading">
                 <template x-for="d in filtered" :key="`${d.type}-${d.id}`">
                     <button @click="open(d)"
-                        class="w-full text-left rounded-2xl border border-gray-100 bg-white shadow-sm p-4">
+                        class="w-full text-left rounded-2xl border border-gray-100 bg-white shadow-sm p-3">
                         <div class="flex items-start gap-3">
                             <!-- badge -->
-                            <div class="flex>
-                <span class=" mt-0.5 inline-flex items-center rounded-full
-                                px-2 py-0.5 text-xs font-medium" :class="badgeClass(d.delivery_status)"
+                            <div class="flex">
+                                <span style="word-break: break-word;" class=" mt-0.5 inline-flex items-center rounded-full w-16 px-2 py-0.5 text-xs font-medium" :class="badgeClass(d.delivery_status)"
                                 x-text="d.delivery_status || '—'"></span>
-                                <img src="https://lydias-lechon.com/storage/products/189/Lechon%20Belly%20(2).png"
-                                    alt="">
                             </div>
 
                             <div class="flex-1">
