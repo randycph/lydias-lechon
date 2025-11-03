@@ -115,10 +115,10 @@ class SalesHeader extends Model
 
     public function getPaymentspendingtotalAttribute()
     {
-        $sale = SalesHeader::whereId($this->id)->first();
+        $sale = SalesHeader::withTrashed()->whereId($this->id)->first();
 
         if (isset($sale->is_sub) && $sale->is_sub == 1) {
-            $parentSale = SalesHeader::where('id', $sale->parent_sales_header_id)->first();
+            $parentSale = SalesHeader::withTrashed()->where('id', $sale->parent_sales_header_id)->first();
             $payments = SalesPayment::where('sales_header_id', $parentSale->id)->get();
         } else {
             $payments = SalesPayment::where('sales_header_id', $sale->id)->get();
@@ -140,13 +140,13 @@ class SalesHeader extends Model
     public function getPaymentadminstatusAttribute()
     {
         $amount = floatval($this->net_amount);
-        $sale = SalesHeader::find($this->id);
+        $sale = SalesHeader::withTrashed()->find($this->id);
 
         if (isset($sale->parent_sales_header_id) && $sale->parent_sales_header_id != null) {
-            $payment = SalesPayment::where('sales_header_id', $sale->parent_sales_header_id)->whereStatus('PAID')->get();
+            $payment = SalesPayment::where('sales_header_id', $sale->parent_sales_header_id)->where('status', 'PAID')->get();
             $paid = (float) $payment->sum('amount');
         } else {
-            $payment = SalesPayment::where('sales_header_id', $sale->id)->whereStatus('PAID')->get();
+            $payment = SalesPayment::where('sales_header_id', $sale->id)->where('status', 'PAID')->get();
             $paid = (float) $payment->sum('amount');
         }
 
@@ -174,13 +174,13 @@ class SalesHeader extends Model
     }
 
     public static function balance($id){
-        $sales = SalesHeader::whereId($id)->first();
+        $sales = SalesHeader::withTrashed()->whereId($id)->first();
 
         if ($sales->is_sub == 1) {
-            $sale = SalesHeader::where('id', $sales->parent_sales_header_id)->first();
+            $sale = SalesHeader::withTrashed()->where('id', $sales->parent_sales_header_id)->first();
             $amount = $sale->net_amount;
         } else {
-            $sale = SalesHeader::whereId($id)->first();
+            $sale = SalesHeader::withTrashed()->whereId($id)->first();
             $amount = $sale->net_amount;
         }
 
@@ -201,12 +201,12 @@ class SalesHeader extends Model
     }
 
     public static function paid($id){
-        $sales = SalesHeader::whereId($id)->first();
+        $sales = SalesHeader::withTrashed()->whereId($id)->first();
 
         if ($sales->is_sub == 1) {
-            $paid = SalesPayment::where('sales_header_id',$sales->parent_sales_header_id)->whereStatus('PAID')->sum('amount');
+            $paid = SalesPayment::where('sales_header_id',$sales->parent_sales_header_id)->where('status', 'PAID')->sum('amount');
         } else {
-            $paid = SalesPayment::where('sales_header_id',$id)->whereStatus('PAID')->sum('amount');
+            $paid = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->sum('amount');
         }
 
         logger('$paid: '.$paid);
@@ -238,7 +238,7 @@ class SalesHeader extends Model
     // }
 
     public static function status(){
-        $data = SalesHeader::where('status','PAID')->first();
+        $data = SalesHeader::withTrashed()->where('status','PAID')->first();
         if(!empty($data)){
             return $data;
         } else {
