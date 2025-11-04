@@ -559,11 +559,11 @@ class SalesController extends Controller
         }
         $today = now();
         
-        if(auth()->user()->role_id == 1 || auth()->user()->role_id == 3 || auth()->user()->role_id == 5 || auth()->user()->role_id == 13 ){
+        if(auth()->user()->role_id == 1 || auth()->user()->role_id == 3 || auth()->user()->role_id == 5 || auth()->user()->role_id == 13 || auth()->user()->role_id == 16 ){
             // $model = SalesHeader::where('id','>',0);
 
-            if (auth()->user()->role_id == 5) {
-                $branchId = auth()->user()->role_id == 5 ? auth()->user()->production_branch_id : null;
+            if (auth()->user()->role_id == 5 || auth()->user()->role_id == 16) {
+                $branchId = auth()->user()->role_id == 5 || auth()->user()->role_id == 16 ? auth()->user()->production_branch_id : null;
 
                 $eligible = DB::table('ecommerce_sales_details as d')
                     ->join('job_orders as jo', 'jo.sales_detail_id', '=', 'd.id')
