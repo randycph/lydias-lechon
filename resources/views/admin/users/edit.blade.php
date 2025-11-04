@@ -126,7 +126,7 @@
                         $arr[] .= $ub->branch_id;
                     }
                 @endphp
-                <div class="form-group @if($user->role_id == 2) d-block @else d-none @endif" id="branches_div">
+                <div class="form-group @if($user->role_id == 2 || $user->role_id == 16 || $user->role_id == 5 || $user->role_id == 4) d-block @else d-none @endif" id="branches_div">
                     <label class="d-block">Branches *</label>
                     <select name="branches[]" id="branches" class="form-control select2" multiple>
                         <option label="Choose one"></option>
