@@ -4,7 +4,9 @@
     	<td>{{$d->created_at}}</td>
         <td>{{$d->status}}</td>
         <td>{{$d->remarks}}</td>   
-        <td>{{$d->delivered_by}}</td> 
+        <td>
+            @php $user = App\Models\User::where('id', $d->delivered_by)->orWhere('name', $d->delivered_by)->first() ?? null; @endphp
+            {{$user?->name ?? $d->delivered_by}}</td> 
         <td>
             @if ($d->image == null && $d->images == null)
                 No Image
