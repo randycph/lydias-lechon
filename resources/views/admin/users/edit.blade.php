@@ -94,9 +94,9 @@
                 </div>
                 <div class="form-group">
                     <label class="d-block">Role *</label>
-                    <select name="role" class="form-control select2-no-search" required onchange="user_role($(this).val());">
+                    <select name="role" class="form-control select2-no-search" required onchange="user_role();">
                         @foreach($roles as $role)
-                            <option value="{{ $role->id }}" {{ (old("role", $user->role_id) == $role->id ? "selected":"") }}>{{ $role->name }}</option>
+                            <option value="{{ $role->id }}" data-role="{{ $role }}" {{ (old("role", $user->role_id) == $role->id ? "selected":"") }}>{{ $role->name }}</option>
                         @endforeach
                     </select>
                     @error('role')
@@ -126,7 +126,7 @@
                         $arr[] .= $ub->branch_id;
                     }
                 @endphp
-                <div class="form-group @if($user->role_id == 2 || $user->role_id == 16 || $user->role_id == 5 || $user->role_id == 4) d-block @else d-none @endif" id="branches_div">
+                <div class="form-group @if($user->assign_role->has_branches == 1) d-block @else d-none @endif" id="branches_div">
                     <label class="d-block">Branches *</label>
                     <select name="branches[]" id="branches" class="form-control select2" multiple>
                         <option label="Choose one"></option>
@@ -189,14 +189,18 @@
             });
         });
 
-        function user_role(role){
+        function user_role(){
+            var role = $('select[name="role"] option:selected').data('role');
+            var role_id = role.id
+            var has_branches = role.has_branches;
+            var can_approve_payment = role.can_approve_payment;
 
-            if(role == 2 || role == 4 || role == 12 || role == 16){ // check if selected user type is branch manager, staff, Cashier
+            if(has_branches == 1){ // check if selected user type is branch manager, staff, Cashier
                 $('#branches_div').removeClass('d-none');
                 $('#branches_div').addClass('d-block');
                 $('#branches').removeAttr('disabled');
                 $('#branches').prop('required',true);
-            } else if (role == 5) {
+            } else if (role_id == 5) {
                 $('#production_branches_div').removeClass('d-none');
                 $('#production_branches_div').addClass('d-block');
                 $('#production_branch_id').removeAttr('disabled');

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Settings;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 
 use App\Models\Role;
 
@@ -48,13 +48,18 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
+        $has_branches = $request->has('has_branches') ? 1 : 0;
+        $can_approve_payment = $request->has('can_approve_payment') ? 1 : 0;
+
         if(Role::where('name',$request->role)->exists()){
             return back()->with('duplicate', __('standard.account_management.roles.duplicate_role'));
         } else {
             Role::create([
                 'name' 		  => $request->role,
                 'description' => $request->description,
-                'created_by'  => Auth::user()->id
+                'created_by'  => Auth::user()->id,
+                'has_branches' => $has_branches,
+                'can_approve_payment' => $can_approve_payment
             ]);
             return redirect()->route('role.index')->with('success', __('standard.account_management.roles.create_success'));
         }
@@ -93,10 +98,15 @@ class RoleController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $has_branches = $request->has('has_branches') ? 1 : 0;
+        $can_approve_payment = $request->has('can_approve_payment') ? 1 : 0;
         Role::find($id)->update([
             'name'        => $request->role,
             'description' => $request->description,
-            'created_by'  => Auth::user()->id
+            'created_by'  => Auth::user()->id,
+            'has_branches' => $has_branches,
+            'can_approve_payment' => $can_approve_payment
+
         ]);
 
         return redirect()->route('role.index')->with('success', __('standard.account_management.roles.update_success'));
