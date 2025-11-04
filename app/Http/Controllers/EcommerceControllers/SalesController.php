@@ -915,7 +915,6 @@ class SalesController extends Controller
 
     public function delivery_status(Request $request)
     {
-        // dd($request->all());
         $type = $request->has('type') ? $request->type : 'sales';
 
         $data = [
@@ -956,6 +955,27 @@ class SalesController extends Controller
                 }
             }
 
+            if(($request->delivery_status == 'Ready For delivery' || $request->delivery_status == 'Delivered/Picked Up' || $request->delivery_status == 'In Transit')){
+                if ($request->delivery_status == 'In Transit') {
+                    $joborder = JobOrder::where('id', $request->del_id)->first();
+                    $salesDetail = SalesDetail::where('id', $joborder->sales_detail_id)->first();
+                    if (!$salesDetail) {
+                        return back()->with('error', 'Sales detail not found for the job order.');
+                    }
+                    $order =  SalesHeader::where('id', $salesDetail->sales_header_id)->with('deliveryAddress', 'items', 'couponUsed', 'user')->first();
+
+                    $driver = User::where('id', $request->delivered_by)->first();
+
+                    if ($driver && !empty($driver->email)) {
+                        Mail::to($driver->email)->send(new DeliveryAssignedMail($order, $driver));
+                    }
+
+                    $sms = new Sms();
+                    if ($driver && $driver->contact_mobile) {
+                        $sms->send_sms($driver->contact_mobile, 'delivery_assigned', $order, $driver);
+                    }
+                }
+            }
         } else {
             if ($request->has('deliveries_lists') && !empty($request->deliveries_lists)) {
                 $deliveryAddress = ProductDeliveryAddress::where('id', $request->deliveries_lists)->first();
@@ -1002,9 +1022,11 @@ class SalesController extends Controller
             $order =  SalesHeader::where('id',$request->del_id)->with('deliveryAddress', 'items', 'couponUsed', 'user')->first();
             $order->is_new_order = 0;
             $order->save();
-            if($order->customer_contact_number && ($request->delivery_status == 'Ready For delivery' || $request->delivery_status == 'Delivered/Picked Up' || $request->delivery_status == 'In Transit')){
+            if(($request->delivery_status == 'Ready For delivery' || $request->delivery_status == 'Delivered/Picked Up' || $request->delivery_status == 'In Transit')){
                 
-                $sms->send_sms($order->customer_contact_number, 'delivery_update', $order);
+                if ($order?->customer_contact_number) {
+                    $sms->send_sms($order->customer_contact_number, 'delivery_update', $order);
+                }
 
                 if ($request->delivery_status == 'In Transit') {
                     $order->has_transited = 1;
@@ -1024,8 +1046,9 @@ class SalesController extends Controller
                     }
                 }
             }
-
-            $this->sms_send_order_status($order->customer_contact_number, $order);
+            if ($order?->customer_contact_number) {
+                $this->sms_send_order_status($order?->customer_contact_number, $order);
+            }
         }
 
         ActivityLog::create([

@@ -445,7 +445,7 @@
                         fd.append('type', this.active.type); // 'sales' | 'joborder'
                         fd.append('del_id', this.active.id);
                         fd.append('driver', true);
-                        fd.append('delivered_by', this.active.driver_name || '');
+                        fd.append('delivered_by', this.active.driver_id || '');
                         fd.append('delivery_status', this.form.status);
                         fd.append('del_remarks', this.form.remarks || '');
                         if (this.form.file) fd.append('image', this.form.file);
