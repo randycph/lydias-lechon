@@ -105,7 +105,6 @@
 <script>
     $(function () {
     const urls = [
-        '{{ asset("addresses/addresses.json") }}',
         '{{ asset("addresses/philippine_provinces_cities_municipalities_and_barangays_2019v2.json") }}'
     ];
 
