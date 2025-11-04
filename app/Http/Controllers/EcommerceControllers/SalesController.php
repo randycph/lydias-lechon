@@ -299,11 +299,11 @@ class SalesController extends Controller
                 $delivery_amount = $request->delivery_fee_amount;
             }
             else{
-                $del_fee = Deliverablecities::where('name',$request->update_dateneeded_d2d)->where('item_type',$rate_type)->first();           
-                $delivery_amount = $del_fee->rate;
-                if($baka == 1 && $del_fee->outside_manila == 1){
-                    $delivery_amount = 3000;
-                }
+                // $del_fee = Deliverablecities::where('name',$request->update_dateneeded_d2d)->where('item_type',$rate_type)->first();           
+                // $delivery_amount = $del_fee->rate;
+                // if($baka == 1 && $del_fee->outside_manila == 1){
+                //     $delivery_amount = 3000;
+                // }
             }
 
             $amt = ($sales->gross_amount - $sales->delivery_fee_amount) + $delivery_amount;
