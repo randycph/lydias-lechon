@@ -197,7 +197,7 @@ class UserController extends Controller
         ]);
         UserBranch::where('user_id',$user->id)->delete();
         if($user){
-            if($request->role == 2 || $request->role == 4 || $request->role == 12){
+            if($request->role == 2 || $request->role == 4 || $request->role == 12 || $request->role == 16){
                 $data = $request->all();
                 $branches = $data['branches'];
 
