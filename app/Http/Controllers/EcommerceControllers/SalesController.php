@@ -633,7 +633,7 @@ class SalesController extends Controller
 
         $selectFields = ['id','order_source','delivery_fee_amount','delivery_type','contact_person','instruction','customer_delivery_adress','outlet','customer_location','order_number', 'customer_name', 'customer_location', 'isConfirm', 'created_at', 'status', 'delivery_status', 'payment_status', 'net_amount', 'gross_amount','deleted_at', DB::raw('(SELECT ecommerce_sales_details.delivery_date From ecommerce_sales_details WHERE ecommerce_sales_headers.id=ecommerce_sales_details.sales_header_id GROUP BY ecommerce_sales_details.sales_header_id) as date_needed')];
 
-        $filterFields = ['order_number', 'customer_name', 'date_needed'];
+        $filterFields = ['order_number', 'customer_name', 'date_needed', 'start_date', 'end_date'];
         $listing = new ListingHelper('desc',20,'order_number', $customConditions);
         $sales = $listing->filter_fields($filterFields)->simple_search_using_collection($model, $this->searchFields,  [],  [], [], $selectFields, $filterFields);
 
@@ -915,6 +915,7 @@ class SalesController extends Controller
 
     public function delivery_status(Request $request)
     {
+        // dd($request->all());
         $type = $request->has('type') ? $request->type : 'sales';
 
         $data = [
