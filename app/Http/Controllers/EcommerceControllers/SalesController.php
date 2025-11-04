@@ -1303,13 +1303,24 @@ class SalesController extends Controller
 
         $type = $request->has('type') ? $request->type : 'sales';
 
+        $isDriver = $request->has('user') && $request->user == 'driver';
+
+        $user = auth()->check() ? auth()->user() : null;
+
         if ($type === 'job') {
-            $delivery = DeliveryStatus::with('images')->where('job_order_id',$request->id)->where('type', 'joborder')->get();
+            $delivery = DeliveryStatus::with('images')->where('job_order_id',$request->id)->where('type', 'joborder')
+                ->when($isDriver && $user, function ($query) use ($user) {
+                    $query->where('delivered_by', $user->id)->orWhere('delivered_by', $user->name);
+                })
+                ->get();
         } else {
-            $delivery = DeliveryStatus::with('images')->where('order_id',$request->id)->where('type', 'sales')->get();
+            $delivery = DeliveryStatus::with('images')->where('order_id',$request->id)->where('type', 'sales')
+                ->when($isDriver && $user, function ($query) use ($user) {
+                    $query->where('delivered_by', $user->id)->orWhere('delivered_by', $user->name);
+                })->get();
         }
 
-        return view('admin.sales.delivery_history',compact('delivery'));
+        return view('admin.sales.delivery_history',compact('delivery', 'isDriver'));
     }
     
     public function sales_printout($id)

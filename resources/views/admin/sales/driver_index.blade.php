@@ -939,7 +939,7 @@
             $.ajax({
                 type: "GET",
                 url: "{{ route('display.delivery-history') }}",
-                data: { id : id, type : type },
+                data: { id : id, type : type, user: 'driver' },
                 success: function( response ) {
                     $('#delivery_history_tbl').html(response);
                     $('#prompt-show-delivery-history').modal('show');
