@@ -439,9 +439,7 @@
 
                                                                 @endphp
 
-                                                                @if (isDispatcher())
-
-                                                                @elseif (!$isPast)
+                                                                @if (!$isPast)
                                                                     <a class="dropdown-item"
                                                                     href="javascript:void(0);"
                                                                     onclick="change_delivery_status({{ $sale->id }}, {{ $is_allowed_delivered }})"
