@@ -160,7 +160,7 @@
 
         function user_role(role){
 
-            if(role == 2 || role == 4 || role == 12){ // check if selected user type is branch manager, staff, Cashier
+            if(role == 2 || role == 4 || role == 12 || role == 16){ // check if selected user type is branch manager, staff, Cashier
                 $('#branches_div').removeClass('d-none');
                 $('#branches_div').addClass('d-block');
                 $('#branches').removeAttr('disabled');
