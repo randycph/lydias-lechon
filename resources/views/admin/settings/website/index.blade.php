@@ -484,7 +484,7 @@
                                         <div id="title" class="parsley-input">
                                             <label>Selected Customers</label>
                                             <select name="customers[]" multiple="multiple" id="customers" class="form-control js-example-basic-multiple js-states select2" style="width:100%">
-                                                @foreach(\App\Models\User::where('user_type','customer')->where('email','not like','lydtemp_%')
+                                                @foreach(\App\Models\User::where('is_active', 1)->where('user_type','customer')->where('email','not like','lydtemp_%')
                                                 ->where('email','not like','lydtmp_%')->orderBy('firstname')->orderBy('lastname')
                                                 ->get() as $c)
                                                     @php

@@ -389,7 +389,7 @@
                             <label for="delivered_by">Delivered by:</label>
                             <select name="delivered_by" id="delivered_by" class="form-control">
                                 <option value="">- Select -</option>
-                                @foreach(\App\Models\User::where('role_id', 15)->get() as $driver)
+                                @foreach(\App\Models\User::where('is_active', 1)->where('role_id', 15)->get() as $driver)
                                     <option value="{{$driver->id}}" {{ $driver->name == auth()->user()->name ? 'selected' : '' }}>{{$driver->name}}</option>
                                 @endforeach
                             </select>

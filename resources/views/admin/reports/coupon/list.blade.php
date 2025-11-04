@@ -103,7 +103,7 @@
                                     <select style="font-size:12px;width: 140px;" name="customer" id="customer" class="form-control input-sm">
                                         <option value="">Select</option>
                                         @php
-                                            $customers = \App\Models\User::where('role_id','6')->orderBy('name')->get();
+                                            $customers = \App\Models\User::where('is_active', 1)->where('role_id','6')->orderBy('name')->get();
                                         @endphp
                                         @forelse($customers as $cu)
                                             <option value="{{$cu->id}}"
