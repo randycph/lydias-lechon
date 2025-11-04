@@ -1,5 +1,7 @@
 @extends('admin.layouts.report')
 
+@section('pagetitle', 'Sales Report')
+
 @section('pagecss')
     <!-- vendor css -->
     <link href="{{ asset('lib/@fortawesome/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
@@ -187,6 +189,18 @@
                                     <input type="date" class="form-control input-sm" name="enddateneeded"  autocomplete="off" value="@isset($_GET['enddateneeded']){{ $_GET['enddateneeded'] }}@endisset">
                                 </div>
                             </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label class="tx-13">Order Type</label>
+                                    <select name="ordertype" id="order_type" class="form-control">
+                                        <option value="">- Select Order Type -</option>
+                                        @foreach (['Whole', 'Reserved', 'Additional'] as $type)
+                                            {{-- fix this --}}
+                                            <option value="{{ $type }}" {{ request('ordertype') == $type ? 'selected' : '' }}>{{ $type }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
 
 
 
@@ -206,6 +220,7 @@
                                 <th>Order#</th>
                                 <th>Order Date</th>
                                 <th>Order Time</th>
+                                <th>Order Type</th>
                                 <th>Customer</th>
                                 <th>Delivery Type</th>
                                 <th>Delivery Address</th>
@@ -242,6 +257,7 @@
                                     <td><a target="_blank" href="{{ route('sales-transaction.view',$r->hid) }}">{{$r->order_number}}</a></td>
                                     <td>{{date('Y-m-d',strtotime($r->hcreated))}}</td>
                                     <td>{{date('h:i A',strtotime($r->hcreated))}}</td>
+                                    <td>{{ $r->order_type }}</td>
                                     <td>{{$r->customer_name}}</td>
                                     <td>{{$r->delivery_type}}</td>
                                     <th>

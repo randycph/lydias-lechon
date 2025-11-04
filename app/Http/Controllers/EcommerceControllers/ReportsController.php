@@ -91,7 +91,10 @@ class ReportsController extends Controller
                 $qry.= " and d.delivery_date >='".date('Y-m-d',strtotime($_GET['startdateneeded']))." 00:00:00.000' and d.delivery_date <='".date('Y-m-d',strtotime($_GET['enddateneeded']))." 23:59:59.999'";
             }
 
-            
+            if(isset($_GET['ordertype']) && strlen($_GET['ordertype'])>=1){
+                $qry.= " and h.order_type='".$_GET['ordertype']."'";
+            }
+
             if(!isset($_GET['startdate'])  && !isset($_GET['startdateneeded'])){
                 $qry.= " and h.created_at >='2050-01-01 00:00:00.000'";
             }
