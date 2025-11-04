@@ -215,7 +215,9 @@
                             <div>
                                 {{-- make a button that says Update Status middle aligned and awlays stick at the bottom
                                 --}}
+                                {{-- only show this button if transaction is transit --}}
                                 <button class="w-full py-3 bg-[#FFC83D] text-gray-900 font-medium rounded-md shadow"
+                                 x-show="active.delivery_status=='In Transit'"
                                     @click="openSheet()">
                                     Update Status
                                 </button>
@@ -274,7 +276,7 @@
                                     <div class="mt-4">
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Attachment</label>
 
-                                        <input type="file" class="hidden" x-ref="file" @change="onFileChange">
+                                        <input type="file" class="hidden" x-ref="file" @change="onFiles($event)">
                                         <div class="flex items-center gap-3">
                                             <button type="button"
                                                 class="rounded-xl border border-gray-200 px-3 py-2 text-[14px] shadow-sm hover:bg-gray-50"
@@ -431,6 +433,15 @@
 
                 alertColor: false,
 
+                onFiles(e) {
+                    // store as an array (even if only 1 file is chosen)
+                    this.form.files = Array.from(e.target.files || []);
+                    // still support your old single-file model if you set this.form.file somewhere else
+                    if (!this.form.files.length && this.form.file) {
+                    this.form.files = [this.form.file];
+                    }
+                },
+
                 async submitStatus() {
                     this.saving = true;
 
@@ -448,7 +459,13 @@
                         fd.append('delivered_by', this.active.driver_id || '');
                         fd.append('delivery_status', this.form.status);
                         fd.append('del_remarks', this.form.remarks || '');
-                        if (this.form.file) fd.append('image', this.form.file);
+
+                        const files = (this.form.files && this.form.files.length)
+                        ? this.form.files
+                        : (this.form.file ? [this.form.file] : []);
+
+                        for (const f of files) fd.append('image[]', f);
+
 
                         const r = await fetch(`{{ route('sales-transaction.delivery_status') }}`, {
                             method: 'POST',
