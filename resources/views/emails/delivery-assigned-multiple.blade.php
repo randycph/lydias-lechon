@@ -36,7 +36,7 @@ You have been assigned a new delivery. Please see the details below:
 @endforeach
 @endif
 
-@component('mail::button', ['url' => route('login')])
+@component('mail::button', ['url' => route('driver.home')])
 Manage Deliveries
 @endcomponent
 
