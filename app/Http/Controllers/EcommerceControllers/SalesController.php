@@ -1040,8 +1040,13 @@ class SalesController extends Controller
             'reference' => $update_delivery_table->id
         ]);
 
-        return back()->with('success','Successfully updated delivery status!');
-
+        if (isset($request->driver) && $request->driver) {
+            return response()->json([
+                'success' => true
+            ]);
+        } else {
+            return back()->with('success','Successfully updated delivery status!');
+        }
     }
 
     public function showDeliveryStatus($id)
@@ -1337,6 +1342,35 @@ class SalesController extends Controller
         return view('admin.sales.print',compact('sales','salesPayments','salesDetails','deliveries','gc', 'title'));
     }
     
+    public function sales_printout_driver($id)
+    {
+        $id = base64_decode($id);
+
+        $title = 'Delivery Report';
+        
+        $sales = \App\EcommerceModel\SalesHeader::with('couponUsed')->where('id',$id)->first();
+
+        if ($sales->is_sub == 1) {
+            $subSales = SalesHeader::where('id', $sales->parent_sales_header_id)->first();
+            $salesPayments = $subSales->payments ?? collect();
+        } else {
+            $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
+        }
+
+        if (!$sales) {
+            return redirect()->route('sales-transaction.index')->with('error', 'Sales record not found.');
+        }
+
+        $salesDetails  = SalesDetail::where('sales_header_id',$id)->get();
+        $deliveries    = DeliveryStatus::where('order_id',$id)->get();
+
+        $gc = GiftCertificate::where('sales_header_id',$id)->get();
+
+        $noHistory = true;
+
+        return view('admin.sales.print',compact('sales','salesPayments','salesDetails','deliveries','gc', 'title', 'noHistory'));
+    }
+    
     public function update_delivery_branch(Request $request)
     {
         //
@@ -1370,6 +1404,7 @@ class SalesController extends Controller
 
     public function driver_sales_transaction(Request $request)
     {
+        
         if(auth()->user()->role_id == 4) // branch manager user
             $customConditions = [
                 [
@@ -1397,6 +1432,12 @@ class SalesController extends Controller
         }
         if(auth()->user()->role_id == config('auth.driver_role_id')){
             $userName = Auth::user()->id;
+
+            // check if theres a param view in the url and its value is desktop if it doesnt hvae redirect to return redirect()->route('driver.home');
+
+            if (!request()->has('view') || request()->get('view') != 'desktop') {
+                return redirect()->route('driver.home');
+            }
 
         // Step 1: SalesHeader
         $salesHeaders = SalesHeader::with(['user', 'items', 'deliveryAddress', 'deliveryStatuses'])

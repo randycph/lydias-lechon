@@ -563,6 +563,7 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     // 11/18/2021 Ryan
     Route::get('/sales-printout/{id}','EcommerceControllers\SalesController@sales_printout')->name('sales.print');
     Route::get('/sales-printout-delivery/{id}','EcommerceControllers\SalesController@sales_printout_delivery')->name('sales.print.delivery');
+    Route::get('/sales-printout-driver/{id}','EcommerceControllers\SalesController@sales_printout_driver')->name('sales.print.driver');
     Route::post('/update-delivery-branch','EcommerceControllers\SalesController@update_delivery_branch')->name('sales.update_delivery_branch');
     //
 
@@ -871,6 +872,7 @@ Route::get('maintenance', function() {
 
 Route::get('/driver-deliveries', function(){
     $userName = auth()->check() ? auth()->user()->id : null;
+    $driver = User::where('id', $userName)->first();
     // Step 1: SalesHeader
     $salesHeaders = SalesHeader::with(['user', 'items', 'deliveryAddress', 'deliveryStatuses'])
         ->whereHas('deliveryStatuses', function ($q) use ($userName) {
@@ -879,12 +881,14 @@ Route::get('/driver-deliveries', function(){
         })
         ->where('delivery_type', '!=', 'Store Pickup')
         ->get()
-        ->map(function ($sale) {
+        ->map(function ($sale) use ($driver) {
             return [
                 'type' => 'sales',
                 'id' => $sale->id,
+                'driver_name' => $driver->name,
                 'delivery_status' => optional($sale->deliveryStatuses->last())->status,
                 'status' => $sale->status,
+                'HashOrderNumber' => base64_encode($sale->id),
                 'customer_name' => $sale->customer_name,
                 'date_needed' => optional($sale->items->first())->delivery_date,
                 'qty' => optional($sale->items->first())->qty,
@@ -914,10 +918,12 @@ Route::get('/driver-deliveries', function(){
     $jobOrders = JobOrder::with('deliveryStatuses')
         ->whereIn('id', $jobOrderIds)
         ->get()
-        ->map(function ($job) {
+        ->map(function ($job) use ($driver) {
             return [
-                'type' => 'job',
+                'type' => 'joborder',
                 'id' => $job->id,
+                'driver_name' => $driver->name,
+                'HashOrderNumber' => base64_encode($job->jo_number),
                 'delivery_status' => optional($job->deliveryStatuses->last())->status,
                 'sales' => $job->sales_detail->first() ?? null,
                 'contact_number' => $job->customer_mobile_number ?? $job->customer_tel_number,
@@ -947,8 +953,16 @@ Route::get('/driver-deliveries', function(){
 })->name('driver.deliveries');
 
 Route::get('driver', function() {
+    if (!auth()->check()) {
+        return redirect()->route('login');
+    }
+
+    if(!auth()->user()->role_id == config('auth.driver_role_id')){
+        return redirect()->route('admin.dashboard');
+    }
+
     return view('driver.index');
-});
+})->name('driver.home');
 
 Route::get('/{slug}', [FrontendController::class, 'page'])->name('page');
 

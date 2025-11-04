@@ -65,8 +65,19 @@
             <header class="mb-4">
                 <h2>Hey {{ auth()->check() ? auth()->user()->name : '' }}</h2>
                 <p class="mb-2">Good {{ now()->format('H') < 12 ? 'morning' : (now()->format('H') < 18 ? 'afternoon' : 'evening') }}!</p>
-                <h1 class="text-2xl font-semibold text-gray-900">Deliveries</h1>
-                <p class="text-sm text-gray-500">Assigned to you</p>
+                
+                <div class="flex items-center justify-between mb-3">
+                    <div>
+                        <h1 class="text-2xl font-semibold text-gray-900">Deliveries</h1>
+                        <p class="text-sm text-gray-500">Assigned to you</p>
+                    </div>
+
+                    <a href="admin/driver-sales-transaction/?view=desktop">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
+                        </svg>
+                    </a>
+                </div>
 
                 <label class="mt-3 relative block">
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -185,6 +196,19 @@
                                     <div x-show="active.contact_number">Contact Number: <a
                                             :href="'tel:' + active.contact_number" x-text="active.contact_number"
                                             class="underline"></a></div>
+
+                                    <button type="button" @click="goPrint()" class="mt-2 inline-flex items-center gap-2 text-sm text-gray-600 hover:underline">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5Zm-3 0h.008v.008H15V10.5Z" />
+                                        </svg> Print Delivery
+                                    </button>
+
+                                    <button type="button" class="mt-2 inline-flex items-center gap-2 text-sm text-gray-600 hover:underline">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                                        </svg>
+                                        Delivery History
+                                    </button>
                                 </div>
                             </template>
 
@@ -236,6 +260,10 @@
                                             <option :value="s" x-text="s"></option>
                                         </template>
                                     </select>
+
+                                    <div class="mt-2 text-[13px] text-gray-500" x-show="form.status=='In Transit'" :class="alertColor ? 'text-red-600 font-medium' : ''">
+                                        Please select <strong>Delivered/Picked Up</strong> or <strong>Returned/Rejected</strong> to update the delivery status.
+                                    </div>
 
                                     <!-- Remarks -->
                                     <label class="block text-sm font-medium text-gray-700 mt-4 mb-1">Remarks</label>
@@ -358,6 +386,9 @@
                 getImage() {
                     return this.active.product ? this.active.product[0].url : null;
                 },
+                goPrint() {
+                    window.location.href = `{{ url('sales-printout-driver') }}/${this.active.HashOrderNumber}`;
+                },
                 sheetOpen: false,
                 saving: false,
                 statuses: ['In Transit', 'Delivered/Picked Up', 'Returned/Rejected'],
@@ -398,15 +429,26 @@
                     this.$refs.file.value = '';
                 },
 
+                alertColor: false,
+
                 async submitStatus() {
                     this.saving = true;
+
+                    if (this.form.status == 'In Transit') {
+                        this.saving = false;
+                        this.alertColor = true;
+                        return;
+                    }
+
                     try {
                         const fd = new FormData();
-                        fd.append('type', this.active.type); // 'sales' | 'job'
-                        fd.append('id', this.active.id);
-                        fd.append('status', this.form.status);
-                        fd.append('remarks', this.form.remarks || '');
-                        if (this.form.file) fd.append('attachment', this.form.file);
+                        fd.append('type', this.active.type); // 'sales' | 'joborder'
+                        fd.append('del_id', this.active.id);
+                        fd.append('driver', true);
+                        fd.append('delivered_by', this.active.driver_name || '');
+                        fd.append('delivery_status', this.form.status);
+                        fd.append('del_remarks', this.form.remarks || '');
+                        if (this.form.file) fd.append('image', this.form.file);
 
                         const r = await fetch(`{{ route('sales-transaction.delivery_status') }}`, {
                             method: 'POST',

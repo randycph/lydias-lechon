@@ -347,7 +347,8 @@
             @endif
 
             <!-- Delivery History -->
-            @if($deliveries->count()))
+            @if (!isset($noHistory))
+            @if($deliveries->count())
             <div class="table-responsive mg-t-40">
                 <h5>Delivery History</h5>
                 <table class="table table-bordered bd-b tx-15">
@@ -375,6 +376,7 @@
                     </tbody>
                 </table>
             </div>
+            @endif
             @endif
 
             <div class="mt-5">
