@@ -216,12 +216,18 @@ class FrontendController extends Controller
             ->orderBy('province')
             ->pluck('province');
 
+        // $cities = Deliverablecities::query()
+        //     ->select('city')
+        //     ->whereNotNull('city')->where('city', '!=', '')
+        //     ->distinct()
+        //     ->orderBy('city')
+        //     ->pluck('city');
+
         $cities = Deliverablecities::query()
-            ->select('city')
+            ->select('city', 'province')
             ->whereNotNull('city')->where('city', '!=', '')
             ->distinct()
-            ->orderBy('city')
-            ->pluck('city');
+            ->orderBy('city')->get();
 
         $triples = Deliverablecities::query()
             ->select('city', 'province')

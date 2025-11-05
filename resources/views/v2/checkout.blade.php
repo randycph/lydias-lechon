@@ -2079,12 +2079,26 @@ recomputeCouponTotals(delivery = null) {
                     this.validateDateTime();
                 }
 
+                this._citySet = new Set(
+                    (this._cities || [])
+                        .map(row => (row && typeof row === 'object') ? (row.city ?? '') : (row ?? ''))
+                        .map(s => String(s).toLowerCase().trim())
+                        .filter(Boolean)
+                );
 
-                // Build lookup sets once (you already do this)
-                this._citySet      = new Set(this._cities.map(s => (s ?? '').toLowerCase()));
-                this._provinceSet  = new Set(this._provinces.map(s => (s ?? '').toLowerCase()));
-                this._locationSet  = new Set(this.locationsAll.map(l => (l.name ?? '').toLowerCase()));
+                this._provinceSet = new Set(
+                    (this._provinces || [])
+                        // if ever you pass objects later, this keeps it robust
+                        .map(row => (row && typeof row === 'object') ? (row.province ?? row.name ?? '') : (row ?? ''))
+                        .map(s => String(s).toLowerCase().trim())
+                        .filter(Boolean)
+                );
 
+                this._locationSet = new Set(
+                    (this.locationsAll || [])
+                        .map(l => String(l?.name ?? '').toLowerCase().trim())
+                        .filter(Boolean)
+                );
 
                 const hasCore = () => (this._addressCore || '').trim().length > 0;
 
@@ -2094,7 +2108,7 @@ recomputeCouponTotals(delivery = null) {
                     this._addressCore = this._stripCurrentPlaces(val);
                 });
 
-                // CITY changed
+                // CITY
                 this.$watch('city', (val, old) => {
                     // 1) remove old city (if any) and current location from the field
                     if (old)            this.delivery_address = this._removePlace(this.delivery_address, old);
@@ -2108,8 +2122,10 @@ recomputeCouponTotals(delivery = null) {
                     if (hasCore()) this._rebuildAddress();
                 });
 
-                // PROVINCE changed
+                // PROVINCE
                 this.$watch('province', (val, old) => {
+                      this._rebuildAllowedCitySetForProvince(val);
+
                     // 1) remove old province and current location from the field
                     if (old)            this.delivery_address = this._removePlace(this.delivery_address, old);
                     if (this.location)  this.delivery_address = this._removePlace(this.delivery_address, this.location);
@@ -2125,7 +2141,7 @@ recomputeCouponTotals(delivery = null) {
                     this.deliveryFee = 0;
                 });
 
-                // LOCATION (barangay) changed
+                // LOCATION (barangay)
                 this.$watch('location', (val, old) => {
                     if (this._syncing) return;
 
@@ -2152,15 +2168,32 @@ recomputeCouponTotals(delivery = null) {
                 this.phData = await res.json();
 
 
-                this.allowedCitySet = new Set(
-                    (this._cities || []).map(n => this._normalizeCityKey(n))
-                );
+                // this.allowedCitySet = new Set(
+                //     (this._cities || []).map(n => this._normalizeCityKey(n))
+                // );
                 
+                this._rebuildAllowedCitySetForProvince(this.province);
+
                 if (!this.privacy && this.carts.length > 0) {
                     this.showModal = true;
                 }
 
             },
+
+            _rebuildAllowedCitySetForProvince(provinceLabel) {
+                const P = this._norm(provinceLabel || '');
+                this.allowedCitySet = new Set(
+                    (this._cities || [])
+                    .map(row =>
+                        (row && typeof row === 'object')
+                        ? (this._norm(row.province) === P ? row.city : null)
+                        : row
+                    )
+                    .filter(Boolean)
+                    .map(name => this._normalizeCityKey(name))
+                );
+            },
+
             allowedCitySet: new Set(),
             _addressCore: '',
             _syncing: false,
@@ -2423,12 +2456,26 @@ recomputeCouponTotals(delivery = null) {
             multipleFilteredCities(index) {
                 const d = this.deliveries[index] || {};
                 if (!this.phData || !d.province) return [];
+
                 const prov = this._findProvinceObj(d.province);
                 if (!prov) return [];
                 const muni = prov.municipality_list || {};
 
+                const P = this._norm(d.province || '');
+                const allow = new Set(
+                    (this._cities || [])
+                    .map(row => {
+                        if (row && typeof row === 'object') {
+                        return (this._norm(row.province) === P) ? (row.city ?? '') : '';
+                        }
+                        return row ?? '';
+                    })
+                    .filter(Boolean)
+                    .map(name => this._normalizeCityKey(name))
+                );
+
                 return Object.keys(muni)
-                    .filter(name => this.allowedCitySet.has(this._normalizeCityKey(name)))
+                    .filter(name => allow.has(this._normalizeCityKey(name)))
                     .sort((a, b) => a.localeCompare(b))
                     .map(name => ({ city: name }));
             },
