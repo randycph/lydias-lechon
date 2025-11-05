@@ -75,10 +75,6 @@ class UserController extends Controller
 
     public function store(UserRequest $request)
     {
-//        if(User::where('name',$request->fname.' '.$request->lname)->exists()){
-//            return back()->with('duplicate', __('standard.users.duplicate_email'));
-//        } else {
-
         $validated = $request->validate([
             'fname' => [
                 'required',
@@ -97,51 +93,63 @@ class UserController extends Controller
 
         $data = $request->all();
 
-        if ($request->role == 5) {
+        $role = Role::where('id',$request->role)->first();
+
+        if ($role->has_production_branch == 1) {
             $request->validate([
-                'production_branch_id' => 'required|exists:production_branches,id',
+                'production_branch_id' => ['required','integer','exists:production_branches,id'],
+            ]);
+        } else {
+            $request->validate([
+                'production_branch_id' => ['nullable','integer','exists:production_branches,id'],
             ]);
         }
 
-            $user = User::create([
-                'firstname'      => $request->fname,
-                'lastname'       => $request->lname,
-                'name'           => $request->fname.' '.$request->lname,
-                'password'       => Hash::make('password'),
-                'email'          => $request->email,
-                'role_id'        => $request->role,
-                'user_type'      => 'cms',
-                'is_active'      => 1,
-                'user_id'        => Auth::id(),
-                'remember_token' => Str::random(10),
-                'address_street'  => ' ',
-                'address_municipality' => ' ',
-                'address_city' => ' ',
-                'address_region' => ' ',
-                'production_branch_id' => $request->production_branch_id ?? null,
+        if ($role->has_branches == 1) {
+            $request->validate([
+                'branches'   => 'required|array|min:1',
+                'branches.*' => 'integer|exists:branches,id',
             ]);
+        }
 
-            if($user){
-                if($request->role == 2 || $request->role == 4 || $request->role == 12 || $request->role == 16){
-                    $branches = $data['branches'];
+        $user = User::create([
+            'firstname'      => $request->fname,
+            'lastname'       => $request->lname,
+            'name'           => $request->fname.' '.$request->lname,
+            'password'       => Hash::make('password'),
+            'email'          => $request->email,
+            'role_id'        => $request->role,
+            'user_type'      => 'cms',
+            'is_active'      => 1,
+            'user_id'        => Auth::id(),
+            'remember_token' => Str::random(10),
+            'address_street'  => ' ',
+            'address_municipality' => ' ',
+            'address_city' => ' ',
+            'address_region' => ' ',
+            'production_branch_id' => $request->production_branch_id ?? null,
+        ]);
 
-                    foreach ($branches as $id) {
-                        UserBranch::create([
-                            'user_id' => $user->id,
-                            'branch_id' => $id
-                        ]);
-                    }
+        if($user){
+            if($role->has_branches == 1){
+                $branches = $data['branches'];
+
+                foreach ($branches as $id) {
+                    UserBranch::create([
+                        'user_id' => $user->id,
+                        'branch_id' => $id
+                    ]);
                 }
             }
+        }
 
-            try {
-                $user->send_reset_temporary_password_email();
-            } catch (\Exception $e) {
-                return redirect()->route('users.index')->with('error', 'Failed to send email. Please contact the administrator.');
-            }
+        try {
+            $user->send_reset_temporary_password_email();
+        } catch (\Exception $e) {
+            return redirect()->route('users.index')->with('error', 'Failed to send email. Please contact the administrator.');
+        }
 
-            return redirect()->route('users.index')->with('success', 'Pending for activation. Please remind the user to check the email and activate the account.');
-//        }
+        return redirect()->route('users.index')->with('success', 'Pending for activation. Please remind the user to check the email and activate the account.');
     }
 
     public function edit($id)
@@ -173,9 +181,18 @@ class UserController extends Controller
             'production_branch_id' => 'nullable|exists:production_branches,id',
         ]);
 
-        if ($request->role == 5) {
+        $role = Role::where('id',$request->role)->first();
+
+        if ($role->has_production_branch == 1) {
             $request->validate([
                 'production_branch_id' => 'required|exists:production_branches,id',
+            ]);
+        }
+
+        if ($role->has_branches == 1) {
+            $request->validate([
+                'branches'   => 'required|array|min:1',
+                'branches.*' => 'integer|exists:branches,id',
             ]);
         }
 
@@ -197,7 +214,7 @@ class UserController extends Controller
         ]);
         UserBranch::where('user_id',$user->id)->delete();
         if($user){
-            if($request->role == 2 || $request->role == 4 || $request->role == 12 || $request->role == 16){
+            if($role->has_branches == 1){
                 $data = $request->all();
                 $branches = $data['branches'];
 

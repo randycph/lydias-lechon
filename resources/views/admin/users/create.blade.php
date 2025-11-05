@@ -1,48 +1,48 @@
 @extends('admin.layouts.app')
 
 @section('pagetitle')
-    User Management
+User Management
 @endsection
 
 @section('pagecss')
-    <link href="{{ asset('lib/bselect/dist/css/bootstrap-select.css') }}" rel="stylesheet">
-    <link href="{{ asset('lib/select2/css/select2.min.css') }}" rel="stylesheet">
+<link href="{{ asset('lib/bselect/dist/css/bootstrap-select.css') }}" rel="stylesheet">
+<link href="{{ asset('lib/select2/css/select2.min.css') }}" rel="stylesheet">
 
-    <style>
-        .select2-container--default .select2-selection--multiple .select2-selection__choice {
-            position: relative;
-            margin-top: 4px;
-            margin-right: 4px;
-            padding: 3px 10px 3px 20px;
-            border-color: transparent;
-            border-radius: 1px;
-            background-color: #0168fa;
-            color: #fff;
-            font-size: 13px;
-            line-height: 1.45;
-        }
+<style>
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+        position: relative;
+        margin-top: 4px;
+        margin-right: 4px;
+        padding: 3px 10px 3px 20px;
+        border-color: transparent;
+        border-radius: 1px;
+        background-color: #0168fa;
+        color: #fff;
+        font-size: 13px;
+        line-height: 1.45;
+    }
 
-        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
-            color: #fff;
-            opacity: .5;
-            font-size: 14px;
-            font-weight: 400;
-            display: inline-block;
-            position: absolute;
-            top: 4px;
-            left: 7px;
-            line-height: 1.2;
-        }
+    .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+        color: #fff;
+        opacity: .5;
+        font-size: 14px;
+        font-weight: 400;
+        display: inline-block;
+        position: absolute;
+        top: 4px;
+        left: 7px;
+        line-height: 1.2;
+    }
 
 
-        .select2-container--default .select2-search--inline .select2-search__field {
-            padding-left: 8px;
-        }
+    .select2-container--default .select2-search--inline .select2-search__field {
+        padding-left: 8px;
+    }
 
-        .select2 {
-            width: 100% !important;
-        }
-    </style>
+    .select2 {
+        width: 100% !important;
+    }
+</style>
 @endsection
 
 @section('content')
@@ -63,88 +63,129 @@
     <div class="row">
         <div class="col-md-6">
             <form autocomplete="off" action="{{ route('users.store') }}" method="post">
-                    @csrf
-                    @method('POST')
-                    <div class="form-group">
-                        <label class="d-block">First Name *</label>
-                        <input type="text" name="fname" id="fname" value="{{ old('fname')}}" class="form-control @error('fname') is-invalid @enderror" required>
-                        @error('fname')
-                            <div class="invalid-feedback">
-                                {{ $message }}
-                            </div>
-                        @enderror
+                @csrf
+                @method('POST')
+                <div class="form-group">
+                    <label class="d-block">First Name *</label>
+                    <input type="text" name="fname" id="fname" value="{{ old('fname')}}"
+                        class="form-control @error('fname') is-invalid @enderror" required>
+                    @error('fname')
+                    <div class="invalid-feedback">
+                        {{ $message }}
                     </div>
-                    <div class="form-group">
-                        <label class="d-block">Last Name *</label>
-                        <input type="text" name="lname" id="lname" value="{{ old('lname')}}" class="form-control @error('lname') is-invalid @enderror" required>
-                        @error('lname')
-                            <div class="invalid-feedback">
-                                {{ $message }}
-                            </div>
-                        @enderror
+                    @enderror
+                </div>
+                <div class="form-group">
+                    <label class="d-block">Last Name *</label>
+                    <input type="text" name="lname" id="lname" value="{{ old('lname')}}"
+                        class="form-control @error('lname') is-invalid @enderror" required>
+                    @error('lname')
+                    <div class="invalid-feedback">
+                        {{ $message }}
                     </div>
-                    <div class="form-group">
-                        <label class="d-block">Email *</label>
-                        <input type="email" name="email" id="email" value="{{ old('email')}}" class="form-control @error('email') is-invalid @enderror" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
-                        @error('email')
-                            <div class="invalid-feedback">
-                                {{ $message }}
-                            </div>
-                        @enderror
+                    @enderror
+                </div>
+                <div class="form-group">
+                    <label class="d-block">Email *</label>
+                    <input type="email" name="email" id="email" value="{{ old('email')}}"
+                        class="form-control @error('email') is-invalid @enderror" required
+                        pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
+                    @error('email')
+                    <div class="invalid-feedback">
+                        {{ $message }}
                     </div>
-                    <div class="form-group">
-                        <label class="d-block">Role *</label>
-                        <select name="role" class="form-control select2-no-search" required onchange="user_role($(this).val());">
-                            <option value=""></option>
-                            @foreach($roles as $role)
-                                <option value="{{ $role->id }}" {{ (old("role") == $role->id ? "selected":"") }}>{{ $role->name }}</option>
-                            @endforeach
-                        </select>
-                        <x-error-message inputName="role" />
-                    </div>
+                    @enderror
+                </div>
+                @php
+                $oldRoleId = old('role');
+                $oldRole = $roles->firstWhere('id', (int)$oldRoleId);
+                $showBranches = (optional($oldRole)->has_branches ?? 0) == 1;
+                $showProd = (optional($oldRole)->has_production_branch ?? 0) == 1;
 
-                    <div class="form-group d-none" id="branches_div">
-                        <label class="d-block">Branches *</label>
-                        <select name="branches[]" id="branches" class="form-control select2" multiple disabled>
-                            <option label="Choose one"></option>
-                            @foreach($branches as $branch)
-                                <option value="{{ $branch->id }}" {{ (old("branches") == $branch->id ? "selected":"") }}>{{ ucwords($branch->name) }}</option>
-                            @endforeach
-                        </select>
-                        <x-error-message inputName="branches" />
-                    </div>
+                $branchesHasError = $errors->has('branches') || $errors->has('branches.*');
+                $prodHasError = $errors->has('production_branch_id');
+                @endphp
 
-                    <div class="form-group {{ old('role') == 5 ? 'd-block' : 'd-none' }}" id="production_branches_div">
-                        <label class="d-block">Production Branch *</label>
-                        <select name="production_branch_id" id="production_branch_id" class="form-control select2">
-                            <option label="Choose one"></option>
-                            @foreach($production_branches as $branch)
-                                <option value="{{ $branch->id }}" {{ (old("production_branch_id") == $branch->id ? "selected":"") }}>{{ ucwords($branch->name) }}</option>
-                            @endforeach
-                        </select>
-                        <x-error-message inputName="production_branch_id" />
-                    </div>
+                <div class="form-group">
+                    <label class="d-block">Role *</label>
+                    <select name="role" class="form-control select2-no-search" required onchange="user_role();">
+                        <option value=""></option>
+                        @foreach($roles as $r)
+                        <option value="{{ $r->id }}" data-has-branches="{{ (int)$r->has_branches }}"
+                            data-has-production-branch="{{ (int)$r->has_production_branch }}"
+                            data-can-approve-payment="{{ (int)$r->can_approve_payment }}" {{ old('role')==$r->id ?
+                            'selected' : '' }}
+                            >{{ $r->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('role')
+                    <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                    @enderror
+                </div>
 
-                    <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Create User</button>
-                    <a class="btn btn-outline-secondary btn-sm btn-uppercase" href="{{ route('users.index') }}">Cancel</a>
-                </form>
-            </div>
+                {{-- Branches --}}
+                <div class="form-group {{ $showBranches || $branchesHasError ? 'd-block' : 'd-none' }}"
+                    id="branches_div">
+                    <label class="d-block">Branches *</label>
+                    <select name="branches[]" id="branches"
+                        class="form-control select2 {{ $branchesHasError ? 'is-invalid' : '' }}" multiple {{
+                        $showBranches || $branchesHasError ? '' : 'disabled' }} data-placeholder="Choose one">
+                        <option value=""></option>
+                        @foreach($branches as $branch)
+                        <option value="{{ $branch->id }}" @if(in_array($branch->id, (array)old('branches', [])))
+                            selected @endif>
+                            {{ ucwords($branch->name) }}
+                        </option>
+                        @endforeach
+                    </select>
+                    @error('branches')
+                    <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                    @enderror
+                    @error('branches.*')
+                    <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                    @enderror
+                </div>
+
+                {{-- Production Branch --}}
+                <div class="form-group {{ $showProd || $prodHasError ? 'd-block' : 'd-none' }}"
+                    id="production_branches_div">
+                    <label class="d-block">Production Branch *</label>
+                    <select name="production_branch_id" id="production_branch_id"
+                        class="form-control select2 {{ $prodHasError ? 'is-invalid' : '' }}" {{ $showProd ||
+                        $prodHasError ? '' : 'disabled' }} data-placeholder="Choose one">
+                        <option value=""></option>
+                        @foreach($production_branches as $branch)
+                        <option value="{{ $branch->id }}" {{ (string)old('production_branch_id')===(string)$branch->id ?
+                            'selected' : '' }}>
+                            {{ ucwords($branch->name) }}
+                        </option>
+                        @endforeach
+                    </select>
+                    @error('production_branch_id')
+                    <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                    @enderror
+                </div>
+
+                <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Create User</button>
+                <a class="btn btn-outline-secondary btn-sm btn-uppercase" href="{{ route('users.index') }}">Cancel</a>
+            </form>
         </div>
     </div>
+</div>
 </div>
 @endsection
 
 @section('pagejs')
-    <script src="{{ asset('lib/bselect/dist/js/bootstrap-select.js') }}"></script>
-    <script src="{{ asset('lib/jquery/jquery.min.js') }}"></script>
-    <script src="{{ asset('lib/select2/js/select2.min.js') }}"></script>
-    <script src="{{ asset('js/dashforge.js') }}"></script>
-    <script src="{{ asset('lib/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ asset('lib/bselect/dist/js/bootstrap-select.js') }}"></script>
+<script src="{{ asset('lib/jquery/jquery.min.js') }}"></script>
+<script src="{{ asset('lib/select2/js/select2.min.js') }}"></script>
+<script src="{{ asset('js/dashforge.js') }}"></script>
+<script src="{{ asset('lib/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 @endsection
 
 @section('customjs')
-    <script>
-        $(function(){
+<script>
+    $(function(){
             'use strict'
 
             $('.select2').select2({
@@ -158,28 +199,38 @@
             });
         });
 
-        function user_role(role){
+        function user_role(){
+            const $roleOpt = $('select[name="role"] option:selected');
+            const has_branches = Number($roleOpt.data('has-branches')) === 1;
+            const has_production_branch = Number($roleOpt.data('has-production-branch')) === 1;
+            const can_approve_payment = Number($roleOpt.data('can-approve-payment')) === 1;
 
-            if(role == 2 || role == 4 || role == 12 || role == 16){ // check if selected user type is branch manager, staff, Cashier
-                $('#branches_div').removeClass('d-none');
-                $('#branches_div').addClass('d-block');
-                $('#branches').removeAttr('disabled');
-                $('#branches').prop('required',true);
-            } else if (role == 5) {
-                $('#production_branches_div').removeClass('d-none');
-                $('#production_branches_div').addClass('d-block');
-                $('#production_branch_id').removeAttr('disabled');
-                $('#production_branch_id').prop('required',true);
+            // Branches
+            if (has_branches) {
+                $('#branches_div').removeClass('d-none').addClass('d-block');
+                $('#branches').prop('disabled', false).prop('required', true).trigger('change.select2');
             } else {
-                $('#branches_div').removeClass('d-block');
-                $('#branches_div').addClass('d-none');
+                $('#branches_div').removeClass('d-block').addClass('d-none');
+                $('#branches').prop('required', false).prop('disabled', true).val(null).trigger('change');
+            }
 
-                $('#production_branches_div').removeClass('d-block');
-                $('#production_branches_div').addClass('d-none');
+            // Production branch
+            if (has_production_branch) {
+                $('#production_branches_div').removeClass('d-none').addClass('d-block');
+                $('#production_branch_id').prop('disabled', false).prop('required', true).trigger('change.select2');
+            } else {
+                $('#production_branches_div').removeClass('d-block').addClass('d-none');
+                $('#production_branch_id').prop('required', false).prop('disabled', true).val('').trigger('change');
+            }
 
-                $('#branches').attr('disabled','disabled');
-                $('#branches').prop('required',false);
+            // Payment types (if you have it)
+            if (can_approve_payment) {
+                $('#payment_div').removeClass('d-none').addClass('d-block');
+                $('#payment_types').prop('disabled', false).prop('required', false).trigger('change.select2');
+            } else {
+                $('#payment_div').removeClass('d-block').addClass('d-none');
+                $('#payment_types').prop('required', false).prop('disabled', true).val(null).trigger('change');
             }
         }
-    </script>
+</script>
 @endsection

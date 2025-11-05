@@ -44,6 +44,33 @@
                                 </div>
 
                                 <div class="form-group">
+                                    <label class="d-block">Associated with branches</label>
+                                    <div class="custom-control custom-switch @error('has_branches') is-invalid @enderror">
+                                        <input type="checkbox" class="custom-control-input" name="has_branches" id="customSwitch13">
+                                        <label class="custom-control-label" id="label_visibility13" for="customSwitch13"></label>
+                                        <x-error-message inputName="has_branches" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="d-block">Can approve payment</label>
+                                    <div class="custom-control custom-switch @error('can_approve_payment') is-invalid @enderror">
+                                        <input type="checkbox" class="custom-control-input" name="can_approve_payment"  id="customSwitch14">
+                                        <label class="custom-control-label" id="label_visibility14" for="customSwitch14"></label>
+                                        <x-error-message inputName="can_approve_payment" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="d-block">Has production branch</label>
+                                    <div class="custom-control custom-switch @error('has_production_branch') is-invalid @enderror">
+                                        <input type="checkbox" class="custom-control-input" name="has_production_branch"  id="customSwitch15">
+                                        <label class="custom-control-label" id="label_visibility15" for="customSwitch15"></label>
+                                        <x-error-message inputName="has_production_branch" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
                                     <label class="tx-10 tx-uppercase tx-medium tx-spacing-1 mg-b-5 tx-color-03">Role Description <i class="tx-danger">*</i></label>
                                     <textarea required class="form-control" name="description" rows="2" placeholder="Enter role description"></textarea>
                                 </div>
@@ -62,5 +89,33 @@
 @endsection
 
 @section('pagejs')
+<script>
+    $("#customSwitch13").change(function() {
+        if(this.checked) {
+            $('#label_visibility13').html('Yes');
+        }
+        else{
+            $('#label_visibility13').html('No');
+        }
+    });
+
+    $("#customSwitch14").change(function() {
+        if(this.checked) {
+            $('#label_visibility14').html('Yes');
+        }
+        else{
+            $('#label_visibility14').html('No');
+        }
+    });
+
+    $("#customSwitch15").change(function() {
+        if(this.checked) {
+            $('#label_visibility15').html('Yes');
+        }
+        else{
+            $('#label_visibility15').html('No');
+        }
+    });
+</script>
 @endsection
 

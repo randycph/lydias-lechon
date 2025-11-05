@@ -83,8 +83,8 @@
                     <h4 class="mg-b-0 tx-spacing--1">Address Information</h4>
 
                     <div class="form-group">
-                        <label class="d-block">Street *</label>
-                        <input type="text" name="address_street" id="address_street" value="{{ old('address_street',$user->address_street)}}" class="form-control @error('address_street') is-invalid @enderror" required>
+                        <label class="d-block">Street</label>
+                        <input type="text" name="address_street" id="address_street" value="{{ old('address_street',$user->address_street)}}" class="form-control @error('address_street') is-invalid @enderror" >
                         @error('address_street')
                         <div class="invalid-feedback">
                             {{ $message }}
@@ -92,8 +92,8 @@
                         @enderror
                     </div>
                     <div class="form-group">
-                        <label class="d-block">Municipality *</label>
-                        <input type="text" name="address_municipality" id="address_municipality" value="{{ old('address_municipality',$user->address_municipality)}}" class="form-control @error('address_municipality') is-invalid @enderror" required>
+                        <label class="d-block">Municipality</label>
+                        <input type="text" name="address_municipality" id="address_municipality" value="{{ old('address_municipality',$user->address_municipality)}}" class="form-control @error('address_municipality') is-invalid @enderror" >
                         @error('address_municipality')
                         <div class="invalid-feedback">
                             {{ $message }}
@@ -101,8 +101,8 @@
                         @enderror
                     </div>
                     <div class="form-group">
-                        <label class="d-block">City *</label>
-                        <input type="text" name="address_city" id="address_city" value="{{ old('address_city',$user->address_city)}}" class="form-control @error('address_city') is-invalid @enderror" required>
+                        <label class="d-block">City</label>
+                        <input type="text" name="address_city" id="address_city" value="{{ old('address_city',$user->address_city)}}" class="form-control @error('address_city') is-invalid @enderror" >
                         @error('address_city')
                         <div class="invalid-feedback">
                             {{ $message }}
@@ -110,8 +110,8 @@
                         @enderror
                     </div>
                     <div class="form-group">
-                        <label class="d-block">Region *</label>
-                        <input type="text" name="address_region" id="address_region" value="{{ old('address_region',$user->address_region)}}" class="form-control @error('address_region') is-invalid @enderror" required>
+                        <label class="d-block">Region</label>
+                        <input type="text" name="address_region" id="address_region" value="{{ old('address_region',$user->address_region)}}" class="form-control @error('address_region') is-invalid @enderror">
                         @error('address_region')
                         <div class="invalid-feedback">
                             {{ $message }}

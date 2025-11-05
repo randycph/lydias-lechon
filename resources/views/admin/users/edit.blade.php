@@ -85,7 +85,7 @@
                 </div>
                 <div class="form-group">
                     <label class="d-block">Email *</label>
-                    <input type="email" name="email" id="email" value="{{ old('email', strtolower($user->email))}}" class="form-control @error('email') is-invalid @enderror" required pattern="[A-Za-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
+                    <input type="email" name="email" id="email" value="{{ old('email', strtolower($user->email))}}" class="form-control @error('email') is-invalid @enderror" required regex="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$">
                     @error('email')
                         <span class="invalid-feedback" role="alert">
                             <strong>{{ $message ?? '' }}</strong>
@@ -96,7 +96,7 @@
                     <label class="d-block">Role *</label>
                     <select name="role" class="form-control select2-no-search" required onchange="user_role($(this).val());">
                         @foreach($roles as $role)
-                            <option value="{{ $role->id }}" {{ (old("role", $user->role_id) == $role->id ? "selected":"") }}>{{ $role->name }}</option>
+                            <option value="{{ $role->id }}" data-role="{{ $role }}" {{ (old("role", $user->role_id) == $role->id ? "selected":"") }}>{{ $role->name }}</option>
                         @endforeach
                     </select>
                     @error('role')
@@ -106,17 +106,25 @@
                     @enderror
                 </div>
 
-                <div class="form-group {{ old('role') == 5 || $user->role_id == 5 ? 'd-block' : 'd-none' }}" id="production_branches_div">
+                <div class="form-group {{ $user->assign_role->has_production_branch == 1 ? 'd-block' : 'd-none' }}"
+                    id="production_branches_div">
                     <label class="d-block">Production Branch *</label>
-                    <select name="production_branch_id" class="form-control select2-no-search" required>
+
+                    <select name="production_branch_id"
+                            class="form-control select2-no-search @error('production_branch_id') is-invalid @enderror"
+                            {{ $user->assign_role->has_production_branch == 1 ? 'required' : '' }}
+                            data-placeholder="Choose one">
+                        <option value="">Choose one</option>
                         @foreach($production_branches as $branch)
-                            <option value="{{ $branch->id }}" {{ (old("production_branch_id", $user->production_branch_id) == $branch->id ? "selected":"") }}>{{ $branch->name }}</option>
+                            <option value="{{ $branch->id }}"
+                                {{ (string)old('production_branch_id', (string)$user->production_branch_id) === (string)$branch->id ? 'selected' : '' }}>
+                                {{ $branch->name }}
+                            </option>
                         @endforeach
                     </select>
+
                     @error('production_branch_id')
-                        <span class="invalid-feedback" role="alert">
-                            <strong>{{ $message ?? '' }}</strong>
-                        </span>
+                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                     @enderror
                 </div>
 
@@ -126,23 +134,32 @@
                         $arr[] .= $ub->branch_id;
                     }
                 @endphp
-                <div class="form-group @if($user->role_id == 2 || $user->role_id == 16 || $user->role_id == 5 || $user->role_id == 4) d-block @else d-none @endif" id="branches_div">
+                <div class="form-group @if($user->assign_role->has_branches == 1) d-block @else d-none @endif" id="branches_div">
                     <label class="d-block">Branches *</label>
-                    <select name="branches[]" id="branches" class="form-control select2" multiple>
+
+                    @php
+                        $hasBranchesError = $errors->has('branches') || $errors->has('branches.*');
+                    @endphp
+
+                    <select name="branches[]" id="branches"
+                            class="form-control select2 {{ $hasBranchesError ? 'is-invalid' : '' }}" multiple>
                         <option label="Choose one"></option>
                         @foreach($branches as $branch)
-                            <option value="{{ $branch->id }}" @if(in_array($branch->id,$arr)) selected @endif>{{ ucwords($branch->name) }}</option>
+                            <option value="{{ $branch->id }}" @if(in_array($branch->id, $arr)) selected @endif>
+                                {{ ucwords($branch->name) }}
+                            </option>
                         @endforeach
                     </select>
+
                     @error('branches')
-                        <span class="invalid-feedback" role="alert">
-                            <strong>{{ $message ?? '' }}</strong>
-                        </span>
+                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                    @enderror
+                    @error('branches.*')
+                        <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
                     @enderror
                 </div>
 
-
-                <div class="form-group">
+                <div class="form-group @if($user->assign_role->can_approve_payment == 1) d-block @else d-none @endif" id="payment_div">
                     <label>Allowed to Approve (Payment Types)</label>
                     <select name="payment_types[]" multiple="multiple" id="payment_types" class="form-control js-example-basic-multiple js-states select2" style="width:100%">
                         @php
@@ -176,11 +193,10 @@
 @section('customjs')
     <script>
         $(function(){
-            'use strict'
 
             $('.select2').select2({
                 placeholder: 'Choose one',
-                searchInputPlaceholder: 'Search options'
+                searchInputPlaceholder: 'Search options',
             });
 
             $('.select2-no-search').select2({
@@ -189,27 +205,46 @@
             });
         });
 
-        function user_role(role){
+        function user_role(){
+            var role = $('select[name="role"] option:selected').data('role');
+            var role_id = role?.id
 
-            if(role == 2 || role == 4 || role == 12 || role == 16){ // check if selected user type is branch manager, staff, Cashier
+            var has_branches = role.has_branches;
+            var can_approve_payment = role.can_approve_payment;
+            var has_production_branch = role.has_production_branch;
+
+            if (has_branches == 1){
                 $('#branches_div').removeClass('d-none');
                 $('#branches_div').addClass('d-block');
                 $('#branches').removeAttr('disabled');
                 $('#branches').prop('required',true);
-            } else if (role == 5) {
+            } else {
+                $('#branches_div').removeClass('d-block');
+                $('#branches_div').addClass('d-none');
+                $('#branches').attr('disabled','disabled');
+                $('#branches').prop('required',false);
+            }
+            if (has_production_branch == 1) {
                 $('#production_branches_div').removeClass('d-none');
                 $('#production_branches_div').addClass('d-block');
                 $('#production_branch_id').removeAttr('disabled');
                 $('#production_branch_id').prop('required',true);
             } else {
-                $('#branches_div').removeClass('d-block');
-                $('#branches_div').addClass('d-none');
-
                 $('#production_branches_div').removeClass('d-block');
                 $('#production_branches_div').addClass('d-none');
-
-                $('#branches').attr('disabled','disabled');
-                $('#branches').prop('required',false);
+                $('#production_branch_id').attr('disabled','disabled');
+                $('#production_branch_id').prop('required',false);
+            }
+            if (can_approve_payment == 1){
+                $('#payment_div').removeClass('d-none');
+                $('#payment_div').addClass('d-block');
+                $('#payment_types').removeAttr('disabled');
+                $('#payment_types').prop('required',false);
+            } else {
+                $('#payment_div').removeClass('d-block');
+                $('#payment_div').addClass('d-none');
+                $('#payment_types').attr('disabled','disabled');
+                $('#payment_types').prop('required',false);
             }
         }
     </script>
