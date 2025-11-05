@@ -97,13 +97,13 @@ User Management
                     @enderror
                 </div>
                 @php
-                $oldRoleId = old('role');
-                $oldRole = $roles->firstWhere('id', (int)$oldRoleId);
-                $showBranches = (optional($oldRole)->has_branches ?? 0) == 1;
-                $showProd = (optional($oldRole)->has_production_branch ?? 0) == 1;
+                    $oldRoleId = old('role');
+                    $oldRole = $roles->firstWhere('id', (int)$oldRoleId);
+                    $showBranches = (optional($oldRole)->has_branches ?? 0) == 1;
+                    $showProd = (optional($oldRole)->has_production_branch ?? 0) == 1;
 
-                $branchesHasError = $errors->has('branches') || $errors->has('branches.*');
-                $prodHasError = $errors->has('production_branch_id');
+                    $branchesHasError = $errors->has('branches') || $errors->has('branches.*');
+                    $prodHasError = $errors->has('production_branch_id');
                 @endphp
 
                 <div class="form-group">
@@ -166,6 +166,38 @@ User Management
                     @enderror
                 </div>
 
+                @php
+                    $oldRoleId = old('role');
+                    $oldRole   = $roles->firstWhere('id', (int)$oldRoleId);
+                    $showPayment = (optional($oldRole)->can_approve_payment ?? 0) == 1;
+                    $paymentHasError = $errors->has('payment_types') || $errors->has('payment_types.*');
+                    $oldPayments = (array) old('payment_types', []); // keep selections after error
+                    $paymentOptions = \App\EcommerceModel\SalesPayment::get_types();
+                @endphp
+
+                <div class="form-group {{ $showPayment || $paymentHasError ? 'd-block' : 'd-none' }}" id="payment_div">
+                    <label>Allowed to Approve (Payment Types)</label>
+                    <select name="payment_types[]" multiple
+                            id="payment_types"
+                            class="form-control select2 {{ $paymentHasError ? 'is-invalid' : '' }}"
+                            style="width:100%"
+                            {{ $showPayment || $paymentHasError ? '' : 'disabled' }}
+                            data-placeholder="Choose payment types">
+                        <option value=""></option>
+                        @foreach($paymentOptions as $p)
+                            <option value="{{ $p }}" {{ in_array($p, $oldPayments, true) ? 'selected' : '' }}>{{ $p }}</option>
+                        @endforeach
+                    </select>
+                    @error('payment_types')
+                    <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                    @enderror
+                    @error('payment_types.*')
+                    <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                    @enderror
+                    <small>These rules only apply if the user can confirm/deny payments.</small>
+                </div>
+
+
                 <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Create User</button>
                 <a class="btn btn-outline-secondary btn-sm btn-uppercase" href="{{ route('users.index') }}">Cancel</a>
             </form>
@@ -224,7 +256,7 @@ User Management
             }
 
             // Payment types (if you have it)
-            if (can_approve_payment) {
+            if (can_approve_payment == 1){
                 $('#payment_div').removeClass('d-none').addClass('d-block');
                 $('#payment_types').prop('disabled', false).prop('required', false).trigger('change.select2');
             } else {

@@ -112,6 +112,11 @@ class UserController extends Controller
             ]);
         }
 
+        $paytypes='';
+        if(isset($request->payment_types) && $role->can_approve_payment == 1){
+            $paytypes= implode(",",$request->payment_types);
+        }
+
         $user = User::create([
             'firstname'      => $request->fname,
             'lastname'       => $request->lname,
@@ -122,6 +127,7 @@ class UserController extends Controller
             'user_type'      => 'cms',
             'is_active'      => 1,
             'user_id'        => Auth::id(),
+            'allowed_payments'  => $paytypes,
             'remember_token' => Str::random(10),
             'address_street'  => ' ',
             'address_municipality' => ' ',
