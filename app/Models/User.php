@@ -12,7 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Sanctum\HasApiTokens;
 use App\Notifications\ResetPasswordLink;
-
+use Illuminate\Support\Facades\Password;
 
 use App\Models\Role;
 
@@ -138,14 +138,20 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function send_reset_password_email()
     {
-        $token = app('auth.password.broker')->createToken($this);
+        // $token = app('auth.password.broker')->createToken($this);
+
+        $broker = Password::broker('users');
+        $token  = $broker->createToken($this);
 
         $this->notify(new UserResetPasswordNotification($token));
     }
 
     public function send_reset_temporary_password_email()
     {
-        $token = app('auth.password.broker')->createToken($this);
+        // $token = app('auth.password.broker')->createToken($this);
+
+        $broker = Password::broker('users');
+        $token  = $broker->createToken($this);
 
         try {
             $this->notify(new NewUserResetPasswordNotification($token));
