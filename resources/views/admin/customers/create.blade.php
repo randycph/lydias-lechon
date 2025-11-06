@@ -52,18 +52,18 @@
                     
                     <div class="individual" style="display:block">
                         <div class="form-group">
-                            <label class="d-block">First Name *</label>
-                            <input type="text" name="fname" id="fname" value="{{ old('fname')}}" class="form-control @error('fname') is-invalid @enderror">
-                            @error('fname')
+                            <label class="d-block">Last Name *</label>
+                            <input type="text" name="lname" id="lname" value="{{ old('lname')}}" class="form-control @error('lname') is-invalid @enderror" >
+                            @error('lname')
                             <div class="invalid-feedback">
                                 {{ $message }}
                             </div>
                             @enderror
                         </div>
                         <div class="form-group">
-                            <label class="d-block">Last Name *</label>
-                            <input type="text" name="lname" id="lname" value="{{ old('lname')}}" class="form-control @error('lname') is-invalid @enderror" >
-                            @error('lname')
+                            <label class="d-block">First Name *</label>
+                            <input type="text" name="fname" id="fname" value="{{ old('fname')}}" class="form-control @error('fname') is-invalid @enderror">
+                            @error('fname')
                             <div class="invalid-feedback">
                                 {{ $message }}
                             </div>
