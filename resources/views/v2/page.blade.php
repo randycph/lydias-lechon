@@ -63,8 +63,17 @@
                             place-items-center place-content-center
                         " style="">
                     </div>
-                    <img src="{{ $page->image_url }}" alt="Lydias Lechon" class="w-full h-auto object-cover"> 
-                    {{-- <img src="{{ asset('images/portrait-hero.jpg') }}" alt="Lydias Lechon" class="w-full h-screen object-cover object-right lg:hidden block">  --}}
+                    @php
+                        function isImageUrlValid($url) {
+                            $headers = @get_headers($url);
+                            return $headers && strpos($headers[0], '200') !== false;
+                        }
+                    @endphp
+                    @if (isImageUrlValid($page->image_url))
+                        <img src="{{ $page->image_url }}" alt="Lydias Lechon" class="w-full h-auto object-cover"> 
+                    @else
+                        {{-- <img src="{{ asset('images/portrait-hero.jpg') }}" alt="Lydias Lechon" class="w-full h-screen object-cover object-right lg:hidden block">  --}}
+                    @endif
                 </div>
             </div>
         @endif
