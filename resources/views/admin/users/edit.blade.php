@@ -94,7 +94,7 @@
                 </div>
                 <div class="form-group">
                     <label class="d-block">Role *</label>
-                    <select name="role" class="form-control select2-no-search" required onchange="user_role($(this).val());">
+                    <select name="role" class="form-control select2-no-search" required onchange="user_role();">
                         @foreach($roles as $role)
                             <option value="{{ $role->id }}" data-role="{{ $role }}" {{ (old("role", $user->role_id) == $role->id ? "selected":"") }}>{{ $role->name }}</option>
                         @endforeach
