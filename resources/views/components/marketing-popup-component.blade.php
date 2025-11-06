@@ -39,7 +39,7 @@
                 </div>
     
                 <div class="md:w-1/2 w-full order-2 lg:order-1 py-10 px-5">
-                    <div class="font-cubao text-3xl text-left text-primary px-6">
+                    <div class="text-3xl text-left text-primary px-6">
                         {{ $popupMessage->title }}
                     </div>
         
