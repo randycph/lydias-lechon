@@ -230,7 +230,6 @@
                                 @php
                                 $use = \App\EcommerceModel\SalesHeader::find($sale->id);
                                 @endphp
-                                {{ $sale->for_deletion }}
                                 <tr style="height:30px; @if($sale->trashed()) background-color:#FFA07A; @elseif($sale->for_deletion == 1) background-color:yellow; @endif">
                                     <td>
                                         <div class="custom-control custom-checkbox">
