@@ -368,7 +368,7 @@
                                                         </div>
                                                     </div>
                                                     @if ($sale->status !== 'CANCELLED')
-                                                    @if (!isDispatcher())
+                                                    @if (true)
                                                     <div class="nav-item dropdown">
                                                         <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                             <i data-feather="credit-card"></i>
