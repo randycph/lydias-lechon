@@ -16,7 +16,8 @@ use Illuminate\Support\Facades\Password;
 
 use App\Models\Role;
 
-use Cookie;
+use App\Models\Permission;
+use Illuminate\Support\Facades\Cookie;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -446,10 +447,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getEmailAttribute($value)
     {
         $str = substr($value,0,7);
-        if($str == 'lydtmp_')
+        if ($str == 'lydtmp_') {
             return '';
-        else
-            return ucfirst($value);
+        } else {
+            return ($value);
+        }
     }
     
     public static function order_origin($origin){
