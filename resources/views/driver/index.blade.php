@@ -217,7 +217,7 @@
                                 --}}
                                 {{-- only show this button if transaction is transit --}}
                                 <button class="w-full py-3 bg-[#FFC83D] text-gray-900 font-medium rounded-md shadow"
-                                 x-show="active.delivery_status=='In Transit'"
+                                 {{-- x-show="active.delivery_status=='In Transit'" --}}
                                     @click="openSheet()">
                                     Update Status
                                 </button>
@@ -276,7 +276,7 @@
                                     <div class="mt-4">
                                         <label class="block text-sm font-medium text-gray-700 mb-1">Attachment</label>
 
-                                        <input type="file" class="hidden" x-ref="file" @change="onFiles($event)">
+                                        <input type="file" class="hidden" x-ref="file" @change="onFiles($event)" required>
                                         <div class="flex items-center gap-3">
                                             <button type="button"
                                                 class="rounded-xl border border-gray-200 px-3 py-2 text-[14px] shadow-sm hover:bg-gray-50"
@@ -292,6 +292,9 @@
                                             </template>
                                         </div>
                                         <p class="mt-1 text-[12px] text-gray-500">JPEG/PNG/PDF up to 10MB.</p>
+                                    </div>
+                                    <div class="" x-show="attachmentError">
+                                        <p class="mt-1 text-sm text-red-600" x-text="attachmentError"></p>
                                     </div>
 
                                     <!-- Actions -->
@@ -442,12 +445,24 @@
                     }
                 },
 
+                attachmentError: '',
+
                 async submitStatus() {
                     this.saving = true;
 
                     if (this.form.status == 'In Transit') {
                         this.saving = false;
                         this.alertColor = true;
+                        return;
+                    }
+
+                    const files = (this.form.files && this.form.files.length)
+                        ? this.form.files
+                        : (this.form.file ? [this.form.file] : []);
+
+                    if (!files.length) {
+                        this.attachmentError = 'Please attach at least one image.';
+                        this.saving = false;
                         return;
                     }
 
@@ -461,8 +476,8 @@
                         fd.append('del_remarks', this.form.remarks || '');
 
                         const files = (this.form.files && this.form.files.length)
-                        ? this.form.files
-                        : (this.form.file ? [this.form.file] : []);
+                            ? this.form.files
+                            : (this.form.file ? [this.form.file] : []);
 
                         for (const f of files) fd.append('image[]', f);
 
