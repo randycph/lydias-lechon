@@ -160,7 +160,7 @@
 	                                    </td>
 	                                </tr>
                             	@empty
-                            		<tr><th colspan="9"><center>No coupons found.</center></th></tr>
+                            		<tr><th colspan="9"><center>No Popup Messages found.</center></th></tr>
                             	@endforelse
                             </tbody>
                         </table>
