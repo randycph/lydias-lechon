@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 
 @section('pagetitle')
-    Sales Transaction Manager
+    Sales Transaction Deletion Requests
 @endsection
 
 @section('pagecss')
@@ -26,7 +26,7 @@
                         <li class="breadcrumb-item active" aria-current="page">Sales Transaction</li>
                     </ol>
                 </nav>
-                <h4 class="mg-b-0 tx-spacing--1">Sales Transaction Manager</h4>
+                <h4 class="mg-b-0 tx-spacing--1">Sales Transaction Deletion Requests</h4>
             </div>
         </div>
 
@@ -230,8 +230,7 @@
                                 @php
                                 $use = \App\EcommerceModel\SalesHeader::find($sale->id);
                                 @endphp
-                                {{ $sale->for_deletion }}
-                                <tr style="height:30px; @if($sale->trashed()) background-color:#FFA07A; @elseif($sale->for_deletion == 1) background-color:yellow; @endif">
+                                <tr style="height:30px; @if($sale->trashed()) background-color:#FFA07A; @endif">
                                     <td>
                                         <div class="custom-control custom-checkbox">
                                             <input type="checkbox" class="custom-control-input cb" id="cb{{ $sale->id }}" {{ $sale->isConfirm == 1 ? 'disabled' : '' }}>
@@ -309,7 +308,7 @@
                                     </td>
                                     <td style="display:none;">{{ rtrim($payment_types,",") }}</td>
                                     <td>
-                                        {{ $sale->Paymentadminstatus }} <a href="#" title="Pending payments" onclick="show_added_payments('{{$sale->id}}');"><span class="badge badge-info">{{$sale->Paymentspendingtotal}}</span></a>
+                                        {{ $sale->Paymentadminstatus }}
                                     </td>
                                     <td align="center">
                                         @if($sale->isConfirm==1)
@@ -333,161 +332,19 @@
                                         @endif
                                     </td>
                                     <td width="10%">
-                                        <!-- 10102 -->
-                                         @php $forecasters = [3,13]; $forecasters = [13]; @endphp
-                                        @if(!in_array(auth()->user()->role_id, $forecasters) || auth()->user()->id == 10102)                                    
-                                            <nav class="nav table-options">
-                                                @if($sale->trashed())
-                                                    @if (auth()->user()->has_access_to_route('sales-transaction.restore'))
-                                                        <nav class="nav table-options">
-                                                            <a class="nav-link" href="{{route('sales-transaction.restore', $sale->id)}}" title="Restore this Sales Transaction"><i data-feather="rotate-ccw"></i></a>
-                                                        </nav>
-                                                    @endif
-                                                @else
-
-
-                                                    <div class="nav-item dropdown">
-                                                        <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                            <i data-feather="eye"></i>
-                                                        </a>
-                                                        <div class="dropdown-menu dropdown-menu-right">
-
-                                                            <a class="dropdown-item" title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale->id) }}">View Sales Summary</a>
-                                                            @if ($sale->status !== 'CANCELLED')
-                                                                @if($sale->isConfirm != 1)
-                                                                    @if(auth()->user()->role_id == 2 || auth()->user()->role_id == 1)
-                                                                    <a class="dropdown-item"  href="javascript:void(0);" onclick="confirm_order({{$sale->id}},'{{ number_format((\App\EcommerceModel\SalesHeader::balance($sale->id)),2) }}');" title="Confirm Order" >Confirm Order</a>
-                                                                    @endif
-                                                                @endif
-                                                                @if (!isDispatcher())
-                                                                <a class="dropdown-item"  href="{{ route('sales.update_details',$sale->id) }}" title="Update Sales Details & Items" >Update Sales Details</a>
-                                                                @endif
-                                                                @if($dateneeded > date('Y-m-d H:i:s') && !isDispatcher())
-                                                                    <a class="dropdown-item text-danger" href="javascript:void(0)" onclick="delete_sales({{$sale->id}},'{{$sale->order_number}}')" title="Delete Transaction">Delete</a>
-                                                                @endif
-                                                            @endif
-                                                        </div>
-                                                    </div>
-                                                    @if ($sale->status !== 'CANCELLED')
-                                                    @if (!isDispatcher())
-                                                    <div class="nav-item dropdown">
-                                                        <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                            <i data-feather="credit-card"></i>
-                                                        </a>
-                                                        <div class="dropdown-menu dropdown-menu-right">
-                                                            @if($sale->status == 'UNPAID')
-                                                                <a class="dropdown-item" data-toggle="modal" data-target="#prompt-change-status" title="Update Sales Transaction" data-id="{{$sale->id}}" data-status="PAID">Paid</a>
-
-                                                            @endif
-
-                                                                <a class="dropdown-item" style="display: none;" target="_blank" href="{{ route('sales-transaction.view_payment',$sale->id) }}" title="Show payment" data-id="{{$sale->id}}">Sales Payment</a>
-
-                                                                <a class="dropdown-item" href="javascript:;" onclick="addPayment('{{$sale->id}}','{{\App\EcommerceModel\SalesPayment::get_remaining_unpaid($sale->gross_amount,$sale->id)}}');">Add Payment</a>
-
-                                                                @if($dateneeded > date('Y-m-d H:i:s'))
-                                                                    @if(auth()->user()->role_id == 2 || auth()->user()->role_id == 1 || auth()->user()->role_id == 3)
-                                                                        <a class="dropdown-item" href="javascript:;" onclick="addDelFee({{$sale->id}},'{{$sale->order_number}}',{{$sale->delivery_fee_amount}});">Update Delivery Fee</a>
-                                                                    @endif
-                                                                @endif
-
-                                                                <a class="dropdown-item" href="javascript:;" onclick="show_added_payments('{{$sale->id}}')">View Payments</a>
-
-
-                                                                @if($sale->payment_type == 'xxxxxx')
-                                                                <a class="dropdown-item" href="{{route('staff-edit-payment',$sale->id)}}">Update Sales Payment</a>
-                                                                @endif
-
-
-
-                                                        </div>
-                                                    </div>
-                                                    @endif
-                                                    <div class="nav-item dropdown">
-                                                        <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                            <i data-feather="truck"></i>
-                                                        </a>
-                                                        <div class="dropdown-menu dropdown-menu-right">
-                                                            @if (auth()->user()->has_access_to_route('sales-transaction.quick_update') && ($sale->isConfirm == 1 || $sale->Paymentadminstatus == 'PAID'))
-                                                                @php
-
-                                                                    $dates = collect($sale->deliveryAddress ?? [])
-                                                                        ->map(function ($addr) {
-                                                                            $date = $addr->delivery_date ?? null;
-                                                                            $time = $addr->delivery_time ?? '00:00';
-                                                                            if (!$date) return null;
-
-                                                                            // Parse with app timezone (set this in config/app.php)
-                                                                            return \Carbon\Carbon::parse(trim($date.' '.$time), config('app.timezone'));
-                                                                        })
-                                                                        ->filter(); // remove nulls
-
-                                                                    $dateneeded = $dates->map->format('M-d H:i')->implode(', ');
-
-                                                                    $allPast = $dates->isNotEmpty()
-                                                                        ? $dates->every(fn ($dt) => $dt->lt(\Carbon\Carbon::now(config('app.timezone'))))
-                                                                        : true;
-
-                                                                    
-                                                                    $date_needed = $sale->items->first();
-
-                                                                    $deliveryDate = $date_needed?->delivery_date;
-
-                                                                    $isPast = true;
-
-                                                                    if ($deliveryDate) {
-                                                                        $isPast = \Carbon\Carbon::parse($deliveryDate)->isPast();
-                                                                    }
-
-                                                                @endphp
-
-                                                                @if (!$isPast)
-                                                                    <a class="dropdown-item"
-                                                                    href="javascript:void(0);"
-                                                                    onclick="change_delivery_status({{ $sale->id }}, {{ $is_allowed_delivered }})"
-                                                                    title="Update Order Status"
-                                                                    data-id="{{ $sale->id }}">
-                                                                        Update Order Status
-                                                                    </a>
-                                                                @endif
-                                                            @endif
-                                                                <a class="dropdown-item" href="{{route('sales.print',$sale->HashOrderNumber)}}" target="_blank" >Print Delivery Receipt</a>
-                                                                <a class="dropdown-item" href="javascript:void(0);" onclick="show_delivery_history({{$sale->id}})" title="Order History" data-id="{{$sale->id}}">Show Order Status History</a>
-                                                            
-                                                            @if (substr(strtolower($sale?->user?->email), 0, 8) == 'lydtemp_')
-                                                                <a class="dropdown-item" href="{{route('confirmation',$sale?->HashOrderNumber)}}" target="_blank" title="View Guest Sales Summary" >Guest Sales Summary</a>
-                                                            @endif
-
-
-                                                            @if (auth()->user()->has_access_to_route('sales-transaction.destroy'))
-                                                                <a class="dropdown-item text-danger" href="javascript:void(0)" onclick="delete_sales({{$sale->id}},'{{$sale->order_number}}')" title="Delete Transaction">Delete</a>
-                                                            @endif
-                                                        </div>
-                                                    </div>
-                                                    @endif
-
-                                                @endif
-                                            </nav>
+                                        @if($sale->trashed())
+                                            @if (auth()->user()->has_access_to_route('sales-transaction.restore'))
+                                                <nav class="nav table-options">
+                                                    <a class="nav-link" href="{{route('sales-transaction.restore', $sale->id)}}" title="Restore this Sales Transaction"><i data-feather="rotate-ccw"></i></a>
+                                                </nav>
+                                            @endif
                                         @else
-                                            <nav class="nav table-options">
-
-                                                    <div class="nav-item dropdown">
-                                                        <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                            <i data-feather="eye"></i>
-                                                        </a>
-                                                        <div class="dropdown-menu dropdown-menu-right">
-
-                                                                <a class="dropdown-item" title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale->id) }}">View Sales Summary</a>
-                                                                 <a class="dropdown-item" href="javascript:;" onclick="show_added_payments('{{$sale->id}}')">View Payments</a>
-
-
-                                                           
-                                                        </div>
-                                                    </div>
-                                                   
-
-                                            </nav>
+                                            @if (auth()->user()->has_access_to_route('sales-transaction.for_deletion'))
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" data-id="{{ $sale->id }}" data-order="{{ $sale->order_number }}" class="delete-forever" style="cursor: pointer; width: 18px; color:red" >
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                            </svg>
+                                            @endif
                                         @endif
-
                                     </td>
                                 </tr>
                             @empty
@@ -552,8 +409,8 @@
   
 
     <div class="modal effect-scale" id="prompt-delete" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <form action="" id="frm_delete" method="POST">
+        <div class="modal-dialog " role="document">
+            <form action="{{ route('sales-transaction.for_deletion') }}" id="frm_delete" method="POST" >
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalCenterTitle">{{__('common.delete_confirmation_title')}}</h5>
@@ -562,11 +419,10 @@
                         </button>
                     </div>
                     <div class="modal-body">
-
                             @csrf
-                            @method('DELETE ')
-                        <input type="hidden" name="id_delete" id="id_delete">
-                        <p>Are you sure you want to delete this transaction no: <span id="delete_order_div"></span>?</p>
+                            @method('POST')
+                        <input type="hidden" name="id" id="id_delete">
+                        <p>This will delete the transaction <span id="delete_order_div"></span>?</p>
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-sm btn-danger" id="btnDelete">Yes, Delete</button>
@@ -1110,7 +966,7 @@
 
 
         function delete_sales(x,order_number){
-            $('#frm_delete').attr('action',"{{route('sales-transaction.destroy',"x")}}");
+            $('#frm_delete').attr('action',"{{route('sales-transaction.for_deletion',"x")}}");
             $('#id_delete').val(x);
             $('#delete_order_div').html(order_number);
             $('#prompt-delete').modal('show');
@@ -1447,6 +1303,17 @@
 
             // Open in new tab
             window.open(fullUrl, '_blank');
+        });
+
+        $('.delete-forever').on('click', function () {
+            const saleId = $(this).data('id');
+            const orderNumber = $(this).data('order');
+
+            $('#id_delete').val(saleId);
+
+            $('#delete_order_div').html(orderNumber);
+
+            $('#prompt-delete').modal('show');
         });
 
 

@@ -557,6 +557,8 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::delete('/admin/sales/bulk-delete', 'EcommerceControllers\SalesController@bulkDelete')->name('sales.bulk-delete');
     Route::delete('/admin/sales/bulk-delete-mixed', 'EcommerceControllers\SalesController@bulkDeleteMixed')->name('sales.bulk-delete-mixed');
     Route::get('/admin/driver-sales-transaction', 'EcommerceControllers\SalesController@driver_sales_transaction')->name('sales-transaction.driver_sales_transaction');
+    Route::get('/admin/sales-transaction-pending-deletion', 'EcommerceControllers\SalesController@pending_deletion')->name('sales-transaction.pending.deletion');
+    Route::post('/admin/sales-transaction/permanent/delete', 'EcommerceControllers\SalesController@for_deletion')->name('sales-transaction.for_deletion');
 
     // 08/04/2021 Ryan
     Route::get('/admin/update-sales-details/{id}', 'EcommerceControllers\SalesController@update_sales_details')->name('sales.update_details');

@@ -631,7 +631,7 @@ class SalesController extends Controller
         $model = $this->additional_filters($model);
       
 
-        $selectFields = ['id','order_source','delivery_fee_amount','delivery_type','contact_person','instruction','customer_delivery_adress','outlet','customer_location','order_number', 'customer_name', 'customer_location', 'isConfirm', 'created_at', 'status', 'delivery_status', 'payment_status', 'net_amount', 'gross_amount','deleted_at', DB::raw('(SELECT ecommerce_sales_details.delivery_date From ecommerce_sales_details WHERE ecommerce_sales_headers.id=ecommerce_sales_details.sales_header_id GROUP BY ecommerce_sales_details.sales_header_id) as date_needed')];
+        $selectFields = ['id','order_source','delivery_fee_amount','delivery_type','for_deletion','contact_person','instruction','customer_delivery_adress','outlet','customer_location','order_number', 'customer_name', 'customer_location', 'isConfirm', 'created_at', 'status', 'delivery_status', 'payment_status', 'net_amount', 'gross_amount','deleted_at', DB::raw('(SELECT ecommerce_sales_details.delivery_date From ecommerce_sales_details WHERE ecommerce_sales_headers.id=ecommerce_sales_details.sales_header_id GROUP BY ecommerce_sales_details.sales_header_id) as date_needed')];
 
         $filterFields = ['order_number', 'customer_name', 'date_needed', 'start_date', 'end_date'];
         $listing = new ListingHelper('desc',20,'order_number', $customConditions);
@@ -741,7 +741,8 @@ class SalesController extends Controller
             'reference' => $sale->id
         ]);
 
-        $sale->delete();
+        $sale->for_deletion = 1;
+        $sale->save();
 
         return back()->with('success','Successfully deleted transaction');
     }
@@ -1630,4 +1631,151 @@ class SalesController extends Controller
 
     }
 
+    public function pending_deletion()
+    {
+        if (auth()->user()->role_id == config('auth.driver_role_id')) {
+            return redirect()->route('sales-transaction.driver_sales_transaction');
+        } 
+
+        if(auth()->user()->role_id == 4) // branch manager user
+            $customConditions = [
+                [
+                    'field' => 'status',
+                    'operator' => '=',
+                    'value' => 'active',
+                    'apply_to_deleted_data' => true
+                ],
+                [
+                    'field' => 'order_source',
+                    'operator' => '=',
+                    'value' => session('branch'),
+                    'apply_to_deleted_data' => true
+                ]
+            ];
+        else {
+            $customConditions = [
+                [
+                    'field' => 'status',
+                    'operator' => '=',
+                    'value' => 'active',
+                    'apply_to_deleted_data' => true
+                ],
+            ];
+        }
+        $today = now();
+        
+        if(auth()->user()->role_id == 1 || auth()->user()->role_id == 3 || auth()->user()->role_id == 5 || auth()->user()->role_id == 13 || auth()->user()->role_id == 16 ){
+            // $model = SalesHeader::where('id','>',0);
+
+            if (auth()->user()->role_id == 5 || auth()->user()->role_id == 16) {
+                $branchId = auth()->user()->role_id == 5 || auth()->user()->role_id == 16 ? auth()->user()->production_branch_id : null;
+
+                $eligible = DB::table('ecommerce_sales_details as d')
+                    ->join('job_orders as jo', 'jo.sales_detail_id', '=', 'd.id')
+                    ->join('production_orders as po', 'po.joborder_id', '=', 'jo.id')
+                    ->when($branchId, function ($query) use ($branchId) {
+                        return $query->where('po.branch_id', $branchId);
+                    })
+                    ->where('d.delivery_date', '>=', $today->startOfDay()->toDateTimeString())
+                    ->select('d.sales_header_id');
+
+                // $model = DB::table('ecommerce_sales_headers')
+                //     ->joinSub($eligible, 'eh', function ($j) {
+                //         $j->on('eh.sales_header_id', '=', 'ecommerce_sales_headers.id');
+                //     });
+
+                $model = SalesHeader::where(function ($query) use($eligible) {
+                    $query->whereIn('id', $eligible)->where('has_sub', 0)->where('for_deletion', 1);
+                })->with('items', function($q) {
+                    $q->orderBy('delivery_date', 'asc');
+                })->orderBy(
+                    SalesDetail::select('delivery_date')
+                        ->whereColumn('sales_header_id', 'ecommerce_sales_headers.id')
+                        ->orderBy('delivery_date', 'asc')
+                        ->limit(1)
+                );
+            } elseif (auth()->user()->role_id == 3) {
+
+                $eligible = DB::table('ecommerce_sales_details as d')
+                    ->join('job_orders as jo', 'jo.sales_detail_id', '=', 'd.id')
+                    ->join('production_orders as po', 'po.joborder_id', '=', 'jo.id')
+                    ->where('d.delivery_date', '>=', $today->startOfDay()->toDateTimeString())
+                    ->select('d.sales_header_id');
+
+                $model = SalesHeader::where(function ($query) use($eligible) {
+                    $query->whereIn('id', $eligible)->where('has_sub', 0)->where('payment_status', '!=', 'PENDING')->where('for_deletion', 1);
+                })->with('items', function($q) {
+                    $q->orderBy('delivery_date', 'asc');
+                })->orderBy(
+                    SalesDetail::select('delivery_date')
+                        ->whereColumn('sales_header_id', 'ecommerce_sales_headers.id')
+                        ->orderBy('delivery_date', 'asc')
+                        ->limit(1)
+                );
+            } else {
+                $model = SalesHeader::where('id','>',0)->where('has_sub', 0)->where('for_deletion', 1);
+            }
+
+        }else{
+            $branches = UserBranch::accessBranch();
+
+            $locations = [];
+            foreach($branches as $branch){
+                
+                array_push($locations, $branch->branch->name);
+            }
+
+
+            $model = SalesHeader::where('id','>',0)
+                                ->where('for_deletion', 1)
+                                ->where(function ($query) use($locations) {
+                                    $query->whereIn('outlet', $locations)
+                                          ->orWhereIn('order_source', $locations);
+                                });
+
+        }
+        $model = $this->additional_filters($model);
+      
+
+        $selectFields = ['id','order_source','delivery_fee_amount','delivery_type','for_deletion','contact_person','instruction','customer_delivery_adress','outlet','customer_location','order_number', 'customer_name', 'customer_location', 'isConfirm', 'created_at', 'status', 'delivery_status', 'payment_status', 'net_amount', 'gross_amount','deleted_at', DB::raw('(SELECT ecommerce_sales_details.delivery_date From ecommerce_sales_details WHERE ecommerce_sales_headers.id=ecommerce_sales_details.sales_header_id GROUP BY ecommerce_sales_details.sales_header_id) as date_needed')];
+
+        $filterFields = ['order_number', 'customer_name', 'date_needed', 'start_date', 'end_date'];
+        $listing = new ListingHelper('desc',20,'order_number', $customConditions);
+        $sales = $listing->filter_fields($filterFields)->simple_search_using_collection($model, $this->searchFields,  [],  [], [], $selectFields, $filterFields);
+
+        $filter = $listing->get_filter($this->searchFields);
+        $searchType = 'simple_search_using_collection';
+        //dd($sales);
+
+
+        return view('admin.sales.index-for-deletion',compact('sales','filter','searchType'));
+
+    }
+
+    public function for_deletion(Request $request)
+    {
+        $id = $request->id;
+
+        if (!auth()->user()->has_access_to_route('sales-transaction.for_deletion')) {
+            return back()->with('error', 'You do not have permission to perform this action.');
+        }
+
+        $sale = SalesHeader::findOrFail($id);
+
+        ActivityLog::create([
+            'created_by' => auth()->id(),
+            'activity_type' => 'delete',
+            'dashboard_activity' => 'permanently delete Sales Transaction',
+            'activity_desc' => 'permanently deleted Sales Transaction with Order Number: '.$sale->order_number,
+            'activity_date' => date("Y-m-d H:i:s"),
+            'db_table' => 'ecommerce_sales_headers',
+            'old_value' => '',
+            'new_value' => '',
+            'reference' => $sale->id
+        ]);
+
+        $sale->delete();
+
+        return back()->with('success','Successfully deleted transaction');
+    }
 }

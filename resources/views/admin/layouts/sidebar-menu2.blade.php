@@ -354,6 +354,10 @@
                         @if (!isDispatcher())
                         <li @if (\Route::current()->getName() == 'sales-transaction.payments') class="active" @endif><a href="{{ route('sales-transaction.payments') }}">Sales Transaction Payments</a></li>
                         @endif
+
+                        @if (auth()->user()->has_access_to_route('sales-transaction.pending.deletion'))
+                        <li @if (\Route::current()->getName() == 'sales-transaction.pending.deletion') class="active" @endif><a href="{{ route('sales-transaction.pending.deletion') }}">Pending Deletion</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif
