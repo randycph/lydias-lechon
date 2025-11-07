@@ -16,10 +16,14 @@
                         $images = json_decode($d->images);
                     @endphp
                     @foreach ($d->images as $key => $image)
+                        @if ($image->image)
                         <a href="{{ config('app.url') . '/images/proof-of-delivery/' . $image->image }}" target="_blank">Image {{ $key + 1 }}</a>
+                        @endif
                     @endforeach
                 @else
+                    @if ($d->image)
                     <a href="{{ config('app.url') . '/images/proof-of-delivery/' . $d->image }}" target="_blank">View</a>
+                    @endif
                 @endif
             @endif
         </td> 
