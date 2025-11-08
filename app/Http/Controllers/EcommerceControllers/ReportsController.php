@@ -565,27 +565,71 @@ class ReportsController extends Controller
                 
             }
 
-
             $jos.= " order by jo.date_needed, customer_name,jo_number";
             
             $jo = DB::select($jos);
         // JO
         // dd($jo);
         //$results = collect($jo)->merge(collect($rs));
-        $results = collect($mrs)->merge(collect($jo)->merge(collect($rs)));
+        // $results = collect($mrs)->merge(collect($jo)->merge(collect($rs)));
         //logger($results);
-        $results = collect($results)->unique(function ($row, $key) {
-            return (int)($row->hid ?? 0) === 0
-                ? (($row->product_name ?? '') . '|' . ($row->customer_delivery_adress ?? '') . '|' . ($row->idd ?? ''))
-                : (($row->dproduct_name ?? '') . '|' . ($row->hid ?? '') . '|' . ($row->idd ?? ''));
-        })->values();
+        $results = collect($mrs)
+            ->merge($jo)
+            ->merge($rs)
+            ->unique(function ($row) {
+                return (int)($row->hid ?? 0) === 0
+                    ? (($row->product_name ?? '') . '|' . ($row->customer_delivery_adress ?? '') . '|' . ($row->idd ?? ''))
+                    : (($row->dproduct_name ?? '') . '|' . ($row->hid ?? '') . '|' . ($row->idd ?? ''));
+            })
+            ->values();
 
+        $ex_array = ['Pantaga','Display','Alpha Size','Belly Pantaga'];
+
+        $original_results = $results;
+
+        if (isset($_GET['filter']) && $_GET['filter'] == 'whole-lechon') {
+            $results = $results
+                ->where('isConfirm', 1)
+                ->where('is_misc', 0)
+                ->where('production_item', 1)
+                ->whereNotIn('jo_category', $ex_array)
+                ->values();
+        } elseif (isset($_GET['filter']) && $_GET['filter'] == 'misc') {
+            $results = $results
+                ->where('isConfirm', 1)
+                ->where('is_misc', 1)
+                ->values();
+        } elseif (isset($_GET['filter']) && $_GET['filter'] == 'overall-lechon') {
+            $results = $results
+                ->where('isConfirm', 1)
+                ->where('is_misc', 0)
+                ->values();
+        }
+
+        if (isset($_GET['filter']) && $_GET['filter'] == 'display') {
+            $results = $results
+                ->where('jo_category', 'Display')
+                ->values();
+        } elseif (isset($_GET['filter']) && $_GET['filter'] == 'alpha-size') {
+            $results = $results
+                ->where('jo_category', 'Alpha Size')
+                ->values();
+        } elseif (isset($_GET['filter']) && $_GET['filter'] == 'belly-pantaga') {
+            $results = $results
+                ->where('jo_category', 'Belly Pantaga')
+                ->values();
+        } elseif (isset($_GET['filter']) && $_GET['filter'] == 'pantaga') {
+            $results = $results
+                ->where('jo_category', 'Pantaga')
+                ->values();
+        }
+        
         //logger($results);
         if(isset($_GET['toexcel']))
             return view('admin.reports.forecaster_excel',compact('rs','jo','results','wra_array','mrs'));
         else
             // return view('admin.reports.forecaster',compact('rs','jo','results','wra_array','mrs'));
-            return view('admin.reports.forecaster-test',compact('rs','jo','results','wra_array','mrs'));
+            return view('admin.reports.forecaster-test',compact('rs','jo','results','wra_array','mrs', 'original_results'));
     }
 
     public function sales_payment(Request $request)
