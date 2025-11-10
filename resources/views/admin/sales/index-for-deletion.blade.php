@@ -41,15 +41,11 @@
                             <tr>
                                 
                                 <td style="width:10%">
-                                    <select name="order_source" id="order_source" class="form-control">
+                                    <select name="order_source[]" id="order_source" class="form-control" multiple size="1">
                                         <option value="">Source</option>
                                         @foreach(\App\EcommerceModel\Branch::where('status', 1)->orderBy('name','asc')->get() as $b)
-                                            <option value="{{$b->name}}">{{$b->name}}</option>
+                                            <option value="{{$b->name}}" {{ isset($_GET['order_source']) && in_array($b->name, $_GET['order_source']) ? 'selected' : '' }}>{{$b->name}}</option>
                                         @endforeach
-                                        <option value="Web">Web</option>
-                                        @if(isset($_GET['order_source_filter']) && strlen($_GET['order_source_filter']) > 1)
-                                            <option value="{{$_GET['order_source_filter']}}" selected="selected">{{$_GET['order_source_filter']}}</option>
-                                        @endif
                                     </select>
                                 </td>
                                 <td style="width:11%">
