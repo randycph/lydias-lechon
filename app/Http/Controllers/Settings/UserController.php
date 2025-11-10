@@ -76,16 +76,8 @@ class UserController extends Controller
     public function store(UserRequest $request)
     {
         $validated = $request->validate([
-            'fname' => [
-                'required',
-                'string',
-                'regex:/^[A-Za-z\s\-]+$/'
-            ],
-            'lname' => [
-                'required',
-                'string',
-                'regex:/^[A-Za-z\s\-]+$/'
-            ],
+            'fname' => ['required','string','regex:/^[\p{L}\s\-]+$/u'],
+            'lname' => ['required','string','regex:/^[\p{L}\s\-]+$/u'],
             'email' => 'required|email|max:191|unique:users,email',
             'role' => 'required|exists:role,id',
             'production_branch_id' => 'nullable|exists:production_branches,id',
