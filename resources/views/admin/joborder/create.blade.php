@@ -1001,6 +1001,8 @@
                 remove_payment(i);
             }
 
+            add_more_payment()
+
             calculate_sub_total();
             calculate_grand_total();
 
