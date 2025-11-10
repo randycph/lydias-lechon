@@ -532,6 +532,8 @@ class SalesController extends Controller
             return redirect()->route('sales-transaction.driver_sales_transaction');
         } 
 
+        $showDeleted = request()->boolean('showDeleted');
+
         if(auth()->user()->role_id == 4) // branch manager user
             $customConditions = [
                 [
@@ -581,7 +583,11 @@ class SalesController extends Controller
 
                 $model = SalesHeader::where(function ($query) use($eligible) {
                     $query->whereIn('id', $eligible)->where('has_sub', 0);
-                })->with('items', function($q) {
+                })->when($showDeleted,
+                    fn ($q) => $q->where('for_deletion', 1),
+                    fn ($q) => $q->where('for_deletion', 0)
+                )
+                ->with('items', function($q) {
                     $q->orderBy('delivery_date', 'asc');
                 })->orderBy(
                     SalesDetail::select('delivery_date')
@@ -599,7 +605,10 @@ class SalesController extends Controller
 
                 $model = SalesHeader::where(function ($query) use($eligible) {
                     $query->whereIn('id', $eligible)->where('has_sub', 0)->where('payment_status', '!=', 'PENDING');
-                })->with('items', function($q) {
+                })->when($showDeleted,
+                    fn ($q) => $q->where('for_deletion', 1),
+                    fn ($q) => $q->where('for_deletion', 0)
+                )->with('items', function($q) {
                     $q->orderBy('delivery_date', 'asc');
                 })->orderBy(
                     SalesDetail::select('delivery_date')
@@ -608,7 +617,10 @@ class SalesController extends Controller
                         ->limit(1)
                 );
             } else {
-                $model = SalesHeader::where('id','>',0)->where('has_sub', 0);
+                $model = SalesHeader::where('id','>',0)->where('has_sub', 0)->when($showDeleted,
+                    fn ($q) => $q->where('for_deletion', 1),
+                    fn ($q) => $q->where('for_deletion', 0)
+                );
             }
 
         }else{
@@ -620,8 +632,11 @@ class SalesController extends Controller
                 array_push($locations, $branch->branch->name);
             }
 
-
             $model = SalesHeader::where('id','>',0)
+                                ->when($showDeleted,
+                                    fn ($q) => $q->where('for_deletion', 1),
+                                    fn ($q) => $q->where('for_deletion', 0)
+                                )
                                 ->where(function ($query) use($locations) {
                                     $query->whereIn('outlet', $locations)
                                           ->orWhereIn('order_source', $locations);
