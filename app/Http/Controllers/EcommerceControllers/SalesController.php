@@ -687,10 +687,11 @@ class SalesController extends Controller
         return redirect()->back()->with('success', 'Selected records deleted successfully.');
     }
 
-    public function additional_filters($model){
-    
-        if(isset($_GET['order_source']) && strlen($_GET['order_source']) > 1){
-            $model = $model->where('order_source','=',$_GET['order_source']);        
+    public function additional_filters($model)
+    {
+        if(isset($_GET['order_source'])){
+            $order_sources = request()->get('order_source');
+            $model = $model->whereIn('order_source', $order_sources);
         }
         if(isset($_GET['order_status']) && strlen($_GET['order_status']) > 0){
             if($_GET['order_status'] == 2){
