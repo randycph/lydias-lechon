@@ -3,6 +3,7 @@
 use App\EcommerceModel\Branch;
 use App\Models\Article;
 use App\Models\ArticleCategory;
+use App\Models\Page;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use Illuminate\Support\Facades\DB;
@@ -191,7 +192,16 @@ if (!function_exists('handle_shortcode')) {
 
                 return View::make('components.shortcode-blog', compact('blogs'))->render();
 
+            case 'shortcodes_faq':
 
+                $page = Page::where('slug', 'frequently-asked-questions')->where('status', 'PUBLISHED')->first();
+
+                if (!$page) {
+                    return '';
+                }
+
+                return View::make('components.shortcode-faq', compact('page'))->render();
+            
             default:
                 return ''; // Unknown shortcode
         }

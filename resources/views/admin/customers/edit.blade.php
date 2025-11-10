@@ -55,15 +55,15 @@
 
                     <div class="individual" style="@if($user->is_org == 1 ) display:none @endif">
                         <div class="form-group">
-                            <label class="d-block">First Name *</label>
-                            <input type="text" name="fname" id="fname" value="{{ old('fname', $user->firstname)}}" class="form-control @error('fname') is-invalid @enderror" required>
-                            @error(['inputName' => 'fname'])
-                            @enderror
-                        </div>
-                        <div class="form-group">
                             <label class="d-block">Last Name *</label>
                             <input type="text" name="lname" id="lname" value="{{ old('lname', $user->lastname)}}" class="form-control @error('lname') is-invalid @enderror" required>
                             @error(['inputName' => 'lname'])
+                            @enderror
+                        </div>
+                        <div class="form-group">
+                            <label class="d-block">First Name *</label>
+                            <input type="text" name="fname" id="fname" value="{{ old('fname', $user->firstname)}}" class="form-control @error('fname') is-invalid @enderror" required>
+                            @error(['inputName' => 'fname'])
                             @enderror
                         </div>
                         <div class="form-group">

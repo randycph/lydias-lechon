@@ -992,6 +992,19 @@ class CartController extends Controller
             $contact_person = $request->name;
             $outlet = '';
         }
+
+        $req = $request->all();
+
+        if ($delivery_type == 'Door to door delivery') {
+            $req['force_fee'] = true;
+
+            if ($delivery_fee == 0 || $delivery_fee == '' || $delivery_fee == null) {
+                $shippingRate = $this->get_shipping_fee(new Request($req));
+
+                $delivery_fee = $shippingRate;
+            }
+        }
+
         $totalPrice = $request->order_amount;
         $discount = 0;
         // $delivery_fee = $request->shipping_type == 'pickup' ? 0 : $request->delivery_fee;
@@ -1941,11 +1954,15 @@ class CartController extends Controller
         if($check_product == 1 || $check_customer == 1){
             $rate = 0;
         }
-        
-        return response()->json([
-            'fee' => $rate,
-            'location' => $request->city .', '.$request->province
-        ]);
+
+        if ($request->has('force_fee')) {
+            return $rate;
+        } else {
+            return response()->json([
+                'fee' => $rate,
+                'location' => $request->city .', '.$request->province
+            ]);
+        }
     }  
 
     public function cartCount(Request $request)

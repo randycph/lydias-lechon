@@ -36,7 +36,7 @@
     $total_lechon_overall = 0;
     $total_misc = 0;
     $ex_array = ['Pantaga','Display','Alpha Size','Belly Pantaga'];
-    foreach(collect($results) as $j){
+    foreach(collect($original_results) as $j){
         if($j->is_misc == 0 && $j->production_item == 1){
 
                                          
@@ -193,40 +193,6 @@
 
 
     </style>
-@endsection
-
-@section('pagetitle')
-    {{-- <table width="100%" style="font-size:18px;font-weight:bold;"><tr><td class="bord" align="center">Forecast Report {!! $datetxt !!} {!!$dbranch!!}</td></tr></table> --}}
-    <table id="totals-table" width="40%" style="font-size:14px;font-weight:bold;">
-        <tr>
-            <td>TOTAL WHOLE LECHON ORDER:</td>
-            <td align="center">{{$total_lechon_order}}</td>
-        </tr>
-        <tr>
-            <td>TOTAL PANTAGA:</td>
-            <td align="center">{{collect($jo)->where('jo_category','=','Pantaga')->sum('qty')}}</td>
-        </tr>
-        <tr>
-            <td>TOTAL BELLY PANTAGA:</td>
-            <td align="center">{{collect($jo)->where('jo_category','=','Belly Pantaga')->sum('qty')}}</td>
-        </tr>
-        <tr>
-            <td>TOTAL DISPLAY:</td>
-            <td align="center">{{collect($jo)->where('jo_category','=','Display')->sum('qty')}}</td>
-        </tr>
-        <tr>
-            <td>TOTAL ALPHA SIZE:</td>
-            <td align="center">{{collect($jo)->where('jo_category','=','Alpha Size')->sum('qty')}}</td>
-        </tr>
-        <tr>
-            <td>OVERALL TOTAL LECHON: </td>
-            <td align="center">{{$total_lechon_overall}}</td>
-        </tr>
-        <tr>
-            <td>TOTAL MISC QTY:</td>
-            <td align="center">{{$total_misc}}</td>
-        </tr>
-    </table>
 @endsection
 
 @section('content')
@@ -448,31 +414,59 @@
                     <table class="print-table" border="1" width="40%" style="font-size: 14px; font-weight:bold; ">
                         <tr>
                             <td>TOTAL WHOLE LECHON ORDER:</td>
-                            <td align="center">{{$total_lechon_order}}</td>
+                            <td align="center">
+                                <a href="{{ request()->fullUrlWithQuery(['filter' => 'whole-lechon']) }}">
+                                    {{ $total_lechon_order }}
+                                </a>
+                            </td>
                         </tr>
                         <tr>
                             <td>TOTAL PANTAGA:</td>
-                            <td align="center">{{collect($jo)->where('jo_category','=','Pantaga')->sum('qty')}}</td>
+                            <td align="center">
+                                <a href="{{ request()->fullUrlWithQuery(['filter' => 'pantaga']) }}">
+                                    {{collect($jo)->where('jo_category','=','Pantaga')->sum('qty')}}
+                                </a>
+                            </td>
                         </tr>
                         <tr>
                             <td>TOTAL BELLY PANTAGA:</td>
-                            <td align="center">{{collect($jo)->where('jo_category','=','Belly Pantaga')->sum('qty')}}</td>
+                            <td align="center">
+                                <a href="{{ request()->fullUrlWithQuery(['filter' => 'belly-pantaga']) }}">
+                                    {{collect($jo)->where('jo_category','=','Belly Pantaga')->sum('qty')}}
+                                </a>
+                            </td>
                         </tr>
                         <tr>
                             <td>TOTAL DISPLAY:</td>
-                            <td align="center">{{collect($jo)->where('jo_category','=','Display')->sum('qty')}}</td>
+                            <td align="center">
+                                <a href="{{ request()->fullUrlWithQuery(['filter' => 'display']) }}">
+                                    {{collect($jo)->where('jo_category','=','Display')->sum('qty')}}
+                                </a>
+                            </td>
                         </tr>
                         <tr>
                             <td>TOTAL ALPHA SIZE:</td>
-                            <td align="center">{{collect($jo)->where('jo_category','=','Alpha Size')->sum('qty')}}</td>
+                            <td align="center">
+                                <a href="{{ request()->fullUrlWithQuery(['filter' => 'alpha-size']) }}">
+                                    {{collect($jo)->where('jo_category','=','Alpha Size')->sum('qty')}}
+                                </a>
+                            </td>
                         </tr>
                         <tr>
                             <td>OVERALL TOTAL LECHON: </td>
-                            <td align="center">{{$total_lechon_overall}}</td>
+                            <td align="center">
+                                <a href="{{ request()->fullUrlWithQuery(['filter' => 'overall-lechon']) }}">
+                                    {{$total_lechon_overall}}
+                                </a>
+                            </td>
                         </tr>
                         <tr>
                             <td>TOTAL MISC QTY:</td>
-                            <td align="center">{{$total_misc}}</td>
+                            <td align="center">
+                                <a href="{{ request()->fullUrlWithQuery(['filter' => 'misc']) }}">
+                                    {{$total_misc}}
+                                </a>
+                            </td>
                         </tr>
                     </table>
                 </div>

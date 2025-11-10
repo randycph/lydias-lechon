@@ -11,7 +11,7 @@
 
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'CMS') }}</title>
+    <title>@yield('pagetitle', config('app.name', 'CMS'))</title>
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('storage').'/icons/'.Setting::getFaviconLogo()->website_favicon }}">
 
     <!-- vendor css -->

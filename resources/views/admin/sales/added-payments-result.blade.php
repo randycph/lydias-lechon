@@ -23,7 +23,7 @@
             <td align="center">{{$payment->status}} {!!$approval_code!!}</td>
             <td>@if($payment->status<>'PAID')
                     @if(in_array(strtolower($payment->payment_type),array_map('strtolower',$alls)) || auth()->user()->role_id == 1 || (auth()->user()->has_access_to_route('approve_payment') || auth()->user()->has_access_to_route('disapprove_payment')))
-                        @if (auth()->user()->has_access_to_route('approve_payment'))
+                        @if (auth()->user()->has_access_to_route('approve_payment') || auth()->user()->role_id == 1)
                             <a href="#" onclick="confirm_sales_payment({{$payment->id}},'{{$payment->payment_type}}','{{preg_replace( "/\r|\n/", "", $payment->receipt_number )}}')" class="btn btn-primary btn-xs">Approve</a>
                         @endif
 

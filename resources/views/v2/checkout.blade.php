@@ -1,24 +1,23 @@
 @extends('layouts.guest', ['page' => $page])
 
 @section('title', 'Checkout')
-@section('meta_description', 'Complete your order at Lydia\'s Lechon. Review your cart, choose delivery or pickup, and
-finalize your purchase for a delicious meal.')
+@section('meta_description', 'Complete your order at Lydia\'s Lechon. Review your cart, choose delivery or pickup, and finalize your purchase for a delicious meal.')
 
 @section('content')
 
 @php
-$deliveryFee = 0;
-$total = 0;
+    $deliveryFee = 0;
+    $total = 0;
 
-foreach ($carts as $cart) {
-$qty = $cart['qty'] ?? 1;
-$paella_price = $cart['paella_price'] > 0 ? $cart['product']['paella_price'] : 0;
-$price = $cart['price'] ?? 0;
+    foreach ($carts as $cart) {
+        $qty = $cart['qty'] ?? 1;
+        $paella_price = $cart['paella_price'] > 0 ? $cart['product']['paella_price'] : 0;
+        $price = $cart['price'] ?? 0;
 
-$isFree = $cart['is_free_product'] ?? false;
+        $isFree = $cart['is_free_product'] ?? false;
 
-$total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
-}
+        $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
+    }
 @endphp
 
 <style>
@@ -1408,110 +1407,108 @@ $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
 
             clearToProceed: true,
 
-recomputeCouponTotals(delivery = null) {
-    this.totalDiscountAmount = 0;
-    this.shippingDiscountAmount = 0;
-    this.shippingDiscountLists = [];
+            recomputeCouponTotals(delivery = null) {
+                this.totalDiscountAmount = 0;
+                this.shippingDiscountAmount = 0;
+                this.shippingDiscountLists = [];
 
-    const isMulti = this.method === 'delivery' && this.allowMultiple;
+                const isMulti = this.method === 'delivery' && this.allowMultiple;
 
-    if (isMulti) {
-        // Reset per-row delivery fee discounts
-        this.deliveryFees = this.deliveryFees.map(row => ({
-            ...row,
-            discount: 0
-        }));
-    }
+                if (isMulti) {
+                    // Reset per-row delivery fee discounts
+                    this.deliveryFees = this.deliveryFees.map(row => ({
+                        ...row,
+                        discount: 0
+                    }));
+                }
 
-    // Re-filter coupons (only needed for multi)
-    this.coupons = this.coupons.filter(coupon => {
-        if (coupon.free_shipping && coupon.location) {
-            const allowedLocations = coupon.location
-                .split('|')
-                .map(l => l.trim())
-                .filter(l => l !== '');
+                // Re-filter coupons (only needed for multi)
+                this.coupons = this.coupons.filter(coupon => {
+                    if (coupon.free_shipping && coupon.location) {
+                        const allowedLocations = coupon.location
+                            .split('|')
+                            .map(l => l.trim())
+                            .filter(l => l !== '');
 
-            if (isMulti) {
-                return this.deliveries.some(d =>
-                    allowedLocations.includes(d.location) || allowedLocations.includes('all')
-                );
-            } else {
-                return (
-                    allowedLocations.includes(this.location) || allowedLocations.includes('all')
-                );
-            }
-        }
-        return true;
-    });
+                        if (isMulti) {
+                            return this.deliveries.some(d =>
+                                allowedLocations.includes(d.location) || allowedLocations.includes('all')
+                            );
+                        } else {
+                            return (
+                                allowedLocations.includes(this.location) || allowedLocations.includes('all')
+                            );
+                        }
+                    }
+                    return true;
+                });
 
-    // Apply per-coupon logic
-    this.coupons.forEach(coupon => {
-        if (coupon.free_shipping && this.method !== 'pickup') {
-            const allowedLocations = coupon.location
-                ?.split('|')
-                .map(l => l.trim())
-                .filter(l => l !== '') || [];
+                // Apply per-coupon logic
+                this.coupons.forEach(coupon => {
+                    if (coupon.free_shipping && this.method !== 'pickup') {
+                        const allowedLocations = coupon.location
+                            ?.split('|')
+                            .map(l => l.trim())
+                            .filter(l => l !== '') || [];
 
-            if (isMulti) {
-                this.deliveryFees.forEach((feeRow, idx) => {
-                    if (
-                        allowedLocations.includes(feeRow.location) ||
-                        allowedLocations.includes('all')
-                    ) {
-                        const fee = feeRow.fee || 0;
-                        const discount = parseFloat(coupon.free_shipping_discount_amount || 0);
+                        if (isMulti) {
+                            this.deliveryFees.forEach((feeRow, idx) => {
+                                if (
+                                    allowedLocations.includes(feeRow.location) ||
+                                    allowedLocations.includes('all')
+                                ) {
+                                    const fee = feeRow.fee || 0;
+                                    const discount = parseFloat(coupon.free_shipping_discount_amount || 0);
 
-                        const discountAmount =
-                            discount === 100
-                                ? fee
-                                : (fee * discount) / 100;
+                                    const discountAmount =
+                                        discount === 100
+                                            ? fee
+                                            : (fee * discount) / 100;
 
-                        this.deliveryFees[idx].discount = discountAmount;
-                        this.shippingDiscountAmount += discountAmount;
+                                    this.deliveryFees[idx].discount = discountAmount;
+                                    this.shippingDiscountAmount += discountAmount;
 
-                        this.shippingDiscountLists.push({
-                            location: feeRow.location,
-                            index: idx,
-                            discount: parseFloat(discountAmount.toFixed(2))
-                        });
+                                    this.shippingDiscountLists.push({
+                                        location: feeRow.location,
+                                        index: idx,
+                                        discount: parseFloat(discountAmount.toFixed(2))
+                                    });
+                                }
+                            });
+                        } else {
+                            // Single delivery flow
+                            const fee = this.deliveryFee || 0;
+
+                            if (
+                                allowedLocations.includes(this.location) ||
+                                allowedLocations.includes('all')
+                            ) {
+                                const discount = parseFloat(coupon.free_shipping_discount_amount || 0);
+                                const discountAmount =
+                                    discount === 100 ? fee : (fee * discount) / 100;
+
+                                this.shippingDiscountAmount += discountAmount;
+
+                                this.shippingDiscountLists.push({
+                                    location: this.province + '' + this.city,
+                                    index: 0,
+                                    discount: parseFloat(discountAmount.toFixed(2))
+                                });
+                            }
+                        }
+                    } else {
+                        // Handle order discount
+                        if (coupon.discount_type === 'amount') {
+                            this.totalDiscountAmount += parseFloat(coupon.discount ?? 0);
+                        } else if (coupon.discount_type === 'percent') {
+                            this.totalDiscountAmount += (this.orderAmount * parseFloat(coupon.discount ?? 0)) / 100;
+                        }
                     }
                 });
-            } else {
-                // Single delivery flow
-                const fee = this.deliveryFee || 0;
 
-                if (
-                    allowedLocations.includes(this.location) ||
-                    allowedLocations.includes('all')
-                ) {
-                    const discount = parseFloat(coupon.free_shipping_discount_amount || 0);
-                    const discountAmount =
-                        discount === 100 ? fee : (fee * discount) / 100;
-
-                    this.shippingDiscountAmount += discountAmount;
-
-                    this.shippingDiscountLists.push({
-                        location: this.province + '' + this.city,
-                        index: 0,
-                        discount: parseFloat(discountAmount.toFixed(2))
-                    });
-                }
-            }
-        } else {
-            // Handle order discount
-            if (coupon.discount_type === 'amount') {
-                this.totalDiscountAmount += parseFloat(coupon.discount ?? 0);
-            } else if (coupon.discount_type === 'percent') {
-                this.totalDiscountAmount += (this.orderAmount * parseFloat(coupon.discount ?? 0)) / 100;
-            }
-        }
-    });
-
-    // Cap total discount to orderAmount
-    this.totalDiscountAmount = Math.min(this.totalDiscountAmount, this.orderAmount);
-},
-
-
+                // Cap total discount to orderAmount
+                this.totalDiscountAmount = Math.min(this.totalDiscountAmount, this.orderAmount);
+            },
 
             computeTotal() {
                 // Fallbacks
