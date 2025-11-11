@@ -174,19 +174,6 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label class="tx-13">Start (Date Needed)</label>
-                                    <input type="date" class="form-control input-sm" name="startdateneeded"  autocomplete="off" value="@isset($_GET['startdateneeded']){{ $_GET['startdateneeded'] }}@endisset">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label class="tx-13">End (Date Needed)</label>
-                                    <input type="date" class="form-control input-sm" name="enddateneeded"  autocomplete="off" value="@isset($_GET['enddateneeded']){{ $_GET['enddateneeded'] }}@endisset">
-                                </div>
-                            </div>
-
 
 
                         </div>
