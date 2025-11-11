@@ -34,17 +34,7 @@
     }
 @endphp
 @section('pagetitle')
-    <table width="100%" style="font-size:18px;font-weight:bold;">
-        <tr>
-            <td class="bord" align="center">
-                <br>
-                Guest Logins Report <br>
-                {{$date_display}}
-                <br><br>
-            </td>
-        </tr>
-    </table>
-    
+Guest Logins Report {{$date_display}}
 @endsection
 
 @section('content')
@@ -72,7 +62,7 @@
                     <input type="date" class="form-control input-sm" name="enddate" autocomplete="off" value="{{ $endDate }}">
                 </td>
                 <td><button type="submit" class="btn btn-primary" style="margin:0px 0px 0px 20px;">Generate</button></td>
-                <td><a href="{{ route('admin.report.sales_social') }}" class="btn btn-success" style="margin:0px 0px 0px 5px;">Reset</a></td>
+                <td><a href="{{ route('admin.report.guest_orders') }}" class="btn btn-success" style="margin:0px 0px 0px 5px;">Reset</a></td>
             </tr>
         </table>
     </form>

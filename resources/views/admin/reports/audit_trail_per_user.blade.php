@@ -1,9 +1,5 @@
 @extends('admin.layouts.report')
 
-@section('pagetitle')
-
-@endsection
-
 @section('pagecss')
     <!-- vendor css -->
     <link href="{{ asset('lib/@fortawesome/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
@@ -45,17 +41,8 @@
     }
 @endphp
 @section('pagetitle')
-    <table width="100%" style="font-size:18px;font-weight:bold;">
-        <tr>
-            <td class="bord" align="center">
-                <br>
-                User Audit Trail <br>
+                User Audit Trail
                 {{$date_display}}
-                <br><br>
-            </td>
-        </tr>
-    </table>
-    
 @endsection
 
 @section('content')

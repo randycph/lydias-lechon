@@ -23,6 +23,10 @@
     </style>
 @endsection
 
+@section('pagetitle')
+Most Saleable Products Report
+@endsection
+
 
 @php
     $date_display='';
@@ -30,19 +34,6 @@
         $date_display=date('M d, Y',strtotime($_GET['startdate']))." to ".date('M d, Y',strtotime($_GET['enddate']));
     }
 @endphp
-@section('pagetitle')
-    <table width="100%" style="font-size:18px;font-weight:bold;">
-        <tr>
-            <td class="bord" align="center">
-                <br>
-                Most Saleable Products Report <br>
-                {{$date_display}}
-                <br><br>
-            </td>
-        </tr>
-    </table>
-    
-@endsection
 
 @section('content')
 <div class="container">
@@ -68,7 +59,7 @@
                     <input type="date" class="form-control input-sm" name="enddate" autocomplete="off" value="{{ $endDate }}">
                 </td>
                 <td><button type="submit" class="btn btn-primary" style="margin:0px 0px 0px 20px;">Generate</button></td>
-                <td><a href="{{ route('admin.report.sales_social') }}" class="btn btn-success" style="margin:0px 0px 0px 5px;">Reset</a></td>
+                <td><a href="{{ route('admin.report.top_products') }}" class="btn btn-success" style="margin:0px 0px 0px 5px;">Reset</a></td>
             </tr>
         </table>
     </form>
