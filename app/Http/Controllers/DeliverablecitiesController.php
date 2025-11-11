@@ -8,6 +8,7 @@ use App\Models\Permission;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 
 class DeliverablecitiesController extends Controller
 {
@@ -57,28 +58,51 @@ class DeliverablecitiesController extends Controller
     public function store(Request $request)
     {
         $validate = $request->validate([
-            'name' => 'nullable',
-            'rate' => 'required|numeric',
-            'area' => 'nullable',
-            'barangay' => 'nullable',
-            'province' => 'required',
-            'city' => 'required',
-            'item_type' => 'required',
-            'region' => 'required',
+            'name'       => 'nullable',
+            'rate'       => 'required|numeric',
+            'area'       => 'nullable',
+            'barangay'   => 'nullable',
+            'province'   => 'required',
+            'city'       => 'required',
+            'item_type'  => 'required',
+            'region'     => 'required',
+
+            'is_active'      => 'nullable',
+            'control_mode'   => 'nullable|in:manual,scheduled',
+            'override_state' => 'nullable|boolean',
+            'override_until' => 'nullable|date|after:now',
+            'auto_on_at'     => 'nullable|date|after_or_equal:now',
+            'auto_off_at'    => 'nullable|date|after_or_equal:now',
         ]);
 
-        Deliverablecities::create([
-            'rate' => $request->rate,
-            'item_type' => $request->item_type,
-            'province' => $request->province,
-            'city' => $request->city,
-            'barangay' => $request->barangay,
-            'region' => $request->region,
-            'outside_manila' => ($request->has('outside_manila') ? '1' : '0'),
-            'user_id' => Auth::id()
+        $toUtc = function (?string $dt) {
+            if (!$dt) return null;
+            return Carbon::parse($dt, 'Asia/Manila');
+        };
+
+        $row = Deliverablecities::create([
+            'rate'          => $request->rate,
+            'item_type'     => $request->item_type,
+            'province'      => $request->province,
+            'city'          => $request->city,
+            'barangay'      => $request->barangay,
+            'region'        => $request->region,
+            'outside_manila'=> $request->boolean('outside_manila') ? 1 : 0,
+            'user_id'       => Auth::id(),
+
+            // scheduling fields
+            'is_active'      => $request->has('is_active') ? 1 : 0,
+            'control_mode'   => $request->input('control_mode'),
+
+            // If override_until provided, keep override_state as checkbox (true if checked, false if unchecked but present)
+            'override_state' => $request->has('override_state') ? (int)$request->boolean('override_state') : null,
+            'override_until' => $toUtc($request->input('override_until')),
+
+            'auto_on_at'     => $toUtc($request->input('auto_on_at')),
+            'auto_off_at'    => $toUtc($request->input('auto_off_at')),
         ]);
 
-        return back()->with('success','Successfully saved new location!');
+        return back()->with('success', 'Successfully saved new location!');
     }
 
     /**
@@ -114,34 +138,83 @@ class DeliverablecitiesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $validate = $request->validate([
-            'name' => 'nullable',
-            'rate' => 'required|numeric',
-            'region' => 'required',
-            'area' => 'nullable',
-            'barangay' => 'nullable',
-            'province' => 'required',
-            'city' => 'required',
-            'item_type' => 'required'
+        // Base validation
+        $request->validate([
+            'name'       => 'nullable',
+            'rate'       => 'required|numeric',
+            'region'     => 'required',
+            'area'       => 'nullable',
+            'barangay'   => 'nullable',
+            'province'   => 'required',
+            'city'       => 'required',
+            'item_type'  => 'required',
+
+            // Simplified scheduler fields
+            'is_active'    => 'nullable',
+            'control_mode' => 'nullable|in:auto_on,auto_off',
+            // require the correct datetime depending on selected mode
+            'auto_on_at'   => 'nullable|required_if:control_mode,auto_on|date',
+            'auto_off_at'  => 'nullable|required_if:control_mode,auto_off|date',
         ]);
 
-        // dd($request->all());
+        if ($request->input('control_mode') === 'auto_on') {
+            $request->validate([
+                'auto_on_at' => 'date|after:now',
+            ]);
+        } elseif ($request->input('control_mode') === 'auto_off') {
+            $request->validate([
+                'auto_off_at' => 'date|after:now',
+            ]);
+        }
 
-        Deliverablecities::findOrFail($id)->update([
-            'rate' => $request->rate,
-            'province' => $request->province,
-            'city' => $request->city,
-            'barangay' => $request->barangay,
-            'region' => $request->region,
-            'item_type' => $request->item_type,
-            'outside_manila' => ($request->has('outside_manila') ? '1' : '0'),
-            'user_id' => Auth::id()
-        ]);
+        $row = Deliverablecities::findOrFail($id);
+        $before = $row->is_active;
+
+        $toUtc = function (?string $dt) {
+            if (!$dt) return null;
+            return Carbon::parse($dt, 'Asia/Manila');
+        };
+
+        $mode = $request->input('control_mode'); // null | auto_on | auto_off
+
+        // Only keep the relevant schedule; clear the other
+        $autoOnAt  = $mode === 'auto_on'  ? $toUtc($request->input('auto_on_at'))  : null;
+        $autoOffAt = $mode === 'auto_off' ? $toUtc($request->input('auto_off_at')) : null;
+
+        // Build updates
+        $updates = [
+            'rate'           => $request->rate,
+            'province'       => $request->province,
+            'city'           => $request->city,
+            'barangay'       => $request->barangay,
+            'region'         => $request->region,
+            'item_type'      => $request->item_type,
+            'outside_manila' => $request->boolean('outside_manila') ? 1 : 0,
+            'user_id'        => Auth::id(),
+
+            'is_active'    => $request->has('is_active') ? 1 : 0,
+
+            'control_mode' => $mode,
+            'auto_on_at'   => $autoOnAt,
+            'auto_off_at'  => $autoOffAt,
+
+            // We’re not using override_* in this simplified UI
+            'override_state' => null,
+            'override_until' => null,
+        ];
+
+        $row->update($updates);
+
+        if ($row->is_active !== $before) {
+            $row->last_changed_at = now();
+            $row->save();
+        }
+
         
-//        $address = Deliverablecities::all();
-//        return view('admin.deliverablelocations.index',compact('address'))->with('success','Successfully updated delivery rate!');
 
-        return redirect()->route('admin.locations.index')->with('success','Successfully updated delivery rate!');
+        return redirect()
+            ->route('admin.locations.index')
+            ->with('success', 'Successfully updated delivery rate!');
     }
 
     /**

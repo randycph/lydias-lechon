@@ -29,7 +29,7 @@ class CheckoutController extends Controller
         $profile = Auth::user()->profile;
         $products = Cart::where('user_id',Auth::id())->get();
         $branches = Branch::where('status', 1)->where('pickup_branch', 1)->get();
-        $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
+        $locations = Deliverablecities::distinct()->where('is_active', 1)->orderBy('name')->get(['name']);
         $coupon = 0;
         foreach($products as $p){
             if(!empty($p->coupon_code)){  
@@ -71,7 +71,7 @@ class CheckoutController extends Controller
     {
         $products = session('cart', []); // Cart::where('user_id',Auth::id())->get();
         $branches = Branch::where('status', 1)->where('pickup_branch', 1)->get();
-        $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
+        $locations = Deliverablecities::distinct()->where('is_active', 1)->orderBy('name')->get(['name']);
 
         if (count($products) == 0) {
             return redirect()->route('product.front.list');

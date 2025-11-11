@@ -158,7 +158,7 @@ class SalesController extends Controller
             $delivery_amount = 0;
             
             if($sales->customer_location <> 'Other'){
-                $del_fee = Deliverablecities::where('name',$sales->customer_location)->where('item_type',$rate_type)->first();
+                $del_fee = Deliverablecities::where('name',$sales->customer_location)->where('is_active', 1)->where('item_type',$rate_type)->first();
                
                 $delivery_amount = $del_fee?->rate ?? 0;
 
@@ -877,7 +877,7 @@ class SalesController extends Controller
 
         // dd($salesheader->deliveryAddress);
 
-        $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
+        $locations = Deliverablecities::distinct()->where('is_active', 1)->orderBy('name')->get(['name']);
 
         $locations = $locations->filter(function ($value) {
             return !is_null($value->name) && $value->name !== '';
@@ -897,6 +897,7 @@ class SalesController extends Controller
 
         $provinces = Deliverablecities::query()
             ->select('province')
+            ->where('is_active', 1)
             ->whereNotNull('province')->where('province', '!=', '')
             ->distinct()
             ->orderBy('province')
@@ -904,6 +905,7 @@ class SalesController extends Controller
 
         $cities = Deliverablecities::query()
             ->select('city')
+            ->where('is_active', 1)
             ->whereNotNull('city')->where('city', '!=', '')
             ->distinct()
             ->orderBy('city')
