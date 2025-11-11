@@ -131,14 +131,6 @@
                         </div>
                     </div>
 
-                    {{-- (read-only helper) --}}
-                    @if(old('last_changed_at'))
-                        <div class="form-group">
-                            <label class="d-block">Last Changed</label>
-                            <input type="text" class="form-control" value="{{ old('last_changed_at') }}" readonly>
-                        </div>
-                    @endif
-
                     <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Submit</button>
                     <a class="btn btn-outline-secondary btn-sm btn-uppercase" href="{{ route('admin.locations.index') }}">Cancel</a>
             </form>

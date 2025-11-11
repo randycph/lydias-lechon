@@ -68,7 +68,7 @@ class DeliverablecitiesController extends Controller
             'region'     => 'required',
 
             'is_active'      => 'nullable',
-            'control_mode'   => 'nullable|in:manual,scheduled',
+            'control_mode'   => 'nullable|in:auto_on,auto_off',
             'override_state' => 'nullable|boolean',
             'override_until' => 'nullable|date|after:now',
             'auto_on_at'     => 'nullable|date|after_or_equal:now',
