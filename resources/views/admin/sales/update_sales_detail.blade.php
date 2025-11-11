@@ -130,13 +130,13 @@
 
 
                                         <!-- Allow Multiple Address Toggle -->
-                                        <div class="form-check mb-3 mt-3">
+                                        {{-- <div class="form-check mb-3 mt-3">
                                             <input class="form-check-input" type="checkbox" value=""
                                                 id="allowMultiple" />
                                             <label class="form-check-label" for="allowMultiple">
                                                 Allow multiple address
                                             </label>
-                                        </div>
+                                        </div> --}}
 
                                         <!-- Dynamic Address Sections -->
                                         <div id="multipleAddressesWrapper"></div>
