@@ -58,6 +58,7 @@ class BranchController extends Controller
             'direction_link' => $request->direction_link ?? '',
             'google_map_link' => $request->google_map_link ?? '',
             'is_head_office' => $request->has('is_head_office') ? 1 : 0,
+            'jo_select_branch' => $request->has('jo_select_branch') ? 1 : 0,
             'status' => $status,
         ]);
 
@@ -114,6 +115,7 @@ class BranchController extends Controller
                 'direction_link' => $request->direction_link ?? '',
                 'google_map_link' => $request->google_map_link ?? '',
                 'is_head_office' => $request->has('is_head_office') ? 1 : 0,
+                'jo_select_branch' => $request->has('jo_select_branch') ? 1 : 0,
                 'status' => $status,
             ]);
 
