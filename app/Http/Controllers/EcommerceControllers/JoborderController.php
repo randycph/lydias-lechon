@@ -197,11 +197,12 @@ class JoborderController extends Controller
             $products = Product::where('production_item',1)->where('status','PUBLISHED')->orderBy('name','asc')->get();
             $branches_store = Branch::where('status', 1)->orderBy('name','asc')->get();
             $pbs = ProductionBranch::orderBy('name','asc')->get();
-            $branches  = Deliverablecities::distinct()->orderBy('name')->get(['name']);
+            $branches  = Deliverablecities::distinct()->where('is_active', 1)->orderBy('name')->get(['name']);
 
 
             $provinces = Deliverablecities::query()
                 ->select('province')
+                ->where('is_active', 1)
                 ->whereNotNull('province')->where('province', '!=', '')
                 ->distinct()
                 ->orderBy('province')
@@ -209,6 +210,7 @@ class JoborderController extends Controller
 
             $cities = Deliverablecities::query()
                 ->select('city', 'province')
+                ->where('is_active', 1)
                 ->whereNotNull('city')->where('city', '!=', '')
                 ->distinct()
                 ->orderBy('city')->get();
@@ -617,7 +619,7 @@ class JoborderController extends Controller
         $products = Product::where('production_item',1)->orderBy('name','asc')->get();
 
         $ordered_products = SalesDetail::where('sales_header_id',$id)->get();
-        $branches  = Deliverablecities::orderBy('name','asc')->get();
+        $branches  = Deliverablecities::where('is_active', 1)->orderBy('name','asc')->get();
 
         return view('admin.joborder.edit',compact('products','miscelaneous','details','ordered_products','branches'));
     }
@@ -900,8 +902,8 @@ class JoborderController extends Controller
         // $location_lechon = Deliverablecities::whereName($request->location)->where('item_type','lechon')->first();
         // $location_misc = Deliverablecities::whereName($request->location)->where('item_type','misc')->first();
 
-        $location_lechon = Deliverablecities::where('province', $province)->where('city', $city)->where('item_type','lechon')->first();
-        $location_misc = Deliverablecities::where('province', $province)->where('city', $city)->where('item_type','misc')->first();
+        $location_lechon = Deliverablecities::where('province', $province)->where('is_active', 1)->where('city', $city)->where('item_type','lechon')->first();
+        $location_misc = Deliverablecities::where('province', $province)->where('is_active', 1)->where('city', $city)->where('item_type','misc')->first();
 
         if($request->has_lechon == '1' || $request->has_lechon == '2'){
             if(!empty($location_lechon)){

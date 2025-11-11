@@ -201,16 +201,18 @@ class FrontendController extends Controller
 
         $table = (new Deliverablecities)->getTable();
 
-        $pickOnePerName = Deliverablecities::selectRaw('MAX(id) AS id')
+        $pickOnePerName = Deliverablecities::selectRaw('MAX(id) AS id')->where('is_active', 1)
             ->groupBy('name');
 
         $locations = Deliverablecities::query()
+            ->where('is_active', 1)
             ->joinSub($pickOnePerName, 'p', "$table.id", '=', 'p.id')
             ->orderBy("$table.name")
             ->get(); // full rows, unique by name
 
         $provinces = Deliverablecities::query()
             ->select('province')
+            ->where('is_active', 1)
             ->whereNotNull('province')->where('province', '!=', '')
             ->distinct()
             ->orderBy('province')
@@ -225,12 +227,14 @@ class FrontendController extends Controller
 
         $cities = Deliverablecities::query()
             ->select('city', 'province')
+            ->where('is_active', 1)
             ->whereNotNull('city')->where('city', '!=', '')
             ->distinct()
             ->orderBy('city')->get();
 
         $triples = Deliverablecities::query()
             ->select('city', 'province')
+            ->where('is_active', 1)
             ->whereNotNull('city')->where('city', '!=', '')
             ->whereNotNull('province')->where('province', '!=', '')
             ->distinct()

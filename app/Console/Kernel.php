@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('transactions:check-unpaid')->daily();
 
         $schedule->command('sitemap:generate')->dailyAt('02:00');
+        $schedule->command('update:deliverable-cities-schedules')->everyFiveMinutes();
     }
 
     /**

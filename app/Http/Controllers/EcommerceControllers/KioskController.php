@@ -108,7 +108,7 @@ class KioskController extends Controller
 
         $profile = Auth::user()->profile;
         $products = Cart::where('user_id',Auth::id())->get();
-        $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
+        $locations = Deliverablecities::distinct()->where('is_active', 1)->orderBy('name')->get(['name']);
         $coupon = 0;
 
         $counter = 0;

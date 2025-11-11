@@ -87,6 +87,99 @@
                             ($rate->outside_manila == "0" ? "Within":"Outside") }} Manila</label>
                     </div>
                 </div>
+
+                {{-- --- ACTIVE / MANUAL OVERRIDE / SCHEDULE --- --}}
+                <div class="form-group">
+                    <label class="d-block">Active</label>
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox"
+                            class="custom-control-input"
+                            id="is_active"
+                            name="is_active"
+                            {{ old('is_active', $rate->is_active) ? 'checked' : '' }}>
+                        <label class="custom-control-label" for="is_active">
+                            <span id="is_active_label">{{ old('is_active', $rate->is_active) ? 'ON' : 'OFF' }}</span>
+                        </label>
+                    </div>
+                    @error('is_active') <span class="text-danger">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="form-group">
+                    <label class="d-block">Control Mode (Scheduled)</label>
+                    <select name="control_mode" id="control_mode" class="form-control">
+                        <option value="">Select Schedule type</option>
+                        <option value="auto_on" {{ old('control_mode', $rate->control_mode) === 'auto_on' ? 'selected' : '' }}>Auto On</option>
+                        <option value="auto_off" {{ old('control_mode', $rate->control_mode) === 'auto_off' ? 'selected' : '' }}>Auto Off</option>
+                    </select>
+                    <small class="form-text text-muted">
+                        Choose a schedule type to set automatic ON/OFF at specific times.
+                    </small>
+                    @error('control_mode') <span class="text-danger">{{ $message }}</span> @enderror
+                </div>
+
+
+                {{-- --- MANUAL OVERRIDE WITH AUTO-REVERT --- --}}
+                @php
+                    $tz = 'Asia/Manila';
+                    $overrideUntilLocal = $rate->override_until ? \Carbon\Carbon::parse($rate->override_until)->setTimezone($tz)->format('Y-m-d\TH:i') : null;
+                    $autoOnLocal  = $rate->auto_on_at ? \Carbon\Carbon::parse($rate->auto_on_at)->setTimezone($tz)->format('Y-m-d\TH:i') : null;
+                    $autoOffLocal = $rate->auto_off_at ? \Carbon\Carbon::parse($rate->auto_off_at)->setTimezone($tz)->format('Y-m-d\TH:i') : null;
+                @endphp
+
+                {{-- <div id="manual_block" class="{{ $cm === 'manual' ? '' : 'd-none' }}">
+                    <div class="form-group">
+                        <label class="d-block">Manual Override (optional)</label>
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox"
+                                class="custom-control-input"
+                                id="override_state"
+                                name="override_state"
+                                {{ old('override_state', !is_null($rate->override_state) ? (int)$rate->override_state : null) !== null ? 'checked' : '' }}>
+                            <label class="custom-control-label" for="override_state">
+                                Force <strong>ON</strong> when checked. Leave unchecked (but set a revert time) to force OFF until the time.
+                            </label>
+                        </div>
+                        <small class="form-text text-muted">Set a “Revert at” time to auto-restore after the override.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Override Revert At (optional)</label>
+                        <input type="datetime-local"
+                            class="form-control"
+                            name="override_until"
+                            value="{{ old('override_until', $overrideUntilLocal) }}">
+                        @error('override_until') <span class="text-danger">{{ $message }}</span> @enderror
+                    </div>
+                </div> --}}
+
+                {{-- --- ONE-SHOT SCHEDULED FLIPS --- --}}
+                <div  class="">
+                    <div class="form-group" id="scheduled_on_block">
+                        <label>Auto ON At</label>
+                        <input type="datetime-local"
+                            class="form-control"
+                            name="auto_on_at"
+                            value="{{ old('auto_on_at', $autoOnLocal) }}">
+                        @error('auto_on_at') <span class="text-danger">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="form-group" id="scheduled_off_block">
+                        <label>Auto OFF At</label>
+                        <input type="datetime-local"
+                            class="form-control"
+                            name="auto_off_at"
+                            value="{{ old('auto_off_at', $autoOffLocal) }}">
+                        @error('auto_off_at') <span class="text-danger">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
+                @if($rate->last_changed_at)
+                    <div class="form-group">
+                        <label class="d-block">Last Changed</label>
+                        <input type="text" class="form-control" value="{{ \Carbon\Carbon::parse($rate->last_changed_at)->setTimezone($tz)->format('Y-m-d H:i') }} {{ $tz }}" readonly>
+                    </div>
+                @endif
+
                 <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Submit</button>
                 <a class="btn btn-outline-secondary btn-sm btn-uppercase"
                     href="{{ route('admin.locations.index') }}">Cancel</a>
@@ -108,6 +201,47 @@
         else{
             $('#label_visibility').html('Within Manila');
         }
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const control = document.getElementById('control_mode');
+        const controlModeLabel = document.getElementById('control_mode_label');
+        const manual  = document.getElementById('manual_block');
+        const sched   = document.getElementById('scheduled_block');
+        const isActive = document.getElementById('is_active');
+        const isActiveLabel = document.getElementById('is_active_label');
+        const outside = document.getElementById('customSwitch1');
+        const outsideLabel = document.getElementById('label_visibility');
+        const auto_on_block  = document.getElementById('scheduled_on_block');
+        const auto_off_block = document.getElementById('scheduled_off_block');
+
+        function syncBlocks() {
+            if (control.value === 'auto_on') {
+                auto_on_block.classList.remove('d-none');
+                auto_off_block.classList.add('d-none');
+            } else if (control.value === 'auto_off') {
+                auto_on_block.classList.add('d-none');
+                auto_off_block.classList.remove('d-none');
+            } else {
+                auto_on_block.classList.add('d-none');
+                auto_off_block.classList.add('d-none');
+            }
+        }
+
+        control.addEventListener('change', syncBlocks);
+        syncBlocks();
+
+        function syncLabels() {
+            isActiveLabel.textContent = isActive.checked ? 'ON' : 'OFF';
+            if (outside && outsideLabel) {
+                outsideLabel.textContent = outside.checked ? 'Outside Manila' : 'Within Manila';
+            }
+        }
+        isActive.addEventListener('change', syncLabels);
+        if (outside) outside.addEventListener('change', syncLabels);
+        syncLabels();
     });
 </script>
 

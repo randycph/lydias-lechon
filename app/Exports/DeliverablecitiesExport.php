@@ -23,7 +23,7 @@ class DeliverablecitiesExport implements FromQuery, WithHeadings
     public function query()
     {
         // Select all columns explicitly to keep order consistent
-        return Deliverablecities::query()->select($this->columns);
+        return Deliverablecities::query()->where('is_active', 1)->select($this->columns);
     }
 
     public function headings(): array

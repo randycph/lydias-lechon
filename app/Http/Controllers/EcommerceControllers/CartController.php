@@ -1848,8 +1848,8 @@ class CartController extends Controller
         $baka = 0;
         $check_product = 0;
 
-        $location_lechon = Deliverablecities::where('city', $location['city'])->where('province', $location['province'])->where('item_type', 'lechon')->first();
-        $location_misc = Deliverablecities::where('city', $location['city'])->where('province', $location['province'])->where('item_type', 'misc')->first();
+        $location_lechon = Deliverablecities::where('is_active', 1)->where('city', $location['city'])->where('province', $location['province'])->where('item_type', 'lechon')->first();
+        $location_misc = Deliverablecities::where('is_active', 1)->where('city', $location['city'])->where('province', $location['province'])->where('item_type', 'misc')->first();
 
         if (!empty($location_misc)) {
             $rate = $location_misc->rate;
@@ -1904,8 +1904,8 @@ class CartController extends Controller
         $check_product = 0;
         $check_customer = 0;
         //$baka_with_fee = ['Imus Cavite','Molino'];
-        $location_lechon = Deliverablecities::where('province', $province)->where('city', $city)->where('item_type','lechon')->first();
-        $location_misc = Deliverablecities::where('province', $province)->where('city', $city)->where('item_type','misc')->first();
+        $location_lechon = Deliverablecities::where('is_active', 1)->where('province', $province)->where('city', $city)->where('item_type','lechon')->first();
+        $location_misc = Deliverablecities::where('is_active', 1)->where('province', $province)->where('city', $city)->where('item_type','misc')->first();
 
         if (Auth::user()) {
             $carts = Cart::where('user_id',Auth::id())->get();

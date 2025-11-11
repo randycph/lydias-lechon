@@ -60,7 +60,7 @@ class CouponController extends Controller
         //$brands = Product::whereNotNull('brand')->distinct()->get(['brand']);
         $customers = User::where('role_id',6)->where('is_active',1)->get();
 
-        $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
+        $locations = Deliverablecities::distinct()->where('is_active', 1)->orderBy('name')->get(['name']);
         $free_products = Product::get();
 
         return view('admin.coupon.create',compact('products','categories','customers','locations','free_products'));
@@ -187,7 +187,7 @@ class CouponController extends Controller
         $categories =  ProductCategory::has('published_products')->where('status','PUBLISHED')->get();
       
         $customers = User::where('role_id',6)->where('is_active',1)->get();
-        $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
+        $locations = Deliverablecities::distinct()->where('is_active', 1)->orderBy('name')->get(['name']);
         $free_products = Product::get();
 
         $selectedCustomers = explode('|', $coupon->scope_customer_id ?? '');

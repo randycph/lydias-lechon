@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Deliverablecities extends Model
 {
     protected $table = 'deliverable_cities';
-        protected $fillable = ['name', 'rate','area',  'user_id','item_type','outside_manila', 'province', 'city', 'municipality', 'region', 'barangay'];
+    protected $fillable = ['name', 'rate','area',  'user_id','item_type','outside_manila', 'province', 'city', 'municipality', 'region', 'barangay',
+        'is_active', 'control_mode', 'override_state', 'override_until', 'auto_on_at', 'auto_off_at'
+    ];
 
     public function user()
     {
