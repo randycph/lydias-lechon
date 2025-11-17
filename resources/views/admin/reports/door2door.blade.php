@@ -31,17 +31,7 @@
     }
 @endphp
 @section('pagetitle')
-    <table width="100%" style="font-size:18px;font-weight:bold;">
-        <tr>
-            <td class="bord" align="center">
-                <br>
-                Delivery Report <br>
-                {{$date_display}}
-                <br><br>
-            </td>
-        </tr>
-    </table>
-    
+Delivery Report {{$date_display}}
 @endsection
 
 @section('content')
