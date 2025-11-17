@@ -35,18 +35,9 @@
     }
 @endphp
 @section('pagetitle')
-    <table width="100%" style="font-size:18px;font-weight:bold;">
-        <tr>
-            <td class="bord" align="center">
-                <br>
-                Leftover Report <br>
-                {{ $status_display }}<br>
+                Gift Certificate Report
+                {{ $status_display }}
                 {{$date_display}}
-                <br><br>
-            </td>
-        </tr>
-    </table>
-    
 @endsection
 
 
@@ -74,7 +65,7 @@
                         </td>
                         <td>Start Date <input type="date" required name="startdate" class="form-control input-sm " value="@isset($_GET['startdate']){{ $_GET['startdate'] }}@endisset"></td>
                         <td>End Date <input type="date" required name="enddate" class="form-control input-sm " value="@isset($_GET['enddate']){{ $_GET['enddate'] }}@endisset"></td>                        
-                        <td><br><input type="submit" value="Generate" class="btn btn-primary btn-sm"></td>
+                        <td><br><input type="submit" value="Generate" class="btn btn-primary btn-sm"><a href="{{route('admin.report.gift_cert')}}" class="btn btn-info ml-1 btn-sm">Reset</a></td>
                         <td style="display: none;"><br><a href="#" onclick="$('#advance_modal').modal('show');" class="btn btn-md btn-info">Advance Search</a></td>
                     </tr>
                 </table>

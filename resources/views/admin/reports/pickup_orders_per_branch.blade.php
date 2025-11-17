@@ -1,9 +1,5 @@
 @extends('admin.layouts.report')
 
-@section('pagetitle')
-
-@endsection
-
 @section('pagecss')
     <!-- vendor css -->
     <link href="{{ asset('lib/@fortawesome/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
@@ -44,18 +40,9 @@
     }
 @endphp
 @section('pagetitle')
-    <table width="100%" style="font-size:18px;font-weight:bold;">
-        <tr>
-            <td class="bord" align="center">
-                <br>
-                Pickup Orders Per Production Branch <br>
-                {{ $branch_display }}<br>
+                Pickup Orders Per Production Branch
+                {{ $branch_display }}
                 {{$date_display}}
-                <br><br>
-            </td>
-        </tr>
-    </table>
-    
 @endsection
 
 @section('content')
@@ -106,7 +93,7 @@
                             <div class="col-md-3 filter-action mg-r-5">
                                 <a href="#" onclick="$('#adv').toggle();" class="btn btn-sm btn-success mg-t-7 mg-r-5">Advance Filter</a>
                                 <button type="submit" class="btn btn-sm btn-primary mg-t-7 mg-r-5">Generate</button>
-                                <a href="{{route('admin.report.sales')}}" class="btn btn-sm btn-info mg-t-7 mg-r-5">Reset</a>
+                                <a href="{{route('admin.report.pickup_orders_per_branch')}}" class="btn btn-sm btn-info mg-t-7 mg-r-5">Reset</a>
                             </div>
                         </div>
                         <div class="row" id="adv" style="display:none;">

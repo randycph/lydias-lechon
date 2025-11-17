@@ -150,7 +150,7 @@
                             <div class="col-md-4 filter-action mg-r-5">
                                 <a href="#" onclick="$('#adv').toggle();" class="btn btn-success mg-t-7 mg-r-5 btn-sm">Advance Filter</a>
                                 <button type="submit" class="btn btn-primary mg-t-7 mg-r-5 btn-sm">Generate</button>
-                                <a href="{{route('admin.report.forecaster')}}" class="btn btn-info mg-t-7 mg-r-5 btn-sm">Reset</a>
+                                <a href="{{route('admin.report.forecast_report_per_product_type')}}" class="btn btn-info mg-t-7 mg-r-5 btn-sm">Reset</a>
                             </div>
                         </div>
                         <div class="row" id="adv" style="display:none;">

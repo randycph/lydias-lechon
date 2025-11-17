@@ -44,11 +44,11 @@
                                         <div class="form-group">
                                             <label for="exampleDropdownFormEmail1">{{__('common.sort_by')}}</label>
                                             <div class="custom-control custom-radio">
-                                                <input type="radio" id="orderBy1" name="orderBy" class="custom-control-input" value="updated_at" @if ($filter->orderBy == 'updated_at') checked @endif>
+                                                <input type="radio" id="orderBy1" name="orderBy" class="custom-control-input" value="name" @if ($filter->orderBy == 'name') checked @endif>
                                                 <label class="custom-control-label" for="orderBy1">Branch Name</label>
                                             </div>
                                             <div class="custom-control custom-radio">
-                                                <input type="radio" id="orderBy2" name="orderBy" class="custom-control-input" value="name" @if ($filter->orderBy == 'name') checked @endif>
+                                                <input type="radio" id="orderBy2" name="orderBy" class="custom-control-input" value="contact_person" @if ($filter->orderBy == 'contact_person') checked @endif>
                                                 <label class="custom-control-label" for="orderBy2">Contact Person</label>
                                             </div>
                                         </div>

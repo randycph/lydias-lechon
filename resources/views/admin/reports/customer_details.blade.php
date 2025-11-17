@@ -34,17 +34,8 @@
     }
 @endphp
 @section('pagetitle')
-    <table width="100%" style="font-size:18px;font-weight:bold;">
-        <tr>
-            <td class="bord" align="center">
-                <br>
-                Customer Detail Reports <br>
+                Customer Detail Reports
                 {{$date_display}}
-                <br><br>
-            </td>
-        </tr>
-    </table>
-    
 @endsection
 
 @section('content')
@@ -77,7 +68,7 @@
                                 <br>
                                 <a href="#" onclick="$('#adv').toggle();" class="btn btn-success mg-t-7 mg-r-5 btn-sm">Advance Filter</a>
                                 <button type="submit" class="btn btn-primary mg-t-7 mg-r-5 btn-sm">Generate</button>
-                                <a href="{{route('admin.report.sales')}}" class="btn btn-info mg-t-7 mg-r-5 btn-sm">Reset</a>
+                                <a href="{{route('admin.report.customer-details')}}" class="btn btn-info mg-t-7 mg-r-5 btn-sm">Reset</a>
                             </div>
                         </div>
                         <div class="row" id="adv" style="display:none;">
@@ -174,19 +165,6 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label class="tx-13">Start (Date Needed)</label>
-                                    <input type="date" class="form-control input-sm" name="startdateneeded"  autocomplete="off" value="@isset($_GET['startdateneeded']){{ $_GET['startdateneeded'] }}@endisset">
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label class="tx-13">End (Date Needed)</label>
-                                    <input type="date" class="form-control input-sm" name="enddateneeded"  autocomplete="off" value="@isset($_GET['enddateneeded']){{ $_GET['enddateneeded'] }}@endisset">
-                                </div>
-                            </div>
-
 
 
                         </div>
