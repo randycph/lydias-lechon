@@ -50,7 +50,7 @@
 
         <div class="container-fluid">
             <div class="text-center mg-b-20"><img height="100px" src="{{ asset('images/lydias1965.png') }}" alt="">
-            <h4 class="mg-b-0 tx-spacing--1">Audit Trail (User)</h4></div>
+            <h4 class="mg-b-0 tx-spacing--1">Audit Trail (Sales)</h4></div>
           
 
             <div class="row-sm">
