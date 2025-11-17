@@ -139,7 +139,7 @@
                                     {{ $sales->customer_delivery_adress }}
                                 @endif
                             @else
-                                {{$sales->customer_delivery_adress}}
+                                {{$sales->customer_delivery_adress ?? $sales->customer_location}}
                             @endif
                         </p>
                         @if ($sales?->deliveryAddress && count($sales?->deliveryAddress) == 0)
