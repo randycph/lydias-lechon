@@ -290,7 +290,7 @@
                                 <select class="form-control" id="province_select" name="province" style="width:100%" disabled onchange="set_complete_address()">
                                     <option value="">Select Province</option>
                                     @foreach ($provinces as $province)
-                                        <option value="{{ $province }}">{{ $province }}
+                                        <option value="{{ $province['province'] }}">{{ $province['province'] }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -1411,283 +1411,338 @@
 
     <script>
         $(function () {
-        const urls = [
-            '{{ asset("addresses/philippine_provinces_cities_municipalities_and_barangays_2019v2.json") }}'
-        ];
+            const urls = [
+                '{{ asset("addresses/philippine_provinces_cities_municipalities_and_barangays_2019v2.json") }}'
+            ];
 
-        const ALLOWED_CITY_PROVINCE = @json($cities);
+            const ALLOWED_PROVINCES = @json($provinces);
+            const ALLOWED_CITY_PROVINCE = @json($cities);
 
-        const norm = s => (s || '').toString().trim().toLowerCase();
+            const norm = s => (s || '').toString().trim().toLowerCase();
 
-        const ALLOWED_BY_PROV = new Map();
-        (ALLOWED_CITY_PROVINCE || []).forEach(item => {
-            const p = norm(item.province);
-            const c = norm(item.city);
-            if (!p || !c) return;
-            if (!ALLOWED_BY_PROV.has(p)) ALLOWED_BY_PROV.set(p, new Set());
-            ALLOWED_BY_PROV.get(p).add(c);
-        });
+            const canonBasic = s =>
+            (s || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase();
 
-        const DEFAULT_REGION_NAME = 'NCR';
+            const canonProv = p => {
+                let x = canonBasic(p).replace(/\s+/g,' ');
+                if (x.startsWith('ncr')) return 'metro manila';  
+                if (x.includes('taguig') && x.includes('pateros')) return 'metro manila';
+                return x;
+            };
 
-        const initial = {
-            region:        @json(old('region',        '')),
-            region_code:   @json(old('region_code',   '')), 
-            province:      @json(old('province',      '')),
-            city:          @json(old('city',          '')),
-            barangay:      @json(old('barangay',      '')),
-        };
+            const canonRegCode = s =>
+            (s || '').toString().trim().toUpperCase().replace(/\s+/g,''); // e.g., '4A', 'NCR'
 
-        const $region   = $('#region_select');
-        const $province = $('#province_select');
-        const $city     = $('#city_select');
-        const $barangay = $('#barangay_select');
-
-        // Init Select2 shells
-        initSelect2($region,   'Select Region');
-        initSelect2($province, 'Select Province');
-        initSelect2($city,     'Select City/Municipality');
-        initSelect2($barangay, 'Select Barangay');
-
-        let DATA = null;
-
-        loadJSONWithFallbacks(urls).then(json => {
-            DATA = json || {};
-            populateRegions();
-
-            // --- Resolve which region to use ---
-            let useRegionCode = null;
-
-            // 1) If old region_code exists AND is in DATA, use it
-            if (initial.region_code && DATA[initial.region_code]) {
-                useRegionCode = initial.region_code;
-            }
-            // 2) Else if old region (name) exists, map to region_code
-            else if (initial.region) {
-                useRegionCode = findRegionCodeByName(initial.region) || null;
-            }
-            // 3) Else if old city exists, derive region+province from city
-            else if (initial.city) {
-                const found = findByCity(initial.city);
-                if (found) {
-                    useRegionCode   = found.regionCode;
-                    initial.province = found.provinceName; // ensure province aligns with city
-                }
-            }
-            // 4) Else if old province exists, derive region from province
-            else if (initial.province) {
-                useRegionCode = findRegionByProvince(initial.province) || null;
-            }
-            // 5) Else default to NCR
-            if (!useRegionCode) {
-                useRegionCode = findRegionCodeByName(DEFAULT_REGION_NAME) || Object.keys(DATA)[0] || '';
-            }
-
-            // Preselect region
-            if (useRegionCode) {
-                $region.val(useRegionCode).trigger('change.select2');
-                onRegionChange(false); // populate provinces without clearing
-            }
-
-            // Preselect province (if available)
-            if (initial.province) {
-                setSelectByText($province, initial.province);
-                onProvinceChange(false); // populate cities without clearing
-            }
-
-            // Preselect city (if available)
-            if (initial.city) {
-                setSelectByText($city, initial.city);
-                onCityChange(false); // populate barangays without clearing
-            }
-
-            // Preselect barangay (if available)
-            if (initial.barangay) {
-                setSelectByText($barangay, initial.barangay);
-            }
-
-        }).catch(err => {
-            console.error('Failed to load LGU JSON:', err);
-            alert('Location list failed to load. Ensure /public/addresses/2019v2.json is present.');
-        });
-
-        // Events
-        $region.on('change', () => onRegionChange(true));
-        $province.on('change', () => onProvinceChange(true));
-        $city.on('change', () => onCityChange(true));
-
-        // ---------- Select2 helpers ----------
-        function initSelect2($el, placeholder){
-            $el.select2({ placeholder, allowClear: true, width: '100%' });
-        }
-        async function loadJSONWithFallbacks(list){
-            let lastErr;
-            for (const u of list){
-                try { return await $.getJSON(u, { cache: true }); }
-                catch (e){ lastErr = e; console.warn('JSON load failed for', u, e); }
-            }
-            throw lastErr || new Error('All sources failed');
-        }
-
-        // ---------- Populate ----------
-        function populateRegions(){
-            const regions = Object.keys(DATA).map(code => ({
-                code,
-                name: String(DATA[code]?.region_name || '')
-            })).sort((a, b) => {
-                const A = a.name.trim().toLowerCase();
-                const B = b.name.trim().toLowerCase();
-                const isOtherA = (A === 'other');
-                const isOtherB = (B === 'other');
-
-                if (isOtherA && !isOtherB) return 1;   // A goes after B
-                if (!isOtherA && isOtherB) return -1;  // A goes before B
-                return A.localeCompare(B);
+            // province -> Set(city) (needed by populateCities)
+            const ALLOWED_BY_PROV = new Map();
+            (ALLOWED_CITY_PROVINCE || []).forEach(({ province, city }) => {
+                const p = canonProv(province);
+                const c = canonBasic(city);
+                if (!p || !c) return;
+                if (!ALLOWED_BY_PROV.has(p)) ALLOWED_BY_PROV.set(p, new Set());
+                ALLOWED_BY_PROV.get(p).add(c);
             });
 
-            $region.empty().append(new Option('', '', false, false));
-            regions.forEach(r => $region.append(new Option(r.name, r.code, false, false)));
-            $region.prop('disabled', regions.length === 0).trigger('change.select2');
-        }
-        function populateProvinces(regionCode){
-            const provObj = DATA?.[regionCode]?.province_list || {};
-            const provinces = Object.keys(provObj).sort((a,b)=> a.localeCompare(b));
-            $province.empty().append(new Option('', '', false, false));
-            provinces.forEach(p => $province.append(new Option(p, p, false, false)));
-            $province.prop('disabled', provinces.length === 0).trigger('change.select2');
-        }
-        function populateCities(regionCode, provinceName){
-            const muniObj = DATA?.[regionCode]?.province_list?.[provinceName]?.municipality_list || {};
-            const allCities = Object.keys(muniObj);
+            // Set of ALL allowed provinces (regardless of region) – used as fallback
+            const ALLOWED_PROV_SET = new Set(
+                (ALLOWED_PROVINCES || []).map(x => canonProv(x.province)).filter(Boolean)
+            );
 
-            const allowedSet = ALLOWED_BY_PROV.get(norm(provinceName)) || new Set();
+            // regionCode -> Set(allowed provinces) from Deliverablecities
+            const ALLOWED_BY_REGIONCODE = new Map();
+            (ALLOWED_PROVINCES || []).forEach(({ province, region }) => {
+                const rc = canonRegCode(region);           // '4A', 'NCR', etc. (may be null/empty)
+                const p  = canonProv(province);
+                if (!p || !rc) return;                     // skip rows with null region
+                if (!ALLOWED_BY_REGIONCODE.has(rc)) ALLOWED_BY_REGIONCODE.set(rc, new Set());
+                ALLOWED_BY_REGIONCODE.get(rc).add(p);
+            });
 
-            const cities = allCities
-                .filter(c => allowedSet.has(norm(c)))
-                .sort((a,b) => a.localeCompare(b));
+            (ALLOWED_CITY_PROVINCE || []).forEach(item => {
+                const p = norm(item.province);
+                const c = norm(item.city);
+                if (!p || !c) return;
+                if (!ALLOWED_BY_PROV.has(p)) ALLOWED_BY_PROV.set(p, new Set());
+                ALLOWED_BY_PROV.get(p).add(c);
+            });
 
-            $city.empty().append(new Option('', '', false, false));
-            cities.forEach(c => $city.append(new Option(c, c, false, false)));
+            const DEFAULT_REGION_NAME = 'NCR';
 
-            const hasAny = cities.length > 0;
-            $city.prop('disabled', !hasAny).trigger('change.select2');
+            const initial = {
+                region:        @json(old('region',        '')),
+                region_code:   @json(old('region_code',   '')), 
+                province:      @json(old('province',      '')),
+                city:          @json(old('city',          '')),
+                barangay:      @json(old('barangay',      '')),
+            };
 
-            const current = ($city.val() || '').toString();
-            if (!cities.includes(current)) {
-                $city.val(null).trigger('change.select2');
-                disableBelowCity();
+            const $region   = $('#region_select');
+            const $province = $('#province_select');
+            const $city     = $('#city_select');
+            const $barangay = $('#barangay_select');
+
+            // Init Select2 shells
+            initSelect2($region,   'Select Region');
+            initSelect2($province, 'Select Province');
+            initSelect2($city,     'Select City/Municipality');
+            initSelect2($barangay, 'Select Barangay');
+
+            let DATA = null;
+
+            loadJSONWithFallbacks(urls).then(json => {
+                DATA = json || {};
+                populateRegions();
+
+                // --- Resolve which region to use ---
+                let useRegionCode = null;
+
+                // 1) If old region_code exists AND is in DATA, use it
+                if (initial.region_code && DATA[initial.region_code]) {
+                    useRegionCode = initial.region_code;
+                }
+                // 2) Else if old region (name) exists, map to region_code
+                else if (initial.region) {
+                    useRegionCode = findRegionCodeByName(initial.region) || null;
+                }
+                // 3) Else if old city exists, derive region+province from city
+                else if (initial.city) {
+                    const found = findByCity(initial.city);
+                    if (found) {
+                        useRegionCode   = found.regionCode;
+                        initial.province = found.provinceName; // ensure province aligns with city
+                    }
+                }
+                // 4) Else if old province exists, derive region from province
+                else if (initial.province) {
+                    useRegionCode = findRegionByProvince(initial.province) || null;
+                }
+                // 5) Else default to NCR
+                if (!useRegionCode) {
+                    useRegionCode = findRegionCodeByName(DEFAULT_REGION_NAME) || Object.keys(DATA)[0] || '';
+                }
+
+                // Preselect region
+                if (useRegionCode) {
+                    $region.val(useRegionCode).trigger('change.select2');
+                    onRegionChange(false); // populate provinces without clearing
+                }
+
+                // Preselect province (if available)
+                if (initial.province) {
+                    setSelectByText($province, initial.province);
+                    onProvinceChange(false); // populate cities without clearing
+                }
+
+                // Preselect city (if available)
+                if (initial.city) {
+                    setSelectByText($city, initial.city);
+                    onCityChange(false); // populate barangays without clearing
+                }
+
+                // Preselect barangay (if available)
+                if (initial.barangay) {
+                    setSelectByText($barangay, initial.barangay);
+                }
+
+            }).catch(err => {
+                console.error('Failed to load LGU JSON:', err);
+                alert('Location list failed to load. Ensure /public/addresses/2019v2.json is present.');
+            });
+
+            // Events
+            $region.on('change', () => onRegionChange(true));
+            $province.on('change', () => onProvinceChange(true));
+            $city.on('change', () => onCityChange(true));
+
+            // ---------- Select2 helpers ----------
+            function initSelect2($el, placeholder){
+                $el.select2({ placeholder, allowClear: true, width: '100%' });
             }
-        }
+            async function loadJSONWithFallbacks(list){
+                let lastErr;
+                for (const u of list){
+                    try { return await $.getJSON(u, { cache: true }); }
+                    catch (e){ lastErr = e; console.warn('JSON load failed for', u, e); }
+                }
+                throw lastErr || new Error('All sources failed');
+            }
 
-        function populateBarangays(regionCode, provinceName, cityName){
-            const brgys = (DATA?.[regionCode]?.province_list?.[provinceName]?.municipality_list?.[cityName]?.barangay_list || [])
-            .slice().sort((a,b)=> a.localeCompare(b));
-            $barangay.empty().append(new Option('', '', false, false));
-            brgys.forEach(b => $barangay.append(new Option(b, b, false, false)));
-            $barangay.prop('disabled', brgys.length === 0).trigger('change.select2');
-        }
+            // ---------- Populate ----------
+            function populateRegions(){
+                const regions = Object.keys(DATA).map(code => ({
+                    code,
+                    name: String(DATA[code]?.region_name || '')
+                })).sort((a, b) => {
+                    const A = a.name.trim().toLowerCase();
+                    const B = b.name.trim().toLowerCase();
+                    const isOtherA = (A === 'other');
+                    const isOtherB = (B === 'other');
 
-        function hideIfRegionIsOthers() {
-            $('.non-others-region').hide();
-            setTimeout(() => {
-                $('#set_delivery_charge').prop('readonly', false);
-                $('#other_outlet_div_').show();
-            }, 500);
-        
-        }
+                    if (isOtherA && !isOtherB) return 1;   // A goes after B
+                    if (!isOtherA && isOtherB) return -1;  // A goes before B
+                    return A.localeCompare(B);
+                });
 
-        // ---------- Cascades ----------
-        function onRegionChange(clearDownstream){
-            const regionCode = $region.val() || null;
-            if (!regionCode){ return disableBelowRegion(); }
-            populateProvinces(regionCode);
-            if (clearDownstream){
-                $province.val(null).trigger('change.select2');
-                disableBelowProvince();
+                $region.empty().append(new Option('', '', false, false));
+                regions.forEach(r => $region.append(new Option(r.name, r.code, false, false)));
+                $region.prop('disabled', regions.length === 0).trigger('change.select2');
+            }
 
-                if (regionCode.toLowerCase() === 'other'){
-                    hideIfRegionIsOthers();
-                } else {
-                    $('.non-others-region').show();
-                    $('#other_outlet_div_').hide();
-                    $('#set_delivery_charge').prop('readonly', true);
+            function populateProvinces(regionCode){
+                const provObj  = DATA?.[regionCode]?.province_list || {};
+                const allProvs = Object.keys(provObj);
+
+                const rc         = canonRegCode(regionCode);
+                const regionSet  = ALLOWED_BY_REGIONCODE.get(rc) || new Set();
+
+                const provinces = allProvs
+                    .filter(p => regionSet.size ? regionSet.has(canonProv(p)) : ALLOWED_PROV_SET.has(canonProv(p)))
+                    .sort((a,b)=> a.localeCompare(b));
+
+                $province.empty().append(new Option('', '', false, false));
+                provinces.forEach(p => $province.append(new Option(p, p, false, false)));
+                $province.prop('disabled', provinces.length === 0).trigger('change.select2');
+
+                const current = ($province.val() || '').toString();
+                if (!provinces.includes(current)) {
+                    $province.val(null).trigger('change.select2');
+                    disableBelowProvince();
                 }
             }
-        }
-        function onProvinceChange(clearDownstream){
-            const regionCode = $region.val();
-            const provinceName = $province.val();
-            if (!regionCode || !provinceName){ return disableBelowProvince(); }
-            populateCities(regionCode, provinceName);
-            if (clearDownstream){
-                $city.val(null).trigger('change.select2');
-                disableBelowCity();
-            }
-        }
-        function onCityChange(clearDownstream){
-            const regionCode = $region.val();
-            const provinceName = $province.val();
-            const cityName = $city.val();
-            if (!regionCode || !provinceName || !cityName){ return disableBelowCity(); }
-            populateBarangays(regionCode, provinceName, cityName);
-            if (clearDownstream){
-                $barangay.val(null).trigger('change.select2');
-            }
-        }
 
-        // ---------- Resets ----------
-        function disableBelowRegion(){
-            $province.empty().append(new Option('', '', false, false)).prop('disabled', true).trigger('change.select2');
-            disableBelowProvince();
-        }
-        function disableBelowProvince(){
-            $city.empty().append(new Option('', '', false, false)).prop('disabled', true).trigger('change.select2');
-            disableBelowCity();
-        }
-        function disableBelowCity(){
-            $barangay.empty().append(new Option('', '', false, false)).prop('disabled', true).trigger('change.select2');
-        }
+            function populateCities(regionCode, provinceName){
+                const muniObj   = DATA?.[regionCode]?.province_list?.[provinceName]?.municipality_list || {};
+                const allCities = Object.keys(muniObj);
 
-        // ---------- Finders / setters ----------
-        function findRegionCodeByName(regionName){
-            const target = (regionName||'').toString().trim().toLowerCase();
-            for (const code of Object.keys(DATA)){
-                const name = (DATA[code]?.region_name || '').toString().trim().toLowerCase();
-                if (name === target) return code;
-            }
-            return null;
-        }
-        function findRegionByProvince(provinceName){
-            const p = (provinceName||'').toString().trim().toLowerCase();
-            for (const code of Object.keys(DATA)){
-                const provObj = DATA[code]?.province_list || {};
-                for (const prov of Object.keys(provObj)){
-                    if (prov.toLowerCase() === p) return code;
+                const pKey      = canonProv(provinceName);
+                const allowedSet= ALLOWED_BY_PROV.get(pKey) || new Set();
+
+                const cities = allCities
+                    .filter(c => allowedSet.has(canonBasic(c)))
+                    .sort((a,b) => a.localeCompare(b));
+
+                $city.empty().append(new Option('', '', false, false));
+                cities.forEach(c => $city.append(new Option(c, c, false, false)));
+
+                const hasAny = cities.length > 0;
+                $city.prop('disabled', !hasAny).trigger('change.select2');
+
+                const current = ($city.val() || '').toString();
+                if (!cities.includes(current)) {
+                    $city.val(null).trigger('change.select2');
+                    disableBelowCity();
                 }
             }
-            return null;
-        }
-        function findByCity(cityName){
-            const c = (cityName||'').toString().trim().toLowerCase();
-            for (const code of Object.keys(DATA)){
-                const provObj = DATA[code]?.province_list || {};
-                for (const prov of Object.keys(provObj)){
-                    const muniObj = provObj[prov]?.municipality_list || {};
-                    for (const muni of Object.keys(muniObj)){
-                        if (muni.toLowerCase() === c) return { regionCode: code, provinceName: prov };
+
+            function populateBarangays(regionCode, provinceName, cityName){
+                const brgys = (DATA?.[regionCode]?.province_list?.[provinceName]?.municipality_list?.[cityName]?.barangay_list || [])
+                .slice().sort((a,b)=> a.localeCompare(b));
+                $barangay.empty().append(new Option('', '', false, false));
+                brgys.forEach(b => $barangay.append(new Option(b, b, false, false)));
+                $barangay.prop('disabled', brgys.length === 0).trigger('change.select2');
+            }
+
+            function hideIfRegionIsOthers() {
+                $('.non-others-region').hide();
+                setTimeout(() => {
+                    $('#set_delivery_charge').prop('readonly', false);
+                    $('#other_outlet_div_').show();
+                }, 500);
+            
+            }
+
+            // ---------- Cascades ----------
+            function onRegionChange(clearDownstream){
+                const regionCode = $region.val() || null;
+                if (!regionCode){ return disableBelowRegion(); }
+                populateProvinces(regionCode);
+                if (clearDownstream){
+                    $province.val(null).trigger('change.select2');
+                    disableBelowProvince();
+
+                    if (regionCode.toLowerCase() === 'other'){
+                        hideIfRegionIsOthers();
+                    } else {
+                        $('.non-others-region').show();
+                        $('#other_outlet_div_').hide();
+                        $('#set_delivery_charge').prop('readonly', true);
                     }
                 }
             }
-            return null;
-        }
-        function setSelectByText($el, text){
-            const target = (text||'').toString().trim().toLowerCase();
-            let found = null;
-            $el.find('option').each(function(){
-                if ($(this).text().trim().toLowerCase() === target) { found = $(this).val(); return false; }
-            });
-            if (found !== null) { $el.val(found).trigger('change.select2'); }
-        }
+            function onProvinceChange(clearDownstream){
+                const regionCode = $region.val();
+                const provinceName = $province.val();
+                if (!regionCode || !provinceName){ return disableBelowProvince(); }
+                populateCities(regionCode, provinceName);
+                if (clearDownstream){
+                    $city.val(null).trigger('change.select2');
+                    disableBelowCity();
+                }
+            }
+            function onCityChange(clearDownstream){
+                const regionCode = $region.val();
+                const provinceName = $province.val();
+                const cityName = $city.val();
+                if (!regionCode || !provinceName || !cityName){ return disableBelowCity(); }
+                populateBarangays(regionCode, provinceName, cityName);
+                if (clearDownstream){
+                    $barangay.val(null).trigger('change.select2');
+                }
+            }
+
+            // ---------- Resets ----------
+            function disableBelowRegion(){
+                $province.empty().append(new Option('', '', false, false)).prop('disabled', true).trigger('change.select2');
+                disableBelowProvince();
+            }
+            function disableBelowProvince(){
+                $city.empty().append(new Option('', '', false, false)).prop('disabled', true).trigger('change.select2');
+                disableBelowCity();
+            }
+            function disableBelowCity(){
+                $barangay.empty().append(new Option('', '', false, false)).prop('disabled', true).trigger('change.select2');
+            }
+
+            // ---------- Finders / setters ----------
+            function findRegionCodeByName(regionName){
+                const target = (regionName||'').toString().trim().toLowerCase();
+                for (const code of Object.keys(DATA)){
+                    const name = (DATA[code]?.region_name || '').toString().trim().toLowerCase();
+                    if (name === target) return code;
+                }
+                return null;
+            }
+            function findRegionByProvince(provinceName){
+                const p = (provinceName||'').toString().trim().toLowerCase();
+                for (const code of Object.keys(DATA)){
+                    const provObj = DATA[code]?.province_list || {};
+                    for (const prov of Object.keys(provObj)){
+                        if (prov.toLowerCase() === p) return code;
+                    }
+                }
+                return null;
+            }
+            function findByCity(cityName){
+                const c = (cityName||'').toString().trim().toLowerCase();
+                for (const code of Object.keys(DATA)){
+                    const provObj = DATA[code]?.province_list || {};
+                    for (const prov of Object.keys(provObj)){
+                        const muniObj = provObj[prov]?.municipality_list || {};
+                        for (const muni of Object.keys(muniObj)){
+                            if (muni.toLowerCase() === c) return { regionCode: code, provinceName: prov };
+                        }
+                    }
+                }
+                return null;
+            }
+            function setSelectByText($el, text){
+                const target = (text||'').toString().trim().toLowerCase();
+                let found = null;
+                $el.find('option').each(function(){
+                    if ($(this).text().trim().toLowerCase() === target) { found = $(this).val(); return false; }
+                });
+                if (found !== null) { $el.val(found).trigger('change.select2'); }
+            }
         });
     </script>
 
