@@ -201,12 +201,14 @@ class JoborderController extends Controller
 
 
             $provinces = Deliverablecities::query()
-                ->select('province')
+                ->select('province', 'region')
                 ->where('is_active', 1)
                 ->whereNotNull('province')->where('province', '!=', '')
                 ->distinct()
                 ->orderBy('province')
-                ->pluck('province');
+                ->get();
+
+                // dd($provinces->toArray());
 
             $cities = Deliverablecities::query()
                 ->select('city', 'province')
