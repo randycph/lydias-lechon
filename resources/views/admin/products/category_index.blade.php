@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 
 @section('pagetitle')
-Manage Customer
+Manage Product Categories
 @endsection
 
 @section('pagecss')
