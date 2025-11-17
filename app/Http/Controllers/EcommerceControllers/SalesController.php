@@ -769,6 +769,7 @@ class SalesController extends Controller
     public function restore($sales)
     {
         SalesHeader::withTrashed()->findOrFail($sales)->restore();
+        SalesHeader::withTrashed()->findOrFail($sales)->update(['for_deletion' => 0]);
 
         return back()->with('success', 'The transaction has been restored');
     }
