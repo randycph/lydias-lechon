@@ -208,9 +208,10 @@
                     <div class="form-group">
                         <label class="d-block">Order Type</label>
                         <select class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select order type" data-width="100%" name="order_type">
-                            <option value="Whole">Whole</option>
-                            <option value="Reserved">Reserved</option>
+                            <option value="Buhat">Buhat</option>
                             <option value="Additional">Additional</option>
+                            <option value="Reserve">Reserve</option>
+                            <option value="Miscellaneous">Miscellaneous</option>
                         </select>
                     </div>
 
