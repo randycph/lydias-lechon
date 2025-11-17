@@ -150,10 +150,10 @@
 	                                        @else
 	                                            <nav class="nav table-options">
                                                     @if (auth()->user()->has_access_to_route('popup-message.edit'))
-	                                                <a class="nav-link" href="{{ route('popup-message.edit',$coupon->id) }}" title="Edit Coupon"><i data-feather="edit"></i></a>
+	                                                <a class="nav-link" href="{{ route('popup-message.edit',$coupon->id) }}" title="Edit Popup Message"><i data-feather="edit"></i></a>
                                                     @endif
                                                     @if (auth()->user()->has_access_to_route('popup-message.destroy'))
-	                                                <a class="nav-link" href="javascript:void(0)" onclick="delete_one_coupon('{{$coupon->id}}')" title="Delete Popup"><i data-feather="trash"></i></a>
+	                                                <a class="nav-link" href="javascript:void(0)" onclick="delete_one_coupon('{{$coupon->id}}')" title="Delete Popup Message"><i data-feather="trash"></i></a>
                                                     @endif
 	                                            </nav>
 	                                        @endif
