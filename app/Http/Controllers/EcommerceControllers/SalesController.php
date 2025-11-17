@@ -217,9 +217,9 @@ class SalesController extends Controller
     public function update_dateneeded(Request $request){
         $sales = SalesHeader::whereId($request->update_dateneeded_id)->first();
     
-        if(isset($request->delivery_branch)){
-            SalesHeader::whereId($request->update_dateneeded_id)->update(['delivery_branch' => $request->delivery_branch]);
-        }
+        // if(isset($request->delivery_branch)){
+        //     SalesHeader::whereId($request->update_dateneeded_id)->update(['delivery_branch' => $request->delivery_branch]);
+        // }
         
         $update = SalesHeader::whereId($request->update_dateneeded_id)->update([
             'delivery_status' => ''
@@ -316,7 +316,8 @@ class SalesController extends Controller
                     'delivery_fee_amount' => $delivery_amount,
                     'gross_amount' => $amt,
                     'net_amount' => $amt,
-                    'customer_address' => $request->new_delivery_address
+                    'customer_address' => $request->new_delivery_address,
+                    'delivery_branch' => $request->delivery_branch
                 ]);
 
             }else{
@@ -328,7 +329,8 @@ class SalesController extends Controller
                     'delivery_fee_amount' => $delivery_amount,
                     'gross_amount' => $amt,
                     'net_amount' => $amt,
-                    'customer_address' => $request->new_delivery_address
+                    'customer_address' => $request->new_delivery_address,
+                    'delivery_branch' => $request->delivery_branch
                 ]);
 
             }
@@ -346,7 +348,8 @@ class SalesController extends Controller
                 'delivery_type' => 'Store Pickup',
                 'customer_address' => $request->update_dateneeded_sp,
                 'customer_delivery_adress' => $request->update_dateneeded_sp,
-                'customer_location' => ''
+                'customer_location' => '',
+                'delivery_branch' => null
             ]);
         }
 
@@ -912,7 +915,6 @@ class SalesController extends Controller
             ->pluck('city');
 
             // dd($salesheader);
-            // dateneeded_date
 
         return view('admin.sales.update_sales_detail',compact('salesheader','dateneeded','date_only','time_only','locationed','products','branches_store', 'locations', 'provinces', 'cities'));
 

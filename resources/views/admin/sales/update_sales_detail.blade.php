@@ -109,8 +109,9 @@
                                                     style="display:none;" @endif>
                                                     Delivery Fee:
                                                     <input class="form-control" type="number" step="0.01" min="0.00"
-                                                        value="{{number_format($salesheader->delivery_fee_amount,2)}}"
+                                                        value="{{ old('delivery_fee_amount', number_format((float) $salesheader->delivery_fee_amount, 2, '.', '')) }}"
                                                         name="delivery_fee_amount" id="delivery_fee_amount">
+
                                                 </div>
                                         </div>
 
