@@ -162,9 +162,9 @@ class PopupMessageController extends Controller
         return back()->with('success', __('standard.coupons.single_delete_success'));
     }
 
-    public function restore($message){
-        PopupMessage::withTrashed()->find($message)->update(['is_active' => 0, 'user_id' => Auth::id() ]);
-        PopupMessage::whereId($message)->restore();
+    public function restore($id){
+        PopupMessage::withTrashed()->find($id)->update(['is_active' => 0, 'user_id' => Auth::id() ]);
+        PopupMessage::whereId($id)->restore();
 
         return back()->with('success', __('standard.coupons.restore_promo_success'));
     }
