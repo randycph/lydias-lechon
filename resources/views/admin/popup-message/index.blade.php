@@ -145,7 +145,7 @@
 	                                    <td>
 	                                        @if($coupon->trashed())
 	                                            <nav class="nav table-options">
-	                                                <a class="nav-link" href="{{route('coupon.restore',$coupon->id)}}" title="Restore this coupon"><i data-feather="rotate-ccw"></i></a>
+	                                                <a class="nav-link" href="{{route('popup-message.restore',$coupon->id)}}" title="Restore this message"><i data-feather="rotate-ccw"></i></a>
 	                                            </nav>
 	                                        @else
 	                                            <nav class="nav table-options">
