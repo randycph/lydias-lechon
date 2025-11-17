@@ -72,7 +72,12 @@ class ProductFrontController extends Controller
     }
 
     public function list(Request $request) {
-        return $this->show_forsale();
+        $productCategory = ProductCategory::where('id', $request->criteria)->first();
+
+        $slug = $productCategory->slug;
+
+        return redirect('/menu/?s='.$slug);
+
         //logger($_GET['sort']);
         $pageLimit = 10;
 
