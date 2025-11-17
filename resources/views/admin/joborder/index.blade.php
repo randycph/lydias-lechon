@@ -222,7 +222,7 @@
                             </thead>
                             <tbody>
                                 @forelse($joborders as $jo)
-                                <tr id="row{{$jo->id}}">
+                                <tr id="row{{$jo->id}}" style="@if($jo->trashed()) background-color:#FFA07A; @endif">
                                     <td>
                                         <strong>{{ $jo->jo_number }}</strong>
                                     </td>
