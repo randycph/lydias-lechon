@@ -663,7 +663,7 @@ class SalesController extends Controller
                 $model = SalesHeader::where('id','>',0)
                     ->with('items', function($q) use($today) {
                         $q->where('delivery_date', '>=', $today->startOfDay()->toDateTimeString())
-                          ->orderBy('delivery_date', 'asc');
+                          ->orderBy('delivery_date', 'desc');
                     })
                     ->where('has_sub', 0)
                     ->when($showDeleted === true,
