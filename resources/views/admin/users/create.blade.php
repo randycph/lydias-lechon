@@ -128,7 +128,7 @@ User Management
                     id="branches_div">
                     <label class="d-block">Branches *</label>
                     <select name="branches[]" id="branches"
-                        class="form-control select2 {{ $branchesHasError ? 'is-invalid' : '' }}" multiple {{
+                        class="form-control select2 select-branch {{ $branchesHasError ? 'is-invalid' : '' }}" multiple {{
                         $showBranches || $branchesHasError ? '' : 'disabled' }} data-placeholder="Choose one">
                         <option value=""></option>
                         @foreach($branches as $branch)
@@ -150,13 +150,12 @@ User Management
                 <div class="form-group {{ $showProd || $prodHasError ? 'd-block' : 'd-none' }}"
                     id="production_branches_div">
                     <label class="d-block">Production Branch *</label>
-                    <select name="production_branch_id" id="production_branch_id"
-                        class="form-control select2 {{ $prodHasError ? 'is-invalid' : '' }}" {{ $showProd ||
+                    <select name="production_branch_id[]" multiple="multiple" id="production_branch_id"
+                        class="form-control select2 select-production-branch {{ $prodHasError ? 'is-invalid' : '' }}" {{ $showProd ||
                         $prodHasError ? '' : 'disabled' }} data-placeholder="Choose one">
                         <option value=""></option>
                         @foreach($production_branches as $branch)
-                        <option value="{{ $branch->id }}" {{ (string)old('production_branch_id')===(string)$branch->id ?
-                            'selected' : '' }}>
+                        <option value="{{ $branch->id }}" {{ in_array($branch->id, (array)old('production_branch_id', [])) ? 'selected' : '' }}>
                             {{ ucwords($branch->name) }}
                         </option>
                         @endforeach
@@ -179,7 +178,7 @@ User Management
                     <label>Allowed to Approve (Payment Types)</label>
                     <select name="payment_types[]" multiple
                             id="payment_types"
-                            class="form-control select2 {{ $paymentHasError ? 'is-invalid' : '' }}"
+                            class="form-control select2 select-payment-types {{ $paymentHasError ? 'is-invalid' : '' }}"
                             style="width:100%"
                             {{ $showPayment || $paymentHasError ? '' : 'disabled' }}
                             data-placeholder="Choose payment types">
@@ -220,14 +219,19 @@ User Management
     $(function(){
             'use strict'
 
-            $('.select2').select2({
-                placeholder: 'Choose one',
-                searchInputPlaceholder: 'Search options'
+            $('.select-branch').select2({
+                placeholder: 'Choose Branches',
+                searchInputPlaceholder: 'Search options',
             });
 
-            $('.select2-no-search').select2({
+            $('.select-payment-types').select2({
+                placeholder: 'Choose Payment Types',
+                searchInputPlaceholder: 'Search options',
+            });
+
+            $('.select-production-branch').select2({
                 minimumResultsForSearch: Infinity,
-                placeholder: 'Choose one'
+                placeholder: 'Choose Production Branches'
             });
         });
 
