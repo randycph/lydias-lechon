@@ -80,7 +80,6 @@ class UserController extends Controller
             'lname' => ['required','string','regex:/^[\p{L}\s\-]+$/u'],
             'email' => 'required|email|max:191|unique:users,email',
             'role' => 'required|exists:role,id',
-            'production_branch_id' => 'nullable|exists:production_branches,id',
         ]);
 
         $data = $request->all();
@@ -89,13 +88,10 @@ class UserController extends Controller
 
         if ($role->has_production_branch == 1) {
             $request->validate([
-                'production_branch_id' => ['required','integer','exists:production_branches,id'],
+                'production_branch_id'   => 'required|array|min:1',
+                'production_branch_id.*' => 'required|exists:production_branches,id',
             ]);
-        } else {
-            $request->validate([
-                'production_branch_id' => ['nullable','integer','exists:production_branches,id'],
-            ]);
-        }
+        } 
 
         if ($role->has_branches == 1) {
             $request->validate([
@@ -107,6 +103,11 @@ class UserController extends Controller
         $paytypes='';
         if(isset($request->payment_types) && $role->can_approve_payment == 1){
             $paytypes= implode(",",$request->payment_types);
+        }
+
+        $productionBranches = [];
+        if(isset($request->production_branch_id)){
+            $productionBranches = implode(",",$request->production_branch_id);
         }
 
         $user = User::create([
@@ -125,7 +126,7 @@ class UserController extends Controller
             'address_municipality' => ' ',
             'address_city' => ' ',
             'address_region' => ' ',
-            'production_branch_id' => $request->production_branch_id ?? null,
+            'production_branch_id' => $productionBranches,
         ]);
 
         if($user){
@@ -168,14 +169,14 @@ class UserController extends Controller
             'lname' => ['required','string','regex:/^[\p{L}\s\-]+$/u'],
             'email' => 'required|email|max:191|unique:users,email,'.$user->id,
             'role' => 'required|exists:role,id',
-            'production_branch_id' => 'nullable|exists:production_branches,id',
         ]);
 
         $role = Role::where('id',$request->role)->first();
 
         if ($role->has_production_branch == 1) {
             $request->validate([
-                'production_branch_id' => 'required|exists:production_branches,id',
+                'production_branch_id'   => 'required|array|min:1',
+                'production_branch_id.*' => 'required|exists:production_branches,id',
             ]);
         }
 
@@ -191,6 +192,11 @@ class UserController extends Controller
             $paytypes= implode(",",$request->payment_types);
         }
 
+        $productionBranches = [];
+        if(isset($request->production_branch_id)){
+            $productionBranches = implode(",",$request->production_branch_id);
+        }
+
         $user->update([
             'firstname'=> $request->fname,
             'lastname' => $request->lname,
@@ -200,7 +206,7 @@ class UserController extends Controller
             'allowed_payments'  => $paytypes,
             'user_id'  => Auth::id(),
             'user_type'      => 'cms',
-            'production_branch_id' => $request->production_branch_id ?? null,
+            'production_branch_id' => $productionBranches,
         ]);
         UserBranch::where('user_id',$user->id)->delete();
         if($user){

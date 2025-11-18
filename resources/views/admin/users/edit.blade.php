@@ -110,14 +110,15 @@
                     id="production_branches_div">
                     <label class="d-block">Production Branch *</label>
 
-                    <select name="production_branch_id"
-                            class="form-control select2-no-search @error('production_branch_id') is-invalid @enderror"
+                    <select name="production_branch_id[]" multiple="multiple"
+                            class="form-control select-production-branch select2-no-search @error('production_branch_id') is-invalid @enderror"
                             {{ $user->assign_role->has_production_branch == 1 ? 'required' : '' }}
                             data-placeholder="Choose one">
-                        <option value="">Choose one</option>
+                        <option value="">Choose Production Branch</option>
                         @foreach($production_branches as $branch)
+                            @php $productionBranches = explode(',', $user->production_branch_id); @endphp
                             <option value="{{ $branch->id }}"
-                                {{ (string)old('production_branch_id', (string)$user->production_branch_id) === (string)$branch->id ? 'selected' : '' }}>
+                                {{ in_array($branch->id, $productionBranches) ? 'selected' : '' }}>
                                 {{ $branch->name }}
                             </option>
                         @endforeach
@@ -142,8 +143,8 @@
                     @endphp
 
                     <select name="branches[]" id="branches"
-                            class="form-control select2 {{ $hasBranchesError ? 'is-invalid' : '' }}" multiple>
-                        <option label="Choose one"></option>
+                            class="form-control select2 select-branch {{ $hasBranchesError ? 'is-invalid' : '' }}" multiple>
+                        <option label="Choose Branch"></option>
                         @foreach($branches as $branch)
                             <option value="{{ $branch->id }}" @if(in_array($branch->id, $arr)) selected @endif>
                                 {{ ucwords($branch->name) }}
@@ -161,7 +162,7 @@
 
                 <div class="form-group @if($user->assign_role->can_approve_payment == 1) d-block @else d-none @endif" id="payment_div">
                     <label>Allowed to Approve (Payment Types)</label>
-                    <select name="payment_types[]" multiple="multiple" id="payment_types" class="form-control js-example-basic-multiple js-states select2" style="width:100%">
+                    <select name="payment_types[]" multiple="multiple" id="payment_types" class="form-control js-example-basic-multiple js-states select2 select-payment-types" style="width:100%">
                         @php
                             $alls = explode(",",$user->allowed_payments);
                         @endphp
@@ -194,14 +195,19 @@
     <script>
         $(function(){
 
-            $('.select2').select2({
-                placeholder: 'Choose one',
+            $('.select-branch').select2({
+                placeholder: 'Choose Branches',
                 searchInputPlaceholder: 'Search options',
             });
 
-            $('.select2-no-search').select2({
+            $('.select-payment-types').select2({
+                placeholder: 'Choose Payment Types',
+                searchInputPlaceholder: 'Search options',
+            });
+
+            $('.select-production-branch').select2({
                 minimumResultsForSearch: Infinity,
-                placeholder: 'Choose one'
+                placeholder: 'Choose Production Branches'
             });
         });
 

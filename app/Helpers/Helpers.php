@@ -4,6 +4,8 @@ use App\EcommerceModel\DeliveryStatus;
 use App\EcommerceModel\JobOrder;
 use App\EcommerceModel\SalesDetail;
 use App\EcommerceModel\SalesHeader;
+use App\Models\Role;
+use App\Models\UserBranch;
 use Illuminate\Support\Facades\DB;
 
 if(!function_exists('isImageBroken')) {
@@ -70,11 +72,22 @@ if (!function_exists('unreadTransactions')) {
     {
         $from = now()->subDays($days)->startOfDay();
 
-        if (auth()->user()->role_id == 5) {
+        $roleId        = auth()->user()->role_id;
+        $role          = Role::find($roleId);
+        $hasProdBranch = (int) $role->has_production_branch === 1;
+        $hasBranches   = (int) $role->has_branches === 1;
 
-            $branchId = auth()->user()->role_id == 5 ? auth()->user()->production_branch_id : null;
+        $branches   = UserBranch::accessBranch();
+        $locations  = [];
+        foreach ($branches as $branch) {
+            $locations[] = $branch?->branch?->name ?? $branch?->name ?? null;
+        }
 
-            if ($branchId == null) {
+        if ($hasProdBranch && auth()->user()->role_id == 5) {
+
+            $branchIds = explode(',', auth()->user()->production_branch_id) ?? null;
+
+            if ($branchIds == null) {
                 return 0;
             }
             
@@ -83,8 +96,8 @@ if (!function_exists('unreadTransactions')) {
             $eligible = DB::table('ecommerce_sales_details as d')
                 ->join('job_orders as jo', 'jo.sales_detail_id', '=', 'd.id')
                 ->join('production_orders as po', 'po.joborder_id', '=', 'jo.id')
-                ->when($branchId, function ($query) use ($branchId) {
-                    return $query->where('po.branch_id', $branchId);
+                ->when($branchIds, function ($query) use ($branchIds) {
+                    return $query->whereIn('po.branch_id', $branchIds);
                 })
                 ->where('d.delivery_date', '>=', $today->startOfDay()->toDateTimeString())
                 ->select('d.sales_header_id');
@@ -94,19 +107,25 @@ if (!function_exists('unreadTransactions')) {
             // });
 
             $sales = SalesHeader::where(function ($query) use($eligible) {
-                $query->whereIn('id', $eligible)->where('has_sub', 0)->where('is_new_order', 1);
+                $query->whereIn('id', $eligible)->where('has_sub', 0)->where('is_new_order', 1)->where('for_deletion', 0);
             });
 
             return $sales->count();
 
         } elseif (auth()->user()->role_id == 15) {
             $userName = auth()->user()->id;
+
             // Step 1: SalesHeader
             $salesHeaders = SalesHeader::with(['user', 'items', 'deliveryAddress', 'deliveryStatuses'])
                 ->where('has_transited', 1)
+                ->where('for_deletion', 0)
                 ->whereHas('deliveryStatuses', function ($q) use ($userName) {
                     $q->where('delivered_by', $userName)
                     ->whereIn('delivery_status', ['In Transit', 'Returned/Rejected', 'Delivered/Picked Up']);
+                })
+                ->when($locations, function ($query) use ($locations) {
+                        $query->whereIn('outlet', $locations)
+                        ->orWhereIn('order_source', $locations);
                 })
                 ->get()
                 ->map(function ($sale) {
@@ -178,9 +197,19 @@ if (!function_exists('unreadTransactions')) {
                 return false;
             })->count();
         } else {
-            return SalesHeader::query()
-                ->where('is_new_order', 1)
-                ->count();
+
+            $today = now();
+
+            return SalesHeader::where('id','>',0)
+                    ->with('items', function($q) use($today) {
+                        $q->where('delivery_date', '>=', $today->startOfDay()->toDateTimeString())
+                          ->orderBy('delivery_date', 'asc');
+                    })
+                    ->where('has_sub', 0)
+                    ->where('status', 'active')
+                    ->where('for_deletion', 0)
+                    ->where('is_new_order', 1)
+                    ->count();
         }
     }
 }
@@ -189,8 +218,19 @@ if (!function_exists('isUnreadTransaction')) {
     function isUnreadTransaction($transactionId, int $days = 1): int
     {
         if (auth()->user()->role_id == 15) {
+
+            $branches   = UserBranch::accessBranch();
+            $locations  = [];
+            foreach ($branches as $branch) {
+                $locations[] = $branch?->branch?->name ?? $branch?->name ?? null;
+            }
+
             $sales = SalesHeader::with(['deliveryStatuses'])
                 ->whereKey($transactionId)
+                ->when($locations, function ($query) use ($locations) {
+                    $query->whereIn('outlet', $locations)
+                    ->orWhereIn('order_source', $locations);
+                })
                 ->where('has_transited', 1)
                 ->first();
 
@@ -222,11 +262,23 @@ if (!function_exists('isUnreadTransaction')) {
 if (!function_exists('unreadForecastersTransactions')) {
     function unreadForecastersTransactions(int $days = 1): int
     {
+        $branches   = UserBranch::accessBranch();
+
+        $locations  = [];
+        if ($branches) {
+            foreach ($branches as $branch) {
+                $locations[] = $branch?->branch?->name ?? $branch?->name ?? null;
+            }
+        }
         $salesDetails = SalesDetail::whereIN('sales_header_id', function($query){ $query->select('id')->from('ecommerce_sales_headers')->where('status','active')->where('has_sub', 0)->where('isConfirm','1')->whereNull('deleted_at'); } )          
             ->where('Joborder_id',0)
             ->where('delivery_date','>=',date('Y-m-d', strtotime(' - 2 days')))
-            ->whereHas('header', function ($q) {
+            ->whereHas('header', function ($q) use ($locations) {
                 $q->where('is_new_order', 1);
+                $q->when($locations, function ($query) use ($locations) {
+                    $query->whereIn('outlet', $locations)
+                    ->orWhereIn('order_source', $locations);
+                });
             })
             ->get();
 
