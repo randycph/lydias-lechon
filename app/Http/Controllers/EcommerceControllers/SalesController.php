@@ -1755,7 +1755,7 @@ class SalesController extends Controller
                 $eligible = DB::table('ecommerce_sales_details as d')
                     ->join('job_orders as jo', 'jo.sales_detail_id', '=', 'd.id')
                     ->join('production_orders as po', 'po.joborder_id', '=', 'jo.id')
-                    ->when($productionBranches, function ($query) use ($productionBranches) {
+                    ->when(count($productionBranches) > 0, function ($query) use ($productionBranches) {
                         return $query->whereIn('po.branch_id', $productionBranches);
                     })
                     ->where('d.delivery_date', '>=', $today->startOfDay()->toDateTimeString())
