@@ -107,7 +107,7 @@ if (!function_exists('unreadTransactions')) {
             // });
 
             $sales = SalesHeader::where(function ($query) use($eligible) {
-                $query->whereIn('id', $eligible)->where('has_sub', 0)->where('is_new_order', 1);
+                $query->whereIn('id', $eligible)->where('has_sub', 0)->where('is_new_order', 1)->where('for_deletion', 0);
             });
 
             return $sales->count();
@@ -118,6 +118,7 @@ if (!function_exists('unreadTransactions')) {
             // Step 1: SalesHeader
             $salesHeaders = SalesHeader::with(['user', 'items', 'deliveryAddress', 'deliveryStatuses'])
                 ->where('has_transited', 1)
+                ->where('for_deletion', 0)
                 ->whereHas('deliveryStatuses', function ($q) use ($userName) {
                     $q->where('delivered_by', $userName)
                     ->whereIn('delivery_status', ['In Transit', 'Returned/Rejected', 'Delivered/Picked Up']);
