@@ -234,6 +234,14 @@ class SalesController extends Controller
             ]);
         }
 
+        if ($request->shipping_type == 'storepickup') {
+            $request->validate([
+                'update_dateneeded_sp' => 'required',
+            ], [
+                'update_dateneeded_sp.required' => 'Location is required.',
+            ]);
+        }
+
         // Insert new addresses
         if ($request->filled('address')) {
             ProductDeliveryAddress::where('sales_header_id', $request->update_dateneeded_id)->delete();
@@ -319,7 +327,7 @@ class SalesController extends Controller
                     'delivery_fee_amount' => $delivery_amount,
                     'gross_amount' => $amt,
                     'net_amount' => $amt,
-                    'customer_address' => $request->new_delivery_address,
+                    'customer_address' => '',
                     'delivery_branch' => $request->delivery_branch
                 ]);
 
@@ -332,7 +340,7 @@ class SalesController extends Controller
                     'delivery_fee_amount' => $delivery_amount,
                     'gross_amount' => $amt,
                     'net_amount' => $amt,
-                    'customer_address' => $request->new_delivery_address,
+                    'customer_address' => '',
                     'delivery_branch' => $request->delivery_branch
                 ]);
 
@@ -350,7 +358,6 @@ class SalesController extends Controller
                 'delivery_fee_amount' => 0,
                 'delivery_type' => 'Store Pickup',
                 'customer_address' => $request->update_dateneeded_sp,
-                'customer_delivery_adress' => $request->update_dateneeded_sp,
                 'customer_location' => '',
                 'delivery_branch' => null
             ]);
