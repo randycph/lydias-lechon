@@ -76,20 +76,20 @@ class SalesController extends Controller
                     $paella_qty = $request->input('uiu_qty'.$item->id);
                     $gross = ($request->input('uiu_qty'.$item->id) * $item->price) + ($request->input('uiu_qty'.$item->id) * $request->input('uiu_paella'.$item->id));
                 }
+                // check if the $item->product_name has "Boneless with Paella" and remove it before appending again
+                $product_name = $item->product_name;
+                $product_name = str_replace(" Boneless with Paella", "", $product_name);
                 $update = SalesDetail::whereId($item->id)->update([
                     'paella_price' => $paella_price,
                     'paella_qty' => $paella_qty,
                     'qty' => $request->input('uiu_qty'.$item->id),
                     'gross_amount' => $gross,
-                    'net_amount' => $gross
+                    'net_amount' => $gross,
+                    'product_name' => $paella_qty > 0 ? $product_name . " Boneless with Paella" : $product_name,
                 ]);
-            }
-            else{
-
+            } else {
                 $delete = SalesDetail::whereId($item->id)->forceDelete();
-
             }
-            
         }
 
         for($x = 1; $x <= $request->ui_total_new; $x++){
@@ -103,10 +103,12 @@ class SalesController extends Controller
                     $gross = ($request->input('uia_qty'.$x) * $request->input('uia_price'.$x)) + ($request->input('uia_qty'.$x) * $request->input('uia_paella'.$x));
                 }
                 $p = Product::whereId($request->input('uia_product'.$x))->first();
+                $product_name = $p->name;
+                $product_name = str_replace(" Boneless with Paella", "", $product_name);
                 $update = SalesDetail::create([
                     'sales_header_id' => $head->id,
                     'product_id' => $request->input('uia_product'.$x),
-                    'product_name' => $p->name,
+                    'product_name' => $paella_qty > 0 ? $product_name . " Boneless with Paella" : $product_name,
                     'product_category' => $p->category_id,
                     'price' => $request->input('uia_price'.$x),
                     'cost' => 0,
