@@ -93,7 +93,7 @@
                             <div class="col-md-3 filter-action mg-r-5">
                                 <a href="#" onclick="$('#adv').toggle();" class="btn btn-sm btn-success mg-t-7 mg-r-5">Advance Filter</a>
                                 <button type="submit" class="btn btn-sm btn-primary mg-t-7 mg-r-5">Generate</button>
-                                <a href="{{route('admin.report.audit_trail_per_user')}}" class="btn btn-sm btn-info mg-t-7 mg-r-5">Reset</a>
+                                <a href="{{route('admin.report.delivery_per_production_location')}}" class="btn btn-sm btn-info mg-t-7 mg-r-5">Reset</a>
                             </div>
                         </div>
                         <div class="row" id="adv" style="display:none;">
