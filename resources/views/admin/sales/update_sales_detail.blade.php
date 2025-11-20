@@ -126,6 +126,10 @@
                                                         value="{{$b->name}}">{{$b->name}}</option>
                                                     @endforeach
                                                 </select>
+                                                
+                                                @if ($errors->has('update_dateneeded_sp'))
+                                                    <span class="text-danger">{{ $errors->first('update_dateneeded_sp') }}</span>
+                                                @endif
                                         </div>
 
 
