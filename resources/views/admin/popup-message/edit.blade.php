@@ -45,7 +45,7 @@
 					<li class="breadcrumb-item active" aria-current="page">Create Popup Message</li>
 				</ol>
 			</nav>
-			<h4 class="mg-b-0 tx-spacing--1">Create Popup Message</h4>
+			<h4 class="mg-b-0 tx-spacing--1">Edit Popup Message</h4>
 		</div>
 	</div>
 	@if ($errors->any())
