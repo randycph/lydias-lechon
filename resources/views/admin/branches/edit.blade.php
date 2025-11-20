@@ -69,6 +69,10 @@
                             <label class="mg-b-5 tx-color-03" for="delivery_branch">Delivery Branch</label>                                
                         </div>
                         <div class="form-group mg-b-20">
+                            <input type="checkbox" name="jo_select_branch" id="jo_select_branch" @if($branches->jo_select_branch=='1') checked="checked" @endif>
+                            <label class="mg-b-5 tx-color-03" for="jo_select_branch">JO Select Branch</label>                   
+                        </div>
+                        <div class="form-group mg-b-20">
                             <label class="d-block">Status</label>
                             <div class="custom-control custom-switch @error('status') is-invalid @enderror">
                                 <input type="checkbox" class="custom-control-input" name="status" {{ (old("status", $branches->status) ? "checked":"") }} id="customSwitch13">
