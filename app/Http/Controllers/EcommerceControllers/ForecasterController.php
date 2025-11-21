@@ -270,7 +270,18 @@ class ForecasterController extends Controller
     public function display_orders(Request $request){
         $input = $request->all();
 
-        $orders = ProductionOrder::where('branch_id',$request->branch_id)->whereDate('delivery_date',$request->date_needed)->orderBy('delivery_date','desc')->get();
+        $orders = ProductionOrder::where('branch_id', $request->branch_id)->whereDate('delivery_date', $request->date_needed)
+            ->where(function ($q) {
+                $q->whereHas('jobOrder_details', function ($q) {
+                    $q->where(function ($q) {
+                        $q->where('sales_detail_id', 0)
+                        ->orWhereNull('sales_detail_id');
+                    });
+                })
+                ->orWhereHas('jobOrder_details.sales_detail.header', function ($q) {
+                    $q->where('delivery_status', '!=', 'Delivered/Picked Up');
+                });
+            })->get();
 
         return view('admin.forecaster.display-assigned-orders',compact('orders'));
     }
