@@ -121,7 +121,7 @@
                                                     data-style="btn btn-outline-light btn-md btn-block tx-left"
                                                     title="Choose New Location" data-width="100%" name="update_dateneeded_sp"
                                                     id="update_dateneeded_sp">
-                                                    @foreach (\App\EcommerceModel\Branch::where('status', 1)->orderBy('name')->get() as $b)
+                                                    @foreach (\App\EcommerceModel\Branch::where('status', 1)->where('pickup_branch', 1)->orderBy('name')->get() as $b)
                                                     <option @if ($b->name == $locationed) selected @endif
                                                         value="{{$b->name}}">{{$b->name}}</option>
                                                     @endforeach
