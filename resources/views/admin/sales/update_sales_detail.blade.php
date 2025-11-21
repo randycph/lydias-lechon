@@ -80,7 +80,7 @@
                                                 title="Select branch to deliver" data-width="100%" name="delivery_branch"
                                                 id="delivery_branch">
                                                 <option value="">- Select Branch -</option>
-                                                @foreach ($branches_store->where('pickup_branch', '1')->sortBy('name') as $b)
+                                                @foreach ($branches_store->where('delivery_branch', '1')->sortBy('name') as $b)
                                                     <option @if ($salesheader->delivery_branch == $b->name) selected @endif
                                                         value="{{ $b->name }}">{{ $b->name }}</option>
                                                 @endforeach
@@ -268,7 +268,7 @@
                                                             class="tx-danger">*</span></label>
                                                     <select class="form-control branch">
                                                         <option value="">- Select Branch -</option>
-                                                        @foreach ($branches_store->where('pickup_branch', '1')->sortBy('name') as $b)
+                                                        @foreach ($branches_store->where('delivery_branch', '1')->sortBy('name') as $b)
                                                             <option value="{{ $b->name }}">{{ $b->name }}
                                                             </option>
                                                         @endforeach
