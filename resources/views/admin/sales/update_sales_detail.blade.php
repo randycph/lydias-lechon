@@ -37,10 +37,9 @@
                 <h4 class="mg-b-0 tx-spacing--1">Update Sales Details</h4>
             </div>
         </div>
-        <!-- {{ auth()->user()->id }} auth()->user()->role_id <= 3 -->
         <div class="row row-sm">
             <div class="col-lg-6">
-                @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102)
+                @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102 || auth()->user()->has_access_to_route('sales-transaction.restore'))
 
                     @if ($dateneeded > date('Y-m-d H:i:s') || $salesheader->delivery_status == 'Open Date')
                         <form method="post" action="{{ route('update_dateneeded') }}" id="updatefrm">
@@ -98,7 +97,7 @@
                                                     data-style="btn btn-outline-light btn-md btn-block tx-left"
                                                     title="Choose New Location" data-width="100%" name="update_dateneeded_d2d"
                                                     id="update_dateneeded_d2d">
-                                                    @foreach (\App\EcommerceModel\Branch::where('status', 1)->where('pickup_branch', 1)->orderBy('name')->get() as $b)
+                                                    @foreach ($locations as $b)
                                                     <option @if ($b->name == $locationed) selected @endif
                                                         value="{{$b->name}}">{{$b->name}}</option>
                                                     @endforeach
@@ -121,7 +120,7 @@
                                                     data-style="btn btn-outline-light btn-md btn-block tx-left"
                                                     title="Choose New Location" data-width="100%" name="update_dateneeded_sp"
                                                     id="update_dateneeded_sp">
-                                                    @foreach (\App\EcommerceModel\Branch::where('status', 1)->orderBy('name')->get() as $b)
+                                                    @foreach (\App\EcommerceModel\Branch::where('status', 1)->where('pickup_branch', 1)->orderBy('name')->get() as $b)
                                                     <option @if ($b->name == $locationed) selected @endif
                                                         value="{{$b->name}}">{{$b->name}}</option>
                                                     @endforeach
