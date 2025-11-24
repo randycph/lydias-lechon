@@ -288,8 +288,10 @@ class FrontendController extends Controller
         $setting = Setting::first();
         $minimum_order_amount_door_to_door = $setting ? $setting->minimum_order : 0;
         $minimum_order_amount_pickup = $setting ? $setting->minimum_order_pickup : 0;
+        $minimum_processing_hours = $setting ? $setting->minimum_processing_hours : 72;
+        $minimum_processing_hours_misc = $setting ? $setting->minimum_processing_hours_misc : 96;
 
-        return view('v2.checkout', compact('triples', 'provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc', 'eligibleCoupons', 'minimum_order_amount_door_to_door', 'minimum_order_amount_pickup'));
+        return view('v2.checkout', compact('triples', 'provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc', 'eligibleCoupons', 'minimum_order_amount_door_to_door', 'minimum_order_amount_pickup', 'minimum_processing_hours', 'minimum_processing_hours_misc'));
     }
 
     public function confirmation($id)

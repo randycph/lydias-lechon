@@ -1206,6 +1206,8 @@
     window.privacy = @json(auth()->check());
     window.minimum_order_amount_door_to_door = @json($minimum_order_amount_door_to_door);
     window.minimum_order_amount_pickup = @json($minimum_order_amount_pickup);
+    window.minimum_processing_hours = @json($minimum_processing_hours);
+    window.minimum_processing_hours_misc = @json($minimum_processing_hours_misc);
 </script>
 
 <script>
@@ -1217,6 +1219,8 @@
             hasMisc: window.hasMisc || false,
             minimum_order_amount_door_to_door: window.minimum_order_amount_door_to_door || 0,
             minimum_order_amount_pickup: window.minimum_order_amount_pickup || 0,
+            minimum_processing_hours: window.minimum_processing_hours || 0,
+            minimum_processing_hours_misc: window.minimum_processing_hours_misc || 0,
             minDate() {
                 if (this.hasbaka == true) {
                     const day = new Date(this.today);
