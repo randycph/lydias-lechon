@@ -233,3 +233,25 @@ if (!function_exists('unreadForecastersTransactions')) {
         return $salesDetails->count();
     }
 }
+
+if (! function_exists('clean_name')) {
+    function clean_name($value)
+    {
+        if ($value === null) {
+            return $value;
+        }
+
+        // 1) Remove all characters except letters, digits, spaces, dot, and hyphen
+        $value = preg_replace('/[^\p{L}\d\s\.\-]/u', '', $value);
+
+        // 2) Remove leading/trailing dots and hyphens (like ". UST", "--- ELMA", "ELMA ---", ". Name.")
+        $value = preg_replace('/^[\.\-]+/u', '', $value);   // leading
+        $value = preg_replace('/[\.\-]+$/u', '', $value);   // trailing
+
+        // 3) Normalize spaces
+        $value = preg_replace('/\s+/u', ' ', $value);
+
+        return trim($value);
+    }
+}
+
