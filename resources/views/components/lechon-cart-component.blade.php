@@ -313,8 +313,8 @@
                 document.getElementById("share-facebook").href =
                     `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
 
-                document.getElementById("share-twitter").href =
-                    `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${shareText}`;
+                // document.getElementById("share-twitter").href =
+                //     `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${shareText}`;
 
                 // Instagram and TikTok don't support direct sharing
                 document.getElementById("share-instagram").href =

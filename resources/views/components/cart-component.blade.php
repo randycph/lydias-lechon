@@ -22,6 +22,8 @@
 
             this.carts = data.cart;
 
+            this.isMiscOnly = this.carts.length > 0 && this.carts.every(cart => cart.product?.is_misc == 1);
+
             this.cartCount = this.carts?.length ?? 0;
             
             this.shippingMessage = '';
@@ -30,6 +32,7 @@
             console.error('There was a problem with the fetch operation:', error);
         }
     },
+    isMiscOnly: false,
     init() {
         this.shippingMessage = '';
         this.getCarts();
@@ -92,6 +95,9 @@
         } else if (this.shippingMethod === 'pickup' && this.subtotal < this.minimumOrderAmountPickup) {
             this.canCheckout = false;
             this.shippingMessage = 'Minimum order amount for Pickup is ₱' + this.minimumOrderAmountPickup.toLocaleString(undefined, { minimumFractionDigits: 2 });
+        } else if (this.isMiscOnly && this.subtotal < this.minimum_order_misc) {
+            this.canCheckout = false;
+            this.shippingMessage = 'Minimum order amount for Miscellaneous items is ₱' + this.minimum_order_misc.toLocaleString(undefined, { minimumFractionDigits: 2 });
         } else {
             this.canCheckout = true;
             this.shippingMessage = '';
@@ -114,6 +120,7 @@
     },
     minimumOrderAmountDoorToDoor: {{ $minimum_order_amount_door_to_door }},
     minimumOrderAmountPickup: {{ $minimum_order_amount_pickup }},
+    minimum_order_misc: {{ $minimum_order_misc }},
     isGuest: false,
 }" @fetch-cart.window="init()" x-cloak>
     <!-- Drawer Overlay -->

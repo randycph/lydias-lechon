@@ -1208,6 +1208,7 @@
     window.minimum_order_amount_pickup = @json($minimum_order_amount_pickup);
     window.minimum_processing_hours = @json($minimum_processing_hours);
     window.minimum_processing_hours_misc = @json($minimum_processing_hours_misc);
+    window.minimum_order_misc = @json($minimum_order_misc);
 </script>
 
 <script>
@@ -1221,6 +1222,7 @@
             minimum_order_amount_pickup: window.minimum_order_amount_pickup || 0,
             minimum_processing_hours: window.minimum_processing_hours || 0,
             minimum_processing_hours_misc: window.minimum_processing_hours_misc || 0,
+            minimum_order_misc: window.minimum_order_misc || 0,
             minDate() {
                 if (this.hasbaka == true) {
                     const day = new Date(this.today);
@@ -1619,6 +1621,8 @@
                 privacy: null,
             },
 
+            isMiscOnly: false,
+
             submitForm() {
                 this.formEl = document.getElementById('checkoutForm');
 
@@ -1629,10 +1633,11 @@
                 this.noNeededTime = false;
                 this.noDeliveryAddress = false;
 
-                console.log(this.orderAmount ,  'this.orderAmount')
+                this.isMiscOnly = this.carts.length > 0 && this.carts.every(cart => cart.product?.is_misc == 1);
 
                 this.minimum_order_amount_door_to_door = parseFloat(this.minimum_order_amount_door_to_door) || 0;
                 this.minimum_order_amount_pickup = parseFloat(this.minimum_order_amount_pickup) || 0;
+                this.minimum_order_misc = parseFloat(this.minimum_order_misc) || 0;
 
                 if (this.method === 'delivery' && parseFloat(this.orderAmount) < this.minimum_order_amount_door_to_door) {
                     // add a link going to /menu
@@ -1641,6 +1646,10 @@
                     return;
                 } else if(this.method === 'pickup' && parseFloat(this.orderAmount) < this.minimum_order_amount_pickup) {
                     this.warningMessage = `The minimum order amount for pickup is ₱${this.minimum_order_amount_pickup.toFixed(2)}. Please add more items to your cart to proceed. <a href="/menu" class="underline font-bold">Browse Menu</a>`;
+                    this.isSubmitting = false;
+                    return;
+                } else if (this.isMiscOnly && parseFloat(this.orderAmount) < this.minimum_order_misc) {
+                    this.warningMessage = `The minimum order amount for miscellaneous items is ₱${this.minimum_order_misc.toFixed(2)}. Please add more items to your cart to proceed. <a href="/menu" class="underline font-bold">Browse Menu</a>`;
                     this.isSubmitting = false;
                     return;
                 } else {

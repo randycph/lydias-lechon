@@ -206,6 +206,8 @@ class WebController extends Controller
         $ecommerce->minimum_processing_hours_misc = $request->minimum_processing_hours_misc;  
         $ecommerce->announcement = $request->announcement;
         $ecommerce->cutoff = $request->cutoff;
+        $ecommerce->minimum_order_misc = floatval($request->minimum_order_misc);
+        $ecommerce->disable_delivery_misc = isset($request->disable_delivery_misc) ? 1 : 0;
 
         $ecommerce->disable_pickup_dates='';
         $ecommerce->disable_delivery_dates = '';
@@ -215,12 +217,18 @@ class WebController extends Controller
         if(isset($request->disable_delivery_dates)){
             $ecommerce->disable_delivery_dates = implode(",",$request->disable_delivery_dates);
         }
+        if (isset($request->disable_delivery_misc_dates)) {
+            $ecommerce->disable_delivery_misc_dates = implode(",", $request->disable_delivery_misc_dates);
+        }
 
         if(!isset($request->disable_order)){
             $ecommerce->disable_pickup_dates = '';
         }
         if(!isset($request->disable_delivery)){
             $ecommerce->disable_delivery_dates = '';
+        }
+        if (!isset($request->disable_delivery_misc)) {
+            $ecommerce->disable_delivery_misc_dates = '';
         }
         $ecommerce->save();
 
