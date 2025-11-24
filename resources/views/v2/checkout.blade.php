@@ -902,6 +902,9 @@
                                 refer to the warning message that appeared on your order screen or call our hotline at
                                 89391221 / 89394665. Thank you.
                             </div>
+                            <div x-show="warningMessage"
+                                class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded" x-html="warningMessage">
+                            </div>
                             <button :disable="isSubmitting" type="submit"
                                 class="bg-primary custom-btn btn-primary-dark text-center text-white px-6 py-4 mt-4 w-full rounded-md">
                                 <span x-show="!isSubmitting">Place Order</span>
@@ -1201,6 +1204,11 @@
     window.hasMisc = @json($hasMisc);
     window.hasLechon = @json($haslechon);
     window.privacy = @json(auth()->check());
+    window.minimum_order_amount_door_to_door = @json($minimum_order_amount_door_to_door);
+    window.minimum_order_amount_pickup = @json($minimum_order_amount_pickup);
+    window.minimum_processing_hours = @json($minimum_processing_hours);
+    window.minimum_processing_hours_misc = @json($minimum_processing_hours_misc);
+    window.minimum_order_misc = @json($minimum_order_misc);
 </script>
 
 <script>
@@ -1210,6 +1218,11 @@
             hasbaka: window.hasBaka || false,
             haslechon: window.hasLechon || false,
             hasMisc: window.hasMisc || false,
+            minimum_order_amount_door_to_door: window.minimum_order_amount_door_to_door || 0,
+            minimum_order_amount_pickup: window.minimum_order_amount_pickup || 0,
+            minimum_processing_hours: window.minimum_processing_hours || 0,
+            minimum_processing_hours_misc: window.minimum_processing_hours_misc || 0,
+            minimum_order_misc: window.minimum_order_misc || 0,
             minDate() {
                 if (this.hasbaka == true) {
                     const day = new Date(this.today);
@@ -1608,6 +1621,8 @@
                 privacy: null,
             },
 
+            isMiscOnly: false,
+
             submitForm() {
                 this.formEl = document.getElementById('checkoutForm');
 
@@ -1617,6 +1632,29 @@
                 this.noNeededDate = false;
                 this.noNeededTime = false;
                 this.noDeliveryAddress = false;
+
+                this.isMiscOnly = this.carts.length > 0 && this.carts.every(cart => cart.product?.is_misc == 1);
+
+                this.minimum_order_amount_door_to_door = parseFloat(this.minimum_order_amount_door_to_door) || 0;
+                this.minimum_order_amount_pickup = parseFloat(this.minimum_order_amount_pickup) || 0;
+                this.minimum_order_misc = parseFloat(this.minimum_order_misc) || 0;
+
+                if (this.method === 'delivery' && parseFloat(this.orderAmount) < this.minimum_order_amount_door_to_door) {
+                    // add a link going to /menu
+                    this.warningMessage = `The minimum order amount for door-to-door delivery is ₱${this.minimum_order_amount_door_to_door.toFixed(2)}. Please add more items to your cart to proceed. <a href="/menu" class="underline font-bold">Browse Menu</a>`;
+                    this.isSubmitting = false;
+                    return;
+                } else if(this.method === 'pickup' && parseFloat(this.orderAmount) < this.minimum_order_amount_pickup) {
+                    this.warningMessage = `The minimum order amount for pickup is ₱${this.minimum_order_amount_pickup.toFixed(2)}. Please add more items to your cart to proceed. <a href="/menu" class="underline font-bold">Browse Menu</a>`;
+                    this.isSubmitting = false;
+                    return;
+                } else if (this.isMiscOnly && parseFloat(this.orderAmount) < this.minimum_order_misc) {
+                    this.warningMessage = `The minimum order amount for miscellaneous items is ₱${this.minimum_order_misc.toFixed(2)}. Please add more items to your cart to proceed. <a href="/menu" class="underline font-bold">Browse Menu</a>`;
+                    this.isSubmitting = false;
+                    return;
+                } else {
+                    this.warningMessage = '';
+                }
                 
                 if ((!this.need_time && this.method === 'pickup') || (!this.need_time && this.method === 'delivery' && !this.allowMultiple)) {
                     this.noNeededTime = true;

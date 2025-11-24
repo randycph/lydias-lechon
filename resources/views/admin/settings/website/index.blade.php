@@ -357,6 +357,15 @@
                                     </div>                                
                                 </div>
 
+                                <div class="col-md-7">
+                                    <div class="form-group">
+                                        <div id="title" class="parsley-input">
+                                            <label>Minimum Order (Miscellaneous)</label>
+                                            <input type="number" step="0.01" min="0.00" name="minimum_order_misc" class="form-control" data-parsley-class-handler="#title" value="{{ old('minimum_order_misc',$web->minimum_order_misc) }}" required @htmlValidationMessage({{__('standard.empty_all_field')}})>
+                                        </div>
+                                    </div>                                
+                                </div>
+
 
                                 <div class="col-md-7">
                                     <div class="form-group">
@@ -380,19 +389,13 @@
                                     <div class="form-group">
                                         <div id="title" class="parsley-input">
                                             <input type="checkbox" name="disable_order" id="disable_order" @if($web->disable_order == 1) checked @endif>
-                                            <label>Disable Pickup</label>
+                                            <label for="disable_order">Disable Pickup</label>
                                         </div>
                                     </div>
-
-
-
-
-
-
-
+                                    
                                     <div class="form-group" id="disable_pickup_dates_div" @if($web->disable_order <> 1) style="display:none;" @endif>
                                         <div id="title" class="parsley-input">
-                                            <label>Disable Pickup Dates</label>
+                                            <label for="disable_pickup_dates">Disable Pickup Dates</label>
 
                                             <input type="text" id="single-date" placeholder="Select a date" class="mb-2 form-control" />
 
@@ -409,12 +412,12 @@
                                     <div class="form-group">
                                         <div id="title" class="parsley-input">
                                             <input type="checkbox" name="disable_delivery" id="disable_delivery" @if($web->disable_delivery == 1) checked @endif>
-                                            <label>Disable Delivery</label>
+                                            <label for="disable_delivery">Disable Delivery</label>
                                         </div>
                                     </div>   
                                     <div class="form-group" id="disable_delivery_dates_div" @if($web->disable_delivery <> 1) style="display:none;" @endif>
                                         <div id="title" class="parsley-input">
-                                            <label>Disable Delivery Dates</label> <br>
+                                            <label for="disable_delivery_dates">Disable Delivery Dates</label> <br>
 
                                             <input type="text" id="single-date-delivery" placeholder="Select a date" class="mb-2 form-control" />
 
@@ -426,7 +429,30 @@
                                             </select>
                                         </div>
                                     </div>
-                                </div>                            
+                                </div>      
+
+                                <div class="col-md-7">
+                                    <div class="form-group">
+                                        <div id="title" class="parsley-input">
+                                            <input type="checkbox" name="disable_delivery_misc" id="disable_delivery_misc" @if($web->disable_delivery_misc == 1) checked @endif>
+                                            <label for="disable_delivery_misc">Disable Delivery For Miscellaneous</label>
+                                        </div>
+                                    </div>   
+                                    <div class="form-group" id="disable_delivery_misc_dates_div" @if($web->disable_delivery_misc <> 1) style="display:none;" @endif>
+                                        <div id="title" class="parsley-input">
+                                            <label for="disable_delivery_misc_dates">Disable Delivery For Miscellaneous Dates</label> <br>
+
+                                            <input type="text" id="single-date-delivery-misc" placeholder="Select a date" class="mb-2 form-control" />
+
+                                            <!-- Time Picker -->
+                                            <select id="multiple-times-delivery-misc" multiple style="width: 100%;" class="mb-2 select2 form-control" placeholder="Select time"></select>
+
+                                            <!-- Final Select2 -->
+                                            <select name="disable_delivery_misc_dates[]" multiple="multiple" id="disable_delivery_misc_dates" class="form-control select2" style="width:100%">
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>                          
                            
                            
                                 <div class="col-md-7">
@@ -616,6 +642,12 @@
             placeholder: "Disable Delivery Dates",
             width: '100%'
         });
+        // 
+        const $disableDatesMisc = $('#disable_delivery_misc_dates').select2({
+            tags: true,
+            placeholder: "Disable Delivery Dates for Miscellaneous",
+            width: '100%'
+        });
 
         // Initialize time picker select
         const $timeSelect = $('#multiple-times-delivery').select2({
@@ -641,6 +673,15 @@
             }
         });
 
+        flatpickr("#single-date-delivery-misc", {
+                dateFormat: "Y-m-d",
+                minDate: "today",
+                onChange: function (selectedDates, dateStr) {
+                selectedDate = dateStr;
+                $disableDatesMisc.val(null).trigger('change');
+            }
+        });
+
         // Handle time selection
         $timeSelect.on('select2:select', function (e) {
             const selectedTime = e.params.data.id;
@@ -657,6 +698,38 @@
             if ($('#disable_pickup_dates option[value="' + dateTime + '"]').length === 0) {
                 const newOption = new Option(dateTime, dateTime, true, true);
                 $disableDates.append(newOption).trigger('change');
+            }
+        });
+
+        // Handle time selection for misc
+        const $timeSelectMisc = $('#multiple-times-delivery-misc').select2({
+            tags: true,
+            placeholder: "Select time",
+            width: '100%'
+        });
+
+        // Populate time options for misc
+        timeSlots.forEach(time => {
+            const option = new Option(time, time, false, false);
+            $timeSelectMisc.append(option);
+        });
+
+        // Handle time selection for misc
+        $timeSelectMisc.on('select2:select', function (e) {
+            const selectedTime = e.params.data.id;
+
+            if (!selectedDate) {
+                alert("Please select a date first.");
+                $timeSelectMisc.val($timeSelectMisc.val().filter(val => val !== selectedTime)).trigger('change');
+                return;
+            }
+
+            const dateTime = `${selectedDate} ${selectedTime}`;
+
+            // Avoid duplicates
+            if ($('#disable_delivery_misc_dates option[value="' + dateTime + '"]').length === 0) {
+                const newOption = new Option(dateTime, dateTime, true, true);
+                $disableDatesMisc.append(newOption).trigger('change');
             }
         });
     });
@@ -703,6 +776,22 @@
                     $select2.append(newOption).trigger('change');
                 });
             }
+
+            const $select3 = $('#disable_delivery_misc_dates').select2({
+                placeholder: 'Choose one',
+                searchInputPlaceholder: 'Search options'
+            });
+
+            const savedDeliveryMiscDates = "{{ $web->disable_delivery_misc_dates }}";
+            if (savedDeliveryMiscDates) {
+                savedDeliveryMiscDates.split(',').forEach(date => {
+                    date = date.trim();
+
+                    const newOption = new Option(date, date, true, true);
+                    $select3.append(newOption).trigger('change');
+                });
+            }
+
         });
 
         $('#disable_order').change(function() {
@@ -723,7 +812,14 @@
             }
         });
 
-
+        $('#disable_delivery_misc').change(function() {
+            if($(this).is(":checked")) {
+                $('#disable_delivery_misc_dates_div').show();
+            }
+            else{
+                $('#disable_delivery_misc_dates_div').hide();
+            }
+        });
         
         function matchCustom(params, data) {
             // If there are no search terms, return all of the data

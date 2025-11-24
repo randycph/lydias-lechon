@@ -22,14 +22,21 @@
 
             this.carts = data.cart;
 
+            this.isMiscOnly = this.carts.length > 0 && this.carts.every(cart => cart.product?.is_misc == 1);
+
             this.cartCount = this.carts?.length ?? 0;
+            
+            this.shippingMessage = '';
 
         } catch (error) {
             console.error('There was a problem with the fetch operation:', error);
         }
     },
+    isMiscOnly: false,
     init() {
+        this.shippingMessage = '';
         this.getCarts();
+        this.chooseShippingMethod(document.cookie.replace(/(?:(?:^|.*;\s*)shipping_method\s*\=\s*([^;]*).*$)|^.*$/, '$1') || 'pickup');
     },
     async removeCart(productid, paella = 0) {
         this.loading = true;
@@ -67,11 +74,39 @@
         }
     },
     shippingMethod: 'pickup',
+    shippingMessage: '',
+    subtotal: 0,
     chooseShippingMethod(method) {
         this.shippingMethod = method;
         document.cookie = 'shipping_method=' + method + '; path=/; max-age=31536000';
     },
+    canCheckout: false,
     handleCheckout(auth) {
+        this.subtotal = this.carts.reduce(
+            (total, cart) => 
+                total +
+                (Number((cart?.paella_price > 0 ? cart.product?.paella_price : 0) * (cart?.qty || 1)) || 0) +
+                ((cart?.is_free_product ? 0 : (Number(cart?.product?.price) || 0) * (Number(cart?.qty) || 1))),
+            0
+        );
+        if (this.shippingMethod === 'delivery' && this.subtotal < this.minimumOrderAmountDoorToDoor) {
+            this.canCheckout = false;
+            this.shippingMessage = 'Minimum order amount for Door to Door delivery is ₱' + this.minimumOrderAmountDoorToDoor.toLocaleString(undefined, { minimumFractionDigits: 2 });
+        } else if (this.shippingMethod === 'pickup' && this.subtotal < this.minimumOrderAmountPickup) {
+            this.canCheckout = false;
+            this.shippingMessage = 'Minimum order amount for Pickup is ₱' + this.minimumOrderAmountPickup.toLocaleString(undefined, { minimumFractionDigits: 2 });
+        } else if (this.isMiscOnly && this.subtotal < this.minimum_order_misc) {
+            this.canCheckout = false;
+            this.shippingMessage = 'Minimum order amount for Miscellaneous items is ₱' + this.minimum_order_misc.toLocaleString(undefined, { minimumFractionDigits: 2 });
+        } else {
+            this.canCheckout = true;
+            this.shippingMessage = '';
+        }
+
+        if (!this.canCheckout) {
+            return;
+        }
+
         if (this.shippingMethod == '') {
             alert('Please select a shipping method');
             return;
@@ -83,8 +118,11 @@
             window.location.href = '{{ route('login') }}?redirect={{ urlencode(route('checkout')) }}';
         }
     },
+    minimumOrderAmountDoorToDoor: {{ $minimum_order_amount_door_to_door }},
+    minimumOrderAmountPickup: {{ $minimum_order_amount_pickup }},
+    minimum_order_misc: {{ $minimum_order_misc }},
     isGuest: false,
-}" @fetch-cart.window="init()">
+}" @fetch-cart.window="init()" x-cloak>
     <!-- Drawer Overlay -->
     <div x-show="openCart" x-transition.opacity class="fixed inset-0 bg-black/50 z-40" @click="openCart = false"></div>
 
@@ -240,6 +278,7 @@
                                         Delivery
                                     </button>
                                 </div>
+                                <div class="text-red-600 mt-2 italic" x-text="shippingMessage"></div>
                             </div>
 
                             <!-- Coupon Code Section -->
@@ -273,7 +312,7 @@
 
                             <div class="px-6 w-full flex">
                                 <button @click="handleCheckout('{{ auth()->check() }}')" type="button"
-                                    class="bg-primary custom-btn btn-primary-dark text-white text-center px-6 py-3 rounded-md mt-10 w-full">
+                                    class="bg-primary custom-btn btn-primary-dark text-white text-center px-6 py-3 rounded-md mt-10 w-full disabled:opacity-50 disabled:cursor-not-allowed">
                                     Checkout
                                 </button>
                             </div>
