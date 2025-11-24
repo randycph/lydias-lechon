@@ -285,14 +285,15 @@ class FrontendController extends Controller
 
         // dd($eligibleCoupons);
 
-        $setting = Setting::first();
         $minimum_order_amount_door_to_door = $setting ? $setting->minimum_order : 0;
         $minimum_order_amount_pickup = $setting ? $setting->minimum_order_pickup : 0;
         $minimum_processing_hours = $setting ? $setting->minimum_processing_hours : 24;
         $minimum_processing_hours_misc = $setting ? $setting->minimum_processing_hours_misc : 12;
         $minimum_order_misc = $setting ? $setting->minimum_order_misc : 0;
+        $disable_delivery_misc_dates = $setting ? $setting->disable_delivery_misc_dates : '';
+        $disable_delivery_misc_dates = explode(',', $setting->disable_delivery_misc_dates ?? '');
 
-        return view('v2.checkout', compact('triples', 'provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc', 'eligibleCoupons', 'minimum_order_amount_door_to_door', 'minimum_order_amount_pickup', 'minimum_processing_hours', 'minimum_processing_hours_misc', 'minimum_order_misc'));
+        return view('v2.checkout', compact('triples', 'provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc', 'eligibleCoupons', 'minimum_order_amount_door_to_door', 'minimum_order_amount_pickup', 'minimum_processing_hours', 'minimum_processing_hours_misc', 'minimum_order_misc', 'disable_delivery_misc_dates'));
     }
 
     public function confirmation($id)
