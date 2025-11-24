@@ -1209,6 +1209,7 @@
     window.minimum_processing_hours = @json($minimum_processing_hours);
     window.minimum_processing_hours_misc = @json($minimum_processing_hours_misc);
     window.minimum_order_misc = @json($minimum_order_misc);
+    window.disable_delivery_misc_dates = @json($disable_delivery_misc_dates);
 </script>
 
 <script>
@@ -1223,6 +1224,7 @@
             minimum_processing_hours: window.minimum_processing_hours || 0,
             minimum_processing_hours_misc: window.minimum_processing_hours_misc || 0,
             minimum_order_misc: window.minimum_order_misc || 0,
+            disable_delivery_misc_dates: window.disable_delivery_misc_dates || [],
             minDate() {
                 if (this.hasbaka == true) {
                     const day = new Date(this.today);
@@ -2213,6 +2215,7 @@
                     this.showModal = true;
                 }
 
+                this.isMiscOnly = this.carts.length > 0 && this.carts.every(cart => cart.product?.is_misc == 1);
             },
 
             _rebuildAllowedCitySetForProvince(provinceLabel) {
@@ -3371,6 +3374,11 @@
                     }
 
                     const timeStr = (hour < 10 ? '0' + hour : hour) + ':00';
+
+                    if (this.isMiscOnly) {
+                        return this.disable_delivery_misc_dates.includes(`${delivery.need_date} ${timeStr}`);
+                    }
+
                     return this.disabledDeliveryDates.includes(`${delivery.need_date} ${timeStr}`);
                 };
             },
@@ -3459,9 +3467,14 @@
 
                 // Check disabled slots
                 const fullStr = `${this.need_date} ${timeStr}`;
+
+                if (this.isMiscOnly) {
+                    return this.disable_delivery_misc_dates.includes(fullStr);
+                }
+
                 if (this.method === 'pickup') {
                     return this.disabledPickupDates.includes(fullStr);
-                } else {
+                }  else {
                     return this.disabledDeliveryDates.includes(fullStr);
                 }
             },
