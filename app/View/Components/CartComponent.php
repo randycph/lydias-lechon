@@ -25,9 +25,11 @@ class CartComponent extends Component
         $setting = Setting::first();
         $minimum_order_amount_door_to_door = $setting ? $setting->minimum_order : 0;
         $minimum_order_amount_pickup = $setting ? $setting->minimum_order_pickup : 0;
+        $minimum_order_misc = $setting ? $setting->minimum_order_misc : 0;
         return view('components.cart-component', [
             'minimum_order_amount_door_to_door' => $minimum_order_amount_door_to_door,
             'minimum_order_amount_pickup' => $minimum_order_amount_pickup,
+            'minimum_order_misc' => $minimum_order_misc,
         ]);
     }
 }
