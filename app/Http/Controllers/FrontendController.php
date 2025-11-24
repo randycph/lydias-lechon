@@ -285,7 +285,11 @@ class FrontendController extends Controller
 
         // dd($eligibleCoupons);
 
-        return view('v2.checkout', compact('triples', 'provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc', 'eligibleCoupons'));
+        $setting = Setting::first();
+        $minimum_order_amount_door_to_door = $setting ? $setting->minimum_order : 0;
+        $minimum_order_amount_pickup = $setting ? $setting->minimum_order_pickup : 0;
+
+        return view('v2.checkout', compact('triples', 'provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc', 'eligibleCoupons', 'minimum_order_amount_door_to_door', 'minimum_order_amount_pickup'));
     }
 
     public function confirmation($id)
