@@ -590,12 +590,12 @@ class FrontendController extends Controller
                 'first_name' => [
                     'required_if:account_type,individual',
                     'nullable',
-                    'regex:/^[A-Za-z\s\-]+$/'
+                    'regex:/^(?!\.)(?!.*\.\.)(?!.*\.$)[\p{L}](?:[\p{L}\d\s\-]*|\.[\p{L}\d]+)*$/u'
                 ],
                 'last_name' => [
                     'required_if:account_type,individual',
                     'nullable',
-                    'regex:/^[A-Za-z\s\-]+$/'
+                    'regex:/^(?!\.)(?!.*\.\.)(?!.*\.$)[\p{L}](?:[\p{L}\d\s\-]*|\.[\p{L}\d]+)*$/u'
                 ],
                 'birth_date' => 'nullable|date',
                 'org_name' => [
@@ -807,12 +807,12 @@ class FrontendController extends Controller
                         'first_name' => [
                             'required',
                             'string',
-                            'regex:/^[A-Za-z\s\-]+$/'
+                            'regex:/^(?!\.)(?!.*\.\.)(?!.*\.$)[\p{L}](?:[\p{L}\d\s\-]*|\.[\p{L}\d]+)*$/u'
                         ],
                         'last_name' => [
                             'required',
                             'string',
-                            'regex:/^[A-Za-z\s\-]+$/'
+                            'regex:/^(?!\.)(?!.*\.\.)(?!.*\.$)[\p{L}](?:[\p{L}\d\s\-]*|\.[\p{L}\d]+)*$/u'
                         ],
                         'birth_date' => 'nullable|date',
                         'country' => 'required|string',

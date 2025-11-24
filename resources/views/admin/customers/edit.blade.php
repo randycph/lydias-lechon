@@ -57,13 +57,19 @@
                         <div class="form-group">
                             <label class="d-block">Last Name *</label>
                             <input type="text" name="lname" id="lname" value="{{ old('lname', $user->lastname)}}" class="form-control @error('lname') is-invalid @enderror" required>
-                            @error(['inputName' => 'lname'])
+                            @error('lname')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
                             @enderror
                         </div>
                         <div class="form-group">
                             <label class="d-block">First Name *</label>
                             <input type="text" name="fname" id="fname" value="{{ old('fname', $user->firstname)}}" class="form-control @error('fname') is-invalid @enderror" required>
-                            @error(['inputName' => 'fname'])
+                            @error('fname')
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
                             @enderror
                         </div>
                         <div class="form-group">

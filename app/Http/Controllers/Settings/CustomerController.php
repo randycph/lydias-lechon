@@ -78,8 +78,8 @@ class CustomerController extends Controller
         $request->validate([
             'email' => 'nullable|email|max:191|unique:users,email',
             'contact_mobile' => 'required|max:15',
-            'fname' => 'required_if:is_org,0|max:191',
-            'lname' => 'required_if:is_org,0|max:191',
+            'fname' => ['required_if:is_org,0', 'max:191', 'string', 'regex:/^(?!\.)(?!.*\.\.)(?!.*\.$)[\p{L}](?:[\p{L}\d\s\-]*|\.[\p{L}\d]+)*$/u'],
+            'lname' => ['required_if:is_org,0', 'max:191', 'string', 'regex:/^(?!\.)(?!.*\.\.)(?!.*\.$)[\p{L}](?:[\p{L}\d\s\-]*|\.[\p{L}\d]+)*$/u'],
             'organization' => 'required_if:is_org,1|max:191',
         ]);
         
@@ -159,8 +159,8 @@ class CustomerController extends Controller
         $request->validate([
             'email' => 'nullable|email|max:191|unique:users,email,'.$customer->id,
             'contact_mobile' => 'required|max:15',
-            'fname' => 'required_if:is_org,0|max:191',
-            'lname' => 'required_if:is_org,0|max:191',
+            'fname' => ['required_if:is_org,0', 'max:191', 'string', 'regex:/^(?!\.)(?!.*\.\.)(?!.*\.$)[\p{L}](?:[\p{L}\d\s\-]*|\.[\p{L}\d]+)*$/u'],
+            'lname' => ['required_if:is_org,0', 'max:191', 'string', 'regex:/^(?!\.)(?!.*\.\.)(?!.*\.$)[\p{L}](?:[\p{L}\d\s\-]*|\.[\p{L}\d]+)*$/u'],
             'organization' => 'required_if:is_org,1|max:191',
             'address_street' => 'nullable|max:191',
             'address_municipality' => 'nullable|max:191',
