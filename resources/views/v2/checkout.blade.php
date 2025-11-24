@@ -437,7 +437,7 @@
                                                         </div>
                                                     </div>
                                                     <div class="w-full lg:w-1/2">
-                                                        <label class="font-bold block text-sm mb-1">Select Timevv</label>
+                                                        <label class="font-bold block text-sm mb-1">Select Time</label>
                                                         <div class="relative">
                                                             <div
                                                                 class="absolute inset-y-0 end-0 top-0 flex items-center pe-3.5 pointer-events-none">
