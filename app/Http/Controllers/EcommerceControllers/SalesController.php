@@ -289,6 +289,7 @@ class SalesController extends Controller
         }
 
         if($request->shipping_type == 'd2d'){
+            dd($request->all());
             $sales->update(['delivery_type' => 'Door to door delivery']);
             $rate_type= 'misc';
             $baka = 0;
@@ -320,7 +321,8 @@ class SalesController extends Controller
             $amt = ($sales->gross_amount - $sales->delivery_fee_amount) + $delivery_amount;
 
             if($sales->customer_location == $request->update_dateneeded_d2d){
-
+                
+            dd($request->all(), 222);
                 $update_date_needed = SalesHeader::whereId($request->update_dateneeded_id)->update([               
                     'customer_delivery_adress' => $request->new_delivery_address,
                     'instruction' => $request->new_instruction,
@@ -332,7 +334,7 @@ class SalesController extends Controller
                 ]);
 
             }else{
-
+                dd($request->all(), 111);
                 $update_date_needed = SalesHeader::whereId($request->update_dateneeded_id)->update([
                     'customer_location' => $request->update_dateneeded_d2d,
                     'customer_delivery_adress' => $request->new_delivery_address,
