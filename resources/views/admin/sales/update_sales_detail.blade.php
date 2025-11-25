@@ -89,10 +89,10 @@
                                     </div>
 
                                     <div class="form-group">    
-                                        <label class="d-block">Location <span class="tx-danger">*</span></label>
 
                                         <div class="divd2d" @if ($salesheader->delivery_type != 'Door to door delivery')
                                                 style="display:none;" @endif>
+                                                <label class="d-block">Location <span class="tx-danger">*</span></label>
                                                 <select class="selectpicker mg-b-5"
                                                     data-style="btn btn-outline-light btn-md btn-block tx-left"
                                                     title="Choose New Location" data-width="100%" name="update_dateneeded_d2d"
@@ -116,6 +116,7 @@
 
                                         <div class="divsp" @if ($salesheader->delivery_type != 'Store Pickup')
                                                 style="display:none;" @endif >
+                                                <label class="d-block">Pickup Branch <span class="tx-danger">*</span></label>
                                                 <select class="selectpicker mg-b-5"
                                                     data-style="btn btn-outline-light btn-md btn-block tx-left"
                                                     title="Choose New Location" data-width="100%" name="update_dateneeded_sp"
