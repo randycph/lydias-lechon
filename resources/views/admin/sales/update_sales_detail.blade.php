@@ -379,7 +379,7 @@
                                     <div class="form-group">
                                         <label class="d-block">Note <span class="tx-danger">*</span></label>
                                         <textarea name="new_instruction" class="form-control"
-                                            @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102) @else style="pointer-events: none;background-color:#E9ECEF" @endif>{{ $salesheader->instruction }}</textarea>
+                                            @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102 || auth()->user()->has_access_to_route('sales-transaction.update') || auth()->user()->has_access_to_route('update_dateneeded')) @else style="pointer-events: none;background-color:#E9ECEF" @endif>{{ $salesheader->instruction }}</textarea>
                                     </div>
                                 @endif
 
