@@ -289,7 +289,6 @@ class SalesController extends Controller
         }
 
         if($request->shipping_type == 'd2d'){
-            dd($request->all());
             $sales->update(['delivery_type' => 'Door to door delivery']);
             $rate_type= 'misc';
             $baka = 0;
@@ -349,7 +348,7 @@ class SalesController extends Controller
             }
         }
         if($request->shipping_type == 'storepickup'){
-
+            $sales->update(['delivery_type' => 'Store Pickup']);
             $gross = $sales->gross_amount - $sales->delivery_fee_amount;
             dd($request->all());
             $sales->update([
