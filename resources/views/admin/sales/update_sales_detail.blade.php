@@ -39,7 +39,7 @@
         </div>
         <div class="row row-sm">
             <div class="col-lg-6">
-                @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102 || auth()->user()->has_access_to_route('sales-transaction.restore'))
+                @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102 || auth()->user()->has_access_to_route('sales-transaction.update') || auth()->user()->has_access_to_route('update_dateneeded'))
 
                     @if ($dateneeded > date('Y-m-d H:i:s') || $salesheader->delivery_status == 'Open Date')
                         <form method="post" action="{{ route('update_dateneeded') }}" id="updatefrm">
