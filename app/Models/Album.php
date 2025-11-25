@@ -51,7 +51,7 @@ class Album extends Model
     {
         return Validator::make(request()->all(), [
             'name' => 'required|max:150',
-            'effect' => 'required',
+            // 'effect' => 'required',
             // 'transition_in' => 'required',
             // 'transition_out' => 'required',
             // 'transition' => 'required|numeric|min:2|max:10',
