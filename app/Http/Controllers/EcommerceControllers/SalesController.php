@@ -234,7 +234,7 @@ class SalesController extends Controller
             ]);
         }
 
-        if ($request->shipping_type == 'storepickup') {
+        if ($request->shipping_type == 'storepickup' && auth()->user()->has_access_to_route('sales.update_delivery_branch')) {
             $request->validate([
                 'update_dateneeded_sp' => 'required',
             ], [
@@ -288,7 +288,6 @@ class SalesController extends Controller
             }
         }
 
-        dd($request->all(), 000);
 
         if($request->shipping_type == 'd2d'){
             $sales->update(['delivery_type' => 'Door to door delivery']);
@@ -323,7 +322,6 @@ class SalesController extends Controller
 
             if($sales->customer_location == $request->update_dateneeded_d2d){
                 
-            dd($request->all(), 222);
                 $update_date_needed = SalesHeader::whereId($request->update_dateneeded_id)->update([               
                     'customer_delivery_adress' => $request->new_delivery_address,
                     'instruction' => $request->new_instruction,
@@ -335,7 +333,6 @@ class SalesController extends Controller
                 ]);
 
             }else{
-                dd($request->all(), 111);
                 $update_date_needed = SalesHeader::whereId($request->update_dateneeded_id)->update([
                     'customer_location' => $request->update_dateneeded_d2d,
                     'customer_delivery_adress' => $request->new_delivery_address,
@@ -352,7 +349,6 @@ class SalesController extends Controller
         if($request->shipping_type == 'storepickup'){
             $sales->update(['delivery_type' => 'Store Pickup']);
             $gross = $sales->gross_amount - $sales->delivery_fee_amount;
-            dd($request->all());
             $sales->update([
                 'customer_delivery_adress' => $request->update_dateneeded_sp,
                 'instruction' => $request->new_instruction,
