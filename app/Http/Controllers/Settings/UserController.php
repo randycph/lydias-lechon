@@ -109,6 +109,11 @@ class UserController extends Controller
             $paytypes= implode(",",$request->payment_types);
         }
 
+        $productionBranches = [];
+        if(isset($request->production_branch_id)){
+            $productionBranches = implode(",",$request->production_branch_id);
+        }
+    
         $user = User::create([
             'firstname'      => $request->fname,
             'lastname'       => $request->lname,
@@ -121,11 +126,13 @@ class UserController extends Controller
             'user_id'        => Auth::id(),
             'allowed_payments'  => $paytypes,
             'remember_token' => Str::random(10),
-            'address_street'  => ' ',
-            'address_municipality' => ' ',
-            'address_city' => ' ',
-            'address_region' => ' ',
-            'production_branch_id' => $request->production_branch_id ?? null,
+
+            'address_street' => '',
+            'address_municipality' => '',
+            'address_city' => '',
+            'address_region' => '',
+
+            'production_branch_id' => $productionBranches,
         ]);
 
         if($user){
