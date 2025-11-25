@@ -288,6 +288,8 @@ class SalesController extends Controller
             }
         }
 
+        dd($request->all(), 000);
+
         if($request->shipping_type == 'd2d'){
             $sales->update(['delivery_type' => 'Door to door delivery']);
             $rate_type= 'misc';
