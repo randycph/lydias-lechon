@@ -218,7 +218,7 @@ class SalesController extends Controller
     }
 
     public function update_dateneeded(Request $request){
-        $sales = SalesHeader::whereId($request->update_dateneeded_id)->first();
+        $sales = SalesHeader::find($request->update_dateneeded_id);
     
         // if(isset($request->delivery_branch)){
         //     SalesHeader::whereId($request->update_dateneeded_id)->update(['delivery_branch' => $request->delivery_branch]);
@@ -349,7 +349,8 @@ class SalesController extends Controller
         if($request->shipping_type == 'storepickup'){
 
             $gross = $sales->gross_amount - $sales->delivery_fee_amount;
-            $update_date_needed = SalesHeader::whereId($request->update_dateneeded_id)->update([
+            dd($request->all());
+            $sales->update([
                 'customer_delivery_adress' => $request->update_dateneeded_sp,
                 'instruction' => $request->new_instruction,
                 'outlet' => $request->update_dateneeded_sp,

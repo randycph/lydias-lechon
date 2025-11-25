@@ -369,7 +369,7 @@
                                             style="display:none;" @endif>
                                             <label class="d-block">Delivery Address <span class="tx-danger">*</span></label>
                                             <textarea name="new_delivery_address" class="form-control" rows="5"
-                                                @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102) @else style="pointer-events: none;background-color:#E9ECEF" @endif>{{ $salesheader->customer_delivery_adress }}</textarea>
+                                                @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102 || auth()->user()->has_access_to_route('sales-transaction.update') || auth()->user()->has_access_to_route('update_dateneeded')) @else style="pointer-events: none;background-color:#E9ECEF" @endif>{{ $salesheader->customer_delivery_adress }}</textarea>
                                     </div>
 
 
