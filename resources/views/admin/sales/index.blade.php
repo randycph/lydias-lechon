@@ -109,6 +109,13 @@
                                                             <label class="custom-control-label" for="showDeleted">{{__('common.show_deleted')}}</label>
                                                         </div>
                                                     </div>
+                                                    
+                                                    <div class="form-group">
+                                                        <div class="custom-control custom-checkbox">
+                                                            <input type="checkbox" id="unread" name="unread" class="custom-control-input" @if (request('unread') && request('unread') == 'on') checked @endif>
+                                                            <label class="custom-control-label" for="unread">View all unread transaction</label>
+                                                        </div>
+                                                    </div>
                                                     <div class="form-group mg-b-40">
                                                         <label class="d-block">{{__('common.item_displayed')}}</label>
                                                         <input id="displaySize" type="text" class="js-range-slider" name="perPage" value="{{ $filter->perPage }}"/>

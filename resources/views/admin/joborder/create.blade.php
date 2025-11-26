@@ -1288,6 +1288,7 @@
                 $('#loc_div').show();
             } else if(type == 2) {
                 $('#delivery_branch_div').hide();
+                $('#delivery_branch').prop('required',false);
                 $('#outlet_div').show();
                 $('#d2d_div').hide();
                 $('#loc_div').hide();
