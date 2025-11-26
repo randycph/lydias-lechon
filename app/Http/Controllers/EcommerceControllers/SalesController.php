@@ -606,7 +606,8 @@ class SalesController extends Controller
                     ->when($hasBranches && count($locations) > 0,
                         fn ($q) => $q->where(function ($q2) use ($locations) {
                             $q2->whereIn('outlet', $locations)
-                               ->orWhereIn('order_source', $locations);
+                               ->orWhereIn('order_source', $locations)
+                               ->orWhereIn('delivery_branch', $locations);
                         }),
                         fn ($q) => $q
                     )
@@ -620,7 +621,8 @@ class SalesController extends Controller
                     $branchIds = SalesHeader::query()
                         ->where(function ($q) use ($locations) {
                             $q->whereIn('outlet', $locations)
-                            ->orWhereIn('order_source', $locations);
+                            ->orWhereIn('order_source', $locations)
+                            ->orWhereIn('delivery_branch', $locations);
                         })
                         ->pluck('id');
                 }
@@ -665,7 +667,8 @@ class SalesController extends Controller
                 )->when($hasBranches && count($locations) > 0,
                         fn ($q) => $q->where(function ($q2) use ($locations) {
                             $q2->whereIn('outlet', $locations)
-                               ->orWhereIn('order_source', $locations);
+                               ->orWhereIn('order_source', $locations)
+                               ->orWhereIn('delivery_branch', $locations);
                         }),
                         fn ($q) => $q
                     )->with('items', function($q) {
@@ -684,7 +687,8 @@ class SalesController extends Controller
                     )->when($hasBranches && count($locations) > 0,
                         fn ($q) => $q->where(function ($q2) use ($locations) {
                             $q2->whereIn('outlet', $locations)
-                               ->orWhereIn('order_source', $locations);
+                               ->orWhereIn('order_source', $locations)
+                               ->orWhereIn('delivery_branch', $locations);
                         }),
                         fn ($q) => $q
                     )->when($showUnread === true,
@@ -710,7 +714,8 @@ class SalesController extends Controller
                                 )
                                 ->where(function ($query) use($locations) {
                                     $query->whereIn('outlet', $locations)
-                                        ->orWhereIn('order_source', $locations);
+                                        ->orWhereIn('order_source', $locations)
+                                        ->orWhereIn('delivery_branch', $locations);
                                 });
             }
         }
