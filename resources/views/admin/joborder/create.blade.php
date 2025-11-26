@@ -242,7 +242,7 @@
                                 <option value="">- Select Branch -</option>
                                 @php 
                                     $name='delivery';
-                                    $brr = $branches_store->where('delivery_branch','1')
+                                    $brr = \App\EcommerceModel\Branch::where('status', 1)->where('delivery_branch', 1)->orderBy('name')->get();
                                 @endphp
                                 @foreach($brr as $b)
                                     <option value="{{$b->name}}">{{$b->name}}</option>
@@ -256,9 +256,10 @@
                                 <option value="">- Select Branch -</option>
                                 @php 
                                     $name='delivery';
-                                    $prr = $branches_store->where('pickup_branch','1')->filter(function ($item) use($name){
-                                                 return false === stristr($item->name, $name);
-                                            })
+                                    $prr = \App\EcommerceModel\Branch::where('status', 1)->where('pickup_branch', 1)->orderBy('name')->get();
+                                    // $prr = $prr->where('pickup_branch','1')->filter(function ($item) use($name){
+                                    //             return false !== stristr($item->name, $name);
+                                    //         });
                                 @endphp
                                 @foreach($prr as $b)
                                     <option value="{{$b->name}}|0">{{$b->name}}</option>
