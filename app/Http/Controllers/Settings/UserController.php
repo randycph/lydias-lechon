@@ -82,6 +82,18 @@ class UserController extends Controller
             'role' => 'required|exists:role,id',
         ]);
 
+        $request->merge([
+            'payment_types'        => is_array($request->payment_types) ? $request->payment_types : [],
+            'production_branch_id' => is_array($request->production_branch_id) ? $request->production_branch_id : [],
+            'branches'             => is_array($request->branches) ? $request->branches : [],
+        ]);
+
+        $request->merge([
+            'payment_types'        => array_filter($request->payment_types),
+            'production_branch_id' => array_filter($request->production_branch_id),
+            'branches'             => array_filter($request->branches),
+        ]);
+
         $data = $request->all();
 
         $role = Role::where('id',$request->role)->first();
@@ -102,14 +114,14 @@ class UserController extends Controller
 
         $paytypes='';
         if(isset($request->payment_types) && $role->can_approve_payment == 1){
-            $paytypes= implode(",",$request->payment_types);
+            $paytypes= implode(",",$request->payment_types ?? []);
         }
 
         $productionBranches = [];
         if(isset($request->production_branch_id)){
-            $productionBranches = implode(",",$request->production_branch_id);
+            $productionBranches = implode(",",$request->production_branch_id ?? []);
         }
-
+    
         $user = User::create([
             'firstname'      => $request->fname,
             'lastname'       => $request->lname,
@@ -122,16 +134,18 @@ class UserController extends Controller
             'user_id'        => Auth::id(),
             'allowed_payments'  => $paytypes,
             'remember_token' => Str::random(10),
-            'address_street'  => ' ',
-            'address_municipality' => ' ',
-            'address_city' => ' ',
-            'address_region' => ' ',
+
+            'address_street' => '',
+            'address_municipality' => '',
+            'address_city' => '',
+            'address_region' => '',
+
             'production_branch_id' => $productionBranches,
         ]);
 
         if($user){
             if($role->has_branches == 1){
-                $branches = $data['branches'];
+                $branches = $data['branches'] ?? [];
 
                 foreach ($branches as $id) {
                     UserBranch::create([
@@ -171,6 +185,18 @@ class UserController extends Controller
             'role' => 'required|exists:role,id',
         ]);
 
+        $request->merge([
+            'payment_types'        => is_array($request->payment_types) ? $request->payment_types : [],
+            'production_branch_id' => is_array($request->production_branch_id) ? $request->production_branch_id : [],
+            'branches'             => is_array($request->branches) ? $request->branches : [],
+        ]);
+
+        $request->merge([
+            'payment_types'        => array_filter($request->payment_types),
+            'production_branch_id' => array_filter($request->production_branch_id),
+            'branches'             => array_filter($request->branches),
+        ]);
+
         $role = Role::where('id',$request->role)->first();
 
         if ($role->has_production_branch == 1) {
@@ -189,7 +215,12 @@ class UserController extends Controller
 
         $paytypes='';
         if(isset($request->payment_types)){
-            $paytypes= implode(",",$request->payment_types);
+            $paytypes= implode(",",$request->payment_types ?? []);
+        }
+
+        $productionBranches = [];
+        if(isset($request->production_branch_id)){
+            $productionBranches = implode(",",$request->production_branch_id ?? []);
         }
 
         $productionBranches = [];
@@ -212,7 +243,7 @@ class UserController extends Controller
         if($user){
             if($role->has_branches == 1){
                 $data = $request->all();
-                $branches = $data['branches'];
+                $branches = $data['branches'] ?? [];
 
                 foreach ($branches as $id) {
                     UserBranch::create([
