@@ -586,7 +586,10 @@ class SalesController extends Controller
         foreach ($branches as $branch) {
             $locations[] = $branch?->branch?->name ?? $branch?->name ?? null;
         }
-        array_push($locations, 'Web');
+
+        if (auth()->user()->role_id == 1) {
+            array_push($locations, 'Web');
+        }
 
         if(auth()->user()->role_id == 1 || $hasProdBranch || auth()->user()->role_id == 3 || $hasBranches){
 
@@ -704,7 +707,9 @@ class SalesController extends Controller
                 foreach($branches as $branch){
                     array_push($locations, $branch->branch->name);
                 }
-                array_push($locations, 'Web');
+                if (auth()->user()->role_id == 1) {
+                    array_push($locations, 'Web');
+                }
 
                 $model = SalesHeader::where('id','>',0)
                                 ->when($showDeleted === true,
@@ -1771,7 +1776,9 @@ class SalesController extends Controller
             $locations[] = $branch?->branch?->name ?? $branch?->name ?? null;
         }
         
-        array_push($locations, 'Web');
+        if (auth()->user()->role_id == 1) {
+            array_push($locations, 'Web');
+        }
 
         if(auth()->user()->role_id == 1 || $hasProdBranch || auth()->user()->role_id == 3 || $hasBranches){
             // $model = SalesHeader::where('id','>',0);
@@ -1851,7 +1858,9 @@ class SalesController extends Controller
                 array_push($locations, $branch?->branch?->name ?? $branch?->name);
             }
 
-            array_push($locations, 'Web');
+            if (auth()->user()->role_id == 1) {
+                array_push($locations, 'Web');
+            }
 
             $model = SalesHeader::where('id','>',0)
                                 ->where('for_deletion', 1)
