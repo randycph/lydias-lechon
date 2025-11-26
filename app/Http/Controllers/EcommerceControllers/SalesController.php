@@ -594,65 +594,46 @@ class SalesController extends Controller
         if(auth()->user()->role_id == 1 || $hasProdBranch || auth()->user()->role_id == 3 || $hasBranches){
 
             if ($hasProdBranch || $hasBranches) {
-                $productionBranches = $hasProdBranch ? explode(',', auth()->user()->production_branch_id) : [];
+                $productionBranches = $hasProdBranch
+                    ? explode(',', auth()->user()->production_branch_id)
+                    : [];
 
-                // --- Build ELIGIBLE sales_header ids by production branch/date ---
+                // Subquery of eligible sales_header ids
                 $eligible = DB::table('ecommerce_sales_details as d')
                     ->join('job_orders as jo', 'jo.sales_detail_id', '=', 'd.id')
                     ->join('production_orders as po', 'po.joborder_id', '=', 'jo.id')
-                    ->when(count($productionBranches) > 0, fn($q) => $q->whereIn('po.branch_id', $productionBranches))
+                    ->when(count($productionBranches) > 0, function ($q) use ($productionBranches) {
+                        $q->whereIn('po.branch_id', $productionBranches);
+                    })
                     ->where('d.delivery_date', '>=', $today->startOfDay()->toDateTimeString())
                     ->select('d.sales_header_id');
-                    
-                // 1) Production-side IDs
-                $prodIds = SalesHeader::query()
-                    ->whereIn('id', $eligible)
-                    ->when($hasBranches && count($locations) > 0,
-                        fn ($q) => $q->where(function ($q2) use ($locations) {
-                            $q2->whereIn('outlet', $locations)
-                               ->orWhereIn('order_source', $locations)
-                               ->orWhereIn('delivery_branch', $locations);
-                        }),
-                        fn ($q) => $q
-                    )
+
+                $model = SalesHeader::with(['items' => function ($q) {
+                        $q->orderBy('delivery_date', 'asc');
+                    }])
                     ->where('has_sub', 0)
-                    // optionally defer for_deletion filter to the final query
-                    ->pluck('id');
+                    ->when($showDeleted === true,
+                        fn ($q) => $q->where('for_deletion', 1),
+                        fn ($q) => $q->where('for_deletion', 0)
+                    )
+                    ->when($showUnread === true,
+                        fn ($q) => $q->where('is_new_order', 1)
+                    )
+                    // apply production / branch filters without plucking IDs
+                    ->where(function ($q) use ($hasProdBranch, $eligible, $hasBranches, $locations) {
+                        if ($hasProdBranch) {
+                            // this becomes: where id in (select sales_header_id from ...)
+                            $q->orWhereIn('id', $eligible);
+                        }
 
-                // 2) Branch-side IDs (location filter)
-                $branchIds = collect();
-                if ($hasBranches && count($locations) > 0) {
-                    $branchIds = SalesHeader::query()
-                        ->where(function ($q) use ($locations) {
-                            $q->whereIn('outlet', $locations)
-                            ->orWhereIn('order_source', $locations)
-                            ->orWhereIn('delivery_branch', $locations);
-                        })
-                        ->pluck('id');
-                }
-
-                // Merge & unique
-                $ids = $prodIds->merge($branchIds)->unique()->values();
-
-                // If empty, short-circuit to an empty result
-                if ($ids->isEmpty()) {
-                    $model = SalesHeader::whereRaw('1=0'); // no rows
-                } else {
-                    // Final Eloquent query WITH relationships and proper ordering
-                    $model = SalesHeader::with(['items' => function ($q) {
-                            $q->orderBy('delivery_date', 'asc');
-                        }])
-                        ->when($showDeleted === true,
-                            fn ($q) => $q->where('for_deletion', 1),
-                            fn ($q) => $q->where('for_deletion', 0)
-                        )
-                        ->when($showUnread === true,
-                            fn ($q) => $q->where('is_new_order', 1)
-                        )
-                        ->whereIn('id', $ids)
-                        ->orderBy('order_number', 'desc');
-                }
-
+                        if ($hasBranches && count($locations) > 0) {
+                            $q->orWhere(function ($q2) use ($locations) {
+                                $q2->whereIn('outlet', $locations)
+                                ->orWhereIn('order_source', $locations)
+                                ->orWhereIn('delivery_branch', $locations);
+                            });
+                        }
+                    })->orderBy('order_number', 'desc');
             } elseif (auth()->user()->role_id == 3) {
 
                 $eligible = DB::table('ecommerce_sales_details as d')
@@ -661,23 +642,27 @@ class SalesController extends Controller
                     ->where('d.delivery_date', '>=', $today->startOfDay()->toDateTimeString())
                     ->select('d.sales_header_id');
 
-                $model = SalesHeader::where(function ($query) use($eligible) {
-                    $query->whereIn('id', $eligible)->where('has_sub', 0)->where('payment_status', '!=', 'PENDING');
-                })->when($showDeleted === true,
-                    fn ($q) => $q->where('for_deletion', 1),
-                    fn ($q) => $q->where('for_deletion', 0)
-                )->when($showUnread === true,
-                    fn ($q) => $q->where('is_new_order', 1)
-                )->when($hasBranches && count($locations) > 0,
+                $model = SalesHeader::with(['items' => function($q) {
+                        $q->orderBy('delivery_date', 'asc');
+                    }])
+                    ->whereIn('id', $eligible) 
+                    ->where('has_sub', 0)
+                    ->where('payment_status', '!=', 'PENDING')
+                    ->when($showDeleted === true,
+                        fn ($q) => $q->where('for_deletion', 1),
+                        fn ($q) => $q->where('for_deletion', 0)
+                    )
+                    ->when($showUnread === true,
+                        fn ($q) => $q->where('is_new_order', 1)
+                    )
+                    ->when($hasBranches && count($locations) > 0,
                         fn ($q) => $q->where(function ($q2) use ($locations) {
                             $q2->whereIn('outlet', $locations)
-                               ->orWhereIn('order_source', $locations)
-                               ->orWhereIn('delivery_branch', $locations);
-                        }),
-                        fn ($q) => $q
-                    )->with('items', function($q) {
-                    $q->orderBy('delivery_date', 'asc');
-                })->orderBy('order_number', 'desc');
+                            ->orWhereIn('order_source', $locations)
+                            ->orWhereIn('delivery_branch', $locations);
+                        })
+                    )
+                    ->orderBy('order_number', 'desc');
             } else {
                 $model = SalesHeader::where('id','>',0)
                     ->with('items', function($q) use($today) {
@@ -1780,45 +1765,37 @@ class SalesController extends Controller
             array_push($locations, 'Web');
         }
 
-        if(auth()->user()->role_id == 1 || $hasProdBranch || auth()->user()->role_id == 3 || $hasBranches){
-            // $model = SalesHeader::where('id','>',0);
+        if (auth()->user()->role_id == 1 || $hasProdBranch || auth()->user()->role_id == 3 || $hasBranches) {
 
             if ($hasProdBranch || $hasBranches) {
-                $productionBranches = $hasProdBranch ? explode(',', auth()->user()->production_branch_id) : [];
+                $productionBranches = $hasProdBranch
+                    ? explode(',', auth()->user()->production_branch_id)
+                    : [];
 
                 $eligible = DB::table('ecommerce_sales_details as d')
                     ->join('job_orders as jo', 'jo.sales_detail_id', '=', 'd.id')
                     ->join('production_orders as po', 'po.joborder_id', '=', 'jo.id')
                     ->when(count($productionBranches) > 0, function ($query) use ($productionBranches) {
-                        return $query->whereIn('po.branch_id', $productionBranches);
+                        $query->whereIn('po.branch_id', $productionBranches);
                     })
                     ->where('d.delivery_date', '>=', $today->startOfDay()->toDateTimeString())
                     ->select('d.sales_header_id');
 
-                // $model = DB::table('ecommerce_sales_headers')
-                //     ->joinSub($eligible, 'eh', function ($j) {
-                //         $j->on('eh.sales_header_id', '=', 'ecommerce_sales_headers.id');
-                //     });
-
-                $model = SalesHeader::where(function ($query) use($eligible, $locations, $hasBranches) {
-                    $query->whereIn('id', $eligible)->where('has_sub', 0)->where('for_deletion', 1)
-                        ->when(count($locations) > 0, function ($q) use ($locations) {
-                            $q->where(function ($subQ) use ($locations) {
-                                $subQ->whereIn('outlet', $locations)
-                                     ->orWhereIn('order_source', $locations)
-                                    ->orWhereIn('delivery_branch', $locations);
-                            });
-                        })->when($hasBranches && count($locations) > 0,
-                        fn ($q) => $q->where(function ($q2) use ($locations) {
-                            $q2->whereIn('outlet', $locations)
-                               ->orWhereIn('order_source', $locations)
+                $model = SalesHeader::with(['items' => function ($q) {
+                        $q->orderBy('delivery_date', 'asc');
+                    }])
+                    ->whereIn('id', $eligible)
+                    ->where('has_sub', 0)
+                    ->where('for_deletion', 1)
+                    ->when($hasBranches && count($locations) > 0, function ($q) use ($locations) {
+                        $q->where(function ($subQ) use ($locations) {
+                            $subQ->whereIn('outlet', $locations)
+                                ->orWhereIn('order_source', $locations)
                                 ->orWhereIn('delivery_branch', $locations);
-                        }),
-                        fn ($q) => $q
-                    );
-                })->with('items', function($q) {
-                    $q->orderBy('delivery_date', 'asc');
-                })->orderBy('order_number', 'desc');
+                        });
+                    })
+                    ->orderBy('order_number', 'desc');
+
             } elseif (auth()->user()->role_id == 3) {
 
                 $eligible = DB::table('ecommerce_sales_details as d')
@@ -1827,50 +1804,57 @@ class SalesController extends Controller
                     ->where('d.delivery_date', '>=', $today->startOfDay()->toDateTimeString())
                     ->select('d.sales_header_id');
 
-                $model = SalesHeader::where(function ($query) use($eligible, $locations, $hasBranches) {
-                    $query->whereIn('id', $eligible)->where('has_sub', 0)->where('payment_status', '!=', 'PENDING')->where('for_deletion', 1)
-                            ->when(count($locations) > 0, function ($q) use ($locations) {
-                                $q->where(function ($subQ) use ($locations) {
-                                    $subQ->whereIn('outlet', $locations)
-                                        ->orWhereIn('order_source', $locations)
-                                        ->orWhereIn('delivery_branch', $locations);
-                                });
-                            })->when($hasBranches && count($locations) > 0,
-                                fn ($q) => $q->where(function ($q2) use ($locations) {
-                                    $q2->whereIn('outlet', $locations)
-                                    ->orWhereIn('order_source', $locations)
-                                    ->orWhereIn('delivery_branch', $locations);
-                                }),
-                                fn ($q) => $q
-                            );
-                })->with('items', function($q) {
-                    $q->orderBy('delivery_date', 'asc');
-                })->orderBy('order_number', 'desc');
+                $model = SalesHeader::with(['items' => function ($q) {
+                        $q->orderBy('delivery_date', 'asc');
+                    }])
+                    ->whereIn('id', $eligible)       // still a subquery
+                    ->where('has_sub', 0)
+                    ->where('payment_status', '!=', 'PENDING')
+                    ->where('for_deletion', 1)
+                    ->when($hasBranches && count($locations) > 0, function ($q) use ($locations) {
+                        $q->where(function ($subQ) use ($locations) {
+                            $subQ->whereIn('outlet', $locations)
+                                ->orWhereIn('order_source', $locations)
+                                ->orWhereIn('delivery_branch', $locations);
+                        });
+                    })
+                    ->orderBy('order_number', 'desc');
+
             } else {
-                $model = SalesHeader::where('id','>',0)->where('has_sub', 0)->where('for_deletion', 1);
+                $model = SalesHeader::with(['items' => function ($q) {
+                        $q->orderBy('delivery_date', 'asc');
+                    }])
+                    ->where('id', '>', 0)
+                    ->where('has_sub', 0)
+                    ->where('for_deletion', 1)
+                    ->orderBy('order_number', 'desc');
             }
 
-        }else{
+        } else {
             $branches = UserBranch::accessBranch();
 
             $locations = [];
-            foreach($branches as $branch){
-                array_push($locations, $branch?->branch?->name ?? $branch?->name);
+            foreach ($branches as $branch) {
+                $locations[] = $branch?->branch?->name ?? $branch?->name;
             }
 
             if (auth()->user()->role_id == 1) {
-                array_push($locations, 'Web');
+                $locations[] = 'Web';
             }
 
-            $model = SalesHeader::where('id','>',0)
-                                ->where('for_deletion', 1)
-                                ->where(function ($query) use($locations) {
-                                    $query->whereIn('outlet', $locations)
-                                          ->orWhereIn('order_source', $locations)
-                                          ->orWhereIn('delivery_branch', $locations);
-                                });
-
+            $model = SalesHeader::with(['items' => function ($q) {
+                    $q->orderBy('delivery_date', 'asc');
+                }])
+                ->where('id', '>', 0)
+                ->where('for_deletion', 1)
+                ->where(function ($query) use ($locations) {
+                    $query->whereIn('outlet', $locations)
+                        ->orWhereIn('order_source', $locations)
+                        ->orWhereIn('delivery_branch', $locations);
+                })
+                ->orderBy('order_number', 'desc');
         }
+
         $model = $this->additional_filters($model);
       
 
