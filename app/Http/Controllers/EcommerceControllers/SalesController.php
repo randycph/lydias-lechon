@@ -709,6 +709,15 @@ class SalesController extends Controller
                                         ->orWhereIn('order_source', $locations)
                                         ->orWhereIn('delivery_branch', $locations);
                                 });
+            } else {
+                $model = SalesHeader::where('id','>',0)
+                                ->when($showDeleted === true,
+                                    fn ($q) => $q->where('for_deletion', 1),
+                                    fn ($q) => $q->where('for_deletion', 0)
+                                )
+                                ->when($showUnread === true,
+                                    fn ($q) => $q->where('is_new_order', 1)
+                                );
             }
         }
         $model = $this->additional_filters($model);
