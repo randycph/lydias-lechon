@@ -211,7 +211,6 @@ User Management
 <script src="{{ asset('lib/jquery/jquery.min.js') }}"></script>
 <script src="{{ asset('lib/select2/js/select2.min.js') }}"></script>
 <script src="{{ asset('js/dashforge.js') }}"></script>
-<script src="{{ asset('lib/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 @endsection
 
 @section('customjs')
