@@ -922,6 +922,13 @@ class CartController extends Controller
             $carts = Cart::where('user_id',$user->id)->get();
         }
 
+        if ($carts->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your cart is empty. Please add items to your cart before proceeding to checkout.'
+            ]);
+        }
+
         $coupon_data = json_decode($request->input('coupon_data'), true);
 
         if (!empty($coupon_data)) {
