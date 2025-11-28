@@ -50,7 +50,7 @@
 
         <div class="container-fluid">
             <div class="text-center mg-b-20"><img height="100px" src="{{ asset('images/lydias1965.png') }}" alt="">
-            <h4 class="mg-b-0 tx-spacing--1">Audit Trail (Sales)</h4></div>
+            <h4 class="mg-b-0 tx-spacing--1">Audit Trail (User)</h4></div>
           
 
             <div class="row-sm">
@@ -77,13 +77,13 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="tx-13">Start Date</label>
-                                    <input type="date" required class="form-control input-sm" name="startdate"  autocomplete="off" value="@isset($_GET['startdate']){{ $_GET['startdate'] }}@endisset">
+                                    <input type="date" class="form-control input-sm" name="startdate"  autocomplete="off" value="@isset($_GET['startdate']){{ $_GET['startdate'] }}@endisset">
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="tx-13">End Date</label>
-                                    <input type="date" required class="form-control input-sm" name="enddate"  autocomplete="off" value="@isset($_GET['enddate']){{ $_GET['enddate'] }}@endisset">
+                                    <input type="date" class="form-control input-sm" name="enddate"  autocomplete="off" value="@isset($_GET['enddate']){{ $_GET['enddate'] }}@endisset">
                                 </div>
                             </div>
                             <div class="col-md-3 filter-action mg-r-5">
@@ -120,7 +120,7 @@
                          
                             @foreach($rs as $r) 
                                 <tr style="text-align: left">
-                                    <td>@if(date('Y-m-d',strtotime($r->activity_date)) <> '1970-01-01'){{date('m-d-Y g:i A',strtotime($r->activity_date))}} @endif</td>
+                                    <td>{{ \Carbon\Carbon::parse($r->activity_date)->format('m-d-Y g:i A') }}</td>
                                     <td>{{$r->activity_type}}</td>
                                     <td>{{$r->dashboard_activity}}</td>
                                     <td>{{$r->activity_desc}}</td>
@@ -192,7 +192,7 @@
         $('#example').DataTable( {
             dom: 'Bfrtip',
             pageLength: 20,
-            sorting: [[ 0, "desc" ]],
+            ordering: false,
             buttons: [
                 {
                     extend: 'print',
