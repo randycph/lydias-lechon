@@ -76,6 +76,11 @@ trait LogsActivityDiff
             }
         });
 
+        static::deleting(function (Model $model) {
+            // snapshot full original state before it disappears
+            $model->__activity_originals_for_delete = $model->getOriginal();
+        });
+
         static::deleted(function (Model $model) {
             $orig = $model->__activity_originals_for_delete ?? null;
             unset($model->__activity_originals_for_delete);

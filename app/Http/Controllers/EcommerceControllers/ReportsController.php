@@ -1467,28 +1467,6 @@ class ReportsController extends Controller
     }
 
     public function audit_trail_per_user(Request $request){
-        // $rs = '';
-        // $qry = "SELECT * FROM `cms_activity_logs` where id>0 ";
-        // // conditions
-        //     if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-        //         $qry .= " and activity_date >= '" . date('Y-m-d 00:00:00', strtotime($_GET['startdate'])) . "' and activity_date <= '" . date('Y-m-d 23:59:59', strtotime($_GET['enddate'])) . "'";
-        //     }
-        //     else{
-        //         $qry.= " and activity_date >='".date('Y-m-d 00:00:00')."' and activity_date <='".date('Y-m-d 23:59:59')."'";
-        //     }
-
-        //     if(isset($_GET['pb']) && strlen($_GET['pb'])>=1){
-        //         $ex = $_GET['pb'];
-        //         $qry.= " and (created_by ='".$ex."')";
-        //     }
-        //     else{
-        //         $qry.= " and created_by ='1111111111111111111111111111111111111'";
-        //     }
-        //     $qry.=" order by id desc";
-        // // end conditions
-        //    //dd($qry);
-        // $rs = DB::select($qry);
-
         $start = $request->input('startdate') ?? Carbon::now()->format('Y-m-d');
         $end = $request->input('enddate') ?? Carbon::now()->format('Y-m-d');
         $pb = $request->input('pb') ?? null; 
@@ -1505,10 +1483,9 @@ class ReportsController extends Controller
                     ->orderBy('activity_date', 'desc')
                     ->get();
 
-                    // dd($rs);
+        // $users = User::where('role_id','<>',env('CUSTOMER_ROLE_ID'))->orderBy('name')->get();
+        return view('admin.reports.audit_trail_per_user',compact('rs'));
 
-        $users = User::where('role_id','<>',env('CUSTOMER_ROLE_ID'))->orderBy('name')->get();
-        return view('admin.reports.audit_trail_per_user',compact('rs','users'));
     }
 
     public function searchUsers(Request $request)
@@ -1520,7 +1497,7 @@ class ReportsController extends Controller
         //             ->orderBy('name')
         //             ->limit(20)
         //             ->get();
-            $users = User::where('role_id', '=', 6)
+            $users = User::where('role_id', '=', env('CUSTOMER_ROLE_ID'))
                      ->when($search, fn($query) => $query->where('name', 'like', "%{$search}%"))
                     ->orderBy('name')
                     ->limit(20)
@@ -1530,7 +1507,7 @@ class ReportsController extends Controller
         return response()->json([
             'results' => $users->map(fn($user) => [
                 'id' => $user->id,
-                'text' => $user->name." (".$user->email.")"
+                'text' => $user->name . ($user->email ? " (".$user->email.")" : "")
             ])
         ]);
     }
@@ -1552,27 +1529,41 @@ class ReportsController extends Controller
     //     ]);
     // }
 
-    public function audit_trail_per_sales(Request $request){
-        $rs = '';
-        $qry = "SELECT l.* FROM `cms_activity_logs` l
-        left join ecommerce_sales_headers h on h.id=l.reference
-        where l.reference REGEXP '^-?[0-9]+$' ";
-        // conditions
-           
-            if(isset($_GET['pb']) && strlen($_GET['pb'])>=1){
-              
-                $qry.= " and order_number like '%".$_GET['pb']."%'";
-            }
-            else{
-                $qry.= " and h.id ='1'";
-            }
-            $qry.=" order by l.id desc";
-        // end conditions
-           //dd($qry);
-        $rs = DB::select($qry);
-   
-        return view('admin.reports.audit_trail_per_sales',compact('rs'));
+    public function audit_trail_per_sales(Request $request)
+    {
+        $pb = trim((string) $request->input('pb', ''));
+
+        $rs = DB::table('cms_activity_logs as l')
+            // ref -> detail
+            ->leftJoin('ecommerce_sales_details as d', 'd.id', '=', 'l.reference')
+            // detail -> header
+            ->leftJoin('ecommerce_sales_headers as h', 'h.id', '=', 'd.sales_header_id')
+            // also allow ref -> header directly
+            ->leftJoin('ecommerce_sales_headers as h2', 'h2.id', '=', 'l.reference')
+            ->whereRaw("l.reference REGEXP '^[0-9]+$'") // numeric ref only
+            ->when($pb !== '', function ($q) use ($pb) {
+                $q->where(function ($q) use ($pb) {
+                    $q->where('h.order_number',  'like', "%{$pb}%")  // via detail->header
+                    ->orWhere('h2.order_number','like', "%{$pb}%") // directly header
+                    ->orWhere('d.id',          'like', "%{$pb}%")  // detail id
+                    ->orWhere('h.id',          'like', "%{$pb}%"); // header id
+                });
+            }, function ($q) {
+                // fallback filter (optional – remove if you don't want a default)
+                $q->where('h.id', '=', 1);
+            })
+            ->orderByDesc('l.id')
+            ->select([
+                'l.*',
+                'd.id as sales_detail_id',
+                DB::raw('COALESCE(h.id, h2.id) as sales_header_id'),
+                DB::raw('COALESCE(h.order_number, h2.order_number) as order_number'),
+            ])
+            ->get();
+
+        return view('admin.reports.audit_trail_per_sales', compact('rs'));
     }
+
 
     public function audit_trail_per_external(Request $request){
         $rs = '';
