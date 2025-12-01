@@ -620,7 +620,7 @@ class SalesController extends Controller
                         fn ($q) => $q->where('is_new_order', 1)
                     )
                     ->when($isDispatcher,
-                        fn ($q) => $q->where('payment_status', '!=', 'PENDING')
+                        fn ($q) => $q->where('payment_status', '!=', 'UNPAID')
                     )
                     // apply production / branch filters without plucking IDs
                     ->where(function ($q) use ($hasProdBranch, $eligible, $hasBranches, $locations) {
@@ -656,7 +656,7 @@ class SalesController extends Controller
                         fn ($q) => $q->where('for_deletion', 0)
                     )
                     ->when($isDispatcher,
-                        fn ($q) => $q->where('payment_status', '!=', 'PENDING')
+                        fn ($q) => $q->where('payment_status', '!=', 'UNPAID')
                     )
                     ->when($showUnread === true,
                         fn ($q) => $q->where('is_new_order', 1)
@@ -677,7 +677,7 @@ class SalesController extends Controller
                     })
                     ->where('has_sub', 0)
                     ->when($isDispatcher,
-                        fn ($q) => $q->where('payment_status', '!=', 'PENDING')
+                        fn ($q) => $q->where('payment_status', '!=', 'UNPAID')
                     )
                     ->when($showDeleted === true,
                         fn ($q) => $q->where('for_deletion', 1),
@@ -714,7 +714,7 @@ class SalesController extends Controller
                                     fn ($q) => $q->where('is_new_order', 1)
                                 )
                                 ->when($isDispatcher,
-                                    fn ($q) => $q->where('payment_status', '!=', 'PENDING')
+                                    fn ($q) => $q->where('payment_status', '!=', 'UNPAID')
                                 )
                                 ->where(function ($query) use($locations) {
                                     $query->whereIn('outlet', $locations)
@@ -728,7 +728,7 @@ class SalesController extends Controller
                                     fn ($q) => $q->where('for_deletion', 0)
                                 )
                                 ->when($isDispatcher,
-                                    fn ($q) => $q->where('payment_status', '!=', 'PENDING')
+                                    fn ($q) => $q->where('payment_status', '!=', 'UNPAID')
                                 )
                                 ->when($showUnread === true,
                                     fn ($q) => $q->where('is_new_order', 1)
@@ -1821,7 +1821,7 @@ class SalesController extends Controller
                         });
                     })
                     ->when($isDispatcher,
-                        fn ($q) => $q->where('payment_status', '!=', 'PENDING')
+                        fn ($q) => $q->where('payment_status', '!=', 'UNPAID')
                     )
                     ->orderBy('order_number', 'desc');
 
@@ -1854,7 +1854,7 @@ class SalesController extends Controller
                         $q->orderBy('delivery_date', 'asc');
                     }])
                     ->when($isDispatcher,
-                        fn ($q) => $q->where('payment_status', '!=', 'PENDING')
+                        fn ($q) => $q->where('payment_status', '!=', 'UNPAID')
                     )
                     ->where('id', '>', 0)
                     ->where('has_sub', 0)
@@ -1880,7 +1880,7 @@ class SalesController extends Controller
                 ->where('id', '>', 0)
                 ->where('for_deletion', 1)
                     ->when($isDispatcher,
-                        fn ($q) => $q->where('payment_status', '!=', 'PENDING')
+                        fn ($q) => $q->where('payment_status', '!=', 'UNPAID')
                     )
                 ->where(function ($query) use ($locations) {
                     $query->whereIn('outlet', $locations)
