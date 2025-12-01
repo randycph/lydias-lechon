@@ -59,31 +59,31 @@
             <li class="nav-item with-sub @if (request()->routeIs('reports*')) active show @endif">
                 <a href="#" class="nav-link"><i data-feather="pie-chart"></i> <span>Reports</span></a>
                 <ul>
-                    @if(auth()->user()->has_access_to_route('admin.report.sales') && !isDispatcher())
+                    @if(auth()->user()->has_access_to_route('admin.report.sales'))
                         <li><a target="_blank" href="{{route('admin.report.sales')}}">Sales Summary Report</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.sales_payment') && !isForecaster() && !isDispatcher())
+                    @if(auth()->user()->has_access_to_route('admin.report.sales_payment'))
                         <li><a target="_blank" href="{{route('admin.report.sales_payment')}}">Sales Payment Report</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.delivery_status') && !isForecaster() && !isDispatcher())
+                    @if(auth()->user()->has_access_to_route('admin.report.delivery_status'))
                         <li><a target="_blank" href="{{route('admin.report.delivery_status')}}">Delivery Status Report</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.joborder') && !isForecaster() && !isDispatcher())
+                    @if(auth()->user()->has_access_to_route('admin.report.joborder'))
                         <li><a target="_blank" href="{{route('admin.report.joborder')}}">Job Order Report</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.leftover') && !isForecaster() && !isDispatcher())
+                    @if(auth()->user()->has_access_to_route('admin.report.leftover'))
                         <li><a target="_blank" href="{{route('admin.report.leftover')}}">Leftover Report</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.sales-per-agent') && !isForecaster() && !isDispatcher())
+                    @if(auth()->user()->has_access_to_route('admin.report.sales-per-agent'))
                         <li><a target="_blank" href="{{route('admin.report.sales-per-agent')}}">Sales per Agent</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.sales-per-customer') && !isForecaster() && !isDispatcher())
+                    @if(auth()->user()->has_access_to_route('admin.report.sales-per-customer'))
                         <li><a target="_blank" href="{{route('admin.report.sales-per-customer')}}">Sales per Customer</a></li>
                     @endif
                     @if(auth()->user()->has_access_to_route('admin.report.forecaster'))
                         <li><a target="_blank" href="{{route('admin.report.forecaster')}}">Forecaster Report</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.door2door_report') && !isForecaster() && !isDispatcher())
+                    @if(auth()->user()->has_access_to_route('admin.report.door2door_report'))
                         <li><a target="_blank" href="{{route('admin.report.door2door_report')}}">Delivery Report</a></li>
                     @endif
                     @if(auth()->user()->has_access_to_route('admin.report.sales_category'))
@@ -122,7 +122,7 @@
                     @if (auth()->user()->has_access_to_route('admin.report.commissary_production'))
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.commissary_production')}}">Commissary Production</a></li>
                     @endif
-                    @if (auth()->user()->has_access_to_route('admin.report.customer_details'))
+                    @if (auth()->user()->has_access_to_route('admin.report.customer-details'))
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.customer-details')}}">Customer Details Report</a></li>
                     @endif
                     @if (auth()->user()->has_access_to_route('admin.report.gift_cert'))
