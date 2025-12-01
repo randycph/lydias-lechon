@@ -1934,7 +1934,7 @@ class CartController extends Controller
                 else
                     $rate = $location_lechon->rate;
             }
-            if($p->id == 42 ) // if lechon baka
+            if($p->id == 178 ) // if lechon baka
             {
                 $baka = 1;
             }
