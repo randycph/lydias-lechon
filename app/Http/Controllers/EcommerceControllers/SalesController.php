@@ -589,7 +589,9 @@ class SalesController extends Controller
             array_push($locations, 'Web');
         }
 
-        if(auth()->user()->role_id == 1 || $hasProdBranch || auth()->user()->role_id == 3 || $hasBranches){
+        $isDispatcher = auth()->user()->role_id == 5;
+
+        if(auth()->user()->role_id == 1 || $hasProdBranch || auth()->user()->role_id == 3 || $hasBranches || auth()->user()->role_id == 5){
 
             if ($hasProdBranch || $hasBranches) {
                 $productionBranches = $hasProdBranch
@@ -616,6 +618,9 @@ class SalesController extends Controller
                     )
                     ->when($showUnread === true,
                         fn ($q) => $q->where('is_new_order', 1)
+                    )
+                    ->when($isDispatcher,
+                        fn ($q) => $q->where('payment_status', '!=', 'PENDING')
                     )
                     // apply production / branch filters without plucking IDs
                     ->where(function ($q) use ($hasProdBranch, $eligible, $hasBranches, $locations) {
@@ -650,6 +655,9 @@ class SalesController extends Controller
                         fn ($q) => $q->where('for_deletion', 1),
                         fn ($q) => $q->where('for_deletion', 0)
                     )
+                    ->when($isDispatcher,
+                        fn ($q) => $q->where('payment_status', '!=', 'PENDING')
+                    )
                     ->when($showUnread === true,
                         fn ($q) => $q->where('is_new_order', 1)
                     )
@@ -668,6 +676,9 @@ class SalesController extends Controller
                           ->orderBy('delivery_date', 'desc');
                     })
                     ->where('has_sub', 0)
+                    ->when($isDispatcher,
+                        fn ($q) => $q->where('payment_status', '!=', 'PENDING')
+                    )
                     ->when($showDeleted === true,
                         fn ($q) => $q->where('for_deletion', 1),
                         fn ($q) => $q->where('for_deletion', 0)
@@ -702,6 +713,9 @@ class SalesController extends Controller
                                 ->when($showUnread === true,
                                     fn ($q) => $q->where('is_new_order', 1)
                                 )
+                                ->when($isDispatcher,
+                                    fn ($q) => $q->where('payment_status', '!=', 'PENDING')
+                                )
                                 ->where(function ($query) use($locations) {
                                     $query->whereIn('outlet', $locations)
                                         ->orWhereIn('order_source', $locations)
@@ -712,6 +726,9 @@ class SalesController extends Controller
                                 ->when($showDeleted === true,
                                     fn ($q) => $q->where('for_deletion', 1),
                                     fn ($q) => $q->where('for_deletion', 0)
+                                )
+                                ->when($isDispatcher,
+                                    fn ($q) => $q->where('payment_status', '!=', 'PENDING')
                                 )
                                 ->when($showUnread === true,
                                     fn ($q) => $q->where('is_new_order', 1)
@@ -1772,7 +1789,9 @@ class SalesController extends Controller
             array_push($locations, 'Web');
         }
 
-        if (auth()->user()->role_id == 1 || $hasProdBranch || auth()->user()->role_id == 3 || $hasBranches) {
+        $isDispatcher = auth()->user()->role_id == 5; // dispatcher role
+
+        if (auth()->user()->role_id == 1 || $hasProdBranch || auth()->user()->role_id == 3 || $hasBranches || $isDispatcher) {
 
             if ($hasProdBranch || $hasBranches) {
                 $productionBranches = $hasProdBranch
@@ -1801,6 +1820,9 @@ class SalesController extends Controller
                                 ->orWhereIn('delivery_branch', $locations);
                         });
                     })
+                    ->when($isDispatcher,
+                        fn ($q) => $q->where('payment_status', '!=', 'PENDING')
+                    )
                     ->orderBy('order_number', 'desc');
 
             } elseif (auth()->user()->role_id == 3) {
@@ -1831,6 +1853,9 @@ class SalesController extends Controller
                 $model = SalesHeader::with(['items' => function ($q) {
                         $q->orderBy('delivery_date', 'asc');
                     }])
+                    ->when($isDispatcher,
+                        fn ($q) => $q->where('payment_status', '!=', 'PENDING')
+                    )
                     ->where('id', '>', 0)
                     ->where('has_sub', 0)
                     ->where('for_deletion', 1)
@@ -1854,6 +1879,9 @@ class SalesController extends Controller
                 }])
                 ->where('id', '>', 0)
                 ->where('for_deletion', 1)
+                    ->when($isDispatcher,
+                        fn ($q) => $q->where('payment_status', '!=', 'PENDING')
+                    )
                 ->where(function ($query) use ($locations) {
                     $query->whereIn('outlet', $locations)
                         ->orWhereIn('order_source', $locations)
