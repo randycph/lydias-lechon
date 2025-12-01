@@ -841,6 +841,7 @@ class CartController extends Controller
 
     public function save_sales(Request $request) 
     {
+        // dd($request->all());
         $request->validate([
             'mobile' => [
                 'required',
@@ -1211,6 +1212,8 @@ class CartController extends Controller
                             'is_multiple_address' => 0,
                             'is_new_order' => 1,
                             'is_sub' => 1,
+                            'has_baka' => $delivery->isBaka ?? 0,
+                            'lechon_baka_service' => $delivery->lechon_baka_service ?? 0,
                             // 'date_needed' => $delivery->need_date . ' ' . $delivery->need_time,
                             // 'delivery_fee' => $delivery->delivery_fee,
                             // 'note' => $delivery->note,
@@ -1248,6 +1251,8 @@ class CartController extends Controller
                             'province' => $delivery->province,
                             'city' => $delivery->city,
                             'barangay' => $delivery->location ?? '',
+                            'has_baka' => $delivery->isBaka ?? 0,
+                            'lechon_baka_service' => $delivery->lechon_baka_service ?? 0,
                         ]);
 
                         if ($delivery->phone && $delivery->sms) {
@@ -1288,7 +1293,9 @@ class CartController extends Controller
                                     'other_cost' => 0,
                                     'other_cost_description' => '',
                                     'created_by' => $user->id,
-                                    'delivery_date' => $delivery->need_date . ' ' . $delivery->need_time
+                                    'delivery_date' => $delivery->need_date . ' ' . $delivery->need_time,
+                                    'has_baka' => $delivery->isBaka ?? 0,
+                                    'lechon_baka_service' => $delivery->lechon_baka_service ?? 0,
                                 ]);
                             }
                         }
@@ -1383,7 +1390,7 @@ class CartController extends Controller
                 'other_cost' => 0,
                 'other_cost_description' => '',
                 'created_by' => $user->id,
-                'delivery_date' => $date_needed
+                'delivery_date' => $date_needed,
             ]);
             $saved_items .= $cart->qty." x ".$product->name.", ";
         }
@@ -1783,31 +1790,35 @@ class CartController extends Controller
 
         // Handle single location
         if (is_string($locations)) {
-            logger('Single location fee calculation', ['location' => $locations]);
             $fee = $this->calculateRate($locations, $carts, $check_customer);
             $fees[] = [
                 'location' => $locations['city'] . ', ' . $locations['province'],
-                'fee' => $fee
+                'fee' => $fee['rate'],
+                'is_baka' => $fee['is_baka'],
+                'lechon_baka_service' => $fee['lechon_baka_service']
             ];
-            $totalFee = $fee;
+            $totalFee = $fee['rate'];
         }
 
         // Handle multiple locations
         if (is_array($locations)) {
-            logger('Multiple locations fee calculation', ['locations' => $locations]);
             foreach ($locations as $loc) {
                 $fee = $this->calculateRate($loc, $carts, $check_customer);
                 $fees[] = [
                     'location' => $loc['city'] . ', ' . $loc['province'],
-                    'fee' => $fee
+                    'fee' => $fee['rate'],
+                    'is_baka' => $fee['is_baka'],
+                    'lechon_baka_service' => $fee['lechon_baka_service']
                 ];
-                $totalFee += $fee;
+                $totalFee += $fee['rate'];
             }
         }
 
         return response()->json([
             'fees' => $fees,
-            'fee' => $totalFee
+            'fee' => $totalFee,
+            'has_baka' => collect($fees)->contains('is_baka', true),
+            'lechon_baka_service_total' => collect($fees)->where('is_baka', true)->sum('lechon_baka_service')
         ]);
     }
 
@@ -1867,24 +1878,24 @@ class CartController extends Controller
                 $rate = $location_lechon?->rate ?? 0;
             }
 
-            if ($p->id == 42) { // lechon baka
+            if ($p->id == 178) { // lechon baka
                 $baka = 1;
             }
         }
 
-        if ($baka == 1) {
+        if ($baka == 1 && $location_lechon->outside_manila == 0) {
             $rate = 0;
-        }
-
-        if ($baka == 1 && $location_lechon && $location_lechon->outside_manila == 1) {
-            $rate = 3000;
         }
 
         if ($check_product == 1 || $check_customer == 1) {
             $rate = 0;
         }
 
-        return $rate;
+        return [
+            'rate' => $rate,
+            'is_baka' => $baka == 1 ? true : false,
+            'lechon_baka_service' => $baka == 1 ? floatval(Product::whereId(270)->first()->price) : 0
+        ];
     }
 
     public function get_shipping_fee(Request $request){
@@ -1939,19 +1950,23 @@ class CartController extends Controller
                 $baka = 1;
             }
         }
+
         if(!isset($rate)){
             $rate = 0 ;
         }
 
-        if($baka == 1){
-            $rate = 0;
-        }
-        if($baka == 1 && $location_lechon->outside_manila == 1){
-            $rate = 3500;
-        }
-
         if($check_product == 1 || $check_customer == 1){
             $rate = 0;
+        }
+
+        if ($baka == 1 && $location_lechon->outside_manila == 0) {
+            $rate = 0;
+        }
+
+        $bakaServicePrice = 0;
+
+        if ($baka == 1) {
+            $bakaServicePrice = Product::whereId(270)->first()->price;
         }
 
         if ($request->has('force_fee')) {
@@ -1959,7 +1974,9 @@ class CartController extends Controller
         } else {
             return response()->json([
                 'fee' => $rate,
-                'location' => $request->city .', '.$request->province
+                'location' => $request->city .', '.$request->province,
+                'is_baka' => $baka == 1 ? true : false,
+                'lechon_baka_service' => floatval($bakaServicePrice)
             ]);
         }
     }  

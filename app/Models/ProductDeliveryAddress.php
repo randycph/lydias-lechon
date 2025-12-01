@@ -33,6 +33,8 @@ class ProductDeliveryAddress extends Model
         'region',
         'city',
         'barangay',
+        'has_baka', 
+        'lechon_baka_service',
     ];
 
     public function user()

@@ -191,19 +191,41 @@
                                     </div>
                                 </div>
                             </template>
+                            <template
+                                x-if="isBaka && lechonBakaService > 0 && method == 'delivery'">
+                                <div>
+                                    <div class="flex justify-between lg:mt-2">
+                                        <span class="font-medium italic text-gray-800">Lechon Baka Service</span>
+                                        <span class="font-medium"
+                                            x-text="lechonBakaService > 0 ? '₱' + lechonBakaService.toLocaleString(undefined, { minimumFractionDigits: 2 }) : ''"></span>
+                                    </div>
+                                </div>
+                            </template>
                             <template x-if="deliveryFees.length > 0">
                                 <div class="flex flex-col gap-1 mt-2">
                                     <template x-for="(item, i) in deliveryFees" :key="i">
-                                        <div class="flex justify-between text-gray-500 text-sm">
-                                            <span x-text="'Delivery Fee (' + item.location + ')'"></span>
-                                            <div class="flex items-center gap-1">
-                                                <template x-if="item.discount && item.discount > 0">
-                                                    <span class="line-through text-red-700 italic"
-                                                        x-text="'₱' + item.fee.toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
-                                                </template>
-                                                <span
-                                                    x-text="'₱' + (item.fee - (item.discount || 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+                                        <div>
+                                            <div class="flex justify-between text-gray-500 text-sm">
+                                                <span x-text="'Delivery Fee (' + item.location + ')'"></span>
+                                                <div class="flex items-center gap-1">
+                                                    <template x-if="item.discount && item.discount > 0">
+                                                        <span class="line-through text-red-700 italic"
+                                                            x-text="'₱' + item.fee.toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+                                                    </template>
+                                                    <span
+                                                        x-text="'₱' + (item.fee - (item.discount || 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+                                                </div>
                                             </div>
+
+                                            <template x-if="item.isBaka && item.lechon_baka_service > 0 && allowMultiple && method == 'delivery'">
+                                                <ul class="pl-6 list-disc">
+                                                    <li class="flex justify-between text-gray-500 text-sm">
+                                                        <span class="italic ">Lechon Baka Service</span>
+                                                        <span
+                                                            x-text="'₱' + item.lechon_baka_service.toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+                                                    </li>
+                                                </ul>
+                                            </template>
                                         </div>
                                     </template>
                                 </div>
@@ -348,8 +370,8 @@
                                     <input @change="onChangeMultipleAddress()" x-model="allowMultiple" checked
                                         id="multiple-address" type="checkbox" value=""
                                         class="w-5 h-5 text-primary bg-gray-100 border-gray-300 rounded-sm focus:ring-primary-dark focus:ring-2">
-                                    <label for="multiple-address" class="ms-2 text-base font-medium text-gray-900">Allow
-                                        multiple delivery address</label>
+                                    <label for="multiple-address" class="ms-2 text-base font-medium text-gray-900">
+                                        Allow multiple delivery address</label>
                                 </div>
 
                                 <template x-if="allowMultiple">
@@ -1223,6 +1245,8 @@
             minimum_processing_hours: window.minimum_processing_hours || 0,
             minimum_processing_hours_misc: window.minimum_processing_hours_misc || 0,
             minimum_order_misc: window.minimum_order_misc || 0,
+            lechonBakaService: 0,
+            isBaka: false,
             minDate() {
                 if (this.hasbaka == true) {
                     const day = new Date(this.today);
@@ -1302,6 +1326,8 @@
                 }];
                 this.deliveryFees = [];
                 this.deliveryFee = 0;
+                this.isBaka = false;
+                this.lechonBakaService = 0;
 
             },
             formEl: null,
@@ -1543,7 +1569,7 @@
                 }
 
                 // Compute total
-                let total = orderAmount + deliveryFeeFinal - (couponDiscount + this.shippingDiscountAmount);
+                let total = orderAmount + deliveryFeeFinal - (couponDiscount + this.shippingDiscountAmount) + this.lechonBakaService;
 
                 total = total <= 0 ? 0 : total;
 
@@ -1866,6 +1892,9 @@
                 const location = this.$refs?.location?.value;
                 const branch = this.$refs?.branch?.value;
 
+                this.isBaka = false;
+                this.lechonBakaService = 0;
+
                 if (this.province && this.city) {
                     try {
                         let response = await fetch('{{route('cart.front.get_shipping_fee')}}', {
@@ -1889,6 +1918,9 @@
                         let data = await response.json();
 
                         this.deliveryFee = data.fee;
+
+                        this.isBaka = data.is_baka;
+                        this.lechonBakaService = data.lechon_baka_service;
 
                         this.location = location;
 
@@ -2075,14 +2107,22 @@
                     const fee = parseFloat(data.fee || 0);
 
                     delivery.delivery_fee = fee;
+                    delivery.isBaka = data.has_baka;
+                    delivery.lechon_baka_service = data.lechon_baka_service_total;
 
                     // Always store by index — 1 entry per row
-                    this.deliveryFees[index] = { location: city + ', ' + province, fee };
+                    this.deliveryFees[index] = { 
+                        location: city + ', ' + province, 
+                        fee, 
+                        isBaka: data.has_baka, 
+                        lechon_baka_service: 
+                        data.lechon_baka_service_total
+                    };
 
                     // this.deliveryFee += fee;
 
                     // Update total delivery fee
-                    this.deliveryFee = this.deliveries.reduce((sum, d) => sum + parseFloat(d.delivery_fee || 0), 0);
+                    this.deliveryFee = this.deliveries.reduce((sum, d) => sum + (parseFloat(d.delivery_fee || 0)) + (parseFloat(d.lechon_baka_service || 0)), 0);
 
                     // await this.loadAutoCoupons(true);
 
