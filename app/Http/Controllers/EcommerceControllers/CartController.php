@@ -1947,7 +1947,7 @@ class CartController extends Controller
             $rate = 0;
         }
         if($baka == 1 && $location_lechon->outside_manila == 1){
-            $rate = 3000;
+            $rate = 3500;
         }
 
         if($check_product == 1 || $check_customer == 1){
