@@ -232,6 +232,10 @@ class SalesController extends Controller
             $update_date_needed = SalesDetail::where('sales_header_id',$request->update_dateneeded_id)->update([
                 'delivery_date' => $request->update_dateneeded_date." ".$request->update_dateneeded_time
             ]);
+
+            JobOrder::where('sales_number', $sales->order_number)->update([
+                'date_needed' => $request->update_dateneeded_date." ".$request->update_dateneeded_time
+            ]);
         }
 
         if ($request->shipping_type == 'storepickup' && auth()->user()->has_access_to_route('sales.update_delivery_branch')) {
