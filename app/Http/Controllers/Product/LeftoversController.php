@@ -33,10 +33,10 @@ class LeftoversController extends Controller
             if(isset($_GET['date'])){
                 $dates->where('date',$_GET['date']);
             }
-            $dates->distinct()->get(['date','branch_id']);            
+            $dates = $dates->distinct()->get(['date','branch_id', 'id']);            
         }
         else{
-            $dates = Leftovers::whereIn('branch_id',$array)->distinct()->get(['date','branch_id']);
+            $dates = Leftovers::whereIn('branch_id',$array)->distinct()->get(['date','branch_id', 'id']);
         }
         return view('admin.leftover.index',compact('dates','branches'));
     }
@@ -49,7 +49,7 @@ class LeftoversController extends Controller
     public function create()
     {
         $branches = UserBranch::accessBranch();
-        $products = Product::withTrashed()->get();
+        $products = Product::where('status', 'PUBLISHED')->where('for_sale', 1)->orderBy('name')->get();
         return view('admin.leftover.create',compact('branches','products'));
     }
 
@@ -114,7 +114,7 @@ class LeftoversController extends Controller
     {               
         $branched = Branch::whereId($branch)->first();        
         $los = Leftovers::where('branch_id',$branch)->where('date',$date)->get();
-        $products = Product::all();
+        $products = Product::where('status', 'PUBLISHED')->where('for_sale', 1)->orderBy('name')->get();
         
         return view('admin.leftover.edit',compact('los','branched','date','products'));
     }
@@ -157,8 +157,13 @@ class LeftoversController extends Controller
      * @param  \App\Leftovers  $leftovers
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Leftovers $leftovers)
+    public function destroy($id)
     {
-        //
+        $leftovers = Leftovers::find($id);
+        if ($leftovers) {
+            $leftovers->delete();
+            return redirect()->route('leftover.index')->with('success','Successfully deleted record!');
+        }
+        return redirect()->route('leftover.index')->with('error','Record not found!');
     }
 }

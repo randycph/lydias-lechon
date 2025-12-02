@@ -78,7 +78,7 @@
                                     <td width="40%">
                                         <select class="form-control jt{{$x}}" name="prod{{$x}}" id="prod{{$x}}">
                                             <option selected="selected" value="">Select Product</option>
-                                            @forelse($products->whereIn('id',[32,35,38,41,137,138,139,140,141,142,7,66,17,63,6,146,145,144,143]) as $p)
+                                            @forelse($products as $p)
                                                 @if($p->id <> 42)
                                                 <option value="{{$p->id}}">{{$p->name}} - &#8369;{{number_format($p->price,2)}}</option>
                                                 @endif

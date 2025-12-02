@@ -72,7 +72,7 @@
                                     <td width="5%"><a href="javascript:void(0)" class="btn btn-xs btn-danger" onclick="remove_product({{$y}})">X</a></td>
                                     <td width="40%">
                                         <select class="form-control jt{{$y}}" name="prod{{$y}}" id="prod{{$y}}">
-                                            <option selected="selected" value="{{$lo->product_id}}">{{$lo->product->name}}</option>
+                                            <option selected="selected" value="{{$lo->product_id}}">{{$lo?->product?->name}}</option>
                                             @forelse($products as $p)
                                                 @if($p->id <> 42)
                                                 <option value="{{$p->id}}">{{$p->name}}</option>

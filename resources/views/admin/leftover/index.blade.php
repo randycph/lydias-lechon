@@ -54,7 +54,9 @@
                             </form>
                         </div>
                         <div class="">
+                            @if (auth()->user()->has_access_to_route('leftover.create'))
                             <a class="btn btn-primary btn-sm mg-b-20" href="{{ route('leftover.create') }}">Add Daily Leftover</a>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -82,9 +84,16 @@
                                     <td> {{$date->branch->name }}</td>
                                     <td>{{ $date->date }}</td>                                    
                                     <td>
-                                        <nav class="nav table-options">                                           
+                                        <nav class="nav table-options">  
+                                            @if (auth()->user()->has_access_to_route('leftover.update_all') || auth()->user()->has_access_to_route('leftover.edit_all'))
                                             <a class="nav-link" href="{{ route('leftover.edit_all',['date' => $date->date, 'branch' => $date->branch_id]) }}" title="Edit This date"><i data-feather="edit"></i></a>
-                                            <a class="nav-link" target="_blank" href="{{ route('leftover.print',['date' => $date->date, 'branch' => $date->branch_id]) }}" title="Print"><i data-feather="file-text"></i></a>  
+                                            @endif
+                                            @if (auth()->user()->has_access_to_route('leftover.index') || auth()->user()->has_access_to_route('leftover.show') || auth()->user()->has_access_to_route('leftover.print'))
+                                            <a class="nav-link" target="_blank" href="{{ route('leftover.print',['date' => $date->date, 'branch' => $date->branch_id]) }}" title="Print"><i data-feather="file-text"></i></a>
+                                            @endif  
+                                            @if (auth()->user()->has_access_to_route('leftover.delete'))
+                                            <a class="nav-link" target="_blank" href="{{ route('leftover.delete', $date->id) }}" title="Delete"><i data-feather="trash"></i></a>
+                                            @endif 
                                         </nav>
                                     </td>
                                 </tr>

@@ -43,7 +43,7 @@
         @forelse($los as $lo)
         <tr>
             <td width="40%">
-                {{$lo->product->name}}
+                {{$lo->product?->name}}
             </td>                                    
             <td width="10%">
                 {{$lo->qty}}                
