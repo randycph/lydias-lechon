@@ -358,14 +358,14 @@
                                                             <a class="dropdown-item" title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale->id) }}">View Sales Summary</a>
                                                             @if ($sale->status !== 'CANCELLED')
                                                                 @if($sale->isConfirm != 1)
-                                                                    @if(auth()->user()->role_id == 2 || auth()->user()->role_id == 1)
+                                                                    @if(auth()->user()->has_access_to_route('sales.confirm.order'))
                                                                     <a class="dropdown-item"  href="javascript:void(0);" onclick="confirm_order({{$sale->id}},'{{ number_format((\App\EcommerceModel\SalesHeader::balance($sale->id)),2) }}');" title="Confirm Order" >Confirm Order</a>
                                                                     @endif
                                                                 @endif
-                                                                @if (!isDispatcher())
+                                                                @if(auth()->user()->has_access_to_route('sales-transaction.update') || auth()->user()->has_access_to_route('update_dateneeded'))
                                                                 <a class="dropdown-item"  href="{{ route('sales.update_details',$sale->id) }}" title="Update Sales Details & Items" >Update Sales Details</a>
                                                                 @endif
-                                                                @if($dateneeded > date('Y-m-d H:i:s') && !isDispatcher())
+                                                                @if($dateneeded > date('Y-m-d H:i:s') && auth()->user()->has_access_to_route('sales-transaction.destroy'))
                                                                     <a class="dropdown-item text-danger" href="javascript:void(0)" onclick="delete_sales({{$sale->id}},'{{$sale->order_number}}')" title="Delete Transaction">Delete</a>
                                                                 @endif
                                                             @endif
