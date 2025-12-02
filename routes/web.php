@@ -628,7 +628,8 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::get('/admin/customer-search/', 'Settings\CustomerController@search')->name(
         'customer.search');
     Route::get('/admin/customer-profile-log-search/', 'Settings\CustomerController@filter')->name('customer.activity.search');
-    Route::resource('/admin/leftover', 'Product\LeftoversController');
+    Route::resource('/admin/leftover', 'Product\LeftoversController')->except(['destroy']);
+    Route::get('/admin/leftover/delete/{id}', 'Product\LeftoversController@destroy')->name('leftover.delete');
     Route::get('/admin/edit_lo/{date}/{branch}', 'Product\LeftoversController@edit_all')->name('leftover.edit_all');
     Route::post('/admin/update_all', 'Product\LeftoversController@update_all')->name('leftover.update_all');
     Route::get('/admin/print/{date}/{branch}', 'Product\LeftoversController@print')->name('leftover.print');
