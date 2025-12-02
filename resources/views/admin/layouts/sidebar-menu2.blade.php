@@ -51,7 +51,7 @@
 
         @if(auth()->user()->has_access_to_route('leftover.index') || auth()->user()->has_access_to_route('leftover.show'))
             <li class="nav-item @if (request()->routeIs('leftover*')) active show @endif">
-                <a href="{{route('leftover.index')}}" class="nav-link"><i data-feather="bar-chart"></i> <span>Daily Leftover</span></a>
+                <a href="{{route('leftover.index')}}" class="nav-link"><i data-feather="droplet"></i> <span>Daily Leftover</span></a>
             </li>
         @endif
 
