@@ -92,7 +92,7 @@
                                             <a class="nav-link" target="_blank" href="{{ route('leftover.print',['date' => $date->date, 'branch' => $date->branch_id]) }}" title="Print"><i data-feather="file-text"></i></a>
                                             @endif  
                                             @if (auth()->user()->has_access_to_route('leftover.delete'))
-                                            <a class="nav-link" target="_blank" href="{{ route('leftover.delete', $date->id) }}" title="Delete"><i data-feather="trash"></i></a>
+                                                <a href="#modalDeleteLeftover" class="nav-link delete_permission" data-pid="{{ $date->id }}" data-toggle="modal"><i data-feather="trash"></i></a>
                                             @endif 
                                         </nav>
                                     </td>
@@ -118,6 +118,33 @@
         <input type="text" id="status" name="status">
     </form>
 
+
+    
+
+    <div class="modal effect-scale" id="modalDeleteLeftover" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalCenterTitle">{{__('standard.account_management.permissions.delete_confirmation_title')}}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{route('leftover.delete')}}" method="post">
+                    @csrf
+                    <input type="hidden" id="pid" name="id">
+                    <div class="modal-body">
+                        <p>You are about to delete this leftover record. Do you want to continue?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-sm btn-danger">Yes, Delete</button>
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
    
 
 @endsection
@@ -131,5 +158,11 @@
 @endsection
 
 @section('customjs')
-    
+    <script>
+        $(document).on('click','.delete_permission', function(){
+            $('#modalDeleteLeftover').show();
+
+            $('#pid').val($(this).data('pid'));
+        });
+    </script>
 @endsection
