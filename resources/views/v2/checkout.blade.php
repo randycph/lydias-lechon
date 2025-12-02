@@ -2073,7 +2073,8 @@
                 const delivery = this.deliveries[index];
                 const city = delivery.city;
                 const province = delivery.province;
-                const products = delivery?.orders?.map(o => o.product_id);
+                // include qty in products
+                const products = delivery?.orders?.map(o => ({ product_id: o.product_id, qty: o.qty }));
 
                 if (!delivery?.orders && !delivery?.orders?.length) {
                     delivery.city = '';
@@ -2949,6 +2950,9 @@
                     });
                 } else if (!isChecked && existingIndex !== -1) {
                     delivery.orders.splice(existingIndex, 1);
+                    this.deliveryFees.splice(this.deliveries.indexOf(delivery), 1);
+                    this.delivery.province = '';
+                    this.delivery.city = '';
                 }
 
                 this.refreshAllAvailableQty();
@@ -3140,6 +3144,8 @@
                 }
 
                 this.refreshAllAvailableQty();
+
+                this.getDeliveryFeeForMultipleDelivery(orderIndex);
             },
 
 

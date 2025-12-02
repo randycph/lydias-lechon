@@ -1771,20 +1771,49 @@ class CartController extends Controller
         $totalFee = 0;
         $fees = [];
 
-        $carts = Product::whereIn('id', $productIds)
-            ->get()
-            ->map(function ($product) {
-                return (object)[
-                    'product_id' => $product->id,
-                    'name' => $product->name,
-                    'price' => $product->price,
-                    'paella_price' => $product->paella_price ?? 0,
-                    'qty' => 1,
-                    'photo' => $product->photos()->first() ? asset('storage/products/' . $product->photos()->first()->path) : '',
-                    'product' => $product
-                ];
-            });
+        // products request is now in this format
+        // [
+        //     {
+        //         "product_id": 178,
+        //         "qty": 2
+        //     },
+        //     {
+        //         "product_id": 170,
+        //         "qty": 1
+        //     }
+        // ]
 
+        $carts = collect([]);
+
+        foreach ($productIds as $product) {
+            $p = Product::find($product['product_id']);
+            if (!$p) continue;
+
+            $carts->push((object)[
+                'product_id' => $p->id,
+                'name' => $p->name,
+                'price' => $p->price,
+                'paella_price' => $p->paella_price ?? 0,
+                'qty' => $product['qty'],
+                'photo' => $p->photos()->first() ? asset('storage/products/' . $p->photos()->first()->path) : '',
+                'product' => $p,
+                'qty' => $product['qty'],
+            ]);
+        }
+
+        // $carts = Product::whereIn('id', $productIds)
+        //     ->get()
+        //     ->map(function ($product) {
+        //         return (object)[
+        //             'product_id' => $product->id,
+        //             'name' => $product->name,
+        //             'price' => $product->price,
+        //             'paella_price' => $product->paella_price ?? 0,
+        //             'qty' => 1,
+        //             'photo' => $product->photos()->first() ? asset('storage/products/' . $product->photos()->first()->path) : '',
+        //             'product' => $product
+        //         ];
+        //     });
 
         $check_customer = Auth::check() && \App\Models\DeliveryFeePromo::check_customer(Auth::id()) ? 1 : 0;
 
@@ -1865,6 +1894,8 @@ class CartController extends Controller
             $rate = $location_misc->rate;
         }
 
+        $bakaQty = 0;
+
         foreach ($carts as $cart) {
             $delivery_promo = \App\Models\DeliveryFeePromo::check_product($cart->product_id);
             if ($delivery_promo == 1) {
@@ -1880,6 +1911,7 @@ class CartController extends Controller
 
             if ($p->id == 178) { // lechon baka
                 $baka = 1;
+                $bakaQty += $cart->qty;
             }
         }
 
@@ -1894,7 +1926,7 @@ class CartController extends Controller
         return [
             'rate' => $rate,
             'is_baka' => $baka == 1 ? true : false,
-            'lechon_baka_service' => $baka == 1 ? floatval(Product::whereId(270)->first()->price) : 0
+            'lechon_baka_service' => $baka == 1 ? floatval(Product::whereId(270)->first()->price * $bakaQty) : 0
         ];
     }
 
@@ -1930,7 +1962,8 @@ class CartController extends Controller
 
         if(!empty($location_misc)){
             $rate = $location_misc->rate;
-        }        
+        }  
+        $bakaQty = 0;      
         foreach($carts as $cart){
             
             $delivery_promo = \App\Models\DeliveryFeePromo::check_product($cart->product_id);
@@ -1948,6 +1981,7 @@ class CartController extends Controller
             if($p->id == 178 ) // if lechon baka
             {
                 $baka = 1;
+                $bakaQty += $cart->qty;
             }
         }
 
@@ -1966,7 +2000,7 @@ class CartController extends Controller
         $bakaServicePrice = 0;
 
         if ($baka == 1) {
-            $bakaServicePrice = Product::whereId(270)->first()->price;
+            $bakaServicePrice = Product::whereId(270)->first()->price * $bakaQty;
         }
 
         if ($request->has('force_fee')) {
