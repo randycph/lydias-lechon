@@ -29,7 +29,9 @@ class ItextmoSmsService
         ];
 
         try {
-            $response = Http::asForm()->post($this->url, $payload);
+            $response = Http::withOptions([
+                'verify' => false
+            ])->asForm()->post($this->url, $payload);
 
             return [
                 'success'  => $response->successful(),
@@ -66,7 +68,6 @@ class ItextmoSmsService
             curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($itextmo));
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             $response = curl_exec($ch);
-            curl_close($ch);
 
             return $response;
         } catch (\Exception $ex) {
