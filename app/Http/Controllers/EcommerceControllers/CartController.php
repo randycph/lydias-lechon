@@ -841,6 +841,7 @@ class CartController extends Controller
 
     public function save_sales(Request $request) 
     {
+        // dd($request->all());
         $request->validate([
             'mobile' => [
                 'required',
@@ -915,11 +916,54 @@ class CartController extends Controller
             //     'is_active' => 1
             // ]);
 
+            $carts = (session('cart', []));
+
+            // check if theres a product with the of 178 (lechon baka) in the cart
+
+            $bakaCart = collect($carts)->firstWhere('product_id', 178);
+            $bakaQty = $bakaCart ? $bakaCart['qty'] : 0;
+
+            if ($bakaCart) {
+                $bakaProduct = Product::whereId(270)->first();
+
+                $order = new Cart();
+                $order->product_id = 270;
+                $order->qty = $bakaQty;
+                $order->price = $bakaProduct->price ?? 0;
+                $order->paella_price = 0;
+                $order->photo = null;
+                $order->product = $bakaProduct;
+
+                array_push($carts, $order);
+
+                session(['cart' => $carts]);
+            }
+
             $carts = collect(session('cart', []));
+
         } else {
             $user = auth()->user();
             $customer_name = $user->name;
-            $carts = Cart::where('user_id',$user->id)->get();
+            $carts = Cart::where('user_id', $user->id)->get();
+
+            $bakaCart = $carts->firstWhere('product_id', 178);
+            $bakaQty = $bakaCart ? $bakaCart->qty : 0;
+
+            Cart::updateOrCreate(
+                [
+                    'product_id' => 270,
+                    'user_id' => $user->id,
+                ],
+                [
+                    'qty' => $bakaQty,
+                    'price' => Product::whereId(270)->first()->price ?? 0,
+                    'photo' => null,
+                    'product' => Product::whereId(270)->first(),
+                    'paella_price' => 0
+                ]
+            );
+
+            $carts = Cart::where('user_id', $user->id)->get();
         }
 
         if ($carts->isEmpty()) {
@@ -928,6 +972,7 @@ class CartController extends Controller
                 'message' => 'Your cart is empty. Please add items to your cart before proceeding to checkout.'
             ]);
         }
+        $bakaServiceFee = Product::whereId(270)->first()->price ?? 0;
 
         $coupon_data = json_decode($request->input('coupon_data'), true);
 
@@ -1000,6 +1045,15 @@ class CartController extends Controller
         }
 
         $req = $request->all();
+        
+        if ($request->has('deliveries')) {
+            $deliveries = json_decode($request->deliveries ?? '[]', true);
+            if ($deliveries && count($deliveries) > 0) {
+                $delivery_fee = array_reduce($deliveries, function ($carry, $item) {
+                    return $carry + (float) ($item['delivery_fee'] ?? 0);
+                }, 0);
+            }
+        }
 
         if ($delivery_type == 'Door to door delivery') {
             $req['force_fee'] = true;
@@ -1011,7 +1065,18 @@ class CartController extends Controller
             }
         }
 
-        $totalPrice = $request->order_amount;
+        $lechonBakaSevice = $request->isBaka == 1 ? $request->lechon_baka_service : 0;
+        $bakaProduct = Product::whereId(270)->first();
+
+        $qty = 0;
+        foreach (collect($carts) as $cart) {
+            if ($cart->product_id == 178) {
+                $qty = $cart->qty;
+                break;
+            }
+        }
+
+        $totalPrice = $request->order_amount + ( $bakaProduct->price * $qty );
         $discount = 0;
         // $delivery_fee = $request->shipping_type == 'pickup' ? 0 : $request->delivery_fee;
         $netAmount = $totalPrice + $delivery_fee;
@@ -1071,6 +1136,8 @@ class CartController extends Controller
                 'is_multiple_address' => ($request->has('deliveries') && count(json_decode($request->deliveries)) > 0) ? 1 : 0,
                 'is_new_order' => 1,
                 'has_sub' => ($request->has('deliveries') && count(json_decode($request->deliveries)) > 0) ? 1 : 0,
+                'lechon_baka_service' => $lechonBakaSevice,
+                'has_baka' => $request->isBaka == 1 ? 1 : 0,
             ]);
             $salesHeader = SalesHeader::find($salesHeader->id);
             if (!$salesHeader) {
@@ -1122,7 +1189,7 @@ class CartController extends Controller
                 'delivery_type' => $delivery_type,
                 'delivery_fee_amount' => $delivery_fee,
                 'order_source' => 'Web',
-                'gross_amount' => $request->order_amount,
+                'gross_amount' => $request->order_amount + ( $bakaProduct?->price * $qty ),
                 'tax_amount' => 0,
                 'net_amount' => $netAmount,
                 'discount_amount' => $discount,
@@ -1140,6 +1207,8 @@ class CartController extends Controller
                 'is_multiple_address' => ($request->has('deliveries') && count(json_decode($request->deliveries)) > 0) ? 1 : 0,
                 'is_new_order' => 1,
                 'has_sub' => ($request->has('deliveries') && count(json_decode($request->deliveries)) > 0) ? 1 : 0,
+                'lechon_baka_service' => $lechonBakaSevice,
+                'has_baka' => $request->isBaka == 1 ? 1 : 0,
             ]);
         }
 
@@ -1200,7 +1269,7 @@ class CartController extends Controller
                             'delivery_type' => 'Door to door delivery',
                             'delivery_fee_amount' => $delivery->delivery_fee,
                             'order_source' => 'Web',
-                            'gross_amount' => $request->order_amount,
+                            'gross_amount' => $request->order_amount + ( $bakaProduct->price * $qty ),
                             'tax_amount' => 0,
                             'net_amount' => $netAmount,
                             'discount_amount' => $discount,
@@ -1218,6 +1287,8 @@ class CartController extends Controller
                             'is_multiple_address' => 0,
                             'is_new_order' => 1,
                             'is_sub' => 1,
+                            'has_baka' => $delivery->isBaka ? 1 : 0,
+                            'lechon_baka_service' => $delivery->lechon_baka_service ?? 0,
                             // 'date_needed' => $delivery->need_date . ' ' . $delivery->need_time,
                             // 'delivery_fee' => $delivery->delivery_fee,
                             // 'note' => $delivery->note,
@@ -1255,6 +1326,8 @@ class CartController extends Controller
                             'province' => $delivery->province,
                             'city' => $delivery->city,
                             'barangay' => $delivery->location ?? '',
+                            'has_baka' => $delivery->isBaka ? 1 : 0,
+                            'lechon_baka_service' => $delivery->lechon_baka_service ?? 0,
                         ]);
 
                         if ($delivery->phone && $delivery->sms) {
@@ -1295,8 +1368,44 @@ class CartController extends Controller
                                     'other_cost' => 0,
                                     'other_cost_description' => '',
                                     'created_by' => $user->id,
-                                    'delivery_date' => $delivery->need_date . ' ' . $delivery->need_time
+                                    'delivery_date' => $delivery->need_date . ' ' . $delivery->need_time,
+                                    'has_baka' => $delivery->isBaka ? 1 : 0,
+                                    'lechon_baka_service' => $delivery->lechon_baka_service ?? 0,
                                 ]);
+
+                                if ($product->id == 178) {
+                                    $product = Product::whereId(270)->first();
+                                    $gross_amount = ((float)$product->price) * $order->qty;
+                                    $tax_amount = $gross_amount - ($gross_amount/1.12);
+                                    $grand_gross += $gross_amount;
+                                    $grand_tax += $tax_amount;
+                                    SalesDetail::create([
+                                        'sales_header_id' => $subSalesHeader->id,
+                                        'product_id' => 270,
+                                        'product_name' => $product->name,
+                                        'product_category' => $product->category_id,
+                                        'price' => $product->price,
+                                        'cost' => 0,
+                                        'tax_amount' => $tax_amount,
+                                        'promo_id' => 0,
+                                        'promo_description' => '',
+                                        'discount_amount' => 0,
+                                        'gross_amount' => $gross_amount,
+                                        'net_amount' => $gross_amount,
+                                        'qty' => $order->qty,
+                                        'paella_qty' => 0,
+                                        'uom' => $product->uom,
+                                        'size' => $product->size ?? "",
+                                        'no_of_pax' => $product->no_of_pax ?? "",
+                                        'paella_price' => 0,
+                                        'other_cost' => 0,
+                                        'other_cost_description' => '',
+                                        'created_by' => $user->id,
+                                        'delivery_date' => $delivery->need_date . ' ' . $delivery->need_time,
+                                        'has_baka' => $delivery->isBaka ? 1 : 0,
+                                        'lechon_baka_service' => $delivery->lechon_baka_service ?? 0,
+                                    ]);
+                                }
                             }
                         }
                     }
@@ -1311,6 +1420,8 @@ class CartController extends Controller
         $coupon_amount = 0;
         $saved_items = '';
 //        $carts = Cart::where('user_id',$user->id)->get();
+        // convert to collection above
+        $carts = collect($carts);
         foreach ($carts as $cart) {
             if(!empty($cart->coupon_code)){
                 
@@ -1367,6 +1478,18 @@ class CartController extends Controller
             $data['tax'] = $data['price'] - ($data['price']/1.12);
             $data['other_cost'] = 0;
             $data['net_price'] = $data['price'] - ($data['tax'] + $data['other_cost']);
+
+            $withBaka = false;
+
+            if ($product->id == 178) {
+                $withBaka = true;
+            }
+
+            $bakaQty = 0;
+
+            if ($withBaka) {
+                $bakaQty = $cart->qty;
+            }
            
             SalesDetail::create([
                 'sales_header_id' => $salesHeader->id,
@@ -1390,7 +1513,9 @@ class CartController extends Controller
                 'other_cost' => 0,
                 'other_cost_description' => '',
                 'created_by' => $user->id,
-                'delivery_date' => $date_needed
+                'delivery_date' => $date_needed,
+                'has_baka' => $withBaka ? 1 : 0,
+                'lechon_baka_service' => $withBaka ? ($bakaQty * $bakaServiceFee) : 0,
             ]);
             $saved_items .= $cart->qty." x ".$product->name.", ";
         }
@@ -1771,50 +1896,83 @@ class CartController extends Controller
         $totalFee = 0;
         $fees = [];
 
-        $carts = Product::whereIn('id', $productIds)
-            ->get()
-            ->map(function ($product) {
-                return (object)[
-                    'product_id' => $product->id,
-                    'name' => $product->name,
-                    'price' => $product->price,
-                    'paella_price' => $product->paella_price ?? 0,
-                    'qty' => 1,
-                    'photo' => $product->photos()->first() ? asset('storage/products/' . $product->photos()->first()->path) : '',
-                    'product' => $product
-                ];
-            });
+        // products request is now in this format
+        // [
+        //     {
+        //         "product_id": 178,
+        //         "qty": 2
+        //     },
+        //     {
+        //         "product_id": 170,
+        //         "qty": 1
+        //     }
+        // ]
 
+        $carts = collect([]);
+
+        foreach ($productIds as $product) {
+            $p = Product::find($product['product_id']);
+            if (!$p) continue;
+
+            $carts->push((object)[
+                'product_id' => $p->id,
+                'name' => $p->name,
+                'price' => $p->price,
+                'paella_price' => $p->paella_price ?? 0,
+                'qty' => $product['qty'],
+                'photo' => $p->photos()->first() ? asset('storage/products/' . $p->photos()->first()->path) : '',
+                'product' => $p,
+                'qty' => $product['qty'],
+            ]);
+        }
+
+        // $carts = Product::whereIn('id', $productIds)
+        //     ->get()
+        //     ->map(function ($product) {
+        //         return (object)[
+        //             'product_id' => $product->id,
+        //             'name' => $product->name,
+        //             'price' => $product->price,
+        //             'paella_price' => $product->paella_price ?? 0,
+        //             'qty' => 1,
+        //             'photo' => $product->photos()->first() ? asset('storage/products/' . $product->photos()->first()->path) : '',
+        //             'product' => $product
+        //         ];
+        //     });
 
         $check_customer = Auth::check() && \App\Models\DeliveryFeePromo::check_customer(Auth::id()) ? 1 : 0;
 
         // Handle single location
         if (is_string($locations)) {
-            logger('Single location fee calculation', ['location' => $locations]);
             $fee = $this->calculateRate($locations, $carts, $check_customer);
             $fees[] = [
                 'location' => $locations['city'] . ', ' . $locations['province'],
-                'fee' => $fee
+                'fee' => $fee['rate'],
+                'is_baka' => $fee['is_baka'],
+                'lechon_baka_service' => $fee['lechon_baka_service']
             ];
-            $totalFee = $fee;
+            $totalFee = $fee['rate'];
         }
 
         // Handle multiple locations
         if (is_array($locations)) {
-            logger('Multiple locations fee calculation', ['locations' => $locations]);
             foreach ($locations as $loc) {
                 $fee = $this->calculateRate($loc, $carts, $check_customer);
                 $fees[] = [
                     'location' => $loc['city'] . ', ' . $loc['province'],
-                    'fee' => $fee
+                    'fee' => $fee['rate'],
+                    'is_baka' => $fee['is_baka'],
+                    'lechon_baka_service' => $fee['lechon_baka_service']
                 ];
-                $totalFee += $fee;
+                $totalFee += $fee['rate'];
             }
         }
 
         return response()->json([
             'fees' => $fees,
-            'fee' => $totalFee
+            'fee' => $totalFee,
+            'has_baka' => collect($fees)->contains('is_baka', true),
+            'lechon_baka_service_total' => collect($fees)->where('is_baka', true)->sum('lechon_baka_service')
         ]);
     }
 
@@ -1861,6 +2019,8 @@ class CartController extends Controller
             $rate = $location_misc->rate;
         }
 
+        $bakaQty = 0;
+
         foreach ($carts as $cart) {
             $delivery_promo = \App\Models\DeliveryFeePromo::check_product($cart->product_id);
             if ($delivery_promo == 1) {
@@ -1874,24 +2034,25 @@ class CartController extends Controller
                 $rate = $location_lechon?->rate ?? 0;
             }
 
-            if ($p->id == 42) { // lechon baka
+            if ($p->id == 178) { // lechon baka
                 $baka = 1;
+                $bakaQty += $cart->qty;
             }
         }
 
-        if ($baka == 1) {
+        if ($baka == 1 && $location_lechon->outside_manila == 0) {
             $rate = 0;
-        }
-
-        if ($baka == 1 && $location_lechon && $location_lechon->outside_manila == 1) {
-            $rate = 3000;
         }
 
         if ($check_product == 1 || $check_customer == 1) {
             $rate = 0;
         }
 
-        return $rate;
+        return [
+            'rate' => $rate,
+            'is_baka' => $baka == 1 ? true : false,
+            'lechon_baka_service' => $baka == 1 ? floatval(Product::whereId(270)->first()->price * $bakaQty) : 0
+        ];
     }
 
     public function get_shipping_fee(Request $request){
@@ -1926,7 +2087,8 @@ class CartController extends Controller
 
         if(!empty($location_misc)){
             $rate = $location_misc->rate;
-        }        
+        }  
+        $bakaQty = 0;      
         foreach($carts as $cart){
             
             $delivery_promo = \App\Models\DeliveryFeePromo::check_product($cart->product_id);
@@ -1944,21 +2106,26 @@ class CartController extends Controller
             if($p->id == 178 ) // if lechon baka
             {
                 $baka = 1;
+                $bakaQty += $cart->qty;
             }
         }
+
         if(!isset($rate)){
             $rate = 0 ;
         }
 
-        if($baka == 1){
-            $rate = 0;
-        }
-        if($baka == 1 && $location_lechon->outside_manila == 1){
-            $rate = 3500;
-        }
-
         if($check_product == 1 || $check_customer == 1){
             $rate = 0;
+        }
+
+        if ($baka == 1 && $location_lechon->outside_manila == 0) {
+            $rate = 0;
+        }
+
+        $bakaServicePrice = 0;
+
+        if ($baka == 1) {
+            $bakaServicePrice = Product::whereId(270)->first()->price * $bakaQty;
         }
 
         if ($request->has('force_fee')) {
@@ -1966,7 +2133,9 @@ class CartController extends Controller
         } else {
             return response()->json([
                 'fee' => $rate,
-                'location' => $request->city .', '.$request->province
+                'location' => $request->city .', '.$request->province,
+                'is_baka' => $baka == 1 ? true : false,
+                'lechon_baka_service' => floatval($bakaServicePrice)
             ]);
         }
     }  
@@ -1976,14 +2145,24 @@ class CartController extends Controller
         if (auth()->check()) {
             $cart = Cart::where('user_id', Auth::id())->get();
 
+            $carts = $cart->reject(function ($item) {
+                return data_get($item, 'product_id') == 270;
+            });
+
             return response()->json([
-                'totalItems' => $cart->count()
+                'totalItems' => $carts->count()
             ]);
         } else {
             $cart = session('cart', []);
 
+            $carts = collect($cart)->reject(function ($item) {
+                return data_get($item, 'product_id') == 270;
+            });
+
+            session(['cart' => $carts->values()->all()]);
+
             return response()->json([
-                'totalItems' => count(session('cart', []))
+                'totalItems' => $carts->count()
             ]);
         }
     }
@@ -1991,15 +2170,28 @@ class CartController extends Controller
     public function getCart(Request $request)
     {
         if (auth()->check()) {
-            $cart = Cart::where('user_id', Auth::id())->with('product.photos')->get();
+            $cart = Cart::where('user_id', Auth::id())
+                        ->with('product.photos')
+                        ->get();
         } else {
-            $cart = session('cart', []);
+            // Normalize session cart to collection
+            $cart = collect(session('cart', []));
+        }
+
+        // Works for both session arrays AND model objects
+        $carts = $cart->reject(function ($item) {
+            return data_get($item, 'product_id') == 270;
+        });
+
+        if (!auth()->check()) {
+            $carts = $carts->values()->all();
         }
 
         return response()->json([
-            'cart' => $cart
+            'cart' => $carts
         ]);
     }
+
 
     public function removeCart(Request $request)
     {
@@ -2016,6 +2208,12 @@ class CartController extends Controller
                     ->where('paella', $request->paella == 1)
                     ->delete();
             }
+
+            if ($request->product_remove_id == 178) {
+                Cart::where('product_id', 270)
+                    ->where('user_id', Auth::id())
+                    ->delete();
+            }
         } else {
             $cart = session('cart', []);
             $productId = (int) $request->product_remove_id;
@@ -2023,8 +2221,14 @@ class CartController extends Controller
     
             // Filter out the Cart objects by checking product_id directly
             $filtered = array_values(array_filter($cart, function ($item) use ($productId, $paella) {
-                return (int) $item->product_id !== $productId || (int) $item->paella !== $paella;
+                return (int) $item['product_id'] !== $productId || (int) $item['paella'] !== $paella;
             }));
+
+            if ($productId == 178) {
+                $filtered = array_values(array_filter($filtered, function ($item) {
+                    return (int) $item['product_id'] !== 270;
+                }));
+            }
     
             session(['cart' => $filtered]);
         }

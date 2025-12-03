@@ -52,58 +52,57 @@ class PaymayaController extends Controller
             )
         ));
 
-        $first_response = file_get_contents($this->paymaya_url().'/'.$sales->receipt_number, FALSE, $context);
-       
-        
-        if($first_response === FALSE){
-            die('Error');
-        }
+        try {
+            $first_response = file_get_contents($this->paymaya_url().'/'.$sales->receipt_number, FALSE, $context);
 
-        $first_responseData = json_decode($first_response, TRUE);
-        //return $first_responseData;
-        if($first_responseData['paymentStatus'] == 'PAYMENT_SUCCESS'){
-            $update_payment = SalesPayment::whereId($id)->update([
-                'amount' => $first_responseData['totalAmount']['amount'],
-                'status' => 'PAID'
-            ]);
-
-            $sales->sales->isConfirm = 1;
-            $sales->sales->confirmed_by = 'Customer';
-            $sales->sales->confirmed_on = date('Y-m-d H:i:s');
-            $sales->sales->confirm_remarks = 'Auto confirm via Paymaya checkout';
-            $sales->sales->updated_at = $sales->sales->created_at;
-            $sales->sales->save();
-
-            $subSales = SalesHeader::where('parent_sales_header_id', $sales->sales->id)->get();
-            if ($subSales && count($subSales) > 0) {
-                foreach ($subSales as $sub) {
-                    $sub->isConfirm = 1;
-                    $sub->confirmed_by = 'Customer';
-                    $sub->confirmed_on = date('Y-m-d H:i:s');
-                    $sub->confirm_remarks = 'Auto confirm via Paymaya checkout';
-                    $sub->updated_at = $sub->created_at;
-                    $sub->save();
-
-                    $sub->assign_to_production_branch($sub, 1);
-                }
-            }
-
-            //Auto add production branch
-            $sh = new SalesHeader();
-            $sh->assign_to_production_branch($sales->sales, 1);
-
-            if ($sales->sales->discount_amount && $sales->sales->discount_amount > 0) {
-                CouponCart::where('sales_header_id', $sales->sales->id)->update([
-                    'status' => 1
+            $first_responseData = json_decode($first_response, TRUE);
+            //return $first_responseData;
+            if($first_responseData['paymentStatus'] == 'PAYMENT_SUCCESS'){
+                $update_payment = SalesPayment::whereId($id)->update([
+                    'amount' => $first_responseData['totalAmount']['amount'],
+                    'status' => 'PAID'
                 ]);
+
+                $sales->sales->isConfirm = 1;
+                $sales->sales->confirmed_by = 'Customer';
+                $sales->sales->confirmed_on = date('Y-m-d H:i:s');
+                $sales->sales->confirm_remarks = 'Auto confirm via Paymaya checkout';
+                $sales->sales->updated_at = $sales->sales->created_at;
+                $sales->sales->save();
+
+                $subSales = SalesHeader::where('parent_sales_header_id', $sales->sales->id)->get();
+                if ($subSales && count($subSales) > 0) {
+                    foreach ($subSales as $sub) {
+                        $sub->isConfirm = 1;
+                        $sub->confirmed_by = 'Customer';
+                        $sub->confirmed_on = date('Y-m-d H:i:s');
+                        $sub->confirm_remarks = 'Auto confirm via Paymaya checkout';
+                        $sub->updated_at = $sub->created_at;
+                        $sub->save();
+
+                        $sub->assign_to_production_branch($sub, 1);
+                    }
+                }
+
+                //Auto add production branch
+                $sh = new SalesHeader();
+                $sh->assign_to_production_branch($sales->sales, 1);
+
+                if ($sales->sales->discount_amount && $sales->sales->discount_amount > 0) {
+                    CouponCart::where('sales_header_id', $sales->sales->id)->update([
+                        'status' => 1
+                    ]);
+                }
+
+                return true;
             }
 
-            return true;
+        } catch (\Throwable $th) {
+            logger('PAYMAYA CHECK ERROR:', ['error' => $th->getMessage()]);
+            return false;
         }
 
         return false;
-
-         
     }
 
     public function success(){        
@@ -203,32 +202,36 @@ class PaymayaController extends Controller
     }
     
 
-    public function pay(Request $request){        
-        
-        // dd($request->all());
-        $sales = SalesHeader::find($request->sales_header_id); 
+    public function pay(Request $request)
+    {        
+        try {
+            $sales = SalesHeader::find($request->sales_header_id); 
 
-        if ($sales && $sales->items && count($sales->items) == 0) {
-            return Redirect::back()->withErrors(['error' => 'No items found in the sales order.']);
+            if ($sales && $sales->items && count($sales->items) == 0) {
+                return Redirect::back()->withErrors(['error' => 'No items found in the sales order.']);
+            }
+
+            $payment = SalesPayment::create([
+                'sales_header_id' => $request->sales_header_id,
+                'payment_type' => 'Paymaya',
+                'amount' => $request->amount,
+                'status'  => 'PENDING',
+                'payment_date'  => date('Y-m-d'),
+                'receipt_number'  => '',
+                'created_by' => $sales->user_id
+            ]);
+
+            $checkoutId = $this->get_checkoutId($request, $payment);
+
+            $update_payment = $payment->update([
+                'receipt_number' => $checkoutId['checkoutId']
+            ]);
+            
+            return Redirect::to($checkoutId['redirectUrl']);
+        } catch (\Throwable $th) {
+            logger('PAYMAYA ERROR:', ['error' => $th->getMessage()]);
+            return Redirect::back()->withErrors(['error' => 'An error occurred while processing your payment. Please try again later.']);
         }
-
-        $payment = SalesPayment::create([
-            'sales_header_id' => $request->sales_header_id,
-            'payment_type' => 'Paymaya',
-            'amount' => $request->amount,
-            'status'  => 'PENDING',
-            'payment_date'  => date('Y-m-d'),
-            'receipt_number'  => '',
-            'created_by' => $sales->user_id
-        ]);
-
-        $checkoutId = $this->get_checkoutId($request, $payment);
-
-        $update_payment = $payment->update([
-            'receipt_number' => $checkoutId['checkoutId']
-        ]);
-        
-        return Redirect::to($checkoutId['redirectUrl']);
     }
 
     public function paydata($id,$amount,$checkoutId){

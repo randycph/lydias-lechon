@@ -193,6 +193,10 @@ class FrontendController extends Controller
             $carts = collect(session('cart', [])); 
         }
 
+        $carts = $carts->reject(function ($item) {
+            return data_get($item, 'product_id') == 270;
+        })->values();
+
         $pickupBranches = Branch::where('status', 1)->orderBy('name', 'asc')->where('pickup_branch', 1)->get();
 
         $deliveryBranches = Branch::where('status', 1)->orderBy('name', 'asc')->where('delivery_branch', 1)->get();
@@ -246,17 +250,40 @@ class FrontendController extends Controller
         $disabledPickupDates = explode(',', $setting->disable_pickup_dates ?? '');
         $disabledDeliveryDates = explode(',', $setting->disable_delivery_dates ?? '');
 
-        $haslechon  = $carts->contains(function ($cart) {
-            return $cart->product->category_id == 1;
+        $haslechon = $carts->contains(function ($cart) {
+            return data_get($cart, 'product.category_id') == 1
+                || data_get($cart, 'category_id') == 1;
         });
 
+
+        // check how many baka qty in the cart
+        $bakaQty = $carts->reduce(function ($carry, $cart) {
+            $slug = data_get($cart, 'product.slug', data_get($cart, 'slug'));
+            $qty  = (int) data_get($cart, 'qty', 0);
+
+            if ($slug === 'lechon-baka') {
+                return $carry + $qty;
+            }
+
+            return $carry;
+        }, 0);
+
+        // does cart have lechon-baka?
         $hasbaka = $carts->contains(function ($cart) {
-            return $cart->product->slug == 'lechon-baka';
+            $slug = data_get($cart, 'product.slug', data_get($cart, 'slug'));
+
+            return $slug === 'lechon-baka';
         });
 
+        // does cart have any misc item?
         $hasMisc = $carts->contains(function ($cart) {
-            return $cart->product->is_misc == 1;
+            // is_misc can be on product (DB) or directly on the item (session)
+            $isMisc = data_get($cart, 'product.is_misc', data_get($cart, 'is_misc', 0));
+
+            return (int) $isMisc === 1;
         });
+
+        $lechonBakaService = floatval(Product::whereId(270)->first()->price * ($bakaQty ?? 1));
 
         $dataPrivacy = Page::where('slug', 'data-privacy')->first();
 
@@ -293,7 +320,7 @@ class FrontendController extends Controller
         $disable_delivery_misc_dates = $setting ? $setting->disable_delivery_misc_dates : '';
         $disable_delivery_misc_dates = explode(',', $setting->disable_delivery_misc_dates ?? '');
 
-        return view('v2.checkout', compact('triples', 'provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc', 'eligibleCoupons', 'minimum_order_amount_door_to_door', 'minimum_order_amount_pickup', 'minimum_processing_hours', 'minimum_processing_hours_misc', 'minimum_order_misc', 'disable_delivery_misc_dates'));
+        return view('v2.checkout', compact('lechonBakaService', 'triples', 'provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc', 'eligibleCoupons', 'minimum_order_amount_door_to_door', 'minimum_order_amount_pickup', 'minimum_processing_hours', 'minimum_processing_hours_misc', 'minimum_order_misc', 'disable_delivery_misc_dates'));
     }
 
     public function confirmation($id)
