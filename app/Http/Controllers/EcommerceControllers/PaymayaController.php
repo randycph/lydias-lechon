@@ -203,32 +203,36 @@ class PaymayaController extends Controller
     }
     
 
-    public function pay(Request $request){        
-        
-        // dd($request->all());
-        $sales = SalesHeader::find($request->sales_header_id); 
+    public function pay(Request $request)
+    {        
+        try {
+            $sales = SalesHeader::find($request->sales_header_id); 
 
-        if ($sales && $sales->items && count($sales->items) == 0) {
-            return Redirect::back()->withErrors(['error' => 'No items found in the sales order.']);
+            if ($sales && $sales->items && count($sales->items) == 0) {
+                return Redirect::back()->withErrors(['error' => 'No items found in the sales order.']);
+            }
+
+            $payment = SalesPayment::create([
+                'sales_header_id' => $request->sales_header_id,
+                'payment_type' => 'Paymaya',
+                'amount' => $request->amount,
+                'status'  => 'PENDING',
+                'payment_date'  => date('Y-m-d'),
+                'receipt_number'  => '',
+                'created_by' => $sales->user_id
+            ]);
+
+            $checkoutId = $this->get_checkoutId($request, $payment);
+
+            $update_payment = $payment->update([
+                'receipt_number' => $checkoutId['checkoutId']
+            ]);
+            
+            return Redirect::to($checkoutId['redirectUrl']);
+        } catch (\Throwable $th) {
+            logger('PAYMAYA ERROR:', ['error' => $th->getMessage()]);
+            return Redirect::back()->withErrors(['error' => 'An error occurred while processing your payment. Please try again later.']);
         }
-
-        $payment = SalesPayment::create([
-            'sales_header_id' => $request->sales_header_id,
-            'payment_type' => 'Paymaya',
-            'amount' => $request->amount,
-            'status'  => 'PENDING',
-            'payment_date'  => date('Y-m-d'),
-            'receipt_number'  => '',
-            'created_by' => $sales->user_id
-        ]);
-
-        $checkoutId = $this->get_checkoutId($request, $payment);
-
-        $update_payment = $payment->update([
-            'receipt_number' => $checkoutId['checkoutId']
-        ]);
-        
-        return Redirect::to($checkoutId['redirectUrl']);
     }
 
     public function paydata($id,$amount,$checkoutId){

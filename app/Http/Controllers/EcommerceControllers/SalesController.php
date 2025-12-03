@@ -60,7 +60,8 @@ class SalesController extends Controller
         return view('admin.sales.update_items',compact('items','products'));
     }
 
-    public function update_items(Request $request){
+    public function update_items(Request $request)
+    {
         $head = SalesHeader::whereId($request->ui_sales_id)->first();
         $date_needed = '';
         foreach($head->items as $item){
@@ -721,7 +722,7 @@ class SalesController extends Controller
         $model = $this->additional_filters($model);
       
 
-        $selectFields = ['id','order_source','delivery_fee_amount','delivery_type','for_deletion','contact_person','instruction','customer_delivery_adress','outlet','customer_location','order_number', 'customer_name', 'customer_location', 'isConfirm', 'created_at', 'status', 'delivery_status', 'payment_status', 'net_amount', 'gross_amount','deleted_at', DB::raw('(SELECT ecommerce_sales_details.delivery_date From ecommerce_sales_details WHERE ecommerce_sales_headers.id=ecommerce_sales_details.sales_header_id GROUP BY ecommerce_sales_details.sales_header_id) as date_needed')];
+        $selectFields = ['id','order_source','delivery_fee_amount','delivery_type','for_deletion','lechon_baka_service','has_baka','contact_person','instruction','customer_delivery_adress','outlet','customer_location','order_number', 'customer_name', 'customer_location', 'isConfirm', 'created_at', 'status', 'delivery_status', 'payment_status', 'net_amount', 'gross_amount','deleted_at', DB::raw('(SELECT ecommerce_sales_details.delivery_date From ecommerce_sales_details WHERE ecommerce_sales_headers.id=ecommerce_sales_details.sales_header_id GROUP BY ecommerce_sales_details.sales_header_id) as date_needed')];
 
         $filterFields = ['order_number', 'customer_name', 'date_needed', 'start_date', 'end_date'];
         $listing = new ListingHelper('desc',20,'order_number', $customConditions);

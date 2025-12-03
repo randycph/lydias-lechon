@@ -192,12 +192,12 @@
                                 </div>
                             </template>
                             <template
-                                x-if="isBaka && lechonBakaService > 0 && method == 'delivery'">
+                                x-if="!allowMultiple && hasbaka && lechonBakaService > 0">
                                 <div>
                                     <div class="flex justify-between lg:mt-2">
-                                        <span class="font-medium italic text-gray-800">Lechon Baka Service</span>
+                                        <span class="font-medium text-gray-800 italic">Lechon Baka Service</span>
                                         <span class="font-medium"
-                                            x-text="lechonBakaService > 0 ? '₱' + lechonBakaService.toLocaleString(undefined, { minimumFractionDigits: 2 }) : ''"></span>
+                                            x-text="lechonBakaService > 0 ? '₱' + lechonBakaService.toLocaleString(undefined, { minimumFractionDigits: 2 }) : 'Free'"></span>
                                     </div>
                                 </div>
                             </template>
@@ -1231,6 +1231,7 @@
     window.minimum_processing_hours = @json($minimum_processing_hours);
     window.minimum_processing_hours_misc = @json($minimum_processing_hours_misc);
     window.minimum_order_misc = @json($minimum_order_misc);
+    window.lechonBakaService = @json($lechonBakaService);
 </script>
 
 <script>
@@ -1245,7 +1246,7 @@
             minimum_processing_hours: window.minimum_processing_hours || 0,
             minimum_processing_hours_misc: window.minimum_processing_hours_misc || 0,
             minimum_order_misc: window.minimum_order_misc || 0,
-            lechonBakaService: 0,
+            lechonBakaService: window.lechonBakaService || 0,
             isBaka: false,
             minDate() {
                 if (this.hasbaka == true) {
@@ -1629,6 +1630,9 @@
                     this.validateDateTime();
                 }
 
+                this.deliveryFee = 0;
+                this.lechonBakaService = window.lechonBakaService || 0;
+
                 this.recomputeCouponTotals()
             },
 
@@ -1790,13 +1794,15 @@
 
                 console.log('Total discount used:', discounted_amount);
 
-
+                console.log('this.hasBaka', this.hasbaka)
                 formData.append('discount_amount', couponsWithDiscountUsed.reduce((sum, c) => sum + (c.discount_used || 0), 0));
                 formData.append('coupon_data', JSON.stringify(this.coupons));
                 formData.append('order_amount', this.orderAmount);
                 formData.append('delivery_fee', this.deliveryFee);
                 formData.append('deposit', this.deposit);
                 formData.append('total_amount', this.totalAmount);
+                formData.append('isBaka', this.hasbaka ? 1 : 0);
+                formData.append('lechon_baka_service', this.lechonBakaService);
 
                 if (this.allowMultiple) {
                     formData.append('deliveries', JSON.stringify(this.deliveries));
@@ -1893,7 +1899,7 @@
                 const branch = this.$refs?.branch?.value;
 
                 this.isBaka = false;
-                this.lechonBakaService = 0;
+                // this.lechonBakaService = 0;
 
                 if (this.province && this.city) {
                     try {

@@ -916,12 +916,57 @@ class CartController extends Controller
             //     'is_active' => 1
             // ]);
 
+            $carts = (session('cart', []));
+
+            // check if theres a product with the of 178 (lechon baka) in the cart
+
+            $bakaCart = collect($carts)->firstWhere('product_id', 178);
+            $bakaQty = $bakaCart ? $bakaCart['qty'] : 0;
+
+            if ($bakaCart) {
+                $bakaProduct = Product::whereId(270)->first();
+
+                $order = new Cart();
+                $order->product_id = 270;
+                $order->qty = $bakaQty;
+                $order->price = $bakaProduct->price ?? 0;
+                $order->paella_price = 0;
+                $order->photo = null;
+                $order->product = $bakaProduct;
+
+                array_push($carts, $order);
+
+                session(['cart' => $carts]);
+            }
+
             $carts = collect(session('cart', []));
+
         } else {
             $user = auth()->user();
             $customer_name = $user->name;
-            $carts = Cart::where('user_id',$user->id)->get();
+            $carts = Cart::where('user_id', $user->id)->get();
+
+            $bakaCart = $carts->firstWhere('product_id', 178);
+            $bakaQty = $bakaCart ? $bakaCart->qty : 0;
+
+            Cart::updateOrCreate(
+                [
+                    'product_id' => 270,
+                    'user_id' => $user->id,
+                ],
+                [
+                    'qty' => $bakaQty,
+                    'price' => Product::whereId(270)->first()->price ?? 0,
+                    'photo' => null,
+                    'product' => Product::whereId(270)->first(),
+                    'paella_price' => 0
+                ]
+            );
+
+            $carts = Cart::where('user_id', $user->id)->get();
         }
+
+        $bakaServiceFee = Product::whereId(270)->first()->price ?? 0;
 
         $coupon_data = json_decode($request->input('coupon_data'), true);
 
@@ -1005,7 +1050,18 @@ class CartController extends Controller
             }
         }
 
-        $totalPrice = $request->order_amount;
+        $lechonBakaSevice = $request->isBaka == 1 ? $request->lechon_baka_service : 0;
+        $bakaProduct = Product::whereId(270)->first();
+
+        $qty = 0;
+        foreach (collect($carts) as $cart) {
+            if ($cart->product_id == 178) {
+                $qty = $cart->qty;
+                break;
+            }
+        }
+
+        $totalPrice = $request->order_amount + ( $bakaProduct->price * $qty );
         $discount = 0;
         // $delivery_fee = $request->shipping_type == 'pickup' ? 0 : $request->delivery_fee;
         $netAmount = $totalPrice + $delivery_fee;
@@ -1065,6 +1121,8 @@ class CartController extends Controller
                 'is_multiple_address' => ($request->has('deliveries') && count(json_decode($request->deliveries)) > 0) ? 1 : 0,
                 'is_new_order' => 1,
                 'has_sub' => ($request->has('deliveries') && count(json_decode($request->deliveries)) > 0) ? 1 : 0,
+                'lechon_baka_service' => $lechonBakaSevice,
+                'has_baka' => $request->isBaka == 1 ? 1 : 0,
             ]);
             $salesHeader = SalesHeader::find($salesHeader->id);
             if (!$salesHeader) {
@@ -1116,7 +1174,7 @@ class CartController extends Controller
                 'delivery_type' => $delivery_type,
                 'delivery_fee_amount' => $delivery_fee,
                 'order_source' => 'Web',
-                'gross_amount' => $request->order_amount,
+                'gross_amount' => $request->order_amount + ( $bakaProduct?->price * $qty ),
                 'tax_amount' => 0,
                 'net_amount' => $netAmount,
                 'discount_amount' => $discount,
@@ -1134,6 +1192,8 @@ class CartController extends Controller
                 'is_multiple_address' => ($request->has('deliveries') && count(json_decode($request->deliveries)) > 0) ? 1 : 0,
                 'is_new_order' => 1,
                 'has_sub' => ($request->has('deliveries') && count(json_decode($request->deliveries)) > 0) ? 1 : 0,
+                'lechon_baka_service' => $lechonBakaSevice,
+                'has_baka' => $request->isBaka == 1 ? 1 : 0,
             ]);
         }
 
@@ -1194,7 +1254,7 @@ class CartController extends Controller
                             'delivery_type' => 'Door to door delivery',
                             'delivery_fee_amount' => $delivery->delivery_fee,
                             'order_source' => 'Web',
-                            'gross_amount' => $request->order_amount,
+                            'gross_amount' => $request->order_amount + ( $bakaProduct->price * $qty ),
                             'tax_amount' => 0,
                             'net_amount' => $netAmount,
                             'discount_amount' => $discount,
@@ -1212,7 +1272,7 @@ class CartController extends Controller
                             'is_multiple_address' => 0,
                             'is_new_order' => 1,
                             'is_sub' => 1,
-                            'has_baka' => $delivery->isBaka ?? 0,
+                            'has_baka' => $delivery->isBaka ? 1 : 0,
                             'lechon_baka_service' => $delivery->lechon_baka_service ?? 0,
                             // 'date_needed' => $delivery->need_date . ' ' . $delivery->need_time,
                             // 'delivery_fee' => $delivery->delivery_fee,
@@ -1251,7 +1311,7 @@ class CartController extends Controller
                             'province' => $delivery->province,
                             'city' => $delivery->city,
                             'barangay' => $delivery->location ?? '',
-                            'has_baka' => $delivery->isBaka ?? 0,
+                            'has_baka' => $delivery->isBaka ? 1 : 0,
                             'lechon_baka_service' => $delivery->lechon_baka_service ?? 0,
                         ]);
 
@@ -1294,7 +1354,7 @@ class CartController extends Controller
                                     'other_cost_description' => '',
                                     'created_by' => $user->id,
                                     'delivery_date' => $delivery->need_date . ' ' . $delivery->need_time,
-                                    'has_baka' => $delivery->isBaka ?? 0,
+                                    'has_baka' => $delivery->isBaka ? 1 : 0,
                                     'lechon_baka_service' => $delivery->lechon_baka_service ?? 0,
                                 ]);
                             }
@@ -1311,6 +1371,8 @@ class CartController extends Controller
         $coupon_amount = 0;
         $saved_items = '';
 //        $carts = Cart::where('user_id',$user->id)->get();
+        // convert to collection above
+        $carts = collect($carts);
         foreach ($carts as $cart) {
             if(!empty($cart->coupon_code)){
                 
@@ -1367,6 +1429,18 @@ class CartController extends Controller
             $data['tax'] = $data['price'] - ($data['price']/1.12);
             $data['other_cost'] = 0;
             $data['net_price'] = $data['price'] - ($data['tax'] + $data['other_cost']);
+
+            $withBaka = false;
+
+            if ($product->id == 178) {
+                $withBaka = true;
+            }
+
+            $bakaQty = 0;
+
+            if ($withBaka) {
+                $bakaQty = $cart->qty;
+            }
            
             SalesDetail::create([
                 'sales_header_id' => $salesHeader->id,
@@ -1391,6 +1465,8 @@ class CartController extends Controller
                 'other_cost_description' => '',
                 'created_by' => $user->id,
                 'delivery_date' => $date_needed,
+                'has_baka' => $withBaka ? 1 : 0,
+                'lechon_baka_service' => $withBaka ? ($bakaQty * $bakaServiceFee) : 0,
             ]);
             $saved_items .= $cart->qty." x ".$product->name.", ";
         }
@@ -2020,14 +2096,24 @@ class CartController extends Controller
         if (auth()->check()) {
             $cart = Cart::where('user_id', Auth::id())->get();
 
+            $carts = $cart->reject(function ($item) {
+                return data_get($item, 'product_id') == 270;
+            });
+
             return response()->json([
-                'totalItems' => $cart->count()
+                'totalItems' => $carts->count()
             ]);
         } else {
             $cart = session('cart', []);
 
+            $carts = collect($cart)->reject(function ($item) {
+                return data_get($item, 'product_id') == 270;
+            });
+
+            session(['cart' => $carts->values()->all()]);
+
             return response()->json([
-                'totalItems' => count(session('cart', []))
+                'totalItems' => $carts->count()
             ]);
         }
     }
@@ -2035,15 +2121,29 @@ class CartController extends Controller
     public function getCart(Request $request)
     {
         if (auth()->check()) {
-            $cart = Cart::where('user_id', Auth::id())->with('product.photos')->get();
+            $cart = Cart::where('user_id', Auth::id())
+                        ->with('product.photos')
+                        ->get();
         } else {
-            $cart = session('cart', []);
+            // Normalize session cart to collection
+            $cart = collect(session('cart', []));
+        }
+
+        // Works for both session arrays AND model objects
+        $carts = $cart->reject(function ($item) {
+            return data_get($item, 'product_id') == 270;
+        });
+
+        // Reset array keys + convert to array for session carts
+        if (!auth()->check()) {
+            $carts = $carts->values()->all();
         }
 
         return response()->json([
-            'cart' => $cart
+            'cart' => $carts
         ]);
     }
+
 
     public function removeCart(Request $request)
     {
@@ -2060,6 +2160,12 @@ class CartController extends Controller
                     ->where('paella', $request->paella == 1)
                     ->delete();
             }
+
+            if ($request->product_remove_id == 178) {
+                Cart::where('product_id', 270)
+                    ->where('user_id', Auth::id())
+                    ->delete();
+            }
         } else {
             $cart = session('cart', []);
             $productId = (int) $request->product_remove_id;
@@ -2067,8 +2173,14 @@ class CartController extends Controller
     
             // Filter out the Cart objects by checking product_id directly
             $filtered = array_values(array_filter($cart, function ($item) use ($productId, $paella) {
-                return (int) $item->product_id !== $productId || (int) $item->paella !== $paella;
+                return (int) $item['product_id'] !== $productId || (int) $item['paella'] !== $paella;
             }));
+
+            if ($productId == 178) {
+                $filtered = array_values(array_filter($filtered, function ($item) {
+                    return (int) $item['product_id'] !== 270;
+                }));
+            }
     
             session(['cart' => $filtered]);
         }

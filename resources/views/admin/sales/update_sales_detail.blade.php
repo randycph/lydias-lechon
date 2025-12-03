@@ -562,14 +562,17 @@
                             <tbody id="ui_body">
                                 @foreach ($salesheader->items as $item)
                                     <tr id="ui_tr{{ $item->id }}">
-                                        <td><input type="hidden" name="product[]" value="{{ $item->product_id }}"><a
-                                                href="#" class="btn btn-xs btn-danger"
-                                                onclick="ui_removeitem('ui_tr{{ $item->id }}');">x</a></td>
+                                        <td>
+                                            <input type="hidden" name="product[]" value="{{ $item->product_id }}">
+                                                <a href="#" class="btn btn-xs btn-danger"
+                                                    onclick="ui_removeitem('ui_tr{{ $item->id }}');">x</a>
+                                            </td>
                                         <td>{{ $item->product_name }}<input name="uia_product{{ $item->id }}"
                                                 value="{{ $item->product_id }}" type="hidden"></td>
                                         <td>
                                             <input type="number" class="form-control uiu_qty"
                                                 title="{{ $item->id }}"
+                                                {{ $item->product_id == 270 ? 'readonly' : '' }}
                                                 onchange="ui_change_qty('uiu',{{ $item->id }});"
                                                 name="uiu_qty{{ $item->id }}" min="0"
                                                 id="uiu_qty{{ $item->id }}"
@@ -775,16 +778,69 @@
             $("#ui_product").val('').trigger('change');
         }
 
+        // function ui_change_qty(i, x) {
+        //     var qty = $('#' + i + '_qty' + x).val();
+        //     var price = $('#' + i + '_price' + x).val();
+        //     var paella = 0;
+        //     if ($('#' + i + '_paella' + x).is(':checked')) {
+        //         paella = $('#' + i + '_paella' + x).val();
+        //     }
+        //     var subtotal = parseFloat(parseFloat(qty) * parseFloat(price)) + parseFloat(parseFloat(paella) * parseFloat(
+        //         qty));
+        //     $('#' + i + '_total' + x).html(addCommas(parseFloat(subtotal).toFixed(2)));
+        // }
+
         function ui_change_qty(i, x) {
-            var qty = $('#' + i + '_qty' + x).val();
-            var price = $('#' + i + '_price' + x).val();
+            var qty    = parseFloat($('#' + i + '_qty' + x).val()) || 0;
+            var price  = parseFloat($('#' + i + '_price' + x).val()) || 0;
             var paella = 0;
-            if ($('#' + i + '_paella' + x).is(':checked')) {
-                paella = $('#' + i + '_paella' + x).val();
+
+            if ($('#' + i + '_paella' + x).length && $('#' + i + '_paella' + x).is(':checked')) {
+                paella = parseFloat($('#' + i + '_paella' + x).val()) || 0;
             }
-            var subtotal = parseFloat(parseFloat(qty) * parseFloat(price)) + parseFloat(parseFloat(paella) * parseFloat(
-                qty));
-            $('#' + i + '_total' + x).html(addCommas(parseFloat(subtotal).toFixed(2)));
+
+            var subtotal = (qty * price) + (qty * paella);
+
+            $('#' + i + '_total' + x).html(addCommas(subtotal.toFixed(2)));
+            if ($('#' + i + '_subtotal' + x).length) {
+                $('#' + i + '_subtotal' + x).val(subtotal.toFixed(2));
+            }
+
+            // sync lechon baka service (270) with lechon baka (178)
+            // get product id of the row that was changed
+            var productId = $('input[name="uia_product' + x + '"]').val();
+
+            // if this row is lechon baka (178), update lechon baka service (270)
+            if (parseInt(productId, 10) === 178) {
+                var bakaQty = qty;
+
+                // find the row whose product is 270
+                $('input[name^="uia_product"]').each(function () {
+                    if (parseInt($(this).val(), 10) === 270) {
+                        var serviceId = this.name.replace('uia_product', ''); // extract item id
+
+                        // set qty of the service row
+                        $('#' + i + '_qty' + serviceId).val(bakaQty);
+
+                        // recalc subtotal for service row (same logic as above)
+                        var sQty    = bakaQty;
+                        var sPrice  = parseFloat($('#' + i + '_price' + serviceId).val()) || 0;
+                        var sPaella = 0;
+
+                        if ($('#' + i + '_paella' + serviceId).length &&
+                            $('#' + i + '_paella' + serviceId).is(':checked')) {
+                            sPaella = parseFloat($('#' + i + '_paella' + serviceId).val()) || 0;
+                        }
+
+                        var sSubtotal = (sQty * sPrice) + (sQty * sPaella);
+
+                        $('#' + i + '_total' + serviceId).html(addCommas(sSubtotal.toFixed(2)));
+                        if ($('#' + i + '_subtotal' + serviceId).length) {
+                            $('#' + i + '_subtotal' + serviceId).val(sSubtotal.toFixed(2));
+                        }
+                    }
+                });
+            }
         }
 
         function ui_removeitem(tr) {
