@@ -968,5 +968,16 @@ Route::get('driver', function() {
     return view('driver.index');
 })->name('driver.home');
 
+Route::get('itextmo-sample', function() {
+    try {
+        $sms = new \App\Services\ItextmoSmsService();
+        $result = $sms->send('09174128392', 'Test Message from Lydias');
+
+        return response()->json($result);
+    } catch (\Throwable $th) {
+        throw $th;
+    }
+})->name('driver.home');
+
 Route::get('/{slug}', [FrontendController::class, 'page'])->name('page');
 
