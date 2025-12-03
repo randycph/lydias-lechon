@@ -76,12 +76,12 @@
                     <div
                         class="flex items-center text-sm lg:text-base justify-between px-4 py-3 border-b border-[#DFDFDF]">
                         <div x-text="carts.length + ' items'"></div>
-                        <div class="font-bold" x-text="'₱' + carts.reduce((sum, item) => 
+                        <div class="font-bold" x-text="'₱' + carts?.reduce((sum, item) => 
                                 sum + 
                                 ((Number((item?.paella_price > 0 ? item?.product?.paella_price : 0)) || 0) * (Number(item.qty) || 1)) + 
                                 (item.is_free_product ? 0 : (Number(item.price) || 0) * (Number(item.qty) || 1))
                             , 0).toLocaleString(undefined, { minimumFractionDigits: 2 })" {{--
-                            x-text="'₱' + carts.reduce((sum, item) => sum + item.paella_price + (item.is_free_product ? 0 : item.price * item.qty), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })"
+                            x-text="'₱' + carts?.reduce((sum, item) => sum + item.paella_price + (item.is_free_product ? 0 : item.price * item.qty), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })"
                             --}}></div>
                     </div>
 

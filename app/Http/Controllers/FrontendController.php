@@ -195,7 +195,7 @@ class FrontendController extends Controller
 
         $carts = $carts->reject(function ($item) {
             return data_get($item, 'product_id') == 270;
-        });
+        })->values();
 
         $pickupBranches = Branch::where('status', 1)->orderBy('name', 'asc')->where('pickup_branch', 1)->get();
 

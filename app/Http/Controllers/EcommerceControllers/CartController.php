@@ -1039,6 +1039,15 @@ class CartController extends Controller
         }
 
         $req = $request->all();
+        
+        if ($request->has('deliveries')) {
+            $deliveries = json_decode($request->deliveries ?? '[]', true);
+            if ($deliveries && count($deliveries) > 0) {
+                $delivery_fee = array_reduce($deliveries, function ($carry, $item) {
+                    return $carry + (float) ($item['delivery_fee'] ?? 0);
+                }, 0);
+            }
+        }
 
         if ($delivery_type == 'Door to door delivery') {
             $req['force_fee'] = true;
@@ -1357,6 +1366,40 @@ class CartController extends Controller
                                     'has_baka' => $delivery->isBaka ? 1 : 0,
                                     'lechon_baka_service' => $delivery->lechon_baka_service ?? 0,
                                 ]);
+
+                                if ($product->id == 178) {
+                                    $product = Product::whereId(270)->first();
+                                    $gross_amount = ((float)$product->price) * $order->qty;
+                                    $tax_amount = $gross_amount - ($gross_amount/1.12);
+                                    $grand_gross += $gross_amount;
+                                    $grand_tax += $tax_amount;
+                                    SalesDetail::create([
+                                        'sales_header_id' => $subSalesHeader->id,
+                                        'product_id' => 270,
+                                        'product_name' => $product->name,
+                                        'product_category' => $product->category_id,
+                                        'price' => $product->price,
+                                        'cost' => 0,
+                                        'tax_amount' => $tax_amount,
+                                        'promo_id' => 0,
+                                        'promo_description' => '',
+                                        'discount_amount' => 0,
+                                        'gross_amount' => $gross_amount,
+                                        'net_amount' => $gross_amount,
+                                        'qty' => $order->qty,
+                                        'paella_qty' => 0,
+                                        'uom' => $product->uom,
+                                        'size' => $product->size ?? "",
+                                        'no_of_pax' => $product->no_of_pax ?? "",
+                                        'paella_price' => 0,
+                                        'other_cost' => 0,
+                                        'other_cost_description' => '',
+                                        'created_by' => $user->id,
+                                        'delivery_date' => $delivery->need_date . ' ' . $delivery->need_time,
+                                        'has_baka' => $delivery->isBaka ? 1 : 0,
+                                        'lechon_baka_service' => $delivery->lechon_baka_service ?? 0,
+                                    ]);
+                                }
                             }
                         }
                     }
@@ -2134,7 +2177,6 @@ class CartController extends Controller
             return data_get($item, 'product_id') == 270;
         });
 
-        // Reset array keys + convert to array for session carts
         if (!auth()->check()) {
             $carts = $carts->values()->all();
         }
