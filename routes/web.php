@@ -971,9 +971,12 @@ Route::get('driver', function() {
 Route::get('itextmo-sample', function() {
     try {
         $sms = new \App\Services\ItextmoSmsService();
-        $result = $sms->debugCheck('09174128392', 'Test Message from Lydias');
+        $result = $sms->sendWithCurl('09174128392', 'Hello world!');
 
-        return response()->json($result);
+        return response()->json([
+            'message' => 'SMS sent successfully!',
+            'result' => $result,
+        ]);
     } catch (\Throwable $th) {
         throw $th;
     }
