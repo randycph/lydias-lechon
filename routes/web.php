@@ -1031,8 +1031,17 @@ Route::get('/revert-special-character', function () {
 
 Route::get('itextmo-sample', function() {
     try {
+        $number = request()->number;
+        $message = request()->message;
+
+        if (!$number || !$message) {
+            return response()->json([
+                'message' => 'number and message parameters are required.'
+            ], 400);
+        }
+
         $sms = new \App\Services\ItextmoSmsService();
-        $result = $sms->sendWithCurl('09174128392', 'Hello world!');
+        $result = $sms->sendWithCurl($number, $message);
 
         $response = json_decode($result, true);
 
