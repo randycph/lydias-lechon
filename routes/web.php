@@ -970,17 +970,17 @@ Route::get('driver', function() {
 
 Route::get('itextmo-sample', function() {
     try {
-        $ip = request()->number;
+        $number = request()->number;
         $message = request()->message;
 
-        if (!$ip || !$message) {
+        if (!$number || !$message) {
             return response()->json([
                 'message' => 'number and message parameters are required.'
             ], 400);
         }
 
         $sms = new \App\Services\ItextmoSmsService();
-        $result = $sms->sendWithCurl('09174128392', $message);
+        $result = $sms->sendWithCurl($number, $message);
 
         $response = json_decode($result, true);
 
