@@ -1083,5 +1083,10 @@ Route::get('itextmo-sample-2', function() {
 
 });
 
+Route::get('ip-check', function() {
+    dd(request()->ip());
+
+});
+
 Route::get('/{slug}', [FrontendController::class, 'page'])->name('page');
 
