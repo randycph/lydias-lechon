@@ -973,9 +973,12 @@ Route::get('itextmo-sample', function() {
         $sms = new \App\Services\ItextmoSmsService();
         $result = $sms->sendWithCurl('09174128392', 'Hello world!');
 
+        $response = json_decode($result, true);
+
         return response()->json([
-            'message' => 'SMS sent successfully!',
-            'result' => $result,
+            'error' => $response['Error'] ?? '',
+            'message' => $response['Message'] ?? '',
+            'result' => $response,
         ]);
     } catch (\Throwable $th) {
         throw $th;
