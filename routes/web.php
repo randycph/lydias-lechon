@@ -1085,7 +1085,7 @@ Route::get('itextmo-sample-2', function() {
 
 Route::get('ip-check', function() {
     // check server ip
-    dd(dd($_SERVER['SERVER_ADDR'] ?? 'unknown'), gethostbyname(gethostname()));
+    dd(($_SERVER['SERVER_ADDR'] ?? 'unknown'), gethostbyname(gethostname()));
 
 });
 
