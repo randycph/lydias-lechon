@@ -1023,9 +1023,15 @@ Route::get('itextmo-sample-2', function() {
 });
 
 Route::get('ip-check', function() {
-    // check server ip
-    dd(($_SERVER['SERVER_ADDR'] ?? 'unknown'), gethostbyname(gethostname()));
+    return [
+        'SERVER_ADDR' => $_SERVER['SERVER_ADDR'] ?? 'unknown',
+        'hostname_ip' => gethostbyname(gethostname()),
+        'remote_addr' => request()->ip(),
+    ];
+});
 
+Route::get('external-ip', function () {
+    return file_get_contents('https://api.ipify.org');
 });
 
 Route::get('/{slug}', [FrontendController::class, 'page'])->name('page');
