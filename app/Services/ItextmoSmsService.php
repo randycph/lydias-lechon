@@ -78,4 +78,49 @@ class ItextmoSmsService
     }
 
 
+    public function debugCheck(string|array $recipients, string $message)
+    {
+        $endpoint = 'https://api.itexmo.com/api/broadcast';
+        $email    = config('itextmo.email');
+        $password = config('itextmo.password');
+
+        try {
+            $ch = curl_init($endpoint);
+
+            $headers = [
+                'Content-Type: application/json',
+                'Authorization: Basic ' . base64_encode($email . ':' . $password),
+            ];
+
+            $payload = [
+                'Recipients' => ['09174128392'],
+                'Message'    => 'Test Message',
+                'ApiCode'    => config('itextmo.apicode'),
+            ];
+
+            curl_setopt_array($ch, [
+                CURLOPT_HTTPHEADER     => $headers,
+                CURLOPT_POST           => true,
+                CURLOPT_POSTFIELDS     => json_encode($payload),
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_SSL_VERIFYHOST => false,
+            ]);
+
+            $response = curl_exec($ch);
+
+            if (curl_errno($ch)) {
+                $error = curl_error($ch);
+                logger()->error('cURL error: ' . $error);
+                return $error;
+            }
+
+            logger($response);
+
+            return $response;
+        } catch (\Exception $ex) {
+            return $ex->getMessage();
+        }
+
+    }
 }
