@@ -1029,6 +1029,16 @@ Route::get('/revert-special-character', function () {
     return "User names reverted from backup fields.";
 });
 
+Route::get('itextmo-sample', function() {
+    try {
+        $sms = new \App\Services\ItextmoSmsService();
+        $result = $sms->send('09174128392', 'Test Message from Lydias');
+
+        return response()->json($result);
+    } catch (\Throwable $th) {
+        throw $th;
+    }
+})->name('driver.home');
 
 Route::get('/{slug}', [FrontendController::class, 'page'])->name('page');
 
