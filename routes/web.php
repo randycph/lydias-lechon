@@ -1023,7 +1023,8 @@ Route::get('itextmo-sample-2', function() {
 });
 
 Route::get('ip-check', function() {
-    dd(request()->ip());
+    // check server ip
+    dd(dd($_SERVER['SERVER_ADDR'] ?? 'unknown'), gethostbyname(gethostname()));
 
 });
 
