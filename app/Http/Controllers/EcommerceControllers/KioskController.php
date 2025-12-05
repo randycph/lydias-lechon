@@ -121,7 +121,7 @@ class KioskController extends Controller
                 break;
             }
 
-            if($p->product_id == 42){
+            if($p->product_id == 178){
                 $baka = 1;
             }
 

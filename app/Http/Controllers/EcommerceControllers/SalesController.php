@@ -144,7 +144,7 @@ class SalesController extends Controller
         $details = SalesDetail::where('sales_header_id',$sales->id)->get();
         foreach($details as $item){
             $gross+=$item->gross_amount;
-            if($item->product_id == 42){
+            if($item->product_id == 178){
                 $baka = 1;
             }
             if($item->product->production_item){
@@ -163,8 +163,8 @@ class SalesController extends Controller
                
                 $delivery_amount = $del_fee?->rate ?? 0;
 
-                if($baka == 1 && $del_fee->outside_manila == 1){
-                    $delivery_amount = 3000;
+                if($baka == 1){
+                    $delivery_amount = 3500;
                 }
             }
             else{
@@ -293,7 +293,7 @@ class SalesController extends Controller
             $lechon = 0;
             $details = SalesDetail::where('sales_header_id',$request->update_dateneeded_id)->get();
             foreach($details as $d){
-                if($d->product_id == 42){
+                if($d->product_id == 178){
                     $baka = 1;
                 }
                 if($d->product->production_item==1 && $d->product->is_misc<>1){
@@ -313,6 +313,7 @@ class SalesController extends Controller
                 // if($baka == 1 && $del_fee->outside_manila == 1){
                 //     $delivery_amount = 3000;
                 // }
+                $delivery_amount = $sales->delivery_fee_amount;
             }
 
             $amt = ($sales->gross_amount - $sales->delivery_fee_amount) + $delivery_amount;

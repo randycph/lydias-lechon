@@ -124,7 +124,7 @@
                                 @forelse($cart as $key => $order)
                                     @php
 
-                                        if($order->product_id == 42){
+                                        if($order->product_id == 178){
                                             $baka = 1;
                                         }
 
