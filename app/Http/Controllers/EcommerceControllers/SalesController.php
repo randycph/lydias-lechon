@@ -589,12 +589,20 @@ class SalesController extends Controller
             array_push($locations, 'Web');
         }
 
+        if (in_array('Tandang Sora Head Office', $locations)) {
+            array_push($locations, 'Web');
+        }
+
         if(auth()->user()->role_id == 1 || $hasProdBranch || auth()->user()->role_id == 3 || $hasBranches){
 
             if ($hasProdBranch || $hasBranches) {
                 $productionBranches = $hasProdBranch
                     ? explode(',', auth()->user()->production_branch_id)
                     : [];
+
+                if (in_array(1, $productionBranches)) {
+                    array_push($locations, 'Web');
+                }
 
                 // Subquery of eligible sales_header ids
                 $eligible = DB::table('ecommerce_sales_details as d')
@@ -1772,12 +1780,20 @@ class SalesController extends Controller
             array_push($locations, 'Web');
         }
 
+        if (in_array('Tandang Sora Head Office', $locations)) {
+            array_push($locations, 'Web');
+        }
+
         if (auth()->user()->role_id == 1 || $hasProdBranch || auth()->user()->role_id == 3 || $hasBranches) {
 
             if ($hasProdBranch || $hasBranches) {
                 $productionBranches = $hasProdBranch
                     ? explode(',', auth()->user()->production_branch_id)
                     : [];
+
+                if (in_array(1, $productionBranches)) {
+                    array_push($locations, 'Web');
+                }
 
                 $eligible = DB::table('ecommerce_sales_details as d')
                     ->join('job_orders as jo', 'jo.sales_detail_id', '=', 'd.id')
