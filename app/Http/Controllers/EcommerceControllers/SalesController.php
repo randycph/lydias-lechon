@@ -159,13 +159,14 @@ class SalesController extends Controller
             $delivery_amount = 0;
             
             if($sales->customer_location <> 'Other'){
-                $del_fee = Deliverablecities::where('name',$sales->customer_location)->where('is_active', 1)->where('item_type',$rate_type)->first();
+                // $del_fee = Deliverablecities::where('name',$sales->customer_location)->where('is_active', 1)->where('item_type',$rate_type)->first();
                
-                $delivery_amount = $del_fee?->rate ?? 0;
+                // $delivery_amount = $del_fee?->rate ?? 0;
 
-                if($baka == 1){
-                    $delivery_amount = 3500;
-                }
+                // if($baka == 1){
+                //     $delivery_amount = 3500;
+                // }
+                $delivery_amount = $sales->delivery_fee_amount;
             }
             else{
                 $delivery_amount = $sales->delivery_fee_amount;
