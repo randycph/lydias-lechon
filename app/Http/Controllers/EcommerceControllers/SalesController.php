@@ -953,7 +953,14 @@ class SalesController extends Controller
         $salesdetail = SalesDetail::where('sales_header_id',$id)->first();
         $salesheader = SalesHeader::with('deliveryAddress')->find($id);
 
-        $products = Product::orderBy('name')->get();
+        $specialId = 270;
+
+        $products = Product::where(function ($q) use ($specialId) {
+                $q->where('status', 'PUBLISHED')
+                ->orWhere('id', $specialId);
+            })
+            ->orderBy('name')
+            ->get();
 
         $dateneeded = '';
         $date_only = '';
