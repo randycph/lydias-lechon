@@ -950,6 +950,7 @@ class CartController extends Controller
             $bakaQty = $bakaCart ? $bakaCart->qty : 0;
 
             if ($bakaCart) {
+                dd(123);
                 Cart::updateOrCreate(
                     [
                         'product_id' => 270,
@@ -1073,6 +1074,7 @@ class CartController extends Controller
         $qty = 0;
         foreach (collect($carts) as $cart) {
             if ($cart->product_id == 178) {
+                dd('1234');
                 $qty = $cart->qty;
                 break;
             }
@@ -1253,6 +1255,7 @@ class CartController extends Controller
         $salesHeader->save();
 
         if ($request->has('deliveries')) {
+            dd('ssss');
             $deliveries = json_decode($request->deliveries ?? '');
             if ($deliveries && count($deliveries) > 0) {
                 foreach ($deliveries as $k => $delivery) {
@@ -1376,6 +1379,7 @@ class CartController extends Controller
                                 ]);
 
                                 if ($product->id == 178) {
+                                    dd('dldld');
                                     $product = Product::whereId(270)->first();
                                     $gross_amount = ((float)$product->price) * $order->qty;
                                     $tax_amount = $gross_amount - ($gross_amount/1.12);
@@ -1424,6 +1428,7 @@ class CartController extends Controller
 //        $carts = Cart::where('user_id',$user->id)->get();
         // convert to collection above
         $carts = collect($carts);
+        dd($carts);
         foreach ($carts as $cart) {
             if(!empty($cart->coupon_code)){
                 
