@@ -1428,7 +1428,6 @@ class CartController extends Controller
 //        $carts = Cart::where('user_id',$user->id)->get();
         // convert to collection above
         $carts = collect($carts);
-        dd($carts);
         foreach ($carts as $cart) {
             if(!empty($cart->coupon_code)){
                 
