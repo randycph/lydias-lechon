@@ -949,19 +949,21 @@ class CartController extends Controller
             $bakaCart = $carts->firstWhere('product_id', 178);
             $bakaQty = $bakaCart ? $bakaCart->qty : 0;
 
-            Cart::updateOrCreate(
-                [
-                    'product_id' => 270,
-                    'user_id' => $user->id,
-                ],
-                [
-                    'qty' => $bakaQty,
-                    'price' => Product::whereId(270)->first()->price ?? 0,
-                    'photo' => null,
-                    'product' => Product::whereId(270)->first(),
-                    'paella_price' => 0
-                ]
-            );
+            if ($bakaCart) {
+                Cart::updateOrCreate(
+                    [
+                        'product_id' => 270,
+                        'user_id' => $user->id,
+                    ],
+                    [
+                        'qty' => $bakaQty,
+                        'price' => Product::whereId(270)->first()->price ?? 0,
+                        'photo' => null,
+                        'product' => Product::whereId(270)->first(),
+                        'paella_price' => 0
+                    ]
+                );
+            }
 
             $carts = Cart::where('user_id', $user->id)->get();
         }
