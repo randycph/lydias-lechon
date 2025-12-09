@@ -63,9 +63,10 @@ class SalesController extends Controller
     public function update_items(Request $request){
         $head = SalesHeader::whereId($request->ui_sales_id)->first();
         $date_needed = '';
+        $joborder = JobOrder::where('sales_number', $head->order_number)->first();
         foreach($head->items as $item){
             if(!empty($item->delivery_date)){
-                $date_needed = $item->delivery_date;
+                $date_needed = $joborder ? $joborder?->date_needed : $item->delivery_date;
             }
             if($request->has('uia_product'.$item->id)){
                 $paella_price = 0;
@@ -81,7 +82,9 @@ class SalesController extends Controller
                     'paella_qty' => $paella_qty,
                     'qty' => $request->input('uiu_qty'.$item->id),
                     'gross_amount' => $gross,
-                    'net_amount' => $gross
+                    'net_amount' => $gross,
+                    'delivery_date' => $date_needed,
+                    'product_name' => $paella_qty > 0 ? $product_name . " Boneless with Paella" : $product_name,
                 ]);
             }
             else{
