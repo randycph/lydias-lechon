@@ -13655,6 +13655,7 @@ textarea.parsley-success:focus {
     display: inline-block;
     position: relative;
     margin-left: auto;
+    margin-right: 20px;
     opacity: .5; }
   .nav-aside .with-sub.show .nav-link {
     font-weight: 500; }
