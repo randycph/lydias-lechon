@@ -110,7 +110,7 @@
                     id="production_branches_div">
                     <label class="d-block">Production Branch *</label>
 
-                    <select name="production_branch_id[]" multiple="multiple"
+                    <select id="production_branch_id" name="production_branch_id[]" multiple="multiple"
                             class="form-control select-production-branch select2-no-search @error('production_branch_id') is-invalid @enderror"
                             {{ $user->assign_role->has_production_branch == 1 ? 'required' : '' }}
                             data-placeholder="Choose one">
