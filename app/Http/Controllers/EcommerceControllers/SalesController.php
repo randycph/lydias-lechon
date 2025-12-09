@@ -63,10 +63,9 @@ class SalesController extends Controller
     public function update_items(Request $request){
         $head = SalesHeader::whereId($request->ui_sales_id)->first();
         $date_needed = '';
-        $joborder = JobOrder::where('sales_number', $head->order_number)->first();
         foreach($head->items as $item){
             if(!empty($item->delivery_date)){
-                $date_needed = $joborder ? $joborder?->date_needed : $item->delivery_date;
+                $date_needed = $item->delivery_date;
             }
             if($request->has('uia_product'.$item->id)){
                 $paella_price = 0;
@@ -77,22 +76,20 @@ class SalesController extends Controller
                     $paella_qty = $request->input('uiu_qty'.$item->id);
                     $gross = ($request->input('uiu_qty'.$item->id) * $item->price) + ($request->input('uiu_qty'.$item->id) * $request->input('uiu_paella'.$item->id));
                 }
+                // check if the $item->product_name has "Boneless with Paella" and remove it before appending again
+                $product_name = $item->product_name;
+                $product_name = str_replace(" Boneless with Paella", "", $product_name);
                 $update = SalesDetail::whereId($item->id)->update([
                     'paella_price' => $paella_price,
                     'paella_qty' => $paella_qty,
                     'qty' => $request->input('uiu_qty'.$item->id),
                     'gross_amount' => $gross,
                     'net_amount' => $gross,
-                    'delivery_date' => $date_needed,
                     'product_name' => $paella_qty > 0 ? $product_name . " Boneless with Paella" : $product_name,
                 ]);
-            }
-            else{
-
+            } else {
                 $delete = SalesDetail::whereId($item->id)->forceDelete();
-
             }
-            
         }
 
         for($x = 1; $x <= $request->ui_total_new; $x++){
