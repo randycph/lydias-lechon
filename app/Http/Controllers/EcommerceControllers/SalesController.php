@@ -60,7 +60,8 @@ class SalesController extends Controller
         return view('admin.sales.update_items',compact('items','products'));
     }
 
-    public function update_items(Request $request){
+    public function update_items(Request $request)
+    {
         $head = SalesHeader::whereId($request->ui_sales_id)->first();
         $date_needed = '';
         foreach($head->items as $item){
@@ -103,10 +104,12 @@ class SalesController extends Controller
                     $gross = ($request->input('uia_qty'.$x) * $request->input('uia_price'.$x)) + ($request->input('uia_qty'.$x) * $request->input('uia_paella'.$x));
                 }
                 $p = Product::whereId($request->input('uia_product'.$x))->first();
+                $product_name = $p->name;
+                $product_name = str_replace(" Boneless with Paella", "", $product_name);
                 $update = SalesDetail::create([
                     'sales_header_id' => $head->id,
                     'product_id' => $request->input('uia_product'.$x),
-                    'product_name' => $p->name,
+                    'product_name' => $paella_qty > 0 ? $product_name . " Boneless with Paella" : $product_name,
                     'product_category' => $p->category_id,
                     'price' => $request->input('uia_price'.$x),
                     'cost' => 0,
