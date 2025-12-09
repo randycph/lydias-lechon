@@ -219,38 +219,32 @@
             var can_approve_payment = role.can_approve_payment;
             var has_production_branch = role.has_production_branch;
 
+            // Branches
             if (has_branches == 1){
-                $('#branches_div').removeClass('d-none');
-                $('#branches_div').addClass('d-block');
-                $('#branches').removeAttr('disabled');
-                $('#branches').prop('required',true);
+                $('#branches_div').removeClass('d-none').addClass('d-block');
+                $('#branches').prop('disabled', false).prop('required', true);
             } else {
-                $('#branches_div').removeClass('d-block');
-                $('#branches_div').addClass('d-none');
-                $('#branches').attr('disabled','disabled');
-                $('#branches').prop('required',false);
+                $('#branches_div').removeClass('d-block').addClass('d-none');
+                $('#branches').prop('disabled', true).prop('required', false);
             }
+
+            // Production branches
+            const $prod = $('#production_branch_id');
             if (has_production_branch == 1) {
-                $('#production_branches_div').removeClass('d-none');
-                $('#production_branches_div').addClass('d-block');
-                $('#production_branch_id').removeAttr('disabled');
-                $('#production_branch_id').prop('required',true);
+                $('#production_branches_div').removeClass('d-none').addClass('d-block');
+                $prod.prop('disabled', false).prop('required', true);
             } else {
-                $('#production_branches_div').removeClass('d-block');
-                $('#production_branches_div').addClass('d-none');
-                $('#production_branch_id').attr('disabled','disabled');
-                $('#production_branch_id').prop('required',false);
+                $('#production_branches_div').removeClass('d-block').addClass('d-none');
+                $prod.prop('disabled', true).prop('required', false);
             }
+
+            // Payment types
             if (can_approve_payment == 1){
-                $('#payment_div').removeClass('d-none');
-                $('#payment_div').addClass('d-block');
-                $('#payment_types').removeAttr('disabled');
-                $('#payment_types').prop('required',false);
+                $('#payment_div').removeClass('d-none').addClass('d-block');
+                $('#payment_types').prop('disabled', false).prop('required', false);
             } else {
-                $('#payment_div').removeClass('d-block');
-                $('#payment_div').addClass('d-none');
-                $('#payment_types').attr('disabled','disabled');
-                $('#payment_types').prop('required',false);
+                $('#payment_div').removeClass('d-block').addClass('d-none');
+                $('#payment_types').prop('disabled', true).prop('required', false);
             }
         }
     </script>
