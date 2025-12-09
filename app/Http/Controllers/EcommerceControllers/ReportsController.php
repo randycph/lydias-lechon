@@ -862,7 +862,7 @@ class ReportsController extends Controller
             left join product_categories c on c.id=p.category_id
             left join production_orders po on po.joborder_id = jo.id
             left join production_branches pb on pb.id = po.branch_id
-         where h.id>0 and h.deleted_at is null AND h.for_deletion = 0 and jo.deleted_at is null and po.deleted_at is null";
+         where h.id>0 and h.deleted_at is null AND h.for_deletion = 0 and jo.deleted_at is null and po.deleted_at is null and d.deleted_at is null";
         // conditions
             if(isset($_GET['agent']) && $_GET['agent']<>''){
                 $qry.= " and h.agent='".$_GET['agent']."'";
