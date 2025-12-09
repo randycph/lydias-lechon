@@ -253,7 +253,7 @@ class UserController extends Controller
                 }
             } 
         }
-        return back()->with('success', __('standard.users.update_success'));
+        // return back()->with('success', __('standard.users.update_success'));
 
         return redirect()->route('users.index')->with('success', __('standard.users.update_success'));
     }
