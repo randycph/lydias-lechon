@@ -54,7 +54,7 @@ class SalesHeader extends Model
                 'product_name' => $salesdetail->product->name,
                 'product_size' => $salesdetail->product->size,
                 'product_weight' => $salesdetail->product->weight,
-                'product_category' => $salesdetail->product->category_id,
+                'product_category' => $salesdetail->product->category_id ?? null,
                 'price' => $salesdetail->price,
                 'paella_qty' => $salesdetail->paella_qty,
                 'qty' => $salesdetail->qty,
