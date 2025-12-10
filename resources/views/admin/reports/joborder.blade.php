@@ -78,13 +78,13 @@
                         <div class="row row-sm">
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="tx-13">Start Date</label>
+                                    <label class="tx-13">Start Date (Date Needed)</label>
                                     <input type="date" class="form-control" name="startdate"  value="@isset($_GET['startdate']){{ $_GET['startdate'] }}@endisset">
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="tx-13">End Date</label>
+                                    <label class="tx-13">End Date (Date Needed)</label>
                                     <input type="date" class="form-control" name="enddate"  value="@isset($_GET['enddate']){{ $_GET['enddate'] }}@endisset">
                                 </div>
                             </div>
