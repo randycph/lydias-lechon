@@ -362,10 +362,10 @@
                                                                     <a class="dropdown-item"  href="javascript:void(0);" onclick="confirm_order({{$sale->id}},'{{ number_format((\App\EcommerceModel\SalesHeader::balance($sale->id)),2) }}');" title="Confirm Order" >Confirm Order</a>
                                                                     @endif
                                                                 @endif
-                                                                @if (!isDispatcher())
+                                                                @if (auth()->user()->has_access_to_route('sales-transaction.update'))
                                                                 <a class="dropdown-item"  href="{{ route('sales.update_details',$sale->id) }}" title="Update Sales Details & Items" >Update Sales Details</a>
                                                                 @endif
-                                                                @if($dateneeded > date('Y-m-d H:i:s') && !isDispatcher())
+                                                                @if($dateneeded > date('Y-m-d H:i:s') && auth()->user()->has_access_to_route('sales-transaction.destroy'))
                                                                     <a class="dropdown-item text-danger" href="javascript:void(0)" onclick="delete_sales({{$sale->id}},'{{$sale->order_number}}')" title="Delete Transaction">Delete</a>
                                                                 @endif
                                                             @endif
@@ -385,16 +385,18 @@
 
                                                                 <a class="dropdown-item" style="display: none;" target="_blank" href="{{ route('sales-transaction.view_payment',$sale->id) }}" title="Show payment" data-id="{{$sale->id}}">Sales Payment</a>
 
+                                                                @if (auth()->user()->has_access_to_route('payment.add.store'))
                                                                 <a class="dropdown-item" href="javascript:;" onclick="addPayment('{{$sale->id}}','{{\App\EcommerceModel\SalesPayment::get_remaining_unpaid($sale->gross_amount,$sale->id)}}');">Add Payment</a>
-
+                                                                @endif
                                                                 @if($dateneeded > date('Y-m-d H:i:s'))
                                                                     @if(auth()->user()->role_id == 2 || auth()->user()->role_id == 1 || auth()->user()->role_id == 3)
                                                                         <a class="dropdown-item" href="javascript:;" onclick="addDelFee({{$sale->id}},'{{$sale->order_number}}',{{$sale->delivery_fee_amount}});">Update Delivery Fee</a>
                                                                     @endif
                                                                 @endif
 
+                                                                @if (auth()->user()->has_access_to_route('display.added-payments'))
                                                                 <a class="dropdown-item" href="javascript:;" onclick="show_added_payments('{{$sale->id}}')">View Payments</a>
-
+                                                                @endif
 
                                                                 @if($sale->payment_type == 'xxxxxx')
                                                                 <a class="dropdown-item" href="{{route('staff-edit-payment',$sale->id)}}">Update Sales Payment</a>
