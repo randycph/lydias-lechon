@@ -968,31 +968,5 @@ Route::get('driver', function() {
     return view('driver.index');
 })->name('driver.home');
 
-Route::get('itextmo-sample', function() {
-    try {
-        $number = request()->number;
-        $message = request()->message;
-
-        if (!$number || !$message) {
-            return response()->json([
-                'message' => 'number and message parameters are required.'
-            ], 400);
-        }
-
-        $sms = new \App\Services\ItextmoSmsService();
-        $result = $sms->send($number, $message);
-
-        $response = json_decode($result, true);
-
-        return response()->json([
-            'error' => $response['Error'] ?? '',
-            'message' => $response['Message'] ?? '',
-            'result' => $response,
-        ]);
-    } catch (\Throwable $th) {
-        throw $th;
-    }
-});
-
 Route::get('/{slug}', [FrontendController::class, 'page'])->name('page');
 
