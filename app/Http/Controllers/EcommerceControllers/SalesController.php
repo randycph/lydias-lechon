@@ -644,7 +644,7 @@ class SalesController extends Controller
                                 ->orWhereIn('delivery_branch', $locations);
                             });
                         }
-                    })->orderBy('order_number', 'desc');
+                    });
             } elseif (auth()->user()->role_id == 3) {
 
                 $eligible = DB::table('ecommerce_sales_details as d')
@@ -675,8 +675,7 @@ class SalesController extends Controller
                             ->orWhereIn('order_source', $locations)
                             ->orWhereIn('delivery_branch', $locations);
                         })
-                    )
-                    ->orderBy('order_number', 'desc');
+                    );
             } else {
                 $model = SalesHeader::where('id','>',0)
                     ->with('items', function($q) use($today) {
@@ -1862,8 +1861,7 @@ class SalesController extends Controller
                                 ->orWhereIn('order_source', $locations)
                                 ->orWhereIn('delivery_branch', $locations);
                         });
-                    })
-                    ->orderBy('order_number', 'desc');
+                    });
 
             } else {
                 $model = SalesHeader::with(['items' => function ($q) {
@@ -1874,8 +1872,7 @@ class SalesController extends Controller
                     )
                     ->where('id', '>', 0)
                     ->where('has_sub', 0)
-                    ->where('for_deletion', 1)
-                    ->orderBy('order_number', 'desc');
+                    ->where('for_deletion', 1);
             }
 
         } else {
@@ -1902,8 +1899,7 @@ class SalesController extends Controller
                     $query->whereIn('outlet', $locations)
                         ->orWhereIn('order_source', $locations)
                         ->orWhereIn('delivery_branch', $locations);
-                })
-                ->orderBy('order_number', 'desc');
+                });
         }
 
         $model = $this->additional_filters($model);
