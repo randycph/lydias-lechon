@@ -589,12 +589,22 @@ class SalesController extends Controller
             array_push($locations, 'Web');
         }
 
-        if(auth()->user()->role_id == 1 || $hasProdBranch || auth()->user()->role_id == 3 || $hasBranches){
+        if (in_array('Tandang Sora Head Office', $locations)) {
+            array_push($locations, 'Web');
+        }
+
+        $isDispatcher = auth()->user()->role_id == 5;
+
+        if(auth()->user()->role_id == 1 || $hasProdBranch || auth()->user()->role_id == 3 || $hasBranches || auth()->user()->role_id == 5){
 
             if ($hasProdBranch || $hasBranches) {
                 $productionBranches = $hasProdBranch
                     ? explode(',', auth()->user()->production_branch_id)
                     : [];
+
+                if (in_array(1, $productionBranches)) {
+                    array_push($locations, 'Web');
+                }
 
                 // Subquery of eligible sales_header ids
                 $eligible = DB::table('ecommerce_sales_details as d')
@@ -616,6 +626,9 @@ class SalesController extends Controller
                     )
                     ->when($showUnread === true,
                         fn ($q) => $q->where('is_new_order', 1)
+                    )
+                    ->when($isDispatcher,
+                        fn ($q) => $q->where('payment_status', '!=', 'UNPAID')
                     )
                     // apply production / branch filters without plucking IDs
                     ->where(function ($q) use ($hasProdBranch, $eligible, $hasBranches, $locations) {
@@ -650,6 +663,9 @@ class SalesController extends Controller
                         fn ($q) => $q->where('for_deletion', 1),
                         fn ($q) => $q->where('for_deletion', 0)
                     )
+                    ->when($isDispatcher,
+                        fn ($q) => $q->where('payment_status', '!=', 'UNPAID')
+                    )
                     ->when($showUnread === true,
                         fn ($q) => $q->where('is_new_order', 1)
                     )
@@ -668,6 +684,9 @@ class SalesController extends Controller
                           ->orderBy('delivery_date', 'desc');
                     })
                     ->where('has_sub', 0)
+                    ->when($isDispatcher,
+                        fn ($q) => $q->where('payment_status', '!=', 'UNPAID')
+                    )
                     ->when($showDeleted === true,
                         fn ($q) => $q->where('for_deletion', 1),
                         fn ($q) => $q->where('for_deletion', 0)
@@ -702,6 +721,9 @@ class SalesController extends Controller
                                 ->when($showUnread === true,
                                     fn ($q) => $q->where('is_new_order', 1)
                                 )
+                                ->when($isDispatcher,
+                                    fn ($q) => $q->where('payment_status', '!=', 'UNPAID')
+                                )
                                 ->where(function ($query) use($locations) {
                                     $query->whereIn('outlet', $locations)
                                         ->orWhereIn('order_source', $locations)
@@ -712,6 +734,9 @@ class SalesController extends Controller
                                 ->when($showDeleted === true,
                                     fn ($q) => $q->where('for_deletion', 1),
                                     fn ($q) => $q->where('for_deletion', 0)
+                                )
+                                ->when($isDispatcher,
+                                    fn ($q) => $q->where('payment_status', '!=', 'UNPAID')
                                 )
                                 ->when($showUnread === true,
                                     fn ($q) => $q->where('is_new_order', 1)
@@ -1772,12 +1797,22 @@ class SalesController extends Controller
             array_push($locations, 'Web');
         }
 
-        if (auth()->user()->role_id == 1 || $hasProdBranch || auth()->user()->role_id == 3 || $hasBranches) {
+        if (in_array('Tandang Sora Head Office', $locations)) {
+            array_push($locations, 'Web');
+        }
+
+        $isDispatcher = auth()->user()->role_id == 5; // dispatcher role
+
+        if (auth()->user()->role_id == 1 || $hasProdBranch || auth()->user()->role_id == 3 || $hasBranches || $isDispatcher) {
 
             if ($hasProdBranch || $hasBranches) {
                 $productionBranches = $hasProdBranch
                     ? explode(',', auth()->user()->production_branch_id)
                     : [];
+
+                if (in_array(1, $productionBranches)) {
+                    array_push($locations, 'Web');
+                }
 
                 $eligible = DB::table('ecommerce_sales_details as d')
                     ->join('job_orders as jo', 'jo.sales_detail_id', '=', 'd.id')
@@ -1801,6 +1836,9 @@ class SalesController extends Controller
                                 ->orWhereIn('delivery_branch', $locations);
                         });
                     })
+                    ->when($isDispatcher,
+                        fn ($q) => $q->where('payment_status', '!=', 'UNPAID')
+                    )
                     ->orderBy('order_number', 'desc');
 
             } elseif (auth()->user()->role_id == 3) {
@@ -1831,6 +1869,9 @@ class SalesController extends Controller
                 $model = SalesHeader::with(['items' => function ($q) {
                         $q->orderBy('delivery_date', 'asc');
                     }])
+                    ->when($isDispatcher,
+                        fn ($q) => $q->where('payment_status', '!=', 'UNPAID')
+                    )
                     ->where('id', '>', 0)
                     ->where('has_sub', 0)
                     ->where('for_deletion', 1)
@@ -1854,6 +1895,9 @@ class SalesController extends Controller
                 }])
                 ->where('id', '>', 0)
                 ->where('for_deletion', 1)
+                    ->when($isDispatcher,
+                        fn ($q) => $q->where('payment_status', '!=', 'UNPAID')
+                    )
                 ->where(function ($query) use ($locations) {
                     $query->whereIn('outlet', $locations)
                         ->orWhereIn('order_source', $locations)
