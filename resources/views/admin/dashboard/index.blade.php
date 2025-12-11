@@ -80,6 +80,8 @@
                     </a>
                 </div>
             </div>
+        @else 
+            <div class="col-lg-3 col-md-6"></div>
         @endif
         @if (auth()->user()->has_access_to_pages_module() || auth()->user()->has_access_to_albums_module() || auth()->user()->has_access_to_user_module() || auth()->user()->has_access_to_news_module())
             <div class="col-lg-3 col-md-4">
