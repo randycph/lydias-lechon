@@ -480,6 +480,13 @@
                                                     </div>
                                                 </div>
 
+                                                <template x-if="delivery.cochinillo_warning">
+                                                    <div
+                                                        class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
+                                                        Cochinillo (Oven Roasted) with FREE Mexican Rice is not available on December 24. Please select another date.
+                                                    </div>
+                                                </template>
+
                                                 <div
                                                     class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
                                                     <div>We've pre-selected the earliest available time for your order. You may adjust the date and time to your preference. For bookings earlier that our pre-selected schedule, please contact our Hotline directly.</div>
@@ -813,8 +820,7 @@
                                 <template x-if="!allowMultiple">
                                     <div class="w-full flex gap-4">
                                         <div class="my-2 w-full lg:w-1/2">
-                                            <label for="date" class="block mb-2 text-sm font-bold text-gray-900">Select
-                                                Date <span class="text-red-700">*</span></label>
+                                            <label for="date" class="block mb-2 text-sm font-bold text-gray-900">Select Date <span class="text-red-700">*</span></label>
                                             <div class="relative">
                                                 <div
                                                     class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
@@ -860,6 +866,10 @@
                                         </div>
                                     </div>
                                 </template>
+                                <div x-show="withConchinilloOnDec24Selected"
+                                    class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
+                                    Cochinillo (Oven Roasted) with FREE Mexican Rice is not available on December 24. Please select another date.
+                                </div>
                                 <template x-if="!allowMultiple">
                                     <div
                                         class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
@@ -1209,6 +1219,7 @@
     window.minimum_processing_hours = @json($minimum_processing_hours);
     window.minimum_processing_hours_misc = @json($minimum_processing_hours_misc);
     window.minimum_order_misc = @json($minimum_order_misc);
+    window.hasCochinillo = @json($hasCochinillo);
 </script>
 
 <script>
@@ -1216,6 +1227,7 @@
         return {
             today: new Date(),
             hasbaka: window.hasBaka || false,
+            hasCochinillo: window.hasCochinillo || false,
             haslechon: window.hasLechon || false,
             hasMisc: window.hasMisc || false,
             minimum_order_amount_door_to_door: window.minimum_order_amount_door_to_door || 0,
@@ -1277,6 +1289,7 @@
                     note: '', 
                     delivery_fee: 0,
                     paella: false,
+                    cochinillo_warning: false,
                 }
             ],
             allowMultiple: false,
@@ -1299,6 +1312,7 @@
                     note: '',
                     paella: false,
                     delivery_fee: 0,
+                    cochinillo_warning: false,
                 }];
                 this.deliveryFees = [];
                 this.deliveryFee = 0;
@@ -1685,6 +1699,14 @@
                     this.isSubmitting = false;
                     return;
                 }
+
+                const selectedDate = new Date(this.need_date);
+
+                if (hasCochinillo && selectedDate.getDate() === 24 && selectedDate.getMonth() === 11) {
+                    this.withConchinilloOnDec24Selected = true;
+                    this.isSubmitting = false;
+                    return;
+                }
                 
                 if (this.hasErrorMessage) {
                     this.isSubmitting = false;
@@ -1702,7 +1724,7 @@
 
                 if (this.method === 'delivery' && this.allowMultiple) {
                     if (!this.validateAllDeliveryFields()) {
-                        this.qtyValidationMessage = 'Please fill all quantity fields.';
+                        this.qtyValidationMessage = 'Please check all errors in the delivery entries.';
                         this.isSubmitting = false;
                         return;
                     }
@@ -1855,6 +1877,7 @@
                     return (
                         delivery.need_time &&
                         delivery.need_date &&
+                        delivery.cochinillo_warning === false &&
                         delivery.city &&
                         delivery.province &&
                         hasValidProducts
@@ -3048,7 +3071,14 @@
                     delivery.warningMessage = `⚠️ Warning! The date and time you've selected (${delivery.need_date} - ${this.formatTime(delivery.need_time)}) is less than 24 hours from now. You can still proceed by contacting our <span class='underline text-blue-600 cursor-pointer' @click='openHotline = true'>Hotline</span>.`;
                 }
 
-                this.clearToProceed = true;
+                const hasCochinillo = delivery.orders.some(o => o.product_id === 165);
+                if (hasCochinillo && selectedDate.getDate() === 24 && selectedDate.getMonth() === 11) {
+                    delivery.cochinillo_warning = true;
+                    this.clearToProceed = false;
+                } else {
+                    delivery.cochinillo_warning = false;
+                    this.clearToProceed = true;
+                }
             },
 
             // Get previously selected qty in *this delivery* to allow it again in dropdown
@@ -3095,6 +3125,7 @@
                         product_id: order.product_id,
                         qty: parseInt(newQty) || 0,
                         product: order.product,
+                        cochinillo_warning: false,
                         product_name: isPaella ? order.product.name + ' Boneless with Paella' : order.product.name,
                     });
                 }
@@ -3297,7 +3328,8 @@
                     need_time: '',
                     note: '',
                     delivery_fee: 0,
-                    sms: false
+                    sms: false,
+                    cochinillo_warning: false,
                 });
 
                 this.qtyValidationMessage = '';
@@ -3383,6 +3415,8 @@
                 return `${adjustedHours}:${minutes} ${isPM ? 'PM' : 'AM'}`;
             },
 
+            withConchinilloOnDec24Selected: false,
+
             validateDateTime() {
                 const now = new Date();
 
@@ -3392,6 +3426,13 @@
                 }
 
                 const selectedDate = new Date(this.need_date);
+
+                if (hasCochinillo && selectedDate.getDate() === 24 && selectedDate.getMonth() === 11) {
+                    this.withConchinilloOnDec24Selected = true;
+                    return;
+                } else  {
+                    this.withConchinilloOnDec24Selected = false;
+                }
 
                 if (!this.need_time || this.isTimeDisabled(parseInt(this.need_time.split(':')[0]))) {
                     // Auto-select first valid hour
