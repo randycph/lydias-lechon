@@ -249,6 +249,7 @@ class FrontendController extends Controller
 
         $disabledPickupDates = explode(',', $setting->disable_pickup_dates ?? '');
         $disabledDeliveryDates = explode(',', $setting->disable_delivery_dates ?? '');
+        $disabledDeliveryMiscDates = explode(',', $setting->disable_delivery_misc_dates ?? '');
 
         $haslechon = $carts->contains(function ($cart) {
             return data_get($cart, 'product.category_id') == 1
@@ -324,7 +325,7 @@ class FrontendController extends Controller
             return $cart->product_id === 165;
         });
 
-        return view('v2.checkout', compact('lechonBakaService', 'triples', 'provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc', 'eligibleCoupons', 'minimum_order_amount_door_to_door', 'minimum_order_amount_pickup', 'minimum_processing_hours', 'minimum_processing_hours_misc', 'minimum_order_misc', 'disable_delivery_misc_dates', 'hasCochinillo'));
+        return view('v2.checkout', compact('lechonBakaService', 'triples', 'provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'disabledDeliveryMiscDates', 'haslechon', 'hasbaka', 'hasMisc', 'eligibleCoupons', 'minimum_order_amount_door_to_door', 'minimum_order_amount_pickup', 'minimum_processing_hours', 'minimum_processing_hours_misc', 'minimum_order_misc', 'disable_delivery_misc_dates', 'hasCochinillo'));
     }
 
     public function confirmation($id)
