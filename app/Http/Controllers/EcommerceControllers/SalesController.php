@@ -317,15 +317,16 @@ class SalesController extends Controller
                 $delivery_amount = $request->delivery_fee_amount;
             }
             else{
-                // $del_fee = Deliverablecities::where('name',$request->update_dateneeded_d2d)->where('item_type',$rate_type)->first();           
-                // $delivery_amount = $del_fee->rate;
-                // if($baka == 1 && $del_fee->outside_manila == 1){
-                //     $delivery_amount = 3000;
-                // }
-                $delivery_amount = $sales->delivery_fee_amount;
+                if ($sales->delivery_fee_amount == 0) {
+                    $del_fee = Deliverablecities::where('name',$request->update_dateneeded_d2d)->where('item_type',$rate_type)->first();           
+                    $delivery_amount = $del_fee->rate;
+                } else {
+                    $delivery_amount = $sales->delivery_fee_amount;
+                }
             }
 
-            $amt = ($sales->gross_amount - $sales->delivery_fee_amount) + $delivery_amount;
+            $amt = $sales->items->sum('gross_amount') + $delivery_amount;
+            // $amt = ($sales->gross_amount - $sales->delivery_fee_amount) + $delivery_amount;
 
             if($sales->customer_location == $request->update_dateneeded_d2d){
                 
@@ -355,8 +356,8 @@ class SalesController extends Controller
         }
         if($request->shipping_type == 'storepickup'){
             $sales->update(['delivery_type' => 'Store Pickup']);
-            $gross = $sales->gross_amount - $sales->delivery_fee_amount;
-            $sales->update([
+            $gross = $sales->items->sum('gross_amount');
+            $update_date_needed = SalesHeader::whereId($request->update_dateneeded_id)->update([
                 'customer_delivery_adress' => $request->update_dateneeded_sp,
                 'instruction' => $request->new_instruction,
                 'outlet' => $request->update_dateneeded_sp,
