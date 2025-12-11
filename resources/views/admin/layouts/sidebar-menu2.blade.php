@@ -59,53 +59,73 @@
             <li class="nav-item with-sub @if (request()->routeIs('reports*')) active show @endif">
                 <a href="#" class="nav-link"><i data-feather="pie-chart"></i> <span>Reports</span></a>
                 <ul>
-                    @if(auth()->user()->has_access_to_route('admin.report.sales') && !isDispatcher())
+                    @if(auth()->user()->has_access_to_route('admin.report.sales'))
                         <li><a target="_blank" href="{{route('admin.report.sales')}}">Sales Summary Report</a></li>
                     @endif
-                    {{--                @if(auth()->user()->has_access_to_route('admin.report.sales'))--}}
-                    {{--                    <li><a target="_blank" href="{{route('admin.report.sales')}}" style="display:none;">Branch Sales Summary</a></li>--}}
-                    {{--                @endif--}}
-                    @if(auth()->user()->has_access_to_route('admin.report.sales_payment') && !isForecaster() && !isDispatcher())
+                    @if(auth()->user()->has_access_to_route('admin.report.sales_payment'))
                         <li><a target="_blank" href="{{route('admin.report.sales_payment')}}">Sales Payment Report</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.delivery_status') && !isForecaster() && !isDispatcher())
+                    @if(auth()->user()->has_access_to_route('admin.report.delivery_status'))
                         <li><a target="_blank" href="{{route('admin.report.delivery_status')}}">Delivery Status Report</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.joborder') && !isForecaster() && !isDispatcher())
+                    @if(auth()->user()->has_access_to_route('admin.report.joborder'))
                         <li><a target="_blank" href="{{route('admin.report.joborder')}}">Job Order Report</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.leftover') && !isForecaster() && !isDispatcher())
+                    @if(auth()->user()->has_access_to_route('admin.report.leftover'))
                         <li><a target="_blank" href="{{route('admin.report.leftover')}}">Leftover Report</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.sales-per-agent') && !isForecaster() && !isDispatcher())
+                    @if(auth()->user()->has_access_to_route('admin.report.sales-per-agent'))
                         <li><a target="_blank" href="{{route('admin.report.sales-per-agent')}}">Sales per Agent</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.sales-per-customer') && !isForecaster() && !isDispatcher())
+                    @if(auth()->user()->has_access_to_route('admin.report.sales-per-customer'))
                         <li><a target="_blank" href="{{route('admin.report.sales-per-customer')}}">Sales per Customer</a></li>
                     @endif
                     @if(auth()->user()->has_access_to_route('admin.report.forecaster'))
                         <li><a target="_blank" href="{{route('admin.report.forecaster')}}">Forecaster Report</a></li>
                     @endif
-                    @if(auth()->user()->has_access_to_route('admin.report.door2door_report') && !isForecaster() && !isDispatcher())
+                    @if(auth()->user()->has_access_to_route('admin.report.door2door_report'))
                         <li><a target="_blank" href="{{route('admin.report.door2door_report')}}">Delivery Report</a></li>
                     @endif
-                    
-                    @if (!isForecaster() && !isDispatcher())
-                    {{--<li><a target="_blank" href="{{route('admin.report.door2door_report')}}">Dispatcher Report</a></li>--}}
+                    @if(auth()->user()->has_access_to_route('admin.report.sales_category'))
                     <li><a target="_blank" href="{{route('admin.report.sales_category')}}">Sales by Category Report</a></li>
+                    @endif
+                    @if (auth()->user()->has_access_to_route('admin.report.sales-per-branch'))
                     <li><a target="_blank" href="{{route('admin.report.sales-per-branch')}}">Sales by Branch Report</a></li>
+                    @endif
+                    @if (auth()->user()->has_access_to_route('admin.report.sales_social'))
                     <li><a target="_blank" href="{{route('admin.report.sales_social')}}">Sales by Channel Report</a></li>
+                    @endif
+                    @if (auth()->user()->has_access_to_route('admin.report.top_products'))
                     <li><a target="_blank" href="{{route('admin.report.top_products')}}">Most Saleable Products</a></li>
+                    @endif
+                    @if (auth()->user()->has_access_to_route('admin.report.top_agents'))
                     <li><a target="_blank" href="{{route('admin.report.top_agents')}}">Top Agents Report</a></li>
+                    @endif
+                    @if (auth()->user()->has_access_to_route('admin.report.guest_orders'))
                     <li><a target="_blank" href="{{route('admin.report.guest_orders')}}">Guest Logins Report</a></li>
+                    @endif
+                    @if (auth()->user()->has_access_to_route('admin.report.delivery_per_production_location'))
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.delivery_per_production_location')}}">Delivery per Production Location</a></i></li>
+                    @endif
+                    @if (auth()->user()->has_access_to_route('admin.report.audit_trail_per_user'))
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.audit_trail_per_user')}}">Audit Trail (User)</a></li>
+                    @endif
+                    @if (auth()->user()->has_access_to_route('admin.report.audit_trail_per_sales'))
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.audit_trail_per_sales')}}">Audit Trail (Sales)</a></li>
-                    <!-- <li><a style="color: white;" target="_blank" href="{{route('admin.report.audit_trail_per_external')}}">Audit Trail (External)</a></li> -->
+                    @endif
+                    @if (auth()->user()->has_access_to_route('admin.report.forecast_report_per_product_type'))
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.forecast_report_per_product_type')}}">Forecast Report per Product Type</a></li>
+                    @endif
+                    @if (auth()->user()->has_access_to_route('admin.report.pickup_orders_per_branch'))
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.pickup_orders_per_branch')}}">Pickup Orders per Branch</a></li>
+                    @endif
+                    @if (auth()->user()->has_access_to_route('admin.report.commissary_production'))
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.commissary_production')}}">Commissary Production</a></li>
+                    @endif
+                    @if (auth()->user()->has_access_to_route('admin.report.customer-details'))
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.customer-details')}}">Customer Details Report</a></li>
+                    @endif
+                    @if (auth()->user()->has_access_to_route('admin.report.gift_cert'))
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.gift_cert')}}">Gift Cert Report</a></li>
                     @endif
                 </ul>

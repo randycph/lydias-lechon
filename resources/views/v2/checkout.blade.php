@@ -905,8 +905,8 @@
                             <div x-show="warningMessage"
                                 class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded" x-html="warningMessage">
                             </div>
-                            <button :disable="isSubmitting" type="submit"
-                                class="bg-primary custom-btn btn-primary-dark text-center text-white px-6 py-4 mt-4 w-full rounded-md">
+                            <button :disabled="isSubmitting" type="submit"
+                                class="bg-primary custom-btn btn-primary-dark text-center text-white px-6 py-4 mt-4 w-full rounded-md disabled:opacity-50 disabled:bg-gray-400">
                                 <span x-show="!isSubmitting">Place Order</span>
                                 <span x-show="isSubmitting" class="flex items-center justify-center gap-2">
                                     <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
@@ -1807,10 +1807,10 @@
 
                         this.depositModal = true;
 
-                        this.isSubmitting = false;
+                        // this.isSubmitting = false;
                     } else {
                         this.isSubmitting = false
-                        alert('Error: ' + data.message);
+                        this.warningMessage = data.message;
                     };
                 })
                 .catch(async error => {

@@ -413,18 +413,59 @@ class JoborderController extends Controller
                 }
             }
 
+            // if($request->total_misc > 0){
+            //     $misc_id    = $data['misc_id'];
+            //     $misc_qty   = $data['misc_qty'];
 
+            //     foreach($misc_id as $key => $id){
+            //         $product = Product::find($id);
 
-            if($request->total_misc > 0){
-                $misc_id    = $data['misc_id'];
-                $misc_qty   = $data['misc_qty'];
+            //         $this->save_product_to_sales_detail($salesHeader->id,$product,$misc_qty[$key],0,$request);
+            //     }
+            // }
 
-                foreach($misc_id as $key => $id){
-                    $product = Product::find($id);
+            if ($request->total_misc > 0) {
+                // 1) Base map from misc_id + misc_qty
+                $productIds = (array) $request->input('misc_id', []); 
+                $baseQtys   = (array) $request->input('misc_qty', []);
 
-                    $this->save_product_to_sales_detail($salesHeader->id,$product,$misc_qty[$key],0,$request);
+                $qtyById = [];
+                foreach ($productIds as $i => $pid) {
+                    $pid = (int) $pid;
+                    $qtyById[$pid] = isset($baseQtys[$i]) ? (int) $baseQtys[$i] : 0;
+                }
+
+                // 2) If has miscellaneous, override qty by PRODUCT ID
+                $miscRaw = $request->input('miscellaneous');
+                if (is_string($miscRaw) && trim($miscRaw) !== '') {
+                    $items = json_decode($miscRaw, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($items)) {
+                        $latestById = [];
+                        foreach ($items as $it) {
+                            if (!isset($it['id'])) continue;
+                            $pid = (int) $it['id'];
+                            $q   = isset($it['qty']) ? (int) $it['qty'] : null;
+                            if ($q !== null) $latestById[$pid] = $q;
+                        }
+
+                        // Only override existing products
+                        foreach ($latestById as $pid => $q) {
+                            if (array_key_exists($pid, $qtyById)) {
+                                $qtyById[$pid] = max(0, (int)$q);
+                            }
+                        }
+                    }
+                }
+
+                // 3) Save
+                foreach ($qtyById as $productId => $qty) {
+                    if ($qty <= 0) continue;
+                    if (!$product = Product::find($productId)) continue;
+
+                    $this->save_product_to_sales_detail($salesHeader->id, $product, $qty, 0, $request);
                 }
             }
+
                 for($ix=1; $ix<=10; $ix++){
 
                     if($request->input('payment_amount'.$ix) > 0){

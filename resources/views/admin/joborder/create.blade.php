@@ -380,6 +380,9 @@
                         <label class="d-block">Agent Code</label>
                         <input type="text" class="form-control" name="agent" id="agent" readonly="readonly" value="{{Auth::user()->name}}">
                     </div>
+
+                    <input type="hidden" class="grandtotal" value="0" name="grandtotal">
+                    <input type="hidden" class="miscellaneous" name="miscellaneous">
                     
                     <div class="jo_payment">
                        {{--  <div class="form-group">
@@ -706,6 +709,7 @@
     </script>
 
     <script>
+    let misc = [];
     /** form validations **/
         $(document).ready(function () {
             //called when key is pressed in textbox
@@ -943,17 +947,24 @@
 
             $('#total_misc').val(total_added_misc);
 
+            if ($('#product_name').val() == '' || $('#product_price').val() == 0) {
+                $('#prompt-product-validation').modal('show');
+                $('#prompt_msg').html('Please select a miscellaneous product to add.');
+                $('#addmiscellaneous').modal('hide');
+                return false;
+            }
+
             var id   = $('#product_id').val();
             var name = $('#product_name').val();
             var price= $('#product_price').val();
             var qty  = $('#misc_qty').val();
             var total = parseInt(price)*qty;
 
-            $('#misc_summary').append('<tr id="misc_row'+m+'">'+
+            $('#misc_summary').append('<tr class="misclists" id="misc_row'+m+'">'+
                 '<td style="display:none;"><input type="text" name="misc[]" value="'+name+'"/></td>'+
-                '<td>'+name+'</td>'+
+                '<td>'+name+' '+id+'</td>'+
                 '<td>'+FormatAmount(price,2)+'</td>'+
-                '<td><input type="number" name="mq" id="mq'+m+'" min="1" value="'+qty+'" onchange="change_qty('+m+')" style="width:50px;" maxlength="4" size="4"/></td>'+
+                '<td><input type="number" name="mq" data-m="'+m+'" data-id="'+id+'" id="mq'+m+'" min="1" value="'+qty+'" onchange="change_qty('+m+')" style="width:50px;" maxlength="4" size="4" class="change-qty"/></td>'+
                 '<td class="text-right" id="itemtotal'+m+'">PHP '+FormatAmount(total,2)+'</td>'+
                 '<td style="display:none;" class="text-right"><input type="text" id="miscqty'+m+'" name="misc_qty[]" value="'+qty+'" /></td>'+
                 '<td style="display:none;" class="text-right"><input type="text" name="misc_id[]" value="'+id+'" /><input type="text" id="pryc'+m+'" value="'+price+'" /></td>'+
@@ -975,7 +986,31 @@
 
         } 
 
+        $(document).on('change', '.change-qty', function(){
+            var m = $(this).data('m');
+            var id = $(this).data('id');
+            change_qty(m);
+
+            misc.push({
+                id: id,
+                qty: $('#mq'+m).val(),
+                price: $('#pryc'+m).val()
+            });
+
+            for(i=0;i<10;i++){
+                remove_payment(i);
+            }
+
+            add_more_payment()
+
+            calculate_sub_total();
+            calculate_grand_total();
+
+            $('#payment_total').html('Total: '+FormatAmount(0,2));
+        });
+
         function change_qty(m){
+            console.log('ssss')
             var p = parseFloat($('#pryc'+m).val()) * parseInt($('#mq'+m).val());
 
             $('#product_total_qty_per_misc_product'+m).val($('#mq'+m).val());
@@ -1183,7 +1218,7 @@
             var total_misc = $('#input_total_misc').val();
 
             var grand_total = (parseInt(subtotal)+parseInt(delivery_charge)+parseInt(total_misc)) - parseFloat(total_coupon);
-
+            $('.grandtotal').val(grand_total);
             $('#summary_input_gross').val(grand_total.toFixed(2));
             $('#grand_total').html('PHP '+FormatAmount(grand_total,2));
         }
@@ -1388,6 +1423,7 @@
                 }
             }
 
+            $('.miscellaneous').val(JSON.stringify(misc));
 
             var req_attached = ['Bank Deposit','Check Payment','Gcash','Online Bank Transfer', 'Cash', 'Credit/Debit Card', 'Gift Certificate'];
             var no_attached = 0;
