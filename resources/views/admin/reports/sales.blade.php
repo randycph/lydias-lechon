@@ -66,13 +66,13 @@
                         <div class="row row-sm">
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="tx-13">Start Date</label>
+                                    <label class="tx-13">Start Date (Order Date)</label>
                                     <input type="date" class="form-control input-sm" name="startdate"  autocomplete="off" value="@isset($_GET['startdate']){{ $_GET['startdate'] }}@endisset">
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="tx-13">End Date</label>
+                                    <label class="tx-13">End Date (Order Date)</label>
                                     <input type="date" class="form-control input-sm" name="enddate"  autocomplete="off" value="@isset($_GET['enddate']){{ $_GET['enddate'] }}@endisset">
                                 </div>
                             </div>
