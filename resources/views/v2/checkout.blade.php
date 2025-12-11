@@ -1199,6 +1199,7 @@
 <script>
     window.disabledPickupDates = @json($disabledPickupDates);
     window.disabledDeliveryDates = @json($disabledDeliveryDates);
+    window.disabledDeliveryMiscDates = @json($disabledDeliveryMiscDates);
     window.fullUrl = @json(config('app.url'));
     window.hasBaka = @json($hasbaka);
     window.hasMisc = @json($hasMisc);
@@ -1248,6 +1249,7 @@
             couponModal: false,
             disabledDeliveryDates: window.disabledDeliveryDates,
             disabledPickupDates: window.disabledPickupDates,
+            disabledDeliveryMiscDates: window.disabledDeliveryMiscDates,
             paymentMode: '',
             currentDate: new Date()?.toISOString()?.split('T')[0],
             method: 'pickup',
@@ -3370,8 +3372,26 @@
                         return true;
                     }
 
+                    const productTypes = delivery.orders?.map(o => this.getProductType(o)) || [];
+
                     const timeStr = (hour < 10 ? '0' + hour : hour) + ':00';
-                    return this.disabledDeliveryDates.includes(`${delivery.need_date} ${timeStr}`);
+
+                    // if its productTypes includes misc only then use this.disabledDeliveryMiscDates.includes(`${delivery.need_date} ${timeStr}`);
+                    // but if productTypes includes other that misc then use this.disabledDeliveryDates.includes(`${delivery.need_date} ${timeStr}`);
+                    // but if productTypes includes both misc and others then combine the disabledDeliveryMiscDates and disabledDeliveryDates.
+
+                    if (productTypes.includes('misc') && !productTypes.includes('lechon') && !productTypes.includes('baka')) {
+                        return this.disabledDeliveryMiscDates.includes(`${delivery.need_date} ${timeStr}`);
+                    } else {
+                        const combinedDisabledDates = [...new Set([...this.disabledDeliveryDates, ...this.disabledDeliveryMiscDates])];
+                        return combinedDisabledDates.includes(`${delivery.need_date} ${timeStr}`);
+                    }
+
+                    // if (productTypes.includes('misc')) {
+                    //     return this.disabledDeliveryMiscDates.includes(`${delivery.need_date} ${timeStr}`);
+                    // } else {
+                    //     return this.disabledDeliveryDates.includes(`${delivery.need_date} ${timeStr}`);
+                    // }
                 };
             },
 

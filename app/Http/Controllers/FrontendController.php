@@ -245,6 +245,7 @@ class FrontendController extends Controller
 
         $disabledPickupDates = explode(',', $setting->disable_pickup_dates ?? '');
         $disabledDeliveryDates = explode(',', $setting->disable_delivery_dates ?? '');
+        $disabledDeliveryMiscDates = explode(',', $setting->disable_delivery_misc_dates ?? '');
 
         $haslechon  = $carts->contains(function ($cart) {
             return $cart->product->category_id == 1;
@@ -292,7 +293,7 @@ class FrontendController extends Controller
         $minimum_processing_hours_misc = $setting ? $setting->minimum_processing_hours_misc : 12;
         $minimum_order_misc = $setting ? $setting->minimum_order_misc : 0;
 
-        return view('v2.checkout', compact('triples', 'provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc', 'eligibleCoupons', 'minimum_order_amount_door_to_door', 'minimum_order_amount_pickup', 'minimum_processing_hours', 'minimum_processing_hours_misc', 'minimum_order_misc'));
+        return view('v2.checkout', compact('triples', 'provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'disabledDeliveryMiscDates', 'haslechon', 'hasbaka', 'hasMisc', 'eligibleCoupons', 'minimum_order_amount_door_to_door', 'minimum_order_amount_pickup', 'minimum_processing_hours', 'minimum_processing_hours_misc', 'minimum_order_misc'));
     }
 
     public function confirmation($id)
