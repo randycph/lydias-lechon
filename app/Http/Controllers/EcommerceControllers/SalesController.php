@@ -348,7 +348,7 @@ class SalesController extends Controller
             }
         }
         if($request->shipping_type == 'storepickup'){
-
+            $sales->update(['delivery_type' => 'Store Pickup']);
             $gross = $sales->items->sum('gross_amount');
             $update_date_needed = SalesHeader::whereId($request->update_dateneeded_id)->update([
                 'customer_delivery_adress' => $request->update_dateneeded_sp,
