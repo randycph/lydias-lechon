@@ -781,8 +781,8 @@ class ReportsController extends Controller
         if(isset($_GET['category']) && strlen($_GET['category'])>=1){
             $qry.= " and c.id='".$_GET['category']."'";
         }
-        if(isset($_GET['datestart']) && strlen($_GET['datestart'])>=1){
-            $qry.= " and d.date>='".date('Y-m-d',strtotime($_GET['datestart']))." 00:00:00.000' and d.date<='".date('Y-m-d',strtotime($_GET['dateend']))." 23:59:59.999'";
+        if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
+            $qry.= " and d.date>='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and d.date<='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
         }
         else{
             $qry.= " and d.date='".date('Y-m-d')."'";

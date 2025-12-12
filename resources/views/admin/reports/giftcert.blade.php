@@ -63,8 +63,8 @@
                                 
                             </select>
                         </td>
-                        <td>Start Date <input type="date" required name="startdate" class="form-control input-sm " value="@isset($_GET['startdate']){{ $_GET['startdate'] }}@endisset"></td>
-                        <td>End Date <input type="date" required name="enddate" class="form-control input-sm " value="@isset($_GET['enddate']){{ $_GET['enddate'] }}@endisset"></td>                        
+                        <td>Start Date (Date Created)<input type="date" required name="startdate" class="form-control input-sm " value="@isset($_GET['startdate']){{ $_GET['startdate'] }}@endisset"></td>
+                        <td>End Date (Date Created)<input type="date" required name="enddate" class="form-control input-sm " value="@isset($_GET['enddate']){{ $_GET['enddate'] }}@endisset"></td>                        
                         <td><br><input type="submit" value="Generate" class="btn btn-primary btn-sm"><a href="{{route('admin.report.gift_cert')}}" class="btn btn-info ml-1 btn-sm">Reset</a></td>
                         <td style="display: none;"><br><a href="#" onclick="$('#advance_modal').modal('show');" class="btn btn-md btn-info">Advance Search</a></td>
                     </tr>

@@ -46,8 +46,8 @@ Top Agents Report {{$date_display}}
         @csrf
         <table>
             <tr>
-                <td>Start date</td>
-                <td>End Date</td>
+                <td>Start date (Order Date)</td>
+                <td>End Date (Order Date)</td>
                 <td>&nbsp;</td>
             </tr>
             <tr>
