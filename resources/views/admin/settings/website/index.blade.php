@@ -509,17 +509,15 @@
                                     <div class="form-group">
                                         <div id="title" class="parsley-input">
                                             <label>Selected Customers</label>
-                                            <select name="customers[]" multiple="multiple" id="customers" class="form-control js-example-basic-multiple js-states select2" style="width:100%">
-                                                @foreach(\App\Models\User::where('is_active', 1)->where('user_type','customer')->where('email','not like','lydtemp_%')
-                                                ->where('email','not like','lydtmp_%')->orderBy('firstname')->orderBy('lastname')
-                                                ->get() as $c)
-                                                    @php
-                                                        $rec_customer = \App\Models\DeliveryFeePromo::where('type','customer')->where('ref_id',$c->id)->first();
-                                                    @endphp
-                                                    <option value="{{$c->id}}" @if(!empty($rec_customer)) selected="selected" @endif>{{$c->name}}</option>
+
+                                            <select name="customers[]" multiple="multiple" id="customers"
+                                                    class="form-control select2" style="width:100%">
+                                                @foreach($selectedCustomers ?? [] as $c)
+                                                    <option value="{{ $c->id }}" selected>{{ $c->name }} ({{ $c->email }})</option>
                                                 @endforeach
-                                            </select>  
-                                            <small>All selected customers will have free delivery fee.</small>                                     
+                                            </select>
+
+                                            <small>All selected customers will have free delivery fee.</small>
                                         </div>
                                     </div>   
                                 </div>  
@@ -629,110 +627,164 @@
                 const newOption = new Option(dateTime, dateTime, true, true);
                 $disableDates.append(newOption).trigger('change');
             }
+
+            sortSelect2ByDateTime($disableDates);
         });
+
+        function sortSelect2ByDateTime($select) {
+            const options = $select.find('option').toArray();
+
+            options.sort((a, b) => {
+                return a.value.localeCompare(b.value); // works with YYYY-MM-DD HH:mm
+            });
+
+            $select.empty().append(options).trigger('change.select2');
+        }
     });
 </script>
 <script>
     $(document).ready(function () {
-        let selectedDate = null;
 
-        // Initialize final Select2 list
+        const timeSlots = ["05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"];
+
+        // =========================
+        // DELIVERY (non-misc)
+        // =========================
+        let selectedDateDelivery = null;
+
         const $disableDates = $('#disable_delivery_dates').select2({
             tags: true,
             placeholder: "Disable Delivery Dates",
             width: '100%'
         });
-        // 
+
+        const $timeSelect = $('#multiple-times-delivery').select2({
+            placeholder: "Select time",
+            width: '100%'
+        });
+
+        timeSlots.forEach(t => $timeSelect.append(new Option(t, t, false, false)));
+
+        flatpickr("#single-date-delivery", {
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            onChange: function (_, dateStr) {
+            selectedDateDelivery = dateStr;
+            // clear only the time picker UI, keep final selected list
+            $timeSelect.val(null).trigger('change.select2');
+            }
+        });
+
+        // Add ALL selected times for the chosen date
+        $timeSelect.on('change', function () {
+            const times = $(this).val() || [];
+
+            if (!selectedDateDelivery) {
+                alert("Please select a date first.");
+                $timeSelect.val(null).trigger('change.select2');
+                return;
+            }
+
+            times.forEach(time => {
+                const dateTime = `${selectedDateDelivery} ${time}`;
+
+                // avoid duplicates in final select
+                if ($disableDates.find(`option[value="${dateTime}"]`).length === 0) {
+                    $disableDates.append(new Option(dateTime, dateTime, true, true)).trigger('change.select2');
+                }
+            });
+            
+            sortSelect2ByDateTime($disableDates);
+        });
+
+        // =========================
+        // MISC
+        // =========================
+        let selectedDateMisc = null;
+
         const $disableDatesMisc = $('#disable_delivery_misc_dates').select2({
             tags: true,
             placeholder: "Disable Delivery Dates for Miscellaneous",
             width: '100%'
         });
 
-        // Initialize time picker select
-        const $timeSelect = $('#multiple-times-delivery').select2({
-            tags: true,
+        const $timeSelectMisc = $('#multiple-times-delivery-misc').select2({
             placeholder: "Select time",
             width: '100%'
         });
 
-        // Populate time options
-        const timeSlots = ["05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00"];
-        timeSlots.forEach(time => {
-            const option = new Option(time, time, false, false);
-            $timeSelect.append(option);
-        });
-
-        // Initialize Flatpickr for date selection
-        flatpickr("#single-date-delivery", {
-                dateFormat: "Y-m-d",
-                minDate: "today",
-                onChange: function (selectedDates, dateStr) {
-                selectedDate = dateStr;
-                $timeSelect.val(null).trigger('change');
-            }
-        });
+        timeSlots.forEach(t => $timeSelectMisc.append(new Option(t, t, false, false)));
 
         flatpickr("#single-date-delivery-misc", {
-                dateFormat: "Y-m-d",
-                minDate: "today",
-                onChange: function (selectedDates, dateStr) {
-                selectedDate = dateStr;
-                $disableDatesMisc.val(null).trigger('change');
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            onChange: function (_, dateStr) {
+            selectedDateMisc = dateStr;
+            // clear only the time picker UI
+            $timeSelectMisc.val(null).trigger('change.select2');
             }
         });
 
-        // Handle time selection
-        $timeSelect.on('select2:select', function (e) {
-            const selectedTime = e.params.data.id;
+        $timeSelectMisc.on('change', function () {
+            const times = $(this).val() || [];
 
-            if (!selectedDate) {
+            if (!selectedDateMisc) {
                 alert("Please select a date first.");
-                $timeSelect.val($timeSelect.val().filter(val => val !== selectedTime)).trigger('change');
+                $timeSelectMisc.val(null).trigger('change.select2');
                 return;
             }
 
-            const dateTime = `${selectedDate} ${selectedTime}`;
+            times.forEach(time => {
+                const dateTime = `${selectedDateMisc} ${time}`;
 
-            // Avoid duplicates
-            if ($('#disable_pickup_dates option[value="' + dateTime + '"]').length === 0) {
-                const newOption = new Option(dateTime, dateTime, true, true);
-                $disableDates.append(newOption).trigger('change');
+                if ($disableDatesMisc.find(`option[value="${dateTime}"]`).length === 0) {
+                    $disableDatesMisc.append(
+                        new Option(dateTime, dateTime, true, true)
+                    );
+                }
+            });
+
+            sortSelect2ByDateTime($disableDatesMisc);
+        });
+
+        function sortSelect2ByDateTime($select) {
+            const options = $select.find('option').toArray();
+
+            options.sort((a, b) => {
+                return a.value.localeCompare(b.value); // works with YYYY-MM-DD HH:mm
+            });
+
+            $select.empty().append(options).trigger('change.select2');
+        }
+
+        $('#customers').select2({
+            width: '100%',
+            placeholder: 'Search customer by name, email, or contact number...',
+            minimumInputLength: 2,
+            ajax: {
+                url: "{{ route('admin.customers.search') }}",
+                dataType: 'json',
+                delay: 300,
+                data: function (params) {
+                    return {
+                        q: params.term || '',
+                        page: params.page || 1
+                    };
+                },
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    return {
+                        results: data.results,
+                        pagination: data.pagination
+                    };
+                },
+                cache: true
             }
         });
 
-        // Handle time selection for misc
-        const $timeSelectMisc = $('#multiple-times-delivery-misc').select2({
-            tags: true,
-            placeholder: "Select time",
-            width: '100%'
-        });
 
-        // Populate time options for misc
-        timeSlots.forEach(time => {
-            const option = new Option(time, time, false, false);
-            $timeSelectMisc.append(option);
-        });
-
-        // Handle time selection for misc
-        $timeSelectMisc.on('select2:select', function (e) {
-            const selectedTime = e.params.data.id;
-
-            if (!selectedDate) {
-                alert("Please select a date first.");
-                $timeSelectMisc.val($timeSelectMisc.val().filter(val => val !== selectedTime)).trigger('change');
-                return;
-            }
-
-            const dateTime = `${selectedDate} ${selectedTime}`;
-
-            // Avoid duplicates
-            if ($('#disable_delivery_misc_dates option[value="' + dateTime + '"]').length === 0) {
-                const newOption = new Option(dateTime, dateTime, true, true);
-                $disableDatesMisc.append(newOption).trigger('change');
-            }
-        });
     });
+
 </script>
 
 

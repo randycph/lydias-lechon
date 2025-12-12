@@ -18,6 +18,7 @@ use App\Http\Controllers\FacebookController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\Settings\UserController;
+use App\Http\Controllers\Settings\WebController;
 use App\Mail\CartReminderMail;
 use App\Mail\OrderCancelledMail;
 use App\Mail\SalesCompleted;
@@ -393,6 +394,8 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
 
     Route::post('/update/deliveryfee/', 'Settings\WebController@update_deliveryfee')->name('deliveryfee.update');
     //
+
+    Route::get('/admin/customers/search', [WebController::class, 'search'])->name('admin.customers.search');
 
     // Audit
     Route::get('/admin/audit/index', 'Settings\LogsController@index')->name('settings.audit');
