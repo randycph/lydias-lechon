@@ -3,6 +3,11 @@
 @section('title', 'Checkout')
 @section('meta_description', 'Complete your order at Lydia\'s Lechon. Review your cart, choose delivery or pickup, and finalize your purchase for a delicious meal.')
 
+@section('alpine.plugins')
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/css/datepicker.min.css">
+    @endsection
+
 @section('content')
 
 @php
@@ -31,6 +36,14 @@
 
     .vertical-rl {
         writing-mode: vertical-rl;
+    }
+
+    .datepicker-dropdown {
+        width: 100% !important;
+    }
+
+    .datepicker-view {
+        width: 100% !important;
     }
 </style>
 
@@ -853,8 +866,8 @@
                                                             d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
                                                     </svg>
                                                 </div>
-                                                <input onkeydown="return false" :min="minDate"
-                                                    @change="validateDateTime" x-model="need_date" type="date"
+                                                <input onkeydown="return false" :min="minDate" id="need_date"
+                                                     x-model="need_date" type="text"
                                                     name="need_date"
                                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 "
                                                     placeholder="Select date">
@@ -1228,6 +1241,8 @@
 
 <x-footer-component />
 
+<script src="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/js/datepicker.min.js"></script>
+
 <script>
     window.disabledPickupDates = @json($disabledPickupDates);
     window.disabledDeliveryDates = @json($disabledDeliveryDates);
@@ -1264,17 +1279,15 @@
             lechonBakaService: window.lechonBakaService || 0,
             isBaka: false,
             minDate() {
-                if (this.hasbaka == true) {
-                    const day = new Date(this.today);
-                    day.setDate(day.getDate() + 3);
-                    return day.toISOString().split('T')[0];
-                } else if (this.haslechon == true) {
-                    const tomorrow = new Date(this.today);
-                    tomorrow.setDate(tomorrow.getDate() + 1);
-                    return tomorrow.toISOString().split('T')[0];
-                } else {
-                    return this.today.toISOString().split('T')[0];
+                const d = new Date(this.today);
+
+                if (this.hasbaka) {
+                    d.setDate(d.getDate() + 3);
+                } else if (this.haslechon) {
+                    d.setDate(d.getDate() + 1);
                 }
+
+                return d;
             },
             paymentDetails: {
                 sales_header_id: '',
@@ -1642,6 +1655,8 @@
                 this.deliveryFees = [];
                 this.removeCoupon();
 
+                this.initPicker();
+
                 // this.loadAutoCoupons();
 
                 if (!this.allowMultiple) {
@@ -1736,7 +1751,7 @@
 
                 const selectedDate = new Date(this.need_date);
 
-                if (hasCochinillo && selectedDate.getDate() === 24 && selectedDate.getMonth() === 11) {
+                if (this.hasCochinillo && selectedDate.getDate() === 24 && selectedDate.getMonth() === 11) {
                     this.withConchinilloOnDec24Selected = true;
                     this.isSubmitting = false;
                     return;
@@ -2288,6 +2303,7 @@
                 }
 
                 this.isMiscOnly = this.carts.length > 0 && this.carts.every(cart => cart.product?.is_misc == 1);
+                this.initPicker();
             },
 
             _rebuildAllowedCitySetForProvince(provinceLabel) {
@@ -3471,11 +3487,6 @@
                         return this.disabledDeliveryMiscDates.includes(`${delivery.need_date} ${timeStr}`);
                     } else if ((productTypes.includes('lechon') || productTypes.includes('baka')) && !productTypes.includes('misc')) {
                         return this.disabledDeliveryDates.includes(`${delivery.need_date} ${timeStr}`);
-                    } else if (productTypes.includes('misc') && (productTypes.includes('lechon') || productTypes.includes('baka'))) {
-                        const combinedDisabledDates = [...new Set([...this.disabledDeliveryDates, ...this.disabledDeliveryMiscDates])];
-                        return combinedDisabledDates.includes(`${delivery.need_date} ${timeStr}`);
-                    } else {
-                        return false;
                     }
 
                     // if (productTypes.includes('misc')) {
@@ -3494,6 +3505,58 @@
                 return `${adjustedHours}:${minutes} ${isPM ? 'PM' : 'AM'}`;
             },
 
+            formatLocalYMD(date) {
+                const y = date.getFullYear();
+                const m = String(date.getMonth() + 1).padStart(2, '0');
+                const d = String(date.getDate()).padStart(2, '0');
+                return `${y}-${m}-${d}`;
+            },
+
+            formatLocalYMD(date) {
+                const y = date.getFullYear();
+                const m = String(date.getMonth() + 1).padStart(2, '0');
+                const d = String(date.getDate()).padStart(2, '0');
+                return `${y}-${m}-${d}`;
+            },
+
+            picker: null,
+
+            blockedDates: [
+                '2025-12-19',
+                '2025-12-20',
+                '2025-12-24',
+                '2025-12-31'
+            ],
+
+            initPicker() {
+                if (this.picker) {
+                    this.picker.destroy();
+                }
+
+                const el = document.getElementById('need_date');
+
+                this.picker = new Datepicker(document.getElementById('need_date'), {
+                    minDate: this.minDate(),
+                    autohide: true,
+                    format: 'yyyy-mm-dd',
+                    beforeShowDay: (date) => {
+                        if (this.method !== 'delivery') {
+                            return true;
+                        }
+
+                        if (this.hasCochinillo && !this.allowMultiple) {
+                            if (date.getMonth() === 11 && date.getDate() === 24) return false;
+                        }
+
+                        return !this.blockedDates.includes(this.formatLocalYMD(date));
+                    }
+                });
+
+                el.addEventListener('changeDate', (e) => {
+                    this.need_date = e.target.value;
+                    this.validateDateTime();
+                });
+            },
             withConchinilloOnDec24Selected: false,
 
             validateDateTime() {
@@ -3504,10 +3567,13 @@
                     return;
                 }
 
+                this.noNeededDate = false
+
                 const selectedDate = new Date(this.need_date);
 
-                if (hasCochinillo && selectedDate.getDate() === 24 && selectedDate.getMonth() === 11) {
+                if (this.hasCochinillo && selectedDate.getDate() === 24 && selectedDate.getMonth() === 11) {
                     this.withConchinilloOnDec24Selected = true;
+                    if (this.picker) this.picker.setDate({ clear: true });
                     return;
                 } else  {
                     this.withConchinilloOnDec24Selected = false;
@@ -3590,13 +3656,8 @@
                     if (this.hasMisc && !this.haslechon && !this.hasbaka) {
                         return this.disabledDeliveryMiscDates.includes(fullStr);
                     } else if ((this.haslechon || this.hasbaka) && !this.hasMisc) {
-                        return this.disabledDeliveryDates.includes(fullStr);
-                    } else if (this.hasMisc && (this.haslechon || this.hasbaka)) {
-                        const combinedDisabledDates = [...new Set([...this.disabledDeliveryDates, ...this.disabledDeliveryMiscDates])];
-                        return combinedDisabledDates.includes(fullStr);
-                    } else {
-                        return false;
-                    }
+                       return this.disabledDeliveryDates.includes(fullStr);
+                    } 
                 }
             },
 
