@@ -208,8 +208,6 @@ class JoborderController extends Controller
                 ->orderBy('province')
                 ->get();
 
-                // dd($provinces->toArray());
-
             $cities = Deliverablecities::query()
                 ->select('city', 'province')
                 ->where('is_active', 1)
