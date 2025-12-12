@@ -813,8 +813,7 @@
                                 <template x-if="!allowMultiple">
                                     <div class="w-full flex gap-4">
                                         <div class="my-2 w-full lg:w-1/2">
-                                            <label for="date" class="block mb-2 text-sm font-bold text-gray-900">Select
-                                                Date <span class="text-red-700">*</span></label>
+                                            <label for="date" class="block mb-2 text-sm font-bold text-gray-900">Select Date <span class="text-red-700">*</span></label>
                                             <div class="relative">
                                                 <div
                                                     class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
@@ -3382,9 +3381,13 @@
 
                     if (productTypes.includes('misc') && !productTypes.includes('lechon') && !productTypes.includes('baka')) {
                         return this.disabledDeliveryMiscDates.includes(`${delivery.need_date} ${timeStr}`);
-                    } else {
+                    } else if ((productTypes.includes('lechon') || productTypes.includes('baka')) && !productTypes.includes('misc')) {
+                        return this.disabledDeliveryDates.includes(`${delivery.need_date} ${timeStr}`);
+                    } else if (productTypes.includes('misc') && (productTypes.includes('lechon') || productTypes.includes('baka'))) {
                         const combinedDisabledDates = [...new Set([...this.disabledDeliveryDates, ...this.disabledDeliveryMiscDates])];
                         return combinedDisabledDates.includes(`${delivery.need_date} ${timeStr}`);
+                    } else {
+                        return false;
                     }
 
                     // if (productTypes.includes('misc')) {
@@ -3482,7 +3485,16 @@
                 if (this.method === 'pickup') {
                     return this.disabledPickupDates.includes(fullStr);
                 } else {
-                    return this.disabledDeliveryDates.includes(fullStr);
+                    if (this.hasMisc && !this.haslechon && !this.hasbaka) {
+                        return this.disabledDeliveryMiscDates.includes(fullStr);
+                    } else if ((this.haslechon || this.hasbaka) && !this.hasMisc) {
+                        return this.disabledDeliveryDates.includes(fullStr);
+                    } else if (this.hasMisc && (this.haslechon || this.hasbaka)) {
+                        const combinedDisabledDates = [...new Set([...this.disabledDeliveryDates, ...this.disabledDeliveryMiscDates])];
+                        return combinedDisabledDates.includes(fullStr);
+                    } else {
+                        return false;
+                    }
                 }
             },
 
