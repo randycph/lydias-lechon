@@ -3469,9 +3469,13 @@
 
                     if (productTypes.includes('misc') && !productTypes.includes('lechon') && !productTypes.includes('baka')) {
                         return this.disabledDeliveryMiscDates.includes(`${delivery.need_date} ${timeStr}`);
-                    } else {
+                    } else if ((productTypes.includes('lechon') || productTypes.includes('baka')) && !productTypes.includes('misc')) {
+                        return this.disabledDeliveryDates.includes(`${delivery.need_date} ${timeStr}`);
+                    } else if (productTypes.includes('misc') && (productTypes.includes('lechon') || productTypes.includes('baka'))) {
                         const combinedDisabledDates = [...new Set([...this.disabledDeliveryDates, ...this.disabledDeliveryMiscDates])];
                         return combinedDisabledDates.includes(`${delivery.need_date} ${timeStr}`);
+                    } else {
+                        return false;
                     }
 
                     // if (productTypes.includes('misc')) {
@@ -3582,8 +3586,17 @@
 
                 if (this.method === 'pickup') {
                     return this.disabledPickupDates.includes(fullStr);
-                }  else {
-                    return this.disabledDeliveryDates.includes(fullStr);
+                } else {
+                    if (this.hasMisc && !this.haslechon && !this.hasbaka) {
+                        return this.disabledDeliveryMiscDates.includes(fullStr);
+                    } else if ((this.haslechon || this.hasbaka) && !this.hasMisc) {
+                        return this.disabledDeliveryDates.includes(fullStr);
+                    } else if (this.hasMisc && (this.haslechon || this.hasbaka)) {
+                        const combinedDisabledDates = [...new Set([...this.disabledDeliveryDates, ...this.disabledDeliveryMiscDates])];
+                        return combinedDisabledDates.includes(fullStr);
+                    } else {
+                        return false;
+                    }
                 }
             },
 
