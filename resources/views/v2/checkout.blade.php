@@ -1719,7 +1719,7 @@
 
                 const selectedDate = new Date(this.need_date);
 
-                if (hasCochinillo && selectedDate.getDate() === 24 && selectedDate.getMonth() === 11) {
+                if (this.hasCochinillo && selectedDate.getDate() === 24 && selectedDate.getMonth() === 11) {
                     this.withConchinilloOnDec24Selected = true;
                     this.isSubmitting = false;
                     return;
@@ -3457,15 +3457,6 @@
                 return `${y}-${m}-${d}`;
             },
 
-            beforeShowDay: (date) => {
-                const d = this.formatLocalYMD(date);
-
-                if (this.blockedDates.includes(d)) {
-                    return false; // disable
-                }
-                return true;
-            },
-
             formatLocalYMD(date) {
                 const y = date.getFullYear();
                 const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -3498,6 +3489,10 @@
                             return true;
                         }
 
+                        if (this.hasCochinillo && !this.allowMultiple) {
+                            if (date.getMonth() === 11 && date.getDate() === 24) return false;
+                        }
+
                         return !this.blockedDates.includes(this.formatLocalYMD(date));
                     }
                 });
@@ -3517,10 +3512,13 @@
                     return;
                 }
 
+                this.noNeededDate = false
+
                 const selectedDate = new Date(this.need_date);
 
-                if (hasCochinillo && selectedDate.getDate() === 24 && selectedDate.getMonth() === 11) {
+                if (this.hasCochinillo && selectedDate.getDate() === 24 && selectedDate.getMonth() === 11) {
                     this.withConchinilloOnDec24Selected = true;
+                    if (this.picker) this.picker.setDate({ clear: true });
                     return;
                 } else  {
                     this.withConchinilloOnDec24Selected = false;
