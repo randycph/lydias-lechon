@@ -31,14 +31,14 @@
     }
 @endphp
 @section('pagetitle')
-Branch Report {{$date_display}}
+Sales by Branch Report {{$date_display}}
 @endsection
 
 @section('content')
 <div class="container">
     <div class="text-center mg-b-20">
         <img height="100px" src="{{ asset('images/lydias1965.png') }}" alt="">
-        <h4 class="mg-b-0 tx-spacing--1">Branch Report</h4>
+        <h4 class="mg-b-0 tx-spacing--1">Sales by Branch Report</h4>
         {{ \Carbon\Carbon::parse($startDate)->format('F d, Y') }} - {{ \Carbon\Carbon::parse($endDate)->format('F d, Y') }}
     </div>
     <form action="" method="get">
@@ -46,8 +46,8 @@ Branch Report {{$date_display}}
         @csrf
         <table>
             <tr>
-                <td>Start date</td>
-                <td>End Date</td>
+                <td>Start date (Order Date)</td>
+                <td>End Date (Order Date)</td>
                 <td>&nbsp;</td>
             </tr>
             <tr>

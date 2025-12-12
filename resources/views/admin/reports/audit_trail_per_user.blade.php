@@ -76,14 +76,14 @@
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="tx-13">Start Date</label>
-                                    <input type="date" class="form-control input-sm" name="startdate"  autocomplete="off" value="@isset($_GET['startdate']){{ $_GET['startdate'] }}@endisset">
+                                    <label class="tx-13">Start Date (Log Date)</label>
+                                    <input type="date" required class="form-control input-sm" name="startdate"  autocomplete="off" value="@isset($_GET['startdate']){{ $_GET['startdate'] }}@endisset">
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="tx-13">End Date</label>
-                                    <input type="date" class="form-control input-sm" name="enddate"  autocomplete="off" value="@isset($_GET['enddate']){{ $_GET['enddate'] }}@endisset">
+                                    <label class="tx-13">End Date (Log Date)</label>
+                                    <input type="date" required class="form-control input-sm" name="enddate"  autocomplete="off" value="@isset($_GET['enddate']){{ $_GET['enddate'] }}@endisset">
                                 </div>
                             </div>
                             <div class="col-md-3 filter-action mg-r-5">
