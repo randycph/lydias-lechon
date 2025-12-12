@@ -756,33 +756,6 @@
 
             $select.empty().append(options).trigger('change.select2');
         }
-
-        $('#customers').select2({
-            width: '100%',
-            placeholder: 'Search customer by name, email, or contact number...',
-            minimumInputLength: 2,
-            ajax: {
-                url: "{{ route('admin.customers.search') }}",
-                dataType: 'json',
-                delay: 300,
-                data: function (params) {
-                    return {
-                        q: params.term || '',
-                        page: params.page || 1
-                    };
-                },
-                processResults: function (data, params) {
-                    params.page = params.page || 1;
-                    return {
-                        results: data.results,
-                        pagination: data.pagination
-                    };
-                },
-                cache: true
-            }
-        });
-
-
     });
 
 </script>
@@ -844,6 +817,30 @@
                 });
             }
 
+            $('#customers').select2({
+                width: '100%',
+                placeholder: 'Search customer by name, email, or contact number...',
+                minimumInputLength: 2,
+                ajax: {
+                    url: "{{ route('admin.customers.search') }}",
+                    dataType: 'json',
+                    delay: 300,
+                    data: function (params) {
+                        return {
+                            q: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function (data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: data.results,
+                            pagination: data.pagination
+                        };
+                    },
+                    cache: true
+                }
+            });
         });
 
         $('#disable_order').change(function() {
