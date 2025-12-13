@@ -508,7 +508,7 @@
                                                 <template x-if="delivery.cochinillo_warning">
                                                     <div
                                                         class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
-                                                        Cochinillo (Oven Roasted) with FREE Mexican Rice is not available on December 24. Please select another date.
+                                                        Our Cochinillo is not available on December 24. Please select another size.
                                                     </div>
                                                 </template>
 
@@ -893,7 +893,7 @@
                                 </template>
                                 <div x-show="withConchinilloOnDec24Selected"
                                     class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
-                                    Cochinillo (Oven Roasted) with FREE Mexican Rice is not available on December 24. Please select another date.
+                                    Our Cochinillo is not available on December 24. Please select another size.
                                 </div>
                                 <template x-if="!allowMultiple">
                                     <div
