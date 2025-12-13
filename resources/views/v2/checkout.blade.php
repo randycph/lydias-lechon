@@ -2148,6 +2148,8 @@
 
             async init() {
                 this.checkMultipleDeliveries();
+
+                this.isMiscOnly = this.carts.length > 0 && this.carts.every(cart => cart.product?.is_misc == 1);
                 
                 const cookie = document.cookie.split('; ').find(row => row.startsWith('shipping_method='));
                 this.method = cookie ? cookie.split('=')[1] : 'pickup';
@@ -3509,7 +3511,35 @@
                             if (date.getMonth() === 11 && date.getDate() === 24) return false;
                         }
 
-                        return !this.blockedDates.includes(this.formatLocalYMD(date));
+
+                        // block dates from dec 13 - 31 for misc only
+                        const blockedDatesMisc = [
+                            '2025-12-13',
+                            '2025-12-14',
+                            '2025-12-15',
+                            '2025-12-16',
+                            '2025-12-17',
+                            '2025-12-18',
+                            '2025-12-19',
+                            '2025-12-20',
+                            '2025-12-21',
+                            '2025-12-22',
+                            '2025-12-23',
+                            '2025-12-24',
+                            '2025-12-25',
+                            '2025-12-26',
+                            '2025-12-27',
+                            '2025-12-28',
+                            '2025-12-29',
+                            '2025-12-30',
+                            '2025-12-31'
+                        ];
+
+                        if (this.isMiscOnly && this.method === 'delivery') {
+                            return !blockedDatesMisc.includes(this.formatLocalYMD(date));
+                        } else {
+                            return !this.blockedDates.includes(this.formatLocalYMD(date));
+                        }
                     }
                 });
 
@@ -3528,6 +3558,8 @@
             },
 
             initDatePickerFor(index, el) {
+                if (!this.allowMultiple) return;
+
                 if (this.pickers[index]) {
                     this.pickers[index].destroy();
                     delete this.pickers[index];
