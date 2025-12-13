@@ -379,13 +379,12 @@
 
                             <div x-show="method === 'delivery'" class="space-y-4">
 
-                                <div class="flex items-center me-4 my-4">
+                                {{-- <div class="flex items-center me-4 my-4">
                                     <input @change="onChangeMultipleAddress()" x-model="allowMultiple" checked
                                         id="multiple-address" type="checkbox" value=""
                                         class="w-5 h-5 text-primary bg-gray-100 border-gray-300 rounded-sm focus:ring-primary-dark focus:ring-2">
-                                    <label for="multiple-address" class="ms-2 text-base font-medium text-gray-900">
-                                        Allow multiple delivery address</label>
-                                </div>
+                                    <label for="multiple-address" class="ms-2 text-base font-medium text-gray-900">Allow multiple delivery address</label>
+                                </div> --}}
 
                                 <template x-if="allowMultiple">
                                     <div class="space-y-6">
@@ -457,13 +456,26 @@
                                                                         d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
                                                                 </svg>
                                                             </div>
-                                                            <input :class="{'border-red-500': errors[index]?.need_date}"
+                                                            {{-- <input :class="{'border-red-500': errors[index]?.need_date}"
                                                                 onkeydown="return false" :min="minimumDate"
                                                                 @change="validateDeliveryDateTime(delivery)"
                                                                 x-model="delivery.need_date" name="need_date"
                                                                 type="date"
                                                                 class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3"
-                                                                placeholder="Select date">
+                                                                placeholder="Select date"> --}}
+
+                                                                <input
+                                                                    :id="`need_date_${index}`"
+                                                                    x-ref="needDateInputs"
+                                                                    type="text"
+                                                                readonly
+                                                                    x-model="delivery.need_date"
+                                                                    :class="{'border-red-500': errors[index]?.need_date}"
+                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3"
+                                                                    placeholder="Select date"
+                                                                >
+
+
 
                                                             <template x-if="errors[index]?.need_date">
                                                                 <div class="text-red-500 text-xs mt-1"
@@ -2304,6 +2316,8 @@
 
                 this.isMiscOnly = this.carts.length > 0 && this.carts.every(cart => cart.product?.is_misc == 1);
                 this.initPicker();
+
+                this.$nextTick(() => this.initAllDatePickers());
             },
 
             _rebuildAllowedCitySetForProvince(provinceLabel) {
@@ -3521,6 +3535,8 @@
 
             picker: null,
 
+            pickers: null,
+
             blockedDates: [
                 '2025-12-19',
                 '2025-12-20',
@@ -3557,6 +3573,48 @@
                     this.validateDateTime();
                 });
             },
+
+            initAllDatePickers() {
+                const els = this.$refs.needDateInputs;
+
+                const inputs = Array.isArray(els) ? els : [els];
+
+                inputs.forEach((el, index) => this.initDatePickerFor(index, el));
+            },
+
+            initDatePickerFor(index, el) {
+                if (this.pickers[index]) {
+                    this.pickers[index].destroy();
+                    delete this.pickers[index];
+                }
+
+                const picker = new Datepicker(el, {
+                    minDate: this.minimumDate(),
+                    autohide: true,
+                    format: 'yyyy-mm-dd',
+                    beforeShowDay: (date) => {
+                    const ymd = this.formatLocalYMD(date);
+
+                    // only block special dates if delivery
+                    if (this.method === 'delivery' && this.blockedDates.includes(ymd)) return false;
+
+                    // block Dec 24 if hasCochinillo
+                    if (this.hasCochinillo && date.getMonth() === 11 && date.getDate() === 24) return false;
+
+                    return true;
+                    }
+                });
+
+                // IMPORTANT: listen to datepicker event (not @change)
+                el.addEventListener('changeDate', (e) => {
+                    this.deliveries[index].need_date = e.target.value;
+                    this.validateDeliveryDateTime(this.deliveries[index], index);
+                });
+
+                this.pickers[index] = picker;
+            },
+
+
             withConchinilloOnDec24Selected: false,
 
             validateDateTime() {
