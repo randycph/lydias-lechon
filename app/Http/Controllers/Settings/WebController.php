@@ -12,6 +12,7 @@ use App\Models\Setting;
 use App\Models\MediaAccounts;
 use App\Models\DeliveryFeePromo;
 use App\Models\ProductCategory;
+use App\Models\User;
 
 class WebController extends Controller
 {
@@ -75,7 +76,17 @@ class WebController extends Controller
         $deliveryfees = DeliveryFeePromo::get();
         $categories = ProductCategory::where('status','PUBLISHED')->get();
 
-        return view('admin.settings.website.index',compact('web','medias','deliveryfees','categories'));
+        $selectedIds = DeliveryFeePromo::where('type', 'customer')->pluck('ref_id');
+
+        $selectedCustomers = User::whereIn('id', $selectedIds)
+            ->select('id','firstname','lastname','email','contact_mobile')
+            ->get()
+            ->map(function($u){
+                $u->name = trim($u->firstname.' '.$u->lastname);
+                return $u;
+            });
+
+        return view('admin.settings.website.index',compact('web','medias','deliveryfees','categories','selectedCustomers'));
     }
 
     /**
@@ -352,6 +363,61 @@ class WebController extends Controller
         Setting::find($id)->update(['kiosk_express_categories' => $cat]);
 
         return back()->with('success', 'Successfully Update Kiosk Settings');
+    }
+
+    public function search(Request $request)
+    {
+        $q = trim($request->get('q', ''));
+        $page = (int) $request->get('page', 1);
+        $perPage = 20;
+
+        if (mb_strlen($q) < 2) {
+            return response()->json([
+                'results' => [],
+                'pagination' => ['more' => false],
+            ]);
+        }
+
+        // ids already selected (optional: show "Selected" badge)
+        $selectedIds = DeliveryFeePromo::where('type', 'customer')->pluck('ref_id')->all();
+
+        $query = User::query()
+            ->where('is_active', 1)
+            ->where('user_type', 'customer')
+            ->where(function ($qq) {
+                $qq->where('email','not like','lydtemp_%')
+                ->where('email','not like','lydtmp_%');
+            })
+            ->where(function ($qq) use ($q) {
+                $qq->where('email', 'like', "%{$q}%")
+                ->orWhere('firstname', 'like', "%{$q}%")
+                ->orWhere('lastname', 'like', "%{$q}%")
+                ->orWhere('contact_mobile', 'like', "%{$q}%");
+            })
+            ->orderBy('firstname')
+            ->orderBy('lastname')
+            ->select('id','firstname','lastname','email','contact_mobile');
+
+        $paginator = $query->paginate($perPage, ['*'], 'page', $page);
+
+        $results = $paginator->getCollection()->map(function ($u) use ($selectedIds) {
+            $name = trim($u->firstname.' '.$u->lastname);
+            $label = $name;
+
+            if ($u->email) $label .= " — {$u->email}";
+            if ($u->contact_mobile) $label .= " — {$u->contact_mobile}";
+            if (in_array($u->id, $selectedIds)) $label .= " ✅ (Selected)";
+
+            return [
+                'id' => $u->id,
+                'text' => $label,
+            ];
+        })->values();
+
+        return response()->json([
+            'results' => $results,
+            'pagination' => ['more' => $paginator->hasMorePages()],
+        ]);
     }
 
 }
