@@ -3546,61 +3546,66 @@
                 '2025-12-31'
             ],
 
+            blockedDatesMisc: [
+                '2025-12-13','2025-12-14','2025-12-15','2025-12-16','2025-12-17','2025-12-18',
+                '2025-12-19','2025-12-20','2025-12-21','2025-12-22','2025-12-23','2025-12-24',
+                '2025-12-25','2025-12-26','2025-12-27','2025-12-28','2025-12-29','2025-12-30','2025-12-31'
+            ],
+
             initPicker() {
-                if (this.picker) {
-                    this.picker.destroy();
-                }
+                if (this.picker) this.picker.destroy();
 
                 const el = document.getElementById('need_date');
 
-                this.picker = new Datepicker(document.getElementById('need_date'), {
+                this.picker = new Datepicker(el, {
                     minDate: this.minDate(),
                     autohide: true,
                     format: 'yyyy-mm-dd',
                     beforeShowDay: (date) => {
-                        if (this.method !== 'delivery') {
-                            return true;
-                        }
+                        if (this.method !== 'delivery') return true;
 
                         if (this.hasCochinillo && !this.allowMultiple) {
                             if (date.getMonth() === 11 && date.getDate() === 24) return false;
                         }
 
+                        const ymd = this.formatLocalYMD(date);
 
-                        // block dates from dec 13 - 31 for misc only
-                        const blockedDatesMisc = [
-                            '2025-12-13',
-                            '2025-12-14',
-                            '2025-12-15',
-                            '2025-12-16',
-                            '2025-12-17',
-                            '2025-12-18',
-                            '2025-12-19',
-                            '2025-12-20',
-                            '2025-12-21',
-                            '2025-12-22',
-                            '2025-12-23',
-                            '2025-12-24',
-                            '2025-12-25',
-                            '2025-12-26',
-                            '2025-12-27',
-                            '2025-12-28',
-                            '2025-12-29',
-                            '2025-12-30',
-                            '2025-12-31'
-                        ];
-
-                        if (this.isMiscOnly && this.method === 'delivery') {
-                            return !blockedDatesMisc.includes(this.formatLocalYMD(date));
-                        } else {
-                            return !this.blockedDates.includes(this.formatLocalYMD(date));
+                        if (this.isMiscOnly) {
+                            return !this.blockedDatesMisc.includes(ymd);
                         }
+
+                        return !this.blockedDates.includes(ymd);
                     }
                 });
 
                 el.addEventListener('changeDate', (e) => {
                     this.need_date = e.target.value;
                     this.validateDateTime();
+                });
+
+                // Force initial selection to first allowed date
+                this.$nextTick(() => {
+                    let d = this.minDate();
+
+                    const isAllowed = (dt) => {
+                        if (this.method !== 'delivery') return true;
+
+                        if (this.hasCochinillo && !this.allowMultiple) {
+                            if (dt.getMonth() === 11 && dt.getDate() === 24) return false;
+                        }
+
+                        const ymd = this.formatLocalYMD(dt);
+
+                        if (this.isMiscOnly) return !this.blockedDatesMisc.includes(ymd);
+
+                        return !this.blockedDates.includes(ymd);
+                    };
+
+                    while (!isAllowed(d)) d.setDate(d.getDate() + 1);
+
+                    const firstValid = this.formatLocalYMD(d);
+                    this.need_date = firstValid;
+                    this.picker.setDate(firstValid, { render: true });
                 });
             },
 
