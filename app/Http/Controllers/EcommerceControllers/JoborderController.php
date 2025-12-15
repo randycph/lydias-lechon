@@ -48,62 +48,69 @@ class JoborderController extends Controller
         $rem = 0;
         $err = '';
 
-        $x = explode(" - ", $request->dateneeded);
+        $raw = trim((string) $request->input('dateneeded', ''));
 
-        $tym24 = date("H:i", strtotime($x[1]));
+        $x = array_map('trim', explode(' - ', $raw, 2));
 
-        //check if time is between the operation time
-        $current_time = $x[1];
-        $open = "04:59";
+        if (count($x) < 2 || $x[0] === '' || $x[1] === '') {
+            return response()->json([
+                'err' => '<li>Invalid date/time. Please select a date and time again.</li>',
+                'remark' => 1
+            ], 422);
+        }
+
+        [$datePart, $timePart] = $x;
+
+        $date = strtotime($datePart . ' ' . $timePart);
+        if ($date === false) {
+            return response()->json([
+                'err' => '<li>Invalid date/time. Please select a valid date and time.</li>',
+                'remark' => 1
+            ], 422);
+        }
+
+        $tym24 = date("H:i", $date); // use parsed timestamp
+        $open  = "04:59";
         $close = "21:01";
+
         $date1 = new DateTime($tym24);
         $date2 = new DateTime($open);
         $date3 = new DateTime($close);
-        if ($date1 > $date2 && $date1 < $date3){
 
-        }
-        else{
+        if (!($date1 > $date2 && $date1 < $date3)) {
             $rem = 1;
-            $err .= "<li>The time you've selected (".$x[1].") is beyond our operation time which is between 5AM - 9PM.</li>";
+            $err .= "<li>The time you've selected ({$timePart}) is beyond our operation time which is between 5AM - 9PM.</li>";
         }
 
-        //check if time is more than 48 hrs
-        $date = strtotime($x[0]." ".$x[1]);
+        $hasLechon = (int) $request->input('has_lechon', 0);
 
-
-        //logger($request);
-
-        if($request->has_lechon == 2){
-            if($date < time() + 259200) {
+        if ($hasLechon === 2) {
+            if ($date < time() + 259200) { // 72 hrs
                 $rem = 1;
-                $err .= "<li>The date and time you've selected (".$request->dateneeded.") is less than 72 hours from now. Our standard processing time for lechon baka is atleast 72 hours. However, you can still proceed with your order by clicking the close button.</li>";
+                $err .= "<li>The date and time you've selected ({$raw}) is less than 72 hours from now. Our standard processing time for lechon baka is atleast 72 hours. However, you can still proceed with your order by clicking the close button.</li>";
+            }
+        } elseif ($hasLechon === 1) {
+            if ($date < time() + 86400) { // 24 hrs
+                $rem = 1;
+                $err .= "<li>The date and time you've selected ({$raw}) is less than 24 hours from now. Our standard processing time is atleast 24 hours. However, you can still proceed with your order by clicking the close button.</li>";
+            }
+        } else { // misc
+            if ($date < time()) {
+                $rem = 1;
+                $err .= "<li>The date and time you've selected ({$raw}) is invalid. Selecting past dates is not allowed.</li>";
+            }
+            if ($date < time() + 7200) { // 2 hrs
+                $rem = 1;
+                $err .= "<li>The date and time you've selected ({$raw}) is less than 2 hours from now. Our standard processing time is atleast 2 hours. However, you can still proceed with your order by clicking the close button.</li>";
             }
         }
-        if($request->has_lechon == 1){
-            if($date < time() + 86400) {
-                $rem = 1;
-                $err .= "<li>The date and time you've selected (".$request->dateneeded.") is less than 24 hours from now. Our standard processing time is atleast 24 hours. However, you can still proceed with your order by clicking the close button.</li>";
-            }
-        }
-        if($request->has_lechon == 0){
-            if($date < time()) {
-                $rem = 1;
-                $err .= "<li>The date and time you've selected (".$request->dateneeded.") is invalid. Selecting past dates is not allowed.</li>";
-            }
-            if($date < time() + 7200) {
-                $rem = 1;
-                $err .= "<li>The date and time you've selected (".$request->dateneeded.") is less than 2 hours from now. Our standard processing time is atleast 2 hours. However, you can still proceed with your order by clicking the close button.</li>";
-            }
-        }
-
-
 
         return response()->json([
             'err' => $err,
             'remark' => $rem
         ]);
-
     }
+
     public function index()
     {
         
