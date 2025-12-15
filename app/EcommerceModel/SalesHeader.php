@@ -286,15 +286,21 @@ class SalesHeader extends Model
         // // Normalize legacy 'Completed' to PAID
         // return in_array($current, ['PAID', 'Completed'], true) ? 'PAID' : 'UNPAID';
 
-        $paid = SalesPayment::where('sales_header_id',$this->id)->whereStatus('PAID')->sum('amount');
+        $sales = SalesHeader::withTrashed()->whereId($this->id)->first();
 
-        if($paid >= $this->net_amount){
-            $tag_as_paid = SalesHeader::whereId($this->id)->update(['payment_status' => 'PAID']);
-            if($this->delivery_status == 'Waiting for Payment' || $this->delivery_status == '' ){
-                $update_delivery_status = SalesHeader::whereId($this->id)->update(['delivery_status' => 'Processing Stock']);
+        if ($sales->is_sub == 1) {
+            $paid = SalesPayment::where('sales_header_id',$sales->parent_sales_header_id)->where('status', 'PAID')->sum('amount');
+        } else {
+            $paid = SalesPayment::where('sales_header_id',$this->id)->where('status', 'PAID')->sum('amount');
+        }
+
+        if ($paid >= $this->net_amount) {
+            SalesHeader::whereId($this->id)->update(['payment_status' => 'PAID']);
+            if ($this->delivery_status == 'Waiting for Payment' || $this->delivery_status == '') {
+                SalesHeader::whereId($this->id)->update(['delivery_status' => 'Processing Stock']);
             }
             return 'PAID';
-        }else{
+        } else {
             return 'UNPAID';
         }
     }
