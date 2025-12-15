@@ -42,72 +42,66 @@ class ArticleFrontController extends Controller
 
     }
 
-    public function news_list()
+    public function news_list(Request $request)
     {
         $pageLimit = 6;
 
-        /* Search Function */
-        if(isset($_GET['type']) && isset($_GET['criteria'])){
+        $articlesQuery = Article::query()->whereStatus('Published');
 
-            if($_GET['type'] == 'searchbox'){
+        // Search / filter
+        if ($request->filled('type') && $request->filled('criteria')) {
 
-                $articles = Article::where(function($query){
-                                    $query->where('name','like','%'.$_GET['criteria'].'%')
-                                    ->orWhere('contents','like','%'.$_GET['criteria'].'%');
-                                })->whereStatus('Published');
+            $type = $request->input('type');
+            $criteria = $request->input('criteria');
 
-
+            if ($type === 'searchbox') {
+                $articlesQuery->where(function ($query) use ($criteria) {
+                    $query->where('name', 'like', '%' . $criteria . '%')
+                        ->orWhere('contents', 'like', '%' . $criteria . '%');
+                });
             }
-            elseif($_GET['type'] == 'year'){
-
-                $articles = Article::whereYear('date','=',$_GET['criteria'])->whereStatus('Published');
-
+            elseif ($type === 'year') {
+                $articlesQuery->whereYear('date', '=', $criteria);
             }
-            elseif($_GET['type'] == 'month'){
+            elseif ($type === 'month') {
+                $criterias = explode('-', $criteria);
+                $year  = $criterias[0] ?? null;
+                $month = $criterias[1] ?? null;
 
-                $criterias = explode("-", $_GET['criteria']);
-                $articles = Article::whereYear('date','=',$criterias[0])->whereMonth('date','=',$criterias[1])->whereStatus('Published');
-
+                if ($year && $month) {
+                    $articlesQuery->whereYear('date', '=', $year)
+                                ->whereMonth('date', '=', $month);
+                }
             }
-            elseif($_GET['type'] == 'category'){
-                if($_GET['criteria'] == 0)
-                    $articles = Article::where(function($query){
-                                    $query->whereNull('category_id')->orWhere('category_id','=',0);
-                                })
-                                ->whereStatus('Published');
-                else
-                    $articles = Article::where('category_id','=',$_GET['criteria'])->whereStatus('Published');
+            elseif ($type === 'category') {
+                if ((int) $criteria === 0) {
+                    $articlesQuery->where(function ($query) {
+                        $query->whereNull('category_id')
+                            ->orWhere('category_id', '=', 0);
+                    });
+                } else {
+                    $articlesQuery->where('category_id', '=', $criteria);
+                }
             }
-            else{
-                $articles = Article::whereStatus('Published')->get();
-            }
-            $articles = $articles->orderBy('updated_at','desc')
-                                ->orderBy('id','desc')
-                                ->paginate($pageLimit);
-        }
-        else{
-            $articles = Article::whereStatus('Published')
-                                ->orderBy('updated_at','desc')
-                                ->orderBy('id','desc')
-                                ->paginate($pageLimit);
         }
 
-
-
-        /* End Search function */
+        $articles = $articlesQuery
+            ->orderBy('updated_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate($pageLimit)
+            ->withQueryString();
 
         $dates = $this->dates();
         $categories = $this->categories();
-
         $breadcrumb = $this->breadcrumb();
 
         $page = Page::where('slug', 'news')->first();
-
         $footer = Page::where('slug', 'footer')->where('name', 'footer')->first();
 
-        return view('theme.'.config('app.frontend_template').'.pages.news-list',compact('page', 'footer', 'articles','breadcrumb','dates','categories'));
-
-
+        return view(
+            'theme.' . config('app.frontend_template') . '.pages.news-list',
+            compact('page', 'footer', 'articles', 'breadcrumb', 'dates', 'categories')
+        );
     }
 
     public function dates($conditions=null){
