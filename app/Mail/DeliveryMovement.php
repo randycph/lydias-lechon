@@ -28,7 +28,9 @@ class DeliveryMovement extends Mailable
      */
     public function build()
     {
+        $orderNumber = $this->h->order_number;
+        $subject = "Your Order From Lydia's Lechon (Order No. $orderNumber)";
         return $this->view('mail.delivery.status-change')
-            ->subject('Sales Transaction');
+            ->subject($subject);
     }
 }

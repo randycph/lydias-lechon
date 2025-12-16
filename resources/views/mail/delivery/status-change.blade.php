@@ -631,10 +631,14 @@
                         
                 <tr>
                     <td class="wrapper last">
-                        <h4>Dear Valued Customer.</h4>
-                        <h5>We're happy to inform you that your order#: {{$h->sales->order_number}} is now on: <b>{{$h->status}}<b> status.</h5>
-                        <h5>We'll keep you informed for any update on your order.</h5>       
-                       
+                        <h4>Happy Day, {{$h->customer_name}}! </h4>
+                        <p>Your Order No. {{$h->sales->order_number}} is now on: {{$h->status}} Status.</p>
+                        <br>
+                        <p>We'll keep you informed for updates on your order. </p>
+                        <br>
+                        <p>For any inquiries or concerns, kindly reach out to the Lydia's Lechon Head Office at 0917 538 0304 (Globe) or 0918 967 5213 (Smart).</p>
+                        <br>
+                        <p>Thank you!</p>   
                     </td>
                 </tr>
                 </table>

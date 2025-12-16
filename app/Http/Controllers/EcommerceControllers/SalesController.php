@@ -513,13 +513,9 @@ class SalesController extends Controller
 
         $sh = new SalesHeader();
         $sh->assign_to_production_branch($sales, 1);
-    
-        //$mobile = SalesHeader::whereId($order_id)->first();
-        
-        /*
+            
         $sms = new Sms();
-        $sms->send_sms($mobile->customer_contact_number, 'confirm_order', $mobile);
-        */
+        $sms->send_sms($sales->customer_contact_number, 'confirm_order', $sales);
         
         return true;
     }
