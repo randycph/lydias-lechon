@@ -691,8 +691,8 @@
         </td>
 
         {{-- Customer (merged for sales) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $isSales ? $contactMerged : (string)($r->customer_name ?? '') }}">
-            {!! $isSales ? ($isMerged ? '&nbsp;' : $chunkWords($contactMerged))
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $isSales ? $r->customer_name : (string)($r->customer_name ?? '') }}">
+            {!! $isSales ? ($isMerged ? '&nbsp;' : $r->customer_name)
                          : e((strlen((string)($r->customer_name ?? '')) < 2) ? ($r->customer_delivery_adress ?? '') : ($r->customer_name ?? '')) !!}
         </td>
 
@@ -746,8 +746,8 @@
         </td>
 
         {{-- Contact Person / Customer Name (merged for sales; JO per-row) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $customerName }}">
-            {{ $isSales ? ($isMerged ? '' : e($customerName)) : e($r->customer_name ?? '') }}
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $chunkWords($contactMerged) }}">
+            {{ $isSales ? ($isMerged ? '' : e($chunkWords($contactMerged))) : e($r->customer_name ?? '') }}
         </td>
 
         {{-- Contact Number (merged for sales; JO per-row) --}}
