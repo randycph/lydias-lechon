@@ -918,7 +918,7 @@ class CartController extends Controller
             $carts = collect(session('cart', []));
         } else {
             $user = auth()->user();
-            $customer_name = $user->name;
+            $customer_name = $user->firstname . ' ' . $user->lastname;
             $carts = Cart::where('user_id',$user->id)->get();
         }
 
@@ -983,7 +983,7 @@ class CartController extends Controller
             $customer_delivery_adress = $request?->delivery_branch ?? $request->delivery_address;            
             $customer_contact_number = $request->mobile;
             $customer_location = '';
-            $contact_person = $customer_name;
+            $contact_person = $request->name;
         } else {
             $delivery_type='Door to door delivery';
             $delivery_fee = $request->delivery_fee;
@@ -995,7 +995,7 @@ class CartController extends Controller
                      
             $customer_contact_number = $request->mobile;
             $customer_location = $request->delivery_address;
-            $contact_person = $customer_name;
+            $contact_person = $request->name;
             $outlet = '';
         }
 
