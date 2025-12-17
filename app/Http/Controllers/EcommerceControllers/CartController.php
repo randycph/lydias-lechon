@@ -1115,6 +1115,9 @@ class CartController extends Controller
                 'customer_contact_number' => $customer_contact_number,
                 'customer_address' => $customer_delivery_adress,
                 'customer_delivery_adress' => $customer_delivery_adress,
+                'city' => $request->city ?? '',
+                'province' => $request->province ?? '',
+                'barangay' => $request->location ?? '',
                 'delivery_tracking_number' => '',
                 'delivery_type' => $delivery_type,
                 'delivery_fee_amount' => $delivery_fee,
@@ -1187,6 +1190,9 @@ class CartController extends Controller
                 'customer_contact_number' => $customer_contact_number,
                 'customer_address' => $customer_delivery_adress,
                 'customer_delivery_adress' => $customer_delivery_adress,
+                'city' => $request->city ?? '',
+                'province' => $request->province ?? '',
+                'barangay' => $request->location ?? '',
                 'delivery_tracking_number' => '',
                 'delivery_type' => $delivery_type,
                 'delivery_fee_amount' => $delivery_fee,
@@ -1294,6 +1300,9 @@ class CartController extends Controller
                             // 'date_needed' => $delivery->need_date . ' ' . $delivery->need_time,
                             // 'delivery_fee' => $delivery->delivery_fee,
                             // 'note' => $delivery->note,
+                            'city' => $delivery->city ?? '',
+                            'province' => $delivery->province ?? '',
+                            'barangay' => $delivery->location ?? '',
                         ]);
 
                         if ($request->order_amount <= 0) {
