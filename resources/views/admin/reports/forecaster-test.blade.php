@@ -746,8 +746,8 @@
         </td>
 
         {{-- Contact Person / Customer Name (merged for sales; JO per-row) --}}
-        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $chunkWords($contactMerged) }}">
-            {{ $isSales ? ($isMerged ? '' : e($chunkWords($contactMerged))) : e($r->customer_name ?? '') }}
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $contactMerged }}">
+            {{ $isSales ? ($isMerged ? '' : e($contactMerged)) : e($r->customer_name ?? '') }}
         </td>
 
         {{-- Contact Number (merged for sales; JO per-row) --}}
