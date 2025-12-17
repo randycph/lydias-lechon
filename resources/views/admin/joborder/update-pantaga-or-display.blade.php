@@ -40,6 +40,7 @@
     <form autocomplete="off" action="{{ route('joborders.update-pantaga') }}" method="post">
         <input type="hidden" name="jo_id" value="{{$jo->id}}">
         <input type="hidden" name="po_id" value="{{$po->id}}">
+        <input type="hidden" name="return_url" value="{{ request('return_url') }}">
         @csrf
         <div class="row row-sm">
             <div class="col-lg-6">
