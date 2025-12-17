@@ -242,7 +242,7 @@
 
                                             <button type="button" class="btn btn-secondary btn-xs" data-toggle="collapse" data-target="#sales-details_{{$jo->id}}" class="accordion-toggle">Details</button>
                                             @if($jo->date_needed > date('Y-m-d H:i:s') && $jo->sales_detail_id == 0)
-                                                <a href="{{route('joborders.edit-pantaga-or-display',$jo->id)}}" class="btn btn-success btn-xs">Edit</a>
+                                                <a href="{{route('joborders.edit-pantaga-or-display',$jo->id)}}?return_url={{ urlencode(url()->full()) }}" class="btn btn-success btn-xs">Edit</a>
                                             @endif
 
                                             @if (auth()->user()->has_access_to_route('joborders.destroy') || auth()->user()->has_access_to_route('jo.delete'))

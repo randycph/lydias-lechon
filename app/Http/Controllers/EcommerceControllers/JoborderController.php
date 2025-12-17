@@ -825,7 +825,8 @@ class JoborderController extends Controller
             'delivery_date' => $request->production_date.' '.$request->production_time
         ]);
 
-        return redirect()->route('joborders.index')->with('success','Successfully updated Joborder');
+        return redirect($request->return_url ?? route('joborders.index'))
+            ->with('success', 'Successfully updated Joborder');
     }
 
     public function store_pantaga_or_display(Request $request)
