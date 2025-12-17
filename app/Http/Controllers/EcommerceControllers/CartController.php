@@ -983,7 +983,7 @@ class CartController extends Controller
             $customer_delivery_adress = $request?->delivery_branch ?? $request->delivery_address;            
             $customer_contact_number = $request->mobile;
             $customer_location = '';
-            $contact_person = $request->name;
+            $contact_person = $customer_name;
         } else {
             $delivery_type='Door to door delivery';
             $delivery_fee = $request->delivery_fee;
@@ -995,7 +995,7 @@ class CartController extends Controller
                      
             $customer_contact_number = $request->mobile;
             $customer_location = $request->delivery_address;
-            $contact_person = $request->name;
+            $contact_person = $customer_name;
             $outlet = '';
         }
 
