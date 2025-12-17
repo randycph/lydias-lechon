@@ -621,7 +621,7 @@
         $addressHtml   = $formatAddress($r);
         $payments      = $isSales ? ($paymentsByHid->get($r->hid ?? 0, collect())) : collect();
         $custAddrSafe  = strip_tags($r->customer_delivery_adress ?? '');
-        $contactMerged = $isSales ? (($r->contact_person ?? '') ?: ($r->customer_name ?? '')) : '';
+        $contactMerged = $r->contact_person ?? $r->customer_name ?? '';
         $deliveryDate  = $fmtDate($r->delivery_date);
         $deliveryTime  = $fmtTime($r->delivery_date);
         $noteChunked   = $chunkWords($r->instruction ?? '');
@@ -747,7 +747,7 @@
 
         {{-- Contact Person / Customer Name (merged for sales; JO per-row) --}}
         <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $contactMerged }}">
-            {{ $isSales ? ($isMerged ? '' : e($contactMerged)) : e($r->customer_name ?? '') }}
+            {{ $contactMerged }}
         </td>
 
         {{-- Contact Number (merged for sales; JO per-row) --}}
