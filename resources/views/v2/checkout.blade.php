@@ -1717,15 +1717,6 @@
                     return;
                 }
 
-                console.log('this.need_time', this.need_time);
-
-                if (!this.need_time && !this.allowMultiple) {
-                    console.log('22222')
-                    this.noNeededTime = true;
-                    this.isSubmitting = false;
-                    return;
-                }
-
                 if (this.errorMessage) {
                     this.hasErrorMessage = true;
                     this.isSubmitting = false;
