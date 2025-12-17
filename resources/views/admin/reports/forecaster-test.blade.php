@@ -692,8 +692,7 @@
 
         {{-- Customer (merged for sales) --}}
         <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $isSales ? $r->customer_name : (string)($r->customer_name ?? '') }}">
-            {!! $isSales ? ($isMerged ? '&nbsp;' : $r->customer_name)
-                         : e((strlen((string)($r->customer_name ?? '')) < 2) ? ($r->customer_delivery_adress ?? '') : ($r->customer_name ?? '')) !!}
+            {{ $r->customer_name ?? $r->customer_delivery_adress ?? '' }}
         </td>
 
         {{-- Date Needed (merged for sales) --}}
