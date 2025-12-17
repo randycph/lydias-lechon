@@ -60,7 +60,7 @@
                         <select name="branch_source" id="branch_source" required="required" class="form-control">
                             <option value="">- Select Branch -</option>
                             @foreach($branches_store as $b)
-                                <option value="{{$b->name}}|{{$b->rate}}">{{$b->name}}</option>
+                                <option value="{{$b->name}}|{{$b->rate}}" {{ old('branch_source') == $b->name.'|'.$b->rate ? 'selected' : '' }}>{{$b->name}}</option>
                             @endforeach
                         </select>
                     </div>
@@ -174,7 +174,7 @@
                         <div class="col-md-8">
                             <div class="form-group">
                                 <label class="d-block">Delivery/Pickup Date & Time <i class="text-danger">*</i></label>
-                                <input required type="text" name="delivery_date" class="form-control" placeholder="Choose date" id="date1">
+                                <input required type="text" name="delivery_date" class="form-control" placeholder="Choose date" id="date1" value="{{ old('delivery_date') }}">
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -182,23 +182,23 @@
                                 <label class="d-block">&nbsp;</label>
                                 <div class="input-group timepicker">
                                     <select required class="selectpicker" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select delivery time" data-width="100%" name="delivery_time" id="delivery_time" onchange="check_time($(this).val());">                                       
-                                        <option value="05:00">05:00 AM</option>
-                                        <option value="06:00">06:00 AM</option>
-                                        <option value="07:00">07:00 AM</option>
-                                        <option value="08:00">08:00 AM</option>
-                                        <option value="09:00">09:00 AM</option>
-                                        <option value="10:00">10:00 AM</option>
-                                        <option value="11:00">11:00 AM</option>
-                                        <option value="12:00">12:00 NN</option>
-                                        <option value="13:00">01:00 PM</option>
-                                        <option value="14:00">02:00 PM</option>
-                                        <option value="15:00">03:00 PM</option>
-                                        <option value="16:00">04:00 PM</option>
-                                        <option value="17:00">05:00 PM</option>
-                                        <option value="18:00">06:00 PM</option>
-                                        <option value="19:00">07:00 PM</option>
-                                        <option value="20:00">08:00 PM</option>
-                                        <option value="21:00">09:00 PM</option>
+                                        <option value="05:00" {{ old('delivery_time') == '05:00' ? 'selected' : '' }}>05:00 AM</option>
+                                        <option value="06:00" {{ old('delivery_time') == '06:00' ? 'selected' : '' }}>06:00 AM</option>
+                                        <option value="07:00" {{ old('delivery_time') == '07:00' ? 'selected' : '' }}>07:00 AM</option>
+                                        <option value="08:00" {{ old('delivery_time') == '08:00' ? 'selected' : '' }}>08:00 AM</option>
+                                        <option value="09:00" {{ old('delivery_time') == '09:00' ? 'selected' : '' }}>09:00 AM</option>
+                                        <option value="10:00" {{ old('delivery_time') == '10:00' ? 'selected' : '' }}>10:00 AM</option>
+                                        <option value="11:00" {{ old('delivery_time') == '11:00' ? 'selected' : '' }}>11:00 AM</option>
+                                        <option value="12:00" {{ old('delivery_time') == '12:00' ? 'selected' : '' }}>12:00 NN</option>
+                                        <option value="13:00" {{ old('delivery_time') == '13:00' ? 'selected' : '' }}>01:00 PM</option>
+                                        <option value="14:00" {{ old('delivery_time') == '14:00' ? 'selected' : '' }}>02:00 PM</option>
+                                        <option value="15:00" {{ old('delivery_time') == '15:00' ? 'selected' : '' }}>03:00 PM</option>
+                                        <option value="16:00" {{ old('delivery_time') == '16:00' ? 'selected' : '' }}>04:00 PM</option>
+                                        <option value="17:00" {{ old('delivery_time') == '17:00' ? 'selected' : '' }}>05:00 PM</option>
+                                        <option value="18:00" {{ old('delivery_time') == '18:00' ? 'selected' : '' }}>06:00 PM</option>
+                                        <option value="19:00" {{ old('delivery_time') == '19:00' ? 'selected' : '' }}>07:00 PM</option>
+                                        <option value="20:00" {{ old('delivery_time') == '20:00' ? 'selected' : '' }}>08:00 PM</option>
+                                        <option value="21:00" {{ old('delivery_time') == '21:00' ? 'selected' : '' }}>09:00 PM</option>
                                     </select>
                                 </div>
                             </div>
@@ -208,10 +208,10 @@
                     <div class="form-group">
                         <label class="d-block">Order Type</label>
                         <select class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select order type" data-width="100%" name="order_type">
-                            <option value="Buhat">Buhat</option>
-                            <option value="Additional">Additional</option>
-                            <option value="Reserve">Reserve</option>
-                            <option value="Miscellaneous">Miscellaneous</option>
+                            <option value="Buhat" {{ old('order_type') == 'Buhat' ? 'selected' : '' }}>Buhat</option>
+                            <option value="Additional" {{ old('order_type') == 'Additional' ? 'selected' : '' }}>Additional</option>
+                            <option value="Reserve" {{ old('order_type') == 'Reserve' ? 'selected' : '' }}>Reserve</option>
+                            <option value="Miscellaneous" {{ old('order_type') == 'Miscellaneous' ? 'selected' : '' }}>Miscellaneous</option>
                         </select>
                     </div>
 
@@ -223,7 +223,7 @@
                                 <option value=""> - Select -</option>
                                 
                                 @foreach($pbs as $pb)
-                                    <option value="{{$pb->id}}">{{$pb->name}}</option>
+                                    <option value="{{$pb->id}}" {{ old('pb') == $pb->id ? 'selected' : '' }}>{{$pb->name}}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -232,8 +232,8 @@
                             <label class="d-block">Delivery Type <span class="tx-danger">*</span></label>
                             <select required class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select delivery type" data-width="100%" id="delivery_type" name="delivery_type">
                                 <option value=""> - Select -</option>
-                                <option value="1">Door to door</option>
-                                <option value="2">Pick-up at store</option>
+                                <option value="1" {{ old('delivery_type') == 1 ? 'selected' : '' }}>Door to door</option>
+                                <option value="2" {{ old('delivery_type') == 2 ? 'selected' : '' }}>Pick-up at store</option>
                             </select>
                         </div>
                         
@@ -246,9 +246,13 @@
                                     $brr = \App\EcommerceModel\Branch::where('status', 1)->where('delivery_branch', 1)->orderBy('name')->get();
                                 @endphp
                                 @foreach($brr as $b)
-                                    <option value="{{$b->name}}">{{$b->name}}</option>
+                                    <option value="{{$b->name}}" {{ old('delivery_branch') == $b->name ? 'selected' : '' }}>{{$b->name}}</option>
                                 @endforeach
                             </select>
+                            
+                            @if ($errors->has('delivery_branch'))
+                                <span class="text-danger">{{ $errors->first('delivery_branch') }}</span>
+                            @endif
                         </div>
                         
                         <div class="form-group" id="outlet_div" style="display: none;">
@@ -267,6 +271,9 @@
                                 @endforeach
                                
                             </select>
+                            @if ($errors->has('outlet_pickup'))
+                                <span class="text-danger">{{ $errors->first('outlet_pickup') }}</span>
+                            @endif
                         </div>
 
                         {{-- New select address filters --}}
@@ -286,6 +293,9 @@
                                 <label class="d-block">Delivery Address <span class="tx-danger">*</span></label>
                                 <textarea name="add_ress" class="form-control" id="add_ress" cols="30" rows="4" onchange="set_complete_address()"></textarea>
                             </div>
+                            @if ($errors->has('add_ress'))
+                                <span class="text-danger">{{ $errors->first('add_ress') }}</span>
+                            @endif
 
                             <div class="form-group non-others-region">
                                 <label class="d-block">Province *</label>
@@ -296,20 +306,20 @@
                                         </option>
                                     @endforeach
                                 </select>
-                                @if ($errors->has('province'))
-                                <span class="text-danger">{{ $errors->first('province') }}</span>
-                                @endif
                             </div>
+                            @if ($errors->has('province'))
+                                <span class="text-danger">{{ $errors->first('province') }}</span>
+                            @endif
 
                             <div class="form-group non-others-region">
                                 <label class="d-block">City/Municipality *</label>
                                 <select class="form-control" id="city_select" name="city" style="width:100%" disabled onchange="set_complete_address()">
                                     <option value="">Select City/Municipality</option>
                                 </select>
-                                @if ($errors->has('city'))
-                                <span class="text-danger">{{ $errors->first('city') }}</span>
-                                @endif
                             </div>
+                            @if ($errors->has('city'))
+                                <span class="text-danger">{{ $errors->first('city') }}</span>
+                            @endif
                         </div>
 
 
@@ -1305,6 +1315,12 @@
             $('#input_delivery_charge').val(rate);
 
             calculate_grand_total();
+        });
+
+        $(document).ready(function(){
+            @if(old('delivery_type'))
+                $('#delivery_type').val('{{ old('delivery_type') }}').trigger('change');
+            @endif
         });
 
         $(document).on('change', '#delivery_type', function(){
