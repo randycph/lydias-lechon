@@ -2320,6 +2320,12 @@
                 this.initPicker();
 
                 this.$nextTick(() => this.initAllDatePickers());
+
+                if (!this.allowMultiple) {
+                    this.$nextTick(() => {
+                        this.validateDateTime();
+                    });
+                }
             },
 
             _rebuildAllowedCitySetForProvince(provinceLabel) {
