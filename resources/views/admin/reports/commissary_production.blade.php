@@ -298,7 +298,7 @@
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">{{$r->agent}}</td>                                    
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top"><a target="_blank" href="{{ route('sales-transaction.view',$r->hid) }}">{{$r->order_number}}</a></td> 
                                             
-                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">{{$r->customer_name}}</td>
+                                            <td class="bord" rowspan="{{$cntsales}}" valign="top">{{$r->contact_person}}</td>
                                                                                                                           
                                             <td class="bord" rowspan="{{$cntsales}}" valign="top">{{$r->customer_contact_number}}</td>
                                             

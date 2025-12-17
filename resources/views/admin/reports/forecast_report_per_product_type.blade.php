@@ -451,7 +451,7 @@
                                             <td class="" rowspan="1" valign="top">{{$r->agent}}</td>                                    
                                             <td class="" rowspan="1" valign="top"><a target="_blank" href="{{ route('sales-transaction.view',$r->hid) }}">{{$r->order_number}}</a></td> 
                                             
-                                            <td class="" rowspan="1" valign="top">{{$r->customer_name}}</td>
+                                            <td class="" rowspan="1" valign="top">{{$r?->contact_person ?? $r->customer_name}}</td>
                                                                                                                           
                                             <td class="" rowspan="1" valign="top">{{$r->customer_contact_number}}</td>
                                             

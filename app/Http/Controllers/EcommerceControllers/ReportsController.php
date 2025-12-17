@@ -1425,7 +1425,7 @@ class ReportsController extends Controller
     {
 
         $rs = '';
-        $qry = "SELECT pb.name as prod_branch,jo.jo_number as jnum,h.*,d.*,h.created_at as hcreated,h.id as hid,p.category_id,c.name as catname,d.id as did, h.delivery_status as delstat
+        $qry = "SELECT pb.name as prod_branch,jo.jo_number as jnum,h.*,d.*,h.created_at as hcreated,h.id as hid,p.category_id,c.name as catname,d.id as did, h.delivery_status as delstat, h.contact_person
             FROM `ecommerce_sales_details` d
             left join ecommerce_sales_headers h on h.id=d.sales_header_id
             left join products p on p.id=d.product_id
@@ -1638,7 +1638,7 @@ class ReportsController extends Controller
         $wra.=")";
         $no_jo = 0;
 
-        $qry = "SELECT d.product_name, d.paella_price,d.id as didi,
+        $qry = "SELECT d.product_name, d.paella_price,d.id as didi, h.contact_person,
         d.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,d.price, h.customer_delivery_adress,
         h.customer_name, d.delivery_date as delivery_date, h.instruction, po.delivery_date as deldate, h.delivery_type, jo.jo_number, pb.name as pbname, h.delivery_status as delstat,h.agent, h.customer_contact_number,'' as dr, h.delivery_fee_amount, d.price, '' as releasing, h.order_source, br.name as receiver, c.name as catname, u.name as username, jo.jo_order_type,h.order_type as hordertype, h.id as hid, '' as jo_category, 'sales' as trantype, DATE_FORMAT(d.delivery_date,'%H:%i:%s') as timeneeded, DATE_FORMAT(d.delivery_date, '%Y-%m-%d') as dateneeded, p.is_misc, p.production_item, h.isConfirm as isConfirm, h.gross_amount as gros, h.forecast_date as forecast_dt, h.delivery_branch as del_branch,p.id as prodid,h.created_at as created
         FROM `ecommerce_sales_details` d
