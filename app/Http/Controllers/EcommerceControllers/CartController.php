@@ -918,7 +918,7 @@ class CartController extends Controller
             $carts = collect(session('cart', []));
         } else {
             $user = auth()->user();
-            $customer_name = $user->name;
+            $customer_name = $user->firstname . ' ' . $user->lastname;
             $carts = Cart::where('user_id',$user->id)->get();
         }
 
