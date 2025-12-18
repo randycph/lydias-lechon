@@ -254,15 +254,15 @@
                                         $pays = '';
                                     }
 
-                                    if (isset($sale->is_sub) && $sale->is_sub == 1) {
-                                        $parentSale = \App\EcommerceModel\SalesHeader::withTrashed()->where('id', $sale->parent_sales_header_id)->first();
-                                        $payments = \App\EcommerceModel\SalesPayment::where('sales_header_id', $sale->parent_sales_header_id)->where('status', 'PAID')->get();
+                                    if (isset($s->is_sub) && $s->is_sub == 1) {
+                                        $parentSale = \App\EcommerceModel\SalesHeader::withTrashed()->where('id', $s->parent_sales_header_id)->first();
+                                        $payments = \App\EcommerceModel\SalesPayment::where('sales_header_id', $parentSale->parent_sales_header_id)->where('status', 'PAID')->get();
 
                                         foreach ($payments as $pay) {
                                             $pays .= ' ' . number_format($pay->amount, 2) . ' (' . $pay->payment_type . '),';
                                         }
                                     } else {
-                                        $payments = \App\EcommerceModel\SalesPayment::where('sales_header_id', $r->sales_header_id)->where('status', 'PAID')->get();
+                                        $payments = \App\EcommerceModel\SalesPayment::where('sales_header_id', $s->id)->where('status', 'PAID')->get();
 
                                         foreach ($payments as $pay) {
                                             $pays .= ' ' . number_format($pay->amount, 2) . ' (' . $pay->payment_type . '),';
