@@ -255,9 +255,9 @@
                                     }
 
                                     if (isset($s->is_sub) && $s->is_sub == 1) {
-                                        $parentSale = \App\EcommerceModel\SalesHeader::withTrashed()->where('id', $s->parent_sales_header_id)->first();
-                                        $payments = \App\EcommerceModel\SalesPayment::where('sales_header_id', $parentSale->parent_sales_header_id)->where('status', 'PAID')->get();
-
+                                        $parentSale = \App\EcommerceModel\SalesHeader::where('id', $s->parent_sales_header_id)->first();
+                                        $payments = \App\EcommerceModel\SalesPayment::where('sales_header_id', $parentSale->id)->where('status', 'PAID')->get();
+                                        
                                         foreach ($payments as $pay) {
                                             $pays .= ' ' . number_format($pay->amount, 2) . ' (' . $pay->payment_type . '),';
                                         }
