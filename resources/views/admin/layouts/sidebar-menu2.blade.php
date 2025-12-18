@@ -6,15 +6,13 @@
             <span>View Website</span>
         </a>
     </li>
-    @if (auth()->user()->role_id == env('DRIVER_ROLE_ID'))
-        <li class="nav-item">
-            <a href="{{ route('sales-transaction.index') }}" class="nav-link"><i data-feather="align-justify"></i> <span>My Deliveries @if (unreadTransactions() > 0)<span class="badge badge-light">{{ unreadTransactions() }}</span>@endif</span></a>           
-        </li>
-    @else
         <li class="nav-label mg-t-25">PORTAL</li>
-        <li class="nav-item @if (url()->current() == route('dashboard')) active @endif">
-            <a href="{{ route('dashboard') }}" class="nav-link"><i data-feather="home"></i><span>Dashboard</span></a>
-        </li>
+        @if (auth()->user()->role_id == env('DRIVER_ROLE_ID'))
+        @else
+            <li class="nav-item @if (url()->current() == route('dashboard')) active @endif">
+                <a href="{{ route('dashboard') }}" class="nav-link"><i data-feather="home"></i><span>Dashboard</span></a>
+            </li>
+        @endif
 
         @if (auth()->user()->has_access_to_module('customer'))
             <li class="nav-item with-sub @if (request()->routeIs('customers*')) active show @endif">
@@ -55,7 +53,29 @@
             </li>
         @endif
 
-        @if (auth()->user()->has_access_to_module('reports'))
+        @if (auth()->user()->has_access_to_route('admin.report.sales') || 
+            auth()->user()->has_access_to_route('admin.report.sales_payment') ||
+            auth()->user()->has_access_to_route('admin.report.delivery_status') ||
+            auth()->user()->has_access_to_route('admin.report.joborder') ||
+            auth()->user()->has_access_to_route('admin.report.leftover') ||
+            auth()->user()->has_access_to_route('admin.report.sales-per-agent') ||
+            auth()->user()->has_access_to_route('admin.report.sales-per-customer') ||
+            auth()->user()->has_access_to_route('admin.report.forecaster') ||
+            auth()->user()->has_access_to_route('admin.report.door2door_report') ||
+            auth()->user()->has_access_to_route('admin.report.sales_category') ||
+            auth()->user()->has_access_to_route('admin.report.sales-per-branch') ||
+            auth()->user()->has_access_to_route('admin.report.sales_social') ||
+            auth()->user()->has_access_to_route('admin.report.top_products') ||
+            auth()->user()->has_access_to_route('admin.report.top_agents') ||
+            auth()->user()->has_access_to_route('admin.report.guest_orders') ||
+            auth()->user()->has_access_to_route('admin.report.delivery_per_production_location') ||
+            auth()->user()->has_access_to_route('admin.report.audit_trail_per_user') ||
+            auth()->user()->has_access_to_route('admin.report.audit_trail_per_sales') ||
+            auth()->user()->has_access_to_route('admin.report.forecast_report_per_product_type') ||
+            auth()->user()->has_access_to_route('admin.report.pickup_orders_per_branch') ||
+            auth()->user()->has_access_to_route('admin.report.commissary_production') ||
+            auth()->user()->has_access_to_route('admin.report.customer-details') ||
+            auth()->user()->has_access_to_route('admin.report.gift_cert'))
             <li class="nav-item with-sub @if (request()->routeIs('reports*')) active show @endif">
                 <a href="#" class="nav-link"><i data-feather="pie-chart"></i> <span>Reports</span></a>
                 <ul>
@@ -363,21 +383,27 @@
                 </li>
             @endif
 
-            @if (auth()->user()->has_access_to_route('sales-transaction.index'))
-                <li class="nav-item with-sub @if (request()->routeIs('sales-transaction*')) active show @endif">
-                    <a href="" class="nav-link"><i data-feather="users"></i> <span>Sales Transaction @if (unreadTransactions() > 0)<span class="badge badge-light">{{ unreadTransactions() }}</span>@endif</span></a>
-                    <ul>
-                        <li @if (\Route::current()->getName() == 'sales-transaction.create') class="active" @endif><a href="{{ route('sales-transaction.index') }}">Manage Sales Transaction</a></li>
-
-                        @if (!isDispatcher())
-                        <li @if (\Route::current()->getName() == 'sales-transaction.payments') class="active" @endif><a href="{{ route('sales-transaction.payments') }}">Sales Transaction Payments</a></li>
-                        @endif
-
-                        @if (auth()->user()->has_access_to_route('sales-transaction.pending.deletion'))
-                        <li @if (\Route::current()->getName() == 'sales-transaction.pending.deletion') class="active" @endif><a href="{{ route('sales-transaction.pending.deletion') }}">Pending Deletion</a></li>
-                        @endif
-                    </ul>
+            @if (auth()->user()->role_id == env('DRIVER_ROLE_ID'))
+                <li class="nav-item">
+                    <a href="{{ route('sales-transaction.index') }}" class="nav-link"><i data-feather="align-justify"></i> <span>My Deliveries @if (unreadTransactions() > 0)<span class="badge badge-light">{{ unreadTransactions() }}</span>@endif</span></a>           
                 </li>
+            @else
+                @if (auth()->user()->has_access_to_route('sales-transaction.index'))
+                    <li class="nav-item with-sub @if (request()->routeIs('sales-transaction*')) active show @endif">
+                        <a href="" class="nav-link"><i data-feather="users"></i> <span>Sales Transaction @if (unreadTransactions() > 0)<span class="badge badge-light">{{ unreadTransactions() }}</span>@endif</span></a>
+                        <ul>
+                            <li @if (\Route::current()->getName() == 'sales-transaction.create') class="active" @endif><a href="{{ route('sales-transaction.index') }}">Manage Sales Transaction</a></li>
+
+                            @if (!isDispatcher())
+                            <li @if (\Route::current()->getName() == 'sales-transaction.payments') class="active" @endif><a href="{{ route('sales-transaction.payments') }}">Sales Transaction Payments</a></li>
+                            @endif
+
+                            @if (auth()->user()->has_access_to_route('sales-transaction.pending.deletion'))
+                            <li @if (\Route::current()->getName() == 'sales-transaction.pending.deletion') class="active" @endif><a href="{{ route('sales-transaction.pending.deletion') }}">Pending Deletion</a></li>
+                            @endif
+                        </ul>
+                    </li>
+                @endif
             @endif
             
             @if (auth()->user()->has_access_to_module('shareable_link'))
@@ -392,5 +418,4 @@
             </li>
             @endif
         @endif
-    @endif
 </ul>
