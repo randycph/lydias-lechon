@@ -151,7 +151,7 @@
                 </ul>
             </li>
         @endif
-        @if (!isForecaster() && !isDispatcher())
+        @if (!isForecaster() && !isDispatcher() && auth()->user()->role_id != env('DRIVER_ROLE_ID'))
         <li class="nav-label mg-t-25">CMS</li>
         @endif
         @if (auth()->user()->has_access_to_pages_module())
