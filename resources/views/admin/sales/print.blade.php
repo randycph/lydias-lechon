@@ -262,7 +262,6 @@
                                 $customer_delivery_address = trim($sales->customer_delivery_adress ?? '');
                                 $address_to_use = !empty($outlet) ? $outlet : (!empty($customer_address) ? $customer_address : $customer_delivery_address);
                             @endphp
-                            {{ $address_to_use }}
                            Delivery/Pickup Address: {{$address_to_use}}
                         @endif
                     </p>   
