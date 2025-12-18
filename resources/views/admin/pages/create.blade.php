@@ -26,7 +26,7 @@
             <h4 class="mg-b-0 tx-spacing--1">Create a Page</h4>
 		</div>
 	</div>
-	<form method="post" action="{{ route('pages.store') }}" enctype="multipart/form-data">
+	<form method="post" action="{{ route('pages.store') }}" enctype="multipart/form-data" id="create_page_form" autocomplete="off">
 		<div class="row row-sm">
 			<div class="col-lg-6">
 				@csrf
@@ -158,7 +158,7 @@
 			</div>
 
 			<div class="col-lg-12 mg-t-30">
-				<input class="btn btn-primary btn-sm btn-uppercase" type="submit" value="Save Page">
+				<button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitBtn">Save Page</button>
 				<a href="{{ route('pages.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
 			</div>
 		</div>
@@ -202,6 +202,11 @@
 
 @section('customjs')
 	<script>
+        $("#create_page_form").submit(function() {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+        });
         // Replace the <textarea id="editor1"> with a CKEditor
         // instance, using default configuration.        
         var options = {

@@ -31,7 +31,7 @@
 
         <div class="row row-sm">
             <div class="col-lg-12">
-                <form autocomplete="off" action="{{ route('production-branches.store') }}" method="post">
+                <form autocomplete="off" action="{{ route('production-branches.store') }}" method="post" id="create_production_branch_form">
                     @method('POST')
                     @csrf
                     <div class="row row-sm">
@@ -83,7 +83,7 @@
                             </div>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-sm btn-primary btn-uppercase">Save Branch</button>
+                    <button type="submit" class="btn btn-sm btn-primary btn-uppercase" id="submitBtn">Save Branch</button>
                     <a href="{{ route('production-branches.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
                 </form>
             </div>
@@ -106,6 +106,11 @@
 
 @section('customjs')
     <script>
+        $("#create_production_branch_form").submit(function(e){
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+        });
         $(document).ready(function () {
             //called when key is pressed in textbox
             $("#address_zip,#contact_mobile,#contact_tel").keypress(function (e) {

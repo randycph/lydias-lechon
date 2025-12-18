@@ -32,7 +32,7 @@
 
         <div class="row row-sm">
             <div class="col-lg-12">
-                <form autocomplete="off" action="{{ route('gift-certificate.store') }}" method="post">
+                <form autocomplete="off" action="{{ route('gift-certificate.store') }}" method="post" id="giftCertificateForm">
                     @method('POST')
                     @csrf
                     <div class="row row-sm">
@@ -69,7 +69,7 @@
                             </div>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-sm btn-primary btn-uppercase">Save Gift Certificate</button>
+                    <button type="submit" class="btn btn-sm btn-primary btn-uppercase" id="submitBtn">Save Gift Certificate</button>
                     <a href="{{ route('gift-certificate.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
                 </form>
             </div>
@@ -93,6 +93,11 @@
 @section('customjs')
 
     <script>
+        $("#giftCertificateForm").submit(function(e){
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = 'Submitting...';
+        });
         $("#customSwitch1").change(function() {
             if(this.checked) {
                 $('#label_visibility').html('Used');

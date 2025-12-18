@@ -379,7 +379,7 @@
                 </div>
 
                 <div class="col-lg-12 mg-t-30">
-                    <input class="btn btn-primary btn-sm btn-uppercase" type="submit" value="Update Product">
+                    <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitBtn">Update Product</button>
                     <a href="{{ route('products.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
                 </div>
 
@@ -459,6 +459,11 @@
 
 @section('customjs')
 	<script>
+        $("#updateForm").submit(function(e){
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = 'Updating...';
+        });
         var options = {
             filebrowserImageBrowseUrl: '{{env("APP_URL")}}/filemanager?type=Images',
             filebrowserImageUpload: '{{env("APP_URL")}}/filemanager/upload?type=Images&_token=',

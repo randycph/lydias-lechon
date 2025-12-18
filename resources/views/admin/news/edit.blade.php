@@ -166,8 +166,8 @@
             </div>
 
     		<div class="col-lg-12 mg-t-30">
-    		    <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Update News</button>
-    		    <a href="{{ route('news.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
+    		    <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="saveNewsBtn">Update News</button>
+    		    <a href="{{ route('news.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase" >Cancel</a>
     		</div>
         </div>
     </form>
@@ -232,6 +232,11 @@
 
 @section('customjs')
 	<script>
+        $("#editForm").submit(function(e){
+            const btn = document.getElementById('saveNewsBtn');
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+        });
         // Replace the <textarea id="editor1"> with a CKEditor
         // instance, using default configuration.
         var options = {

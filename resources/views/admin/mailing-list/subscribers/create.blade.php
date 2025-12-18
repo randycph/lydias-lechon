@@ -18,7 +18,7 @@
             </div>
         </div>
 
-        <form class="row row-sm" method="POST" action="{{ route('mailing-list.subscribers.store') }}">
+        <form class="row row-sm" method="POST" action="{{ route('mailing-list.subscribers.store') }}" id="createSubscriberForm" autocomplete="off">
             @csrf
             <div class="col-lg-6">
                 <div class="form-group">
@@ -45,7 +45,7 @@
                 </div>
             </div>
             <div class="col-lg-12 mg-t-10">
-                <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Add Subscriber</button>
+                <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitBtn">Add Subscriber</button>
                 <a href="{{ route('mailing-list.subscribers.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
             </div>
         </form>
@@ -58,6 +58,11 @@
 
 @section('customjs')
     <script>
+        $("#createSubscriberForm").submit(function(e){
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = 'Adding...';
+        });
         $("#status").change(function() {
             if(this.checked) {
                 $('#label_is_active').html('Active');

@@ -215,7 +215,7 @@
 
     <div class="modal effect-scale" id="prompt-confirm-payment-approval" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
-            <form method="post" action="{{route('approve_payment')}}" enctype="multipart/form-data">
+            <form method="post" action="{{route('approve_payment')}}" enctype="multipart/form-data" id="confirm_form">
                 @csrf
                 <div class="modal-content">
                     <div class="modal-header">
@@ -236,7 +236,7 @@
 
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-sm btn-danger">Yes, Confirm</button>
+                        <button type="submit" class="btn btn-sm btn-danger" id="confirmBtn">Yes, Confirm</button>
                         <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </div>
@@ -254,6 +254,11 @@
     <script src="{{ asset('lib/jqueryui/jquery-ui.min.js') }}"></script>
     <script src="{{ asset('lib/jqueryui/jquery-ui.min.js') }}"></script>
     <script>
+        $("#confirm_form").submit(function(e){
+            const btn = document.getElementById('confirmBtn');
+            btn.disabled = true;
+            btn.innerText = 'Confirming...';
+        });
         //var dateToday = new Date();
         $(function(){
             'use strict'

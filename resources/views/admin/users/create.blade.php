@@ -62,7 +62,7 @@ User Management
 
     <div class="row">
         <div class="col-md-6">
-            <form autocomplete="off" action="{{ route('users.store') }}" method="post">
+            <form autocomplete="off" action="{{ route('users.store') }}" method="post" id="user_form">
                 @csrf
                 @method('POST')
                 <div class="form-group">
@@ -197,7 +197,7 @@ User Management
                 </div>
 
 
-                <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Create User</button>
+                <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitBtn">Create User</button>
                 <a class="btn btn-outline-secondary btn-sm btn-uppercase" href="{{ route('users.index') }}">Cancel</a>
             </form>
         </div>
@@ -216,6 +216,11 @@ User Management
 
 @section('customjs')
 <script>
+    $("#user_form").submit(function(e){
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerText = 'Saving...';
+    });
     $(function(){
             'use strict'
 

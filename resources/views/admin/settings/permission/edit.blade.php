@@ -30,7 +30,7 @@
                     </div><!-- card-header -->
                     <div class="card-body pd-0">
                         <div class="table-responsive">
-                            <form action="{{ route('permission.update', $permission->id) }}" method="post">
+                            <form action="{{ route('permission.update', $permission->id) }}" method="post" id="selectForm2">
                                 @method('PUT')
                                 @csrf
                                 @if ($errors->any())
@@ -88,7 +88,7 @@
                                 </div>
                                 <div class="modal-footer pd-x-20 pd-y-15">
                                     <a href="{{ route('permission.index') }}" class="btn btn-danger text-white">Cancel</a>
-                                    <button type="submit" class="btn btn-primary">Update Permission</button>
+                                    <button type="submit" class="btn btn-primary" id="savePermissionBtn">Update Permission</button>
                                 </div>
                             </form>
                         </div>
@@ -106,6 +106,11 @@
 
 @section('customjs')
     <script>
+        $("#selectForm2").submit(function(e){
+            const btn = document.getElementById('savePermissionBtn');
+            btn.disabled = true;
+            btn.innerText = 'Updating...';
+        });
         $(document).ready(function() {
             $('#routes').select2({
                 closeOnSelect: false,

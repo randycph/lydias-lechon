@@ -31,7 +31,7 @@
 
         <div class="row">
             <div class="col-md-6">
-                <form action="{{ route('customers.update',$user->id) }}" method="post">
+                <form action="{{ route('customers.update',$user->id) }}" method="post" id="user_form" autocomplete="off">
                     @csrf
                     @method('PUT')
                     <div class="form-group">
@@ -172,7 +172,7 @@
                         @error(['inputName' => 'agent_code'])
                         @enderror
                     </div>
-                    <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Update Customer</button>
+                    <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitBtn">Update Customer</button>
                     <a class="btn btn-outline-secondary btn-sm btn-uppercase" href="{{ route('customers.index') }}">Cancel</a>
                 </form>
             </div>
@@ -187,6 +187,11 @@
 
 @section('customjs')
     <script>
+        $("#user_form").submit(function(e){
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+        });
         $(function() {
             @if($user->is_org <> 1 )
                 $('#fname').attr('required', true);

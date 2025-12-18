@@ -30,7 +30,7 @@
             </div>
         </div>
 
-        <form autocomplete="off" action="{{ route('gift-certificate.update', $giftcertificate->id) }}" method="post" enctype="multipart/form-data">
+        <form autocomplete="off" action="{{ route('gift-certificate.update', $giftcertificate->id) }}" method="post" enctype="multipart/form-data" id="giftCertificateForm">
             <div class="row row-sm">
                 @method('PUT')
                 @csrf
@@ -73,7 +73,7 @@
                     </div>
                 </div>
                 <div class="col-lg-12 mg-t-30">
-                    <input class="btn btn-primary btn-sm btn-uppercase" type="submit" value="Update Gift Certificate">
+                    <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitBtn" value="Update Gift Certificate">Update Gift Certificate</button>
                     <a href="{{ route('gift-certificate.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
                 </div>
             </div>
@@ -92,6 +92,11 @@
 
 @section('customjs')
     <script>
+        $("#giftCertificateForm").submit(function(e){
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = 'Updating...';
+        });
         $("#customSwitch1").change(function() {
             if(this.checked) {
                 $('#label_visibility').html('Used');

@@ -32,7 +32,7 @@
             <a class="btn btn-outline-primary btn-sm" href="{{$page->get_url()}}" target="_blank">Preview Page</a>
         </div>
 	</div>
-	<form id="editForm" action="{{ route('pages.update',$page->id) }}" method="post" enctype="multipart/form-data">
+	<form id="editForm" action="{{ route('pages.update',$page->id) }}" method="post" enctype="multipart/form-data" autocomplete="off">
 		<div class="row row-sm">
 			<div class="col-lg-6">
 				@csrf
@@ -189,7 +189,7 @@
 			</div>
 
 			<div class="col-lg-12 mg-t-30">
-				<input class="btn btn-primary btn-sm btn-uppercase" type="submit" value="Update Page">
+				<button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitBtn">Update Page</button>
 				<a href="{{route('pages.index')}}" class="btn btn-outline-secondary btn-sm btn-uppercase" type="cancel">Cancel</a>
 			</div>
 		</div>
@@ -255,6 +255,11 @@
 
 @section('customjs')
 	<script>
+        $("#editForm").submit(function() {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = 'Updating...';
+        });
         // Replace the <textarea id="editor1"> with a CKEditor
         // instance, using default configuration.
         var options = {

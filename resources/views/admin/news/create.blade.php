@@ -25,7 +25,7 @@
             <h4 class="mg-b-0 tx-spacing--1">Create a News</h4>
         </div>
     </div>
-    <form method="post" action="{{ route('news.store') }}" enctype="multipart/form-data">
+    <form method="post" action="{{ route('news.store') }}" enctype="multipart/form-data" id="newsForm">
         <div class="row row-sm">
             <div class="col-lg-6">
                 <input name="is_blog" type="hidden" value="0">
@@ -154,7 +154,7 @@
             </div>
 
     		<div class="col-lg-12 mg-t-30">
-    		    <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Save News</button>
+    		    <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="saveNewsBtn">Save News</button>
     		    <a href="{{ route('news.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
     		</div>
         </div>
@@ -180,6 +180,11 @@
 
 @section('customjs')
 	<script>
+        $("#newsForm").submit(function(e){
+            const btn = document.getElementById('saveNewsBtn');
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+        });
         // CKEditor
         var options = {
             filebrowserImageBrowseUrl: '{{env("APP_URL")}}/filemanager?',

@@ -62,7 +62,7 @@
 
     <div class="row row-sm">
         <div class="col-lg-6">
-            <form action="{{ route('users.update',$user->id) }}" method="post">
+            <form action="{{ route('users.update',$user->id) }}" method="post" id="user_form" autocomplete="off">
                 @csrf
                 @method('PUT')
                 <div class="form-group">
@@ -175,7 +175,7 @@
                 </div>   
                            
 
-                <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Update User</button>
+                <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitBtn">Update User</button>
                 <a class="btn btn-outline-secondary btn-sm btn-uppercase" href="{{ route('users.index') }}">Cancel</a>
             </form>
         </div>
@@ -193,6 +193,11 @@
 
 @section('customjs')
     <script>
+        $("#user_form").submit(function(e){
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = 'Updating...';
+        });
         $(function(){
 
             $('.select-branch').select2({

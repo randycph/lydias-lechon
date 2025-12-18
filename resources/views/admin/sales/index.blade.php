@@ -704,7 +704,7 @@
                     </div>
                     <input type="hidden" id="del_id" name="del_id" value="">
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                        <button type="submit" class="btn btn-sm btn-primary" id="updateDeliveryStatusBtn">Update</button>
                         <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </form>
@@ -771,7 +771,7 @@
 
     <div class="modal effect-scale" id="prompt-confirm-order" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
-            <form method="post" action="{{route('sales.confirm.order')}}">
+            <form method="post" action="{{route('sales.confirm.order')}}" id="confirm_order_form">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalCenterTitle">Confirm Order</h5>
@@ -790,7 +790,7 @@
 
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-sm btn-danger">Yes, Confirm</button>
+                        <button type="submit" class="btn btn-sm btn-danger" id="confirmOrderBtn">Yes, Confirm</button>
                         <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </div>
@@ -819,7 +819,7 @@
 
     <div class="modal effect-scale" id="prompt-add-delfee" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
-            <form action="{{route('admin.sales.update_deliveryfee')}}" method="post">
+            <form action="{{route('admin.sales.update_deliveryfee')}}" method="post" id="add_delfee_form">
                 @csrf
             <div class="modal-content">
                 <div class="modal-header">
@@ -834,7 +834,7 @@
                     <input type="number" name="delfee" id="delfee" min="0" step="0.01" value="0.00">
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-sm btn-success">Submit Delivery Fee</button>
+                    <button type="submit" class="btn btn-sm btn-success" id="addDelfeeBtn">Submit Delivery Fee</button>
                     <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
@@ -851,7 +851,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form autocomplete="off" action="{{ route('payment.add.store') }}" method="post" enctype="multipart/form-data">
+                <form autocomplete="off" action="{{ route('payment.add.store') }}" method="post" enctype="multipart/form-data" id="add_payment_form">
                 @csrf
 
                     <div class="modal-body">
@@ -906,7 +906,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-sm btn-primary">Submit</button>
+                        <button type="submit" class="btn btn-sm btn-primary" id="addPaymentBtn">Submit</button>
                     </div>
                 </form>
             </div>
@@ -980,7 +980,7 @@
 
     <div class="modal effect-scale" id="prompt-confirm-payment-approval" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
-            <form method="post" action="{{route('approve_payment')}}" enctype="multipart/form-data">
+            <form method="post" action="{{route('approve_payment')}}" enctype="multipart/form-data" id="confirm_form">
                 @csrf
                 <div class="modal-content">
                     <div class="modal-header">
@@ -1001,7 +1001,7 @@
 
                     </div>
                     <div class="modal-footer">
-                        <button type="submit" class="btn btn-sm btn-danger">Yes, Confirm</button>
+                        <button type="submit" class="btn btn-sm btn-danger" id="confirmBtn">Yes, Confirm</button>
                         <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </div>
@@ -1019,6 +1019,36 @@
     <script src="{{ asset('lib/jqueryui/jquery-ui.min.js') }}"></script>
     <script src="{{ asset('lib/jqueryui/jquery-ui.min.js') }}"></script>
     <script>
+        $("#confirm_form").submit(function(e){
+            const btn = document.getElementById('confirmBtn');
+            btn.disabled = true;
+            btn.innerText = 'Confirming...';
+        });
+        $("#confirm_order_form").submit(function(e){
+            const btn = document.getElementById('confirmOrderBtn');
+            btn.disabled = true;
+            btn.innerText = 'Confirming...';
+        });
+        $("#frm_delete").submit(function(e){
+            const btn = document.getElementById('btnDelete');
+            btn.disabled = true;
+            btn.innerText = 'Deleting...';
+        });
+        $("#add_payment_form").submit(function(e){
+            const btn = document.getElementById('addPaymentBtn');
+            btn.disabled = true;
+            btn.innerText = 'Submitting...';
+        });
+        $("#add_delfee_form").submit(function(e){
+            const btn = document.getElementById('addDelfeeBtn');
+            btn.disabled = true;
+            btn.innerText = 'Submitting...';
+        });
+        $("#dd_form").submit(function(e){
+            const btn = document.getElementById('updateDeliveryStatusBtn');
+            btn.disabled = true;
+            btn.innerText = 'Updating...';
+        });
         //var dateToday = new Date();
         $(function(){
             'use strict'

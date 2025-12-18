@@ -31,7 +31,7 @@
 
     <div class="row">
         <div class="col-md-6">
-            <form action="{{ route('customers.store') }}" method="post">
+            <form action="{{ route('customers.store') }}" method="post" id="user_form" autocomplete="off">
                     @csrf
                     @method('POST')
                     <div class="form-group">
@@ -193,7 +193,7 @@
                         </div>
                         @enderror
                     </div>              
-                    <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Create Customer</button>
+                    <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitBtn">Create Customer</button>
                     <a class="btn btn-outline-secondary btn-sm btn-uppercase" href="{{ route('customers.index') }}">Cancel</a>
                 </form>
             </div>
@@ -208,6 +208,11 @@
 
 @section('customjs')
     <script>
+        $("#user_form").submit(function(e){
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+        });
         $(function() {
             $('#fname').attr('required', true);
             $('#lname').attr('required', true); 
