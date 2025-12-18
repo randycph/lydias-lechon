@@ -278,6 +278,29 @@ class JoborderController extends Controller
         $order_number = $today[0].substr($ran, 2,6);
 
         $bs = explode('|', $request->branch_source);
+
+        if ($request->delivery_type == 1) {
+            $request->validate([
+                'delivery_branch' => 'required',
+                'add_ress' => 'required|string',
+                'province' => 'required|string',
+                'city' => 'required|string',
+            ], [
+                'delivery_branch.required' => 'The delivery branch field is required when delivery type is Door to door delivery.',
+                'add_ress.required' => 'The delivery address field is required when delivery type is Door to door delivery.',
+                'province.required' => 'The province field is required when delivery type is Door to door delivery.',
+                'city.required' => 'The city field is required when delivery type is Door to door delivery.',
+            ]);
+        }
+
+        if ($request->delivery_type == 2) {
+            $request->validate([
+                'outlet_pickup' => 'required',
+            ], [
+                'outlet_pickup.required' => 'The outlet field is required when delivery type is Store Pickup.',
+            ]);
+        }
+
         $contact_pers = '';
         if($request->customer_type == 'cs-new'){
             $validated = $request->validate([
