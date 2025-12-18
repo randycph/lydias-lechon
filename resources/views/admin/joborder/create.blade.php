@@ -181,7 +181,7 @@
                             <div class="form-group">
                                 <label class="d-block">&nbsp;</label>
                                 <div class="input-group timepicker">
-                                    <select required class="selectpicker" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select delivery time" data-width="100%" name="delivery_time" id="delivery_time" onchange="check_time($(this).val());">                                       
+                                    <select required class="form-control" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select delivery time" data-width="100%" name="delivery_time" id="delivery_time" onchange="check_time($(this).val());">                                       
                                         <option value="05:00" {{ old('delivery_time') == '05:00' ? 'selected' : '' }}>05:00 AM</option>
                                         <option value="06:00" {{ old('delivery_time') == '06:00' ? 'selected' : '' }}>06:00 AM</option>
                                         <option value="07:00" {{ old('delivery_time') == '07:00' ? 'selected' : '' }}>07:00 AM</option>
@@ -207,7 +207,7 @@
 
                     <div class="form-group">
                         <label class="d-block">Order Type</label>
-                        <select class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select order type" data-width="100%" name="order_type">
+                        <select class="form-control mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select order type" data-width="100%" name="order_type">
                             <option value="Buhat" {{ old('order_type') == 'Buhat' ? 'selected' : '' }}>Buhat</option>
                             <option value="Additional" {{ old('order_type') == 'Additional' ? 'selected' : '' }}>Additional</option>
                             <option value="Reserve" {{ old('order_type') == 'Reserve' ? 'selected' : '' }}>Reserve</option>
@@ -219,7 +219,7 @@
 
                         <div class="form-group">
                             <label class="d-block">Production Branch <span class="tx-danger">*</span></label>
-                            <select required class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select Production Branch" data-width="100%" id="pb" name="pb">
+                            <select required class="form-control mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select Production Branch" data-width="100%" id="pb" name="pb">
                                 <option value=""> - Select -</option>
                                 
                                 @foreach($pbs as $pb)
@@ -230,7 +230,7 @@
 
                         <div class="form-group">
                             <label class="d-block">Delivery Type <span class="tx-danger">*</span></label>
-                            <select required class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select delivery type" data-width="100%" id="delivery_type" name="delivery_type">
+                            <select required class="form-control mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select delivery type" data-width="100%" id="delivery_type" name="delivery_type">
                                 <option value=""> - Select -</option>
                                 <option value="1" {{ old('delivery_type') == 1 ? 'selected' : '' }}>Door to door</option>
                                 <option value="2" {{ old('delivery_type') == 2 ? 'selected' : '' }}>Pick-up at store</option>
@@ -239,7 +239,7 @@
                         
                         <div class="form-group" id="delivery_branch_div" style="display: none;">
                             <label class="d-block">Branch to Deliver <span class="tx-danger">*</span></label>
-                            <select class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select branch to deliver" data-width="100%" id="delivery_branch" name="delivery_branch">
+                            <select class="form-control mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select branch to deliver" data-width="100%" id="delivery_branch" name="delivery_branch">
                                 <option value="">- Select Branch -</option>
                                 @php 
                                     $name='delivery';
@@ -257,7 +257,7 @@
                         
                         <div class="form-group" id="outlet_div" style="display: none;">
                             <label class="d-block">Outlet <span class="tx-danger">*</span></label>
-                            <select class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select delivery/pick-up details" data-width="100%" id="outlet_rate" name="outlet_pickup">
+                            <select class="form-control mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select delivery/pick-up details" data-width="100%" id="outlet_rate" name="outlet_pickup">
                                 <option value="">- Select Branch -</option>
                                 @php 
                                     $name='delivery';
@@ -1338,6 +1338,10 @@
                 $('#outlet_div').hide();
                 $('#d2d_div').show();
                 $('#loc_div').show();
+                $('#add_ress').prop('required',true);
+                $('#city_select').prop('required',true);
+                $('#province_select').prop('required',true);
+                $('#outlet_rate').prop('required',false);
             } else if(type == 2) {
                 $('#delivery_branch_div').hide();
                 $('#delivery_branch').prop('required',false);
@@ -1350,11 +1354,16 @@
 
                 $('#summary_delivery_charge').html('0.00');
                 $('#set_delivery_charge').val(0);
-                $('#outlet_rate').prop('required',false);
+
+                $('#outlet_rate').prop('required', true);
                 $('#set_delivery_charge').prop('readonly',true);
 
                 $('#summary_delivery_charge').html('0.00');
                 $('#input_delivery_charge').val(0);
+
+                $('#add_ress').prop('required',false);
+                $('#city_select').prop('required',false);
+                $('#province_select').prop('required',false);
             }
 
             calculate_grand_total();
