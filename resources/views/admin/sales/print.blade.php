@@ -39,46 +39,53 @@
             .payment-options .payment-options-opt h6 {height:3em;}
         }
 
-.mobile-back {
-    display: none;
-    align-items: center;
-    margin-bottom: 12px;
-}
+        .mobile-back {
+            display: none;
+            align-items: center;
+            margin-bottom: 12px;
+        }
 
-/* Back button */
-.back-btn {
-    height: 36px;
-    width: 36px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(6px);
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    cursor: pointer;
-}
+        /* Back button */
+        .back-btn {
+            height: 36px;
+            width: 36px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(6px);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            cursor: pointer;
+        }
 
-/* Arrow icon */
-.back-icon {
-    width: 20px;
-    height: 20px;
-}
+        /* Arrow icon */
+        .back-icon {
+            width: 20px;
+            height: 20px;
+        }
 
-/* Label */
-.back-label {
-    margin-left: 8px;
-    font-weight: 500;
-    color: #111;
-}
+        /* Label */
+        .back-label {
+            margin-left: 8px;
+            font-weight: 500;
+            color: #111;
+        }
 
-/* Mobile only */
-@media (max-width: 767px) {
-    .mobile-back {
-        display: flex;
-    }
-}
+        /* Mobile only */
+        @media (max-width: 767px) {
+            .mobile-back {
+                display: flex;
+            }
+        }
+
+        .signature-line {
+            border-top: 1px solid #000;
+            width: 100%;
+            max-width: 220px;
+            margin: 40px auto 0;
+        }
 
 
     </style>
@@ -436,28 +443,39 @@
             @endif
             @endif
 
-            <div class="mt-5">
-                <div class="text-uppercase">Acknowledgment receipt</div>
-                
-                <div class="text-center mt-3">
-                    <p class="text-uppercase font-weight-bold">Received the above in good order and condition</p>
+            <div class="mt-5 acknowledgment">
+
+                <div class="text-uppercase font-weight-bold mb-2">
+                    Acknowledgment Receipt
                 </div>
 
-                <div class="d-flex justify-content-between mt-2">
-                    <div class="flex-fill text-center">
-                        <p class="font-weight-bold">Received by:</p>
-                        <p class="mt-5" style="border-top: 1px solid black; width: 200px; margin: auto;"></p>
-                    </div>
-                    <div class="flex-fill text-center">
-                        <p class="font-weight-bold">Received date and time:</p>
-                        <p class="mt-5" style="border-top: 1px solid black; width: 200px; margin: auto;"></p>
-                    </div>
-                    <div class="flex-fill text-center">
-                        <p class="font-weight-bold">Delivered by:</p>
-                        <p class="mt-5" style="border-top: 1px solid black; width: 200px; margin: auto;"></p>
-                    </div>
+                <div class="text-center mt-3">
+                    <p class="text-uppercase font-weight-bold">
+                        Received the above in good order and condition
+                    </p>
                 </div>
+
+                <div class="row mt-4 text-center">
+
+                    <div class="col-12 col-md-4 mb-4">
+                        <p class="font-weight-bold">Received by:</p>
+                        <div class="signature-line"></div>
+                    </div>
+
+                    <div class="col-12 col-md-4 mb-4">
+                        <p class="font-weight-bold">Received date and time:</p>
+                        <div class="signature-line"></div>
+                    </div>
+
+                    <div class="col-12 col-md-4 mb-4">
+                        <p class="font-weight-bold">Delivered by:</p>
+                        <div class="signature-line"></div>
+                    </div>
+
+                </div>
+
             </div>
+
         </div>
     </div>
 </body>
