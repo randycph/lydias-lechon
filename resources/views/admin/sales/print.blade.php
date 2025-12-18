@@ -39,19 +39,76 @@
             .payment-options .payment-options-opt h6 {height:3em;}
         }
 
+.mobile-back {
+    display: none;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+/* Back button */
+.back-btn {
+    height: 36px;
+    width: 36px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(6px);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    cursor: pointer;
+}
+
+/* Arrow icon */
+.back-icon {
+    width: 20px;
+    height: 20px;
+}
+
+/* Label */
+.back-label {
+    margin-left: 8px;
+    font-weight: 500;
+    color: #111;
+}
+
+/* Mobile only */
+@media (max-width: 767px) {
+    .mobile-back {
+        display: flex;
+    }
+}
+
+
     </style>
 </head>
  <!-- onload="setTimeout(function() {window.print();}, 1000);" -->
 <body> 
     <div class="content content-fixed">
         <div class="container pd-x-0 pd-lg-x-10 pd-xl-x-0">
+
+            <!-- Mobile back button -->
+            <div class="mobile-back">
+                <button type="button" class="back-btn" onclick="history.back()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="back-icon" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M15 18l-6-6 6-6" />
+                    </svg>
+                </button>
+                <div class="back-label">Deliveries</div>
+            </div>
+
             <div class="text-center">
                 <img style="height:100px;" src="{{asset('images/lydias-lechon-logo-small.jpg')}}" alt="">
                 <h4><strong>{{ $title ?? 'Sales Transaction Summary' }}</strong></h4>
                 <h5>Order #: {{$sales->order_number}}</h5>
             </div>
+
         </div>
     </div>
+
 
 
     <div class="content tx-13">
