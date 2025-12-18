@@ -37,7 +37,7 @@
                 <h4 class="mg-b-0 tx-spacing--1">Create a Product</h4>
             </div>
         </div>
-        <form id="albumForm" method="POST" action="{{ route('products.store') }}" enctype="multipart/form-data">
+        <form id="create_product_form" method="POST" action="{{ route('products.store') }}" enctype="multipart/form-data">
             <div class="row row-sm">
                 @method('POST')
                 @csrf
@@ -273,7 +273,7 @@
                 </div>
 
                 <div class="col-lg-12 mg-t-30">
-                    <input class="btn btn-primary btn-sm btn-uppercase" type="submit" value="Save Product">
+                    <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitBtn">Save Product</button>
                     <a href="{{ route('products.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
                 </div>
 
@@ -350,6 +350,11 @@
 
 @section('customjs')
     <script>
+        $("#create_product_form").submit(function(e){
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+        });
         var options = {
             filebrowserImageBrowseUrl: '{{env("APP_URL")}}/filemanager?type=Images',
             filebrowserImageUpload: '{{env("APP_URL")}}/filemanager/upload?type=Images&_token=',

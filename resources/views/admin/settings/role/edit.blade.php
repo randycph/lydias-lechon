@@ -27,7 +27,7 @@
                 </div><!-- card-header -->
                 <div class="card-body pd-0">
                     <div class="table-responsive">
-                        <form action="{{ route('role.update', $role->id) }}" method="post">
+                        <form action="{{ route('role.update', $role->id) }}" method="post" id="selectForm2">
                             @method('PUT')
                             @csrf
                             <div class="modal-body pd-sm-t-30 pd-sm-b-40 pd-sm-x-30">
@@ -72,7 +72,7 @@
                             </div>
                             <div class="modal-footer pd-x-20 pd-y-15">
                                 <a href="{{ route('role.index') }}" class="btn btn-danger text-white">Cancel</a>
-                                <button type="submit" class="btn btn-primary">Update Role</button>
+                                <button type="submit" class="btn btn-primary" id="saveRoleBtn">Update Role</button>
                             </div>
                         </form>
                     </div>
@@ -92,6 +92,11 @@
 
 @section('customjs')
     <script>
+        $("#selectForm2").submit(function(e){
+            const btn = document.getElementById('saveRoleBtn');
+            btn.disabled = true;
+            btn.innerText = 'Updating...';
+        });
         $('[data-toggle="tooltip"]').tooltip();
 
         $("#customSwitch13").change(function() {

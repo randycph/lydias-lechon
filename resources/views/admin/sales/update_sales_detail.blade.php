@@ -533,7 +533,7 @@
                             </div> --}}
 
                                 <div class="form-group">
-                                    <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Save
+                                    <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitBtn">Save
                                         Changes</button>
                                 </div>
                             </div>
@@ -541,7 +541,7 @@
                     @endif
                 @endif
                 <br>
-                <form action="{{ route('sales-transaction.update_items') }}" method="post">
+                <form action="{{ route('sales-transaction.update_items') }}" method="post" id="items_form" autocomplete="off">
                     @csrf
                     <input type="hidden" name="ui_sales_id" value="{{ $salesheader->id }}">
                     <input type="hidden" name="ui_total_new" id="ui_total_new" value="0">
@@ -621,7 +621,7 @@
                         </table>
                         <br>
                         <div class="form-group">
-                            <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Save Changes</button>
+                            <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitItemsBtn">Save Changes</button>
                         </div>
                     </div>
                 </form>
@@ -680,6 +680,9 @@
             }
         })
         $("#updatefrm").submit(function() {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
             if ($('#shipping_type').val() == 'd2d') {
                 if ($('#delivery_branch').val() == '') {
                     alert('Please select Delivery Branch');
@@ -689,6 +692,11 @@
                 }
             }
 
+        });
+        $("#items_form").submit(function() {
+            const btn = document.getElementById('submitItemsBtn');
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
         });
         /** page level plugins **/
         $('.select2').select2({

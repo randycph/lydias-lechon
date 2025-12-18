@@ -57,7 +57,7 @@
 		    </ul>
 		</div>
 	@endif
-		<form action="{{ route('popup-message.update', $popup_message->id) }}" method="POST">
+		<form action="{{ route('popup-message.update', $popup_message->id) }}" method="POST" id="edit_popup_message_form" autocomplete="off">
 		@csrf
 		@method('PUT')
 		<div class="row row-sm">
@@ -107,7 +107,7 @@
 			</div>
 
 			<div class="col-lg-12 mg-t-30">
-				<button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="btnSubmit">Save</button>
+				<button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitBtn">Save</button>
 				<a href="{{ route('popup-message.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
 			</div>
 		</div>
@@ -128,8 +128,13 @@
 
 @section('customjs')
 <script>
-$(function() {
-	$('.selectpicker').selectpicker();
-});
+	$("#edit_popup_message_form").submit(function(e){
+		const btn = document.getElementById('submitBtn');
+		btn.disabled = true;
+		btn.innerText = 'Saving...';
+	});
+	$(function() {
+		$('.selectpicker').selectpicker();
+	});
 </script>
 @endsection

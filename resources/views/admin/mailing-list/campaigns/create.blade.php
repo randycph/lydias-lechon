@@ -20,7 +20,7 @@
             </div>
         </div>
 
-        <form method="post" class="row row-sm" action="{{ route('mailing-list.campaigns.store') }}">
+        <form method="post" class="row row-sm" action="{{ route('mailing-list.campaigns.store') }}" autocomplete="off" id="createCampaignForm">
             @csrf
             <div class="col-lg-6">
                 <div class="form-group">
@@ -75,8 +75,7 @@
                 </div>
             </div>
             <div class="col-lg-12 mg-t-10 pd-b-40">
-                <input class="btn btn-primary btn-sm tx-uppercase tx-semibold" name="submit" type="submit" value="save only">
-                <input class="btn btn-primary btn-sm tx-uppercase tx-semibold" name="submit" type="submit" value="save and send">
+                <button class="btn btn-primary btn-sm tx-uppercase tx-semibold" name="submit" type="submit" value="save only" id="saveOnlyBtn">Save Only</button>
                 <a  href="{{ route('mailing-list.campaigns.index') }}" class="btn btn-outline-secondary btn-sm tx-uppercase tx-semibold">Cancel</a>
             </div>
         </form>
@@ -90,6 +89,15 @@
 
 @section('customjs')
     <script>
+        $("#createCampaignForm").submit(function(e){
+            const btn = document.getElementById('saveOnlyBtn');
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+
+            const btn2 = document.getElementById('saveAndSendBtn');
+            btn2.disabled = true;
+            btn2.innerText = 'Saving...';
+        });
         $('#recipients').select2({ closeOnSelect: false });
         $('#recipientGroups').select2({ closeOnSelect: false });
         $('#recipients').trigger('change');

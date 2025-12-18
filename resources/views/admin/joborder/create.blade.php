@@ -501,7 +501,7 @@
             </div>
 
             <div class="col-lg-12 mg-t-20 mg-b-30">
-                <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Save Job Order</button>
+                <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitBtn">Save Job Order</button>
                 <a  href="{{route('joborders.index')}}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
             </div>
         </div>
@@ -1411,7 +1411,11 @@
 
     <script>
         $("#joborder_form").submit(function(e){
-            
+        
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+
             var count = $('.hproducts').length;
             var misce = parseInt($('#total_misc').val());
             var tt = parseInt(count) + parseInt(misce);

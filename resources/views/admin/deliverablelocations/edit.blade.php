@@ -180,7 +180,7 @@
                     </div>
                 @endif
 
-                <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Submit</button>
+                <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitBtn">Submit</button>
                 <a class="btn btn-outline-secondary btn-sm btn-uppercase"
                     href="{{ route('admin.locations.index') }}">Cancel</a>
             </form>
@@ -194,6 +194,11 @@
 @section('pagejs')
 <script src="{{ asset('lib/select2/js/select2.min.js') }}"></script>
 <script>
+    $("#delivery_form").submit(function(e){
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerText = 'Submitting ...';
+    });
     $("#customSwitch1").change(function() {
         if(this.checked) {
             $('#label_visibility').html('Outside Manila');

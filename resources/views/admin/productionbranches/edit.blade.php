@@ -30,7 +30,7 @@
         </div>
 
 
-        <form autocomplete="off" action="{{ route('production-branches.update', $productions->id) }}" method="post" enctype="multipart/form-data">
+        <form autocomplete="off" action="{{ route('production-branches.update', $productions->id) }}" method="post" enctype="multipart/form-data" id="edit_production_branch_form">
             <div class="row row-sm">
                 @method('PUT')
                 @csrf
@@ -82,7 +82,7 @@
                     </div>
                 </div>
                 <div class="col-lg-12 mg-t-30">
-                    <input class="btn btn-primary btn-sm btn-uppercase" type="submit" value="Update Production Branch">
+                    <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitBtn">Update Production Branch</button>
                     <a href="{{ route('production-branches.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
                 </div>
             </div>
@@ -103,6 +103,11 @@
 
 @section('customjs')
     <script>
+        $("#edit_production_branch_form").submit(function(e){
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = 'Updating...';
+        });
 
         $(".js-range-slider").ionRangeSlider({
             grid: true,

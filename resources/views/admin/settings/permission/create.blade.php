@@ -106,7 +106,7 @@
                                 </div>
                                 <div class="modal-footer pd-x-20 pd-y-15">
                                     <a href="{{ route('permission.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
-                                    <button type="submit" class="btn btn-sm btn-primary">Save Permission</button>
+                                    <button type="submit" class="btn btn-sm btn-primary" id="savePermissionBtn">Save Permission</button>
                                 </div>
                             </form>
                         </div>
@@ -123,6 +123,11 @@
 
 @section('customjs')
     <script>
+        $("#selectForm2").submit(function(e){
+            const btn = document.getElementById('savePermissionBtn');
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+        });
         $(document).ready(function() {
             $('#routes').select2({
                 closeOnSelect: false,

@@ -72,7 +72,7 @@
                         </div>
                         <div class="col-lg-12 mg-t-30">
                             <hr>
-                            <button type="submit" class="btn btn-primary btn-sm btn-uppercase" type="submit">Save Album</button>
+                            <button type="submit" class="btn btn-primary btn-sm btn-uppercase" type="submit" id="saveAlbumBtn">Save Album</button>
                             <a href="{{ route('albums.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase" type="cancel">Cancel</a>
                         </div>
                     </div>
@@ -121,6 +121,11 @@
 
 @section('customjs')
     <script>
+        $("#albumForm").submit(function(e){
+            const btn = document.getElementById('saveAlbumBtn');
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+        });
         $(function() {
             let image_count = 1;
             let objUpload;

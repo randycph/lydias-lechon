@@ -20,7 +20,7 @@
             </div>
         </div>
 
-        <form method="post" action="{{ route('mailing-list.groups.store') }}" class="row row-sm">
+        <form method="post" action="{{ route('mailing-list.groups.store') }}" class="row row-sm" id="createGroupForm" autocomplete="off" >
             @csrf
             <div class="col-lg-6">
                 <div class="form-group">
@@ -49,7 +49,7 @@
                 </div>
             </div>
             <div class="col-lg-12 mg-t-10">
-                <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Add Mailing Group</button>
+                <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitBtn">Add Mailing Group</button>
                 <a href="{{ route('mailing-list.groups.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
             </div>
         </form>
@@ -62,6 +62,11 @@
 
 @section('customjs')
     <script>
+        $("#createGroupForm").submit(function(e){
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = 'Adding...';
+        });
         $('#subscribers').select2({
             closeOnSelect: false,
             scrollAfterSelect: true

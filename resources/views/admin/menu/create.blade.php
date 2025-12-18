@@ -248,6 +248,12 @@
             suppressScrollX: true
         });
 
+        $("#menuForm").submit(function(e){
+            const btn = document.getElementById('saveMenu');
+            btn.disabled = true;
+            btn.innerText = 'Saving...';
+        });
+
         $('#btnSearch').on('click', function() {
             $('.page-title').each(function() {
                 let pageTitle = $(this).html().toLowerCase();

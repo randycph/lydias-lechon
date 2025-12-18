@@ -131,7 +131,7 @@
                         </div>
                     </div>
 
-                    <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Submit</button>
+                    <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitBtn">Submit</button>
                     <a class="btn btn-outline-secondary btn-sm btn-uppercase" href="{{ route('admin.locations.index') }}">Cancel</a>
             </form>
             </div>
@@ -155,6 +155,11 @@
 </script>
 
 <script>
+    $("#delivery_form").submit(function(e){
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerText = 'Submitting ...';
+    });
     document.addEventListener('DOMContentLoaded', function () {
         const control = document.getElementById('control_mode');
         const controlModeLabel = document.getElementById('control_mode_label');

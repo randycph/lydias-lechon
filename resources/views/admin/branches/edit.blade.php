@@ -213,6 +213,11 @@
     <script src="{{ asset('js/listing.js') }}"></script>
 
     <script>
+        $("#branchForm").submit(function(e){
+            const btn = document.getElementById('updateBranchBtn');
+            btn.disabled = true;
+            btn.innerText = 'Updating...';
+        });
         $(document).ready(function () {
             let branchRowIndex = {{ $branches->numbers->count() }};
 

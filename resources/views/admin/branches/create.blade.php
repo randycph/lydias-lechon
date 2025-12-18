@@ -31,7 +31,7 @@
 
         <div class="row row-sm">
             <div class="col-lg-12">
-                <form autocomplete="off" action="{{ route('branch.store') }}" method="post">
+                <form autocomplete="off" action="{{ route('branch.store') }}" method="post" id="branchForm">
                     @method('POST')
                     @csrf
                     <div class="row row-sm">
@@ -187,7 +187,7 @@
                         </div>
 
                     </div>
-                    <button type="submit" class="btn btn-sm btn-primary btn-uppercase">Save Branch</button>
+                    <button type="submit" class="btn btn-sm btn-primary btn-uppercase" id="saveBranchBtn">Save Branch</button>
                     <a href="{{ route('branch.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
                 </form>
             </div>
@@ -207,6 +207,11 @@
 
 @section('customjs')
     <script>
+        $("#branchForm").submit(function(e){
+            const btn = document.getElementById('saveBranchBtn');
+            btn.disabled = true;
+            btn.innerText = 'Submitting...';
+        });
         $(document).ready(function () {
             let branchRowIndex = 0;
 

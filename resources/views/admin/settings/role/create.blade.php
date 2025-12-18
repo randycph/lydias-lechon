@@ -77,7 +77,7 @@
                             </div>
                             <div class="modal-footer pd-x-20 pd-y-15">
                                 <a href="{{ route('role.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
-                                <button type="submit" class="btn btn-sm btn-primary">Save Role</button>
+                                <button type="submit" class="btn btn-sm btn-primary" id="saveRoleBtn">Save Role</button>
                             </div>
                         </form>
                     </div>
@@ -90,6 +90,11 @@
 
 @section('pagejs')
 <script>
+    $("#selectForm2").submit(function(e){
+        const btn = document.getElementById('saveRoleBtn');
+        btn.disabled = true;
+        btn.innerText = 'Saving...';
+    });
     $("#customSwitch13").change(function() {
         if(this.checked) {
             $('#label_visibility13').html('Yes');

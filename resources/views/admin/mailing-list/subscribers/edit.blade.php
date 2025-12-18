@@ -18,7 +18,7 @@
             </div>
         </div>
 
-        <form class="row row-sm" method="POST" action="{{ route('mailing-list.subscribers.update', $subscriber->id) }}">
+        <form class="row row-sm" method="POST" action="{{ route('mailing-list.subscribers.update', $subscriber->id) }}" id="editSubscriberForm" autocomplete="off">
             @csrf
             @method('put')
             <div class="col-lg-6">
@@ -46,7 +46,7 @@
                 </div>
             </div>
             <div class="col-lg-12 mg-t-10">
-                <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Update Subscriber</button>
+                <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitBtn">Update Subscriber</button>
                 <a href="{{ route('mailing-list.subscribers.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
             </div>
         </form>
@@ -59,6 +59,11 @@
 
 @section('customjs')
     <script>
+        $("#editSubscriberForm").submit(function(e){
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = 'Updating...';
+        });
         $("#status").change(function() {
             if(this.checked) {
                 $('#label_is_active').html('Active');
