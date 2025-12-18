@@ -37,4 +37,16 @@ class DeliveryStatus extends Model
     {
         return $this->hasMany(DeliveriesImage::class, 'delivery_status_id');
     }
+
+    protected $appends = ['delivered_by_name'];
+
+    public function deliveredByUser()
+    {
+        return $this->belongsTo(User::class, 'delivered_by');
+    }
+
+    public function getDeliveredByNameAttribute()
+    {
+        return $this->deliveredByUser?->name;
+    }
 }

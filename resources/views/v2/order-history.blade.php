@@ -521,7 +521,7 @@
                                             },
                                             driverName() {
                                                 const entry = deliveryStatuses.find(s => s.status === 'In Transit');
-                                                return entry ? entry.delivered_by : 'No assigned driver';
+                                                return entry ? entry.delivered_by_name : 'No assigned driver';
                                             },
                                         }">
                                             <!-- ICON -->
@@ -859,11 +859,10 @@
                 this.sales_header_id = sales_header_id;
             },
             trackOrder(sale) {
+                console.log(sale)
                 this.trackOrderModal = true;
                 this.saleId = sale.order_number;
                 this.saleDate = this.formatDate(sale.created_at);
-
-                console.log(sale);
 
                 this.deliveryStatuses = sale.delivery_status;
             },
