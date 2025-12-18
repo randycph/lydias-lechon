@@ -140,7 +140,17 @@
                                     <br>Delivery Branch: {{ $sales->delivery_branch ?? '' }}
                                 @endif
                             @else
-                                {{$sales?->customer_address ?? $sales->customer_delivery_adress}}
+                                @php
+                                    $outlet = trim($sales->outlet ?? '');
+                                    // check if $sales->customer_address has a value of , , if so, treat it as empty
+                                    $customer_address = trim($sales->customer_address ?? '');
+                                    if ($customer_address === ', ,') {
+                                        $customer_address = '';
+                                    }
+                                    $customer_delivery_address = trim($sales->customer_delivery_adress ?? '');
+                                    $address_to_use = !empty($outlet) ? $outlet : (!empty($customer_address) ? $customer_address : $customer_delivery_address);
+                                @endphp
+                                {{ $address_to_use }}
                             @endif
                         </p>
                         @if ($sales?->deliveryAddress && count($sales?->deliveryAddress) == 0)
