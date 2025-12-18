@@ -913,6 +913,7 @@ Route::get('/driver-deliveries', function(){
                 'contact_number' => $sale->customer_contact_number ?? $sale->user->contact_mobile,
                 'sales' => $sale->items->first() ?? null,
                 'product' => optional($sale->items->first())->product->photos ?? null,
+                'deliveryStatuses' => ($sale->deliveryStatuses),
             ];
         });
 
@@ -950,6 +951,7 @@ Route::get('/driver-deliveries', function(){
                 'gross_amount' => ($job->price * $job->qty) + ($job->paella_price * $job->paella_qty),
                 'delivery_address' => $job->customer_delivery_address ?? $job->customer_address,
                 'product' => $job->product->photos ?? null,
+                'deliveryStatuses' => ($job->deliveryStatuses),
             ];
         });
 

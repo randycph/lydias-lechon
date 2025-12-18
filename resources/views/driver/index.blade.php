@@ -44,6 +44,12 @@
         [x-cloak] {
             display: none
         }
+
+        .sheet-body {
+            max-height: 80vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
     </style>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -203,7 +209,7 @@
                                         </svg> Print Delivery
                                     </button>
 
-                                    <button type="button" class="mt-2 inline-flex items-center gap-2 text-sm text-gray-600 hover:underline">
+                                    <button @click="openDeliveryHistorySheet()" type="button" class="mt-2 inline-flex items-center gap-2 text-sm text-gray-600 hover:underline">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
                                         </svg>
@@ -322,6 +328,84 @@
                             </div>
                         </div>
 
+                        <!-- BACKDROP Delivery History -->
+                        <div x-show="deliveryHistorySheet" x-transition.opacity class="fixed inset-0 z-20 bg-black/40"
+                            @click="closeDeliveryHistorySheet()"></div>
+
+                        <!-- BOTTOM SHEET -->
+                        <div x-show="deliveryHistorySheet" x-trap.noscroll="deliveryHistorySheet"
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="translate-y-full" x-transition:enter-end="translate-y-0"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="translate-y-0" x-transition:leave-end="translate-y-full"
+                            class="fixed inset-x-0 bottom-0 z-30" @keydown.escape.prevent.stop="closeDeliveryHistorySheet()">
+                            <div class="mx-auto w-full max-w-sm rounded-t-2xl bg-white shadow-2xl">
+                                <!-- Handle -->
+                                <div class="flex justify-center pt-3">
+                                    <span class="h-1.5 w-12 rounded-full bg-gray-300"></span>
+                                </div>
+
+                                <div class="px-5 pb-5 pt-4 sheet-body">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h3 class="text-lg font-semibold text-gray-900">Delivery History</h3>
+                                        <button class="p-2 rounded-full hover:bg-gray-100" @click="closeDeliveryHistorySheet()">
+                                            <svg class="h-5 w-5 text-gray-600" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                    stroke-width="1.7" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <div class="text-left sm:mt-0 sm:ml-4 sm:text-left">
+
+                                        <div class="mt-1 px-2">
+                                            <ol class="relative border-s border-gray-200 dark:border-gray-700">
+                                                <template x-for="(key, index) in Object.keys(statusMap)" :key="index">
+                                                    <li class="mb-10 ms-0 relative pl-8" x-data="{
+                                                        isCompleted() {
+                                                            return deliveryStatuses.some(s => s.status === key);
+                                                        },
+                                                        completedAt() {
+                                                            const entry = deliveryStatuses.find(s => s.status === key);
+                                                            return entry ? formatDate(entry.created_at) : '';
+                                                        },
+                                                        driverName() {
+                                                            const entry = deliveryStatuses.find(s => s.status === 'In Transit');
+                                                            return entry ? entry.delivered_by_name : 'No assigned driver';
+                                                        },
+                                                    }">
+                                                        <!-- ICON -->
+                                                        <span
+                                                            class="absolute flex items-center justify-center w-10 h-10 border rounded-full -start-5 p-1"
+                                                            :class="isCompleted() ? 'bg-[#CFEDD6] border-primary' : 'bg-[#ECECEC] border-[#ACACAC]'"
+                                                            x-html="getIcon(statusMap[key].icon, isCompleted() ? 'size-6 text-primary' : 'size-6 text-[#ACACAC]')"
+                                                        ></span>
+
+                                                        <!-- TITLE -->
+                                                        <h3 class="mb-1 font-semibold" :class="isCompleted() ? 'text-primary' : 'text-[#ACACAC]'" x-text="statusMap[key].title"></h3>
+
+                                                        <!-- TIME -->
+                                                        <template x-if="isCompleted()">
+                                                            <time class="block mb-2 text-xs text-[#717171] float-right mt-1" x-text="completedAt()"></time>
+                                                        </template>
+
+                                                        <!-- SUBTITLE -->
+                                                        <p class="text-sm" :class="isCompleted() ? 'text-[#717171]' : 'text-[#ACACAC]'" x-text="statusMap[key].subtitle"></p>
+                                                        <template x-if="statusMap[key].title == 'In Transit' && isCompleted()">
+                                                            <p class="text-sm text-[#ACACAC]">Driver: <span x-text="driverName()"></span></p>
+                                                        </template>
+                                                    </li>
+                                                </template>
+                                            </ol>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+
+
                         <!-- bottom padding so last content isn't hidden behind iOS bars -->
                         <div class="h-6"></div>
                     </div>
@@ -414,6 +498,25 @@
 
                 closeSheet() {
                     this.sheetOpen = false;
+                },
+
+                deliveryHistorySheet: false,
+
+                openDeliveryHistorySheet() {
+                    const sale = this.active
+
+                    console.log(this.active)
+
+                    this.saleId = sale.order_number;
+                    this.saleDate = this.formatDate(sale.created_at);
+
+                    this.deliveryStatuses = sale.deliveryStatuses || [];
+
+                    this.deliveryHistorySheet = true;
+                },
+
+                closeDeliveryHistorySheet() {
+                    this.deliveryHistorySheet = false;
                 },
 
                 onFileChange(e) {
@@ -512,6 +615,96 @@
                         this.saving = false;
                     }
                 },
+                
+                deliveryStatuses: [],
+                saleDate: '',
+                sales_header_id: '',
+                amount: '',
+                saleId: '',
+
+                formatDate(dateString) {
+                    const date = new Date(dateString);
+
+                    const month = String(date.getMonth() + 1).padStart(2, '0'); // months are 0-indexed
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const year = date.getFullYear();
+
+                    let hours = date.getHours();
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+                    const ampm = hours >= 12 ? 'PM' : 'AM';
+                    hours = hours % 12;
+                    hours = hours ? hours : 12; // 0 should be 12
+                    const formattedHours = String(hours).padStart(2, '0');
+
+                    return `${month}/${day}/${year} ${formattedHours}:${minutes} ${ampm}`;
+                },
+                statusMap: {
+                    'Open Date': {
+                        title: 'Open Date',
+                        subtitle: 'Waiting to open order.',
+                        icon: 'calendar-days',
+                    },
+                    'Scheduled for Processing': {
+                        title: 'Scheduled for Processing',
+                        subtitle: 'Waiting for your payment confirmation.',
+                        icon: 'receipt-percent',
+                    },
+                    'Processing': {
+                        title: 'Processing',
+                        subtitle: 'We are currently preparing your order.',
+                        icon: 'cog-6-tooth',
+                    },
+                    'In Transit': {
+                        title: 'In Transit',
+                        subtitle: 'Your order is on the way.',
+                        icon: 'truck',
+                    },
+                    'Delivered/Picked Up': {
+                        title: 'Delivered/Picked Up',
+                        subtitle: 'Your order has been delivered or picked up.',
+                        icon: 'check-circle',
+                    },
+                    'Returned/Rejected': {
+                        title: 'Returned/Rejected',
+                        subtitle: 'Your order was returned or rejected.',
+                        icon: 'arrow-uturn-left',
+                    },
+                },
+                getIcon(iconName) {
+                    switch(iconName) {
+                        case 'calendar-days':
+                            return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
+                                    </svg>`;
+                        case 'receipt-percent':
+                            return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m9 14.25 6-6m4.5-3.493V21.75l-3.75-1.5-3.75 1.5-3.75-1.5-3.75 1.5V4.757c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0c1.1.128 1.907 1.077 1.907 2.185ZM9.75 9h.008v.008H9.75V9Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm4.125 4.5h.008v.008h-.008V13.5Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                                    </svg>`;
+                        case 'cog-6-tooth' :
+                            return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                    </svg>`;
+                        case 'archive-box': 
+                            return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
+                                    </svg>`;
+                        case 'truck': 
+                            return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                                    </svg>`;
+                        case 'check-circle': 
+                            return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                    </svg>`;
+                        case 'arrow-uturn-left': 
+                            return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+                                    </svg>`;
+                    }
+                }
+
             }
         }
     </script>
