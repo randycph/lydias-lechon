@@ -39,19 +39,83 @@
             .payment-options .payment-options-opt h6 {height:3em;}
         }
 
+        .mobile-back {
+            display: none;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        /* Back button */
+        .back-btn {
+            height: 36px;
+            width: 36px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(6px);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        /* Arrow icon */
+        .back-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Label */
+        .back-label {
+            margin-left: 8px;
+            font-weight: 500;
+            color: #111;
+        }
+
+        /* Mobile only */
+        @media (max-width: 767px) {
+            .mobile-back {
+                display: flex;
+            }
+        }
+
+        .signature-line {
+            border-top: 1px solid #000;
+            width: 100%;
+            max-width: 220px;
+            margin: 40px auto 0;
+        }
+
+
     </style>
 </head>
  <!-- onload="setTimeout(function() {window.print();}, 1000);" -->
 <body> 
     <div class="content content-fixed">
         <div class="container pd-x-0 pd-lg-x-10 pd-xl-x-0">
+
+            <!-- Mobile back button -->
+            <div class="mobile-back">
+                <button type="button" class="back-btn" onclick="history.back()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="back-icon" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                            d="M15 18l-6-6 6-6" />
+                    </svg>
+                </button>
+                <div class="back-label">Deliveries</div>
+            </div>
+
             <div class="text-center">
                 <img style="height:100px;" src="{{asset('images/lydias-lechon-logo-small.jpg')}}" alt="">
                 <h4><strong>{{ $title ?? 'Sales Transaction Summary' }}</strong></h4>
                 <h5>Order #: {{$sales->order_number}}</h5>
             </div>
+
         </div>
     </div>
+
 
 
     <div class="content tx-13">
@@ -379,28 +443,39 @@
             @endif
             @endif
 
-            <div class="mt-5">
-                <div class="text-uppercase">Acknowledgment receipt</div>
-                
-                <div class="text-center mt-3">
-                    <p class="text-uppercase font-weight-bold">Received the above in good order and condition</p>
+            <div class="mt-5 acknowledgment">
+
+                <div class="text-uppercase font-weight-bold mb-2">
+                    Acknowledgment Receipt
                 </div>
 
-                <div class="d-flex justify-content-between mt-2">
-                    <div class="flex-fill text-center">
-                        <p class="font-weight-bold">Received by:</p>
-                        <p class="mt-5" style="border-top: 1px solid black; width: 200px; margin: auto;"></p>
-                    </div>
-                    <div class="flex-fill text-center">
-                        <p class="font-weight-bold">Received date and time:</p>
-                        <p class="mt-5" style="border-top: 1px solid black; width: 200px; margin: auto;"></p>
-                    </div>
-                    <div class="flex-fill text-center">
-                        <p class="font-weight-bold">Delivered by:</p>
-                        <p class="mt-5" style="border-top: 1px solid black; width: 200px; margin: auto;"></p>
-                    </div>
+                <div class="text-center mt-3">
+                    <p class="text-uppercase font-weight-bold">
+                        Received the above in good order and condition
+                    </p>
                 </div>
+
+                <div class="row mt-4 text-center">
+
+                    <div class="col-12 col-md-4 mb-4">
+                        <p class="font-weight-bold">Received by:</p>
+                        <div class="signature-line"></div>
+                    </div>
+
+                    <div class="col-12 col-md-4 mb-4">
+                        <p class="font-weight-bold">Received date and time:</p>
+                        <div class="signature-line"></div>
+                    </div>
+
+                    <div class="col-12 col-md-4 mb-4">
+                        <p class="font-weight-bold">Delivered by:</p>
+                        <div class="signature-line"></div>
+                    </div>
+
+                </div>
+
             </div>
+
         </div>
     </div>
 </body>
