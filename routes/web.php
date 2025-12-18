@@ -516,8 +516,8 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::get('/admin/report/dispatcher', 'EcommerceControllers\ReportsController@dispatcher')->name('admin.report.dispatcher');
 
     Route::get('/admin/report/delivery-per-production-location', 'EcommerceControllers\ReportsController@delivery_per_production_location')->name('admin.report.delivery_per_production_location');
-    Route::get('/admin/report/audit-trail-per-sales', 'EcommerceControllers\ReportsController@audit_trail_per_user')->name('admin.report.audit_trail_per_user');
-    Route::get('/admin/report/audit-trail-per-user', 'EcommerceControllers\ReportsController@audit_trail_per_sales')->name('admin.report.audit_trail_per_sales');
+    Route::get('/admin/report/audit-trail-per-sales', 'EcommerceControllers\ReportsController@audit_trail_per_sales')->name('admin.report.audit_trail_per_sales');
+    Route::get('/admin/report/audit-trail-per-user', 'EcommerceControllers\ReportsController@audit_trail_per_user')->name('admin.report.audit_trail_per_user');
     Route::get('/admin/report/audit-trail-per-external', 'EcommerceControllers\ReportsController@audit_trail_per_external')->name('admin.report.audit_trail_per_external');
     Route::get('/admin/report/forecast_report_per_product_type', 'EcommerceControllers\ReportsController@forecast_report_per_product_type')->name('admin.report.forecast_report_per_product_type');
     
