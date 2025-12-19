@@ -279,7 +279,7 @@ class JoborderController extends Controller
 
         $bs = explode('|', $request->branch_source);
 
-        if ($request->delivery_type == 1) {
+        if ($request->delivery_type == 1 && $request->region != 'OTHER') {
             $request->validate([
                 'delivery_branch' => 'required',
                 'add_ress' => 'required|string',
