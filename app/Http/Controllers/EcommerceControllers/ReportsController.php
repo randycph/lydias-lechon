@@ -54,7 +54,7 @@ class ReportsController extends Controller
             left join job_orders jo on jo.sales_detail_id = d.id
             left join production_orders po on po.joborder_id = jo.id
             left join production_branches pb on pb.id = po.branch_id
-         where h.id>0 and h.deleted_at is null AND h.for_deletion = 0 and jo.deleted_at is null and d.deleted_at is null";
+         where h.id>0 and h.deleted_at is null AND h.for_deletion = 0 and jo.deleted_at is null and d.deleted_at is null AND h.has_sub = 0";
         // conditions
             if(isset($_GET['agent']) && $_GET['agent']<>''){
                 $qry.= " and h.agent='".$_GET['agent']."'";
@@ -118,7 +118,7 @@ class ReportsController extends Controller
             left join job_orders jo on jo.sales_detail_id = d.id
             left join production_orders po on po.joborder_id = jo.id
             left join production_branches pb on pb.id = po.branch_id
-         where h.id>0 and h.deleted_at is null AND h.for_deletion = 0 and jo.deleted_at is null and d.deleted_at is null";
+         where h.id>0 and h.deleted_at is null AND h.for_deletion = 0 and jo.deleted_at is null and d.deleted_at is null AND h.has_sub = 0";
         // conditions
             if(isset($_GET['agent']) && $_GET['agent']<>''){
                 $qry.= " and h.agent='".$_GET['agent']."'";
@@ -168,7 +168,7 @@ class ReportsController extends Controller
         LEFT JOIN job_orders jo ON jo.sales_detail_id = d.id
         LEFT JOIN users u ON u.id = h.user_id
         WHERE h.deleted_at IS NULL AND h.for_deletion = 0
-        AND jo.deleted_at IS NULL AND d.deleted_at IS NULL
+        AND jo.deleted_at IS NULL AND d.deleted_at IS NULL AND h.has_sub = 0
         ";
 
 
@@ -217,7 +217,7 @@ class ReportsController extends Controller
 
         // Sales
             $qry = "SELECT d.product_name, d.paella_price, h.contact_person, d.product_name as dproduct_name, h.has_sub, '' as jo_category, d.id as idd,
-            d.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,d.price, h.customer_delivery_adress,
+            d.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,d.price, h.customer_delivery_adress, h.parent_sales_header_id,
             h.customer_name, d.delivery_date as delivery_date, h.instruction, po.delivery_date as deldate, h.delivery_type, jo.jo_number, pb.name as pbname, h.delivery_status as delstat,h.agent, h.customer_contact_number,'' as dr, h.delivery_fee_amount, d.price, '' as releasing, h.order_source, br.name as receiver, c.name as catname, u.name as username, jo.jo_order_type,h.order_type as hordertype, h.id as hid, '' as jo_category, 'sales' as trantype, DATE_FORMAT(d.delivery_date,'%H:%i:%s') as timeneeded, DATE_FORMAT(d.delivery_date, '%Y-%m-%d') as dateneeded, p.is_misc, p.production_item, h.isConfirm as isConfirm, h.gross_amount as gros, h.forecast_date as forecast_dt, h.delivery_branch as del_branch,p.id as prodid,h.created_at as created
             FROM `ecommerce_sales_details` d
             left join ecommerce_sales_headers h on h.id=d.sales_header_id
@@ -386,7 +386,7 @@ class ReportsController extends Controller
             //    IF(m.delivery_status, "YES", "NO") as delstat,
 
             $mqry = "SELECT distinct m.product_name, m.paella_price, m.paella, m.contact_person, h.has_sub, m.id as idd,
-            m.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,m.price, m.address as customer_delivery_adress,
+            m.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,m.price, m.address as customer_delivery_adress, h.parent_sales_header_id,
             h.customer_name, m.branch as mbranch, 
             cast(concat(m.delivery_date, ' ', m.delivery_time) as datetime)  as delivery_date,
             m.note as instruction, po.delivery_date as deldate, h.delivery_type, jo.jo_number, pb.name as pbname, 
@@ -637,7 +637,7 @@ class ReportsController extends Controller
         $qry = "SELECT h.*,h.created_at as hcreated,h.id as hid,p.*, h.order_number as hnum,p.id as pid,p.created_at as pcreated
         from ecommerce_sales_payments p
         left join ecommerce_sales_headers h on h.id=p.sales_header_id
-        where p.id>0 and p.status<>'CANCELLED' and p.amount>0";
+        where p.id>0 and p.status<>'CANCELLED' and p.amount>0 AND h.has_sub = 0";
 
         if(isset($_GET['status']) && $_GET['status']<>''){
             $qry.= " and p.status='".$_GET['status']."'";
@@ -862,7 +862,7 @@ class ReportsController extends Controller
             left join product_categories c on c.id=p.category_id
             left join production_orders po on po.joborder_id = jo.id
             left join production_branches pb on pb.id = po.branch_id
-         where h.id>0 and h.deleted_at is null AND h.for_deletion = 0 and jo.deleted_at is null and po.deleted_at is null and d.deleted_at is null";
+         where h.id>0 and h.deleted_at is null AND h.for_deletion = 0 and jo.deleted_at is null and po.deleted_at is null and d.deleted_at is null AND h.has_sub = 0";
         // conditions
             if(isset($_GET['agent']) && $_GET['agent']<>''){
                 $qry.= " and h.agent='".$_GET['agent']."'";
@@ -986,7 +986,7 @@ class ReportsController extends Controller
                     left join production_branches pb on pb.id=p.branch_id
                     left join job_orders j on j.id=p.joborder_id
                     left join ecommerce_sales_headers h on h.order_number=j.sales_number
-                    where j.id>0  and h.deleted_at is null AND h.for_deletion = 0";
+                    where j.id>0  and h.deleted_at is null AND h.for_deletion = 0 AND h.has_sub = 0";
 
         if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
             $qry.= " and p.delivery_date>='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and p.delivery_date<='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
@@ -1036,7 +1036,7 @@ class ReportsController extends Controller
             LEFT JOIN job_orders jo ON jo.sales_detail_id = d.id
             LEFT JOIN production_orders po ON po.joborder_id = jo.id
             LEFT JOIN production_branches pb ON pb.id = po.branch_id
-            WHERE h.agent IS NOT NULL AND h.deleted_at IS NULL AND h.for_deletion = 0 AND d.deleted_at IS NULL
+            WHERE h.agent IS NOT NULL AND h.deleted_at IS NULL AND h.for_deletion = 0 AND d.deleted_at IS NULL AND h.has_sub = 0
         ";
 
         if ($request->filled('agent')) {
@@ -1084,7 +1084,7 @@ class ReportsController extends Controller
             left join job_orders jo on jo.sales_detail_id = d.id
             left join production_orders po on po.joborder_id = jo.id
             left join production_branches pb on pb.id = po.branch_id
-         where h.id>0 and h.deleted_at is null AND h.for_deletion = 0 and d.deleted_at is null";
+         where h.id>0 and h.deleted_at is null AND h.for_deletion = 0 and d.deleted_at is null AND h.has_sub = 0";
         // conditions
 
             if(isset($_GET['pb']) && $_GET['pb']<>''){
@@ -1113,7 +1113,7 @@ class ReportsController extends Controller
                 FROM `job_orders` jo
                 left join production_orders po on po.joborder_id=jo.id
                 left join ecommerce_sales_headers h on h.order_number=jo.sales_number
-                where jo.status = 'Active'  and h.deleted_at is null AND h.for_deletion = 0";
+                where jo.status = 'Active'  and h.deleted_at is null AND h.for_deletion = 0 AND h.has_sub = 0";
 
         if(isset($_GET['branch']) && strlen($_GET['branch'])>=1){
             $qry.= " and po.branch_id='".$_GET['branch']."'";
@@ -1254,7 +1254,7 @@ class ReportsController extends Controller
 
     public function sales_per_branch(Request $request)
     {
-        $qry = "select order_source, count(id) total_order,sum(gross_amount) total_revenue from ecommerce_sales_headers where status = 'active' and payment_status = 'PAID' ";
+        $qry = "select order_source, count(id) total_order,sum(gross_amount) total_revenue from ecommerce_sales_headers where status = 'active' and payment_status = 'PAID' AND has_sub = 0";
 
         if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
             $startDate = date('Y-m-d',strtotime($_GET['startdate']));
@@ -1278,7 +1278,7 @@ class ReportsController extends Controller
     
     public function sales_category(Request $request)
     {
-        $qry = "select sd.product_category, pcat.name, sum(sd.price*sd.qty) total_sales, count(sh.id) total_orders, sum(sd.qty) total_volume from ecommerce_sales_details sd left join ecommerce_sales_headers sh on sh.id = sd.sales_header_id left join product_categories as pcat on pcat.id = sd.product_category where sd.deleted_at is null and sh.status = 'active' and sh.payment_status = 'PAID' ";
+        $qry = "select sd.product_category, pcat.name, sum(sd.price*sd.qty) total_sales, count(sh.id) total_orders, sum(sd.qty) total_volume from ecommerce_sales_details sd left join ecommerce_sales_headers sh on sh.id = sd.sales_header_id left join product_categories as pcat on pcat.id = sd.product_category where sd.deleted_at is null and sh.status = 'active' and sh.payment_status = 'PAID' AND sh.has_sub = 0";
 
         if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
             $startDate = date('Y-m-d',strtotime($_GET['startdate']));
@@ -1318,7 +1318,7 @@ class ReportsController extends Controller
         left join production_orders po on po.joborder_id = jo.id
         left join production_branches pb on pb.id = po.branch_id
         left join users u on u.id = d.created_by
-        where h.id>0 and h.deleted_at is null and jo.deleted_at is null and po.deleted_at is null AND h.for_deletion = 0 and d.deleted_at is null";
+        where h.id>0 and h.deleted_at is null and jo.deleted_at is null and po.deleted_at is null AND h.for_deletion = 0 and d.deleted_at is null AND h.has_sub = 0";
 
         if(isset($_GET['agent']) && $_GET['agent']<>''){
             $qry.= " and h.agent='".$_GET['agent']."'";
@@ -1433,7 +1433,7 @@ class ReportsController extends Controller
             left join job_orders jo on jo.sales_detail_id = d.id
             left join production_orders po on po.joborder_id = jo.id
             left join production_branches pb on pb.id = po.branch_id
-         where h.id>0 and h.deleted_at is null AND h.for_deletion = 0 and d.deleted_at is null";
+         where h.id>0 and h.deleted_at is null AND h.for_deletion = 0 and d.deleted_at is null AND h.has_sub = 0";
         // conditions
             if(isset($_GET['pb']) && $_GET['pb']<>''){
                 $qry.= " and po.branch_id=".$_GET['pb']."";
@@ -1650,7 +1650,7 @@ class ReportsController extends Controller
         left join production_orders po on po.joborder_id = jo.id
         left join production_branches pb on pb.id = po.branch_id
         left join users u on u.id = d.created_by
-        where h.id>0 and h.delivery_status<>'Open Date' and h.deleted_at is null AND d.deleted_at is null and h.for_deletion = 0 and jo.deleted_at is null and po.deleted_at is null and (h.payment_status = 'PAID' OR h.isConfirm=1)";
+        where h.id>0 and h.delivery_status<>'Open Date' and h.deleted_at is null AND d.deleted_at is null and h.for_deletion = 0 and jo.deleted_at is null and po.deleted_at is null and (h.payment_status = 'PAID' OR h.isConfirm=1) AND h.has_sub = 0";
 
         if(isset($_GET['agent']) && $_GET['agent']<>''){
             $qry.= " and h.agent='".$_GET['agent']."'";
