@@ -70,8 +70,8 @@
                                 @endforeach
                             </select>
                         </td>
-                        <td>Start: <input type="date" name="startdate" class="form-control input-sm " value="@isset($_GET['startdate']){{ $_GET['startdate'] }}@endisset"></td>
-                        <td>End: <input type="date" name="enddate" class="form-control input-sm " value="@isset($_GET['enddate']){{ $_GET['enddate'] }}@endisset"></td>                        
+                        <td>Start Date (Order Date): <input type="date" name="startdate" class="form-control input-sm " value="@isset($_GET['startdate']){{ $_GET['startdate'] }}@endisset"></td>
+                        <td>End Date (Order Date): <input type="date" name="enddate" class="form-control input-sm " value="@isset($_GET['enddate']){{ $_GET['enddate'] }}@endisset"></td>                        
                         <td><br><input type="submit" value="Generate" class="btn btn-md btn-primary"></td>
                     </tr>
                 </table>

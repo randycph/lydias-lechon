@@ -31,17 +31,7 @@
     }
 @endphp
 @section('pagetitle')
-    <table width="100%" style="font-size:18px;font-weight:bold;">
-        <tr>
-            <td class="bord" align="center">
-                <br>
-                Social Media Report <br>
-                {{$date_display}}
-                <br><br>
-            </td>
-        </tr>
-    </table>
-    
+Social Media Report {{$date_display}}
 @endsection
 
 @section('content')
@@ -56,8 +46,8 @@
         @csrf
         <table>
             <tr>
-                <td>Start date</td>
-                <td>End Date</td>
+                <td>Start date (Order Date)</td>
+                <td>End Date (Order Date)</td>
                 <td>&nbsp;</td>
             </tr>
             <tr>

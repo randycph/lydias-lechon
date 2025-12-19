@@ -46,8 +46,8 @@ Product Category Report
         @csrf
         <table>
             <tr>
-                <td>Start Date</td>
-                <td>End Date</td>
+                <td>Start Date (Order Date)</td>
+                <td>End Date (Order Date)</td>
                 <td>&nbsp;</td>
             </tr>
             <tr>

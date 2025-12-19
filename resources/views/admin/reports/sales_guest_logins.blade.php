@@ -50,8 +50,8 @@ Guest Logins Report {{$date_display}}
         @csrf
         <table>
             <tr>
-                <td>Start date</td>
-                <td>End Date</td>
+                <td>Start date (Date Created)</td>
+                <td>End Date (Date Created)</td>
                 <td>&nbsp;</td>
             </tr>
             <tr>
