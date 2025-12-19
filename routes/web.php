@@ -852,6 +852,23 @@ Route::get('tests/sms', function() {
     }
 });
 
+Route::get('update-order-number', function() {
+    try {
+        $orders = SalesHeader::withTrashed()->where('order_number', 'like', '%-%')->get();
+
+        foreach ($orders as $order) {
+            $order->order_number = sprintf('%07d', $order->id);
+            $order->save();
+        }
+
+        return response()->json([
+            'message' => 'Order numbers updated successfully!'
+        ]);
+    } catch (\Throwable $th) {
+        throw $th;
+    }
+});
+
 Route::get('export-delivery-location', function() {
     $filename = 'deliverable_cities_' . now()->format('Y-m-d_His') . '.xlsx';
     return Excel::download(new DeliverablecitiesExport, $filename);
