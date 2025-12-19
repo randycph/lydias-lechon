@@ -852,7 +852,7 @@ class ReportsController extends Controller
     public function joborder(Request $request)
     {
 
-        $qry = "SELECT po.schedule_type as schedtype,pb.name as prod_branch,jo.jo_number as jnum,h.*,d.*,h.created_at as hcreated,h.id as hid,p.category_id,c.name as catname,d.id as did, h.instruction, h.payment_status, h.order_number as ordnum, jo.jo_order_type,
+        $qry = "SELECT po.schedule_type as schedtype,pb.name as prod_branch,jo.jo_number as jnum,h.*,d.*,h.created_at as hcreated,h.id as hid,p.category_id,c.name as catname,d.id as did, h.instruction, h.payment_status, h.order_number as ordnum, jo.jo_order_type, jo.date_needed,
             IFNULL(jo.jo_category,'Miscellaneous') as item_type
             FROM  
             job_orders jo 
