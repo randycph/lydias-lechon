@@ -1715,6 +1715,7 @@
                 setTimeout(() => {
                     $('#set_delivery_charge').prop('readonly', false);
                     $('#other_outlet_div_').show();
+                    $('#other_outlet').prop('required', true);
                 }, 500);
             
             }
@@ -1731,6 +1732,7 @@
                     if (regionCode.toLowerCase() === 'other'){
                         hideIfRegionIsOthers();
                     } else {
+                        $('#other_outlet').prop('required', false);
                         $('.non-others-region').show();
                         $('#other_outlet_div_').hide();
                         $('#set_delivery_charge').prop('readonly', true);
