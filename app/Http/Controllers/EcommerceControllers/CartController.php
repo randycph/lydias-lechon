@@ -1241,7 +1241,7 @@ class CartController extends Controller
                         }
 
                         // $subSalesHeader->order_number = sprintf('%07d', $salesHeader->id) . '-' . ($k+1);
-                        $subSalesHeader->order_number = sprintf('%07d', $salesHeader->id);
+                        $subSalesHeader->order_number = sprintf('%07d', $subSalesHeader->id);
                         $subSalesHeader->save();
 
                         ProductDeliveryAddress::create([
