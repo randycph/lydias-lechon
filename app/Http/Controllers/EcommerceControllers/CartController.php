@@ -893,6 +893,7 @@ class CartController extends Controller
                 'name' => $customer_name,
                 'contact_mobile' => $request->mobile,
                 'email' => $request->email ?? 'wsiphproduction@gmail.com',
+                'valid_email' => $request->email ?? null,
                 'registration_type' => 'guest',
                 'registration_source' => 'Guest',
                 'password' => Hash::make(Str::random(10)),
@@ -1565,7 +1566,7 @@ class CartController extends Controller
         //     }
         // }
 
-        $recipient = $user->email ?: $request->email;
+        $recipient = $user->valid_email ?? $user->email ?? $request->email;
         $salesHeader = SalesHeader::with(['couponUsed', 'deliveryAddress'])->find($salesHeader->id);
         if (auth()->guest()) {
             try {

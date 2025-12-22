@@ -101,6 +101,7 @@ class CustomerController extends Controller
             'name'                  => $fname.' '.$lname,
             'password'              => Hash::make('password'),
             'email'                 => $email,
+            'valid_email'           => $email,
             'role_id'               => 6,
             'is_active'             => 1,
             'user_id'               => NULL,
@@ -196,6 +197,7 @@ class CustomerController extends Controller
             'contact_tel'           => $request->contact_tel,
             'contact_mobile'        => $request->contact_mobile,
             'contact_fax'           => $request->contact_fax,
+            'valid_email'           => $request->email,
             'registration_source'   => $request->registration_source,
             'agent_code'            => $request->agent_code,
 
