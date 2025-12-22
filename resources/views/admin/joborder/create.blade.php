@@ -93,6 +93,11 @@
                         <div id="customer_details"></div>
                     </div>
                 </div>
+                <div class="customer-err">
+                    @error('customer')
+                        <div class="alert alert-danger">{{ $message }}</div>
+                    @enderror
+                </div>
 
                 <!-- New Customer -->
                 <div class="cs-new box cnew_details">
@@ -561,6 +566,9 @@
             function handleCustomerTypeChange(value) {
                 if (value === 'cs-new') {
                     $('.cnew_details').show();
+                    $('.customer-err').html('');
+                } else {
+                    $('.cnew_details').hide();
                 }
             }
         });
@@ -1419,6 +1427,11 @@
     </script>
 
     <script>
+        function resetButton() {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = false;
+            btn.innerText = 'Save Job Order';
+        }
         $("#joborder_form").submit(function(e){
         
             const btn = document.getElementById('submitBtn');
@@ -1433,23 +1446,32 @@
                 alert('Product list is empty! Add products to proceed.');
                 $('#selected_product').prop('style', 'border: 1px solid red;');
                 $('#selected_product').focus();
+
+                resetButton();
+
                 e.preventDefault();
                 return;
             }
 
             if(parseFloat(get_payment_balance()) < 0){
                 alert('Your payment/s exceeded the total billing amount!');
+
+                resetButton();
                  e.preventDefault();
             }
 
             if(parseFloat(get_payment_total())  < 1){
                 alert('Please add payment details');
-                 e.preventDefault();
+
+                resetButton();
+                e.preventDefault();
             }
 
             if($('#delivery_type').val() == 2){
                 if(!$("select[name=outlet_pickup]").val()){
                     alert('Please select Pickup Outlet');
+
+                    resetButton();
                     e.preventDefault();
                 }
             }
@@ -1469,6 +1491,8 @@
             });
             if(no_attached > 0){
                 alert('Attachment is required for payment types: Bank Deposit, Check Payment , Gcash, Cash, Credit/Debit Card, Gift Certificate, or Online Bank Transfer');
+
+                resetButton();
                 e.preventDefault();
             }            
             
@@ -1615,6 +1639,8 @@
             }).catch(err => {
                 console.error('Failed to load LGU JSON:', err);
                 alert('Location list failed to load. Ensure /public/addresses/2019v2.json is present.');
+            
+                resetButton();
             });
 
             // Events
