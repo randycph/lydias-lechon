@@ -13,6 +13,7 @@ use App\Helpers\ListingHelper;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\BlockSlotController;
 use App\Http\Controllers\EcommerceControllers\ReportsController;
 use App\Http\Controllers\FacebookController;
 use App\Http\Controllers\FrontendController;
@@ -972,6 +973,9 @@ Route::get('driver', function() {
 
     return view('driver.index');
 })->name('driver.home');
+
+Route::get('/blocks/events', [BlockSlotController::class, 'events'])->name('blocks.events');
+Route::post('/blocks', [BlockSlotController::class, 'store'])->name('blocks.store');
 
 Route::get('/{slug}', [FrontendController::class, 'page'])->name('page');
 

@@ -7,6 +7,15 @@
 @section('pagecss')
 <script src="{{ asset('lib/ckeditor/ckeditor.js') }}"></script>
 <link type="text/css" rel="stylesheet" href="{{ asset('lib/select2/css/select2.min.css') }}" />
+<!-- VanillaJS Datepicker CSS -->
+<link
+  href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/css/datepicker.min.css"
+  rel="stylesheet"
+>
+<link
+  href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+  rel="stylesheet"
+>
 <style>
     .select2-container--default .select2-selection--multiple .select2-selection__choice {
         position: relative;
@@ -51,6 +60,119 @@
             <h4 class="mg-b-0 tx-spacing--1">Website Settings</h4>
         </div>
     </div>
+
+<section class="container my-4">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+    <h5 class="mb-0">Block Dates & Times</h5>
+  </div>
+
+  <!-- Form Section -->
+  <div class="row g-4">
+
+    <!-- LEFT COLUMN -->
+    <div class="col-md-6">
+
+      <!-- Scope -->
+      <div class="mb-3">
+        <label class="form-label fw-bold">Select Scope</label>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="scope" id="scopeAll" checked value="all">
+          <label class="form-check-label" for="scopeAll">All Products</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="scope" id="scopeCategory" value="category">
+          <label class="form-check-label" for="scopeCategory">By Category</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="scope" id="scopeProduct" value="product">
+          <label class="form-check-label" for="scopeProduct">By Product</label>
+        </div>
+      </div>
+
+    <!-- Category -->
+    <div class="mb-3">
+        <label class="form-label">Select Category</label>
+        <select class="form-select" id="category" name="category" disabled>
+            <option selected>Select category</option>
+            <option>Electronics</option>
+            <option>Services</option>
+        </select>
+    </div>
+
+    <!-- Product -->
+    <div class="mb-3">
+        <label class="form-label">Select Product</label>
+        <select class="form-select" id="product" name="product" disabled>
+            <option selected>Select product</option>
+            <option>Product A</option>
+            <option>Product B</option>
+        </select>
+    </div>
+
+      <!-- Date Picker -->
+      <div class="mb-3">
+        <label class="form-label fw-bold">Select Date(s)</label>
+        <input
+          type="text"
+          class="form-control"
+          id="blockDates"
+          placeholder="Select dates"
+          readonly
+        >
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="col-md-6">
+
+        <!-- Time Slots -->
+        <label class="form-label fw-bold">Select Time Slot(s)</label>
+
+        <div class="border rounded p-3 mb-3" id="times">
+        @foreach (range(7, 19) as $hour)
+        <div class="form-check">
+            <input id="timeSlot{{ $hour }}" class="form-check-input time-slot" type="checkbox" value="{{ sprintf('%02d:00', $hour) }}">
+            {{-- show AM and PM in label --}}
+            <label for="timeSlot{{ $hour }}" class="form-check-label">
+                {{ sprintf('%02d:00 %s', ($hour > 12 ? $hour - 12 : $hour), ($hour >= 12 ? 'PM' : 'AM')) }}
+            </label>
+        </div>
+        @endforeach
+
+        <hr>
+
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="allday">
+            <label for="allday" class="form-check-label fw-bold">Block whole day</label>
+        </div>
+        </div>
+
+        <button
+        type="button"
+        class="btn btn-dark px-4"
+        id="addBlock">
+        Add Block
+        </button>
+
+
+    </div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div class="mt-5">
+    <h6 class="fw-bold mb-3">Blocked Schedules</h6>
+    <div class="border rounded p-2">
+      <div id="calendar" style="min-height: 500px;"></div>
+    </div>
+  </div>
+
+</section>
+
+
+
     <div class="row row-sm">
         <div class="col-lg-12">
             <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -564,6 +686,28 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="blockModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Block</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <p><strong>Date:</strong> <span id="modalDate"></span></p>
+        <p><strong>Time:</strong> <span id="modalTime"></span></p>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="deleteBlock">Delete</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
 @include('admin.settings.website.modal')
 @endsection
 
@@ -572,6 +716,14 @@
     <script src="{{ asset('lib/cleave.js/addons/cleave-phone.us.js') }}"></script>
     <script src="{{ asset('lib/parsleyjs/parsley.min.js') }}"></script>
     <script src="{{ asset('lib/select2/js/select2.min.js') }}"></script>
+    <!-- VanillaJS Datepicker JS -->
+    <script
+    src="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/js/datepicker-full.min.js">
+    </script>
+    <!-- FullCalendar JS (no jQuery needed) -->
+    <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.19/index.global.min.js">
+    </script>
 @endsection
 
 @section('customjs')
@@ -1010,4 +1162,219 @@
             }
         }
     </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    /* ---------------------------------------------------
+    * 1. ELEMENT REFERENCES
+    * --------------------------------------------------- */
+    const scopeRadios    = document.querySelectorAll('input[name="scope"]');
+    const categorySelect = document.querySelector('select[name="category"]');
+    const productSelect  = document.querySelector('select[name="product"]');
+    const addBlockBtn    = document.getElementById('addBlock');
+    const dateInput      = document.getElementById('blockDates');
+    const allDayCheckbox = document.getElementById('allday');
+    const timeSlots      = document.querySelectorAll('.time-slot');
+
+    /* ---------------------------------------------------
+    * 2. DATEPICKER INITIALIZATION
+    * --------------------------------------------------- */
+    const datepicker = new Datepicker(dateInput, {
+        format: 'yyyy-mm-dd',
+        multidate: true,
+        autohide: true,
+    });
+
+    /* ---------------------------------------------------
+    * 3. FULLCALENDAR INITIALIZATION
+    * --------------------------------------------------- */
+    const calendarEl = document.getElementById('calendar');
+    const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        slotMinTime: '07:00:00',
+        dayMaxEvents: 4,
+        slotMaxTime: '20:00:00',
+        allDaySlot: true,
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        eventColor: '#e5e5e5',
+        eventTextColor: '#000',
+        eventBorderColor: '#000',
+        events: '/blocks/events',
+    });
+    calendar.render();
+
+    /* ---------------------------------------------------
+    * 4. SCOPE LOGIC (ENABLE / DISABLE)
+    * --------------------------------------------------- */
+    scopeRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            const value = radio.id;
+
+            // Enable/disable category and product selects based on scope
+            categorySelect.disabled = value !== 'scopeCategory';
+            productSelect.disabled  = value !== 'scopeProduct';
+        });
+    });
+
+    /* ---------------------------------------------------
+    * 5. ALL DAY TOGGLE
+    * --------------------------------------------------- */
+    allDayCheckbox.addEventListener('change', () => {
+        timeSlots.forEach(cb => {
+            cb.disabled = allDayCheckbox.checked;
+            if (allDayCheckbox.checked) cb.checked = false;
+        });
+    });
+
+    /* ---------------------------------------------------
+    * 6. ADD BLOCK → CALENDAR
+    * --------------------------------------------------- */
+    addBlockBtn.addEventListener('click', async () => {
+
+        // get selected dates (vanillajs-datepicker)
+        let dates = datepicker.getDate();
+        if (!dates) { alert('Please select at least one date.'); return; }
+        if (!Array.isArray(dates)) dates = [dates];
+
+        // prepare time slots
+        let selectedTimes = [];
+        if (allDayCheckbox.checked) {
+            selectedTimes.push({ start: '00:00', end: '23:59' });
+        } else {
+            timeSlots.forEach(cb => {
+                if (cb.checked) {
+                    selectedTimes.push({
+                        start: cb.value,
+                        end: addOneHour(cb.value)
+                    });
+                }
+            });
+            if (!selectedTimes.length) {
+                alert('Please select at least one time slot.');
+                return;
+            }
+        }
+
+        const isAllDay = allDayCheckbox.checked;
+
+        let times = [];
+        if (!isAllDay) {
+            document.querySelectorAll('#times input[type="checkbox"]:checked')
+                .forEach(cb => {
+                    times.push({
+                        start: cb.value,
+                        end: addOneHour(cb.value)
+                    });
+                });
+
+            if (!times.length) {
+                alert('Select at least one time slot');
+                return;
+            }
+        }
+
+        // const dates = datepicker.getDate();
+        const normalizedDates = (Array.isArray(dates) ? dates : [dates])
+            .map(d => formatDateLocal(d));
+
+        const payload = {
+            scope: document.querySelector('input[name="scope"]:checked').value,
+            category_id: categorySelect?.value || null,
+            product_id: productSelect?.value || null,
+            dates: normalizedDates,
+            is_all_day: isAllDay,
+            times
+        };
+
+        const res = await fetch('{{ route('blocks.store') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json', 
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            alert('Failed to save block');
+            return;
+        }
+
+        calendar.refetchEvents();
+
+        resetForm();
+    });
+    
+
+    /* ---------------------------------------------------
+    * 7. HELPERS
+    * --------------------------------------------------- */
+    function addOneHour(time) {
+        const [h, m] = time.split(':').map(Number);
+        const newH = (h + 1) % 24;
+        return String(newH).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+    }
+
+    function getScopeLabel() {
+        const selected = document.querySelector('input[name="scope"]:checked').id;
+        if (selected === 'scopeProduct') return 'PRODUCT BLOCKED';
+        if (selected === 'scopeCategory') return 'CATEGORY BLOCKED';
+        return 'ALL PRODUCTS BLOCKED';
+    }
+
+    function resetForm() {
+        datepicker.setDate([], { clear: true });
+        timeSlots.forEach(cb => { cb.checked = false; cb.disabled = false; });
+        allDayCheckbox.checked = false;
+    }
+
+    function formatDateLocal(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+    let selectedEvent = null;
+
+    calendar.on('eventClick', function(info) {
+        selectedEvent = info.event;
+
+        const start = info.event.start;
+        const end   = info.event.end;
+
+        document.getElementById('modalDate').innerText =
+            start.toLocaleDateString();
+
+        document.getElementById('modalTime').innerText =
+            info.event.allDay
+                ? 'All day'
+                : `${start.toLocaleTimeString()} – ${end.toLocaleTimeString()}`;
+
+        new bootstrap.Modal(document.getElementById('blockModal')).show();
+    });
+
+    document.getElementById('deleteBlock').addEventListener('click', async () => {
+        if (!selectedEvent) return;
+
+        await fetch(`/blocks/${selectedEvent.id}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+            }
+        });
+
+        selectedEvent.remove();
+        bootstrap.Modal.getInstance(document.getElementById('blockModal')).hide();
+    });
+
+
+});
+</script>
+
 @endsection
