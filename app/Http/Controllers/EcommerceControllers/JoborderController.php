@@ -293,6 +293,32 @@ class JoborderController extends Controller
             ]);
         }
 
+        if ($request->customer_type == 'cs-exist') {
+            $request->validate([
+                'customer' => 'required',
+            ], [
+                'customer.required' => 'The customer details is required.',
+            ]);
+        } elseif ($request->customer_type == 'cs-new') {
+            $request->validate([
+                'fname' => [
+                    'required',
+                    'regex:/^[A-Za-z\s\-]+$/'
+                ],
+                'lname' => [
+                    'required',
+                    'regex:/^[A-Za-z\s\-]+$/'
+                ],
+                'mobile' => 'required|string',
+            ], [
+                'fname.required' => 'The first name field is required for new customers.',
+                'fname.regex' => 'The first name field may only contain letters, spaces, and hyphens.',
+                'lname.required' => 'The last name field is required for new customers.',
+                'lname.regex' => 'The last name field may only contain letters, spaces, and hyphens.',
+                'mobile.required' => 'The mobile number field is required for new customers.',
+            ]);
+        }
+
         if ($request->delivery_type == 2) {
             $request->validate([
                 'outlet_pickup' => 'required',
