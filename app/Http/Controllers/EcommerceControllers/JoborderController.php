@@ -324,6 +324,7 @@ class JoborderController extends Controller
                     'firstname' => $request->fname,
                     'lastname' => $request->lname,
                     'email' => $email_cs,
+                    'valid_email' => $request->email ?? null,
                     'user_type' => 'customer',
                     'address_street' => $request->house_no.' '.$request->street,
                     'address_municipality' => $request->barangay ?? '',
