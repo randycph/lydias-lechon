@@ -185,7 +185,17 @@
                             @endforeach
                             </ul>
                             @else
-                                {{$sales->customer_delivery_adress}}
+                                @php
+                                    $region = $sales->region ? $sales->region : '';
+                                    $province = $sales->province ? ', ' . $sales->province : '';
+                                    $city = $sales->city ? ', ' . $sales->city : '';
+                                    $barangay = $sales->barangay ? ', ' . $sales->barangay : '';
+                                    $full_address = $sales->customer_delivery_adress ? $sales->customer_delivery_adress . $province . $city . $barangay : '';
+                                @endphp
+                                {{ $full_address }}
+                                @if ($sales->delivery_branch)
+                                <br>Delivery Branch: {{ $sales->delivery_branch ?? '' }}
+                                @endif
                             @endif
                         @else
                             @php

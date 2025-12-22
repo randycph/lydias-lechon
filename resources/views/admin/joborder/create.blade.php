@@ -336,7 +336,7 @@
                             <input type="text" class="form-control" name="other_outlet" id="other_outlet" placeholder="Please enter location name">    
                         </div> --}}
 
-                        <div class="form-group">
+                        <div class="form-group delivery_charge_div">
                             <label class="d-block">Delivery Charge <span class="tx-danger">*</span></label>
                             <div class="input-group mb-2">
                                 <div class="input-group-prepend">
@@ -1322,7 +1322,9 @@
                 $('#outlet_div').hide();
                 $('#d2d_div').show();
                 $('#loc_div').show();
+                $('.delivery_charge_div').show();
             } else if(type == 2) {
+                $('.delivery_charge_div').hide();
                 $('#delivery_branch_div').hide();
                 $('#delivery_branch').prop('required',false);
                 $('#outlet_div').show();

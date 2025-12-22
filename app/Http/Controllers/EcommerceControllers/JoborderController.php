@@ -263,6 +263,7 @@ class JoborderController extends Controller
     public function store(Request $request)
     {
         $rdata = $request->all();
+        dd($rdata);
         if($request->totalcoupon > 0){
             $couponCode = $rdata['couponcode'];
             foreach($couponCode as $key => $coupon){
@@ -390,7 +391,11 @@ class JoborderController extends Controller
             'agent' => $request->agent ?? Auth::user()->name,
             'delivery_branch' => $request->delivery_type == 1 ? $request->delivery_branch : NULL,
             'contact_person' => $contact_pers,
-            'temp_prod_branch' => $request->pb
+            'temp_prod_branch' => $request->pb,
+            'region' => $request->region,
+            'province' => $request->province,
+            'city' => $request->city,
+            'barangay' => $request->barangay
         ]);
 
 
