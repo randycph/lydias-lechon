@@ -60,7 +60,7 @@ class ReportsController extends Controller
                 $qry.= " and h.agent='".$_GET['agent']."'";
             }
             if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $qry.= " and h.customer_name='".$_GET['customer']."'";
+                $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
             }
             if(isset($_GET['product']) && $_GET['product']<>''){
                 $qry.= " and d.product_name='".$_GET['product']."'";
@@ -1535,22 +1535,25 @@ class ReportsController extends Controller
         ]);
     }
 
-    // public function searchCustomers(Request $request)
-    // {
-    //     $search = $request->input('q');
+    public function searchCustomers(Request $request)
+    {
+        $search = $request->input('q');
 
-    //     $users = SalesHeader::where('customer_name', 'like', "%{$search}%")                    
-    //                 ->orderBy('name')
-    //                 ->limit(20)
-    //                 ->get();
+        $users = SalesHeader::select('customer_name')
+            ->where('customer_name', 'LIKE', "%{$search}%")
+            ->distinct()
+            ->orderBy('customer_name')
+            ->limit(20)
+            ->get();
 
-    //     return response()->json([
-    //         'results' => $users->map(fn($user) => [
-    //             'id' => $user->id,
-    //             'text' => $user->name
-    //         ])
-    //     ]);
-    // }
+
+        return response()->json([
+            'results' => $users->map(fn ($user) => [
+                'id'   => $user->customer_name,
+                'text' => $user->customer_name,
+            ])
+        ]);
+    }
 
     public function audit_trail_per_sales(Request $request){
         $rs = '';

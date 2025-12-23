@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="{{ asset('css/custom-admin.css') }}">
 
     <link href="{{ asset('lib/ion-rangeslider/css/ion.rangeSlider.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('lib/select2/css/select2.min.css') }}" rel="stylesheet" />
     <style>
         .row-selected {
             background-color: #92b7da !important;
@@ -86,17 +87,17 @@
                         <div class="row" id="adv" style="display:none;">
                             <div class="col-md-2">
                                 <div class="form-group">
-                                    <label class="tx-13">Customer</label>
-                                    <select name="customer" id="customer" class="form-control">
-                                        <option value="">- Select Customer -</option>
-                                        @forelse(\App\EcommerceModel\SalesHeader::select('customer_name')->distinct('customer_name')->orderBy('customer_name')->get() as $cus)
 
-                                            <option value="{{$cus->customer_name}}">{{$cus->customer_name}}</option>
-                                        @empty
-                                        @endforelse
-                                        @isset($_GET['customer'])
-                                            <option value="{{$_GET['customer']}}" selected="selected">{{ $_GET['customer'] }}</option>
-                                        @endisset
+                                    <label class="tx-13">Customer</label>
+                                    <select id="pb" name="customer" class="form-control select2-ajax" style="width:100%">
+                                        @if(request('customer'))
+                                            @php
+                                                $selectedUser = \App\EcommerceModel\SalesHeader::select('customer_name')->where('customer_name', request('customer'))->first();
+                                            @endphp
+                                            @if($selectedUser)
+                                                <option value="{{ $selectedUser->customer_name }}" selected>{{ $selectedUser->customer_name }}</option>
+                                            @endif
+                                        @endif
                                     </select>
                                 </div>
                             </div>
@@ -324,6 +325,8 @@
     <script src="{{ asset('lib/bselect/dist/js/i18n/defaults-en_US.js') }}"></script>
     <script src="{{ asset('lib/prismjs/prism.js') }}"></script>
     <script src="{{ asset('lib/jqueryui/jquery-ui.min.js') }}"></script>
+    
+    <script src="{{ asset('lib/select2/js/select2.min.js') }}"></script>
 
 @endsection
 
@@ -340,6 +343,26 @@
     });
 
     $(document).ready(function() {
+        $('.select2-ajax').select2({
+            placeholder: 'Select a customer',
+            ajax: {
+                url: '{{ route("ajax.search-customers") }}',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        q: params.term // search term
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.results
+                    };
+                },
+                cache: true
+            },
+            minimumInputLength: 1
+        });
         $('#example').DataTable( {
             dom: 'Bfrtip',
             pageLength: 20,
