@@ -124,7 +124,7 @@ class ReportsController extends Controller
                 $qry.= " and h.agent='".$_GET['agent']."'";
             }
             if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $qry.= " and h.customer_name='".$_GET['customer']."'";
+                $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
             }
             if(isset($_GET['product']) && $_GET['product']<>''){
                 $qry.= " and d.product_name='".$_GET['product']."'";
@@ -236,7 +236,7 @@ class ReportsController extends Controller
                 $qry.= " and h.agent='".$_GET['agent']."'";
             }
             if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $qry.= " and h.customer_name='".$_GET['customer']."'";
+                $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
             }
             if(isset($_GET['product']) && $_GET['product']<>''){
                 $qry.= " and d.product_name='".$_GET['product']."'";
@@ -416,7 +416,7 @@ class ReportsController extends Controller
                 $mqry.= " and h.agent='".$_GET['agent']."'";
             }
             if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $mqry.= " and h.customer_name='".$_GET['customer']."'";
+                $mqry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
             }
             if(isset($_GET['product']) && $_GET['product']<>''){
                 $mqry.= " and d.product_name='".$_GET['product']."'";
@@ -643,7 +643,7 @@ class ReportsController extends Controller
             $qry.= " and p.status='".$_GET['status']."'";
         }
         if(isset($_GET['customer']) && $_GET['customer']<>''){
-            $qry.= " and h.customer_name='".$_GET['customer']."'";
+            $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
         }
         if(isset($_GET['payment_type']) && $_GET['payment_type']<>''){
             $qry.= " and p.payment_type='".$_GET['payment_type']."'";
@@ -868,7 +868,7 @@ class ReportsController extends Controller
                 $qry.= " and h.agent='".$_GET['agent']."'";
             }
             if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $qry.= " and h.customer_name='".$_GET['customer']."'";
+                $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
             }
             if(isset($_GET['product']) && $_GET['product']<>''){
                 $qry.= " and d.product_name='".$_GET['product']."'";
@@ -933,7 +933,7 @@ class ReportsController extends Controller
                 $qry.= " and h.agent='".$_GET['agent']."'";
             }
             if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $qry.= " and h.customer_name='".$_GET['customer']."'";
+                $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
             }
             if(isset($_GET['product']) && $_GET['product']<>''){
                 $qry.= " and d.product_name='".$_GET['product']."'";
@@ -1324,7 +1324,7 @@ class ReportsController extends Controller
             $qry.= " and h.agent='".$_GET['agent']."'";
         }
         if(isset($_GET['customer']) && $_GET['customer']<>''){
-            $qry.= " and h.customer_name='".$_GET['customer']."'";
+            $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
         }
         if(isset($_GET['product']) && $_GET['product']<>''){
             $qry.= " and d.product_name='".$_GET['product']."'";
@@ -1439,7 +1439,7 @@ class ReportsController extends Controller
                 $qry.= " and po.branch_id=".$_GET['pb']."";
             }
             if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $qry.= " and h.customer_name='".$_GET['customer']."'";
+                $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
             }
             if(isset($_GET['product']) && $_GET['product']<>''){
                 $qry.= " and d.product_name='".$_GET['product']."'";
@@ -1668,7 +1668,7 @@ class ReportsController extends Controller
             $qry.= " and h.agent='".$_GET['agent']."'";
         }
         if(isset($_GET['customer']) && $_GET['customer']<>''){
-            $qry.= " and h.customer_name='".$_GET['customer']."'";
+            $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
         }
         if(isset($_GET['product']) && $_GET['product']<>''){
             $qry.= " and d.product_name='".$_GET['product']."'";
