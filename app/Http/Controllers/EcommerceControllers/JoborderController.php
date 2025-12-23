@@ -278,7 +278,6 @@ class JoborderController extends Controller
     public function store(Request $request)
     {
         $rdata = $request->all();
-        dd($rdata);
         if($request->totalcoupon > 0){
             $couponCode = $rdata['couponcode'];
             foreach($couponCode as $key => $coupon){
