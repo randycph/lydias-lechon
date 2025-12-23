@@ -996,5 +996,28 @@ Route::get('delete-unpaid', function() {
     ]);
 });
 
+Route::get('delete-unpaid-2', function() {
+    $ids = DB::table('ecommerce_sales_headers as h')
+        ->join('ecommerce_sales_details as d', 'd.sales_header_id', '=', 'h.id')
+        ->whereBetween('h.created_at', [
+            '2025-09-01 00:00:00',
+            '2025-12-19 23:59:59',
+        ])
+        ->where('h.payment_status', '!=', 'PAID')
+        ->where('h.deleted_at', null)
+        ->where('h.has_sub', 0)
+        // order is already 5 days old
+        ->where('h.created_at', '>=', DB::raw('DATE_SUB(CURDATE(), INTERVAL 5 DAY)'))
+        ->distinct()
+        ->pluck('h.id');
+
+    SalesHeader::whereIn('id', $ids)->delete();
+
+    return response()->json([
+        'message' => 'Unpaid orders deleted successfully!',
+        'deleted_ids' => $ids,
+    ]);
+});
+
 Route::get('/{slug}', [FrontendController::class, 'page'])->name('page');
 
