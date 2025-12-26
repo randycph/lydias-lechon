@@ -563,8 +563,22 @@
     /** 3) Preload payments for sales */
     $allHids = $results->filter(fn($r) => ($r->trantype ?? '') === 'sales')
                        ->pluck('hid')->filter()->unique()->values()->all();
+
+
+    $ids = [];                 
+    $headers = \App\EcommerceModel\SalesHeader::whereIn('id', $allHids)->get();
+
+    foreach($headers as $head){
+        if (isset($head->is_sub) && $head->is_sub == 1) {
+            $parentSale = \App\EcommerceModel\SalesHeader::where('id', $head->parent_sales_header_id)->first();
+            $ids[] = $parentSale->id;
+        } else {
+            $ids[] = $head->id;
+        }
+    }
+
     $paymentsByHid = $allHids
-        ? \App\EcommerceModel\SalesPayment::whereIn('sales_header_id', $allHids)->get()->groupBy('sales_header_id')
+        ? \App\EcommerceModel\SalesPayment::whereIn('sales_header_id', $ids)->get()->groupBy('sales_header_id')
         : collect();
 
     // Helpers
@@ -619,7 +633,7 @@
 
         // “group-level” values (for sales; JO prints per row)
         $addressHtml   = $formatAddress($r);
-        $payments      = $isSales ? ($paymentsByHid->get($r->hid ?? 0, collect())) : collect();
+        $payments      = $isSales ? ($paymentsByHid->get($r->parent_sales_header_id > 0 ? $r->parent_sales_header_id : ($r->hid ?? 0), collect())) : collect();
         $custAddrSafe  = strip_tags($r->customer_delivery_adress ?? '');
         $contactMerged = $r->contact_person ?? $r->customer_name ?? '';
         $deliveryDate  = $fmtDate($r->delivery_date);
