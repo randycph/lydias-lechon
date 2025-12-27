@@ -992,7 +992,15 @@ Route::get('driver', function() {
 })->name('driver.home');
 
 Route::get('paymaya-payment-check/{id}', function($id) {
+    if (!$id) {
+        return response()->json([
+            'status' => 400,
+            'message' => 'Receipt number is required.'
+        ], 400);
+    }
+
     $receipt_number = base64_decode($id);
+    
     $salesPayment = SalesPayment::where('receipt_number', $receipt_number)->first();
 
     if (!$salesPayment) {
