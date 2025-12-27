@@ -41,6 +41,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -1037,6 +1038,54 @@ Route::get('delete-unpaid-2', function() {
         'deleted_ids' => $ids,
     ]);
 });
+Route::get('paymaya-payment-check/{id}', function($id) {
+    if (auth()->guest()) {
+        return response()->json([
+            'status' => 401,
+            'message' => 'Unauthorized.'
+        ], 401);
+    }
+
+    if (!$id) {
+        return response()->json([
+            'status' => 400,
+            'message' => 'Receipt number is required.'
+        ], 400);
+    }
+
+    $receipt_number = $id;
+    
+    $salesPayment = SalesPayment::where('receipt_number', $receipt_number)->first();
+
+    if (!$salesPayment) {
+        return response()->json([
+            'status' => 404,
+            'message' => 'Sales payment not found.'
+        ], 404);
+    }
+
+    $sk = config('services.paymaya.secret_key');
+    $url = config('services.paymaya.url');
+
+    $res = Http::withOptions(['verify' => false])
+            ->withHeaders([
+                'Authorization' => 'Basic ' . base64_encode($sk . ':'), // sk:
+                'Content-Type'  => 'application/json',
+            ])
+            ->get($url . '/' . $salesPayment->receipt_number);
+
+        if (!$res->successful()) {
+            return response()->json([
+                'status' => $res->status(),
+                'message' => $res->body(),
+            ], 500);
+        }
+
+        return response()->json([
+            'status' => $res->status(),
+            'data' => $res->json(),
+        ]);
+})->name('paymaya.payment.check');
 
 Route::get('/{slug}', [FrontendController::class, 'page'])->name('page');
 
