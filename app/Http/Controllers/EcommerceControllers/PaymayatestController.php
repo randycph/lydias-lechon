@@ -23,7 +23,7 @@ class PaymayatestController extends Controller
     }
 
     public function sk(){
-        return base64_encode(config('services.paymaya.public_key')); //test
+        return base64_encode(config('services.paymaya.secret_key')); //test
         //return base64_encode('sk-XU2KylKnROUoiOkxzZ4hSEGDssFqIqDtsKhjW2i6mlV');  //beta
         // return base64_encode('sk-iLyM468U8VeXEOywY2ALFyxjuQCWDGS7bWagzCDccJG');  
     
