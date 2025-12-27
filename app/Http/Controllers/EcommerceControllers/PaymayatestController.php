@@ -41,63 +41,103 @@ class PaymayatestController extends Controller
 
     
 
-    public function check_paymaya($id){
-        $sales = SalesPayment::find($id);
-        $order_number = $sales->sales->order_number;
-        $context = stream_context_create(array(
-            'http' => array(
-                'method' => 'GET',
-                'header' => "Authorization: Basic ".$this->sk()."\r\n".
-                            "Content-Type: application/json\r\n"
-            )
-        ));
+    public function check_paymaya($id)
+    {
+        $salesPayment = SalesPayment::findOrFail($id);
+        $salesHeader  = $salesPayment->sales;
 
-        $first_response = file_get_contents($this->paymaya_url().'/'.$sales->receipt_number, FALSE, $context);
-       
-        
-        if($first_response === FALSE){
-            die('Error');
-        }
-
-        $first_responseData = json_decode($first_response, TRUE);
-        //return $first_responseData;
-        if($first_responseData['paymentStatus'] == 'PAYMENT_SUCCESS'){
-            $update_payment = SalesPayment::whereId($id)->update([
-                'amount' => $first_responseData['totalAmount']['amount'],
-                'status' => 'PAID'
-            ]);
-
-            $sales->sales->isConfirm = 1;
-            $sales->sales->confirmed_by = 'Customer';
-            $sales->sales->confirmed_on = date('Y-m-d H:i:s');
-            $sales->sales->confirm_remarks = 'Auto confirm via Paymaya checkout';
-            $sales->sales->save();
-
-            $subSales = SalesHeader::where('parent_sales_header_id', $sales->sales->id)->get();
-            if ($subSales && count($subSales) > 0) {
-                foreach ($subSales as $sub) {
-                    $sub->isConfirm = 1;
-                    $sub->confirmed_by = 'Customer';
-                    $sub->confirmed_on = date('Y-m-d H:i:s');
-                    $sub->confirm_remarks = 'Auto confirm via Paymaya checkout';
-                    $sub->updated_at = $sub->created_at;
-                    $sub->save();
-
-                    $sub->assign_to_production_branch($sub, 1);
-                }
-            }
-
-            if ($sales->sales->discount_amount && $sales->sales->discount_amount > 0) {
-                CouponCart::where('sales_header_id', $sales->sales->id)->update([
-                    'status' => 1
-                ]);
-            }
+        // Already paid? Do nothing (idempotent)
+        if ($salesPayment->status === 'PAID') {
             return true;
         }
 
-        return false;
+        try {
+            $res = Http::withOptions(['verify' => false])
+                ->withHeaders([
+                    'Authorization' => 'Basic ' . base64_encode($this->sk() . ':'), // sk:
+                    'Content-Type'  => 'application/json',
+                ])
+                ->get($this->paymaya_url() . '/' . $salesPayment->receipt_number);
 
-         
+            if (!$res->successful()) {
+                logger('PAYMAYA CHECK FAILED', [
+                    'status' => $res->status(),
+                    'body'   => $res->body(),
+                ]);
+                return false;
+            }
+
+            $data = $res->json();
+            logger('PAYMAYA CHECK RESPONSE', $data);
+
+            /**
+             * FFICIAL SUCCESS CONDITIONS
+             */
+            if (
+                ($data['status'] ?? null) !== 'COMPLETED' ||
+                ($data['paymentStatus'] ?? null) !== 'PAYMENT_SUCCESS'
+            ) {
+                return false;
+            }
+
+            /**
+             * CORRECT AMOUNT SOURCE (post-payment)
+             */
+            $paidAmount = (float)
+                $data['paymentDetails']['responses']['efs']['amount']['total']['value'];
+
+            // =========================
+            // UPDATE PAYMENT RECORD
+            // =========================
+            $salesPayment->update([
+                'amount' => $paidAmount,
+                'status' => 'PAID',
+            ]);
+
+            // =========================
+            // CONFIRM MAIN SALES
+            // =========================
+            $salesHeader->update([
+                'isConfirm'       => 1,
+                'confirmed_by'    => 'Customer',
+                'confirmed_on'    => now(),
+                'confirm_remarks' => 'Auto confirm via Maya checkout',
+                'updated_at'      => $salesHeader->created_at,
+            ]);
+
+            // =========================
+            // CONFIRM SUB-SALES
+            // =========================
+            $subSales = SalesHeader::where('parent_sales_header_id', $salesHeader->id)->get();
+            foreach ($subSales as $sub) {
+                $sub->update([
+                    'isConfirm'       => 1,
+                    'confirmed_by'    => 'Customer',
+                    'confirmed_on'    => now(),
+                    'confirm_remarks' => 'Auto confirm via Maya checkout',
+                    'updated_at'      => $sub->created_at,
+                ]);
+
+                $sub->assign_to_production_branch($sub, 1);
+            }
+
+            // Assign production branch (main)
+            $salesHeader->assign_to_production_branch($salesHeader, 1);
+
+            // Mark coupon as used
+            if ($salesHeader->discount_amount > 0) {
+                CouponCart::where('sales_header_id', $salesHeader->id)
+                    ->update(['status' => 1]);
+            }
+
+            return true;
+
+        } catch (\Throwable $th) {
+            logger('PAYMAYA CHECK ERROR', [
+                'error' => $th->getMessage(),
+            ]);
+            return false;
+        }
     }
 
     public function success(){        
