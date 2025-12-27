@@ -992,6 +992,13 @@ Route::get('driver', function() {
 })->name('driver.home');
 
 Route::get('paymaya-payment-check/{id}', function($id) {
+    if (auth()->guest()) {
+        return response()->json([
+            'status' => 401,
+            'message' => 'Unauthorized.'
+        ], 401);
+    }
+
     if (!$id) {
         return response()->json([
             'status' => 400,
