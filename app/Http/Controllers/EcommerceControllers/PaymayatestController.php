@@ -10,12 +10,13 @@ use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\SalesDetail;
 use App\EcommerceModel\SalesPayment;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redirect;
 class PaymayatestController extends Controller
 {
 
     public function pk(){
-        return base64_encode(config('services.paymaya.public_key'));  // test
+        return (config('services.paymaya.public_key'));  // test
         //return base64_encode('pk-bzhgBQYUAtCvLa0PEPQiWGHeqrDLCEAnNKi7LhJLECY'); // beta
         // return base64_encode('pk-2oMK4D8wMUbKXay0VjLHk84OiKIuTfA2YsrdSH9o844');
             
@@ -23,7 +24,7 @@ class PaymayatestController extends Controller
     }
 
     public function sk(){
-        return base64_encode(config('services.paymaya.secret_key')); //test
+        return (config('services.paymaya.secret_key')); //test
         //return base64_encode('sk-XU2KylKnROUoiOkxzZ4hSEGDssFqIqDtsKhjW2i6mlV');  //beta
         // return base64_encode('sk-iLyM468U8VeXEOywY2ALFyxjuQCWDGS7bWagzCDccJG');  
     
@@ -230,27 +231,16 @@ class PaymayatestController extends Controller
 
     public function get_checkoutId($request, $payment)
     {
-        $data = $this->postdata($request->sales_header_id, $request->amount, $payment);
+        $payload = json_decode($this->postdata($request->sales_header_id, $request->amount, $payment), true);
 
-        $context = stream_context_create([
-            'http' => [
-                'method'  => 'POST',
-                'header'  => "Authorization: Basic " . $this->pk() . "\r\n" .
-                            "Content-Type: application/json\r\n",
-                'content' => $data,
-                'ignore_errors' => true, // capture errors too
-            ]
-        ]);
+        $res = Http::withOptions(['verify' => false])
+            ->withHeaders([
+                'Authorization' => 'Basic ' . base64_encode($this->pk() . ':'),
+                'Content-Type'  => 'application/json',
+            ])
+            ->post($this->paymaya_url(), $payload);
 
-        $response = file_get_contents($this->paymaya_url(), false, $context);
-
-        if ($response === false || strpos($http_response_header[0], '200') === false) {
-            logger('PAYMAYA 400 DEBUG HEADERS:', $http_response_header);
-            logger('PAYMAYA 400 DEBUG RESPONSE:', [$response]);
-            dd('PayMaya Error', $http_response_header, $response);
-        }
-
-        return json_decode($response, true);
+        return $res->json();
     }
 
     public function postdata($id, $amount, $payment){
@@ -357,8 +347,11 @@ class PaymayatestController extends Controller
                 "failure" => route('paymaya-failure').'?id='.$payment->id,
                 "cancel" => route('paymaya-cancel').'?id='.$payment->id
             ],
-            "requestReferenceNumber" => $sale->order_number,
-            "metadata" => new \stdClass()
+            "metadata" => [
+                "sales_header_id" => (int) $salesHeader->id,
+                "payment" => (string) $payment,
+            ],
+            "requestReferenceNumber" => $sale->order_number
         ];
 
         return json_encode($postData);
