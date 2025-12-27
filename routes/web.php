@@ -999,7 +999,7 @@ Route::get('paymaya-payment-check/{id}', function($id) {
         ], 400);
     }
 
-    $receipt_number = base64_decode($id);
+    $receipt_number = $id;
     
     $salesPayment = SalesPayment::where('receipt_number', $receipt_number)->first();
 
