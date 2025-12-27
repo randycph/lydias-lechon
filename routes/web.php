@@ -1026,15 +1026,19 @@ Route::get('paymaya-payment-check/{id}', function($id) {
                 'Content-Type'  => 'application/json',
             ])
             ->get($url . '/' . $salesPayment->receipt_number);
+        
+        $data = $res->json();
 
         if (!$res->successful()) {
             return response()->json([
+                'payment_status' => $data['paymentStatus'] ?? null,
                 'status' => $res->status(),
                 'message' => $res->body(),
             ], 500);
         }
 
         return response()->json([
+            'payment_status' => $data['paymentStatus'] ?? null,
             'status' => $res->status(),
             'data' => $res->json(),
         ]);
