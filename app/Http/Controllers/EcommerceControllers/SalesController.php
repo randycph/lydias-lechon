@@ -440,7 +440,7 @@ class SalesController extends Controller
         }
         */
         $total_paid = SalesHeader::paid($sales->id);
-        if( $total_paid > 0 && $sales->isConfirm == 0){
+        if( $total_paid > 0){
             $this->confirm_order($sales->id, 'Auto confirm after payment completion', Auth::user()->name);
         }
 
