@@ -13,8 +13,8 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule): void
     {
         // $schedule->command('inspire')->hourly();
-        // $schedule->command('cart:check')->daily();
-        // $schedule->command('transactions:check-unpaid')->daily();
+        $schedule->command('cart:check')->daily();
+        $schedule->command('transactions:check-unpaid')->daily();
 
         $schedule->command('sitemap:generate')->dailyAt('02:00');
         $schedule->command('update:deliverable-cities-schedules')->everyFiveMinutes();
