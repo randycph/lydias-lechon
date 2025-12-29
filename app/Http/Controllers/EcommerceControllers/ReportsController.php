@@ -888,10 +888,11 @@ class ReportsController extends Controller
             }
 
 
-            if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
+            if (isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
                 $qry.= " and jo.date_needed >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and jo.date_needed <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
-            }
-            else{
+            } elseif (isset($_GET['customer']) && $_GET['customer']<>'') {
+                $qry.= " and jo.date_needed >='2000-01-01 00:00:00.000' and jo.date_needed <='2050-12-31 23:59:59.999'";
+            } else {
                 $qry.= " and jo.date_needed >='2050-01-01 00:00:00.000' and jo.date_needed <='2050-01-01 23:59:59.999'";
             }
             if(isset($_GET['item_type']) && $_GET['item_type']<>''){
