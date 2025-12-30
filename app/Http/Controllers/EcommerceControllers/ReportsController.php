@@ -986,13 +986,27 @@ class ReportsController extends Controller
                 $qry.= " and h.order_source='".$_GET['order_source']."'";
             }
 
-            if(isset($_GET['branch']) && $_GET['branch']<>''){
-                //$qry.= " and (h.order_source='".$_GET['branch']."' OR h.outlet='".$_GET['branch']."')";
-                $qry.= " and h.order_source='".$_GET['branch']."'";
-            }
+            if (isset($_GET['branch']) && $_GET['branch'] !== '') {
 
-            if(isset($_GET['delbra']) && $_GET['delbra']<>''){
-                $qry.= " and h.delivery_branch='".$_GET['delbra']."'";
+                if ($_GET['branch'] === 'Tandang Sora Head Office') {
+
+                    $qry .= " AND (
+                        (h.order_source = 'Web' AND h.delivery_type = 'Store Pickup')
+                        OR h.order_source = 'Tandang Sora Head Office'
+                    )";
+
+                } elseif ($_GET['branch'] === 'Tandang Sora Delivery') {
+
+                    $qry .= " AND (
+                        (h.order_source = 'Web' AND h.delivery_type = 'Door to door delivery')
+                        OR h.order_source = 'Tandang Sora Delivery'
+                    )";
+
+                } else {
+
+                    // Normal case
+                    $qry .= " AND h.order_source = '" . $_GET['branch'] . "'";
+                }
             }
 
             if(isset($_GET['order_number']) && $_GET['order_number']<>''){
