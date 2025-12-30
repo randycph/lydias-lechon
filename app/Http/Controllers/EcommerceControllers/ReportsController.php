@@ -229,7 +229,7 @@ class ReportsController extends Controller
             left join production_branches pb on pb.id = po.branch_id
             left join users u on u.id = d.created_by
             where h.id>0 and h.delivery_status<>'Open Date' and (h.deleted_at IS NULL OR h.id IS NULL) AND (d.deleted_at IS NULL OR d.id IS NULL) and h.for_deletion = 0 and (jo.deleted_at IS NULL OR jo.id IS NULL) AND (po.deleted_at IS NULL OR po.id IS NULL) and (h.payment_status = 'PAID' OR h.isConfirm=1) AND h.has_sub = 0
-            and h.id not in (select sales_header_id from product_delivery_addresses)
+            -- and h.id not in (select sales_header_id from product_delivery_addresses)
             ";
 
             if(isset($_GET['agent']) && $_GET['agent']<>''){
