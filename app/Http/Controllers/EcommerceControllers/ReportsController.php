@@ -288,6 +288,8 @@ class ReportsController extends Controller
                 }
 
                 $qry .= ")";
+            } else {
+                $qry .= "and h.id not in (select sales_header_id from product_delivery_addresses)";
             }
 
 
