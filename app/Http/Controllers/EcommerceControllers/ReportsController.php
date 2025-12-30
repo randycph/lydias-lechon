@@ -983,7 +983,7 @@ class ReportsController extends Controller
             if(isset($_GET['delbra']) && $_GET['delbra']<>''){
                 $qry.= " and h.delivery_branch='".$_GET['delbra']."'";
 
-                if ($_GET['delbra'] == 'Tandang Sora Delivery#') {
+                if ($_GET['delbra'] == 'Tandang Sora Delivery') {
                     $qry.= " OR (h.order_source='Web' AND h.delivery_type = 'Door to door delivery') ";    
                 }
             }
