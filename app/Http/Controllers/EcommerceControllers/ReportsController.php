@@ -281,9 +281,10 @@ class ReportsController extends Controller
                     (jo.pickup_branch IN $id_opts OR h.delivery_branch IN $br_opts)
                 ";
 
-                // 🔹 ADD THIS PART
                 if (in_array(29, $bIds)) {
-                    $qry .= " OR h.order_source = 'Web' ";
+                    $qry .= " OR h.order_source = 'Web' OR h.id NOT IN (
+                        SELECT sales_header_id FROM product_delivery_addresses
+                    )";
                 }
 
                 $qry .= ")";
