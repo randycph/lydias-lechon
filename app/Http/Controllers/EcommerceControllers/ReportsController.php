@@ -260,17 +260,20 @@ class ReportsController extends Controller
             if(isset($_GET['receiver']) && $_GET['receiver']<>''){
                 $br_opts = "(";
                 $id_opts = "(";
+                $bIds = [];
                 foreach($_GET['receiver'] as $re){
                     $br = \App\EcommerceModel\Branch::whereId($re)->first();
                     $br_opts .= "'".$br->name."',";
                     $id_opts .= $re.",";
+
+                    if ($br) {
+                        $bIds[] = $br->id;
+                    }
                 }
                 $br_opts = rtrim($br_opts,",");
                 $id_opts = rtrim($id_opts,",");
                 $br_opts .= ")";
                 $id_opts .= ")";
-
-                
 
                 $qry.= " and ((h.delivery_type='Store Pickup' and h.customer_delivery_adress in ".$br_opts.") or 
 
