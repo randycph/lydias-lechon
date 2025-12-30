@@ -283,7 +283,7 @@ class ReportsController extends Controller
 
                 // check if $bIds contains 29 or Tandang Sora Head Office
                 if (in_array(29, $bIds)) {
-                    $qry.= " OR h.order_source = 'Web'";
+                    $qry.= " AND h.order_source = 'Web'";
                 }
             }
 
