@@ -257,35 +257,38 @@ class ReportsController extends Controller
 
             // $qry.= " and pb.name='Tandang Sora'";
             
-            if(isset($_GET['receiver']) && $_GET['receiver']<>''){
-                $br_opts = "(";
-                $id_opts = "(";
-                $bIds = [];
-                foreach($_GET['receiver'] as $re){
-                    $br = \App\EcommerceModel\Branch::whereId($re)->first();
-                    $br_opts .= "'".$br->name."',";
-                    $id_opts .= $re.",";
+ if (isset($_GET['receiver']) && $_GET['receiver'] <> '') {
+    $br_opts = "(";
+    $id_opts = "(";
+    $bIds = [];
 
-                    if ($br) {
-                        $bIds[] = $br->id;
-                    }
-                }
-                $br_opts = rtrim($br_opts,",");
-                $id_opts = rtrim($id_opts,",");
-                $br_opts .= ")";
-                $id_opts .= ")";
+    foreach ($_GET['receiver'] as $re) {
+        $br = \App\EcommerceModel\Branch::whereId($re)->first();
 
-                $qry .= " AND (
-                    (h.delivery_type='Store Pickup' AND h.customer_delivery_adress IN $br_opts)
-                    OR
-                    (jo.pickup_branch IN $id_opts OR h.delivery_branch IN $br_opts)
-                    " . (in_array(29, $bIds)
-                        ? " OR h.order_source = 'Web' "
-                        : " OR 1=0 "
-                    ) . "
-                )";
+        if ($br) {
+            $br_opts .= "'" . $br->name . "',";
+            $id_opts .= $re . ",";
+            $bIds[] = $br->id;
+        }
+    }
 
-            }
+    $br_opts = rtrim($br_opts, ",") . ")";
+    $id_opts = rtrim($id_opts, ",") . ")";
+
+    $qry .= " AND (
+        (h.delivery_type = 'Store Pickup' AND h.customer_delivery_adress IN $br_opts)
+        OR
+        (jo.pickup_branch IN $id_opts OR h.delivery_branch IN $br_opts)
+    ";
+
+    // 🔹 ADD THIS PART
+    if (in_array(29, $bIds)) {
+        $qry .= " OR h.order_source = 'Web' ";
+    }
+
+    $qry .= ")";
+}
+
 
 
             if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
