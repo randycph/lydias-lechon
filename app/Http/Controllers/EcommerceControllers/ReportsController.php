@@ -266,7 +266,9 @@ class ReportsController extends Controller
                     $br_opts .= "'".$br->name."',";
                     $id_opts .= $re.",";
 
-                    $bIds[] = $re->id;
+                    if ($br) {
+                        $bIds[] = $br->id;
+                    }
                 }
                 $br_opts = rtrim($br_opts,",");
                 $id_opts = rtrim($id_opts,",");
