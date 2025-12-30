@@ -275,11 +275,16 @@ class ReportsController extends Controller
                 $br_opts .= ")";
                 $id_opts .= ")";
 
-                $qry.= " and ((h.delivery_type='Store Pickup' and h.customer_delivery_adress in ".$br_opts.") or 
-
-                (jo.pickup_branch in ".$id_opts." OR h.delivery_branch in ".$br_opts.") or ".in_array(29, $bIds) ? "h.order_source = 'Web'" : "1=0" ."
-
+                $qry .= " AND (
+                    (h.delivery_type='Store Pickup' AND h.customer_delivery_adress IN $br_opts)
+                    OR
+                    (jo.pickup_branch IN $id_opts OR h.delivery_branch IN $br_opts)
+                    " . (in_array(29, $bIds)
+                        ? " OR h.order_source = 'Web' "
+                        : " OR 1=0 "
+                    ) . "
                 )";
+
             }
 
 
