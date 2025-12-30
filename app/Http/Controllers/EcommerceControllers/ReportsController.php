@@ -942,7 +942,7 @@ class ReportsController extends Controller
          AND h.for_deletion = 0 
          and h.isConfirm=1 
          AND h.has_sub = 0 
-         and (d.deleted_at is null OR d.id IS NULL";
+         and (d.deleted_at is null OR d.id IS NULL)";
 
          // $qry = "SELECT po.schedule_type as schedtype,pb.name as prod_branch,j.jo_number as jnum,h.*,d.*,h.created_at as hcreated,h.id as hid,p.category_id,c.name as catname,d.id as did, h.instruction, h.payment_status, h.order_number as ordnum
          //        FROM `production_orders` po
