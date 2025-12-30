@@ -277,14 +277,9 @@ class ReportsController extends Controller
 
                 $qry.= " and ((h.delivery_type='Store Pickup' and h.customer_delivery_adress in ".$br_opts.") or 
 
-                (jo.pickup_branch in ".$id_opts." OR h.delivery_branch in ".$br_opts.")
+                (jo.pickup_branch in ".$id_opts." OR h.delivery_branch in ".$br_opts.") or ".in_array(29, $bIds) ? "h.order_source = 'Web'" : "1=0" ."
 
                 )";
-
-                // check if $bIds contains 29 or Tandang Sora Head Office
-                if (in_array(29, $bIds)) {
-                    $qry.= " OR h.order_source = 'Web'";
-                }
             }
 
 
