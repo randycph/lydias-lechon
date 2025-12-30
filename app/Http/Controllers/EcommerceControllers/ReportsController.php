@@ -282,7 +282,7 @@ class ReportsController extends Controller
                 ";
 
                 if (in_array(29, $bIds)) {
-                    $qry .= " OR (h.order_source = 'Web' AND h.delivery_type = 'Door to door delivery') OR h.id NOT IN (
+                    $qry .= " OR (h.order_source = 'Web') OR h.id NOT IN (
                         SELECT sales_header_id FROM product_delivery_addresses
                     )";
                 }
@@ -932,7 +932,12 @@ class ReportsController extends Controller
             left join job_orders jo on jo.sales_detail_id = d.id
             left join production_orders po on po.joborder_id = jo.id
             left join production_branches pb on pb.id = po.branch_id
-         where h.delivery_type='Door to door delivery' and h.deleted_at is null AND h.for_deletion = 0 and h.isConfirm=1 AND h.has_sub = 0 and d.deleted_at is null";
+         where h.delivery_type='Door to door delivery' 
+         AND (h.deleted_at is null OR h.id IS NULL) 
+         AND h.for_deletion = 0 
+         and h.isConfirm=1 
+         AND h.has_sub = 0 
+         and (d.deleted_at is null OR d.id IS NULL";
 
          // $qry = "SELECT po.schedule_type as schedtype,pb.name as prod_branch,j.jo_number as jnum,h.*,d.*,h.created_at as hcreated,h.id as hid,p.category_id,c.name as catname,d.id as did, h.instruction, h.payment_status, h.order_number as ordnum
          //        FROM `production_orders` po
