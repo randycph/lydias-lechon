@@ -282,7 +282,7 @@ class ReportsController extends Controller
                 ";
 
                 if (in_array(29, $bIds)) {
-                    $qry .= " OR h.order_source = 'Web' OR h.id NOT IN (
+                    $qry .= " OR (h.order_source = 'Web' AND h.delivery_type = 'Door to door delivery') OR h.id NOT IN (
                         SELECT sales_header_id FROM product_delivery_addresses
                     )";
                 }
