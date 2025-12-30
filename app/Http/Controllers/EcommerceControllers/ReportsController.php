@@ -260,23 +260,29 @@ class ReportsController extends Controller
             if(isset($_GET['receiver']) && $_GET['receiver']<>''){
                 $br_opts = "(";
                 $id_opts = "(";
+                $bIds = [];
                 foreach($_GET['receiver'] as $re){
                     $br = \App\EcommerceModel\Branch::whereId($re)->first();
                     $br_opts .= "'".$br->name."',";
                     $id_opts .= $re.",";
+
+                    $bIds[] = $re->id;
                 }
                 $br_opts = rtrim($br_opts,",");
                 $id_opts = rtrim($id_opts,",");
                 $br_opts .= ")";
                 $id_opts .= ")";
 
-                
-
                 $qry.= " and ((h.delivery_type='Store Pickup' and h.customer_delivery_adress in ".$br_opts.") or 
 
                 (jo.pickup_branch in ".$id_opts." OR h.delivery_branch in ".$br_opts.")
 
                 )";
+
+                // check if $bIds contains 29 or Tandang Sora Head Office
+                if (in_array(29, $bIds)) {
+                    $qry.= " OR (h.order_source = 'Web'";
+                }
             }
 
 
