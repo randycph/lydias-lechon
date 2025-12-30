@@ -275,23 +275,26 @@ class ReportsController extends Controller
                 $br_opts = rtrim($br_opts, ",") . ")";
                 $id_opts = rtrim($id_opts, ",") . ")";
 
-                $qry .= " AND (
-                    (h.delivery_type = 'Store Pickup' AND h.customer_delivery_adress IN $br_opts)
-                    OR
-                    (jo.pickup_branch IN $id_opts OR h.delivery_branch IN $br_opts)
-                ";
+                $qry .= " AND (";
 
-                // if (in_array(29, $bIds)) {
-                //     $qry .= " OR (h.order_source = 'Web' AND h.delivery_type = 'Store Pickup') OR h.id NOT IN (
-                //         SELECT sales_header_id FROM product_delivery_addresses
-                //     )";
-                // }
+                if (in_array(29, $bIds)) {
+                    $qry .= "  (h.order_source = 'Web' AND h.delivery_type = 'Store Pickup') OR h.id NOT IN (
+                        SELECT sales_header_id FROM product_delivery_addresses
+                    )";
+                } else {
+                    $qry .= " (h.delivery_type = 'Store Pickup' AND h.customer_delivery_adress IN $br_opts) OR
+                    (jo.pickup_branch IN $id_opts OR h.delivery_branch IN $br_opts)";
 
-                // if (in_array(36, $bIds)) {
-                //     $qry .= " OR (h.order_source = 'Web' AND h.delivery_type = 'Door to door delivery') OR h.id NOT IN (
-                //         SELECT sales_header_id FROM product_delivery_addresses
-                //     )";
-                // }
+                }
+
+                if (in_array(36, $bIds)) {
+                    $qry .= "  (h.order_source = 'Web' AND h.delivery_type = 'Door to door delivery') OR h.id NOT IN (
+                        SELECT sales_header_id FROM product_delivery_addresses
+                    )";
+                } else {
+                    $qry .= " (h.delivery_type = 'Store Pickup' AND h.customer_delivery_adress IN $br_opts) OR
+                    (jo.pickup_branch IN $id_opts OR h.delivery_branch IN $br_opts)";
+                }
 
                 $qry .= ")";
             } else {
