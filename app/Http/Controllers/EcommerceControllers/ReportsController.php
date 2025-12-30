@@ -281,17 +281,17 @@ class ReportsController extends Controller
                     (jo.pickup_branch IN $id_opts OR h.delivery_branch IN $br_opts)
                 ";
 
-                if (in_array(29, $bIds)) {
-                    $qry .= " OR (h.order_source = 'Web' AND h.delivery_type = 'Store Pickup') OR h.id NOT IN (
-                        SELECT sales_header_id FROM product_delivery_addresses
-                    )";
-                }
+                // if (in_array(29, $bIds)) {
+                //     $qry .= " OR (h.order_source = 'Web' AND h.delivery_type = 'Store Pickup') OR h.id NOT IN (
+                //         SELECT sales_header_id FROM product_delivery_addresses
+                //     )";
+                // }
 
-                if (in_array(36, $bIds)) {
-                    $qry .= " OR (h.order_source = 'Web' AND h.delivery_type = 'Door to door delivery') OR h.id NOT IN (
-                        SELECT sales_header_id FROM product_delivery_addresses
-                    )";
-                }
+                // if (in_array(36, $bIds)) {
+                //     $qry .= " OR (h.order_source = 'Web' AND h.delivery_type = 'Door to door delivery') OR h.id NOT IN (
+                //         SELECT sales_header_id FROM product_delivery_addresses
+                //     )";
+                // }
 
                 $qry .= ")";
             } else {
