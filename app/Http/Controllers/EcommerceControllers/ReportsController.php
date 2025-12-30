@@ -228,7 +228,7 @@ class ReportsController extends Controller
             left join production_orders po on po.joborder_id = jo.id
             left join production_branches pb on pb.id = po.branch_id
             left join users u on u.id = d.created_by
-            where h.id>0 and h.delivery_status<>'Open Date' and h.deleted_at is null and d.deleted_at is null and h.for_deletion = 0 and jo.deleted_at is null and po.deleted_at is null and (h.payment_status = 'PAID' OR h.isConfirm=1) AND h.has_sub = 0
+            where h.id>0 and h.delivery_status<>'Open Date' and (h.deleted_at IS NULL OR h.id IS NULL) AND (d.deleted_at IS NULL OR d.id IS NULL) and h.for_deletion = 0 and (jo.deleted_at IS NULL OR jo.id IS NULL) AND (po.deleted_at IS NULL OR po.id IS NULL) and (h.payment_status = 'PAID' OR h.isConfirm=1) AND h.has_sub = 0
             and h.id not in (select sales_header_id from product_delivery_addresses)
             ";
 
@@ -257,37 +257,37 @@ class ReportsController extends Controller
 
             // $qry.= " and pb.name='Tandang Sora'";
             
- if (isset($_GET['receiver']) && $_GET['receiver'] <> '') {
-    $br_opts = "(";
-    $id_opts = "(";
-    $bIds = [];
+            if (isset($_GET['receiver']) && $_GET['receiver'] <> '') {
+                $br_opts = "(";
+                $id_opts = "(";
+                $bIds = [];
 
-    foreach ($_GET['receiver'] as $re) {
-        $br = \App\EcommerceModel\Branch::whereId($re)->first();
+                foreach ($_GET['receiver'] as $re) {
+                    $br = \App\EcommerceModel\Branch::whereId($re)->first();
 
-        if ($br) {
-            $br_opts .= "'" . $br->name . "',";
-            $id_opts .= $re . ",";
-            $bIds[] = $br->id;
-        }
-    }
+                    if ($br) {
+                        $br_opts .= "'" . $br->name . "',";
+                        $id_opts .= $re . ",";
+                        $bIds[] = $br->id;
+                    }
+                }
 
-    $br_opts = rtrim($br_opts, ",") . ")";
-    $id_opts = rtrim($id_opts, ",") . ")";
+                $br_opts = rtrim($br_opts, ",") . ")";
+                $id_opts = rtrim($id_opts, ",") . ")";
 
-    $qry .= " AND (
-        (h.delivery_type = 'Store Pickup' AND h.customer_delivery_adress IN $br_opts)
-        OR
-        (jo.pickup_branch IN $id_opts OR h.delivery_branch IN $br_opts)
-    ";
+                $qry .= " AND (
+                    (h.delivery_type = 'Store Pickup' AND h.customer_delivery_adress IN $br_opts)
+                    OR
+                    (jo.pickup_branch IN $id_opts OR h.delivery_branch IN $br_opts)
+                ";
 
-    // 🔹 ADD THIS PART
-    if (in_array(29, $bIds)) {
-        $qry .= " OR h.order_source = 'Web' ";
-    }
+                // 🔹 ADD THIS PART
+                if (in_array(29, $bIds)) {
+                    $qry .= " OR h.order_source = 'Web' ";
+                }
 
-    $qry .= ")";
-}
+                $qry .= ")";
+            }
 
 
 
