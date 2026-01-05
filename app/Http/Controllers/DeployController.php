@@ -32,7 +32,7 @@ class DeployController extends Controller
             return response('Not beta branch', 200);
         }
 
-        // 3. Run deploy script (external, NOT inline) for security
+        // 3. Run deploy script (external, NOT inline) for security reasons
         $output = shell_exec(
             'cd /home/lydiaslech0n/beta.lydias-lechon.com && git pull origin beta 2>&1'
         );
