@@ -121,7 +121,7 @@
                             <span class="w-8 text-center font-bold text-primary" x-text="quantity"></span>
 
                             <!-- Plus Button -->
-                            <button @click="quantity++"
+                            <button @click="quantity++" data-qa="test"
                                 class="w-8 h-8 flex items-center justify-center border rounded-md bg-gray-100 text-gray-700">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
                                     class="size-5">
