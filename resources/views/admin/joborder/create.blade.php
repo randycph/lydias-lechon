@@ -706,7 +706,7 @@
             });
         });
 
-        var dateToday = new Date(); 
+        var dateToday = new Date('2025-12-30'); 
 
         $(function(){
             'use strict'
