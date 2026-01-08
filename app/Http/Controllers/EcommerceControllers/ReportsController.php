@@ -26,6 +26,9 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+ini_set('memory_limit', '1024M');
+set_time_limit(600);
+
 class ReportsController extends Controller
 {
     public function __construct()
