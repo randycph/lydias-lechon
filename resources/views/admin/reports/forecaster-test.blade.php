@@ -901,7 +901,7 @@
         lengthMenu: [ [28, 50, 100, -1], [28, 50, 100, "All"] ],
         aaSorting: [],
         bSort: false,
-        searching: false,
+        searching: true,
         asStripeClasses: [],
         buttons: [
             {

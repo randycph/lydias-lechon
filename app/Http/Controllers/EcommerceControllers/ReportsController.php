@@ -219,7 +219,7 @@ class ReportsController extends Controller
         $no_jo = 0;
 
         // Sales
-            $qry = "SELECT d.product_name, d.paella_price, h.contact_person, d.product_name as dproduct_name, h.has_sub, '' as jo_category, d.id as idd,
+            $qry = "SELECT d.product_name, d.paella_price, h.contact_person, d.product_name as dproduct_name, h.has_sub, '' as jo_category, d.id as idd, pda.branch as pdabranch,
             d.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,d.price, h.customer_delivery_adress, h.parent_sales_header_id,
             h.customer_name, d.delivery_date as delivery_date, h.instruction, po.delivery_date as deldate, h.delivery_type, jo.jo_number, pb.name as pbname, h.delivery_status as delstat,h.agent, h.customer_contact_number,'' as dr, h.delivery_fee_amount, d.price, '' as releasing, h.order_source, br.name as receiver, c.name as catname, u.name as username, jo.jo_order_type,h.order_type as hordertype, h.id as hid, '' as jo_category, 'sales' as trantype, DATE_FORMAT(d.delivery_date,'%H:%i:%s') as timeneeded, DATE_FORMAT(d.delivery_date, '%Y-%m-%d') as dateneeded, p.is_misc, p.production_item, h.isConfirm as isConfirm, h.gross_amount as gros, h.forecast_date as forecast_dt, h.delivery_branch as del_branch,p.id as prodid,h.created_at as created
             FROM `ecommerce_sales_details` d
@@ -231,8 +231,9 @@ class ReportsController extends Controller
             left join production_orders po on po.joborder_id = jo.id
             left join production_branches pb on pb.id = po.branch_id
             left join users u on u.id = d.created_by
+            left join product_delivery_addresses pda on pda.sales_header_id = h.id
             where h.id>0 and h.delivery_status<>'Open Date' and h.deleted_at is null and d.deleted_at is null and h.for_deletion = 0 and jo.deleted_at is null and po.deleted_at is null and (h.payment_status = 'PAID' OR h.isConfirm=1) AND h.has_sub = 0
-            and h.id not in (select sales_header_id from product_delivery_addresses)
+            
             ";
 
             if(isset($_GET['agent']) && $_GET['agent']<>''){
@@ -277,7 +278,7 @@ class ReportsController extends Controller
 
                 $qry.= " and ((h.delivery_type='Store Pickup' and h.customer_delivery_adress in ".$br_opts.") or 
 
-                (jo.pickup_branch in ".$id_opts." OR h.delivery_branch in ".$br_opts.")
+                (jo.pickup_branch in ".$id_opts." OR h.delivery_branch in ".$br_opts.") or (pda.branch in ".$br_opts.")
 
                 )";
             }
@@ -389,7 +390,7 @@ class ReportsController extends Controller
             //dd(DB::select("select * from temp_mrs"));
             //    IF(m.delivery_status, "YES", "NO") as delstat,
 
-            $mqry = "SELECT distinct m.product_name, m.paella_price, m.paella, m.contact_person, h.has_sub, m.id as idd,
+            $mqry = "SELECT distinct m.product_name, m.paella_price, m.paella, m.contact_person, h.has_sub, m.id as idd, pda.branch as pdabranch,
             m.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,m.price, m.address as customer_delivery_adress, h.parent_sales_header_id,
             h.customer_name, m.branch as mbranch, 
             cast(concat(m.delivery_date, ' ', m.delivery_time) as datetime)  as delivery_date,
@@ -412,8 +413,9 @@ class ReportsController extends Controller
             left join production_orders po on po.joborder_id = jo.id
             left join production_branches pb on pb.id = po.branch_id
             left join users u on u.id = d.created_by
+            left join product_delivery_addresses pda on pda.sales_header_id = h.id
             where h.id>0 and h.delivery_status<>'Open Date' and h.deleted_at is null and d.deleted_at is null AND h.for_deletion = 0 and jo.deleted_at is null and po.deleted_at is null and (h.payment_status = 'PAID' OR h.isConfirm=1) AND h.has_sub = 0
-            and h.id in (select sales_header_id from product_delivery_addresses)
+            
             ";
 
             if(isset($_GET['agent']) && $_GET['agent']<>''){
@@ -458,7 +460,7 @@ class ReportsController extends Controller
 
                 $mqry.= " and ((h.delivery_type='Store Pickup' and h.customer_delivery_adress in ".$br_opts.") or 
 
-                (jo.pickup_branch in ".$id_opts." OR h.delivery_branch in ".$br_opts.")
+                (jo.pickup_branch in ".$id_opts." OR h.delivery_branch in ".$br_opts.") or pda.branch in ".$br_opts."
 
                 )";
             }
