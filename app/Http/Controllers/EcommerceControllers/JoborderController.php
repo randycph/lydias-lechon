@@ -459,7 +459,8 @@ class JoborderController extends Controller
             'region' => $request->region,
             'province' => $request->province,
             'city' => $request->city,
-            'barangay' => $request->barangay
+            'barangay' => $request->barangay,
+            'is_new_order' => 1,
         ]);
 
 
