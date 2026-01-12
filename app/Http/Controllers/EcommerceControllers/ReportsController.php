@@ -882,18 +882,50 @@ class ReportsController extends Controller
     public function joborder(Request $request)
     {
 
-        $qry = "SELECT po.schedule_type as schedtype,pb.name as prod_branch,jo.jo_number as jnum,h.*,d.*,h.created_at as hcreated,h.id as hid,p.category_id,c.name as catname,d.id as did, h.instruction, h.payment_status, h.order_number as ordnum, jo.jo_order_type, jo.date_needed,
-            IFNULL(jo.jo_category,'Miscellaneous') as item_type
-            FROM  
-            job_orders jo 
-            left join ecommerce_sales_details d on d.id=jo.sales_detail_id
-            left join ecommerce_sales_headers h on h.id=d.sales_header_id
-            left join products p on p.id=d.product_id
-            left join product_categories c on c.id=p.category_id
-            left join production_orders po on po.joborder_id = jo.id
-            left join production_branches pb on pb.id = po.branch_id
-         where h.id>0 and h.deleted_at is null AND h.for_deletion = 0 and jo.deleted_at is null and po.deleted_at is null and d.deleted_at is null AND h.has_sub = 0";
-        // conditions
+        $qry = "SELECT 
+                    po.schedule_type AS schedtype,
+                    pb.name AS prod_branch,
+                    jo.jo_number AS jnum,
+                    h.*,
+                    d.*,
+                    h.created_at AS hcreated,
+                    h.id AS hid,
+                    p.category_id,
+                    c.name AS catname,
+                    d.id AS did,
+                    h.instruction,
+                    h.payment_status,
+                    h.order_number AS ordnum,
+                    jo.jo_order_type,
+                    jo.date_needed,
+                    IFNULL(jo.jo_category,'Miscellaneous') AS item_type
+                FROM ecommerce_sales_headers h
+                LEFT JOIN ecommerce_sales_details d 
+                    ON d.sales_header_id = h.id 
+                    AND d.deleted_at IS NULL
+                LEFT JOIN job_orders jo 
+                    ON jo.sales_detail_id = d.id 
+                    AND jo.deleted_at IS NULL
+                LEFT JOIN products p ON p.id = d.product_id
+                LEFT JOIN product_categories c ON c.id = p.category_id
+                LEFT JOIN production_orders po 
+                    ON po.joborder_id = jo.id 
+                    AND po.deleted_at IS NULL
+                LEFT JOIN production_branches pb ON pb.id = po.branch_id
+                WHERE 
+                    h.deleted_at IS NULL
+                    AND h.for_deletion = 0
+                    AND h.has_sub = 0
+                    AND (
+                            jo.id IS NOT NULL
+                        OR (
+                                h.order_source = 'Web'
+                            AND h.payment_status = 'PAID'
+                            )
+                        )
+        ";
+                
+            // conditions
             if(isset($_GET['agent']) && $_GET['agent']<>''){
                 $qry.= " and h.agent='".$_GET['agent']."'";
             }
