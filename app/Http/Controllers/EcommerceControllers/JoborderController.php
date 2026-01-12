@@ -414,7 +414,8 @@ class JoborderController extends Controller
             'agent' => $request->agent ?? Auth::user()->name,
             'delivery_branch' => $request->delivery_type == 1 ? $request->delivery_branch : NULL,
             'contact_person' => $contact_pers,
-            'temp_prod_branch' => $request->pb
+            'temp_prod_branch' => $request->pb,
+            'is_new_order' => 1,
         ]);
 
 
