@@ -105,6 +105,10 @@ class PaymayatestController extends Controller
                 'updated_at'      => $salesHeader->created_at,
             ]);
 
+            if ($salesHeader->delivery_status == 'Waiting for Payment' || $salesHeader->delivery_status == '') {
+                SalesHeader::whereId($salesHeader->id)->update(['delivery_status' => 'Processing Stock']);
+            }
+
             // =========================
             // CONFIRM SUB-SALES
             // =========================
@@ -117,6 +121,10 @@ class PaymayatestController extends Controller
                     'confirm_remarks' => 'Auto confirm via Maya checkout',
                     'updated_at'      => $sub->created_at,
                 ]);
+
+                if ($sub->delivery_status == 'Waiting for Payment' || $sub->delivery_status == '') {
+                    SalesHeader::whereId($sub->id)->update(['delivery_status' => 'Processing Stock']);
+                }
 
                 $sub->assign_to_production_branch($sub, 1);
             }
@@ -196,6 +204,10 @@ class PaymayatestController extends Controller
                             $sale->confirmed_on = date('Y-m-d H:i:s');
                             $sale->confirm_remarks = 'Auto confirm via Paymaya checkout';
                             $sale->save();
+
+                            if ($sale->delivery_status == 'Waiting for Payment' || $sale->delivery_status == '') {
+                                SalesHeader::whereId($sale->id)->update(['delivery_status' => 'Processing Stock']);
+                            }
                         }
                         return response('Ok', 200);   
                     }else{
