@@ -394,7 +394,7 @@
                                                                     @endif
                                                                 @endif
 
-                                                                @if (auth()->user()->has_access_to_route('display.added-payments'))
+                                                                @if (auth()->user()->has_access_to_route('sales-transaction.view_payment'))
                                                                 <a class="dropdown-item" href="javascript:;" onclick="show_added_payments('{{$sale->id}}')">View Payments</a>
                                                                 @endif
 
@@ -482,8 +482,9 @@
                                                         <div class="dropdown-menu dropdown-menu-right">
 
                                                                 <a class="dropdown-item" title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale->id) }}">View Sales Summary</a>
-                                                                 <a class="dropdown-item" href="javascript:;" onclick="show_added_payments('{{$sale->id}}')">View Payments</a>
-
+                                                                @if (auth()->user()->has_access_to_route('sales-transaction.view_payment'))
+                                                                <a class="dropdown-item" href="javascript:;" onclick="show_added_payments('{{$sale->id}}')">View Payments</a>
+                                                                @endif
 
                                                            
                                                         </div>
