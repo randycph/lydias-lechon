@@ -521,6 +521,10 @@ class SalesController extends Controller
         $sh = new SalesHeader();
         $sh->assign_to_production_branch($sales, 1);
             
+        if ($sales->delivery_status == 'Waiting for Payment' || $sales->delivery_status == '') {
+            SalesHeader::whereId($sales->id)->update(['delivery_status' => 'Processing Stock']);
+        }
+
         $sms = new Sms();
         $sms->send_sms($sales->customer_contact_number, 'confirm_order', $sales);
         
