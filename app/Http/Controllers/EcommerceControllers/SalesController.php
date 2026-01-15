@@ -513,6 +513,10 @@ class SalesController extends Controller
 
         $sh = new SalesHeader();
         $sh->assign_to_production_branch($sales, 1);
+
+        if ($sales->delivery_status == 'Waiting for Payment' || $sales->delivery_status == '') {
+            SalesHeader::whereId($sales->id)->update(['delivery_status' => 'Processing Stock']);
+        }
     
         //$mobile = SalesHeader::whereId($order_id)->first();
         
