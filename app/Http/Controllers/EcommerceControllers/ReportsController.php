@@ -227,7 +227,7 @@ class ReportsController extends Controller
         $no_jo = 0;
 
         // Sales
-            $qry = "SELECT d.product_name, d.paella_price, h.contact_person, d.product_name as dproduct_name, h.has_sub, '' as jo_category, d.id as idd,
+            $qry = "SELECT d.product_name, h.outlet, d.paella_price, h.contact_person, d.product_name as dproduct_name, h.has_sub, '' as jo_category, d.id as idd,
             d.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,d.price, h.customer_delivery_adress, h.parent_sales_header_id,
             h.customer_name, d.delivery_date as delivery_date, h.instruction, po.delivery_date as deldate, h.delivery_type, jo.jo_number, pb.name as pbname, h.delivery_status as delstat,h.agent, h.customer_contact_number,'' as dr, h.delivery_fee_amount, d.price, '' as releasing, h.order_source, br.name as receiver, c.name as catname, u.name as username, jo.jo_order_type,h.order_type as hordertype, h.id as hid, '' as jo_category, 'sales' as trantype, DATE_FORMAT(d.delivery_date,'%H:%i:%s') as timeneeded, DATE_FORMAT(d.delivery_date, '%Y-%m-%d') as dateneeded, p.is_misc, p.production_item, h.isConfirm as isConfirm, h.gross_amount as gros, h.forecast_date as forecast_dt, h.delivery_branch as del_branch,p.id as prodid,h.created_at as created
             FROM `ecommerce_sales_details` d
@@ -406,7 +406,7 @@ class ReportsController extends Controller
             //dd(DB::select("select * from temp_mrs"));
             //    IF(m.delivery_status, "YES", "NO") as delstat,
 
-            $mqry = "SELECT distinct m.product_name, m.paella_price, m.paella, m.contact_person, h.has_sub, m.id as idd,
+            $mqry = "SELECT distinct m.product_name, h.outlet, m.paella_price, m.paella, m.contact_person, h.has_sub, m.id as idd,
             m.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,m.price, m.address as customer_delivery_adress, h.parent_sales_header_id,
             h.customer_name, m.branch as mbranch, 
             cast(concat(m.delivery_date, ' ', m.delivery_time) as datetime)  as delivery_date,

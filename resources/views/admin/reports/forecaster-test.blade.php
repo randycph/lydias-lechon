@@ -649,7 +649,7 @@
         $contactNo     = (string)($r->customer_contact_number ?? '');
         $delFee        = number_format((float)($r->delivery_fee_amount ?? 0), 2);
         $orderSource   = (string)($r->order_source ?? '');
-        $receiver      = (string)($r->receiver ?? '');
+        $receiver      = (string)($r->outlet ?? '');
         $username      = (string)($r->username ?? '');
         $forecastDt    = (string)($r->forecast_dt ?? '');
         $branch        = (string)(($r->mbranch ?? '') ?: ($r->del_branch ?? ''));
