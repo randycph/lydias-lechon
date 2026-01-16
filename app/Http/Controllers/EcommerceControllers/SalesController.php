@@ -519,7 +519,11 @@ class SalesController extends Controller
         ]);
 
         $sh = new SalesHeader();
-        $sh->assign_to_production_branch($sales, 1);
+        if ($sales->order_source == 'Web') {
+            $sh->assign_to_production_branch($sales, 1);
+        } else {
+            $sh->assign_to_production_branch($sales, $sales->temp_prod_branch);
+        }
             
         if ($sales->delivery_status == 'Waiting for Payment' || $sales->delivery_status == '') {
             SalesHeader::whereId($sales->id)->update(['delivery_status' => 'Processing Stock']);
