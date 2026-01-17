@@ -356,7 +356,6 @@
                                     <label class="tx-13">Order Source</label>
                                     <select name="order_source" id="order_source" class="form-control">
                                         <option value="">- Select Source -</option>
-                                        {{-- only record from oct 1 2025 and up --}}
                                         @forelse(\App\EcommerceModel\SalesHeader::select('order_source')->where('created_at', '>=', '2025-10-01')->distinct('order_source')->orderBy('order_source')->get() as $cus)
                                             <option value="{{$cus->order_source}}">{{$cus->order_source}}</option>
                                         @empty
