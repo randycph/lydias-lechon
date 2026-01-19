@@ -6,7 +6,7 @@ use App\EcommerceModel\SalesHeader;
 use Illuminate\Database\Eloquent\Model;
 
 class ProductDeliveryAddress extends Model
-{
+{    
     protected $table = 'product_delivery_addresses';
 
     protected $fillable = [

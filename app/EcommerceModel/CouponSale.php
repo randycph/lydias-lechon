@@ -5,9 +5,12 @@ use Illuminate\Database\Eloquent\Model;
 
 use App\EcommerceModel\Coupon;
 use App\EcommerceModel\SalesHeader;
+use App\Models\Concerns\LogsActivityDiff;
 
 class CouponSale extends Model
 {
+    use LogsActivityDiff;
+    
 	protected $table = "coupon_sales";
     protected $fillable = [ 'customer_id', 'coupon_id', 'coupon_code', 'sales_header_id', 'order_status','product_id', 'discount_used'];
     public $timestamps = true;

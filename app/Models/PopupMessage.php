@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PopupMessage extends Model
 {
     use SoftDeletes;
+    use LogsActivityDiff;
 
     protected $fillable = [
         'title',

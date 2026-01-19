@@ -3,12 +3,14 @@
 namespace App\EcommerceModel;
 use App\Models\User;
 use App\EcommerceModel\JobOrder;
+use App\Models\Concerns\LogsActivityDiff;
 use App\Models\DeliveriesImage;
 use Illuminate\Database\Eloquent\Model;
 
 class DeliveryStatus extends Model
 {
-
+    use LogsActivityDiff;
+    
     protected $table = 'ecommerce_delivery_status';
     protected $fillable = ['order_id', 'user_id', 'status', 'remarks','delivered_by', 'type', 'job_order_id', 'image'];
 

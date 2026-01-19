@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
 class UserBranch extends Model
 {
+    use LogsActivityDiff;
+    
     public $table = 'user_branches';
 
     protected $fillable = [ 'user_id', 'branch_id',];
