@@ -107,70 +107,108 @@
             </div>
             <!-- End Filters -->
 
-           <div class="col-md-12">
-    <div class="table-list mg-b-10">
-        <div class="table-responsive-lg text-nowrap">
-            <table class="table mg-b-0 table-light table-hover" style="width:100%;">
-                <thead>
-                    <tr>
-                        <th style="width: 5%;">
-                            <div class="custom-control custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="checkbox_all">
-                                <label class="custom-control-label" for="checkbox_all"></label>
-                            </div>
-                        </th>
-                        <th scope="col" width="20%">Coupon Code</th>
-                        <th scope="col">Start Date</th>
-                        <th scope="col">End Date</th>
-                        <th class="text-center" scope="col">Usage Limit</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Last Updated</th>
-                        <th scope="col">Options</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($coupons as $coupon)
-                        <tr id="row{{ $coupon->id }}">
-                            <th>
-                                <div class="custom-control custom-checkbox">
-                                    <input type="checkbox" class="custom-control-input cb" id="cb{{ $coupon->id }}">
-                                    <label class="custom-control-label" for="cb{{ $coupon->id }}"></label>
-                                </div>
-                            </th>
-                            <td>{{ $coupon->code }}</td>
-                            <td>
-                                {{ \Carbon\Carbon::parse($coupon->start_date.' '.$coupon->start_time)->format('M d, Y h:i A') }}
-                            </td>
-                            <td>
-                                {{ \Carbon\Carbon::parse($coupon->end_date.' '.$coupon->end_time)->format('M d, Y h:i A') }}
-                            </td>
-                            <td class="text-center">{{ $coupon->usage_limit ?? 0 }}</td>
-                            <td>
-                                @if($coupon->status == 'Active')
-                                    <span class="badge badge-success">Active</span>
-                                @elseif($coupon->status == 'Not Started')
-                                    <span class="badge badge-warning">Not Started</span>
-                                @elseif($coupon->status == 'Expired')
-                                    <span class="badge badge-secondary">Expired</span>
-                                @endif
-                            </td>
-                            <td>{{ \Carbon\Carbon::parse($coupon->updated_at)->format('M d, Y h:i A') }}</td>
-                            <td>
-                                <nav class="nav table-options">
-                                    <a class="nav-link" href="{{ route('coupon.edit',$coupon->id) }}" title="Edit Coupon"><i data-feather="edit"></i></a>
-                                    <a class="nav-link" href="javascript:void(0)" onclick="delete_one_coupon('{{ $coupon->id }}')" title="Delete Coupon"><i data-feather="trash"></i></a>
-                                </nav>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr><th colspan="8"><center>No coupons found.</center></th></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+            <div class="col-md-12">
+                <div class="table-list mg-b-10">
+                    <div class="table-responsive-lg text-nowrap">
+                        <table class="table mg-b-0 table-light table-hover" style="width:100%;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%;">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="checkbox_all">
+                                            <label class="custom-control-label" for="checkbox_all"></label>
+                                        </div>
+                                    </th>
+                                    <th scope="col" width="20%">Name</th>
+                                    <th scope="col">Date Start</th>
+                                    <th scope="col">Date End</th>
+                                    <th class="text-center" scope="col">Total Usage</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Last Date Modified</th>
+                                    <th scope="col">Options</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            	@forelse($coupons as $coupon)
+                            		<tr @if($coupon->status != 'EXPIRED') id="row{{$coupon->id}}" @endif>
+	                                    <th>
+	                                        <div class="custom-control custom-checkbox">
+	                                            <input type="checkbox" class="custom-control-input @if($coupon->status != 'EXPIRED') cb @endif" id="cb{{ $coupon->id }}" @if($coupon->status == 'EXPIRED') disabled @endif>
+	                                            <label class="custom-control-label" for="cb{{ $coupon->id }}"></label>
+	                                        </div>
+	                                    </th>
+                                        <td>
+                                            <strong @if($coupon->trashed()) style="text-decoration:line-through;" @endif> {{ strlen($coupon->name) > 30 ? substr($coupon->name,0,20)."..." : $coupon->name}}</strong><br>
+                                            @if($coupon->activation_type == 'manual')
+                                                {{ $coupon->coupon_code }}
+                                            @endif
+                                        </td>
+	                                    <td>{{ $coupon->start_date }} {{ $coupon->start_time }}</td>
+	                                    <td>{{ $coupon->end_date }} {{ $coupon->end_time }}</td>
+	                                    <td class="text-center">
+                                            @if( $coupon->couponCarts()->where('status', 1)->sum('total_usage') > 0)
+                                                <a target="_blank" href="{{ route('report.coupon.list') }}?coupon_code={{$coupon->coupon_code}}">{{  $coupon->couponCarts()->where('status', 1)->sum('total_usage') }}</a>
+                                            @else
+                                                0
+                                            @endif
+                                        </td>
+	                                    <td>
+	                                    	@if($coupon->status == 'ACTIVE')
+	                                    		<span class="badge badge-success">Active</span>
+	                                    	@endif
 
+	                                    	@if($coupon->status == 'INACTIVE')
+	                                    		<span class="badge badge-secondary">Inactive</span>
+	                                    	@endif
+
+	                                    	@if($coupon->status == 'EXPIRED')
+	                                    		<span class="badge badge-danger">Expired</span>
+	                                    	@endif
+	                                    </td>
+	                                    <td>{{ Setting::date_for_listing($coupon->updated_at) }}</td>
+	                                    <td>
+	                                        @if($coupon->trashed())
+	                                            @if (auth()->user()->has_access_to_route('promo.restore'))
+	                                            <nav class="nav table-options">
+	                                                <a class="nav-link" href="{{route('coupon.restore',$coupon->id)}}" title="Restore this coupon"><i data-feather="rotate-ccw"></i></a>
+	                                            </nav>
+	                                            @endif
+	                                        @else
+	                                            <nav class="nav table-options">
+	                                                @if (auth()->user()->has_access_to_route('coupons.edit'))
+	                                                <a class="nav-link" href="{{ route('coupons.edit',$coupon->id) }}" title="Edit Coupon"><i data-feather="edit"></i></a>
+	                                                @endif
+	                                                @if (auth()->user()->has_access_to_route('coupons.destroy'))
+	                                                <a class="nav-link" href="javascript:void(0)" onclick="delete_one_coupon('{{$coupon->id}}')" title="Delete Coupon"><i data-feather="trash"></i></a>
+	                                                @endif
+
+	                                                @if (auth()->user()->has_access_to_route('promo.change-status'))
+	                                                	@if($coupon->status != 'EXPIRED')
+		                                                    <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		                                                        <i data-feather="settings"></i>
+		                                                    </a>
+		                                                @endif
+	                                                    <div class="dropdown-menu dropdown-menu-right">
+	                                                        @if($coupon->status == 'ACTIVE')
+	                                                            <a class="dropdown-item" href="{{route('coupon.change-status',[$coupon->id,'INACTIVE'])}}"> Inactive</a>
+	                                                        @else
+	                                                            <a class="dropdown-item" href="{{route('coupon.change-status',[$coupon->id,'ACTIVE'])}}"> Active</a>
+	                                                        @endif
+	                                                    </div>
+	                                                @endif
+	                                            </nav>
+	                                        @endif
+	                                    </td>
+	                                </tr>
+                            	@empty
+                            		<tr><th colspan="9"><center>No coupons found.</center></th></tr>
+                            	@endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- table-responsive -->
+                </div>
+            </div>
             <div class="col-md-6">
                 <div class="mg-t-5">
                     @if ($coupons->firstItem() == null)
