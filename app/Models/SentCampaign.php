@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 
 class SentCampaign extends Model
 {
+    use LogsActivityDiff;
+    
     protected $fillable = ['name', 'sender_id', 'campaign_id', 'from_name', 'from_email', 'subject', 'content'];
 
     public function all_subscribers()

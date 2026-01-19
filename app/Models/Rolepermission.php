@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 
 class Rolepermission extends Model
 {
+    use LogsActivityDiff;
+    
     public $table = 'role_permission';
 
     protected $fillable = [ 'role_id', 'permission_id', 'user_id', 'isAllowed' ];
