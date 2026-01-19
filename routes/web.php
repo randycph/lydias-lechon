@@ -13,10 +13,13 @@ use App\Helpers\ListingHelper;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\EcommerceControllers\CouponController;
 use App\Http\Controllers\EcommerceControllers\ReportsController;
 use App\Http\Controllers\FacebookController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\GlobalSearchController;
+use App\Http\Controllers\logincontroller;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Settings\UserController;
 use App\Http\Controllers\Settings\WebController;
 use App\Mail\CartReminderMail;
@@ -171,7 +174,15 @@ Route::get('/products-list', 'Product\Front\ProductFrontController@list')->name(
 Route::get('/order', 'Product\Front\ProductFrontController@show_forsale')->name('product.front.show_forsale');
 Route::get('/products/{slug}', 'Product\Front\ProductFrontController@show')->name('product.front.show');
 
-
+//coupon_sec
+Route::get('/products_list', [CouponController::class, 'getProducts']);
+Route::get('/category_list', [CouponController::class, 'getCategories']);
+Route::post('/insert_coupon', [CouponController::class, 'insert_coupons'])->name('coupon.insert');
+Route::get('/coupon_edit/{id}', [CouponController::class, 'edit_coupon'])->name('coupon.edit');
+Route::post('/coupon_update/{id}', [CouponController::class, 'update_coupon'])->name('coupon.update');
+Route::post('/redeem-coupon/{id}', [CouponController::class, 'redeem']);
+Route::get('/user-coupons', [CouponController::class, 'getUserCoupons'])->name('user.coupons');
+Route::post('/cart/auto-free-delivery', [CouponController::class, 'autoFreeDelivery'])->name('cart.autoFreeDelivery');
 //// MAILING LIST ////
 Route::post('/subscribe', 'MailingList\SubscriberFrontController@subscribe')->name('mailing-list.front.subscribe');
 Route::get('/unsubscribe/{subscriber}/{code}', 'MailingList\SubscriberFrontController@unsubscribe')->name('mailing-list.front.unsubscribe');
@@ -666,7 +677,7 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
 
 
     // Coupon
-    Route::resource('/admin/coupons','EcommerceControllers\CouponController');
+    Route::resource('admin/coupons', CouponController::class);
     Route::get('/admin/coupon/{id}/{status}', 'EcommerceControllers\CouponController@update_status')->name('coupon.change-status');
     Route::post('/admin/coupon-single-delete', 'EcommerceControllers\CouponController@single_delete')->name('coupon.single.delete');
     Route::get('/admin/coupon-restore/{id}', 'EcommerceControllers\CouponController@restore')->name('coupon.restore');

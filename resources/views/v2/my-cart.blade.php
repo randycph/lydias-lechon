@@ -1,3 +1,71 @@
+<style>
+   
+.coupon-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 8px 10px; /* compact card */
+    background: #fff;
+    transition: 0.2s;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.coupon-card:hover {
+    border-color: #28a745;
+    transform: scale(1.01);
+}
+
+.coupon-header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+.coupon-title {
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+.coupon-tag {
+    background: #f0f0f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+.coupon-desc {
+    margin-top: 2px;
+    font-size: 0.8rem;
+    color: #555;
+}
+
+.coupon-validity {
+    font-size: 0.7rem;
+    color: #888;
+}
+
+.discount-value {
+    font-weight: bold;
+    font-size: 0.85rem;
+    color: #28a745;
+}
+ .big-modal {
+    width: 60vw !important;
+    max-width: 1400px !important;
+    height: 60vh !important;
+    max-height: 60vh !important;
+     position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+
+    /* Optional */
+    overflow-y: auto;
+}
+</style>
 @extends('layouts.guest', ['page' => $page])
 
 @section('title', 'My Cart')
@@ -5,81 +73,199 @@
 
 @section('content')
 <div
-    x-init="init"
-    x-data="{
-        cartCount: 0,
-        carts: [],
-        async getCarts() {
-            try {
-                {{-- this.carts = []; --}}
-                let response = await fetch('{{ route('cart.get') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    }
-                }).then((response) => {
-                    return response;
-                }).catch((error) => {
-                    
-                });
+x-init="init"
+x-data="{
+    cartCount: 0,
+    carts: [],
+    coupons: [],
+    loading: false,
 
-                if (!response.ok) throw new Error('Network response was not ok');
+    autoCoupon: null,
+    manualCoupon: null,
+    deliveryFee: 100,
+    originalDeliveryFee: 100,
+    couponDiscount: 0,
 
-                let data = await response.json();
+    /* ---------------- CART ---------------- */
+    async getCarts() {
+        try {
+            let response = await fetch('{{ route('cart.get') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                }
+            });
 
-                this.carts = data.cart;
+            let data = await response.json();
+            this.carts = data.cart ?? [];
+            this.cartCount = this.carts.length;
 
-                this.cartCount = this.carts?.length ?? 0;
-
-            } catch (error) {
-                console.error('There was a problem with the fetch operation:', error);
+            if (!this.originalDeliveryFee) {
+                this.originalDeliveryFee = data.delivery_fee ?? 0;
+                this.deliveryFee = this.originalDeliveryFee;
             }
-        },
-        init() {
-            this.getCarts();
-            const cookie = document.cookie.split('; ').find(row => row.startsWith('shipping_method='));
-            this.shippingMethod = cookie ? cookie.split('=')[1] : 'pickup';
-        },
-        async removeCart(productid) {
-            this.loading = true;
-            try {
-                let response = await fetch('{{ route('cart.remove') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                    },
-                    body: JSON.stringify({
-                        product_remove_id: productid
-                    })
-                }).then((response) => {
-                    return response;
-                }).catch((error) => {
-                    
-                });
 
-                if (!response.ok) throw new Error('Network response was not ok');
+            this.$nextTick(() => {
+                this.autoApplyFreeDelivery();
+                this.applyCoupons();
+            });
 
-                let data = await response.json();
+        } catch (error) {
+            console.error('Fetch carts error:', error);
+        }
+    },
 
-                this.getCarts();
+    async getUserCoupons() {
+        try {
+            let response = await fetch('{{ route('user.coupons') }}');
+            let data = await response.json();
+            this.coupons = data.coupons ?? [];
+        } catch (error) {
+            console.error('Fetch coupons error:', error);
+        }
+    },
 
-                this.loading = false;
+    /* ---------------- SUBTOTAL ---------------- */
+    getSubtotal() {
+        return this.carts.reduce((total, cart) => {
+            let price = this.getItemPrice(cart);
+            return total + price * Number(cart.qty || 1);
+        }, 0);
+    },
+    // Raw subtotal (no item coupons)
+    getRawSubtotal() {
+        return this.carts.reduce(
+            (total, cart) =>
+                total + Number(cart.product.price) * Number(cart.qty || 1),
+            0
+        );
+    },
 
-            } catch (error) {
-                console.error('There was a problem with the fetch operation:', error);
-            }
-        },
-        shippingMethod: 'pickup',
-        chooseShippingMethod(method) {
-            this.shippingMethod = method;
-            document.cookie = `shipping_method=${method}; path=/; max-age=31536000;`;
-        },
-    }"
-    @fetch-cart.window="init()"
+    // Item-level discount
+    getItemPrice(cart) {
+        let price = Number(cart.product.price);
 
-    class="bg-cream">
+        if (
+            this.manualCoupon &&
+            this.manualCoupon.discount_type === 'item_discount' &&
+            this.manualCoupon.product_id === cart.product.id &&
+            this.getRawSubtotal() >= this.manualCoupon.min_cart_total
+        ) {
+            price = Math.max(
+                price - Number(this.manualCoupon.discount_value),
+                0
+            );
+        }
+
+        return price;
+    },
+
+    /* ---------------- TOTAL ---------------- */
+    getTotal() {
+        return this.getSubtotal() + this.deliveryFee - this.couponDiscount;
+    },
+
+    /* ---------------- AUTO COUPON ---------------- */
+    async autoApplyFreeDelivery() {
+        try {
+            const response = await fetch('{{ route('cart.autoFreeDelivery') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    subtotal: this.getSubtotal()
+                })
+            });
+
+            const data = await response.json();
+            this.autoCoupon = data.applied ? data.coupon : null;
+            this.applyCoupons();
+
+        } catch (error) {
+            console.error('Auto coupon error:', error);
+        }
+    },
+
+    /* ---------------- COUPON ENGINE ---------------- */
+    applyCoupons() {
+
+    if (
+        this.manualCoupon &&
+        this.manualCoupon.product_id &&
+        !this.hasCouponItem(this.manualCoupon)
+    ) {
+        this.manualCoupon = null;
+    }
+
+    let deliveryFee = this.originalDeliveryFee ?? 0;
+    let discount = 0;
+
+    // AUTO COUPON
+    if (this.autoCoupon?.discount_type === 'free delivery') {
+        deliveryFee = 0;
+    }
+
+    // MANUAL COUPON
+    if (this.manualCoupon) {
+        if (this.manualCoupon.discount_type === 'fixed') {
+            discount += Number(this.manualCoupon.discount_value);
+        }
+
+        if (this.manualCoupon.discount_type === 'percentage') {
+            discount += this.getRawSubtotal() *
+                (this.manualCoupon.discount_value / 100);
+        }
+    }
+
+    this.deliveryFee = deliveryFee;
+
+    this.couponDiscount = Math.min(
+        discount,
+        this.getRawSubtotal()
+    );
+},
+displayCouponValue(coupon) {
+    if (!coupon) return '₱0.00';
+
+    if (coupon.discount_type === 'fixed') {
+        return '₱' + Number(coupon.discount_value).toFixed(2);
+    }
+
+    if (coupon.discount_type === 'percentage') {
+        return coupon.discount_value + '%';
+    }
+
+    if (coupon.discount_type === 'free delivery') {
+        // discount_value exists, but delivery fee is the REAL saved value
+        return '₱' + Number(this.originalDeliveryFee).toFixed(2);
+    }
+
+    return '₱0.00';
+},
+
+    hasCouponItem(coupon) {
+        if (!coupon?.product_id) return true;
+
+        return this.carts.some(cart =>
+            Number(cart.product.id) === Number(coupon.product_id)
+        );
+    },
+
+    /* ---------------- INIT ---------------- */
+    init() {
+        this.getCarts();
+        this.getUserCoupons();
+    }
+}"
+class="bg-cream"
+>
+
+
+
+
     <div class="py-20 px-4 container">
         <div class="flex gap-6 lg:flex-row flex-col mt-10">
             <div class="w-full lg:w-1/4">
@@ -121,7 +307,8 @@
                                                         <span class="italic" x-text="cart?.paella ? 'Boneless with Paella' : ''"></span>
                                                     </div>
                                                     <div class="flex flex-wrap items-center gap-1">
-                                                        <div class="text-sm text-gray-600" x-text="new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(cart?.product?.price * (cart?.qty || 1))"></div>
+                                                        <div class="text-sm text-gray-600" x-text="new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP'}).format(getItemPrice(cart) * (cart?.qty || 1))"></div>
+
                                                         <span class="italic text-sm text-gray-600" x-text="cart?.paella_price > 0 ? '+ ₱' + parseFloat(cart.product.paella_price * cart.qty).toLocaleString(undefined, { minimumFractionDigits: 2 }) : ''"></span>
                                                     </div>
                                                     
@@ -192,10 +379,137 @@
                                                     )
                                                 "></span>
                                             </div>
-                                            <div class="flex justify-between lg:mt-2 mb-2" x-show="showMessage">
-                                                <span class="font-medium text-red-700 italic">Coupon (<span x-text="couponCode"></span>)</span>
-                                                <span class="font-medium italic text-red-700">- ₱250.00</span>
-                                            </div>
+                                            
+                                           <div x-data="{ showCouponModal: false }">
+
+                                        <!-- Coupon summary / clickable area -->
+                                        <!-- Coupon selection container -->
+<div x-data="{ showCouponModal: false }">
+    <!-- Coupon summary -->
+    <div 
+    class="flex justify-between mb-2 big cursor-pointer bg-gray-100 p-2 rounded-md hover:bg-gray-200"
+    @click="showCouponModal = true"
+>
+    <span class="font-medium italic text-red-600">
+        Add Coupon
+    </span>
+</div>
+
+    <div class="flex flex-col gap-1 text-sm">
+    <!-- Auto coupon -->
+    <template x-if="autoCoupon">
+        <div class="text-green-700">
+            <span x-text="autoCoupon.coupon_name"></span> 
+            <span x-text="autoCoupon.discount_type === 'free delivery' ? '(Free Delivery)' : ''"></span>
+        </div>
+    </template>
+
+    <!-- Manual coupon -->
+    <template x-if="manualCoupon">
+        <div class="text-green-700">
+            <span x-text="manualCoupon.coupon_name"></span> 
+            <span x-text="manualCoupon.discount_type === 'fixed' ? '- ₱' + Number(manualCoupon.discount_value).toFixed(2) : '- ' + manualCoupon.discount_value + '%'"></span>
+        </div>
+    </template>
+</div>
+
+
+    <!-- Coupon Modal -->
+    <!-- Coupon Modal -->
+<div 
+    x-show="showCouponModal" 
+    class="fixed inset-0 bg-black big-modal bg-opacity-50 flex items-start justify-center z-50"
+    x-transition
+>
+    <!-- Large modal container -->
+    <div class="bg-white rounded-lg p-6 overflow-y-auto shadow-2xl max-w-[800px] w-full max-h-[70vh]">
+        <h3 class="font-bold text-2xl mb-6 text-center">Select a Coupon</h3>
+
+        <template x-if="coupons.length === 0">
+            <p class="text-center text-gray-600">No available coupons.</p>
+        </template>
+
+        <!-- Coupon list -->
+        <div class="flex flex-col items-center gap-2">
+            <template x-for="coupon in coupons" :key="coupon.id">
+   <label
+    class="coupon-card p-2 text-sm transition"
+    style="width:260px;max-width:260px;"
+    :class="{
+        'opacity-40 cursor-not-allowed': coupon.product_id && !hasCouponItem(coupon),
+        'border-green-500 bg-green-50 ring-2 ring-green-300':
+            manualCoupon && manualCoupon.id === coupon.id
+    }"
+>
+
+           <input
+    type="radio"
+    name="selectedCoupon"
+    :disabled="coupon.product_id && !hasCouponItem(coupon)"
+    :checked="manualCoupon && manualCoupon.id === coupon.id"
+    @change="
+        if (coupon.product_id && !hasCouponItem(coupon)) return;
+        manualCoupon = coupon;
+        applyCoupons();
+    "
+>
+
+
+            <div class="flex flex-col w-full gap-0.5">
+                <div class="coupon-header">
+                    <div class="coupon-title font-semibold text-xs" x-text="coupon.coupon_name"></div>
+                    <div class="coupon-tag text-[10px] px-1 py-0.5 bg-green-100 rounded" 
+                         x-text="coupon.discount_type"></div>
+                </div>
+
+                <div class="coupon-desc text-[11px] text-gray-600 leading-tight" 
+                     x-text="coupon.coupon_desc ?? 'No description available.'"></div>
+
+                <div class="text-[10px] text-gray-400">
+                    Expires: <span x-text="coupon.end_date"></span>
+                </div>
+
+                <div class="text-xs font-bold text-green-700">
+
+    <!-- FIXED AMOUNT -->
+    <template x-if="coupon.discount_type === 'fixed'">
+        <span>
+            ₱<span x-text="Number(coupon.discount_value).toFixed(2)"></span> OFF
+        </span>
+    </template>
+
+    <!-- PERCENTAGE -->
+    <template x-if="coupon.discount_type === 'percentage'">
+        <span>
+            <span x-text="coupon.discount_value"></span>% OFF
+        </span>
+    </template>
+
+    <!-- FREE DELIVERY -->
+    <template x-if="coupon.discount_type === 'free delivery'">
+        <span>FREE DELIVERY</span>
+    </template>
+
+</div>
+
+            </div>
+        </label>
+    </template>
+</div>
+<div class="mt-3 flex justify-center">
+    <button 
+        class="bg-gray-300 py-2 px-6 text-sm rounded hover:bg-gray-400 transition"
+        @click="showCouponModal = false">
+        Close
+    </button>
+    </div>
+</div>
+
+</div>
+
+                                    </div>
+                                        </div>
+
                                             <p class="text-gray-600 text-sm">Delivery fee is calculated upon checkout</p>
                                         </div>
     
@@ -204,17 +518,13 @@
                                                 <span class="font-medium text-gray-800 font-semibold">Total</span>
                                                 <span class="font-bold">
                                                     <span 
-                                                        x-text="
-                                                            new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(
-                                                                carts.reduce(
-                                                                    (total, cart) => 
-                                                                        total +
-                                                                        (Number((cart?.paella_price > 0 ?cart?.product?.paella_price : 0) * (cart?.qty || 1)) || 0) +
-                                                                        ((cart?.is_free_product ? 0 : (Number(cart?.product?.price) || 0) * (Number(cart?.qty) || 1))),
-                                                                    0
-                                                                )
-                                                            )
-                                                        "></span>
+                                                            x-text="
+                                                                new Intl.NumberFormat('en-PH', { 
+                                                                    style: 'currency', 
+                                                                    currency: 'PHP' 
+                                                                }).format(getTotal())
+                                                            ">
+                                                        </span>
                                                 </span>
                                             </div>
                                         </div>
@@ -240,12 +550,12 @@
                             </div>
                         </template>
                     </div>
-                </div>
+                </div> 
             </div>
         </div>
     </div>
 </div>
-    
+     
 <x-footer-component />
 
-@endsection
+@endsection 
