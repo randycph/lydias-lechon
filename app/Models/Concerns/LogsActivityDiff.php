@@ -180,30 +180,36 @@ trait LogsActivityDiff
         | RESTORE
         |--------------------------------------------------------------------------
         */
-        // static::restored(function (Model $model) {
-        //     $tableTitle = property_exists($model, 'tableTitle')
-        //         ? $model::$tableTitle
-        //         : str(class_basename($model))->headline()->toString();
+        if (in_array(
+            \Illuminate\Database\Eloquent\SoftDeletes::class,
+            class_uses_recursive(static::class)
+        )) {
+            static::restored(function (Model $model) {
+                $tableTitle = property_exists($model, 'tableTitle')
+                    ? $model::$tableTitle
+                    : str(class_basename($model))->headline()->toString();
 
-        //     $recordName = $model->getAttribute($model->logNameAttribute ?? 'name')
-        //         ?? $model->getAttribute('title')
-        //         ?? $model->getKey();
+                $recordName = $model->getAttribute($model->logNameAttribute ?? 'name')
+                    ?? $model->getAttribute('title')
+                    ?? $model->getKey();
 
-        //     ActivityLog::withoutEvents(function () use ($model, $tableTitle, $recordName) {
-        //         ActivityLog::create([
-        //             'created_by'         => auth()->id(),
-        //             'activity_type'      => 'restore',
-        //             'dashboard_activity' => "restored the {$tableTitle}",
-        //             'activity_desc'      => "restored the {$tableTitle} {$recordName}",
-        //             'activity_date'      => now()->format('Y-m-d H:i:s'),
-        //             'db_table'           => $model->getTable(),
-        //             'reference'          => $model->getKey(),
-        //             'subject_type'       => get_class($model),
-        //             'subject_id'         => $model->getKey(),
-        //             'ip_address'         => Request::ip(),
-        //         ]);
-        //     });
-        // });
+                ActivityLog::withoutEvents(function () use ($model, $tableTitle, $recordName) {
+                    ActivityLog::create([
+                        'created_by'         => auth()->id(),
+                        'activity_type'      => 'restore',
+                        'dashboard_activity' => "restored the {$tableTitle}",
+                        'activity_desc'      => "restored the {$tableTitle} {$recordName}",
+                        'activity_date'      => now()->format('Y-m-d H:i:s'),
+                        'db_table'           => $model->getTable(),
+                        'reference'          => $model->getKey(),
+                        'subject_type'       => get_class($model),
+                        'subject_id'         => $model->getKey(),
+                        'ip_address'         => request()->ip(),
+                    ]);
+                });
+            });
+        }
+
     }
 
     /*
