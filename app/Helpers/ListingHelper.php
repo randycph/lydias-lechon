@@ -12,13 +12,34 @@ class ListingHelper
     private $defaultSearchField;
     private $requiredConditions;
 
-    public function __construct($sortBy = 'desc', $perPage = 10, $searchField = 'updated_at', $requiredConditions = [])
+    public $order;
+    public $limit;
+    public $sortBy;
+
+
+  
+
+    public function __construct($order = 'desc', $limit = 10, $sortBy = 'updated_at', $requiredConditions = [])
+    {
+
+        $this->defaultSortBy = $sortBy;
+        $this->defaultPerPage = $limit;
+        $this->defaultSearchField = $sortBy;
+        $this->requiredConditions = $requiredConditions;
+
+
+        $this->order = $order;   
+        $this->limit = $limit;  
+        $this->sortBy = $sortBy; 
+    }
+
+        /*    public function __construct($sortBy = 'desc', $perPage = 10, $searchField = 'updated_at', $requiredConditions = [])
     {
         $this->defaultSortBy = $sortBy;
         $this->defaultPerPage = $perPage;
         $this->defaultSearchField = $searchField;
         $this->requiredConditions = $requiredConditions;
-    }
+    } */
 
     public function filter_fields(Array $fields)
     {
@@ -308,4 +329,31 @@ class ListingHelper
 
         return $models->paginate($perPage);
     }
+
+    //simple_search_update
+    public function simple_search_query($query, array $fields)
+{
+
+    if (request()->filled('search') && !empty($fields)) {
+        $search = request('search');
+
+        $query->where(function ($q) use ($fields, $search) {
+            foreach ($fields as $field) {
+                $q->orWhere($field, 'LIKE', "%{$search}%");
+            }
+        });
+    }
+
+
+    $sortBy = request()->input('orderBy', $this->sortBy ?? 'updated_at');
+    $order = request()->input('sort', $this->order ?? 'desc');
+
+    $query->orderBy($sortBy, $order);
+
+
+    $limit = request()->input('perPage', $this->limit ?? 15);
+
+    return $query->paginate($limit);
+}
+
 }
