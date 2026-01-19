@@ -1523,7 +1523,7 @@ class ReportsController extends Controller
         $end = $request->input('enddate') ?? Carbon::now()->format('Y-m-d');
         $pb = $request->input('pb') ?? null; 
         
-        $rs = ActivityLog::when($start && $end, function ($query) use ($start, $end) {
+        $rs = ActivityLog::with('user')->when($start && $end, function ($query) use ($start, $end) {
                         $query->whereBetween('activity_date', [
                             Carbon::parse($start)->startOfDay(),
                             Carbon::parse($end)->endOfDay()

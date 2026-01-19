@@ -107,8 +107,10 @@
                             <thead>
                             <tr> 
                                 <th>Date</th>
-                                <th>Action</th> 
-                                <th>Name</th>  
+                                <th>Created by</th>
+                                <th>Activity Type</th> 
+                                <th>Activity</th>
+                                <th>IP Address</th>
                                 <th>Description</th> 
                                 <th>Reference</th>   
                                 <th>Old Value</th>
@@ -120,9 +122,11 @@
                          
                             @foreach($rs as $r) 
                                 <tr style="text-align: left">
-                                    <td>{{ \Carbon\Carbon::parse($r->activity_date)->format('m-d-Y g:i A') }}</td>
+                                    <td>@if(date('Y-m-d',strtotime($r->activity_date)) <> '1970-01-01'){{date('m-d-Y g:i A',strtotime($r->activity_date))}} @endif</td>
+                                    <td>{{$r->user->name ?? 'N/A'}}</td>
                                     <td>{{$r->activity_type}}</td>
                                     <td>{{$r->dashboard_activity}}</td>
+                                    <td>{{$r->ip_address}}</td>
                                     <td>{{$r->activity_desc}}</td>
                                     <td>{{$r->reference}}</td>
                                     <td>{{$r->old_value}}</td>
