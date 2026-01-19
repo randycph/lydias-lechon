@@ -14,7 +14,7 @@
         <div class="flex gap-6 lg:flex-row flex-col mt-10">
             <div class="w-full lg:w-1/4">
                 <x-account-menu-component />
-            </div>
+            </div> 
 
             <div class="w-full lg:w-3/4">
                 @if (session('success'))
