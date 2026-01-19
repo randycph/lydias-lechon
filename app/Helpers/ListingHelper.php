@@ -12,13 +12,34 @@ class ListingHelper
     private $defaultSearchField;
     private $requiredConditions;
 
-    public function __construct($sortBy = 'desc', $perPage = 10, $searchField = 'updated_at', $requiredConditions = [])
+    public $order;
+    public $limit;
+    public $sortBy;
+
+
+  
+
+    public function __construct($order = 'desc', $limit = 10, $sortBy = 'updated_at', $requiredConditions = [])
+    {
+
+        $this->defaultSortBy = $sortBy;
+        $this->defaultPerPage = $limit;
+        $this->defaultSearchField = $sortBy;
+        $this->requiredConditions = $requiredConditions;
+
+
+        $this->order = $order;   
+        $this->limit = $limit;  
+        $this->sortBy = $sortBy; 
+    }
+
+        /*    public function __construct($sortBy = 'desc', $perPage = 10, $searchField = 'updated_at', $requiredConditions = [])
     {
         $this->defaultSortBy = $sortBy;
         $this->defaultPerPage = $perPage;
         $this->defaultSearchField = $searchField;
         $this->requiredConditions = $requiredConditions;
-    }
+    } */
 
     public function filter_fields(Array $fields)
     {
