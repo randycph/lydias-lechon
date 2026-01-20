@@ -70,27 +70,25 @@
     <form method="POST" action="{{ route('coupon.update', $coupon->id) }}">
         @csrf
         <div class="coupon-card">
-            <!-- Coupon Name -->
+
             <div class="mb-3">
-                <label class="form-label">Coupon Name</label>
+                <label class="form-label">Coupon Name *</label>
                 <input type="text" name="coupon_name" class="form-control" value="{{ old('coupon_name', $coupon->coupon_name) }}">
             </div>
 
-            <!-- Description -->
             <div class="mb-3">
-                <label class="form-label">Coupon Description</label>
+                <label class="form-label">Coupon Description *</label>
                 <textarea name="coupon_desc" class="form-control">{{ old('coupon_desc', $coupon->coupon_desc) }}</textarea>
             </div>
 
-            <!-- Code -->
             <div class="mb-3">
-                <label class="form-label">Coupon Code</label>
+                <label class="form-label">Coupon Code *</label>
                 <input type="text" name="coupon_code" class="form-control" value="{{ old('code', $coupon->code) }}">
             </div>
 
-            <!-- Discount Type -->
+ 
             <div class="mb-3">
-                <label class="form-label">Discount Type</label>
+                <label class="form-label">Discount Type *</label>
                 <select class="form-control" name="discount_type">
                     <option value="percentage" {{ $coupon->discount_type=='percentage'?'selected':'' }}>Percentage (%)</option>
                     <option value="fixed" {{ $coupon->discount_type=='fixed'?'selected':'' }}>Fixed Amount (₱)</option>
@@ -98,22 +96,22 @@
                 </select>
             </div>
 
-            <!-- Discount Value -->
+     
             <div class="mb-3">
-                <label class="form-label">Discount Value</label>
+                <label class="form-label">Discount Value *</label>
                 <input type="number" name="discount_value" class="form-control" value="{{ old('discount_value', $coupon->discount_value) }}">
             </div>
 
-            <!-- Min Spend & Max Discount -->
+
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Minimum Spend</label>
+                    <label class="form-label">Minimum Spend *</label>
                     <input type="number" name="min_spend" class="form-control" value="{{ old('min_spend', $coupon->min_spend) }}">
                 </div>
                 
             </div>
 
-            <!-- Product Dropdown -->
+
             <div x-data="productDropdown()" x-init="loadProducts(); productId='{{ $coupon->product_id }}'">
                 <label class="form-label">Product Discount</label>
                 <select x-model="productId" name="product_id" class="form-control">
@@ -124,13 +122,13 @@
                 </select>
             </div>
 
-            <!-- Usage Limit -->
+
             <div class="mb-3">
                 <label class="form-label">Usage Limit</label>
                 <input type="number" name="usage_limit" class="form-control" value="{{ old('usage_limit', $coupon->usage_limit) }}">
             </div>
 
-            <!-- Auto Apply -->
+
             <div class="mb-3">
                 <label class="form-label">Auto Apply</label>
                 <select class="form-control" name="auto_apply">
@@ -220,7 +218,6 @@
         </select>
     </div>
 
-    <!-- ✅ REQUIRED HIDDEN INPUTS (SAVE TO DB) -->
     <input type="hidden" name="region_code" x-model="regionCode">
     <input type="hidden" name="province_code" x-model="provinceCode">
     <input type="hidden" name="city_code" x-model="cityCode">
@@ -228,15 +225,14 @@
 
 </div>
 
-            <!-- Dates -->
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">Start Date</label>
+                    <label class="form-label">Start Date *</label>
                     <input type="date" name="start_date" class="form-control" value="{{ old('start_date', $coupon->start_date) }}">
                     <input type="time" name="start_time" class="form-control mt-2" value="{{ old('start_time', $coupon->start_time) }}">
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label class="form-label">End Date</label>
+                    <label class="form-label">End Date *</label>
                     <input type="date" name="end_date" class="form-control" value="{{ old('end_date', $coupon->end_date) }}">
                     <input type="time" name="end_time" class="form-control mt-2" value="{{ old('end_time', $coupon->end_time) }}">
                 </div>

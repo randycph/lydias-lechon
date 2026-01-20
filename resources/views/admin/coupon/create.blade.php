@@ -88,21 +88,21 @@
     @csrf
     <div class="coupon-card">
         <div class="mb-3">
-            <label class="form-label">Coupon Name</label>
+            <label class="form-label">Coupon Name *</label>
             <input type="text" name="coupon_name" class="form-control" placeholder="e.g. Special Coupon">
         </div>
         <div class="mb-3">
-            <label class="form-label">Coupon Description</label>
+            <label class="form-label">Coupon Description *</label>
             <textarea name="coupon_desc" class="form-control" placeholder="e.g. 20% off on the selected items"></textarea>
         </div>
         <div class="mb-3">
-            <label class="form-label">Coupon Code</label>
+            <label class="form-label">Coupon Code *</label>
             <input type="text" name="coupon_code" class="form-control" placeholder="e.g. SAVE20">
         </div>
         
 
         <div class="mb-3">
-            <label class="form-label">Discount Type</label>
+            <label class="form-label">Discount Type *</label>
             <select class="form-control" name="discount_type" id="discount_type">
                 <option value="percentage">Percentage (%)</option>
                 <option value="fixed">Fixed Amount</option>
@@ -111,7 +111,7 @@
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Discount Value</label>
+            <label class="form-label">Discount Value *</label>
             <div class="input-group">
                 <span class="input-group-text" id="discount_symbol">%</span>
                 <input type="number"
@@ -125,7 +125,7 @@
 
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label class="form-label">Minimum Spend</label>
+                <label class="form-label">Minimum Spend *</label>
                 <input type="number" name="min_spend" class="form-control" placeholder="Minimum spend"
                 required
     min="0"
@@ -133,9 +133,9 @@
             </div>
         </div>
 
-        <!-- Product -->
+
         <div x-data="categoryProductDropdown()">
-    <!-- Category Select -->
+
     <div class="mb-3">
         <label class="form-label">Category</label>
         <select x-model="selectedCategory" @change="fetchProducts()" class="form-control">
@@ -146,7 +146,7 @@
         </select>
     </div>
 
-    <!-- Product Select -->
+
     <div class="mb-3">
         <label class="form-label">Product</label>
         <select x-model="selectedProduct" name="product_id" class="form-control">
@@ -247,22 +247,22 @@
     <input type="hidden" name="barangay_code" x-model="barangayCode">
 
 </div>
-        <!-- Dates -->
+
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label class="form-label">Start Date</label>
+                <label class="form-label">Start Date *</label>
                 <input type="date" name="start_date" class="form-control">
                 <input type="time" name="start_time" class="form-control mt-2">
             </div>
             <div class="col-md-6 mb-3">
-                <label class="form-label">End Date</label>
+                <label class="form-label">End Date *</label>
                 <input type="date" name="end_date" class="form-control">
                 <input type="time" name="end_time" class="form-control mt-2">
             </div>
         </div>
 
         <div class="mb-4">
-            <label class="form-label">Status</label>
+            <label class="form-label">Status *</label>
            <select class="form-control" name="status" required>
             <option value="" disabled selected>-- Select Status --</option>
             <option value="active">Active</option>
