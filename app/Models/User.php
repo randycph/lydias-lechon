@@ -28,7 +28,7 @@ class User extends Authenticatable implements MustVerifyEmail
     use SoftDeletes;
     use LogsActivityDiff;
 
-    protected array $logExcept = ['updated_at', 'password'];
+    protected array $logExcept = ['updated_at', 'password', 'remember_token'];
 
     /** 
      * The attributes that are mass assignable.

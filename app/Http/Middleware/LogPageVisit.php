@@ -40,7 +40,7 @@ class LogPageVisit
 
         ActivityLog::withoutEvents(function () use ($request) {
             ActivityLog::create([
-                'created_by'         => auth()->id(), // null for guests
+                'created_by'         => auth()->check() ? auth()->id() : null, // null for guests
                 'activity_type'      => 'page_visit',
                 'dashboard_activity' => 'visited a page',
                 'activity_desc'      => 'visited ' . $request->fullUrl(),
@@ -48,6 +48,8 @@ class LogPageVisit
                 'subject_type'       => 'page',
                 'subject_id'         => null,
                 'ip_address'         => $request->ip(),
+                'email'              => auth()->check() ? auth()->user()?->email : null,
+                'role'               => auth()->check() ? auth()->user()?->user_role?->name : null,
             ]);
         });
 
