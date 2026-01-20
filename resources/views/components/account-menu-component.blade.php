@@ -12,19 +12,6 @@
             <div class="absolute left-0 top-0 h-10 w-1 bg-orange-500 opacity-0 group-hover:opacity-100 transition duration-200 {{ route('my-account') == request()->url() ? 'opacity-100' : 'opacity-0' }}"></div>
             <div class="py-2">Manage Account</div>
         </a>
-
-         <a href="{{ route('my-coupons') }}" 
-        class="group relative items-center flex pl-6 hover:text-tertiary cursor-pointer 
-        {{ request()->routeIs('my-coupons') ? 'text-tertiary' : '' }}">
-            
-            <div class="absolute left-0 top-0 h-10 w-1 bg-orange-500 opacity-0 
-                group-hover:opacity-100 transition duration-200 
-                {{ request()->routeIs('my-coupons') ? 'opacity-100' : 'opacity-0' }}">
-            </div>
-
-            <div class="py-2">Coupons</div>
-        </a>
-
         
         @if (Auth::check() && Auth()->user()->role_id == 6)
         <a href="{{ route('my-cart') }}" class="group relative items-center flex pl-6 hover:text-tertiary  cursor-pointer {{ route('my-cart') == request()->url() ? 'text-tertiary' : '' }}">
@@ -37,8 +24,6 @@
             <div class="absolute left-0 top-0 h-10 w-1 bg-orange-500 opacity-0 group-hover:opacity-100 transition duration-200 {{ route('change-password') == request()->url() ? 'opacity-100' : 'opacity-0' }}"></div>
             <div class="py-2">Change Password</div>
         </a>
-
-      
         
         @if (Auth::check() && Auth()->user()->role_id == 6)
         <a href="{{ route('order-history') }}" class="group relative items-center flex pl-6 hover:text-tertiary cursor-pointer {{ route('order-history') == request()->url() ? 'text-tertiary' : '' }}">
