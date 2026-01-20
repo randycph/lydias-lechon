@@ -312,12 +312,13 @@
             $('#posting_form').submit();
         }
 
-        function delete_one_coupon(id){
-            $('#prompt-delete').modal('show');
-            $('#btnDelete').on('click', function() {
-                post_form("{{route('coupon.single.delete')}}",'',id);
-            });
-        }
+        function delete_one_coupon(id) {
+        $('#prompt-delete').modal('show');
+        $('#btnDelete').off('click').on('click', function () {
+        let url = "{{ route('coupon.delete', ':id') }}".replace(':id', id);
+        post_form(url);
+    });
+}
 
         /*** handles the changing of status of multiple pages ***/
         function change_status(status){

@@ -16,15 +16,12 @@ class ListingHelper
     public $limit;
     public $sortBy;
 
-
-  
-
     public function __construct($order = 'desc', $limit = 10, $sortBy = 'updated_at', $requiredConditions = [])
     {
 
         $this->defaultSortBy = $sortBy;
         $this->defaultPerPage = $limit;
-        $this->defaultSearchField = $sortBy;
+        $this->defaultSearchField = $sortBy; 
         $this->requiredConditions = $requiredConditions;
 
 

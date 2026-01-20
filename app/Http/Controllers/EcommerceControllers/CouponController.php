@@ -124,26 +124,26 @@ return response()->json(['applied' => false]);
     public function insert_coupons(Request $request)
 { 
     $request->validate([
-        'coupon_name'    => 'required|unique:coupon_new,coupon_name',
-        'coupon_desc'    => 'required',
-        'coupon_code'    => 'required',
-        'discount_type'  => 'required|in:percentage,fixed,free delivery',
-        'auto_apply'  => 'required|in:Yes,No',
-        'discount_value' => 'required|numeric',
+    'coupon_name'    => 'required|unique:coupon_new,coupon_name',
+    'coupon_desc'    => 'required',
+    'coupon_code'    => 'required',
+    'discount_type'  => 'required|in:percentage,fixed,free delivery',
+    'auto_apply'     => 'required|in:Yes,No',
+    'discount_value' => 'required|numeric|min:0',
+    'min_spend'      => 'required|numeric|min:0',
+    'usage_limit'    => 'nullable|integer|min:1',
 
-        'min_spend'      => 'nullable|numeric',
-        'usage_limit'    => 'nullable|integer',
-        'region_name'    => 'nullable|string',
-        'province_name'  => 'nullable|string',
-        'city_name'      => 'nullable|string',
-        'barangay_name'  => 'nullable|string',
+    'region_name'    => 'nullable|string',
+    'province_name'  => 'nullable|string',
+    'city_name'      => 'nullable|string',
+    'barangay_name'  => 'nullable|string',
 
-        'start_date'     => 'required|date',
-        'start_time'     => 'required',
-        'end_date'       => 'required|date',
-        'end_time'       => 'required',
-        'status'         => 'required|boolean',
-    ]);
+    'start_date'     => 'required|date',
+    'start_time'     => 'required',
+    'end_date'       => 'required|date|after_or_equal:start_date',
+    'end_time'       => 'required',
+    'status' => 'required|in:active,inactive',
+]);
 
     DB::table('coupon_new')->insert([
         'coupon_name'     => $request->coupon_name,
@@ -221,7 +221,7 @@ return response()->json(['applied' => false]);
         'coupon_desc'      => 'nullable|string',
         'discount_type'    => 'required|in:percentage,fixed,free delivery',
         'discount_value'   => 'nullable|numeric|min:0',
-        'min_spend'        => 'nullable|numeric|min:0',
+        'min_spend'      => 'required|numeric|min:0',
         'max_discount'     => 'nullable|numeric|min:0',
         'usage_limit'      => 'nullable|integer|min:1',
         'usage_per_user'   => 'nullable|integer|min:1',
@@ -235,7 +235,7 @@ return response()->json(['applied' => false]);
         'start_time'       => 'nullable',
         'end_date'         => 'nullable|date|after_or_equal:start_date',
         'end_time'         => 'nullable',
-        'status'           => 'required|in:0,1',
+        'status' => 'required|in:active,inactive',
     ]);
 
     if ($validator->fails()) {
@@ -272,6 +272,28 @@ return response()->json(['applied' => false]);
     DB::table('coupon_new')->where('id', $id)->update($data);
 
     return redirect()->route('coupons.index')->with('success', 'Coupon updated successfully.');
+}
+
+public function delete_coupon(Request $request, $id){
+
+$hasRedemptions = DB::table('coupon_redemptions')
+        ->where('coupon_id', $id)
+        ->exists();
+
+    if ($hasRedemptions) {
+        return back()->withErrors([
+            'error' => 'Coupon cannot be deleted because it has already been used.'
+        ]);
+    }
+
+       DB::table('coupon_new')
+        ->where('id', $id)
+        ->delete();
+
+    return redirect()
+        ->route('coupons.index')
+        ->with('success', 'Coupon deleted successfully.');
+
 }
 
 

@@ -178,6 +178,7 @@ Route::get('/products/{slug}', 'Product\Front\ProductFrontController@show')->nam
 Route::get('/products_list', [CouponController::class, 'getProducts']);
 Route::get('/category_list', [CouponController::class, 'getCategories']);
 Route::post('/insert_coupon', [CouponController::class, 'insert_coupons'])->name('coupon.insert');
+Route::post('/delete_coupon/{id}', [CouponController::class, 'delete_coupon'])->name('coupon.delete');
 Route::get('/coupon_edit/{id}', [CouponController::class, 'edit_coupon'])->name('coupon.edit');
 Route::post('/coupon_update/{id}', [CouponController::class, 'update_coupon'])->name('coupon.update');
 Route::post('/redeem-coupon/{id}', [CouponController::class, 'redeem']);
