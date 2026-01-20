@@ -110,7 +110,8 @@
                                 <th>Created by</th>
                                 <th>Activity Type</th> 
                                 <th>Activity</th>
-                                <th>IP Address</th>
+                                <th>Email</th>
+                                <th>Role</th>
                                 <th>Description</th> 
                                 <th>Reference</th>   
                                 <th>Old Value</th>
@@ -123,14 +124,16 @@
                             @foreach($rs as $r) 
                                 <tr style="text-align: left">
                                     <td>@if(date('Y-m-d',strtotime($r->activity_date)) <> '1970-01-01'){{date('m-d-Y g:i A',strtotime($r->activity_date))}} @endif</td>
-                                    <td>{{$r->user->name ?? 'N/A'}}</td>
+                                    <td>{{$r->user->name ?? 'Guest'}}</td>
                                     <td>{{$r->activity_type}}</td>
                                     <td>{{$r->dashboard_activity}}</td>
-                                    <td>{{$r->ip_address}}</td>
+                                    <td>{{$r->email}}</td>
+                                    <td>{{$r->role}}</td>
                                     <td>{{$r->activity_desc}}</td>
                                     <td>{{$r->reference}}</td>
                                     <td>{{$r->old_value}}</td>
                                     <td>{{$r->new_value}}</td>
+
                                 </tr>
                             @endforeach
                         
