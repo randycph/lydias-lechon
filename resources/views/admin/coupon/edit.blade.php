@@ -246,9 +246,9 @@
             <div class="mb-4">
                 <label class="form-label">Status</label>
                 <select class="form-control" name="status">
-                    <option value="active" {{ $coupon->status==active?'selected':'' }}>Active</option>
-                    <option value="inactive" {{ $coupon->status==inactive?'selected':'' }}>Inactive</option>
-                </select>
+                <option value="active" @selected($coupon->status == 'active')>Active</option>
+                <option value="inactive" @selected($coupon->status == 'inactive')>Inactive</option>
+            </select>
             </div>
             <button type="submit" class="btn btn-primary w-100">Update Coupon</button>
         </div>
