@@ -146,12 +146,10 @@
                             </td>
                             <td class="text-center">{{ $coupon->usage_limit ?? 0 }}</td>
                             <td>
-                                @if($coupon->status == 'Active')
+                                @if($coupon->status == 'active')
                                     <span class="badge badge-success">Active</span>
-                                @elseif($coupon->status == 'Not Started')
-                                    <span class="badge badge-warning">Not Started</span>
-                                @elseif($coupon->status == 'Expired')
-                                    <span class="badge badge-secondary">Expired</span>
+                                @elseif($coupon->status == 'inactive')
+                                    <span class="badge badge-warning">Inactive</span>
                                 @endif
                             </td>
                             <td>{{ \Carbon\Carbon::parse($coupon->updated_at)->format('M d, Y h:i A') }}</td>
