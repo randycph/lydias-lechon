@@ -249,7 +249,6 @@ class FrontendController extends Controller
 
         $disabledPickupDates = explode(',', $setting->disable_pickup_dates ?? '');
         $disabledDeliveryDates = explode(',', $setting->disable_delivery_dates ?? '');
-        $disabledDeliveryMiscDates = explode(',', $setting->disable_delivery_misc_dates ?? '');
 
         $haslechon = $carts->contains(function ($cart) {
             return data_get($cart, 'product.category_id') == 1
@@ -413,39 +412,37 @@ class FrontendController extends Controller
 
     public function my_coupons(Request $request)
     {
-        $page = 'my-coupons';
+       $page = 'my-coupons';
 
-        $request->session()->forget('redirect_after_login');
+$request->session()->forget('redirect_after_login');
 
-        if (!Auth::check()) {
-            return redirect()->route('login', ['redirect' => $request->fullUrl()]);
-        }
+if (!Auth::check()) {
+    return redirect()->route('login', ['redirect' => $request->fullUrl()]);
+}
 
-        $now = now()->toDateTimeString();
         $uid = Auth::id();
 
-        $eligibleCoupons = Coupon::query()
-            ->where('status', 'ACTIVE')
-            ->whereRaw("CONCAT(start_date, ' ', start_time) <= ?", [$now])
-            ->whereRaw("CONCAT(end_date, ' ', end_time) >= ?", [$now])
-            ->where(function ($q) use ($uid) {
-                // visible to everyone
-                $q->whereNull('customer_scope')->orWhere('customer_scope', 'all')
-                // visible only if user's ID is in the list
-                ->orWhere(function ($x) use ($uid) {
-                    $x->where('customer_scope', 'specific')
-                        ->whereRaw(
-                            "FIND_IN_SET(?, REPLACE(REPLACE(scope_customer_id, ' ', ''), '|', ','))",
-                            [$uid]
-                        );
-                });
-            })
-            ->get();
 
+    DB::table('coupon_new')
+        ->where('status', 1)
+        ->whereRaw("CONCAT(end_date, ' ', end_time) <= NOW()")
+        ->update(['status' => 0]);
 
-        // dd($eligibleCoupons);
+    $eligibleCoupons = DB::table('coupon_new as c')
+    
+        ->where('c.status', 1)
+        ->whereNotExists(function ($query) use ($uid) {
+            $query->select(DB::raw(1))
+                ->from('coupon_redemptions')
+                ->whereColumn('coupon_redemptions.coupon_id', 'c.id')
+                ->where('coupon_redemptions.user_id', $uid);
+        })
+        ->get();
+
+return view('v2.my-coupons', compact('page', 'eligibleCoupons'));
 
         return view('v2.my-coupons', compact('page', 'eligibleCoupons'));
+
     }
 
     public function my_cart(Request $request)
@@ -459,7 +456,7 @@ class FrontendController extends Controller
         if (Auth::check() && Auth()->user()->role_id != 6) {
             return redirect()->route('my-account')->with('error', 'You are not allowed to access this page. Please contact support for assistance.');
         }
-
+ 
         return view('v2.my-cart', compact('page'));
     }
 
@@ -677,7 +674,6 @@ class FrontendController extends Controller
                     'lastname' => $request->org_name,
                     'password' => Hash::make($request->password),
                     'email' => $request->email,
-                    'valid_email' => $request->email ?? null,
                     'organization' => $request->org_name ?? $request->organization,
                     'address_street' => $request->address_street,
                     'address_municipality' => $request->address_municipality,
@@ -705,7 +701,6 @@ class FrontendController extends Controller
                     'lastname' => $request->last_name,
                     'password' => Hash::make($request->password),
                     'email' => $request->email,
-                    'valid_email' => $request->email ?? null,
                     'birthday' => $request->birth_date,
                     'country' => $request->country,
                     'address_street' => $request->address_street,
