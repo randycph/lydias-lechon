@@ -110,10 +110,7 @@
                     <label class="form-label">Minimum Spend</label>
                     <input type="number" name="min_spend" class="form-control" value="{{ old('min_spend', $coupon->min_spend) }}">
                 </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Max Discount</label>
-                    <input type="number" name="max_discount" class="form-control" value="{{ old('max_discount', $coupon->max_discount) }}">
-                </div>
+                
             </div>
 
             <!-- Product Dropdown -->
@@ -249,11 +246,10 @@
             <div class="mb-4">
                 <label class="form-label">Status</label>
                 <select class="form-control" name="status">
-                    <option value="1" {{ $coupon->status==1?'selected':'' }}>Active</option>
-                    <option value="0" {{ $coupon->status==0?'selected':'' }}>Inactive</option>
+                    <option value="active" {{ $coupon->status==active?'selected':'' }}>Active</option>
+                    <option value="inactive" {{ $coupon->status==inactive?'selected':'' }}>Inactive</option>
                 </select>
             </div>
-
             <button type="submit" class="btn btn-primary w-100">Update Coupon</button>
         </div>
     </form>

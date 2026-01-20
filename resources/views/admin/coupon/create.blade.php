@@ -103,23 +103,33 @@
 
         <div class="mb-3">
             <label class="form-label">Discount Type</label>
-            <select class="form-control" name="discount_type">
+            <select class="form-control" name="discount_type" id="discount_type">
                 <option value="percentage">Percentage (%)</option>
-                <option value="fixed">Fixed Amount (₱)</option>
+                <option value="fixed">Fixed Amount</option>
                 <option value="free delivery">Free Delivery</option>
             </select>
         </div>
 
-
         <div class="mb-3">
             <label class="form-label">Discount Value</label>
-            <input type="number" name="discount_value" class="form-control" placeholder="20 or 100">
+            <div class="input-group">
+                <span class="input-group-text" id="discount_symbol">%</span>
+                <input type="number"
+                    name="discount_value"
+                    class="form-control"
+                    placeholder="Enter value"
+                    min="0"
+                    step="0.01">
+            </div>
         </div>
 
         <div class="row">
             <div class="col-md-6 mb-3">
                 <label class="form-label">Minimum Spend</label>
-                <input type="number" name="min_spend" class="form-control" placeholder="Optional">
+                <input type="number" name="min_spend" class="form-control" placeholder="Minimum spend"
+                required
+    min="0"
+    step="0.01">
             </div>
         </div>
 
@@ -253,10 +263,11 @@
 
         <div class="mb-4">
             <label class="form-label">Status</label>
-            <select class="form-control" name="status">
-                <option value="1">Active</option>
-                <option value="0">Inactive</option>
-            </select>
+           <select class="form-control" name="status" required>
+            <option value="" disabled selected>-- Select Status --</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+        </select>
         </div>
 
         <button type="submit" class="btn btn-primary w-100">Create Coupon</button>
@@ -391,7 +402,7 @@ function categoryProductDropdown() {
         },
 
         async loadCategories() {
-            const res = await fetch('/category_list'); // your API route for categories
+            const res = await fetch('/category_list'); 
             this.categories = await res.json();
         },
 
@@ -409,6 +420,28 @@ function categoryProductDropdown() {
     }
 }
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const typeSelect = document.getElementById('discount_type');
+    const symbol = document.getElementById('discount_symbol');
+
+    function updateSymbol() {
+        if (typeSelect.value === 'percentage') {
+            symbol.textContent = '%';
+        } else {
+
+            symbol.textContent = '₱';
+        }
+    }
+
+
+    updateSymbol();
+
+
+    typeSelect.addEventListener('change', updateSymbol);
+});
+</script>
+
 
 
 @endsection
