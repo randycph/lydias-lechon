@@ -245,7 +245,6 @@ class FrontendController extends Controller
 
         $disabledPickupDates = explode(',', $setting->disable_pickup_dates ?? '');
         $disabledDeliveryDates = explode(',', $setting->disable_delivery_dates ?? '');
-        $disabledDeliveryMiscDates = explode(',', $setting->disable_delivery_misc_dates ?? '');
 
         $haslechon  = $carts->contains(function ($cart) {
             return $cart->product->category_id == 1;
@@ -286,18 +285,7 @@ class FrontendController extends Controller
 
         // dd($eligibleCoupons);
 
-        $setting = Setting::first();
-        $minimum_order_amount_door_to_door = $setting ? $setting->minimum_order : 0;
-        $minimum_order_amount_pickup = $setting ? $setting->minimum_order_pickup : 0;
-        $minimum_processing_hours = $setting ? $setting->minimum_processing_hours : 24;
-        $minimum_processing_hours_misc = $setting ? $setting->minimum_processing_hours_misc : 12;
-        $minimum_order_misc = $setting ? $setting->minimum_order_misc : 0;
-
-        $hasCochinillo = $carts->contains(function ($cart) {
-            return $cart->product_id === 165;
-        });
-
-        return view('v2.checkout', compact('triples', 'provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'disabledDeliveryMiscDates', 'haslechon', 'hasbaka', 'hasMisc', 'eligibleCoupons', 'minimum_order_amount_door_to_door', 'minimum_order_amount_pickup', 'minimum_processing_hours', 'minimum_processing_hours_misc', 'minimum_order_misc', 'hasCochinillo'));
+        return view('v2.checkout', compact('triples', 'provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'haslechon', 'hasbaka', 'hasMisc', 'eligibleCoupons'));
     }
 
     public function confirmation($id)
@@ -385,39 +373,37 @@ class FrontendController extends Controller
 
     public function my_coupons(Request $request)
     {
-        $page = 'my-coupons';
+       $page = 'my-coupons';
 
-        $request->session()->forget('redirect_after_login');
+$request->session()->forget('redirect_after_login');
 
-        if (!Auth::check()) {
-            return redirect()->route('login', ['redirect' => $request->fullUrl()]);
-        }
+if (!Auth::check()) {
+    return redirect()->route('login', ['redirect' => $request->fullUrl()]);
+}
 
-        $now = now()->toDateTimeString();
         $uid = Auth::id();
 
-        $eligibleCoupons = Coupon::query()
-            ->where('status', 'ACTIVE')
-            ->whereRaw("CONCAT(start_date, ' ', start_time) <= ?", [$now])
-            ->whereRaw("CONCAT(end_date, ' ', end_time) >= ?", [$now])
-            ->where(function ($q) use ($uid) {
-                // visible to everyone
-                $q->whereNull('customer_scope')->orWhere('customer_scope', 'all')
-                // visible only if user's ID is in the list
-                ->orWhere(function ($x) use ($uid) {
-                    $x->where('customer_scope', 'specific')
-                        ->whereRaw(
-                            "FIND_IN_SET(?, REPLACE(REPLACE(scope_customer_id, ' ', ''), '|', ','))",
-                            [$uid]
-                        );
-                });
-            })
-            ->get();
 
+    DB::table('coupon_new')
+        ->where('status', 1)
+        ->whereRaw("CONCAT(end_date, ' ', end_time) <= NOW()")
+        ->update(['status' => 0]);
 
-        // dd($eligibleCoupons);
+    $eligibleCoupons = DB::table('coupon_new as c')
+    
+        ->where('c.status', 1)
+        ->whereNotExists(function ($query) use ($uid) {
+            $query->select(DB::raw(1))
+                ->from('coupon_redemptions')
+                ->whereColumn('coupon_redemptions.coupon_id', 'c.id')
+                ->where('coupon_redemptions.user_id', $uid);
+        })
+        ->get();
+
+return view('v2.my-coupons', compact('page', 'eligibleCoupons'));
 
         return view('v2.my-coupons', compact('page', 'eligibleCoupons'));
+
     }
 
     public function my_cart(Request $request)
@@ -431,7 +417,7 @@ class FrontendController extends Controller
         if (Auth::check() && Auth()->user()->role_id != 6) {
             return redirect()->route('my-account')->with('error', 'You are not allowed to access this page. Please contact support for assistance.');
         }
-
+ 
         return view('v2.my-cart', compact('page'));
     }
 
@@ -649,7 +635,6 @@ class FrontendController extends Controller
                     'lastname' => $request->org_name,
                     'password' => Hash::make($request->password),
                     'email' => $request->email,
-                    'valid_email' => $request->email ?? null,
                     'organization' => $request->org_name ?? $request->organization,
                     'address_street' => $request->address_street,
                     'address_municipality' => $request->address_municipality,
@@ -677,7 +662,6 @@ class FrontendController extends Controller
                     'lastname' => $request->last_name,
                     'password' => Hash::make($request->password),
                     'email' => $request->email,
-                    'valid_email' => $request->email ?? null,
                     'birthday' => $request->birth_date,
                     'country' => $request->country,
                     'address_street' => $request->address_street,
