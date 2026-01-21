@@ -249,6 +249,7 @@ class FrontendController extends Controller
 
         $disabledPickupDates = explode(',', $setting->disable_pickup_dates ?? '');
         $disabledDeliveryDates = explode(',', $setting->disable_delivery_dates ?? '');
+        $disabledDeliveryMiscDates = explode(',', $setting->disable_delivery_misc_dates ?? '');
 
         $haslechon = $carts->contains(function ($cart) {
             return data_get($cart, 'product.category_id') == 1
