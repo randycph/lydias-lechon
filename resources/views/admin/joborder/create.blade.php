@@ -59,9 +59,13 @@
                         <label class="d-block">Select Branch:</label>
                         <select name="branch_source" id="branch_source" required="required" class="form-control">
                             <option value="">- Select Branch -</option>
-                            @foreach($branches_store as $b)
-                                <option value="{{$b->name}}|{{$b->rate}}" {{ old('branch_source') == $b->name.'|'.$b->rate ? 'selected' : '' }}>{{$b->name}}</option>
-                            @endforeach
+                            @if (session()->has('login_branch'))
+                                <option value="{{ session('login_branch') }}|" selected>{{ session('login_branch') }}</option>
+                            @else
+                                @foreach($branches_store as $b)
+                                    <option value="{{$b->name}}|{{$b->rate}}" {{ old('branch_source') == $b->name.'|'.$b->rate ? 'selected' : '' }}>{{$b->name}}</option>
+                                @endforeach
+                            @endif
                         </select>
                     </div>
                 @endif
@@ -211,13 +215,13 @@
                             <option value="Buhat" {{ old('order_type') == 'Buhat' ? 'selected' : '' }}>Buhat</option>
                             <option value="Additional" {{ old('order_type') == 'Additional' ? 'selected' : '' }}>Additional</option>
                             <option value="Reserve" {{ old('order_type') == 'Reserve' ? 'selected' : '' }}>Reserve</option>
-                            <option value="Miscellaneous" {{ old('order_type') == 'Miscellaneous' ? 'selected' : '' }}>Miscellaneous</option>
                         </select>
                     </div>
 
                     <div class="delivery-pickup-place">
 
-                        <div class="form-group">
+                        @if (auth()->user()->user_role->name == 'Admin' || auth()->user()->user_role->name == 'Forecaster')
+                        <div class="form-group"> 
                             <label class="d-block">Production Branch <span class="tx-danger">*</span></label>
                             <select required class="form-control mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select Production Branch" data-width="100%" id="pb" name="pb">
                                 <option value=""> - Select -</option>
@@ -227,6 +231,7 @@
                                 @endforeach
                             </select>
                         </div>
+                        @endif
 
                         <div class="form-group">
                             <label class="d-block">Delivery Type <span class="tx-danger">*</span></label>
