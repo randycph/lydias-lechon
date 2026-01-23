@@ -261,10 +261,26 @@ Delivery Report {{$date_display}}
                         columns: ':visible'
                     }
                 },
-                'colvis'
+                {
+                    extend: 'colvis',
+                    text: 'Column visibility',
+                    buttons: [
+                        {
+                            extend: 'colvisGroup',
+                            text: 'Show all columns',
+                            show: ':hidden'
+                        },
+                        {
+                            extend: 'colvisGroup',
+                            text: 'Hide extra columns',
+                            hide: [3,4,8,10,11,12,13,14,15,17,18,19]
+                        },
+                        'columnsToggle'
+                    ]
+                }
             ],
             columnDefs: [ {
-                targets: [3,4,8,10,11,12,13,14,15,17,18,19,],
+                targets: [3,4,8,10,11,12,13,14,15,17,18,19],
                 visible: false
                 },
                 { type: 'time-uni', targets: [7,15] }
