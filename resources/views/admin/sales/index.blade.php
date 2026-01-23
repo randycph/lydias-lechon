@@ -385,7 +385,7 @@
 
                                                                 <a class="dropdown-item" style="display: none;" target="_blank" href="{{ route('sales-transaction.view_payment',$sale->id) }}" title="Show payment" data-id="{{$sale->id}}">Sales Payment</a>
 
-                                                                @if(canAddPayment($sale))
+                                                                @if(canAddPayment($sale) && auth()->user()->has_access_to_route('payment.add.store'))
                                                                     <a class="dropdown-item" href="javascript:;"
                                                                     onclick="addPayment(
                                                                         '{{ $sale->id }}',
