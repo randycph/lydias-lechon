@@ -229,7 +229,8 @@ class ReportsController extends Controller
         // Sales
             $qry = "SELECT d.product_name, h.outlet, d.paella_price, h.contact_person, d.product_name as dproduct_name, h.has_sub, '' as jo_category, d.id as idd,
             d.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,d.price, h.customer_delivery_adress, h.parent_sales_header_id,
-            h.customer_name, d.delivery_date as delivery_date, h.instruction, po.delivery_date as deldate, h.delivery_type, jo.jo_number, pb.name as pbname, h.delivery_status as delstat,h.agent, h.customer_contact_number,'' as dr, h.delivery_fee_amount, d.price, '' as releasing, h.order_source, br.name as receiver, c.name as catname, u.name as username, jo.jo_order_type,h.order_type as hordertype, h.id as hid, '' as jo_category, 'sales' as trantype, DATE_FORMAT(d.delivery_date,'%H:%i:%s') as timeneeded, DATE_FORMAT(d.delivery_date, '%Y-%m-%d') as dateneeded, p.is_misc, p.production_item, h.isConfirm as isConfirm, h.gross_amount as gros, h.forecast_date as forecast_dt, h.delivery_branch as del_branch,p.id as prodid,h.created_at as created
+            h.customer_name, d.delivery_date as delivery_date, h.instruction, po.delivery_date as deldate, h.delivery_type, jo.jo_number, pb.name as pbname, h.delivery_status as delstat,h.agent, h.customer_contact_number,'' as dr, h.delivery_fee_amount, d.price, '' as releasing, h.order_source, br.name as receiver, c.name as catname, u.name as username, jo.jo_order_type,h.order_type as hordertype, h.id as hid, '' as jo_category, 'sales' as trantype, DATE_FORMAT(d.delivery_date,'%H:%i:%s') as timeneeded, DATE_FORMAT(d.delivery_date, '%Y-%m-%d') as dateneeded, p.is_misc, p.production_item, h.isConfirm as isConfirm, h.gross_amount as gros, h.forecast_date as forecast_dt, h.delivery_branch as del_branch,p.id as prodid,h.created_at as created,
+            p.size
             FROM `ecommerce_sales_details` d
             left join ecommerce_sales_headers h on h.id=d.sales_header_id
             left join products p on p.id=d.product_id
@@ -418,7 +419,8 @@ class ReportsController extends Controller
             c.name as catname, u.name as username, jo.jo_order_type,h.order_type as hordertype, h.id as hid, '' as jo_category, 'sales' as trantype, 
             m.delivery_time as timeneeded, m.delivery_date as dateneeded, 
             p.is_misc, p.production_item, h.isConfirm as isConfirm, h.gross_amount as gros, h.forecast_date as forecast_dt, 
-            h.delivery_branch as del_branch,p.id as prodid,h.created_at as created
+            h.delivery_branch as del_branch,p.id as prodid,h.created_at as created,
+            p.size
             FROM `temp_mrs` m
             left join `ecommerce_sales_details` d on d.product_id=m.product_id and d.sales_header_id=m.sales_header_id
             left join ecommerce_sales_headers h on h.id=d.sales_header_id
@@ -534,7 +536,8 @@ class ReportsController extends Controller
             jo.qty as qty, '' as order_number, u.address_street, u.address_municipality, u.address_city, u.address_region, jo.price, jo.customer_address as customer_delivery_adress,
             jo.customer_name, jo.date_needed as delivery_date,jo.remarks as instruction, po.delivery_date as deldate,'' as delivery_type, jo.jo_number, pb.name as pbname, jo.created_at as created,
 
-            '' as delstat, '' as agent, '' as customer_contact_number,'' as dr, '0' as delivery_fee_amount,'0' as price, '' as releasing, 'Forecaster' as order_source, br.name as receiver, c.name as catname, u.name as username, jo.jo_order_type, '0' as hid, jo.jo_category as jo_category, 'jo' as trantype, DATE_FORMAT(jo.date_needed,'%H:%i:%s') as timeneeded, DATE_FORMAT(jo.date_needed, '%Y-%m-%d') as dateneeded, p.is_misc, p.production_item, '1' as isConfirm, 0 as gros, '' as forecast_dt, '' as del_branch,p.id as prodid
+            '' as delstat, '' as agent, '' as customer_contact_number,'' as dr, '0' as delivery_fee_amount,'0' as price, '' as releasing, 'Forecaster' as order_source, br.name as receiver, c.name as catname, u.name as username, jo.jo_order_type, '0' as hid, jo.jo_category as jo_category, 'jo' as trantype, DATE_FORMAT(jo.date_needed,'%H:%i:%s') as timeneeded, DATE_FORMAT(jo.date_needed, '%Y-%m-%d') as dateneeded, p.is_misc, p.production_item, '1' as isConfirm, 0 as gros, '' as forecast_dt, '' as del_branch,p.id as prodid,
+            p.size
             from job_orders jo 
             left join branches br on  br.id = jo.pickup_branch
             left join production_orders po on po.joborder_id = jo.id
@@ -617,6 +620,15 @@ class ReportsController extends Controller
 
         $original_results = $results;
 
+        $sizeCounts = $results
+            ->map(function ($item) {
+                return trim($item->size ?? '') !== ''
+                    ? $item->size
+                    : 'Size Undefined';
+            })
+            ->countBy()
+            ->sortKeys();
+
         if (isset($_GET['filter']) && $_GET['filter'] == 'whole-lechon') {
             $results = $results
                 ->where('isConfirm', 1)
@@ -654,12 +666,26 @@ class ReportsController extends Controller
                 ->values();
         }
         
-        //logger($results);
-        if(isset($_GET['toexcel']))
-            return view('admin.reports.forecaster_excel',compact('rs','jo','results','wra_array','mrs'));
-        else
-            // return view('admin.reports.forecaster',compact('rs','jo','results','wra_array','mrs'));
-            return view('admin.reports.forecaster-test',compact('rs','jo','results','wra_array','mrs', 'original_results'));
+        if(isset($_GET['toexcel'])) {
+            return view('admin.reports.forecaster_excel', compact(
+                'rs',
+                'jo',
+                'results',
+                'wra_array',
+                'mrs'
+            ));
+        } else { 
+            return view('admin.reports.forecaster-test', compact(
+                'rs',
+                'jo',
+                'results',
+                'wra_array',
+                'mrs',
+                'original_results',
+                'sizeCounts'
+            ));
+        }
+            
     }
 
     public function sales_payment(Request $request)
