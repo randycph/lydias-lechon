@@ -412,64 +412,94 @@
                         </tr>
                     </table>
 
-                    <table class="print-table" border="1" width="40%" style="font-size: 14px; font-weight:bold; ">
+                    <table class="print-table" width="100%" cellpadding="5" cellspacing="0" style="font-size: 14px; font-weight:bold;" >
                         <tr>
-                            <td>TOTAL WHOLE LECHON ORDER:</td>
-                            <td align="center">
-                                <a href="{{ request()->fullUrlWithQuery(['filter' => 'whole-lechon']) }}">
-                                    {{ $total_lechon_order }}
-                                </a>
+                            <!-- LEFT: Existing totals table -->
+                            <td width="60%" valign="top">
+                                <table class="print-table" border="1" width="100%" style="font-size:14px; font-weight:bold;">
+                                    <tr>
+                                        <td>TOTAL WHOLE LECHON ORDER:</td>
+                                        <td align="center">
+                                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'whole-lechon']) }}">
+                                                {{ $total_lechon_order }}
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>TOTAL PANTAGA:</td>
+                                        <td align="center">
+                                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'pantaga']) }}">
+                                                {{collect($jo)->where('jo_category','=','Pantaga')->sum('qty')}}
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>TOTAL BELLY PANTAGA:</td>
+                                        <td align="center">
+                                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'belly-pantaga']) }}">
+                                                {{collect($jo)->where('jo_category','=','Belly Pantaga')->sum('qty')}}
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>TOTAL DISPLAY:</td>
+                                        <td align="center">
+                                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'display']) }}">
+                                                {{collect($jo)->where('jo_category','=','Display')->sum('qty')}}
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>TOTAL ALPHA SIZE:</td>
+                                        <td align="center">
+                                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'alpha-size']) }}">
+                                                {{collect($jo)->where('jo_category','=','Alpha Size')->sum('qty')}}
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>OVERALL TOTAL LECHON:</td>
+                                        <td align="center">
+                                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'overall-lechon']) }}">
+                                                {{$total_lechon_overall}}
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>TOTAL MISC QTY:</td>
+                                        <td align="center">
+                                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'misc']) }}">
+                                                {{$total_misc}}
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </table>
                             </td>
-                        </tr>
-                        <tr>
-                            <td>TOTAL PANTAGA:</td>
-                            <td align="center">
-                                <a href="{{ request()->fullUrlWithQuery(['filter' => 'pantaga']) }}">
-                                    {{collect($jo)->where('jo_category','=','Pantaga')->sum('qty')}}
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>TOTAL BELLY PANTAGA:</td>
-                            <td align="center">
-                                <a href="{{ request()->fullUrlWithQuery(['filter' => 'belly-pantaga']) }}">
-                                    {{collect($jo)->where('jo_category','=','Belly Pantaga')->sum('qty')}}
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>TOTAL DISPLAY:</td>
-                            <td align="center">
-                                <a href="{{ request()->fullUrlWithQuery(['filter' => 'display']) }}">
-                                    {{collect($jo)->where('jo_category','=','Display')->sum('qty')}}
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>TOTAL ALPHA SIZE:</td>
-                            <td align="center">
-                                <a href="{{ request()->fullUrlWithQuery(['filter' => 'alpha-size']) }}">
-                                    {{collect($jo)->where('jo_category','=','Alpha Size')->sum('qty')}}
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>OVERALL TOTAL LECHON: </td>
-                            <td align="center">
-                                <a href="{{ request()->fullUrlWithQuery(['filter' => 'overall-lechon']) }}">
-                                    {{$total_lechon_overall}}
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>TOTAL MISC QTY:</td>
-                            <td align="center">
-                                <a href="{{ request()->fullUrlWithQuery(['filter' => 'misc']) }}">
-                                    {{$total_misc}}
-                                </a>
+
+                            <!-- RIGHT: Size breakdown -->
+                            <td width="40%" valign="top">
+                                <table class="print-table" border="1" width="100%" style="font-size:14px; font-weight:bold;">
+                                    <tr>
+                                        <td colspan="2" align="center">SIZE BREAKDOWN</td>
+                                    </tr>
+
+                                    @foreach ($sizeCounts as $size => $count)
+                                        <tr>
+                                            <td>{{ strtoupper($size) }}</td>
+                                            <td align="center">{{ $count }}</td>
+                                        </tr>
+                                    @endforeach
+                                </table>
                             </td>
                         </tr>
                     </table>
+
                 </div>
             </div>
 
