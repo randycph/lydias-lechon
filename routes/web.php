@@ -109,6 +109,18 @@ Route::post('/admin/login', function(Request $request) {
     try {
         $credentials = $request->only('email', 'password');
 
+        if ($request->has('branch')) {
+            session(['login_branch' => $request->branch]);
+        } else {
+            session()->forget('login_branch');
+        }
+
+        if ($request->has('is_kiosk')) {
+            session(['is_kiosk' => true]);
+        } else {
+            session()->forget('is_kiosk');
+        }
+
         if (Auth::attempt($credentials)) {
 
             $user = Auth::user();

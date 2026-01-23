@@ -21,10 +21,60 @@ class SalesHeader extends Model
     protected $keyType = 'int';
 
     protected $table = 'ecommerce_sales_headers';
-    protected $fillable = ['updated_at', 'created_at', 'user_id', 'order_number', 'response_code', 'customer_name', 'customer_contact_number', 'customer_address', 'customer_delivery_adress', 'delivery_tracking_number', 'delivery_fee_amount',
-        'gross_amount', 'parent_sales_header_id', 'has_sub', 'is_sub', 'has_dispatched', 'has_transited', 'is_new_order', 'tax_amount', 'net_amount', 'discount_amount', 'payment_status', 'region', 'province', 'city', 'barangay',
-        'delivery_status', 'temp_prod_branch', 'has_baka', 'lechon_baka_service', 'status', 'for_deletion', 'currency','order_source','payment_type','delivery_type','order_type','outlet','receipt_number','instruction','agent','customer_location','email','payment_used','payment_remarks','contact_person','isConfirm','confirmed_by','confirmed_on','confirm_remarks','origin','delivery_branch','forecast_date', 'is_multiple_address'];
-
+    protected $fillable = [
+        'updated_at',
+        'created_at',
+        'user_id',
+        'order_number',
+        'response_code',
+        'customer_name',
+        'customer_contact_number',
+        'customer_address',
+        'customer_delivery_adress',
+        'delivery_tracking_number',
+        'delivery_fee_amount',
+        'gross_amount',
+        'parent_sales_header_id',
+        'has_sub',
+        'is_sub',
+        'has_dispatched',
+        'has_transited',
+        'is_new_order',
+        'tax_amount',
+        'net_amount',
+        'discount_amount',
+        'payment_status',
+        'province',
+        'city',
+        'barangay',
+        'delivery_status',
+        'temp_prod_branch',
+        'status',
+        'for_deletion',
+        'currency',
+        'order_source',
+        'payment_type',
+        'delivery_type',
+        'order_type',
+        'outlet',
+        'receipt_number',
+        'instruction',
+        'agent',
+        'customer_location',
+        'email',
+        'payment_used',
+        'payment_remarks',
+        'contact_person',
+        'isConfirm',
+        'confirmed_by',
+        'confirmed_on',
+        'confirm_remarks',
+        'origin',
+        'delivery_branch',
+        'forecast_date',
+        'is_multiple_address'
+    ];
+    
     public function user()
     {
         return $this->belongsTo(User::class);

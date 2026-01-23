@@ -117,7 +117,6 @@
                         <option value="Buhat">Buhat</option>
                         <option value="Additional">Additional</option>
                         <option value="Reserve">Reserve</option>
-                        <option value="Miscellaneous">Miscellaneous</option>
                     </select>
                 </div>
 

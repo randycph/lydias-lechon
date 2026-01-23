@@ -460,6 +460,7 @@ class JoborderController extends Controller
             'province' => $request->province,
             'city' => $request->city,
             'barangay' => $request->barangay,
+            'temp_prod_branch' => $request->pb ?? 0,
             'is_new_order' => 1,
         ]);
 
@@ -593,8 +594,10 @@ class JoborderController extends Controller
                 'confirmed_on' => date('Y-m-d H:i:s')
             ]);
 
-            $sh = new SalesHeader();
-            $sh->assign_to_production_branch($sales, $request->pb);
+            if (auth()->user()->user_role->name != 'Cashier') {
+                $sh = new SalesHeader();
+                $sh->assign_to_production_branch($sales, $request->pb);
+            }
         }
 
         //$sms = new Sms();
