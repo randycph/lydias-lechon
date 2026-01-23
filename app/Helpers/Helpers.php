@@ -307,3 +307,21 @@ if (! function_exists('clean_name')) {
     }
 }
 
+if (!function_exists('canAddPayment')) {
+
+    function canAddPayment(SalesHeader $sale, int $days = 30): bool
+    {
+        // OVERRIDE via URL
+        if (request()->boolean('force_over_30')) {
+            $isOverDays = true;
+        } else {
+            $isOverDays = $sale->created_at->diffInDays(now()) >= $days;
+        }
+
+        $hasSignChit = $sale->payments()
+            ->where('payment_type', 'Sign-Chit')
+            ->exists();
+
+        return !($hasSignChit && $isOverDays);
+    }
+}
