@@ -135,8 +135,13 @@
                     </div>
                     <div class="form-group">
                         <label class="d-block">Size</label>
-                        <input type="text" class="form-control @error('size') is-invalid @enderror" name="size" id="size" value="{{ old('size', $product->size) }}" min="0" step="1">
-                        <x-error-message inputName
+                        <select name="size" id="size" class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select size" data-width="100%">
+                            <option value="0" >-- Select Size --</option>
+                            @foreach($sizes as $size)
+                                <option value="{{$size->name}}" @if($product->size == $size->name) selected @endif>{{strtoupper($size->name)}}</option>
+                            @endforeach
+                        </select>
+                        <x-error-message inputName="size" />
                     </div>
                     <div class="form-group">
                         <label class="d-block">Weight</label>
