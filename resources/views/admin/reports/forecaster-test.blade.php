@@ -128,6 +128,10 @@
   /* neutralize HTML border="1" */
   table[border] { border:0 !important; }
 
+table.dataTable thead .sorting::before, table.dataTable thead .sorting::after {
+    display: none !important;
+}
+
   /* === FULL GRID with merge support (scoped to #example only) === */
   #example { border-collapse: collapse !important; width:100% !important; font-size: 16px !important; }
   #example th, 
@@ -900,8 +904,8 @@
         pageLength: 28,
         lengthMenu: [ [28, 50, 100, -1], [28, 50, 100, "All"] ],
         aaSorting: [],
-        bSort: false,
-        searching: false,
+        bSort: true,
+        searching: true,
         asStripeClasses: [],
         buttons: [
             {
