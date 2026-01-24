@@ -217,7 +217,9 @@
             dom: 'Bfrtip',
             pageLength: 20,
             aaSorting: [],
-            bSort: false,
+            bSort: true,
+            searching: true,
+            asStripeClasses: [],
             buttons: [
                 {
                     extend: 'print',
