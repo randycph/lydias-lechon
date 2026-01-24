@@ -373,7 +373,7 @@
                                     <select name="size" id="size" class="form-control" >
                                         <option value="">- Select Size -</option>                                                                        
                                         @foreach(\App\Models\Product::select('size')->whereNotNull('size')->where('size','!=','')->distinct('size')->orderBy('size')->get() as $cus)
-                                            <option value="{{$cus->size}}">{{$cus->size}}</option>
+                                            <option value="{{$cus->size}}" {{ (isset($_GET['size']) && $_GET['size'] == $cus->size) ? 'selected' : '' }}>{{$cus->size}}</option>
                                         @endforeach
                                     </select>
                                 </div>
