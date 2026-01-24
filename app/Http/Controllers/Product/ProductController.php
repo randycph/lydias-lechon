@@ -17,6 +17,7 @@ use App\Models\ProductTag;
 use App\Models\Product;
 use App\Models\Page;
 use App\Models\ProductAddon;
+use App\Models\ProductSize;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Log;
 
@@ -64,9 +65,10 @@ class ProductController extends Controller
      */
     public function create()
     {
+        $sizes = ProductSize::where('status', 'PUBLISHED')->get();
         $categories = ProductCategory::get();
 
-        return view('admin.products.create',compact('categories'));
+        return view('admin.products.create',compact('categories', 'sizes'));
     }
 
     /**
@@ -200,8 +202,9 @@ class ProductController extends Controller
         }
     
         $selectedAddons = $product->addonProducts->pluck('id')->toArray();
+        $sizes = ProductSize::where('status', 'PUBLISHED')->get();
     
-        return view('admin.products.edit', compact('product', 'categories', 'products', 'selectedAddons'));
+        return view('admin.products.edit', compact('product', 'categories', 'products', 'selectedAddons', 'sizes'));
     }
     
 

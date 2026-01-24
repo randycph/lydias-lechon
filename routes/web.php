@@ -19,6 +19,7 @@ use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\Settings\UserController;
 use App\Http\Controllers\Settings\WebController;
+use App\Http\Controllers\SizeController;
 use App\Mail\CartReminderMail;
 use App\Mail\OrderCancelledMail;
 use App\Mail\SalesCompleted;
@@ -452,7 +453,15 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::get('/admin/product-category/{id}/{status}', 'Product\ProductCategoryController@update_status')->name('product.category.change-status');
     Route::post('/admin/product-categories-multiple-change-status','Product\ProductCategoryController@multiple_change_status')->name('product.category.multiple.change.status');
     Route::post('/admin/product-category-multiple-delete','Product\ProductCategoryController@multiple_delete')->name('product.category.multiple.delete');
-    //
+
+    // Sizes
+    Route::resource('/admin/sizes', SizeController::class);
+    Route::get('/admin/size/search', [SizeController::class, 'search'])->name('size.search');
+    Route::post('/admin/size-single-delete', [SizeController::class, 'single_delete'])->name('size.single.delete');
+    Route::get('/admin/size/restore/{id}', [SizeController::class, 'restore'])->name('size.restore');
+    Route::get('/admin/size/{id}/{status}', [SizeController::class, 'update_status'])->name('size.change-status');
+    Route::post('/admin/size-multiple-change-status',[SizeController::class, 'multiple_change_status'])->name('size.multiple.change.status');
+    Route::post('/admin/size-multiple-delete',[SizeController::class, 'multiple_delete'])->name('size.multiple.delete');
 
     // Products
     Route::resource('/admin/products','Product\ProductController');
