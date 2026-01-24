@@ -366,6 +366,18 @@
                                     </select>
                                 </div>
                             </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label class="tx-13">Sizes</label>
+                                    <select name="size" id="size" class="form-control" >
+                                        <option value="">- Select Size -</option>                                                                        
+                                        @foreach(\App\Models\Product::select('size')->whereNotNull('size')->where('size','!=','')->distinct('size')->orderBy('size')->get() as $cus)
+                                            <option value="{{$cus->size}}">{{$cus->size}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
                             
                             <div class="col-md-2">
                                 <div class="form-group">
