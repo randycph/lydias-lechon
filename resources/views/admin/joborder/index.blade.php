@@ -238,7 +238,6 @@
                                     <td>{{ $jo->delivery_status }}</td>
                                     <td style="width:10%;" class="text-right">
                                         <div class="btn-group pd-10" role="group" aria-label="Basic example">
-                                            <button type="button" class="btn btn-info btn-xs" onclick="change_delivery_status({{$jo->id}})" title="Update Order Status" data-id="{{$jo->id}}">Status</button>
 
                                             <button type="button" class="btn btn-secondary btn-xs" data-toggle="collapse" data-target="#sales-details_{{$jo->id}}" class="accordion-toggle">Details</button>
                                             @if($jo->date_needed > date('Y-m-d H:i:s') && $jo->sales_detail_id == 0)
