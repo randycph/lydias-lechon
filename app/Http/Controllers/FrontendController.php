@@ -317,6 +317,7 @@ class FrontendController extends Controller
         $minimum_order_amount_pickup = $setting ? $setting->minimum_order_pickup : 0;
         $minimum_processing_hours = $setting ? $setting->minimum_processing_hours : 24;
         $minimum_processing_hours_misc = $setting ? $setting->minimum_processing_hours_misc : 12;
+        $minimum_processing_hours_baka = $setting ? $setting->minimum_processing_hours_baka : 72;
         $minimum_order_misc = $setting ? $setting->minimum_order_misc : 0;
         $disable_delivery_misc_dates = $setting ? $setting->disable_delivery_misc_dates : '';
         $disable_delivery_misc_dates = explode(',', $setting->disable_delivery_misc_dates ?? '');
@@ -325,7 +326,34 @@ class FrontendController extends Controller
             return $cart->product_id === 165;
         });
 
-        return view('v2.checkout', compact('lechonBakaService', 'triples', 'provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'disabledDeliveryMiscDates', 'haslechon', 'hasbaka', 'hasMisc', 'eligibleCoupons', 'minimum_order_amount_door_to_door', 'minimum_order_amount_pickup', 'minimum_processing_hours', 'minimum_processing_hours_misc', 'minimum_order_misc', 'disable_delivery_misc_dates', 'hasCochinillo'));
+        return view('v2.checkout', compact(
+            'triples', 
+            'provinces', 
+            'cities', 
+            'page', 
+            'dataPrivacyRender', 
+            'carts', 
+            'pickupBranches', 
+            'locations', 
+            'deliveryBranches', 
+            'disabledPickupDates', 
+            'disabledDeliveryDates', 
+            'disabledDeliveryMiscDates', 
+            'haslechon', 
+            'hasbaka', 
+            'hasMisc', 
+            'eligibleCoupons', 
+            'minimum_order_amount_door_to_door', 
+            'minimum_order_amount_pickup', 
+            'minimum_processing_hours', 
+            'minimum_processing_hours_misc', 
+            'minimum_processing_hours_baka', 
+            'minimum_order_misc', 
+            'hasCochinillo',
+            'disable_delivery_misc_dates',
+            'lechonBakaService'
+            )
+        );
     }
 
     public function confirmation($id)
