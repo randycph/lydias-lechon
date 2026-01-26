@@ -55,6 +55,7 @@
                                         <option value="1" @if(isset($filter->order_status) && $filter->order_status == '1') selected="selected" @endif>Confirmed</option>
                                         <option value="2" @if(isset($filter->order_status) && $filter->order_status == '2') selected="selected" @endif>Open Date</option>
                                         <option value="Cancelled" @if(isset($filter->order_status) && $filter->order_status == 'Cancelled') selected="selected" @endif>Cancelled</option>
+                                        <option value="Abandoned" @if(isset($filter->order_status) && $filter->order_status == 'Abandoned') selected="selected" @endif>Abandoned</option>
                                     </select>
                                 </td>                                
                                 <td style="width:14%">
@@ -293,6 +294,8 @@
 
                                         @if ($sale->status === 'CANCELLED')
                                             CANCELLED
+                                        @elseif ($sale->status === 'ABANDONED')
+                                            ABANDONED
                                         @else
                                             @if ($addrStatusLinks->isNotEmpty())
                                                 {!! $addrStatusLinks->implode(',<br> ') !!}
@@ -367,7 +370,8 @@
                                                                 <a class="dropdown-item"  href="{{ route('sales.update_details',$sale->id) }}" title="Update Sales Details & Items" >Update Sales Details</a>
                                                                 @endif
                                                                 @if($dateneeded > date('Y-m-d H:i:s') && auth()->user()->has_access_to_route('sales-transaction.destroy'))
-                                                                    <a class="dropdown-item text-danger" href="javascript:void(0)" onclick="delete_sales({{$sale->id}},'{{$sale->order_number}}')" title="Delete Transaction">Delete</a>
+                                                                <hr class="dropdown-divider">    
+                                                                <a class="dropdown-item text-danger" href="javascript:void(0)" onclick="delete_sales({{$sale->id}},'{{$sale->order_number}}')" title="Delete Transaction">Delete</a>
                                                                 @endif
                                                             @endif
                                                         </div>
@@ -469,9 +473,17 @@
                                                             @if (substr(strtolower($sale?->user?->email), 0, 8) == 'lydtemp_')
                                                                 <a class="dropdown-item" href="{{route('confirmation',$sale?->HashOrderNumber)}}" target="_blank" title="View Guest Sales Summary" >Guest Sales Summary</a>
                                                             @endif
-
+                                                            
+                                                            @if (
+                                                                    auth()->user()->has_access_to_route('sales-transaction.cancel') && 
+                                                                    ($sale->status != 'CANCELLED' && $sale->status != 'ABANDONED') && 
+                                                                    $sale->delivery_status != 'Delivered/Picked Up'
+                                                                )
+                                                                <a class="dropdown-item" href="javascript:void(0)" onclick="cancel_sales({{$sale->id}},'{{$sale->order_number}}')" title="Cancel Transaction">Cancel Transaction</a>
+                                                            @endif
 
                                                             @if (auth()->user()->has_access_to_route('sales-transaction.destroy'))
+                                                                <hr class="dropdown-divider">
                                                                 <a class="dropdown-item text-danger" href="javascript:void(0)" onclick="delete_sales({{$sale->id}},'{{$sale->order_number}}')" title="Delete Transaction">Delete</a>
                                                             @endif
                                                         </div>
@@ -584,6 +596,30 @@
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-sm btn-danger" id="btnDelete">Yes, Delete</button>
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal effect-scale" id="prompt-cancel" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <form action="{{ route('sales-transaction.cancel') }}" id="frm_cancel" method="POST">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalCenterTitle">{{__('common.cancel_confirmation_title')}}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                            @csrf
+                        <input type="hidden" name="id_cancel" id="id_cancel">
+                        <p>Are you sure you want to cancel this transaction no: <span id="cancel_order_div"></span>?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-sm btn-danger" id="btnCancel">Yes, Cancel</button>
                         <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
                     </div>
                 </div>
@@ -1159,6 +1195,13 @@
             $('#delete_order_div').html(order_number);
             $('#prompt-delete').modal('show');
         }
+
+        function cancel_sales(x,order_number){
+            $('#id_cancel').val(x);
+            $('#cancel_order_div').html(order_number);
+            $('#prompt-cancel').modal('show');
+        }
+
         function addPayment(id,balance){
             $('#prompt-add-payment').modal('show');
             $('#sales_header_id').val(id);
