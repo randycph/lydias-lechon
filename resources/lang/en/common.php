@@ -28,6 +28,7 @@ return [
     'no_selected' => 'Please select at least one (1) page.',
 
     'delete_confirmation_title' => 'Delete Item',
+    'cancel_confirmation_title' => 'Cancel Item',
     'delete_mutiple_confirmation_title' => 'Delete Items',
     'delete_confirmation' => 'You are about to delete this item. Do you want to continue?',
     'delete_mutiple_confirmation' => 'You are about to delete the selected items. Do you want to continue?',
