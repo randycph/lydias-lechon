@@ -1362,7 +1362,7 @@
             showMessage: false,
             need_date: '',
             need_time: '',
-            allHours: Array.from({ length: 14 }, (_, i) => i + 7),
+            allHours: Array.from({ length: 12 }, (_, i) => i + 9),
             warningMessage: '',
             errorMessage: '',
             hasErrorMessage: false,
@@ -3074,8 +3074,8 @@
                     delivery.need_date = minAllowedDateTime.toISOString().split('T')[0];
                 }
 
-                // Filter hours from 7 AM to 8 PM only
-                const availableHours = this.getAvailableHours(delivery).filter(h => h >= 7 && h <= 20);
+                // Filter hours from 9 AM to 8 PM only
+                const availableHours = this.getAvailableHours(delivery).filter(h => h >= 9 && h <= 20);
 
                 const selectedDateTime = delivery.need_time
                     ? new Date(`${delivery.need_date}T${delivery.need_time}`)
@@ -3099,7 +3099,7 @@
                         nextDay.setDate(nextDay.getDate() + 1);
                         delivery.need_date = nextDay.toISOString().split('T')[0];
 
-                        const hoursNextDay = this.getAvailableHours(delivery).filter(h => h >= 7 && h <= 20);
+                        const hoursNextDay = this.getAvailableHours(delivery).filter(h => h >= 9 && h <= 20);
                         const firstHour = hoursNextDay[0];
 
                         delivery.need_time = firstHour !== undefined
@@ -3400,7 +3400,7 @@
 
                 return this.allHours.filter(hour => {
                     const testTime = new Date(`${delivery.need_date}T${hour < 10 ? '0' + hour : hour}:00`);
-                    return testTime >= minAllowedTime && hour >= 7 && hour <= 20;
+                    return testTime >= minAllowedTime && hour >= 9 && hour <= 20;
                 });
             },
 
