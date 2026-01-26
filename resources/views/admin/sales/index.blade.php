@@ -186,6 +186,7 @@
                                 <th>Customer</th>
                                 <th>Ordered By</th>
                                 <th>Source</th>
+                                <th>Delivery Address</th>
                                 <th>Order Date</th>
                                 <th>Date Needed</th>
                                 <th>Delivery Type</th>
@@ -248,6 +249,7 @@
                                     <td class="{{ isUnreadTransaction($sale->id) ? 'font-weight-bold' : '' }}">{{ $sale->customer_name ?? $sale->contact_person }}</td>
                                     <td>{{ $sale->customer_name }}</td>
                                     <td>{{ $sale->order_source }}</td>
+                                    <td>{{ $sale->delivery_type == 'Store Pickup' ? $sale->outlet : $sale->delivery_branch }}</td>
                                     <td>{{ \Carbon\Carbon::parse($sale->created_at)->format('Y-m-d g:i A') }}</td>
                                     <td>
                                         @if($sale->delivery_status <> 'Open Date')
