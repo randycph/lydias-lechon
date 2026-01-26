@@ -443,7 +443,7 @@
 
                                                                 @endphp
 
-                                                                @if (!$isPast)
+                                                                @if (!$isPast && $sale->delivery_status != 'Delivered/Picked Up')
                                                                     <a class="dropdown-item"
                                                                     href="javascript:void(0);"
                                                                     onclick="change_delivery_status({{ $sale->id }}, {{ $is_allowed_delivered }})"
