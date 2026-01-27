@@ -217,20 +217,21 @@ class SalesController extends Controller
     }
 
     public function update_dateneeded(Request $request){
-        $sales = SalesHeader::whereId($request->update_dateneeded_id)->first();
+        $sales = SalesHeader::findOrFail($request->update_dateneeded_id);
     
-        // if(isset($request->delivery_branch)){
-        //     SalesHeader::whereId($request->update_dateneeded_id)->update(['delivery_branch' => $request->delivery_branch]);
-        // }
-        
-        $update = SalesHeader::whereId($request->update_dateneeded_id)->update([
+        SalesHeader::whereId($request->update_dateneeded_id)->update([
             'delivery_status' => ''
         ]);
 
         if ($request->has('update_dateneeded_date') && $request->has('update_dateneeded_time')) {
-            $update_date_needed = SalesDetail::where('sales_header_id',$request->update_dateneeded_id)->update([
-                'delivery_date' => $request->update_dateneeded_date." ".$request->update_dateneeded_time
-            ]);
+            SalesDetail::where('sales_header_id', $request->update_dateneeded_id)
+                ->get()
+                ->each(function ($detail) use ($request) {
+                    $detail->update([
+                        'delivery_date' =>
+                            $request->update_dateneeded_date . ' ' . $request->update_dateneeded_time
+                    ]);
+                });
         }
 
         if ($request->shipping_type == 'storepickup') {
@@ -243,7 +244,10 @@ class SalesController extends Controller
 
         // Insert new addresses
         if ($request->filled('address')) {
-            ProductDeliveryAddress::where('sales_header_id', $request->update_dateneeded_id)->delete();
+            ProductDeliveryAddress::where('sales_header_id', $request->update_dateneeded_id)
+                ->get()
+                ->each
+                ->delete();
 
             foreach ($request->address as $index => $addr) {
 
@@ -251,9 +255,15 @@ class SalesController extends Controller
 
                 $products = Product::whereIn('id', $request->product_ids[$index])->get();
 
-                SalesDetail::where('sales_header_id',$request->update_dateneeded_id)->update([
-                    'delivery_date' => $request->dateneeded_date[$index]." ".$request->dateneeded_time[$index]
-                ]);
+                SalesDetail::where('sales_header_id',$request->update_dateneeded_id)
+                        ->get()
+                        ->each(function ($detail) use ($request, $index) {
+                            $detail->update([
+                                'delivery_date' =>
+                                    $request->dateneeded_date[$index] . ' ' . $request->dateneeded_time[$index]
+                            ]);
+                        });
+
 
                 foreach ($products as $product) {
                     $prods[] = [
@@ -322,7 +332,7 @@ class SalesController extends Controller
 
             if($sales->customer_location == $request->update_dateneeded_d2d){
 
-                $update_date_needed = SalesHeader::whereId($request->update_dateneeded_id)->update([               
+                $sales->update([               
                     'customer_delivery_adress' => $request->new_delivery_address,
                     'instruction' => $request->new_instruction,
                     'delivery_fee_amount' => $delivery_amount,
@@ -334,7 +344,7 @@ class SalesController extends Controller
 
             }else{
 
-                $update_date_needed = SalesHeader::whereId($request->update_dateneeded_id)->update([
+                $sales->update([
                     'customer_location' => $request->update_dateneeded_d2d,
                     'customer_delivery_adress' => $request->new_delivery_address,
                     'instruction' => $request->new_instruction,
@@ -348,9 +358,8 @@ class SalesController extends Controller
             }
         }
         if($request->shipping_type == 'storepickup'){
-            $sales->update(['delivery_type' => 'Store Pickup']);
             $gross = $sales->items->sum('gross_amount');
-            $update_date_needed = SalesHeader::whereId($request->update_dateneeded_id)->update([
+            $sales->update([
                 'customer_delivery_adress' => $request->update_dateneeded_sp,
                 'instruction' => $request->new_instruction,
                 'outlet' => $request->update_dateneeded_sp,
@@ -994,17 +1003,17 @@ class SalesController extends Controller
             return !is_null($value->name) && $value->name !== '';
         })->values();
       
-        ActivityLog::create([
-            'created_by' => auth()->id(),
-            'activity_type' => 'update',
-            'dashboard_activity' => 'update Sales Details',
-            'activity_desc' => 'updated Sales Details with Order Number: '.$salesheader?->order_number,
-            'activity_date' => date("Y-m-d H:i:s"),
-            'db_table' => 'ecommerce_sales_details',
-            'old_value' => '',
-            'new_value' => '',
-            'reference' => $salesdetail?->id
-        ]);
+        // ActivityLog::create([
+        //     'created_by' => auth()->id(),
+        //     'activity_type' => 'update',
+        //     'dashboard_activity' => 'update Sales Details',
+        //     'activity_desc' => 'updated Sales Details with Order Number: '.$salesheader?->order_number,
+        //     'activity_date' => date("Y-m-d H:i:s"),
+        //     'db_table' => 'ecommerce_sales_details',
+        //     'old_value' => '',
+        //     'new_value' => '',
+        //     'reference' => $salesdetail?->id
+        // ]);
 
         $provinces = Deliverablecities::query()
             ->select('province')

@@ -12,12 +12,21 @@ class LogPageVisit
     public function handle(Request $request, Closure $next)
     {
         // Only log real page visits
+        // exclude css/js/img/font files
         if (
             $request->method() !== 'GET' ||
             $request->expectsJson() ||
             $request->is('api/*') ||
             $request->is('livewire/*') ||
-            $request->is('storage/*')
+            $request->is('storage/*') ||
+            $request->is('*/css/*') ||
+            $request->is('*/js/*') ||
+            $request->is('*/img/*') ||
+            $request->is('*/fonts/*') ||
+            $request->is('get-carts') ||
+            $request->is('cart-count') ||
+            $request->is('get-carts') || 
+            $request->is('display-added-payments')
         ) {
             return $next($request);
         }
