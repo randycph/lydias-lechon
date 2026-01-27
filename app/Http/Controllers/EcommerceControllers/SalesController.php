@@ -977,11 +977,11 @@ class SalesController extends Controller
 
         if ($sales->is_sub == 1) {
             $subSales = SalesHeader::where('id', $sales->parent_sales_header_id)->first();
-            $salesPayments = $subSales->payments ?? collect();
-            $totalPayment = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)->sum('amount');
+            $salesPayments = $subSales->payments->where('status', 'PAID') ?? collect();
+            $totalPayment = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)->where('status', 'PAID')->sum('amount');
         } else {
-            $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
-            $totalPayment = SalesPayment::where('sales_header_id',$id)->sum('amount');
+            $salesPayments = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->get();
+            $totalPayment = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->sum('amount');
         }
 
         if (!$sales) {
@@ -1482,9 +1482,9 @@ class SalesController extends Controller
 
         if (isset($sale->is_sub) && $sale->is_sub == 1) {
             $parentSale = SalesHeader::where('id', $sale->parent_sales_header_id)->first();
-            $payments = SalesPayment::where('sales_header_id', $parentSale->id)->get();
+            $payments = SalesPayment::where('sales_header_id', $parentSale->id)->where('status', '!=', 'CANCELLED')->get();
         } else {
-            $payments = SalesPayment::where('sales_header_id',$request->id)->get();
+            $payments = SalesPayment::where('sales_header_id',$request->id)->where('status', '!=', 'CANCELLED')->get();
         }
 
         return view('admin.sales.added-payments-result',compact('payments'));
@@ -1527,9 +1527,9 @@ class SalesController extends Controller
 
         if ($sales->is_sub == 1) {
             $subSales = SalesHeader::where('id', $sales->parent_sales_header_id)->first();
-            $salesPayments = $subSales->payments ?? collect();
+            $salesPayments = $subSales->payments->where('status', 'PAID') ?? collect();
         } else {
-            $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
+            $salesPayments = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->get();
         }
 
         if (!$sales) {
@@ -1554,9 +1554,9 @@ class SalesController extends Controller
 
         if ($sales->is_sub == 1) {
             $subSales = SalesHeader::where('id', $sales->parent_sales_header_id)->first();
-            $salesPayments = $subSales->payments ?? collect();
+            $salesPayments = $subSales->payments->where('status', 'PAID') ?? collect();
         } else {
-            $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
+            $salesPayments = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->get();
         }
 
         if (!$sales) {
@@ -1581,9 +1581,9 @@ class SalesController extends Controller
 
         if ($sales->is_sub == 1) {
             $subSales = SalesHeader::where('id', $sales->parent_sales_header_id)->first();
-            $salesPayments = $subSales->payments ?? collect();
+            $salesPayments = $subSales->payments->where('status', 'PAID') ?? collect();
         } else {
-            $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
+            $salesPayments = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->get();
         }
 
         if (!$sales) {
