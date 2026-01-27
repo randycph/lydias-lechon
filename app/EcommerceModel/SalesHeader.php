@@ -19,6 +19,7 @@ class SalesHeader extends Model
     protected $primaryKey = 'id';
     public $incrementing = true;
     protected $keyType = 'int';
+    protected array $logExcept = ['updated_at', 'is_new_order'];
 
     protected $table = 'ecommerce_sales_headers';
     protected $fillable = [
