@@ -25,11 +25,6 @@ class ActivityLog extends Model
     ];
     public $timestamps = false;
 
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-    
     public function getDbTableAttribute($value)
     {
         if ($value == 'albums') {
@@ -91,5 +86,10 @@ class ActivityLog extends Model
         }
 
         return $value;
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }
