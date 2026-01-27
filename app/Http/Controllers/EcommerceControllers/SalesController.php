@@ -61,7 +61,7 @@ class SalesController extends Controller
     }
 
     public function update_items(Request $request){
-        $head = SalesHeader::whereId($request->ui_sales_id)->first();
+        $head = SalesHeader::findOrFail($request->ui_sales_id);
         $date_needed = '';
         foreach($head->items as $item){
             if(!empty($item->delivery_date)){
@@ -76,18 +76,23 @@ class SalesController extends Controller
                     $paella_qty = $request->input('uiu_qty'.$item->id);
                     $gross = ($request->input('uiu_qty'.$item->id) * $item->price) + ($request->input('uiu_qty'.$item->id) * $request->input('uiu_paella'.$item->id));
                 }
-                $update = SalesDetail::whereId($item->id)->update([
-                    'paella_price' => $paella_price,
-                    'paella_qty' => $paella_qty,
-                    'qty' => $request->input('uiu_qty'.$item->id),
-                    'gross_amount' => $gross,
-                    'net_amount' => $gross
-                ]);
-            }
-            else{
-
-                $delete = SalesDetail::whereId($item->id)->forceDelete();
-
+                SalesDetail::where('id', $item->id)
+                    ->get()
+                    ->each(function ($e) use ($paella_price, $paella_qty, $request, $item, $gross) {
+                        $e->update([
+                            'paella_price' => $paella_price,
+                            'paella_qty' => $paella_qty,
+                            'qty' => $request->input('uiu_qty'.$item->id),
+                            'gross_amount' => $gross,
+                            'net_amount' => $gross
+                        ]);
+                    });
+            } else {
+                SalesDetail::where('id', $item->id)
+                    ->get()
+                    ->each(function ($e) {
+                        $e->forceDelete();
+                    });
             }
             
         }
@@ -172,18 +177,20 @@ class SalesController extends Controller
                 $delivery_amount = $sales->delivery_fee_amount;
             }
         }
-        $update_header = SalesHeader::whereId($sales->id)->update([
-            'delivery_fee_amount' => $delivery_amount,
-            'gross_amount' => ($gross + $delivery_amount), 
-            'net_amount' => ($gross + $delivery_amount) - $sales->discount_amount,
-            'payment_status' => 'UNPAID'
-        ]);
+        SalesHeader::where('id', $sales->id)
+            ->get()
+            ->each(function ($header) use ($delivery_amount, $gross, $sales) {
+                $header->update([
+                    'delivery_fee_amount' => $delivery_amount,
+                    'gross_amount' => ($gross + $delivery_amount), 
+                    'net_amount' => ($gross + $delivery_amount) - $sales->discount_amount,
+                    'payment_status' => 'UNPAID'
+                ]);
+        });
         
     }
 
     public function prepare_dateneeded(Request $request){
-        //({{$sale->id}},'{{ $dateneeded }}','{{$sale->delivery_type}}','{{$locationed}}','{{$sale->instruction}}','{{$sale->customer_delivery_adress}}');
-
         $salesdetail = SalesDetail::where('sales_header_id',$request->id)->first();
         $salesheader = SalesHeader::find($request->id);
 
@@ -380,35 +387,43 @@ class SalesController extends Controller
 
         $orig_payment = SalesPayment::whereId($request->confirm_payment_id)->first();
         $image_url = $orig_payment->file_url;
-        if($request->hasFile('confirm_payment_file'))
-        {
+        if($request->hasFile('confirm_payment_file')) {
             $newFile = $this->upload_file_to_storage('payments', $request->file('confirm_payment_file'));
             $image_url = $newFile['url'];
         }
 
-        $s = SalesPayment::whereId($request->confirm_payment_id)->update(
-            [
-                'status' => 'PAID',
-                'file_url' => $image_url,
-                'receipt_number' => $request->confirm_payment_ref ?? $orig_payment->receipt_number
-            ]
-        );
+        SalesPayment::where('id', $request->confirm_payment_id)
+            ->get()
+            ->each(function ($payment) use ($image_url, $request, $orig_payment) {
+                $payment->update([
+                    'status' => 'PAID',
+                    'file_url' => $image_url,
+                    'receipt_number' => $request->confirm_payment_ref ?? $orig_payment->receipt_number
+                ]);
+            });
         $data = SalesPayment::whereId($request->confirm_payment_id)->first();
         if($data->payment_type == 'Gift Cert'){
 
             $update_gift_cert = GiftCertificate::where('code',$data->receipt_number)->where('isApproved','<>','1')
-                                ->update([
-                                    'isApproved' => '1',
-                                    'approved_by' => Auth::user()->name,
-                                    'approved_on' => date('Y-m-d')
-                                ]);
+                                ->get()
+                                ->each(function ($gc) {
+                                    $gc->update([
+                                        'isApproved' => '1',
+                                        'approved_by' => Auth::user()->name,
+                                        'approved_on' => date('Y-m-d')
+                                    ]);
+                                });
             if($update_gift_cert){
                 $discounts = SalesPayment::where('sales_header_id',$data->sales_header_id)->whereStatus('PAID')->sum('amount');
                 $grand_gross = $data->gross_amount - $discounts;
-                $update_sales_header = SalesHeader::whereId($data->sales_header_id)->update([
-                    'net_amount' => $grand_gross,
-                    'discount_amount' => $coupon_amount
-                ]);
+                $coupon_amount = $discounts;
+                SalesHeader::whereId($data->sales_header_id)
+                    ->get()->each(function ($sh) use ($grand_gross, $coupon_amount) {
+                        $sh->update([
+                            'net_amount' => $grand_gross,
+                            'discount_amount' => $coupon_amount
+                        ]);
+                    });
             }
         }
 
