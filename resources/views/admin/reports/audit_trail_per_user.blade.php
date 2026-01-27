@@ -113,6 +113,7 @@
                                 <th>Reference</th>   
                                 <th>Old Value</th>
                                 <th>New Value</th> 
+                                <th>Module</th> 
                                                    
                             </tr>
                             </thead>
@@ -127,6 +128,7 @@
                                     <td>{{$r->reference}}</td>
                                     <td>{{$r->old_value}}</td>
                                     <td>{{$r->new_value}}</td>
+                                    <td>{{$r->db_table}}</td>
                                 </tr>
                             @endforeach
                         
