@@ -11,7 +11,8 @@ class ActivityLog extends Model
         'db_table', 'old_value', 'new_value', 'reference'];
     public $timestamps = false;
 
-    // accessor for db_table
+    
+    
     public function getDbTableAttribute($value)
     {
         if ($value == 'albums') {
