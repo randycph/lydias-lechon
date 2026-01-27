@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\SalesDetail;
 use App\EcommerceModel\SalesPayment;
+use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 Use Illuminate\Support\Facades\Redirect;
@@ -151,10 +152,23 @@ class PaymayaController extends Controller
     }
 
     public function failure(){
+        ActivityLog::create([
+            'created_by'         => auth()->id() ?? null,
+            'activity_type'      => 'create',
+            'dashboard_activity' => "Paymaya Payment Failed",
+            'activity_desc'      => "Paymaya payment failed for Sales Payment ID ".$_GET['id'],
+            'activity_date'      => now()->format('Y-m-d H:i:s'),
+            'db_table'           => 'SalesPayments',
+            'reference'          => $_GET['id'],
+            'subject_type'       => 'SalesPayments',
+            'subject_id'         => $_GET['id'],
+            'ip_address'         => request()->ip(),
+        ]);
+
         $update = SalesPayment::whereId($_GET['id'])->update([
             'status' => 'CANCELLED'
         ]);
-        $delete = SalesPayment::whereId($_GET['id'])->delete();
+        // $delete = SalesPayment::whereId($_GET['id'])->delete();
      
         $order = SalesPayment::whereId($_GET['id'])->withTrashed()->first();
         if(Auth::guest())
@@ -163,10 +177,22 @@ class PaymayaController extends Controller
             return redirect()->route('order-history',['order_cancelled' => 'cancelled', 'order_no' => $order->sales->order_number]);
     }
     public function cancel(){
+        ActivityLog::create([
+            'created_by'         => auth()->id() ?? null,
+            'activity_type'      => 'create',
+            'dashboard_activity' => "Paymaya Payment Cancelled",
+            'activity_desc'      => "Paymaya payment cancelled for Sales Payment ID ".$_GET['id'],
+            'activity_date'      => now()->format('Y-m-d H:i:s'),
+            'db_table'           => 'SalesPayments',
+            'reference'          => $_GET['id'],
+            'subject_type'       => 'SalesPayments',
+            'subject_id'         => $_GET['id'],
+            'ip_address'         => request()->ip(),
+        ]);
         $update = SalesPayment::whereId($_GET['id'])->update([
             'status' => 'CANCELLED'
         ]);
-        $delete = SalesPayment::whereId($_GET['id'])->delete();
+        // $delete = SalesPayment::whereId($_GET['id'])->delete();
         
         $order = SalesPayment::whereId($_GET['id'])->withTrashed()->first();
         if(Auth::guest())
@@ -213,7 +239,7 @@ class PaymayaController extends Controller
         $update = SalesPayment::where('receipt_number',$request->id)->update([
             'status' => 'CANCELLED'
         ]);
-        $update = SalesPayment::where('receipt_number',$request->id)->delete();
+        // $update = SalesPayment::where('receipt_number',$request->id)->delete();
         
         return response('Ok', 200);  
     }
