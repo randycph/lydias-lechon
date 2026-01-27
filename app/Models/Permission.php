@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Role;
@@ -9,6 +10,7 @@ use App\Models\Role;
 class Permission extends Model
 {
     use SoftDeletes;
+    use LogsActivityDiff;
 
     public $table = 'permission';
 

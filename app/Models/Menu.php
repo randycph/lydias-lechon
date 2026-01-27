@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Validator;
@@ -9,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 class Menu extends Model
 {
     use SoftDeletes;
+    use LogsActivityDiff;
 
     protected $table = 'menus';
     protected $fillable = ['name', 'is_active', 'pages_json'];

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -9,6 +10,7 @@ use Illuminate\Support\Str;
 class ProductReview extends Model
 {
     use SoftDeletes;
+    use LogsActivityDiff;
 
     protected $table = 'ecommerce_product_review';
     protected $fillable = ['user_id', 'review', 'rating', 'parent_id', 'product_id', 'status'];

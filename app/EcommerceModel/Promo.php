@@ -2,6 +2,7 @@
 
 namespace App\EcommerceModel;
 
+use App\Models\Concerns\LogsActivityDiff;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Promo extends Model
 {
     use SoftDeletes;
+    use LogsActivityDiff;
 
     protected $table = 'ecommerce_promos';
     protected $fillable = ['name', 'description', 'amount', 'percentage', 'effectivity_start', 'effectivity_end', 'min_subtotal', 'max_subtotal', 'usage_limit', 'apply_for', 'coupon_code', 'status', 'conditions', 'created_by'];

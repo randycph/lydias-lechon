@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 
 class Role extends Model
 {
+    use LogsActivityDiff;
+    
     public $table = 'role';
 
     protected $fillable = [ 'name', 'description', 'created_by', 'can_approve_payment', 'has_branches', 'has_production_branch'];

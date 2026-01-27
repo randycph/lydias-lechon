@@ -4,6 +4,7 @@ namespace App\EcommerceModel;
 
 use App\Helpers\Webfocus\Setting;
 use App\Mail\Member\EnrollMemberMail;
+use App\Models\Concerns\LogsActivityDiff;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -14,6 +15,7 @@ class Member extends Model
 {
     use Notifiable;
     use SoftDeletes;
+    use LogsActivityDiff;
 
     protected $table = 'members';
     protected $fillable = ['user_id', 'sponsor_id', 'code', 'entity_type', 'government_id_type', 'government_id',

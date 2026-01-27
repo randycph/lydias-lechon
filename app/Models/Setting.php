@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Setting extends Model
 {
     use SoftDeletes;
+    use LogsActivityDiff;
 
     protected $table = 'settings';
     protected $fillable = ['api_key', 'website_name', 'website_favicon', 'company_logo', 'company_favicon', 'company_name', 'disable_delivery_misc', 'disable_delivery_misc_dates',
