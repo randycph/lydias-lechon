@@ -41,7 +41,7 @@
     }
 @endphp
 @section('pagetitle')
-                User Audit Trail
+                Module Audit Trail
                 {{$date_display}}
 @endsection
 
@@ -50,27 +50,23 @@
 
         <div class="container-fluid">
             <div class="text-center mg-b-20"><img height="100px" src="{{ asset('images/lydias1965.png') }}" alt="">
-            <h4 class="mg-b-0 tx-spacing--1">Audit Trail (User)</h4></div>
+            <h4 class="mg-b-0 tx-spacing--1">Audit Trail (Module)</h4></div>
           
 
             <div class="row-sm">
                 <div class="col-md-12">
-                    <form action="{{route('admin.report.audit_trail_per_user')}}" method="get">
+                    <form action="{{route('admin.report.audit_trail_per_module')}}" method="get">
                       
                         @csrf
                         <div class="row row-sm">
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="tx-13">Select User</label>
-                                    <select id="pb" name="pb" class="form-control select2-ajax" style="width:100%">
-                                        @if(request('pb'))
-                                            @php
-                                                $selectedUser = \App\Models\User::find(request('pb'));
-                                            @endphp
-                                            @if($selectedUser)
-                                                <option value="{{ $selectedUser->id }}" selected>{{ $selectedUser->name }}</option>
-                                            @endif
-                                        @endif
+                                    <label class="tx-13">Select Module</label>
+                                    <select id="module" name="module" class="form-control select2-ajax" style="width:100%">
+                                        <option value="">Select Module</option>
+                                        @foreach ($allowedTables as $k => $table)
+                                            <option value="{{ $k }}" @if(request('module') == $k) selected @endif>{{ $table }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>
@@ -89,7 +85,7 @@
                             <div class="col-md-3 filter-action mg-r-5">
                             
                                 <button type="submit" class="btn btn-sm btn-primary mg-t-7 mg-r-5">Generate</button>
-                                <a href="{{route('admin.report.audit_trail_per_user')}}" class="btn btn-sm btn-info mg-t-7 mg-r-5">Reset</a>
+                                <a href="{{route('admin.report.audit_trail_per_module')}}" class="btn btn-sm btn-info mg-t-7 mg-r-5">Reset</a>
                             </div>
                         </div>
                         
@@ -107,11 +103,8 @@
                             <thead>
                             <tr> 
                                 <th>Date</th>
-                                <th>Created by</th>
-                                <th>Activity Type</th> 
-                                <th>Activity</th>
-                                <th>Email</th>
-                                <th>Role</th>
+                                <th>Action</th> 
+                                <th>Name</th>  
                                 <th>Description</th> 
                                 <th>Reference</th>   
                                 <th>Old Value</th>
@@ -125,11 +118,8 @@
                             @foreach($rs as $r) 
                                 <tr style="text-align: left">
                                     <td>@if(date('Y-m-d',strtotime($r->activity_date)) <> '1970-01-01'){{date('m-d-Y g:i A',strtotime($r->activity_date))}} @endif</td>
-                                    <td>{{$r->user->name ?? 'Guest'}}</td>
                                     <td>{{$r->activity_type}}</td>
                                     <td>{{$r->dashboard_activity}}</td>
-                                    <td>{{$r->email}}</td>
-                                    <td>{{$r->role}}</td>
                                     <td>{{$r->activity_desc}}</td>
                                     <td>{{$r->reference}}</td>
                                     <td>{{$r->old_value}}</td>
@@ -177,30 +167,13 @@
 
     $(document).ready(function() {
         $('.select2-ajax').select2({
-            placeholder: 'Select a user',
-            ajax: {
-                url: '{{ route("ajax.search-users") }}',
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    return {
-                        q: params.term // search term
-                    };
-                },
-                processResults: function (data) {
-                    return {
-                        results: data.results
-                    };
-                },
-                cache: true
-            },
-            minimumInputLength: 1
+            placeholder: 'Select a module',
         });
         
         $('#example').DataTable( {
             dom: 'Bfrtip',
             pageLength: 20,
-            ordering: false,
+            sorting: [[ 0, "desc" ]],
             buttons: [
                 {
                     extend: 'print',
@@ -240,23 +213,7 @@
                         columns: ':visible'
                     }
                 },
-                {
-                    extend: 'colvis',
-                    text: 'Column visibility',
-                    buttons: [
-                        {
-                            extend: 'colvisGroup',
-                            text: 'Show all columns',
-                            show: ':hidden'
-                        },
-                        {
-                            extend: 'colvisGroup',
-                            text: 'Hide extra columns',
-                            hide: []
-                        },
-                        'columnsToggle'
-                    ]
-                }
+                'colvis'
             ],
             columnDefs: [ {
                 targets: [],
