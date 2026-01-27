@@ -84,7 +84,12 @@ trait LogsActivityDiff
                     ?? $model->getKey());
 
             foreach ($dirty as $field => $newValue) {
-                $oldValue = $model->getOriginal($field);
+                $oldValue = self::normalize($model->getOriginal($field));
+                $newValue = self::normalize($newValue);
+
+                if ($oldValue === $newValue) {
+                    continue;
+                }
 
                 if (self::shouldMask($model, $field)) {
                     $oldValue = self::masked($oldValue);
@@ -279,5 +284,14 @@ trait LogsActivityDiff
             : [];
 
         return $labels[$field] ?? str($field)->headline()->toString();
+    }
+
+    protected static function normalize($value)
+    {
+        if (is_numeric($value)) {
+            return rtrim(rtrim(number_format((float) $value, 4, '.', ''), '0'), '.');
+        }
+
+        return $value;
     }
 }
