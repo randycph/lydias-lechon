@@ -1546,6 +1546,56 @@ class ReportsController extends Controller
         return view('admin.reports.audit_trail_per_user',compact('rs','users'));
     }
 
+    public function audit_trail_per_module(Request $request){
+        $start = $request->input('startdate') ?? Carbon::now()->format('Y-m-d');
+        $end = $request->input('enddate') ?? Carbon::now()->format('Y-m-d');
+        $module = $request->input('module') ?? null; 
+        
+        $rs = ActivityLog::when($start && $end, function ($query) use ($start, $end) {
+                        $query->whereBetween('activity_date', [
+                            Carbon::parse($start)->startOfDay(),
+                            Carbon::parse($end)->endOfDay()
+                        ]);
+                    })
+                    ->when($module, function ($query) use ($module) {
+                        $query->where('db_table', $module);
+                    })
+                    ->orderBy('activity_date', 'desc')
+                    ->get();
+
+        $allowedTables = [
+            'albums' => 'Albums',
+            'articles' => 'Articles',
+            'banners' => 'Banners',
+            'branches' => 'Branches',
+            'cms_activity_logs' => 'Activity Logs',
+            'campaigns' => 'Campaigns',
+            'coupons' => 'Coupons',
+            'deliverable_cities' => 'Rates',
+            'pages' => 'Pages',
+            'products' => 'Products',
+            'settings' => 'Settings',
+            'users' => 'Users',
+            'ecommerce_sales_details' => 'Sales Details',
+            'ecommerce_sales_headers' => 'Sales Transactions',
+            'ecommerce_sales_payments' => 'Sales Payments',
+            'gift_certificate' => 'Gift Certificates',
+            'groups' => 'Groups',
+            'leftovers' => 'Leftovers',
+            'menus' => 'Menus',
+            'permission' => 'Permission',
+            'popup_messages' => 'Popup Messages',
+            'production_branches' => 'Production Branches',
+            'production_orders' => 'Production Orders',
+            'product_tags' => 'Product Tags',
+            'social_media' => 'Social Media',
+            'product_categories' => 'Product Categories',
+            'subscribers' => 'Subscribers',
+        ];
+
+        return view('admin.reports.audit_trail_per_module',compact('rs', 'allowedTables'));
+    }
+
     public function searchUsers(Request $request)
     {
         $search = $request->input('q');
