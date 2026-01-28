@@ -127,9 +127,9 @@ Route::post('/admin/login', function(Request $request) {
             }
 
             $exludeBranch = [
-                'Web',
-                'Admin Portal',
-                'Forecaster Portal'
+                'web',
+                'admin',
+                'forecaster'
             ];
 
             if (auth()->user()->user_role->name == 'Cashier' && !in_array($request->branch, $exludeBranch)) {
