@@ -140,7 +140,7 @@ Route::post('/admin/login', function(Request $request) {
                 }
             }
 
-            if ($request->branch == 'forecaster') {
+            if ($request->has('branch') && $request->branch == 'forecaster') {
                 return redirect()->intended('admin/forecaster');
             }
 
