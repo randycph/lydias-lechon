@@ -110,11 +110,7 @@ Route::post('/admin/login', function(Request $request) {
     try {
         $credentials = $request->only('email', 'password');
 
-        if ($request->has('branch')) {
-            session(['login_branch' => $request->branch]);
-        } else {
-            session()->forget('login_branch');
-        }
+        session()->forget('login_branch');
 
         if ($request->has('is_kiosk')) {
             session(['is_kiosk' => true]);
@@ -128,6 +124,14 @@ Route::post('/admin/login', function(Request $request) {
 
             if ($user->role_id == config('auth.driver_role_id') ) {
                 return redirect()->route('sales-transaction.driver_sales_transaction');
+            }
+
+            if (auth()->user()->user_role == 'Cashier') {
+                if ($request->has('branch')) {
+                    session(['login_branch' => $request->branch]);
+                } else {
+                    session()->forget('login_branch');
+                }
             }
 
             return redirect()->intended('admin/dashboard');
