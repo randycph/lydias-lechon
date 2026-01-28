@@ -59,7 +59,7 @@
                         <label class="d-block">Select Branch:</label>
                         <select name="branch_source" id="branch_source" required="required" class="form-control">
                             <option value="">- Select Branch -</option>
-                            @if (session()->has('login_branch'))
+                            @if (session()->has('login_branch') && auth()->user()->user_role->name == 'Cashier')
                                 <option value="{{ session('login_branch') }}|" selected>{{ session('login_branch') }}</option>
                             @else
                                 @foreach($branches_store as $b)
