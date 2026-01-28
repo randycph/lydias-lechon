@@ -122,7 +122,13 @@ Route::post('/admin/login', function(Request $request) {
                 return redirect()->route('sales-transaction.driver_sales_transaction');
             }
 
-            if (auth()->user()->user_role == 'Cashier') {
+            $exludeBranch = [
+                'Web',
+                'Admin Portal',
+                'Forecaster Portal'
+            ];
+
+            if (auth()->user()->user_role->name == 'Cashier' && !in_array($request->branch, $exludeBranch)) {
                 if ($request->has('branch')) {
                     session(['login_branch' => $request->branch]);
                 } else {
