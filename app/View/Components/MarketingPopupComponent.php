@@ -7,6 +7,7 @@ use Closure;
 use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
 use Illuminate\Support\Facades\Route;
+use Carbon\Carbon;
 
 
 class MarketingPopupComponent extends Component
@@ -25,8 +26,18 @@ class MarketingPopupComponent extends Component
     public function render(): View|Closure|string
     {   
         $url = request()->url();
+        $now = Carbon::now();
+
         $popupMessage = PopupMessage::where('is_active', 1)
-            ->where('url', $url)
+            ->where('url', 'LIKE', "%{$url}%")
+            ->where(function ($query) use ($now) {
+                $query->whereNull('start_at')
+                    ->orWhere('start_at', '<=', $now);
+            })
+            ->where(function ($query) use ($now) {
+                $query->whereNull('expire_at')
+                    ->orWhere('expire_at', '>=', $now);
+            })
             ->first();
 
         if (!$popupMessage) {

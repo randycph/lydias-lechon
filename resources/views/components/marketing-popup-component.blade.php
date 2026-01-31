@@ -1,33 +1,64 @@
 {{-- Marketing popup --}}
-<div x
+<div
     x-data="{
+        ps: null,
         marketingPopup: false,
         showWithDelay(delay) {
             setTimeout(() => {
-                this.marketingPopup = true;
+                this.open();
+                document.body.classList.add('overflow-hidden');
             }, delay * 1000);
-        }
+        },
+        close() {
+            this.marketingPopup = false;
+            document.body.classList.remove('overflow-hidden');
+
+            if (this.ps) {
+                this.ps.destroy();
+                this.ps = null;
+            }
+        },
+        open() {
+            this.marketingPopup = true;
+            document.body.classList.add('overflow-hidden');
+
+            this.$nextTick(() => {
+                if (this.$refs.scrollArea) {
+                    this.ps = new PerfectScrollbar(this.$refs.scrollArea, {
+                        wheelPropagation: false,
+                        suppressScrollX: true,
+                    });
+                }
+            });
+        },
     }"
-    x-init="showWithDelay({{ $delay }})">
+    @keydown.escape.window="close(); document.body.classList.remove('overflow-hidden')"
+    x-init="showWithDelay({{ $delay }})"
+    >
     <!-- Drawer Overlay -->
-    <div x-show="marketingPopup" x-transition.opacity class="fixed inset-0 bg-black/50 z-40" @click="marketingPopup = false"></div>
+    <div x-show="marketingPopup" x-transition.opacity class="fixed inset-0 bg-black/50 z-40" @click="close()"></div>
 
     <!-- Cart Drawer Content -->
     <div
-    x-show="marketingPopup"
-    x-cloak
-    x-transition:enter="transition duration-300 ease-out"
-    x-transition:enter-start="opacity-0 scale-90"
-    x-transition:enter-end="opacity-100 scale-100"
-    x-transition:leave="transition duration-200 ease-in"
-    x-transition:leave-start="opacity-100 scale-100"
-    x-transition:leave-end="opacity-0 scale-90"
-    class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-[500px] lg:max-w-3xl h-max bg-white text-black z-50 flex flex-col shadow-lg rounded-lg"
+        x-show="marketingPopup"
+        x-cloak
+        x-transition:enter="transition duration-300 ease-out"
+        x-transition:enter-start="opacity-0 scale-90"
+        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition duration-200 ease-in"
+        x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-90"
+        class="fixed top-1/2 left-1/2 transform 
+            -translate-x-1/2 -translate-y-1/2
+            w-[90%] max-w-[500px] lg:max-w-3xl
+            max-h-[90vh]
+            bg-white text-black z-50
+            flex flex-col shadow-lg rounded-lg"
   >
         <!-- Content -->
-        <div class="w-full relative">
+        <div class="w-full relative overflow-y-auto flex-1" x-ref="scrollArea">
             <!-- Close Button -->
-            <button @click="marketingPopup = false" class="absolute top-4 right-4 text-2xl text-gray-800">
+            <button @click="close()" class="absolute top-4 right-4 text-2xl text-gray-800">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class=" px-2 py-2 flex items-center justify-center bg-white rounded-full w-10 h-10 shadow-lg">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                 </svg>
@@ -47,7 +78,7 @@
         
                     <div class="w-full px-6 mt-5">
                         <a href="{{ $popupMessage->button_text_url }}" class="bg-primary flex justify-center w-full text-center custom-btn btn-primary-dark text-white rounded-md px-6 py-4 mt-3 font-medium uppercase">{{ $popupMessage->button_text }}</a>
-                        <button @click="marketingPopup = false" class="bg-white border  custom-btn btn-primary-dark border-primary w-full text-primary rounded-md px-6 py-4 mt-3 font-medium uppercase">{{ $popupMessage->close_button_text }}</button>
+                        <button @click="close()" class="bg-white border  custom-btn btn-primary-dark border-primary w-full text-primary rounded-md px-6 py-4 mt-3 font-medium uppercase">{{ $popupMessage->close_button_text }}</button>
                     </div>
                 </div>
             </div>
