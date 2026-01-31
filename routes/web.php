@@ -133,11 +133,34 @@ Route::post('/admin/login', function(Request $request) {
             ];
 
             if (auth()->user()->user_role->name == 'Cashier' && !in_array($request->branch, $exludeBranch)) {
-                if ($request->has('branch')) {
-                    session(['login_branch' => $request->branch]);
-                } else {
+                
+                $branchName = trim($request->branch);
+
+                $branch = Branch::where('name', $branchName)
+                    ->where('status', 1)
+                    ->first();
+
+                if (!$branch) {
                     session()->forget('login_branch');
+                    auth()->logout();
+                    return back()->withErrors([
+                        'branch' => 'Selected branch does not exist or is inactive.'
+                    ]);
                 }
+
+                $isAllowed = $user->branches()
+                    ->where('branch_id', $branch->id)
+                    ->exists();
+
+                if (!$isAllowed) {
+                    session()->forget('login_branch');
+                    auth()->logout();
+                    return back()->withErrors([
+                        'branch' => 'You are not authorized to access the selected branch.'
+                    ]);
+                }
+
+                session(['login_branch' => $request->branch]);
             }
 
             if ($request->has('branch') && $request->branch == 'forecaster') {
