@@ -128,7 +128,7 @@ Route::post('/admin/login', function(Request $request) {
                 'forecaster'
             ];
 
-            if (auth()->user()->user_role->name == 'Cashier' && !in_array($request->branch, $exludeBranch)) {
+            if (auth()->user()->user_role->name != 'Admin' && !in_array($request->branch, $exludeBranch)) {
                 
                 $branchName = trim($request->branch);
 
