@@ -31,7 +31,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Hurricane&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
+    <link rel="stylesheet" href="https://unpkg.com/perfect-scrollbar/css/perfect-scrollbar.css" />
+    <script src="{{ asset('js/perfect-scrollbar.min.js') }}"></script>
+    
     <style>
         @font-face {
             font-family: 'Feelings';

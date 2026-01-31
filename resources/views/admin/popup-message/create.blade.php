@@ -4,6 +4,7 @@
 	<link href="{{ asset('lib/bselect/dist/css/bootstrap-select.css') }}" rel="stylesheet">
 	<link href="{{ asset('lib/clockpicker/bootstrap-clockpicker.min.css') }}" rel="stylesheet">
 	<link href="{{ asset('lib/select2/css/select2.min.css') }}" rel="stylesheet">
+    <script src="{{ asset('lib/ckeditor/ckeditor.js') }}"></script>
 	<style>
 		.select2 {width:100% !important;}
 
@@ -64,35 +65,68 @@
 				<div class="form-group">
 					<label class="d-block">Title *</label>
 					<input type="text" name="title" class="form-control @error('title') is-invalid @enderror" value="{{ old('title') }}">
-
+					<x-error-message inputName="title" />
 				</div>
 				<div class="form-group">
-					<label class="d-block">Message *</label>
-					<textarea name="message" rows="3" class="form-control @error('message') is-invalid @enderror">{{ old('message') }}</textarea>
+					<label class="d-block" id="messageLabel">Message *</label>
+					<textarea name="message" id="editor1" rows="10" cols="80">{{ old('message') }}</textarea>
+					<x-error-message inputName="message" />
 				</div>
 				<div class="form-group">
 					<label class="d-block">Button text *</label>
 					<input type="text" name="button_text" class="form-control @error('button_text') is-invalid @enderror" value="{{ old('button_text') }}">
-
+					<x-error-message inputName="button_text" />
 				</div>
 				<div class="form-group">
 					<label class="d-block">Button text URL*</label>
 					<input type="text" name="button_text_url" class="form-control @error('button_text_url') is-invalid @enderror" value="{{ old('button_text_url') }}">
-
+					<x-error-message inputName="button_text_url" />
 				</div>
 				<div class="form-group">
 					<label class="d-block">Close Button text *</label>
 					<input type="text" name="close_button_text" class="form-control @error('close_button_text') is-invalid @enderror" value="{{ old('close_button_text') }}">
+					<x-error-message inputName="close_button_text" />
 				</div>
 				<div class="form-group">
 					<label class="d-block">Page URL to show popup *</label>
 					<input type="text" name="url" class="form-control @error('url') is-invalid @enderror" value="{{ old('url') }}">
 					<p class="tx-11 mg-t-4">Add full URL without no additional queries and no forward slash at the end.</p>
+					<x-error-message inputName="url" />
 				</div>
+
+				<div class="form-group">
+					<label class="d-block">Start At</label>
+					<input
+						type="datetime-local"
+						name="start_at"
+						class="form-control @error('start_at') is-invalid @enderror"
+					>
+					<p class="tx-11 mg-t-4">
+						Select the date and time when the popup message will start showing.
+						Leave blank to show immediately.
+					</p>
+					<x-error-message inputName="start_at" />
+				</div>
+
+				<div class="form-group">
+					<label class="d-block">Expire At</label>
+					<input
+						type="datetime-local"
+						name="expire_at"
+						class="form-control @error('expire_at') is-invalid @enderror"
+					>
+					<p class="tx-11 mg-t-4">
+						Select the date and time when the popup message will expire.
+						Leave blank if it should not expire.
+					</p>
+					<x-error-message inputName="expire_at" />
+				</div>
+
 				<div class="form-group">
 					<label class="d-block">Start to show in seconds*</label>
 					<input type="text" name="start_to_show" class="form-control @error('start_to_show') is-invalid @enderror" value="{{ old('start_to_show') }}">
 					<p class="tx-11 mg-t-4">Enter the number of seconds after which the popup will be shown. Default is 0 seconds.</p>
+					<x-error-message inputName="start_to_show" />
 				</div>
 			</div>
 			<div class="col-lg-12">
@@ -134,6 +168,22 @@
 	});
 	$(function() {
 		$('.selectpicker').selectpicker();
+	});
+
+	var options = {
+		filebrowserImageBrowseUrl: '{{env("APP_URL")}}/filemanager?type=Images',
+		filebrowserImageUpload: '{{env("APP_URL")}}/filemanager/upload?type=Images&_token=',
+		filebrowserBrowseUrl: '{{env("APP_URL")}}/filemanager?type=Files',
+		filebrowserUploadUrl: '{{env("APP_URL")}}/filemanager/upload?type=Files&_token',
+		allowedContent: true,
+	};
+	
+	let editor = CKEDITOR.replace('message', options);
+	editor.on('required', function (evt) {
+		if ($('.invalid-feedback').length == 1) {
+			$('#messageRequired').show();
+		}
+		evt.cancel();
 	});
 </script>
 @endsection

@@ -115,6 +115,8 @@
                                     </th>
                                     <th scope="col" width="20%">Title</th>
                                     <th scope="col">URL</th>
+                                    <th scope="col">Start</th>
+                                    <th scope="col">End</th>
                                     <th scope="col">Status</th>
                                     <th scope="col">Options</th>
                                 </tr>
@@ -132,6 +134,9 @@
                                             <strong @if($coupon->trashed()) style="text-decoration:line-through;" @endif title="{{$coupon->title}}"> {{$coupon->title}}</strong>
                                         </td>
 	                                    <td>{{ $coupon->url }}</td>
+                                        {{-- show hours --}}
+                                        <td>{{ $coupon->start_at ? $coupon->start_at->format('M d, Y H:i A') : 'N/A' }}</td>
+                                        <td>{{ $coupon->expire_at ? $coupon->expire_at->format('M d, Y H:i A') : 'N/A' }}</td>
 	                                    <td>	                                    	
                                             @if ($coupon->trashed())
                                                 <span class="badge badge-danger">Deleted</span>

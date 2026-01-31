@@ -19,7 +19,14 @@ class PopupMessage extends Model
         'image',
         'start_to_show',
         'button_text_url',
-        'user_id'
+        'user_id',
+        'start_at',
+        'expire_at',
+    ];
+
+    protected $casts = [
+        'start_at' => 'datetime',
+        'expire_at' => 'datetime',
     ];
 
     public function getButtonTextAttribute($value)
