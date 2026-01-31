@@ -421,24 +421,13 @@
                                         <td valign="top">
                                             <select name="payment_method{{$i}}" id="payment_method{{$i}}" class="form-control payments_created" onchange="check_payment_type($(this).val(),{{$i}})">
                                                 <option value="">-Select -</option> 
-                                                <option value="Bank Deposit">Bank Deposit</option>
-                                                <option value="Cash">Cash</option>
-                                                <option value="Check Payment">Check Payment</option>
-                                                <option value="COD">COD</option>
-                                                <option value="Credit/Debit Card">Credit/Debit Card</option>
-                                                <option value="Discount (Promo)">Discount (Promo)</option>
-                                                <option value="Discount (VAT)">Discount (VAT)</option>
-                                                <option value="Discount (Senior Citizen)">Discount (Senior Citizen)</option>
-                                                <option value="Ex-deal">Ex-deal</option>
-                                                <option value="Gcash">Gcash</option>
-                                                <option value="Gift Certificate">Gift Certificate</option> 
-                                                <option value="M Lhuillier">M Lhuillier</option>
-                                                <option value="Ok Order">Ok Order</option>
-                                                <option value="Online Bank Transfer">Online Bank Transfer</option>
-                                                <option value="Open Date Order">Open Date Order</option>
-                                                <option value="Oth">Oth</option>
-                                                <option value="Paymaya">Paymaya</option>
-                                                <option value="Sign-Chit">Sign-Chit</option>
+                                                @foreach (\App\EcommerceModel\SalesPayment::get_types() as $pm)
+                                                    @php $allowed_payments = explode(',', auth()->user()->allowed_payments); @endphp
+                                                    @if (auth()->user()->user_role->name == 'Cashier' && !in_array($pm, $allowed_payments))
+                                                        @continue
+                                                    @endif
+                                                    <option value="{{ $pm }}">{{ $pm }}</option>
+                                                @endforeach
                                             </select>
                                         </td>
                                         <td valign="top"><input type="number" class="form-control payments" min="0" name="payment_amount{{$i}}" id="payment_amount{{$i}}" value="0"></td>
