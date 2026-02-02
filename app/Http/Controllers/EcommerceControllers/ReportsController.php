@@ -1677,43 +1677,31 @@ class ReportsController extends Controller
                 'text' => $user->customer_name,
             ])
         ]);
+
     }
 
-    public function audit_trail_per_sales(Request $request)
-    {
-        $pb = trim((string) $request->input('pb', ''));
+    public function audit_trail_per_sales(Request $request){
+        $pb = $request->input('pb') ?? null;
 
-        $rs = DB::table('cms_activity_logs as l')
-            // ref -> detail
-            ->leftJoin('ecommerce_sales_details as d', 'd.id', '=', 'l.reference')
-            // detail -> header
-            ->leftJoin('ecommerce_sales_headers as h', 'h.id', '=', 'd.sales_header_id')
-            // also allow ref -> header directly
-            ->leftJoin('ecommerce_sales_headers as h2', 'h2.id', '=', 'l.reference')
-            ->whereRaw("l.reference REGEXP '^[0-9]+$'") // numeric ref only
-            ->when($pb !== '', function ($q) use ($pb) {
-                $q->where(function ($q) use ($pb) {
-                    $q->where('h.order_number',  'like', "%{$pb}%")  // via detail->header
-                    ->orWhere('h2.order_number','like', "%{$pb}%") // directly header
-                    ->orWhere('d.id',          'like', "%{$pb}%")  // detail id
-                    ->orWhere('h.id',          'like', "%{$pb}%"); // header id
-                });
-            }, function ($q) {
-                // fallback filter (optional – remove if you don't want a default)
-                $q->where('h.id', '=', 1);
-            })
-            ->orderByDesc('l.id')
-            ->select([
-                'l.*',
-                'd.id as sales_detail_id',
-                DB::raw('COALESCE(h.id, h2.id) as sales_header_id'),
-                DB::raw('COALESCE(h.order_number, h2.order_number) as order_number'),
-            ])
-            ->get();
-
-        return view('admin.reports.audit_trail_per_sales', compact('rs'));
+        $rs = ActivityLog::whereIn('db_table', [
+            'ecommerce_sales_headers',
+            'ecommerce_sales_details',
+            'ecommerce_sales_payments'
+        ])->whereIn('activity_type', [
+            'update',
+            'delete',
+            'create',
+            'force_delete',
+            'soft_delete',
+            'restore'
+        ])->whereNotNull('subject_id')
+        ->when($pb, function ($query) use ($pb) {
+            $query->where('subject_id', 'LIKE', "%{$pb}%");
+        })->orderBy('id', 'desc')
+        ->get();
+   
+        return view('admin.reports.audit_trail_per_sales',compact('rs'));
     }
-
 
     public function audit_trail_per_external(Request $request){
         $rs = '';
