@@ -99,7 +99,7 @@ Audit Trail (Sales)
                                 @endphp
                                 <tr style="text-align: left">
                                     <td>@if(date('Y-m-d',strtotime($r->activity_date)) <> '1970-01-01'){{date('m-d-Y H:i:s',strtotime($r->activity_date))}} @endif</td>
-                                    <td>{{$r->user->name ?? 'Guest'}}</td>
+                                    <td>{{$r->user->name ?? ''}}</td>
                                     <td>{{$r->activity_type}}</td>
                                     <td>{{$r->dashboard_activity}}</td>
                                     <td>{{$r->activity_desc}}</td>
