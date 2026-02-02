@@ -145,6 +145,14 @@
                                 <td style="width:16%">
                                     <input @if(isset($filter->dn_end_date)) type="date" value="{{$filter->dn_end_date}}" @else type="text" onfocus="(this.type='date')" @endif class="form-control" name="dn_end_date" placeholder="End Date (Date Needed)">
                                 </td>
+                                <td style="width:16%">
+                                    <select name="delivery_address[]" id="delivery_address" class="form-control" multiple size="1">
+                                        <option value="" disabled>Delivery Address</option>
+                                        @foreach(\App\EcommerceModel\Branch::where('status', 1)->orderBy('name','asc')->get() as $b)
+                                            <option value="{{$b->name}}" {{ isset($_GET['delivery_address']) && in_array($b->name, $_GET['delivery_address']) ? 'selected' : '' }}>{{$b->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </td>
                                 <td>
                                     <button id="bulk-delete-btn" type="button" class="btn btn-danger d-none" data-toggle="modal" data-target="#confirmDeleteModal">
                                         Delete Selected
