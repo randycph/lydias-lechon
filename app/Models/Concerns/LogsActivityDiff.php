@@ -36,7 +36,9 @@ trait LogsActivityDiff
 
             ActivityLog::withoutEvents(function () use ($model, $tableTitle, $recordName, $newValues) {
                 ActivityLog::create([
-                    'created_by'         => auth()->id(),
+                    'created_by'        => self::resolveActorId(),
+                    'email'             => optional(auth()->user())->email,
+                    'role'              => optional(auth()->user()?->user_role)->name,
                     'activity_type'      => 'create',
                     'dashboard_activity' => "created a {$tableTitle}",
                     'activity_desc'      => "created the {$tableTitle} {$recordName}",
@@ -112,7 +114,7 @@ trait LogsActivityDiff
                     $newText
                 ) {
                     ActivityLog::create([
-                        'created_by'         => auth()->check() ? auth()->id() : null,
+                        'created_by'         => self::resolveActorId(),
                         'activity_type'      => 'update',
                         'dashboard_activity' => "updated the {$tableTitle} {$fieldLabel}",
                         'activity_desc'      => "updated the {$tableTitle} {$fieldLabel} of {$recordName} from {$oldText} to {$newText}",
@@ -124,8 +126,8 @@ trait LogsActivityDiff
                         'subject_type'       => get_class($model),
                         'subject_id'         => $model->getKey(),
                         'ip_address'         => Request::ip(),
-                        'email'              => auth()->check() ? auth()->user()?->email : null,
-                        'role'               => auth()->check() ? auth()->user()?->user_role?->name : null,
+                        'email'             => optional(auth()->user())->email,
+                        'role'              => optional(auth()->user()?->user_role)->name,
                     ]);
                 });
             }
@@ -166,7 +168,7 @@ trait LogsActivityDiff
                 $recordName
             ) {
                 ActivityLog::create([
-                    'created_by'         => auth()->check() ? auth()->id() : null,
+                    'created_by'         => self::resolveActorId(),
                     'activity_type'      => $action,
                     'dashboard_activity' => "{$action} the {$tableTitle}",
                     'activity_desc'      => "{$action} the {$tableTitle} {$recordName}",
@@ -178,8 +180,8 @@ trait LogsActivityDiff
                     'subject_type'       => get_class($model),
                     'subject_id'         => $model->getKey(),
                     'ip_address'         => Request::ip(),
-                    'email'              => auth()->check() ? auth()->user()?->email : null,
-                    'role'               => auth()->check() ? auth()->user()?->user_role?->name : null,
+                    'email'             => optional(auth()->user())->email,
+                    'role'              => optional(auth()->user()?->user_role)->name,
                 ]);
             });
         });
@@ -204,7 +206,7 @@ trait LogsActivityDiff
 
                 ActivityLog::withoutEvents(function () use ($model, $tableTitle, $recordName) {
                     ActivityLog::create([
-                        'created_by'         => auth()->check() ? auth()->id() : null,
+                        'created_by'         => self::resolveActorId(),
                         'activity_type'      => 'restore',
                         'dashboard_activity' => "restored the {$tableTitle}",
                         'activity_desc'      => "restored the {$tableTitle} {$recordName}",
@@ -214,8 +216,8 @@ trait LogsActivityDiff
                         'subject_type'       => get_class($model),
                         'subject_id'         => $model->getKey(),
                         'ip_address'         => request()->ip(),
-                        'email'              => auth()->check() ? auth()->user()?->email : null,
-                        'role'               => auth()->check() ? auth()->user()?->user_role?->name : null,
+                        'email'             => optional(auth()->user())->email,
+                        'role'              => optional(auth()->user()?->user_role)->name,
                     ]);
                 });
             });
@@ -293,5 +295,12 @@ trait LogsActivityDiff
         }
 
         return $value;
+    }
+
+    protected static function resolveActorId(): ?int
+    {
+        return auth()->id()
+            ?? request()->user()?->id
+            ?? null;
     }
 }
