@@ -833,6 +833,23 @@ class SalesController extends Controller
             $order_sources = request()->get('order_source');
             $model = $model->whereIn('order_source', $order_sources);
         }
+        if (isset($_GET['delivery_address'])) {
+            $delivery_addresses = request()->get('delivery_address');
+
+            $model = $model->where(function ($q) use ($delivery_addresses) {
+                // Door to Door then use delivery_branch
+                $q->where(function ($q2) use ($delivery_addresses) {
+                    $q2->where('delivery_type', 'Door to door delivery')
+                    ->whereIn('delivery_branch', $delivery_addresses);
+                })
+
+                // Store Pickup thenuse outlet
+                ->orWhere(function ($q2) use ($delivery_addresses) {
+                    $q2->where('delivery_type', 'Store Pickup')
+                    ->whereIn('outlet', $delivery_addresses);
+                });
+            });
+        }
         if(isset($_GET['order_status']) && strlen($_GET['order_status']) > 0){
             if($_GET['order_status'] == 2){
                 $model = $model->where('delivery_status','=','Open Date');        
