@@ -1304,6 +1304,25 @@
                     d.setDate(d.getDate() + (bakaDay || 3));
                 } else if (this.haslechon) {
                     d.setDate(d.getDate() + (lechonDay || 1));
+                } else if (this.hasMisc) {
+                    const hours = this.minimum_processing_hours_misc || 24;
+
+                    // add processing hours
+                    d.setTime(d.getTime() + (hours * 60 * 60 * 1000));
+
+                    // set hours enforcement
+                    const hour = d.getHours();
+                    const minute = d.getMinutes();
+
+                    // After 8:00 PM go to next day 9:00 AM
+                    if (hour >= 20) {
+                        d.setDate(d.getDate() + 1);
+                        d.setHours(9, 0, 0, 0);
+                    }
+                    // Before 9:00 AM will be same day 9:00 AM
+                    else if (hour < 9) {
+                        d.setHours(9, 0, 0, 0);
+                    }
                 }
 
                 return d;
