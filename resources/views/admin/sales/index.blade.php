@@ -12,6 +12,18 @@
         .row-selected {
             background-color: #92b7da !important;
         }
+        .bootstrap-select > .dropdown-toggle {
+            background-color: #ffffff !important;
+            border: 1px solid #ced4da;
+            color: #495057;
+        }
+
+        .bootstrap-select > .dropdown-toggle:focus,
+        .bootstrap-select > .dropdown-toggle:active {
+            background-color: #ffffff !important;
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25);
+        }
     </style>
 @endsection
 
@@ -41,10 +53,21 @@
                             <tr>
                                 
                                 <td style="width:10%">
-                                    <select name="order_source[]" id="order_source" class="form-control" multiple size="1">
-                                        <option value="" disabled>Source</option>
+                                    <select 
+                                        name="order_source[]" 
+                                        id="order_source" 
+                                        class="form-control selectpicker" 
+                                        multiple 
+                                        size="1" 
+                                        data-selected-text-format="count"
+                                        data-none-selected-text="0 selected source"
+                                        data-count-selected-text="{0} selected sources"  
+                                    >
                                         @foreach(\App\EcommerceModel\Branch::where('status', 1)->orderBy('name','asc')->get() as $b)
-                                            <option value="{{$b->name}}" {{ isset($_GET['order_source']) && in_array($b->name, $_GET['order_source']) ? 'selected' : '' }}>{{$b->name}}</option>
+                                            <option value="{{$b->name}}"
+                                                {{ isset($_GET['order_source']) && in_array($b->name, $_GET['order_source']) ? 'selected' : '' }}>
+                                                {{$b->name}}
+                                            </option>
                                         @endforeach
                                         <option value="Web">Web</option>
                                     </select>
@@ -67,7 +90,7 @@
                                 
                                 <td style="width:20%"><input name="search" type="search" id="search" class="form-control"  placeholder="Order, Customer" value="{{ $filter->search }}">
                                 </td>                                
-                                <td align="left" style="width:10%">
+                                <td align="left" style="">
                                     <div class="bd-highlight">
                                         <div class="dropdown d-inline">
                                             <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -126,9 +149,9 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>
-                                    <input type="submit" class="btn-xs btn btn-success" value="Search">
-                                    <a href="{{ route('sales-transaction.index') }}" class="btn-xs btn btn-info">Reset</a>
+                                <td class="d-flex">
+                                    <input type="submit" class="btn-sm btn btn-success mr-2" value="Search">
+                                    <a href="{{ route('sales-transaction.index') }}" class="btn-sm btn btn-info">Reset</a>
                                 </td>
                             </tr>
                             <tr>
@@ -1546,4 +1569,7 @@
 
 
     </script>
+
+
+
 @endsection
