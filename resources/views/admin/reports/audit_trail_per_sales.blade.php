@@ -71,8 +71,8 @@ Audit Trail (Sales)
                         <table  id="example" border="1" class="display nowrap" style="width:100%;font: bold 13px/150% Arial, sans-serif, Helvetica;">
                             <thead>
                             <tr> 
-                                <th>User</th>
                                 <th>Date</th>
+                                <th>Created by</th>
                                 <th>Action</th> 
                                 <th>Name</th>  
                                 <th>Description</th> 
@@ -98,8 +98,8 @@ Audit Trail (Sales)
                                     }
                                 @endphp
                                 <tr style="text-align: left">
-                                    <td>{{$user}}</td>
                                     <td>@if(date('Y-m-d',strtotime($r->activity_date)) <> '1970-01-01'){{date('m-d-Y H:i:s',strtotime($r->activity_date))}} @endif</td>
+                                    <td>{{$r->user->name ?? 'Guest'}}</td>
                                     <td>{{$r->activity_type}}</td>
                                     <td>{{$r->dashboard_activity}}</td>
                                     <td>{{$r->activity_desc}}</td>
