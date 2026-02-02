@@ -1683,7 +1683,7 @@ class ReportsController extends Controller
     public function audit_trail_per_sales(Request $request){
         $pb = $request->input('pb') ?? null;
 
-        $rs = ActivityLog::whereIn('db_table', [
+        $rs = ActivityLog::with('user')->whereIn('db_table', [
             'ecommerce_sales_headers',
             'ecommerce_sales_details',
             'ecommerce_sales_payments'
