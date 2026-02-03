@@ -145,6 +145,23 @@
                                 <td style="width:16%">
                                     <input @if(isset($filter->dn_end_date)) type="date" value="{{$filter->dn_end_date}}" @else type="text" onfocus="(this.type='date')" @endif class="form-control" name="dn_end_date" placeholder="End Date (Date Needed)">
                                 </td>
+                                <td style="width:16%">
+                                    <select 
+                                        name="delivery_address[]" 
+                                        id="delivery_address" 
+                                        class="form-control selectpicker" 
+                                        multiple 
+                                        size="1"
+                                        data-none-selected-text="0 selected delivery address"
+                                        data-selected-text-format="count"
+                                        data-count-selected-text="{0} selected delivery addresses"
+                                    >
+                                        <option value="" disabled>Delivery Address</option>
+                                        @foreach(\App\EcommerceModel\Branch::where('status', 1)->orderBy('name','asc')->get() as $b)
+                                            <option value="{{$b->name}}" {{ isset($_GET['delivery_address']) && in_array($b->name, $_GET['delivery_address']) ? 'selected' : '' }}>{{$b->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </td>
                                 <td>
                                     <button id="bulk-delete-btn" type="button" class="btn btn-danger d-none" data-toggle="modal" data-target="#confirmDeleteModal">
                                         Delete Selected
@@ -187,6 +204,7 @@
                                 <th>Customer</th>
                                 <th>Ordered By</th>
                                 <th>Source</th>
+                                <th>Delivery Address</th>
                                 <th>Order Date</th>
                                 <th>Date Needed</th>
                                 <th>Delivery Type</th>
@@ -249,6 +267,7 @@
                                     <td class="{{ isUnreadTransaction($sale->id) ? 'font-weight-bold' : '' }}">{{ $sale->customer_name ?? $sale->contact_person }}</td>
                                     <td>{{ $sale->customer_name }}</td>
                                     <td>{{ $sale->order_source }}</td>
+                                    <td>{{ $sale->delivery_type == 'Store Pickup' ? $sale->outlet : $sale->delivery_branch }}</td>
                                     <td>{{ \Carbon\Carbon::parse($sale->created_at)->format('Y-m-d g:i A') }}</td>
                                     <td>
                                         @if($sale->delivery_status <> 'Open Date')

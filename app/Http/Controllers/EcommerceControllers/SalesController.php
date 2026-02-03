@@ -750,10 +750,40 @@ class SalesController extends Controller
         }
         $model = $this->additional_filters($model);
       
+        $selectFields = [
+            'id',
+            'order_source',
+            'delivery_fee_amount',
+            'outlet',
+            'delivery_branch',
+            'delivery_type',
+            'for_deletion',
+            'contact_person',
+            'instruction',
+            'customer_delivery_adress',
+            'outlet',
+            'customer_location',
+            'order_number',
+            'customer_name',
+            'customer_location',
+            'isConfirm',
+            'created_at',
+            'status',
+            'delivery_status',
+            'payment_status',
+            'net_amount',
+            'gross_amount',
+            'deleted_at',
+            DB::raw('(SELECT ecommerce_sales_details.delivery_date From ecommerce_sales_details WHERE ecommerce_sales_headers.id=ecommerce_sales_details.sales_header_id GROUP BY ecommerce_sales_details.sales_header_id) as date_needed')
+        ];
 
-        $selectFields = ['id','order_source','delivery_fee_amount','delivery_type','for_deletion','contact_person','instruction','customer_delivery_adress','outlet','customer_location','order_number', 'customer_name', 'customer_location', 'isConfirm', 'created_at', 'status', 'delivery_status', 'payment_status', 'net_amount', 'gross_amount','deleted_at', DB::raw('(SELECT ecommerce_sales_details.delivery_date From ecommerce_sales_details WHERE ecommerce_sales_headers.id=ecommerce_sales_details.sales_header_id GROUP BY ecommerce_sales_details.sales_header_id) as date_needed')];
-
-        $filterFields = ['order_number', 'customer_name', 'date_needed', 'start_date', 'end_date'];
+        $filterFields = [
+            'order_number', 
+            'customer_name', 
+            'date_needed', 
+            'start_date', 
+            'end_date'
+        ];
 
         if ($isDispatcher) {
             $listing = new ListingHelper('desc',20,'date_needed', $customConditions);
@@ -802,6 +832,23 @@ class SalesController extends Controller
         if(isset($_GET['order_source'])){
             $order_sources = request()->get('order_source');
             $model = $model->whereIn('order_source', $order_sources);
+        }
+        if (isset($_GET['delivery_address'])) {
+            $delivery_addresses = request()->get('delivery_address');
+
+            $model = $model->where(function ($q) use ($delivery_addresses) {
+                // Door to Door then use delivery_branch
+                $q->where(function ($q2) use ($delivery_addresses) {
+                    $q2->where('delivery_type', 'Door to door delivery')
+                    ->whereIn('delivery_branch', $delivery_addresses);
+                })
+
+                // Store Pickup thenuse outlet
+                ->orWhere(function ($q2) use ($delivery_addresses) {
+                    $q2->where('delivery_type', 'Store Pickup')
+                    ->whereIn('outlet', $delivery_addresses);
+                });
+            });
         }
         if(isset($_GET['order_status']) && strlen($_GET['order_status']) > 0){
             if($_GET['order_status'] == 2){
