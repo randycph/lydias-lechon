@@ -148,7 +148,7 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="d-flex">
+                                <td class="d-flex ml-2">
                                     <input type="submit" class="btn-sm btn btn-success mr-2" value="Search">
                                     <a href="{{ route('sales-transaction.index') }}" class="btn-sm btn btn-info">Reset</a>
                                 </td>
