@@ -214,7 +214,8 @@ class WebController extends Controller
         $ecommerce->disable_order = isset($request->disable_order) ? 1 : 0;
         $ecommerce->disable_delivery = isset($request->disable_delivery) ? 1 : 0;  
         $ecommerce->minimum_processing_hours = $request->minimum_processing_hours; 
-        $ecommerce->minimum_processing_hours_misc = $request->minimum_processing_hours_misc;  
+        $ecommerce->minimum_processing_hours_misc = $request->minimum_processing_hours_misc; 
+        $ecommerce->minimum_processing_hours_baka = $request->minimum_processing_hours_baka; 
         $ecommerce->announcement = $request->announcement;
         $ecommerce->cutoff = $request->cutoff;
         $ecommerce->minimum_order_misc = floatval($request->minimum_order_misc);

@@ -1248,6 +1248,7 @@
     window.minimum_processing_hours_misc = @json($minimum_processing_hours_misc);
     window.minimum_order_misc = @json($minimum_order_misc);
     window.hasCochinillo = @json($hasCochinillo);
+    window.minimum_processing_hours_baka = @json($minimum_processing_hours_baka);
 </script>
 
 <script>
@@ -1262,14 +1263,39 @@
             minimum_order_amount_pickup: window.minimum_order_amount_pickup || 0,
             minimum_processing_hours: window.minimum_processing_hours || 0,
             minimum_processing_hours_misc: window.minimum_processing_hours_misc || 0,
+            minimum_processing_hours_baka: window.minimum_processing_hours_baka || 0,
+            minimum_processing_hours_lechon: window.minimum_processing_hours || 0,
             minimum_order_misc: window.minimum_order_misc || 0,
             minDate() {
                 const d = new Date(this.today);
 
+                // convert hours to day
+                const bakaDay = this.minimum_processing_hours_baka / 24;
+                const lechonDay = this.minimum_processing_hours_lechon / 24;
+
                 if (this.hasbaka) {
-                    d.setDate(d.getDate() + 3);
+                    d.setDate(d.getDate() + (bakaDay || 3));
                 } else if (this.haslechon) {
-                    d.setDate(d.getDate() + 1);
+                    d.setDate(d.getDate() + (lechonDay || 1));
+                } else if (this.hasMisc) {
+                    const hours = this.minimum_processing_hours_misc || 24;
+
+                    // add processing hours
+                    d.setTime(d.getTime() + (hours * 60 * 60 * 1000));
+
+                    // set hours enforcement
+                    const hour = d.getHours();
+                    const minute = d.getMinutes();
+
+                    // After 8:00 PM go to next day 9:00 AM
+                    if (hour >= 20) {
+                        d.setDate(d.getDate() + 1);
+                        d.setHours(9, 0, 0, 0);
+                    }
+                    // Before 9:00 AM will be same day 9:00 AM
+                    else if (hour < 9) {
+                        d.setHours(9, 0, 0, 0);
+                    }
                 }
 
                 return d;
@@ -1355,7 +1381,7 @@
             showMessage: false,
             need_date: '',
             need_time: '',
-            allHours: Array.from({ length: 14 }, (_, i) => i + 7),
+            allHours: Array.from({ length: 12 }, (_, i) => i + 9),
             warningMessage: '',
             errorMessage: '',
             hasErrorMessage: false,
@@ -2853,14 +2879,16 @@
                 if (type === 'lechon') {
                     this.$nextTick(() => {
                         let d = new Date();
-                        d.setDate(d.getDate() + 1);
+                        const lechonDay = this.minimum_processing_hours_lechon ? Math.ceil(this.minimum_processing_hours_lechon / 24) : 2;
+                        d.setDate(d.getDate() + lechonDay);
                         delivery.need_date = d.toISOString().split('T')[0];
                         this.minimumDate(d)
                     });
                 } else if (type === 'baka') {
                     this.$nextTick(() => {
                         let d = new Date();
-                        d.setDate(d.getDate() + 3);
+                        const bakaDay = this.minimum_processing_hours_baka ? Math.ceil(this.minimum_processing_hours_baka / 24) : 3;
+                        d.setDate(d.getDate() + bakaDay);
                         delivery.need_date = d.toISOString().split('T')[0];
                         this.minimumDate(d)
                     });
@@ -3000,9 +3028,11 @@
                 const productTypes = delivery.orders.map(o => this.getProductType(o));
                 let offsetHours = 0;
 
-                if (productTypes.includes('baka')) offsetHours = Math.max(offsetHours, 72);
-                if (productTypes.includes('lechon')) offsetHours = Math.max(offsetHours, 24);
-                if (productTypes.includes('misc')) offsetHours = Math.max(offsetHours, 6);
+                console.log(this.minimum_processing_hours_lechon)
+
+                if (productTypes.includes('baka')) offsetHours = Math.max(offsetHours, this.minimum_processing_hours_baka || 72);
+                if (productTypes.includes('lechon')) offsetHours = Math.max(offsetHours, this.minimum_processing_hours_lechon || 24);
+                if (productTypes.includes('misc')) offsetHours = Math.max(offsetHours, this.minimum_processing_hours_misc || 12);
 
                 const minAllowedTime = new Date(now.getTime() + offsetHours * 60 * 60 * 1000);
 
@@ -3050,9 +3080,9 @@
 
                 // Get the maximum offset required
                 let offsetHours = 0;
-                if (productTypes.includes('baka')) offsetHours = Math.max(offsetHours, 72);
-                if (productTypes.includes('lechon')) offsetHours = Math.max(offsetHours, 24);
-                if (productTypes.includes('misc')) offsetHours = Math.max(offsetHours, 6);
+                if (productTypes.includes('baka')) offsetHours = Math.max(offsetHours, this.minimum_processing_hours_baka || 72);
+                if (productTypes.includes('lechon')) offsetHours = Math.max(offsetHours, this.minimum_processing_hours_lechon || 24);
+                if (productTypes.includes('misc')) offsetHours = Math.max(offsetHours, this.minimum_processing_hours_misc || 12);
 
                 let minAllowedDateTime = new Date(now.getTime() + offsetHours * 60 * 60 * 1000);
 
@@ -3063,8 +3093,8 @@
                     delivery.need_date = minAllowedDateTime.toISOString().split('T')[0];
                 }
 
-                // Filter hours from 7 AM to 8 PM only
-                const availableHours = this.getAvailableHours(delivery).filter(h => h >= 7 && h <= 20);
+                // Filter hours from 9 AM to 8 PM only
+                const availableHours = this.getAvailableHours(delivery).filter(h => h >= 9 && h <= 20);
 
                 const selectedDateTime = delivery.need_time
                     ? new Date(`${delivery.need_date}T${delivery.need_time}`)
@@ -3088,7 +3118,7 @@
                         nextDay.setDate(nextDay.getDate() + 1);
                         delivery.need_date = nextDay.toISOString().split('T')[0];
 
-                        const hoursNextDay = this.getAvailableHours(delivery).filter(h => h >= 7 && h <= 20);
+                        const hoursNextDay = this.getAvailableHours(delivery).filter(h => h >= 9 && h <= 20);
                         const firstHour = hoursNextDay[0];
 
                         delivery.need_time = firstHour !== undefined
@@ -3106,9 +3136,9 @@
                 if (
                     productTypes.includes('lechon') &&
                     finalSelectedDateTime &&
-                    (finalSelectedDateTime - now) / 3600000 < 24
+                    (finalSelectedDateTime - now) / 3600000 < (this.minimum_processing_hours_lechon || 24)
                 ) {
-                    delivery.warningMessage = `⚠️ Warning! The date and time you've selected (${delivery.need_date} - ${this.formatTime(delivery.need_time)}) is less than 24 hours from now. You can still proceed by contacting our <span class='underline text-blue-600 cursor-pointer' @click='openHotline = true'>Hotline</span>.`;
+                    delivery.warningMessage = `Warning! The date and time you've selected (${delivery.need_date} - ${this.formatTime(delivery.need_time)}) is less than ${this.minimum_processing_hours_lechon || 24} hours from now. You can still proceed by contacting our <span class='underline text-blue-600 cursor-pointer' @click='openHotline = true'>Hotline</span>.`;
                 }
 
                 const hasCochinillo = delivery.orders.some(o => o.product_id === 165);
@@ -3380,16 +3410,16 @@
                 const productTypes = delivery.orders?.map(o => this.getProductType(o)) || [];
 
                 let offset = 0;
-                if (productTypes.includes('baka')) offset = 72;
-                else if (productTypes.includes('lechon')) offset = 24;
-                else if (productTypes.includes('misc')) offset = 6;
+                if (productTypes.includes('baka')) offset = this.minimum_processing_hours_baka || 72;
+                else if (productTypes.includes('lechon')) offset = this.minimum_processing_hours_lechon || 24;
+                else if (productTypes.includes('misc')) offset = this.minimum_processing_hours_misc || 12;
 
                 const minAllowedTime = new Date(now.getTime() + offset * 3600 * 1000);
                 const deliveryDate = new Date(delivery.need_date + 'T00:00');
 
                 return this.allHours.filter(hour => {
                     const testTime = new Date(`${delivery.need_date}T${hour < 10 ? '0' + hour : hour}:00`);
-                    return testTime >= minAllowedTime && hour >= 7 && hour <= 20;
+                    return testTime >= minAllowedTime && hour >= 9 && hour <= 20;
                 });
             },
 
@@ -3676,9 +3706,9 @@
 
                 // Determine offset by product type
                 let requiredOffset = 0;
-                if (this.hasbaka) requiredOffset = 72;
-                else if (this.haslechon) requiredOffset = 24;
-                else if (this.hasMisc) requiredOffset = 6;
+                if (this.hasbaka) requiredOffset = this.minimum_processing_hours_baka || 72;
+                else if (this.haslechon) requiredOffset = this.minimum_processing_hours_lechon || 24;
+                else if (this.hasMisc) requiredOffset = this.minimum_processing_hours_misc || 12;
 
                 // Compose full datetime for that hour
                 const timeStr = (hour < 10 ? '0' + hour : hour) + ':00';
