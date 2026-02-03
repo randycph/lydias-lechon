@@ -75,7 +75,6 @@
                                 <td style="width:11%">
                                     <select class="form-control" name="order_status">
                                         <option value="">Order Status</option>
-                                        <option value="0" @if(isset($filter->order_status) && $filter->order_status == '0') selected="selected" @endif>Unconfirm</option>
                                         <option value="1" @if(isset($filter->order_status) && $filter->order_status == '1') selected="selected" @endif>Confirmed</option>
                                         <option value="2" @if(isset($filter->order_status) && $filter->order_status == '2') selected="selected" @endif>Open Date</option>
                                         <option value="Cancelled" @if(isset($filter->order_status) && $filter->order_status == 'Cancelled') selected="selected" @endif>Cancelled</option>
