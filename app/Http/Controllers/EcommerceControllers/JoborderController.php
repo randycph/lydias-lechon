@@ -535,34 +535,43 @@ class JoborderController extends Controller
                 }
             }
 
-                for($ix=1; $ix<=10; $ix++){
+            $payments = collect($request->payments ?? [])
+                ->filter(function ($payment) {
+                    return !empty($payment['method'])
+                        && isset($payment['amount'])
+                        && floatval($payment['amount']) > 0;
+                });
 
-                    if($request->input('payment_amount'.$ix) > 0){
+            foreach ($payments as $payment) {
 
-                        $image_url = '';
-                        if($request->hasFile('payment_file'.$ix))
-                        {
-                            $newFile = $this->upload_file_to_storage('payments', $request->file('payment_file'.$ix));
-                            $image_url = $newFile['url'];
-                        }
+                $image_url = null;
 
-                        //$is_cod = ($request->input('payment_method'.$ix) == 'COD') ? 'PENDING':'PAID';
-                        $is_cod = 'PENDING';
-                        $add_special_payment = SalesPayment::create([
-                            'sales_header_id' => $salesHeader->id,
-                            'payment_type' => $request->input('payment_method'.$ix),
-                            'amount' => $request->input('payment_amount'.$ix),
-                            'status' => $is_cod,
-                            'payment_date' => date('Y-m-d'),
-                            'receipt_number' => $request->input('payment_remarks'.$ix),
-                            'created_by' => $salesHeader->user_id,
-                            'file_url' => $image_url,
-                            'order_number' => $salesHeader->order_number
-                        ]);
-                    }
+                // Handle per-row file upload
+                if (isset($payment['file']) && $payment['file'] instanceof \Illuminate\Http\UploadedFile) {
+                    $newFile = $this->upload_file_to_storage('payments', $payment['file']);
+                    $image_url = $newFile['url'] ?? null;
                 }
-               // logger($add_special_payment);
 
+                // COD
+                // $is_cod = ($payment['method'] === 'COD') ? 'PENDING' : 'PAID';
+
+                $is_cod = 'PENDING';
+
+                $isDiscount = str_starts_with($payment['method'], 'Discount');
+
+                SalesPayment::create([
+                    'sales_header_id' => $salesHeader->id,
+                    'payment_type'    => $payment['method'],
+                    'amount'          => (float) $payment['amount'],
+                    'status'          => $is_cod,
+                    'payment_date'    => now()->toDateString(),
+                    'receipt_number'  => $payment['remarks'] ?? null,
+                    'created_by'      => $salesHeader->user_id,
+                    'file_url'        => $image_url,
+                    'order_number'    => $salesHeader->order_number,
+                    'is_discount'    => $isDiscount ? 1 : 0,
+                ]);
+            }
 
             //if(strlen($request->couponcode)>=1){
             if($request->totalcoupon > 0){
