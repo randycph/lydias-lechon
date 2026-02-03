@@ -411,50 +411,72 @@
                                 <label class="custom-control-label" for="customRadioInline2">No Payment Required</label>
                             </div>
                         </div> --}}
-                        <table width="100%">
+
+                        <table class="table table-sm" id="paymentsTable">
                             <thead>
                                 <tr>
-                                    <th style="width:25%;">Payment Method</th>
-                                    <th style="width:25%;">Amount</th>
-                                    <th style="width:40%;">Remarks & Attachment</th>
-                                    <th style="width:10%;">&nbsp;</th>
+                                    <th width="25%">Payment Method</th>
+                                    <th width="25%">Amount</th>
+                                    <th width="40%">Remarks & Attachment</th>
+                                    <th width="10%"></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @for($i = 1; $i <= 10; $i++)
-                                    <tr style="{{$i == 1 ? '' : 'display:none'}};" class="payment_tr" id="payment_tr{{$i}}">                                        
-                                        <td valign="top">
-                                            <select name="payment_method{{$i}}" id="payment_method{{$i}}" class="form-control payments_created" onchange="check_payment_type($(this).val(),{{$i}})">
-                                                <option value="">-Select -</option> 
-                                                @foreach (\App\EcommerceModel\SalesPayment::get_types() as $pm)
-                                                    @php $allowed_payments = explode(',', auth()->user()->allowed_payments); @endphp
-                                                    @if (auth()->user()->user_role->name == 'Cashier' && !in_array($pm, $allowed_payments))
-                                                        @continue
-                                                    @endif
-                                                    <option value="{{ $pm }}">{{ $pm }}</option>
-                                                @endforeach
-                                            </select>
-                                        </td>
-                                        <td valign="top"><input type="number" class="form-control payments" min="0" name="payment_amount{{$i}}" id="payment_amount{{$i}}" value="0"></td>
-                                        <td valign="top">
-                                            <textarea name="payment_remarks{{$i}}" id="payment_remarks{{$i}}" class="form-control" rows="1" 
-                                            placeholder="Enter payment details here"></textarea>
-                                            <br>
-                                            <input type="file" name="payment_file{{$i}}" id="payment_file{{$i}}">
-                                        </td>
-                                       
-                                        <td valign="top"><a href="javascript:void(0);" title="remove payment" class="btn btn-xs btn-warning" onclick="remove_payment({{$i}});">x</a></td>
-                                    </tr>
+                                <tr class="payment-row d-none align-top">
+                                    <td class="align-top">
+                                        <select name="payments[0][method]" class="form-control payment-method">
+                                            <option value="">- Select -</option>
+                                            @foreach (\App\EcommerceModel\SalesPayment::get_types() as $pm)
+                                                @php $allowed = explode(',', auth()->user()->allowed_payments); @endphp
+                                                @if (auth()->user()->user_role->name === 'Cashier' && !in_array($pm, $allowed))
+                                                    @continue
+                                                @endif
+                                                <option value="{{ $pm }}">{{ $pm }}</option>
+                                            @endforeach
+                                        </select>
+                                    </td>
 
-                                @endfor                              
+                                    <td class="align-top">
+                                        <input type="number"
+                                            min="0"
+                                            value="0"
+                                            name="payments[0][amount]"
+                                            class="form-control payment-amount">
+                                    </td>
+
+                                    <td class="align-top">
+                                        <div class="payment-remarks-wrapper">
+                                            <textarea name="payments[0][remarks]"
+                                                    class="form-control mb-1"
+                                                    rows="2"
+                                                    placeholder="Enter payment details"></textarea>
+
+                                            <input type="file"
+                                                name="payments[0][file]"
+                                                class="form-control-file">
+                                        </div>
+                                    </td>
+
+                                    <td class="text-center align-top">
+                                        <button type="button"
+                                                class="btn btn-warning btn-sm remove-payment"
+                                                title="Remove payment">
+                                            ✕
+                                        </button>
+                                    </td>
+                                </tr>
+
                             </tbody>
                         </table>
-                        <table width="100%">
-                            <tr>
-                                <td style="width:25%"><a href="javascript:void(0);" onclick="add_more_payment();" class="btn btn-sm btn-success">Add more</a></td>
-                                <td style="width:75%"><span id="payment_total"></span></td>
-                            </tr>
-                        </table>
+
+                        <button type="button" class="btn btn-sm btn-success" id="addPayment">
+                            Add more
+                        </button>
+
+                        <div class="mt-2">
+                            <strong id="payment_total">Total: 0.00</strong>
+                        </div>
+
                         
 
                         {{-- 
@@ -560,7 +582,141 @@
     </script>
 
     <script>
-       
+
+       const DISCOUNT_TYPES = {
+            'Discount (Promo)': '.discount-promo-th',
+            'Discount (VAT)': '.discount-vat-th',
+            'Discount (Senior Citizen)': '.discount-senior-th'
+        };
+
+        $(function () {
+
+            addPaymentRow();
+
+            $('#addPayment').on('click', addPaymentRow);
+
+            $('#paymentsTable').on('change', '.payment-method', handlePaymentMethodChange);
+            $('#paymentsTable').on('input', '.payment-amount', recalculatePayments);
+            $('#paymentsTable').on('click', '.remove-payment', removePaymentRow);
+
+            reindexPayments();
+        });
+
+        /* =========================
+        ROW HANDLING
+        ========================= */
+
+        function addPaymentRow() {
+            const $row = $('#paymentsTable tbody tr:first').clone();
+            $row.removeClass('d-none');
+            resetRow($row);
+            $('#paymentsTable tbody').append($row);
+            reindexPayments();
+        }
+
+        function removePaymentRow() {
+            const $row = $(this).closest('tr');
+            $row.remove();
+            reindexPayments();
+            recalculatePayments();
+        }
+
+        function resetRow($row) {
+            $row.find('select').val('');
+            $row.find('input[type=number]').val(0).prop('readonly', false);
+            $row.find('textarea').val('');
+        }
+
+        /* =========================
+        PAYMENT TYPE LOGIC
+        ========================= */
+
+        function handlePaymentMethodChange() {
+            const $row = $(this).closest('tr');
+            const method = $(this).val();
+            const $amount = $row.find('.payment-amount');
+
+            if (method === 'COD') {
+                $amount.val(getPaymentBalance()).prop('readonly', true);
+            } else {
+                $amount.prop('readonly', false);
+            }
+
+            recalculatePayments();
+        }
+
+        /* =========================
+        CALCULATIONS
+        ========================= */
+
+        function recalculatePayments() {
+
+            let paymentTotal = 0;
+            let discountTotals = {
+                promo: 0,
+                vat: 0,
+                senior: 0
+            };
+
+            $('.payment-row:not(.d-none)').each(function () {
+                const method = $(this).find('.payment-method').val();
+                const amount = parseFloat($(this).find('.payment-amount').val()) || 0;
+
+                paymentTotal += amount;
+
+                if (method === 'Discount (Promo)') discountTotals.promo += amount;
+                if (method === 'Discount (VAT)') discountTotals.vat += amount;
+                if (method === 'Discount (Senior Citizen)') discountTotals.senior += amount;
+            });
+
+            updateDiscountUI(discountTotals);
+            $('#payment_total').text('Total: ' + formatAmount(paymentTotal));
+
+            calculate_grand_total();
+        }
+
+        /* =========================
+        DISCOUNT UI
+        ========================= */
+
+        function updateDiscountUI(d) {
+
+            toggleDiscount('.discount-promo-th', d.promo);
+            toggleDiscount('.discount-vat-th', d.vat);
+            toggleDiscount('.discount-senior-th', d.senior);
+
+            const totalDiscount = d.promo + d.vat + d.senior;
+            $('.total-discount-value').text('PHP ' + formatAmount(totalDiscount));
+        }
+
+        function toggleDiscount(selector, value) {
+            if (value > 0) {
+                $(selector).removeClass('d-none')
+                    .find('.discount-value-th')
+                    .text(formatAmount(value));
+            } else {
+                $(selector).addClass('d-none');
+            }
+        }
+
+        /* =========================
+        HELPERS
+        ========================= */
+
+        function getPaymentBalance() {
+            const gross = parseFloat($('#summary_input_gross').val()) || 0;
+            const paid = $('.payment-amount').toArray()
+                .reduce((t, el) => t + (parseFloat(el.value) || 0), 0);
+            return gross - paid;
+        }
+
+        function formatAmount(n) {
+            return Number(n).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
         function set_complete_address(){
             if($('#delivery_type').val() == 1){
                 $('#complete_address').html('Complete Address: '+ $('#add_ress').val() +', '+ $('#province_select').val()+' '+$('#city_select').val() + ' ' + $('#other_outlet').val() );
@@ -570,6 +726,18 @@
             }
         }
         function remove_payment(i){
+            $('#payment_method'+i).prop('disabled', false);
+
+            const paymentMethod = $('#payment_method'+i).val();
+
+            if (paymentMethod === 'Discount (Promo)') {
+                $('.discount-promo-th').addClass('d-none');
+            } else if (paymentMethod === 'Discount (VAT)') {
+                $('.discount-vat-th').addClass('d-none');
+            } else if (paymentMethod === 'Discount (Senior Citizen)') {
+                $('.discount-senior-th').addClass('d-none');
+            }
+
             $('#payment_remarks'+i).val('');
             $('#payment_amount'+i).val(0);
             $('#payment_method'+i).prop('selectedIndex',0);
@@ -583,17 +751,121 @@
             $('#payment_tr'+totalRows).show();
      
         }
-        $(".payments").keyup(function(){
-          $('#payment_total').html('Total: '+FormatAmount(get_payment_total(),2));
+        $(".payments").change(function() {
+            const index = $(this).data('index');
+            const paymentMethod = $('#payment_method'+index).val();
+            const val = parseFloat($(this).val());
+
+            if (paymentMethod === 'Discount (Promo)' && !isNaN(val)) {
+                $('.discount-promo-th').removeClass('d-none');
+                $('.discount-promo-th').find('.discount-value-th').text(FormatAmount(val, 2));
+            }
+            
+            if (paymentMethod === 'Discount (VAT)' && !isNaN(val)) {
+                $('.discount-vat-th').removeClass('d-none');
+                $('.discount-vat-th').find('.discount-value-th').text(FormatAmount(val, 2));
+            }
+            
+            if (paymentMethod === 'Discount (Senior Citizen)' && !isNaN(val)) {
+                $('.discount-senior-th').removeClass('d-none');
+                $('.discount-senior-th').find('.discount-value-th').text(FormatAmount(val, 2));
+            }
+
+            const total_discount = parseFloat($('.discount-value-th').map(function() {
+                return parseFloat($(this).text().replace(/,/g, '')) || 0;
+            }).get().reduce((a, b) => a + b, 0));
+
+            $('.total-discount-value').text('PHP ' + FormatAmount(total_discount, 2));
+
+            $('#payment_total').html('Total: '+FormatAmount(get_payment_total(),2));
         });
+
+        function getTotalDiscountFromPayments() {
+            let total = 0;
+
+            $('.payment-row:not(.d-none)').each(function () {
+                const method = $(this).find('.payment-method').val();
+                const amount = parseFloat($(this).find('.payment-amount').val()) || 0;
+
+                if (
+                    method === 'Discount (Promo)' ||
+                    method === 'Discount (VAT)' ||
+                    method === 'Discount (Senior Citizen)'
+                ) {
+                    total += amount;
+                }
+            });
+
+            return total;
+        }
+
+        function calculate_grand_total() {
+
+            const subtotal       = parseFloat($('#input_subtotal').val()) || 0;
+            const deliveryCharge = parseFloat($('#input_delivery_charge').val()) || 0;
+            const totalMisc      = parseFloat($('#input_total_misc').val()) || 0;
+
+            const totalDiscount  = getTotalDiscountFromPayments();
+
+            // GROSS (before discount)
+            const grossTotal = subtotal + deliveryCharge + totalMisc;
+
+            // NET (after discount) – UI only
+            const netTotal = grossTotal - totalDiscount;
+
+            // ackend value (DO NOT deduct discount here)
+            $('#summary_input_gross').val(grossTotal.toFixed(2));
+
+            // UI value (shows deduction)
+            $('#grand_total').html('PHP ' + FormatAmount(netTotal, 2));
+        }
+
+        function calculate_sub_total() {
+
+            let pricePerPaella = sumInputs('.input_paella_price');
+            let pricePerProduct = sumInputs('.input-total-price-per-product');
+
+            let totalProdQty  = sumInputs('.input-total-qty-per-product');
+            let totalMiscQty  = sumInputs('.input-total-qty-per-misc-product');
+            let totalPaellaQty = sumInputs('.input_paella_qty');
+
+            const subtotal = pricePerProduct + pricePerPaella;
+
+            $('#subtotal').html('PHP ' + FormatAmount(subtotal, 2));
+            $('#totalQty').html(totalProdQty + totalMiscQty + totalPaellaQty);
+            $('#input_subtotal').val(subtotal.toFixed(2));
+
+            calculate_grand_total();
+        }
+
+        function sumInputs(selector) {
+            let total = 0;
+            $(selector).each(function () {
+                const val = parseFloat(this.value);
+                if (!isNaN(val)) total += val;
+            });
+            return total;
+        }
+
+        function reindexPayments() {
+            $('#paymentsTable .payment-row').each(function (i) {
+                $(this).attr('data-index', i);
+
+                $(this).find('[name]').each(function () {
+                    this.name = this.name.replace(/payments\[\d+]/, `payments[${i}]`);
+                });
+            });
+        }
+
         function check_payment_type(x,i){
             if(x == 'COD'){
 
                 $('#payment_amount'+i).val(get_payment_balance());
                 $('#payment_amount'+i).prop('readonly', true);
-
             }
-            else{
+            else if (x == 'Discount (Promo)' || x == 'Discount (VAT)' || x == 'Discount (Senior Citizen)') {
+                $('#payment_method'+i).prop('disabled', true);
+            }else{
                 $('#payment_amount'+i).prop('readonly', false);
             }
             $('#payment_total').html('Total: '+FormatAmount(get_payment_total(),2));
@@ -609,6 +881,9 @@
         function get_payment_total(){
             var amt = 0;
             for(i=1;i<=10;i++){
+                if($('#payment_amount'+i).val() === '') {
+                    $('#payment_amount'+i).val(0);
+                }
                 amt+=parseFloat($('#payment_amount'+i).val());
             }            
             return amt;
@@ -1206,29 +1481,33 @@
             calculate_grand_total();
         }
 
-        function calculate_grand_total(){
-            var total_coupon = 0;
-            $(".coupon_discount").each(function() {
-                if(!isNaN(this.value) && this.value.length!=0) {
-                    total_coupon += parseFloat(this.value);
-                }
-            });
+        // function calculate_grand_total(){
+        //     var total_coupon = 0;
+        //     $(".coupon_discount").each(function() {
+        //         if(!isNaN(this.value) && this.value.length!=0) {
+        //             total_coupon += parseFloat(this.value);
+        //         }
+        //     });
             
-            // if($("#coupon1").val()) {
+        //     // if($("#coupon1").val()) {
             
-            //     total_coupon = parseFloat($("#coupon1").val());
-            // }
-            var subtotal = $('#input_subtotal').val();
-            var delivery_charge = $('#input_delivery_charge').val();
-            var total_misc = $('#input_total_misc').val();
+        //     //     total_coupon = parseFloat($("#coupon1").val());
+        //     // }
+        //     var subtotal = $('#input_subtotal').val();
+        //     var delivery_charge = $('#input_delivery_charge').val();
+        //     var total_misc = $('#input_total_misc').val();
 
-            var grand_total = (parseInt(subtotal)+parseInt(delivery_charge)+parseInt(total_misc)) - parseFloat(total_coupon);
-            $('.grandtotal').val(grand_total);
-            $('#summary_input_gross').val(grand_total.toFixed(2));
-            $('#grand_total').html('PHP '+FormatAmount(grand_total,2));
-        }
+        //     var grand_total = (parseInt(subtotal)+parseInt(delivery_charge)+parseInt(total_misc)) - parseFloat(total_coupon);
+        //     $('.grandtotal').val(grand_total);
+        //     $('#summary_input_gross').val(grand_total.toFixed(2));
+        //     $('#grand_total').html('PHP '+FormatAmount(grand_total,2));
+        // }
 
         function FormatAmount(number, numberOfDigits) {
+
+            if (isNaN(number) || number === null) {
+                return '';
+            }
 
             var amount = parseFloat(number).toFixed(numberOfDigits);
             var num_parts = amount.toString().split(".");

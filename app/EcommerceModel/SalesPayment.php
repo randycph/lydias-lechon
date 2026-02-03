@@ -11,9 +11,26 @@ class SalesPayment extends Model
     use SoftDeletes, LogsActivityDiff;
 
     protected $table = 'ecommerce_sales_payments';
-    protected $fillable = ['sales_header_id','payment_type','amount','status', 'payment_date', 'receipt_number','created_by'
-    ,'order_number','remark','trans_id','err_desc','signature','cc_name','cc_no','bank_name','country','file_url'
-];
+    protected $fillable = [
+        'sales_header_id',
+        'payment_type',
+        'amount',
+        'status',
+        'payment_date',
+        'receipt_number',
+        'created_by',
+        'order_number',
+        'remark',
+        'trans_id',
+        'err_desc',
+        'signature',
+        'cc_name',
+        'cc_no',
+        'bank_name',
+        'country',
+        'file_url',
+        'is_discount'
+    ];
 
     
     public static function check_if_has_added_payments($id)
