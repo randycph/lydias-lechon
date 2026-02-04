@@ -236,7 +236,10 @@ class ForecasterController extends Controller
         $sales_detail->header->is_new_order = 0;
         $sales_detail->header->save();
 
-        return view('admin.forecaster.assign',compact('sales_detail','branches','receivers'));
+        $joborder = JobOrder::where('sales_detail_id', $sales_detail->id)->where('status', 'Active')->first();
+        $productionOrder = ProductionOrder::where('joborder_id', $joborder->id)->first();
+
+        return view('admin.forecaster.assign',compact('sales_detail','branches','receivers', 'productionOrder'));
     }
 
 
