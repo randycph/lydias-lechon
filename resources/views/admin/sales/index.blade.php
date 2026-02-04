@@ -403,10 +403,9 @@
                                                                     <a class="dropdown-item"  href="javascript:void(0);" onclick="confirm_order({{$sale->id}},'{{ number_format((\App\EcommerceModel\SalesHeader::balance($sale->id)),2) }}');" title="Confirm Order" >Confirm Order</a>
                                                                     @endif
                                                                 @endif
-                                                                {{ $sale->isForecasted() }} x {{ $sale->isFullyPaid() }}
                                                                 @if (
                                                                     auth()->user()->has_access_to_route('sales-transaction.update') &&
-                                                                    (!$sale->isForecasted())
+                                                                    !$sale->isConfirmedAndPastCutoffAndForecasted()
                                                                 )
                                                                     <a class="dropdown-item"
                                                                     href="{{ route('sales.update_details',$sale->id) }}"

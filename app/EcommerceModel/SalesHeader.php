@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use App\Models\Concerns\LogsActivityDiff;
 use App\EcommerceModel\ProductionOrder;
+use App\Helpers\Webfocus\Setting;
+use Carbon\Carbon;
 
 class SalesHeader extends Model
 {
@@ -553,5 +555,27 @@ class SalesHeader extends Model
         }
 
         return true;
+    }
+
+    public function isConfirmedAndPastCutoffAndForecasted()
+    {
+        return $this->isConfirm == 1 && $this->pastForecastedTime() && $this->isForecasted();
+    }
+
+    public function pastForecastedTime()
+    {
+        $cutoff = Setting::info()->cutoff;
+
+        $item = $this->items->first();
+        if (!$item) {
+            return false;
+        }
+
+        $deliveryDate = Carbon::parse($item->delivery_date);
+        $now = Carbon::now();
+
+        return
+            $deliveryDate->isTomorrow() &&
+            $now->format('H:i') > $cutoff;
     }
 }
