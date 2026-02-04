@@ -215,7 +215,7 @@ class SalesHeader extends Model
         // }
         $balance = $amount - $paid;
 
-        if ($paid >= $amount) {
+        if ($paid > 0) {
             if ($this->delivery_status == 'Waiting for Payment' || $this->delivery_status == '' || is_null($this->delivery_status)) {
                 SalesHeader::whereId($this->id)->update(['delivery_status' => 'Processing Stock']);
             }
@@ -354,12 +354,16 @@ class SalesHeader extends Model
         } else {
             $paid = SalesPayment::where('sales_header_id',$this->id)->where('status', 'PAID')->sum('amount');
         }
-
-        if ($paid >= $this->net_amount) {
-            SalesHeader::whereId($this->id)->update(['payment_status' => 'PAID']);
+        
+        if ($paid > 0) {
             if ($this->delivery_status == 'Waiting for Payment' || $this->delivery_status == '' || is_null($this->delivery_status)) {
                 SalesHeader::whereId($this->id)->update(['delivery_status' => 'Processing Stock']);
             }
+        }
+
+        if ($paid >= $this->net_amount) {
+            SalesHeader::whereId($this->id)->update(['payment_status' => 'PAID']);
+
             return 'PAID';
         } else {
             return 'UNPAID';
