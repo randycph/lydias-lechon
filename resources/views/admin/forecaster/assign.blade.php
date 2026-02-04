@@ -82,11 +82,12 @@
 
                 <input type="hidden" name="sales_id" value="{{$sales_detail->id}}">
                 <input type="hidden" name="header_id" value="{{$sales_detail->sales_header_id}}">
+
                 <div class="form-group">
                     <label class="d-block">Branch <span class="tx-danger">*</span></label>
                     <select class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select production branch" data-width="100%" name="branch_id" required>
                         @foreach($branches as $branch)
-                        <option value="{{$branch->id}}" @if($branch->name == 'Tandang Sora' || $branch->name == 'Quezon City') selected @endif>{{$branch->name}}</option>
+                        <option value="{{$branch->id}}" @if(($branch->name == 'Tandang Sora' || $branch->name == 'Quezon City') || ($productionOrder && $productionOrder->branch_id == $branch->id)) selected @endif>{{$branch->name}}</option>
                         @endforeach
                     </select>
                     @error('branch_id')
@@ -120,9 +121,9 @@
                 <div class="form-group">
                     <label class="d-block">Order Type <span class="tx-danger">*</span></label>
                     <select class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select order type" data-width="100%" name="schedule_type">
-                        <option value="Buhat">Buhat</option>
-                        <option value="Additional">Additional</option>
-                        <option value="Reserve">Reserve</option>
+                        <option value="Buhat" @if($productionOrder && $productionOrder->schedule_type == 'Buhat') selected @endif>Buhat</option>
+                        <option value="Additional" @if($productionOrder && $productionOrder->schedule_type == 'Additional') selected @endif>Additional</option>
+                        <option value="Reserve" @if($productionOrder && $productionOrder->schedule_type == 'Reserve') selected @endif>Reserve</option>
                     </select>
                     @error('schedule_type')
                         <div class="alert alert-danger">{{ $message }}</div>
@@ -144,7 +145,7 @@
                             <label class="d-block">&nbsp;</label>
                             <div class="input-group timepicker">
                                 <select class="selectpicker" data-style="btn btn-outline-light btn-md btn-block tx-left" required="required" title="Select delivery time" data-width="100%" name="delivery_time" id="delivery_time">
-                                    @foreach (['07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'] as $time)
+                                    @foreach (['05:00', '06:00','07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00'] as $time)
                                     <option @if(date('H:i',strtotime($sales_detail->delivery_date)) == $time) selected @endif value="{{$time}}">{{ date("h:i A", strtotime($time)) }}</option>
                                     @endforeach
                                 </select>
