@@ -13,8 +13,9 @@ use App\EcommerceModel\ProductionOrder;
 use App\EcommerceModel\SalesDetail;
 use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\JobOrder;
+use App\Helpers\Webfocus\Setting;
 use App\Models\Product;
-
+use Carbon\Carbon;
 
 class ForecasterController extends Controller
 {
@@ -73,82 +74,101 @@ class ForecasterController extends Controller
      */
     public function store(Request $request)
     {
-        Validator::make($request->all(), [
-            'branch_id' => 'required',
-            'schedule_type' => 'required',
-            'delivery_date' => 'required',
-            'delivery_time' => 'required'
-        ])->validate();
-        
-        //$header = SalesHeader::find($request->header_id);
-        $salesdetail = SalesDetail::find($request->sales_id);
+        try {
+            Validator::make($request->all(), [
+                'branch_id' => 'required',
+                'schedule_type' => 'required',
+                'delivery_date' => 'required',
+                'delivery_time' => 'required'
+            ],
+            [
+                'branch_id.required' => 'Production Branch field is required',
+                'schedule_type.required' => 'Order Type field is required',
+                'delivery_date.required' => 'Schedule Date field is required',
+                'delivery_time.required' => 'Schedule Time field is required'
+            ])->validate();
+            
+            //$header = SalesHeader::find($request->header_id);
+            $salesdetail = SalesDetail::find($request->sales_id);
 
-        $current_total_order = JobOrder::whereDate('date_needed',$request->delivery_date)->count();
-        $insertID = $current_total_order+1;
-        //dd($current_total_order." aa ".$insertID." bb ".'JO'.date('Ymd',strtotime($request->delivery_date)).sprintf('%04d', $insertID));
+            $current_total_order = JobOrder::whereDate('date_needed',$request->delivery_date)->count();
+            $insertID = $current_total_order+1;
+            //dd($current_total_order." aa ".$insertID." bb ".'JO'.date('Ymd',strtotime($request->delivery_date)).sprintf('%04d', $insertID));
 
-        $existingJo = JobOrder::where('sales_detail_id', $salesdetail->id)
-            ->where('sales_number', $salesdetail->header->order_number)
-            ->where('date_needed', $request->delivery_date.' '.$request->delivery_time)
-            ->where('qty', $salesdetail->qty)
-            // ->where('pickup_branch', $request->receiver)
-            ->where('jo_category', 'Order')
-            ->where('jo_order_type', $salesdetail->header->order_type ?? ' ')
-            ->first();
-
-        if ($request->has('branch_id')) {
-            $salesdetail->header->temp_prod_branch = $request->branch_id;
-            $salesdetail->header->save();
-        }
-
-        if ($existingJo) {
-            $existingPo = ProductionOrder::where('branch_id', $request->branch_id)
-                ->where('joborder_id', $existingJo->id)
-                ->where('delivery_date', $request->delivery_date.' '.$request->delivery_time)
-                ->where('schedule_type', $request->schedule_type)
+            $existingJo = JobOrder::where('sales_detail_id', $salesdetail->id)
+                ->where('sales_number', $salesdetail->header->order_number)
+                ->where('date_needed', $request->delivery_date.' '.$request->delivery_time)
+                ->where('qty', $salesdetail->qty)
+                // ->where('pickup_branch', $request->receiver)
+                ->where('jo_category', 'Order')
+                ->where('jo_order_type', $salesdetail->header->order_type ?? ' ')
                 ->first();
 
-            if ($existingPo) {
-                return redirect()->route('forecaster.index')->with('error', 'This sales detail already has an existing production order for the specified date and time.');
-            }
-        } else {
-            $jo = JobOrder::create([
-                'user_id' => auth()->id(),
-                'jo_number' => 'JO'.date('Ymd',strtotime($request->delivery_date)).sprintf('%04d', $insertID),
-                'sales_number' => $salesdetail->header->order_number,
-                'sales_detail_id' => $salesdetail->id,
-                'order_source' => $salesdetail->header->order_source,
-                'product_id' => $salesdetail->product_id,
-                'product_name' => $salesdetail->product->name,
-                'product_size' => $salesdetail->product->size,
-                'product_weight' => $salesdetail->product->weight,
-                'product_category' => $salesdetail->product->category_id,
-                'price' => $salesdetail->price,
-                'paella_qty' => $salesdetail->paella_qty,
-                'qty' => $salesdetail->qty,
-                'paella_price' => $salesdetail->paella_price,
-                'customer_name' => $salesdetail->header->customer_name,
-                'date_needed' => $request->delivery_date.' '.$request->delivery_time,
-                'customer_mobile_number' => $salesdetail->header->customer_contact_number,
-                'customer_tel_number' => $salesdetail->user->contact_tel,
-                'customer_address' => $salesdetail->header->customer_address,
-                'customer_delivery_adress' => $salesdetail->header->customer_delivery_adress,
-                'delivery_tracking_number' => '',
-                'delivery_method' => $salesdetail->header->delivery_type,
-                'pickup_branch' => $request->receiver,
-                'delivery_status' => 'On Processed',
-                'status' => 'Active',
-                'jo_category' => 'Order',
-                'jo_order_type' => $salesdetail->header->order_type ?? ' '
+            if ($request->has('branch_id')) {
+                if(Carbon::now()->format('H:i') > Setting::info()->cutoff){
+                    $forecast_date = date('Y-m-d', strtotime('+1 days'));
+                } else {
+                    $forecast_date = date('Y-m-d');
+                }
 
-            ]);
-
-            if($jo){
-                $this->assign_to_production_branch($jo->id,$request);
+                $salesdetail->header->temp_prod_branch = $request->branch_id;
+                $salesdetail->header->forecast_date = $forecast_date;
+                $salesdetail->header->save();
             }
 
+            if ($existingJo) {
+                $existingPo = ProductionOrder::where('branch_id', $request->branch_id)
+                    ->where('joborder_id', $existingJo->id)
+                    ->where('delivery_date', $request->delivery_date.' '.$request->delivery_time)
+                    ->where('schedule_type', $request->schedule_type)
+                    ->first();
 
-            return redirect()->route('forecaster.index')->with('success', __('standard.forecaster.create_success'));
+                if ($existingPo) {
+                    return redirect()->route('forecaster.index')->with('error', 'This sales detail already has an existing production order for the specified date and time.');
+                } else {
+                    $this->assign_to_production_branch($existingJo->id,$request);
+                    return redirect()->route('forecaster.index')->with('success', __('standard.forecaster.create_success'));
+                }
+            } else {
+                $jo = JobOrder::create([
+                    'user_id' => auth()->id(),
+                    'jo_number' => 'JO'.date('Ymd',strtotime($request->delivery_date)).sprintf('%04d', $insertID),
+                    'sales_number' => $salesdetail->header->order_number,
+                    'sales_detail_id' => $salesdetail->id,
+                    'order_source' => $salesdetail->header->order_source,
+                    'product_id' => $salesdetail->product_id,
+                    'product_name' => $salesdetail->product->name,
+                    'product_size' => $salesdetail->product->size,
+                    'product_weight' => $salesdetail->product->weight,
+                    'product_category' => $salesdetail->product->category_id,
+                    'price' => $salesdetail->price,
+                    'paella_qty' => $salesdetail->paella_qty,
+                    'qty' => $salesdetail->qty,
+                    'paella_price' => $salesdetail->paella_price,
+                    'customer_name' => $salesdetail->header->customer_name,
+                    'date_needed' => $request->delivery_date.' '.$request->delivery_time,
+                    'customer_mobile_number' => $salesdetail->header->customer_contact_number,
+                    'customer_tel_number' => $salesdetail->user->contact_tel,
+                    'customer_address' => $salesdetail->header->customer_address,
+                    'customer_delivery_adress' => $salesdetail->header->customer_delivery_adress,
+                    'delivery_tracking_number' => '',
+                    'delivery_method' => $salesdetail->header->delivery_type,
+                    'pickup_branch' => $request->receiver,
+                    'delivery_status' => 'On Processed',
+                    'status' => 'Active',
+                    'jo_category' => 'Order',
+                    'jo_order_type' => $salesdetail->header->order_type ?? ' '
+                ]);
+
+                if($jo){
+                    $this->assign_to_production_branch($jo->id,$request);
+                }
+                return redirect()->route('forecaster.index')->with('success', __('standard.forecaster.create_success'));
+            }
+
+            return redirect()->back()->with('error', 'An unexpected error occurred. Please try again.');
+        } catch (\Throwable $th) {
+            throw $th;
         }
     }
 
@@ -216,7 +236,10 @@ class ForecasterController extends Controller
         $sales_detail->header->is_new_order = 0;
         $sales_detail->header->save();
 
-        return view('admin.forecaster.assign',compact('sales_detail','branches','receivers'));
+        $joborder = JobOrder::where('sales_detail_id', $sales_detail->id)->where('status', 'Active')->first();
+        $productionOrder = ProductionOrder::where('joborder_id', $joborder->id)->first();
+
+        return view('admin.forecaster.assign',compact('sales_detail','branches','receivers', 'productionOrder'));
     }
 
 

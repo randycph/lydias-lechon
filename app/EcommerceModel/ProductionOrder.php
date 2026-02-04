@@ -11,7 +11,12 @@ class ProductionOrder extends Model
     use SoftDeletes;
 
     protected $table = 'production_orders';
-    protected $fillable = ['branch_id', 'joborder_id', 'delivery_date','schedule_type'];
+    protected $fillable = [
+        'branch_id', 
+        'joborder_id', 
+        'delivery_date',
+        'schedule_type'
+    ];
 
     // public function salesdetail()
     // {
