@@ -89,6 +89,9 @@
                         <option value="{{$branch->id}}" @if($branch->name == 'Tandang Sora' || $branch->name == 'Quezon City') selected @endif>{{$branch->name}}</option>
                         @endforeach
                     </select>
+                    @error('branch_id')
+                        <div class="alert alert-danger">{{ $message }}</div>
+                    @enderror
                 </div>
               
                     
@@ -106,6 +109,9 @@
                                 {{$receiver->name}}</option>
                             @endforeach
                         </select>
+                        @error('receiver')
+                            <div class="alert alert-danger">{{ $message }}</div>
+                        @enderror
                     </div>
                    
                
@@ -118,6 +124,9 @@
                         <option value="Additional">Additional</option>
                         <option value="Reserve">Reserve</option>
                     </select>
+                    @error('schedule_type')
+                        <div class="alert alert-danger">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <div class="form-row">
@@ -126,6 +135,9 @@
                             <label class="d-block">Schedule Date & Time</label>
                             <input type="text" name="delivery_date" class="form-control" placeholder="Choose date" id="date1" required="required" value="{{date('Y-m-d',strtotime($sales_detail->delivery_date))}}">
                         </div>
+                        @error('delivery_date')
+                            <div class="alert alert-danger">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
@@ -137,6 +149,9 @@
                                     @endforeach
                                 </select>
                             </div>
+                            @error('delivery_time')
+                                <div class="alert alert-danger">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
                 </div>
