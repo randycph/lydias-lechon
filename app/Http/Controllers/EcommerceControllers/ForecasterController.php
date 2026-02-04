@@ -13,8 +13,9 @@ use App\EcommerceModel\ProductionOrder;
 use App\EcommerceModel\SalesDetail;
 use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\JobOrder;
+use App\Helpers\Webfocus\Setting;
 use App\Models\Product;
-
+use Carbon\Carbon;
 
 class ForecasterController extends Controller
 {
@@ -104,7 +105,14 @@ class ForecasterController extends Controller
                 ->first();
 
             if ($request->has('branch_id')) {
+                if(Carbon::now()->format('H:i') > Setting::info()->cutoff){
+                    $forecast_date = date('Y-m-d', strtotime('+1 days'));
+                } else {
+                    $forecast_date = date('Y-m-d');
+                }
+
                 $salesdetail->header->temp_prod_branch = $request->branch_id;
+                $salesdetail->header->forecast_date = $forecast_date;
                 $salesdetail->header->save();
             }
 
