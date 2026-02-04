@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use App\Models\Concerns\LogsActivityDiff;
+use App\EcommerceModel\ProductionOrder;
 
 class SalesHeader extends Model
 {
@@ -509,5 +510,48 @@ class SalesHeader extends Model
     public function subHeaders()
     {
         return $this->hasMany(self::class, 'parent_sales_header_id', 'id');
+    }
+
+    public function isFullyPaid()
+    {
+        return $this->payment_status === 'PAID';
+    }
+
+    public function isPartiallyPaid()
+    {
+        $payments = $this->payments()->where('status', 'PAID')->sum('amount');
+
+        return $payments > 0 && $payments < $this->net_amount;
+    }
+
+    public function isUnpaid()
+    {
+        $payments = $this->payments()->where('status', 'PAID')->sum('amount');
+
+        return $payments == 0;
+    }
+
+    public function isOverpaid()
+    {
+        $payments = $this->payments()->where('status', 'PAID')->sum('amount');
+
+        return $payments > $this->net_amount;
+    }
+
+    public function isForecasted()
+    {
+        $joborder = JobOrder::where('sales_number', $this->order_number)->where('status', 'Active')->first();
+
+        if (!$joborder) {
+            return false;
+        }
+
+        $productionOrder = ProductionOrder::where('joborder_id', $joborder->id)->whereNotNull('branch_id')->first();
+
+        if (!$productionOrder) {
+            return false;
+        }
+
+        return true;
     }
 }
