@@ -519,7 +519,7 @@ class SalesController extends Controller
             $sh->assign_to_production_branch($sales, $sales->temp_prod_branch);
         }
 
-        if ($sales->delivery_status == 'Waiting for Payment' || $sales->delivery_status == '') {
+        if ($sales->delivery_status == 'Waiting for Payment' || $sales->delivery_status == '' || is_null($sales->delivery_status)) {
             SalesHeader::whereId($sales->id)->update(['delivery_status' => 'Processing Stock']);
         }
     

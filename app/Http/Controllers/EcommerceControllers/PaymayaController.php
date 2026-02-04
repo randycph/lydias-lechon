@@ -106,7 +106,7 @@ class PaymayaController extends Controller
                 'updated_at'      => $salesHeader->created_at,
             ]);
 
-            if ($salesHeader->delivery_status == 'Waiting for Payment' || $salesHeader->delivery_status == '') {
+            if ($salesHeader->delivery_status == 'Waiting for Payment' || $salesHeader->delivery_status == ''  || is_null($salesHeader->delivery_status)) {
                 SalesHeader::whereId($salesHeader->id)->update(['delivery_status' => 'Processing Stock']);
             }
 
@@ -206,7 +206,7 @@ class PaymayaController extends Controller
                             $sale->confirm_remarks = 'Auto confirm via Paymaya checkout';
                             $sale->save();
 
-                            if ($sale->delivery_status == 'Waiting for Payment' || $sale->delivery_status == '') {
+                            if ($sale->delivery_status == 'Waiting for Payment' || $sale->delivery_status == '' || is_null($sale->delivery_status)) {
                                 SalesHeader::whereId($sale->id)->update(['delivery_status' => 'Processing Stock']);
                             }
                         }
