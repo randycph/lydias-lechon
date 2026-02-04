@@ -62,6 +62,13 @@ class SalesController extends Controller
 
     public function update_items(Request $request){
         $head = SalesHeader::findOrFail($request->ui_sales_id);
+        
+        if (
+            auth()->user()->has_access_to_route('sales-transaction.update') &&
+            $head->isConfirmedAndPastCutoffAndForecasted()) {
+                return redirect()->route('sales-transaction.index')->with('error', 'Confirmed orders past cutoff and forecasted cannot be updated.');
+        }
+        
         $date_needed = '';
         foreach($head->items as $item){
             if(!empty($item->delivery_date)){
@@ -227,7 +234,18 @@ class SalesController extends Controller
     public function update_dateneeded(Request $request){
         $sales = SalesHeader::findOrFail($request->update_dateneeded_id);
     
-        SalesHeader::whereId($request->update_dateneeded_id)->update([
+        if (
+            auth()->user()->has_access_to_route('sales-transaction.update') &&
+            $sales->isConfirmedAndPastCutoffAndForecasted()) {
+                return redirect()->route('sales-transaction.index')->with('error', 'Confirmed orders past cutoff and forecasted cannot be updated.');
+        }
+
+
+        // if(isset($request->delivery_branch)){
+        //     SalesHeader::whereId($request->update_dateneeded_id)->update(['delivery_branch' => $request->delivery_branch]);
+        // }
+        
+        $update = SalesHeader::whereId($request->update_dateneeded_id)->update([
             'delivery_status' => ''
         ]);
 
@@ -1065,6 +1083,13 @@ class SalesController extends Controller
             })
             ->orderBy('name')
             ->get();
+        if (
+            auth()->user()->has_access_to_route('sales-transaction.update') &&
+            $salesheader->isConfirmedAndPastCutoffAndForecasted()) {
+                return redirect()->route('sales-transaction.index')->with('error', 'Confirmed orders past cutoff and forecasted cannot be updated.');
+        }
+
+        $products = Product::orderBy('name')->get();
 
         $dateneeded = '';
         $date_only = '';

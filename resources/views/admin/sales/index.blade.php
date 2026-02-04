@@ -406,8 +406,15 @@
                                                                     <a class="dropdown-item"  href="javascript:void(0);" onclick="confirm_order({{$sale->id}},'{{ number_format((\App\EcommerceModel\SalesHeader::balance($sale->id)),2) }}');" title="Confirm Order" >Confirm Order</a>
                                                                     @endif
                                                                 @endif
-                                                                @if(auth()->user()->has_access_to_route('sales-transaction.update') || auth()->user()->has_access_to_route('update_dateneeded'))
-                                                                <a class="dropdown-item"  href="{{ route('sales.update_details',$sale->id) }}" title="Update Sales Details & Items" >Update Sales Details</a>
+                                                                @if (
+                                                                    auth()->user()->has_access_to_route('sales-transaction.update') &&
+                                                                    !$sale->isConfirmedAndPastCutoffAndForecasted()
+                                                                )
+                                                                    <a class="dropdown-item"
+                                                                    href="{{ route('sales.update_details',$sale->id) }}"
+                                                                    title="Update Sales Details & Items">
+                                                                        Update Sales Details
+                                                                    </a>
                                                                 @endif
                                                                 @if($dateneeded > date('Y-m-d H:i:s') && auth()->user()->has_access_to_route('sales-transaction.destroy'))
                                                                 <hr class="dropdown-divider">    
