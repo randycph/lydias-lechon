@@ -400,6 +400,10 @@
                                                         <div class="dropdown-menu dropdown-menu-right">
 
                                                                 @if (
+                                                                    @php
+                                                                        auth()->user()->load('assign_role.permissions');
+                                                                        dump(auth()->user()->has_access_to_route('sales-transaction.update'));
+                                                                    @endphp
                                                                     auth()->user()->has_access_to_route('sales-transaction.update')
                                                                 )
                                                                     <a class="dropdown-item"
