@@ -180,8 +180,8 @@ class User extends Authenticatable implements MustVerifyEmail
         // return false;
 
         $routes = $this->get_assigned_routes();
-
-        return in_array($route, $routes, false);
+        logger("User ID: {$this->id}, Assigned Routes: " . implode(', ', $routes), ['route' => $route]);
+        return in_array($route, $routes, true);
     }
 
     public function get_assigned_routes()
