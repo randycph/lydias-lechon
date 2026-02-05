@@ -592,11 +592,16 @@ class SalesHeader extends Model
     }
     public function scopePaidOnlyForForecasterRole($query)
     {
-        return $query->when(auth()->user()->role_id == 3, function ($q) {
-            $q->where('isConfirm', 1)->with([
-                'payments' => fn ($pq) => $pq->where('status', 'PAID')
-            ])->whereHas('payments', fn ($pq) => $pq->where('status', 'PAID'));
-        });
+        return $query->when(
+            auth()->check() && auth()->user()->role_id == 3,
+            function ($q) {
+                $q->where('isConfirm', 1)
+                ->whereHas('payments', fn ($pq) => $pq->where('status', 'PAID'))
+                ->with([
+                    'payments' => fn ($pq) => $pq->where('status', 'PAID')
+                ]);
+            }
+        );
     }
 
 }
