@@ -379,7 +379,7 @@
                                     <td width="10%">
                                         <!-- 10102 -->
                                          @php $forecasters = [3,13]; $forecasters = [13]; @endphp
-                                        @if(!in_array(auth()->user()->role_id, $forecasters) || auth()->user()->id == 10102)                                    
+                                        @if(true)                                    
                                             <nav class="nav table-options">
                                                 @if($sale->trashed())
                                                     @if (auth()->user()->has_access_to_route('sales-transaction.restore'))
