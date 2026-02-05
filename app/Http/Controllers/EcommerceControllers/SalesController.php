@@ -649,7 +649,6 @@ class SalesController extends Controller
         if(auth()->user()->role_id == 1 || $hasProdBranch || auth()->user()->role_id == 3 || $hasBranches || auth()->user()->role_id == 5){
             
             if ($hasProdBranch || $hasBranches) {
-                dd('debug 11');
                 $productionBranches = $hasProdBranch
                     ? explode(',', auth()->user()->production_branch_id)
                     : [];
@@ -671,6 +670,15 @@ class SalesController extends Controller
                 $model = SalesHeader::with(['items' => function ($q) {
                         $q->orderBy('delivery_date', 'asc');
                     }])
+                    ->when(auth()->user()->role_id == 3, function ($q) {
+                        $q->with([
+                            'payments' => function ($pq) {
+                                $pq->where('status', 'PAID');
+                            }
+                        ])->whereHas('payments', function ($pq) {
+                            $pq->where('status', 'PAID');
+                        });
+                    })
                     ->where('has_sub', 0)
                     ->when($showDeleted === true,
                         fn ($q) => $q->where('for_deletion', 1),
