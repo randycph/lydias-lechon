@@ -191,7 +191,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
         // Only permissions where pivot isAllowed = 1
         return $role->permissions()
-            ->wherePivot('isAllowed', 1)
             ->pluck('routes')
             ->flatten()
             ->unique()
