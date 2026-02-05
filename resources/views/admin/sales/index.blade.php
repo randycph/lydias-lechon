@@ -407,7 +407,7 @@
                                                                     @endif
                                                                 @endif
                                                                 @if (
-                                                                    auth()->user()->has_access_to_route('sales-transaction.update') &&
+                                                                    auth()->user()->has_access_to_route('sales-transaction.edit') &&
                                                                     !$sale->isConfirmedAndPastCutoffAndForecasted()
                                                                 )
                                                                     <a class="dropdown-item"
