@@ -189,8 +189,7 @@ class User extends Authenticatable implements MustVerifyEmail
         $role = $this->assign_role;
         if (!$role) return [];
 
-        // Only permissions where pivot isAllowed = 1
-        return $role->permissions()
+        return $role->permissions
             ->pluck('routes')
             ->flatten()
             ->unique()

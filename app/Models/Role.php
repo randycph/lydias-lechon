@@ -27,15 +27,15 @@ class Role extends Model
 
     public function permissions($module = null)
     {
-        if ($module) {
-            return $this->belongsToMany(Permission::class, 'role_permission')
-                ->withPivot(['user_id', 'isAllowed'])
-                ->where('isAllowed', 1)->where('module', $module);
-        }
-
-        return $this->belongsToMany(Permission::class, 'role_permission')
+        $query = $this->belongsToMany(Permission::class, 'role_permission')
             ->withPivot(['user_id', 'isAllowed'])
             ->wherePivot('isAllowed', 1);
+
+        if ($module) {
+            $query->where('module', $module);
+        }
+
+        return $query;
     }
 
     public function all_permissions($module = null)
