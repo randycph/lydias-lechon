@@ -60,6 +60,15 @@ Route::get('/x1', function(){
     $sh->assign_to_production_branch($x, 1);
 });
 
+Route::get('/test1', function(){
+    $role = request()->get('role');
+    $view_access = DB::table('view_access_permission_per_role')
+        ->where('role', $role)
+        ->get();
+
+    return response()->json($view_access);
+});
+
 Route::get('/', [FrontendController::class, 'index'])->name('home');
 Route::get('/homsse', [FrontendController::class, 'home'])->name('index');
 Route::get('/our-storyyy', [FrontendController::class, 'our_story'])->name('our-story');
