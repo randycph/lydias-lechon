@@ -407,7 +407,8 @@
                                                                     @endif
                                                                 @endif
                                                                 @if (
-                                                                    auth()->user()->has_access_to_route('sales-transaction.update')
+                                                                    auth()->user()->has_access_to_route('sales-transaction.update') &&
+                                                                    !$sale->isConfirmedAndPastCutoffAndForecasted()
                                                                 )
                                                                     <a class="dropdown-item"
                                                                     href="{{ route('sales.update_details',$sale->id) }}"
