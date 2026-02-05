@@ -676,7 +676,7 @@ class SalesController extends Controller
                         fn ($q) => $q->where('for_deletion', 0)
                     )
                     ->when(auth()->user()->role_id == 3,
-                        fn ($q) => $q->where('payment_status', 'PAID')->orWhere('isConfirm', 1)
+                        fn ($q) => $q->where('payment_status', 'PAID')->where('isConfirm', 1)
                     )
                     ->when($showUnread === true,
                         fn ($q) => $q->where('is_new_order', 1)
@@ -712,7 +712,7 @@ class SalesController extends Controller
                     }])
                     ->whereIn('id', $eligible) 
                     ->where('has_sub', 0)
-                    ->where('payment_status', 'PAID')->orWhere('isConfirm', 1)
+                    ->where('payment_status', 'PAID')->where('isConfirm', 1)
                     ->when($showDeleted === true,
                         fn ($q) => $q->where('for_deletion', 1),
                         fn ($q) => $q->where('for_deletion', 0)
@@ -738,7 +738,7 @@ class SalesController extends Controller
                         fn ($q) => $q->where('payment_status', '==', 'PAID')->orWhere('isConfirm', 1)
                     )
                     ->when(auth()->user()->role_id == 3,
-                        fn ($q) => $q->where('payment_status', 'PAID')->orWhere('isConfirm', 1)
+                        fn ($q) => $q->where('payment_status', 'PAID')->where('isConfirm', 1)
                     )
                     ->when($showDeleted === true,
                         fn ($q) => $q->where('for_deletion', 1),
