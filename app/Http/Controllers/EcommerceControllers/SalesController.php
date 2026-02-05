@@ -631,6 +631,7 @@ class SalesController extends Controller
                 $model = SalesHeader::with(['items' => function ($q) {
                         $q->orderBy('delivery_date', 'asc');
                     }])
+                    ->scopePaidOnlyForForecasterRole()
                     ->where('has_sub', 0)
                     ->when($showDeleted === true,
                         fn ($q) => $q->where('for_deletion', 1),
@@ -671,14 +672,9 @@ class SalesController extends Controller
                 $model = SalesHeader::with([
                         'items' => function ($q) {
                             $q->orderBy('delivery_date', 'asc');
-                        },
-                        'payments' => function ($q) {
-                            $q->where('status', 'PAID');
                         }
                     ])
-                    ->whereHas('payments', function ($q) {
-                        $q->where('status', 'PAID');
-                    })
+                    ->scopePaidOnlyForForecasterRole()
                     ->whereIn('id', $eligible) 
                     ->where('has_sub', 0)
                     ->where('payment_status', 'PAID')->where('isConfirm', 1)
@@ -702,6 +698,7 @@ class SalesController extends Controller
                         $q->where('delivery_date', '>=', $today->startOfDay()->toDateTimeString())
                           ->orderBy('delivery_date', 'desc');
                     })
+                    ->scopePaidOnlyForForecasterRole()
                     ->where('has_sub', 0)
                     ->when($isDispatcher == true,
                         fn ($q) => $q->where('payment_status', '==', 'PAID')->orWhere('isConfirm', 1)
