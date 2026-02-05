@@ -405,6 +405,16 @@
                         <ul>
                             <li @if (\Route::current()->getName() == 'sales-transaction.create') class="active" @endif><a href="{{ route('sales-transaction.index') }}">Manage Sales Transaction</a></li>
 
+                                @if (
+                                    auth()->user()->has_access_to_route('sales-transaction.update')
+                                )
+                                    <li class="dropdown-item"
+                                    
+                                    title="Update Sales Details & Items">
+                                        Update Sales Detailsbbb
+                                    </li>
+                                @endif
+
                             @if (!isDispatcher())
                             <li @if (\Route::current()->getName() == 'sales-transaction.payments') class="active" @endif><a href="{{ route('sales-transaction.payments') }}">Sales Transaction Payments</a></li>
                             @endif
