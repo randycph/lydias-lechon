@@ -35,8 +35,7 @@ class Role extends Model
 
         return $this->belongsToMany(Permission::class, 'role_permission')
             ->withPivot(['user_id', 'isAllowed'])
-            ->wherePivot('isAllowed', 1)
-            ->wherePivot('user_id', auth()->id());
+            ->wherePivot('isAllowed', 1);
     }
 
     public function all_permissions($module = null)

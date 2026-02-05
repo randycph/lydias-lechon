@@ -61,12 +61,12 @@ Route::get('/x1', function(){
 });
 
 Route::get('/test1', function(){
-    $role = request()->get('role');
-    $view_access = DB::table('view_access_permission_per_role')
-        ->where('role', $role)
-        ->get();
-
-    return response()->json($view_access);
+    dd(
+        auth()->user()
+            ->assign_role
+            ->permissions
+            ->pluck('id', 'pivot.user_id')
+    );
 });
 
 Route::get('/', [FrontendController::class, 'index'])->name('home');
