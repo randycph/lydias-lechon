@@ -186,6 +186,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function get_assigned_routes()
     {
+        $this->loadMissing('assign_role.permissions');
+
         $role = $this->assign_role;
         if (!$role) return [];
 
