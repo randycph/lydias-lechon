@@ -399,13 +399,14 @@
                                                         </a>
                                                         <div class="dropdown-menu dropdown-menu-right">
 
+
                                                                 @if (
                                                                     auth()->user()->has_access_to_route('sales-transaction.update')
                                                                 )
                                                                     <a class="dropdown-item"
                                                                     href="{{ route('sales.update_details',$sale->id) }}"
                                                                     title="Update Sales Details & Items">
-                                                                        Update Sales Detailsxxx
+                                                                        Update Sales Details
                                                                     </a>
                                                                 @endif
                                                             <a class="dropdown-item" title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale->id) }}">View Sales Summary</a>
