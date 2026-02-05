@@ -379,7 +379,15 @@
                                     <td width="10%">
                                         <!-- 10102 -->
                                          @php $forecasters = [3,13]; $forecasters = [13]; @endphp
-                                        @if(true)                                    
+                                        @if (
+                                            auth()->user()->has_access_to_route('sales-transaction.restore') || 
+                                            auth()->user()->has_access_to_route('sales-transaction.view') ||
+                                            auth()->user()->has_access_to_route('sales-transaction.update') ||
+                                            auth()->user()->has_access_to_route('sales-transaction.destroy') ||
+                                            auth()->user()->has_access_to_route('sales-transaction.quick_update') ||
+                                            auth()->user()->has_access_to_route('sales-transaction.view_payment') || 
+                                            auth()->user()->has_access_to_route('payment.add.store') 
+                                        )
                                             <nav class="nav table-options">
                                                 @if($sale->trashed())
                                                     @if (auth()->user()->has_access_to_route('sales-transaction.restore'))
