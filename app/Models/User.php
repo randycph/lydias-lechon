@@ -181,19 +181,17 @@ class User extends Authenticatable implements MustVerifyEmail
 
         $routes = $this->get_assigned_routes();
 
-        return in_array($route, $routes, true);
+        return in_array($route, $routes, false);
     }
 
     public function get_assigned_routes()
     {
-        $this->loadMissing('assign_role.permissions');
-
         $role = $this->assign_role;
         if (!$role) return [];
 
         return $role->permissions
             ->pluck('routes')
-            ->flatten()
+            ->flatMap(fn ($p) => json_decode($p->routes, true) ?? [])
             ->unique()
             ->values()
             ->all();
