@@ -668,9 +668,17 @@ class SalesController extends Controller
                     ->where('d.delivery_date', '>=', $today->startOfDay()->toDateTimeString())
                     ->select('d.sales_header_id');
 
-                $model = SalesHeader::with(['items' => function($q) {
-                        $q->orderBy('delivery_date', 'asc');
-                    }])
+                $model = SalesHeader::with([
+                        'items' => function ($q) {
+                            $q->orderBy('delivery_date', 'asc');
+                        },
+                        'payments' => function ($q) {
+                            $q->where('status', 'PAID');
+                        }
+                    ])
+                    ->whereHas('payments', function ($q) {
+                        $q->where('status', 'PAID');
+                    })
                     ->whereIn('id', $eligible) 
                     ->where('has_sub', 0)
                     ->where('payment_status', 'PAID')->where('isConfirm', 1)
@@ -697,9 +705,6 @@ class SalesController extends Controller
                     ->where('has_sub', 0)
                     ->when($isDispatcher == true,
                         fn ($q) => $q->where('payment_status', '==', 'PAID')->orWhere('isConfirm', 1)
-                    )
-                    ->when(auth()->user()->role_id == 3,
-                        fn ($q) => $q->where('payment_status', 'PAID')->where('isConfirm', 1)
                     )
                     ->when($showDeleted === true,
                         fn ($q) => $q->where('for_deletion', 1),
