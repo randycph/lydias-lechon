@@ -647,8 +647,9 @@ class SalesController extends Controller
         $isDispatcher = auth()->user()->role_id == 5;
 
         if(auth()->user()->role_id == 1 || $hasProdBranch || auth()->user()->role_id == 3 || $hasBranches || auth()->user()->role_id == 5){
-
+            
             if ($hasProdBranch || $hasBranches) {
+                dd('debug 11');
                 $productionBranches = $hasProdBranch
                     ? explode(',', auth()->user()->production_branch_id)
                     : [];
@@ -701,6 +702,7 @@ class SalesController extends Controller
                     });
             } elseif (auth()->user()->role_id == 3) {
 
+                dd('debug 222');
                 $eligible = DB::table('ecommerce_sales_details as d')
                     ->join('job_orders as jo', 'jo.sales_detail_id', '=', 'd.id')
                     ->join('production_orders as po', 'po.joborder_id', '=', 'jo.id')
@@ -736,6 +738,7 @@ class SalesController extends Controller
                         })
                     );
             } else {
+                dd('debug 333');
                 $model = SalesHeader::where('id','>',0)
                     ->with('items', function($q) use($today) {
                         $q->where('delivery_date', '>=', $today->startOfDay()->toDateTimeString())
@@ -760,6 +763,7 @@ class SalesController extends Controller
                     );
             }
         }else{
+            dd('debug 555');
             if ($role->has_branches == 1) {
                 $branches = UserBranch::accessBranch();
 
