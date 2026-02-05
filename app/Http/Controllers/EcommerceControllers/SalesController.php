@@ -709,8 +709,6 @@ class SalesController extends Controller
                         }
                     });
             } elseif (auth()->user()->role_id == 3) {
-
-                dd('debug 222');
                 $eligible = DB::table('ecommerce_sales_details as d')
                     ->join('job_orders as jo', 'jo.sales_detail_id', '=', 'd.id')
                     ->join('production_orders as po', 'po.joborder_id', '=', 'jo.id')
@@ -746,11 +744,19 @@ class SalesController extends Controller
                         })
                     );
             } else {
-                dd('debug 333');
                 $model = SalesHeader::where('id','>',0)
                     ->with('items', function($q) use($today) {
                         $q->where('delivery_date', '>=', $today->startOfDay()->toDateTimeString())
                           ->orderBy('delivery_date', 'desc');
+                    })
+                    ->when(auth()->user()->role_id == 3, function ($q) {
+                        $q->with([
+                            'payments' => function ($pq) {
+                                $pq->where('status', 'PAID');
+                            }
+                        ])->whereHas('payments', function ($pq) {
+                            $pq->where('status', 'PAID');
+                        });
                     })
                     ->where('has_sub', 0)
                     ->when($isDispatcher == true,
@@ -771,7 +777,6 @@ class SalesController extends Controller
                     );
             }
         }else{
-            dd('debug 555');
             if ($role->has_branches == 1) {
                 $branches = UserBranch::accessBranch();
 
