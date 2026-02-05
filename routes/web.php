@@ -62,11 +62,15 @@ Route::get('/x1', function(){
 
 Route::get('/test1', function(){
     dd(
-        auth()->user()
-            ->assign_role
-            ->permissions
-            ->pluck('id')
+        Route::getRoutes()
+            ->getByName('sales-transaction.update'),
+        Route::getRoutes()
+            ->getByName('sales.update_details')
     );
+});
+
+Route::get('/test2', function(){
+    dd(auth()->user()->get_assigned_routes());
 });
 
 Route::get('/', [FrontendController::class, 'index'])->name('home');
