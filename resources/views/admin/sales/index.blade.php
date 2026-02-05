@@ -399,21 +399,21 @@
                                                         </a>
                                                         <div class="dropdown-menu dropdown-menu-right">
 
-                                                            <a class="dropdown-item" title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale->id) }}">View Sales Summary</a>
-                                                            @if ($sale->status !== 'CANCELLED')
-                                                                @if($sale->isConfirm != 1)
-                                                                    @if(auth()->user()->has_access_to_route('sales.confirm.order'))
-                                                                    <a class="dropdown-item"  href="javascript:void(0);" onclick="confirm_order({{$sale->id}},'{{ number_format((\App\EcommerceModel\SalesHeader::balance($sale->id)),2) }}');" title="Confirm Order" >Confirm Order</a>
-                                                                    @endif
-                                                                @endif
                                                                 @if (
                                                                     auth()->user()->has_access_to_route('sales-transaction.update')
                                                                 )
                                                                     <a class="dropdown-item"
                                                                     href="{{ route('sales.update_details',$sale->id) }}"
                                                                     title="Update Sales Details & Items">
-                                                                        Update Sales Details
+                                                                        Update Sales Detailssss
                                                                     </a>
+                                                                @endif
+                                                            <a class="dropdown-item" title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale->id) }}">View Sales Summary</a>
+                                                            @if ($sale->status !== 'CANCELLED')
+                                                                @if($sale->isConfirm != 1)
+                                                                    @if(auth()->user()->has_access_to_route('sales.confirm.order'))
+                                                                    <a class="dropdown-item"  href="javascript:void(0);" onclick="confirm_order({{$sale->id}},'{{ number_format((\App\EcommerceModel\SalesHeader::balance($sale->id)),2) }}');" title="Confirm Order" >Confirm Order</a>
+                                                                    @endif
                                                                 @endif
                                                                 @if($dateneeded > date('Y-m-d H:i:s') && auth()->user()->has_access_to_route('sales-transaction.destroy'))
                                                                 <hr class="dropdown-divider">    
