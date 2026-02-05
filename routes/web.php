@@ -65,7 +65,7 @@ Route::get('/test1', function(){
         auth()->user()
             ->assign_role
             ->permissions
-            ->pluck('id', 'pivot.user_id')
+            ->pluck('id')
     );
 });
 
