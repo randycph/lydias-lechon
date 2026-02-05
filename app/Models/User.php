@@ -190,7 +190,6 @@ class User extends Authenticatable implements MustVerifyEmail
         if (!$role) return [];
 
         return $role->permissions
-            ->pluck('routes')
             ->flatMap(fn ($p) => json_decode($p->routes, true) ?? [])
             ->unique()
             ->values()
