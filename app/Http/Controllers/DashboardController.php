@@ -21,7 +21,30 @@ class DashboardController extends Controller
     {
         $logs = Logs::where('created_by',Auth::id())->orderBy('id','desc')->paginate(15);
 
-        return view('admin.dashboard.index',compact('logs'));
+        $cutoffDate = now()->addDays(3)->endOfDay();
+        $today = now()->startOfDay();
+
+        $pendingPayments = SalesHeader::with(['user', 'items', 'payments'])
+            ->whereRaw("payment_status != 'PAID'")
+            ->whereHas('items', function ($q) use ($today, $cutoffDate) {
+                $q->whereNotNull('delivery_date')
+                ->where('delivery_date', '!=', '0000-00-00 00:00:00')
+                ->whereBetween('delivery_date', [$today, $cutoffDate]);
+            })
+            ->orderBy(
+                SalesDetail::selectRaw('MIN(delivery_date)')
+                    ->whereColumn('sales_header_id', 'ecommerce_sales_headers.id')
+                    ->whereNotNull('delivery_date')
+                    ->where('delivery_date', '!=', '0000-00-00 00:00:00')
+                    ->where('delivery_date', '>=', $today),
+                'desc'
+            )
+            ->get();
+
+        return view('admin.dashboard.index', compact(
+            'logs',
+            'pendingPayments'
+        ));
     }
     
     public function ecommerce(Request $request)

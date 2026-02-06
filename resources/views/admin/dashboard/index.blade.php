@@ -83,86 +83,173 @@
         @else 
             <div class="col-lg-3 col-md-6"></div>
         @endif
-        @if (auth()->user()->has_access_to_pages_module() || auth()->user()->has_access_to_albums_module() || auth()->user()->has_access_to_user_module() || auth()->user()->has_access_to_news_module())
-            <div class="col-lg-3 col-md-4">
+        <div class="col-lg-12">
+            <div class="row align-items-start">
                 @if (auth()->user()->has_access_to_pages_module() || auth()->user()->has_access_to_albums_module() || auth()->user()->has_access_to_user_module() || auth()->user()->has_access_to_news_module())
-                    <div class="card dashboard-summary mg-t-20">
-                        <div class="card-header">
-                            Website Summary
+                    <div class="col-lg-3 col-md-4">
+                        <div class="card dashboard-summary mg-t-20">
+                            <div class="card-header">
+                                Website Summary
+                            </div>
+                            <div class="card-body" style="height:800px !important !important !important;">
+                                @if (auth()->user()->has_access_to_pages_module())
+                                    <h6><strong>Pages</strong></h6>
+                                    <p><a href="{{route('pages.index.advance-search')}}?status=published"><span class="badge badge-dark">{{ \App\Models\Page::totalPublicPages() }}</span> Published Pages</a></p>
+                                    <p><a href="{{route('pages.index.advance-search')}}?status=private"><span class="badge badge-dark">{{ \App\Models\Page::totalPrivatePages() }}</span> Private Pages</a></p>
+                                    <p><a href="{{route('pages.index.advance-search')}}?showDeleted=on"><span class="badge badge-dark">{{ \App\Models\Page::totalDeletePages() }}</span> Deleted Pages</a></p>
+                                    <hr>
+                                @endif
+                                @if (auth()->user()->has_access_to_albums_module())
+                                    <h6><strong>Sub Banners</strong></h6>
+                                        <p><a href="{{ route('albums.index') }}"><span class="badge badge-dark">{{ \App\Models\Album::totalNotDeletedAlbums() }}</span> Albums</a></p>
+                                    <p><a href="{{ route('albums.index') }}"><span class="badge badge-dark">{{ \App\Models\Album::totalDeletePages() }}</span> Deleted Albums</a></p>
+                                    <hr>
+                                @endif
+                                @if (auth()->user()->has_access_to_user_module())
+                                    <h6><strong>Users</strong></h6>
+                                    <p><a href="{{ route('users.index') }}"><span class="badge badge-dark">{{ \App\Models\User::activeTotalUser() }}</span> Active Users</a></p>
+                                        <p><a href="{{ route('users.index') }}?showDeleted=on"><span class="badge badge-dark">{{ \App\Models\User::inactiveTotalUser() }}</span> Inactive Users</a></p>
+                                    <hr>
+                                @endif
+                                @if (auth()->user()->has_access_to_news_module())
+                                    <h6><strong>News</strong></h6>
+                                    <p><a href="{{ route('news.index.advance-search') }}?status=published"><span class="badge badge-dark">{{ \App\Models\Article::totalPublishedArticles() }}</span> Published News</a></p>
+                                    <p><a href="{{ route('news.index.advance-search') }}?status=private"><span class="badge badge-dark">{{ \App\Models\Article::totalDraftArticles() }}</span> Private News</a></p>
+                                    <p><a href="{{ route('news.index.advance-search') }}?status=private"><span class="badge badge-dark">{{ \App\Models\Article::totalDeletedArticles() }}</span> Deleted News</a></p>
+
+                                @endif
+                            </div>
                         </div>
-                        <div class="card-body" style="height:800px !important !important !important;">
+                        
+                        <div class="dashboard-quick mg-t-20">
                             @if (auth()->user()->has_access_to_pages_module())
-                                <h6><strong>Pages</strong></h6>
-                                <p><a href="{{route('pages.index.advance-search')}}?status=published"><span class="badge badge-dark">{{ \App\Models\Page::totalPublicPages() }}</span> Published Pages</a></p>
-                                <p><a href="{{route('pages.index.advance-search')}}?status=private"><span class="badge badge-dark">{{ \App\Models\Page::totalPrivatePages() }}</span> Private Pages</a></p>
-                                <p><a href="{{route('pages.index.advance-search')}}?showDeleted=on"><span class="badge badge-dark">{{ \App\Models\Page::totalDeletePages() }}</span> Deleted Pages</a></p>
-                                <hr>
-                            @endif
-                            @if (auth()->user()->has_access_to_albums_module())
-                                <h6><strong>Sub Banners</strong></h6>
-                                    <p><a href="{{ route('albums.index') }}"><span class="badge badge-dark">{{ \App\Models\Album::totalNotDeletedAlbums() }}</span> Albums</a></p>
-                                <p><a href="{{ route('albums.index') }}"><span class="badge badge-dark">{{ \App\Models\Album::totalDeletePages() }}</span> Deleted Albums</a></p>
-                                <hr>
-                            @endif
-                            @if (auth()->user()->has_access_to_user_module())
-                                <h6><strong>Users</strong></h6>
-                                <p><a href="{{ route('users.index') }}"><span class="badge badge-dark">{{ \App\Models\User::activeTotalUser() }}</span> Active Users</a></p>
-                                    <p><a href="{{ route('users.index') }}?showDeleted=on"><span class="badge badge-dark">{{ \App\Models\User::inactiveTotalUser() }}</span> Inactive Users</a></p>
-                                <hr>
+                                <a href="{{ route('pages.create') }}" class="btn btn-sm pd-x-15 btn-primary btn-uppercase btn-block tx-left text-white">
+                                    <i data-feather="layers" class="wd-10 mg-r-5"></i> Create a Page
+                                </a>
                             @endif
                             @if (auth()->user()->has_access_to_news_module())
-                                <h6><strong>News</strong></h6>
-                                <p><a href="{{ route('news.index.advance-search') }}?status=published"><span class="badge badge-dark">{{ \App\Models\Article::totalPublishedArticles() }}</span> Published News</a></p>
-                                <p><a href="{{ route('news.index.advance-search') }}?status=private"><span class="badge badge-dark">{{ \App\Models\Article::totalDraftArticles() }}</span> Private News</a></p>
-                                <p><a href="{{ route('news.index.advance-search') }}?status=private"><span class="badge badge-dark">{{ \App\Models\Article::totalDeletedArticles() }}</span> Deleted News</a></p>
-
+                                <a href="{{ route('news.create') }}" class="btn btn-sm pd-x-15 btn-primary btn-uppercase btn-block tx-left text-white">
+                                    <i data-feather="edit" class="wd-10 mg-r-5"></i> Create a News
+                                </a>
+                            @endif
+                            @if (auth()->user()->has_access_to_albums_module())
+                                <a href="{{ route('albums.create') }}" class="btn btn-sm pd-x-15 btn-primary btn-uppercase btn-block tx-left text-white">
+                                    <i data-feather="image" class="wd-10 mg-r-5"></i> Create an Album
+                                </a>
                             @endif
                         </div>
                     </div>
-                    
-                    <div class="dashboard-quick mg-t-20">
-                        @if (auth()->user()->has_access_to_pages_module())
-                            <a href="{{ route('pages.create') }}" class="btn btn-sm pd-x-15 btn-primary btn-uppercase btn-block tx-left text-white">
-                                <i data-feather="layers" class="wd-10 mg-r-5"></i> Create a Page
-                            </a>
-                        @endif
-                        @if (auth()->user()->has_access_to_news_module())
-                            <a href="{{ route('news.create') }}" class="btn btn-sm pd-x-15 btn-primary btn-uppercase btn-block tx-left text-white">
-                                <i data-feather="edit" class="wd-10 mg-r-5"></i> Create a News
-                            </a>
-                        @endif
-                        @if (auth()->user()->has_access_to_albums_module())
-                            <a href="{{ route('albums.create') }}" class="btn btn-sm pd-x-15 btn-primary btn-uppercase btn-block tx-left text-white">
-                                <i data-feather="image" class="wd-10 mg-r-5"></i> Create an Album
-                            </a>
-                        @endif
+                    <div class="col-lg-9 col-md-8">
+                        <div class="card dashboard-recent mg-t-20">
+                            <div class="card-header">
+                                My Recent Activities
+                            </div>
+                            <div class="card-body">
+                                <div class="list-group">
+                                    @forelse($logs as $log)
+                                        <p class="list-group-item list-group-item-action">
+                                            <a href="{{route('settings.audit')}}?search={{$log->id}}" target="_blank">
+                                                <span class="badge badge-dark">{{ ucwords($log->firstname) }} {{ ucwords($log->lastname) }}</span>
+                                            </a> {{ $log->dashboard_activity }} at {{ Setting::date_for_listing($log->activity_date) }}
+                                        </p>
+                                    @empty
+                                        No activities found!
+                                    @endforelse
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-end">
+                                    <span class="tx-12"><a href="{{ route('users.show', Auth::user()->id) }}">Show all activities <i class="fa fa-arrow-right"></i></a></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card dashboard-recent mg-t-20">
+                            <div class="card-header">
+                                <div>Pending Payments</div>
+                                <small class="text-muted">
+                                    Transactions nearing their delivery dates with outstanding payments.
+                                </small>
+                            </div>
+                            <div class="card-body">
+                                <div class="list-group">
+                                    <div class="table-responsive mt-3">
+                                        <table class="table table-hover align-middle">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Order #</th>
+                                                    <th>Customer</th>
+                                                    <th>Delivery Date</th>
+                                                    <th class="text-end">Total Amount</th>
+                                                    <th class="text-end">Paid</th>
+                                                    <th class="text-end">Balance</th>
+                                                    <th>Status</th>
+                                                    <th class="text-center">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @forelse ($pendingPayments as $sale)
+                                                    <tr>
+                                                        <td>
+                                                            <a target="_blank" href="{{ route('sales-transaction.view', $sale->id) }}"><strong>#{{ $sale->order_number }}</strong></a>
+                                                        </td>
+
+                                                        <td>
+                                                            {{ $sale->user->name ?? '—' }}
+                                                        </td>
+
+                                                        <td>
+                                                            {{ optional(safe_date($sale->nearest_delivery_date))->format('M d, Y') ?? '—' }}
+                                                        </td>
+
+                                                        <td class="text-end">
+                                                            ₱{{ number_format($sale->net_amount, 2) }}
+                                                        </td>
+
+                                                        <td class="text-end text-success">
+                                                            ₱{{ number_format($sale->payments->where('status', 'PAID')->sum('amount'), 2) }}
+                                                        </td>
+
+                                                        <td class="text-end text-danger fw-semibold">
+                                                            ₱{{ number_format($sale->balance($sale->id), 2) }}
+                                                        </td>
+
+                                                        <td>
+                                                            <span class="badge bg-primary text-white">
+                                                                {{ $sale->payments->where('status', 'PAID')->sum('amount') >= $sale->net_amount ? 'PAID' : ($sale->payments->where('status', 'PAID')->sum('amount') > 0 ? 'PARTIAL' : 'UNPAID'); }}
+                                                            </span>
+                                                        </td>
+
+                                                        <td class="text-center">
+                                                            <a href="{{ route('sales-transaction.index') . '/?search=' . $sale->order_number }}"
+                                                            class="btn btn-sm btn-outline-primary">
+                                                                View
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                @empty
+                                                    <tr>
+                                                        <td colspan="8" class="text-center text-muted py-4">
+                                                            No pending payments at the moment
+                                                        </td>
+                                                    </tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-end">
+                                    <span class="tx-12"><a href="{{ route('sales-transaction.index') . '/?filter=unpaid' }}">Show all pending payments <i class="fa fa-arrow-right"></i></a></span>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 @endif
-            </div>
-        @endif
-        <div class=" @if (auth()->user()->has_access_to_pages_module() || auth()->user()->has_access_to_albums_module() || auth()->user()->has_access_to_user_module() || auth()->user()->has_access_to_news_module()) col-lg-9 col-md-8 @else col-lg-12 @endif">
-            <div class="card dashboard-recent mg-t-20">
-                <div class="card-header">
-                    My Recent Activities
-                </div>
-                <div class="card-body">
-                    <div class="list-group">
-                        @forelse($logs as $log)
-                            <p class="list-group-item list-group-item-action">
-                                <a href="{{route('settings.audit')}}?search={{$log->id}}" target="_blank">
-                                    <span class="badge badge-dark">{{ ucwords($log->firstname) }} {{ ucwords($log->lastname) }}</span>
-                                </a> {{ $log->dashboard_activity }} at {{ Setting::date_for_listing($log->activity_date) }}
-                            </p>
-                        @empty
-                            No activities found!
-                        @endforelse
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <div class="d-flex justify-content-end">
-                        <span class="tx-12"><a href="{{ route('users.show', Auth::user()->id) }}">Show all activities <i class="fa fa-arrow-right"></i></a></span>
-                    </div>
-                </div>
+
             </div>
         </div>
     </div>
