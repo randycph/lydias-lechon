@@ -309,4 +309,22 @@ class UserController extends Controller
         return view('admin.users.profile',compact('user','logs','param'));
     }
 
+    public function bulkDeactivate(Request $request)
+    {
+        $ids = explode('|', $request->users);
+        $ids = array_filter($ids);
+
+        User::whereIn('id', $ids)->get()
+            ->each(function ($user) use ($request) {
+                $user->update([
+                    'is_active' => intval($request->status),
+                    'user_id'   => Auth::id(),
+                ]);
+            });
+
+        $status = $request->status == 1 ? 'activated' : 'deactivated';
+
+        return back()->with('success', __('standard.users.status_success', ['status' => $status]));
+    }    
+
 }

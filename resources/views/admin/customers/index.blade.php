@@ -74,6 +74,22 @@
                                     </form>
                                 </div>
                             </div>
+
+                            @if (auth()->user()->has_access_to_route('customer.deactivate'))
+                                <div class="list-search d-inline">
+                                    <div class="dropdown d-inline mg-r-10">
+                                        <button class="btn btn-light btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            Actions
+                                        </button>
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                            @if (auth()->user()->has_access_to_route('customer.deactivate'))
+                                                <a class="dropdown-item" href="javascript:void(0)" onclick="bulkAction(1)">Activate</a>
+                                                <a class="dropdown-item tx-danger" href="javascript:void(0)" onclick="bulkAction(0)">Deactivate</a>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
 
                         <div class="ml-auto bd-highlight mg-t-10 mg-r-10">
@@ -103,6 +119,12 @@
                         <table class="table mg-b-0 table-light table-hover" style="width:100%;">
                             <thead>
                                 <tr>
+                                    <th style="width: 10%;">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="checkbox_all">
+                                            <label class="custom-control-label" for="checkbox_all"></label>
+                                        </div>
+                                    </th>
                                     <th scope="col" width="30%">Name</th>
                                     <th scope="col">Email</th>
                                     {{-- <th scope="col">Role</th> --}}
@@ -114,6 +136,12 @@
                             <tbody>
                                 @forelse($users as $user)
                                     <tr>
+                                        <th>
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input cb" id="cb{{ $user->id }}">
+                                                <label class="custom-control-label" for="cb{{ $user->id }}"></label>
+                                            </div>
+                                        </th>
                                         <th>
                                             <strong @if($user->is_active == 0) style="text-decoration:line-through;" @endif> {{$user->fullname}}</strong>
                                         </th>
@@ -182,6 +210,52 @@
             <!-- End Navigation -->
 
         </div>
+
+        <form action="" id="posting_form" style="display:none;" method="post">
+            @csrf
+            <input type="text" id="users" name="users">
+            <input type="text" id="status" name="status">
+        </form>
+
+        <div class="modal effect-scale" id="prompt-multiple-deactivate" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalCenterTitle">Deactivate Users</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        You are about to <span class="prompt-status"></span> the selected users. Do you want to continue?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-danger" id="btnDeactivateMultiple">Yes, Deactivate</button>
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal effect-scale" id="prompt-no-selected" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalCenterTitle">{{__('common.no_selected_title')}}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>{{__('common.no_selected')}}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 @include('admin.customers.modals')
 @endsection
@@ -201,4 +275,35 @@
 @endsection
 
 @section('customjs')
+<script>
+    function bulkAction(status){
+        var counter = 0;
+        var selected_users = '';
+        $(".cb:checked").each(function(){
+            counter++;
+            fid = $(this).attr('id');
+            selected_users += fid.substring(2, fid.length)+'|';
+        });
+
+        if(parseInt(counter) < 1){
+            $('#prompt-no-selected').modal('show');
+            return false;
+        }
+        else{
+            $('.prompt-status').text(status == 1 ? 'activate' : 'deactivate');  
+            $('#prompt-multiple-deactivate').modal('show');
+            $('#btnDeactivateMultiple').on('click', function() {
+                post_form("{{route('customers.multiple.deactivate')}}", status ,selected_users);
+            });
+        }
+    }
+
+    function post_form(url,status,users){
+        $('#posting_form').attr('action',url);
+        $('#users').val(users);
+        $('#status').val(status);
+        $('#posting_form').submit();
+    }
+</script>
+
 @endsection
