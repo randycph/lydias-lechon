@@ -386,6 +386,7 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     // Users
     Route::resource('/admin/users', 'Settings\UserController');
     Route::post('/user/deactivate', 'Settings\UserController@deactivate')->name('user.deactivate');
+    Route::post('/users/deactivate/bulk', 'Settings\UserController@bulkDeactivate')->name('users.multiple.deactivate');
     Route::post('/user/activate', 'Settings\UserController@activate')->name('user.activate');
     Route::get('/admin/user-search/', 'Settings\UserController@search')->name(
         'user.search');
@@ -714,6 +715,7 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
 
     Route::resource('/admin/customers', 'Settings\CustomerController');
     Route::post('/customer/deactivate', 'Settings\CustomerController@deactivate')->name('customer.deactivate');
+    Route::post('/customers/deactivate/bulk', 'Settings\CustomerController@bulkDeactivate')->name('customers.multiple.deactivate');
     Route::post('/customer/activate', 'Settings\CustomerController@activate')->name('customer.activate');
     Route::get('/admin/customer-search/', 'Settings\CustomerController@search')->name(
         'customer.search');
