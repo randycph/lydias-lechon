@@ -128,6 +128,7 @@
                                     <th scope="col" width="30%">Name</th>
                                     <th scope="col">Email</th>
                                     {{-- <th scope="col">Role</th> --}}
+                                    <th scope="col">Date Registered</th>
                                     <th scope="col">Status</th>
                                     <th scope="col">Type</th>
                                     <th scope="col">Options</th>
@@ -147,6 +148,9 @@
                                         </th>
                                         <td>{{ $user->email }}</td>
                                         {{-- <td><span class="badge badge-primary">{{ \App\Models\User::userRole($user->role_id) }}</span></td> --}}
+                                        <td>
+                                            {{ $user->created_at->format('M d, Y') }}
+                                        </td>
                                         <td>
                                             @if($user->is_active == 1)
                                                 <span class="badge badge-success">Active</span>
