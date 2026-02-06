@@ -140,29 +140,6 @@
                         </div>
                     </div>
                     <div class="col-lg-9 col-md-8">
-                        <div class="card dashboard-recent mg-t-20">
-                            <div class="card-header">
-                                My Recent Activities
-                            </div>
-                            <div class="card-body">
-                                <div class="list-group">
-                                    @forelse($logs as $log)
-                                        <p class="list-group-item list-group-item-action">
-                                            <a href="{{route('settings.audit')}}?search={{$log->id}}" target="_blank">
-                                                <span class="badge badge-dark">{{ ucwords($log->firstname) }} {{ ucwords($log->lastname) }}</span>
-                                            </a> {{ $log->dashboard_activity }} at {{ Setting::date_for_listing($log->activity_date) }}
-                                        </p>
-                                    @empty
-                                        No activities found!
-                                    @endforelse
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <div class="d-flex justify-content-end">
-                                    <span class="tx-12"><a href="{{ route('users.show', Auth::user()->id) }}">Show all activities <i class="fa fa-arrow-right"></i></a></span>
-                                </div>
-                            </div>
-                        </div>
                         
                         <div class="card dashboard-recent mg-t-20">
                             <div class="card-header">
@@ -171,9 +148,9 @@
                                     Transactions nearing their delivery dates with outstanding payments.
                                 </small>
                             </div>
-                            <div class="card-body">
+                            <div class="card-body pt-3">
                                 <div class="list-group">
-                                    <div class="table-responsive mt-3">
+                                    <div class="table-responsive">
                                         <table class="table table-hover align-middle">
                                             <thead class="table-light">
                                                 <tr>
@@ -240,9 +217,36 @@
 
                                 </div>
                             </div>
+                            @php
+                                $ids = $pendingPayments->pluck('id')->join(',');
+                            @endphp
                             <div class="card-footer">
                                 <div class="d-flex justify-content-end">
-                                    <span class="tx-12"><a href="{{ route('sales-transaction.index') . '/?filter=unpaid' }}">Show all pending payments <i class="fa fa-arrow-right"></i></a></span>
+                                    <span class="tx-12 position-relative" style="top: -7px"><a href="{{ route('sales-transaction.index') . '/?orderBy=date_needed&search=' . $ids }}">Show all pending payments <i class="fa fa-arrow-right"></i></a></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card dashboard-recent mg-t-20">
+                            <div class="card-header">
+                                My Recent Activities
+                            </div>
+                            <div class="card-body">
+                                <div class="list-group">
+                                    @forelse($logs as $log)
+                                        <p class="list-group-item list-group-item-action">
+                                            <a href="{{route('settings.audit')}}?search={{$log->id}}" target="_blank">
+                                                <span class="badge badge-dark">{{ ucwords($log->firstname) }} {{ ucwords($log->lastname) }}</span>
+                                            </a> {{ $log->dashboard_activity }} at {{ Setting::date_for_listing($log->activity_date) }}
+                                        </p>
+                                    @empty
+                                        No activities found!
+                                    @endforelse
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <div class="d-flex justify-content-end">
+                                    <span class="tx-12"><a href="{{ route('users.show', Auth::user()->id) }}">Show all activities <i class="fa fa-arrow-right"></i></a></span>
                                 </div>
                             </div>
                         </div>
@@ -253,9 +257,90 @@
             </div>
         </div>
     </div>
+
+    @if($tomorrowUnpaid->count())
+    <div class="modal fade" id="pendingPaymentModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">
+                        ⚠️ Pending Payments Alert
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <p class="mb-2">
+                        <strong>These transactions are scheduled for delivery tomorrow
+                        and still have pending payments:</strong>
+                    </p>
+
+                    <ul class="mb-3">
+                        @foreach($tomorrowUnpaid as $sale)
+                            <li>
+                                <a target="_blank" href="{{ route('sales-transaction.show', $sale->id) }}">
+                                    <strong>#{{ $sale->order_number }}</strong> - {{ $sale->user->name ?? '—' }} (Balance: ₱{{ number_format($sale->balance($sale->id), 2) }})
+                                </a>    
+                            </li>
+                        @endforeach
+                    </ul>
+
+                    <p class="text-muted mb-0">
+                        Please ensure payments are settled before delivery.
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">
+                        Review Later
+                    </button>
+                    
+                    @php
+                        // get all ids of tomorrow unpaid transactions
+                        $ids = $tomorrowUnpaid->pluck('id')->join(',');
+                    @endphp
+
+                    <a 
+                        href="{{ route('sales-transaction.index') . '/?orderBy=date_needed&search=' . $ids }}"
+                        class="btn btn-warning">
+                            View Pending Payments
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+@endif
+
 @endsection
 
 @section('pagejs')
     <script src="{{ asset('lib/nestable2/jquery.nestable.min.js') }}"></script>
+
+
+    @if($tomorrowUnpaid->count())
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = new bootstrap.Modal(
+                document.getElementById('pendingPaymentModal')
+            );
+            modal.show();
+        });
+    </script>
+
+    {{-- <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (!sessionStorage.getItem('shownTomorrowUnpaidModal')) {
+                const modal = new bootstrap.Modal(
+                    document.getElementById('pendingPaymentModal')
+                );
+                modal.show();
+                sessionStorage.setItem('shownTomorrowUnpaidModal', '1');
+            }
+        });
+    </script> --}}
+
+    @endif
 @endsection

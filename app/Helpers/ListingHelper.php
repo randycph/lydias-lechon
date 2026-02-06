@@ -316,18 +316,43 @@ class ListingHelper
             }
         }
 
-        $models->where(function($models) use ($search, $searchFields, $customQuery, $customQueryFields) {
-            foreach ($searchFields as $fieldName) {
-                if (in_array($fieldName, $customQueryFields) <= -1) {
-                    $models->orWhere($fieldName, 'like', '%' . $search . '%');
-                }
-            }
+        $searchTerms = $this->get_search_terms();
 
-            foreach ($customQuery as $query) {
-                $models->orWhereRaw($query, ['%' . $search . '%']);
+        $models->where(function ($query) use ($searchTerms, $searchFields, $customQuery, $customQueryFields) {
+
+            foreach ($searchTerms as $term) {
+
+                $query->orWhere(function ($q) use ($term, $searchFields, $customQuery, $customQueryFields) {
+
+                    foreach ($searchFields as $fieldName) {
+                        if (!in_array($fieldName, $customQueryFields)) {
+                            $q->orWhere($fieldName, 'like', '%' . $term . '%');
+                        }
+                    }
+
+                    foreach ($customQuery as $raw) {
+                        $q->orWhereRaw($raw, ['%' . $term . '%']);
+                    }
+                });
             }
         });
 
         return $models->paginate($perPage);
+    }
+
+    private function get_search_terms(): array
+    {
+        $search = $this->get_search_string();
+
+        if (!$search) {
+            return [];
+        }
+
+        return collect(explode(',', $search))
+            ->map(fn ($v) => trim($v))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
     }
 }
