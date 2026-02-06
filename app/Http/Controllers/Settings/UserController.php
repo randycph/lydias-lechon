@@ -28,7 +28,7 @@ class UserController extends Controller
 {
     use SendsPasswordResetEmails;
 
-    private $searchFields = ['name'];
+    private $searchFields = ['name', 'email'];
 
     public function __construct()
     {
