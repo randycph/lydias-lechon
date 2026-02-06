@@ -41,9 +41,20 @@ class DashboardController extends Controller
             )
             ->get();
 
+        $tomorrow = now()->addDay()->startOfDay();
+        $endTomorrow = now()->addDay()->endOfDay();
+
+        $tomorrowUnpaid = SalesHeader::with(['items', 'payments'])
+            ->whereHas('items', function ($q) use ($tomorrow, $endTomorrow) {
+                $q->whereBetween('delivery_date', [$tomorrow, $endTomorrow]);
+            })
+            ->get()
+            ->filter(fn ($sale) => $sale->balance($sale->id) > 0);
+
         return view('admin.dashboard.index', compact(
             'logs',
-            'pendingPayments'
+            'pendingPayments',
+            'tomorrowUnpaid'
         ));
     }
     
