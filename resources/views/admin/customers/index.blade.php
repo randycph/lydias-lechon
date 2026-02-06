@@ -95,7 +95,7 @@
                         <div class="ml-auto bd-highlight mg-t-10 mg-r-10">
                             <form class="form-inline" id="searchForm">
                                 <div class="search-form mg-r-10">
-                                    <input name="search" type="search" id="search" class="form-control"  placeholder="Search by Name" value="{{ $filter->search }}">
+                                    <input name="search" type="search" id="search" class="form-control"  placeholder="Search by Name, Email..." value="{{ $filter->search }}">
                                     <button class="btn filter" type="button" id="btnSearch"><i data-feather="search"></i></button>
                                 </div>
                             </form>
