@@ -528,10 +528,9 @@ class SalesHeader extends Model
             auth()->check() && auth()->user()->role_id == 3,
             function ($q) {
                 $q->where('isConfirm', 1)
+                ->where('has_sub', 0)
                 ->whereHas('payments', fn ($pq) => $pq->where('status', 'PAID'))
-                ->with([
-                    'payments' => fn ($pq) => $pq->where('status', 'PAID')
-                ]);
+                ->with('payments');
             }
         );
     }
