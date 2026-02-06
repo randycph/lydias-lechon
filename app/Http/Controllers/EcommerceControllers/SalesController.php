@@ -882,6 +882,18 @@ class SalesController extends Controller
         if(isset($_GET['delivery_type']) && strlen($_GET['delivery_type']) > 0){
             $model = $model->where('delivery_type','=',$_GET['delivery_type']);        
         }
+        
+        if (request('filter') === 'unpaid') {
+            $model = $model->unpaid();
+        }
+
+        if (request('filter') === 'partial') {
+            $model = $model->partial();
+        }
+
+        if (request('filter') === 'paid') {
+            $model = $model->paid();
+        }
 
         return $model;
     }
