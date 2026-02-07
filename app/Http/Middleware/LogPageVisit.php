@@ -49,7 +49,7 @@ class LogPageVisit
 
         ActivityLog::withoutEvents(function () use ($request) {
             ActivityLog::create([
-                'created_by'         => auth()->check() ? auth()->id() : null, // null for guests
+                'created_by' => $this->resolveActorId($request),
                 'activity_type'      => 'page_visit',
                 'dashboard_activity' => 'visited a page',
                 'activity_desc'      => 'visited ' . $request->fullUrl(),
@@ -59,9 +59,22 @@ class LogPageVisit
                 'ip_address'         => $request->ip(),
                 'email'              => auth()->check() ? auth()->user()?->email : null,
                 'role'               => auth()->check() ? auth()->user()?->user_role?->name : null,
+                'session_id'         => $request->session()->getId(),
             ]);
         });
 
         return $next($request);
+    }
+
+    protected function resolveActorId(Request $request): ?int
+    {
+        if (auth()->check()) {
+            return auth()->id();
+        }
+
+        return ActivityLog::where('session_id', $request->session()->getId())
+            ->whereNotNull('created_by')
+            ->latest('id')
+            ->value('created_by');
     }
 }

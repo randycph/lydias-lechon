@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Page;
 use Illuminate\Support\Facades\Auth;
 use App\EcommerceModel\GiftCertificate;
+use App\Models\ActivityLog;
 use App\Models\ProductDeliveryAddress;
 use Redirect;
 use DateTime;
@@ -936,6 +937,12 @@ class CartController extends Controller
             //     'is_active' => 1
             // ]);
 
+            $sessionId = $request->session()->getId();
+
+            ActivityLog::where('session_id', $sessionId)
+                ->where('created_by', null)
+                ->update(['created_by' => $user->id]);
+            
             $carts = collect(session('cart', []));
         } else {
             $user = auth()->user();
