@@ -29,15 +29,31 @@
                     @csrf
                     @method('PUT')
                     <div class="form-group">
+                        <label class="d-block">Product *</label>
+                        <select name="product_id" id="product_id" class="form-control selectpicker @error('product_id') is-invalid @enderror" data-live-search="true">
+                            <option value="">Select Product</option>
+                            @foreach ($products as $product)
+                                <option value="{{ $product->id }}" {{ (old("product_id",$size->product_id) == $product->id ? "selected":"") }}>{{ $product->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('product_id')
+                            <div class="alert alert-danger">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="form-group">
                         <label class="d-block">Name *</label>
                         <input type="text" name="name" id="name" value="{{ old('name',$size->name)}}" class="form-control @error('name') is-invalid @enderror">
-                        <x-error-message inputName="name" />
+                        @error('name')
+                            <div class="alert alert-danger">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="form-group">
                         <label class="d-block">Description *</label>
                         <textarea rows="3" class="form-control @error('description') is-invalid @enderror" name="description">{{ old('description',$size->description) }}</textarea>
-                        <x-error-message inputName="description" />
+                        @error('description')
+                            <div class="alert alert-danger">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="form-group">

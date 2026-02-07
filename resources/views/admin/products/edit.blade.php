@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 
 @section('pagetitle')
-    Create New Product
+    Edit a Product
 @endsection
 
 @section('pagecss')

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ListingHelper;
 use App\Models\Permission;
+use App\Models\Product;
 use App\Models\ProductSize;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -43,7 +44,9 @@ class SizeController extends Controller
     {
         $sizes = ProductSize::all();
 
-        return view('admin.products.size_create', compact('sizes'));
+        $products = Product::where('status', 'PUBLISHED')->orderBy('name')->get();
+
+        return view('admin.products.size_create', compact('sizes', 'products'));
     }
 
     /**
@@ -53,6 +56,7 @@ class SizeController extends Controller
     {
         $request->validate([
             'name' => 'required|unique:product_sizes,name|max:255',
+            'product_id' => 'required|exists:products,id',
         ]);
 
         $status = 'PRIVATE';
@@ -63,10 +67,15 @@ class SizeController extends Controller
 
         $size = new ProductSize();
         $size->name = $request->input('name');
+        $size->product_id = $request->input('product_id');
         $size->description = $request->input('description', '');
         $size->status = $status;
         $size->added_by = Auth::id();
         $size->save();
+
+        if ($size->status == 'PUBLISHED') {
+            Product::where('id', $request->input('product_id'))->update(['size' => $size->name]);
+        }
 
         return redirect()->route('sizes.index')->with('success', 'Product Size created successfully.');
     }
@@ -84,7 +93,9 @@ class SizeController extends Controller
      */
     public function edit(ProductSize $size)
     {
-        return view('admin.products.size_edit',compact('size'));
+        $products = Product::where('status', 'PUBLISHED')->orderBy('name')->get();
+
+        return view('admin.products.size_edit',compact('size', 'products'));
     }
 
     /**
@@ -94,7 +105,14 @@ class SizeController extends Controller
     {
         $request->validate([
             'name' => 'required|max:255|unique:product_sizes,name,'.$size->id,
+            'product_id' => 'required|exists:products,id',
         ]);
+
+        $old_product_id = $size->product_id;
+
+        if ($old_product_id != $request->input('product_id')) {
+            Product::where('id', $old_product_id)->update(['size' => null]);
+        }
 
         $status = 'PRIVATE';
 
@@ -103,10 +121,15 @@ class SizeController extends Controller
         }
 
         $size->name = $request->input('name');
+        $size->product_id = $request->input('product_id');
         $size->description = $request->input('description', '');
         $size->status = $status;
         $size->updated_by = Auth::id();
         $size->save();
+
+        if ($size->status == 'PUBLISHED') {
+            Product::where('id', $request->input('product_id'))->update(['size' => $size->name]);
+        }
 
         return redirect()->route('sizes.index')->with('success', 'Product Size updated successfully.');
     }
