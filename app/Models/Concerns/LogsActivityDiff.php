@@ -307,12 +307,8 @@ trait LogsActivityDiff
             return auth()->id();
         }
 
-        // resolve from activity logs by session
-        $sessionId = request()->session()->getId();
-
-        return ActivityLog::where('session_id', $sessionId)
-            ->whereNotNull('created_by')
-            ->latest('id')
-            ->value('created_by');
+        return ActivityLog::where('session_id', request()->session()->getId())
+            ->whereNotNull('session_owner_id')
+            ->value('session_owner_id');
     }
 }

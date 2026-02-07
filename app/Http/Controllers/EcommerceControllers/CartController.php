@@ -940,8 +940,11 @@ class CartController extends Controller
             $sessionId = $request->session()->getId();
 
             ActivityLog::where('session_id', $sessionId)
-                ->where('created_by', null)
-                ->update(['created_by' => $user->id]);
+                ->whereNull('session_owner_id')
+                ->update([
+                    'session_owner_id' => $user->id,
+                    'created_by' => $user->id,
+                ]);
             
             $carts = collect(session('cart', []));
         } else {

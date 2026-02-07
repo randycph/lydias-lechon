@@ -23,6 +23,7 @@ class ActivityLog extends Model
         'role',
         'email',
         'session_id',
+        'session_owner_id'
     ];
     public $timestamps = false;
 

@@ -66,15 +66,15 @@ class LogPageVisit
         return $next($request);
     }
 
-    protected function resolveActorId(Request $request): ?int
+    protected static function resolveActorId(): ?int
     {
         if (auth()->check()) {
             return auth()->id();
         }
 
-        return ActivityLog::where('session_id', $request->session()->getId())
-            ->whereNotNull('created_by')
-            ->latest('id')
-            ->value('created_by');
+        return ActivityLog::where('session_id', request()->session()->getId())
+            ->whereNotNull('session_owner_id')
+            ->value('session_owner_id');
     }
+
 }
