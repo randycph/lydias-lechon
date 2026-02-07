@@ -130,6 +130,7 @@ Manage Product Sizes
                                         </div>
                                     </th>
                                     <th style="width: 20%;overflow: hidden;">Name</th>
+                                    <th style="width: 10%;">Product</th>
                                     <th style="width: 30%;">Description</th>
                                     <th style="width: 10%;">Status</th>
                                     <th style="width: 15%;">Last Date Modified</th>
@@ -148,6 +149,7 @@ Manage Product Sizes
                                     <td>
                                         <strong @if($size->trashed()) style="text-decoration:line-through;" @endif> {{ $size->name }}</strong>
                                     </td>
+                                    <td>{{ $size->product->name }}</td>
                                     <td>{{ $size->description }}</td>
                                     <td>{{ $size->status }}</td>
                                     <td>{{ Setting::date_for_listing($size->updated_at) }}</td>

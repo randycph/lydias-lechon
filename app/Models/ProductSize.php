@@ -12,10 +12,16 @@ class ProductSize extends Model
     use LogsActivityDiff;
 
     protected $fillable = [
+        'product_id',
         'name',
         'description',
         'added_by',
         'updated_by',
         'status',
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
 }
