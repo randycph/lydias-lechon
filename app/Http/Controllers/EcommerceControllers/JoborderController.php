@@ -186,8 +186,8 @@ class JoborderController extends Controller
             $model= $model->where('date_needed','<=',$_GET['dn_end_date'].' 23:59:59');
         }
 
-        if(isset($_GET['delivery_method']) && strlen($_GET['delivery_method']) > 0){
-            $model = $model->where('delivery_method','=',$_GET['delivery_method']);        
+        if(isset($_GET['delivery_type']) && strlen($_GET['delivery_type']) > 0){
+            $model = $model->where('delivery_method','=',$_GET['delivery_type']);        
         }
 
         return $model;
