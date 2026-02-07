@@ -50,6 +50,7 @@ trait LogsActivityDiff
                     'subject_type'       => get_class($model),
                     'subject_id'         => $model->getKey(),
                     'ip_address'         => Request::ip(),
+                    'session_id'         => Request::session()->getId(),
                 ]);
             });
         });
@@ -128,6 +129,7 @@ trait LogsActivityDiff
                         'ip_address'         => Request::ip(),
                         'email'             => optional(auth()->user())->email,
                         'role'              => optional(auth()->user()?->user_role)->name,
+                        'session_id'         => Request::session()->getId(),
                     ]);
                 });
             }
@@ -182,6 +184,7 @@ trait LogsActivityDiff
                     'ip_address'         => Request::ip(),
                     'email'             => optional(auth()->user())->email,
                     'role'              => optional(auth()->user()?->user_role)->name,
+                    'session_id'         => Request::session()->getId(),
                 ]);
             });
         });
@@ -218,6 +221,7 @@ trait LogsActivityDiff
                         'ip_address'         => request()->ip(),
                         'email'             => optional(auth()->user())->email,
                         'role'              => optional(auth()->user()?->user_role)->name,
+                        'session_id'         => Request::session()->getId(),
                     ]);
                 });
             });
@@ -299,8 +303,12 @@ trait LogsActivityDiff
 
     protected static function resolveActorId(): ?int
     {
-        return auth()->id()
-            ?? request()->user()?->id
-            ?? null;
+        if (auth()->check()) {
+            return auth()->id();
+        }
+
+        return ActivityLog::where('session_id', request()->session()->getId())
+            ->whereNotNull('session_owner_id')
+            ->value('session_owner_id');
     }
 }
