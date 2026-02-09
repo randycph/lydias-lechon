@@ -83,6 +83,7 @@ class SalesHeader extends Model
     public function assign_to_production_branch($sale, $pb){
         //dd($sale);
         $items = $sale->items;
+        $status = !empty($sale?->delivery_status) ? $sale->delivery_status : 'On Processed';
         foreach($items as $salesdetail){
 
             $current_total_order = JobOrder::whereDate('date_needed',date('Y-m-d',strtotime($salesdetail->delivery_date)))->count();
@@ -118,7 +119,7 @@ class SalesHeader extends Model
                 'delivery_tracking_number' => '',
                 'delivery_method' => $sale->delivery_type,
                 'pickup_branch' => $sale->outlet,
-                'delivery_status' => 'On Processed',
+                'delivery_status' => $status,
                 'status' => 'Active',
                 'jo_category' => 'Order',
                 'jo_order_type' => $sale->order_type ?? ' '

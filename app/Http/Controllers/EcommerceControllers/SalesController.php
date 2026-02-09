@@ -1164,7 +1164,11 @@ class SalesController extends Controller
                     $deliveryAddress->save();
                 }
             } else {
-                SalesHeader::whereId($request->del_id)->update([
+                $sale = SalesHeader::whereId($request->del_id)->first();
+                $sale->delivery_status = $request->delivery_status;
+                $sale->save();
+
+                JobOrder::where('sales_number', $sale->order_number)->update([
                     'delivery_status' => $request->delivery_status
                 ]);
             }
