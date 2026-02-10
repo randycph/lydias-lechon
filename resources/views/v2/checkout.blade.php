@@ -379,12 +379,12 @@
 
                             <div x-show="method === 'delivery'" class="space-y-4">
 
-                                {{-- <div class="flex items-center me-4 my-4">
+                                <div class="flex items-center me-4 my-4">
                                     <input @change="onChangeMultipleAddress()" x-model="allowMultiple" checked
                                         id="multiple-address" type="checkbox" value=""
                                         class="w-5 h-5 text-primary bg-gray-100 border-gray-300 rounded-sm focus:ring-primary-dark focus:ring-2">
                                     <label for="multiple-address" class="ms-2 text-base font-medium text-gray-900">Allow multiple delivery address</label>
-                                </div> --}}
+                                </div>
 
                                 <template x-if="allowMultiple">
                                     <div class="space-y-6">
