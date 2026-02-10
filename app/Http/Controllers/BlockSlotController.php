@@ -127,6 +127,16 @@ class BlockSlotController extends Controller
         ], 201);
     }
 
+    public function destroy($id)
+    {
+        $block = BlockedSlot::findOrFail($id);
+        $block->delete();
+
+        return response()->json([
+            'message' => 'Blocked slot deleted successfully'
+        ]);
+    }
+
     public function formatEvent($b)
     {
         return [
@@ -139,6 +149,17 @@ class BlockSlotController extends Controller
                 ? Carbon::parse($b['end'])->addDay()->toDateString()
                 : $b['end'] . 'T' . $b['end_time'],
             'allDay' => $b['is_all_day'],
+
+            'extendedProps' => [
+                'scope' => $b['scope'],
+                'category_id' => $b['category_id'],
+                'product_id' => $b['product_id'],
+                'start_date' => $b['start'],
+                'end_date' => $b['end'],
+                'start_time' => $b['start_time'],
+                'end_time' => $b['end_time'],
+                'is_all_day' => $b['is_all_day'],
+            ]
         ];
     }
 }

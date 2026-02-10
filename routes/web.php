@@ -1020,6 +1020,7 @@ Route::get('driver', function() {
 
 Route::get('/blocks/events', [BlockSlotController::class, 'events'])->name('blocks.events');
 Route::post('/blocks', [BlockSlotController::class, 'store'])->name('blocks.store');
+Route::delete('/blocks/{id}', [BlockSlotController::class, 'destroy'])->name('blocks.destroy');
 Route::get('paymaya-payment-check/{id}', function($id) {
     if (auth()->guest()) {
         return response()->json([
