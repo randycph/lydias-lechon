@@ -96,8 +96,9 @@
         <label class="form-label">Select Category</label>
         <select class="form-select" id="category" name="category" disabled>
             <option selected>Select category</option>
-            <option>Electronics</option>
-            <option>Services</option>
+            @foreach ($categories as $category)
+                <option value="{{ $category->id }}">{{ $category->name }}</option>
+            @endforeach
         </select>
     </div>
 
@@ -106,8 +107,9 @@
         <label class="form-label">Select Product</label>
         <select class="form-select" id="product" name="product" disabled>
             <option selected>Select product</option>
-            <option>Product A</option>
-            <option>Product B</option>
+            @foreach ($products as $product)
+                <option value="{{ $product->id }}">{{ $product->name }}</option>
+            @endforeach
         </select>
     </div>
 
@@ -118,7 +120,7 @@
           type="text"
           class="form-control"
           id="blockDates"
-          placeholder="Select dates"
+            placeholder="Select date range"
           readonly
         >
       </div>
@@ -1191,8 +1193,11 @@ document.addEventListener('DOMContentLoaded', function () {
     * --------------------------------------------------- */
     const datepicker = new Datepicker(dateInput, {
         format: 'yyyy-mm-dd',
-        multidate: true,
-        autohide: true,
+        autohide: false,
+        clearBtn: true,
+        todayHighlight: true,
+        range: true,
+        allowOneSidedRange: true
     });
 
     /* ---------------------------------------------------
@@ -1234,7 +1239,7 @@ document.addEventListener('DOMContentLoaded', function () {
     * 5. ALL DAY TOGGLE
     * --------------------------------------------------- */
     allDayCheckbox.addEventListener('change', () => {
-        timeSlots.forEach(cb => {
+        document.querySelectorAll('.time-slot').forEach(cb => {
             cb.disabled = allDayCheckbox.checked;
             if (allDayCheckbox.checked) cb.checked = false;
         });
@@ -1245,57 +1250,36 @@ document.addEventListener('DOMContentLoaded', function () {
     * --------------------------------------------------- */
     addBlockBtn.addEventListener('click', async () => {
 
-        // get selected dates (vanillajs-datepicker)
-        let dates = datepicker.getDate();
-        if (!dates) { alert('Please select at least one date.'); return; }
-        if (!Array.isArray(dates)) dates = [dates];
-
-        // prepare time slots
-        let selectedTimes = [];
-        if (allDayCheckbox.checked) {
-            selectedTimes.push({ start: '00:00', end: '23:59' });
-        } else {
-            timeSlots.forEach(cb => {
-                if (cb.checked) {
-                    selectedTimes.push({
-                        start: cb.value,
-                        end: addOneHour(cb.value)
-                    });
-                }
-            });
-            if (!selectedTimes.length) {
-                alert('Please select at least one time slot.');
-                return;
-            }
+        const range = datepicker.getDate();
+        if (!range || range.length !== 2) {
+            alert('Please select a date range.');
+            return;
         }
 
+        const dates = expandDateRange(range[0], range[1]);
         const isAllDay = allDayCheckbox.checked;
 
         let times = [];
+
         if (!isAllDay) {
-            document.querySelectorAll('#times input[type="checkbox"]:checked')
-                .forEach(cb => {
-                    times.push({
-                        start: cb.value,
-                        end: addOneHour(cb.value)
-                    });
+            document.querySelectorAll('.time-slot:checked').forEach(cb => {
+                times.push({
+                    start: cb.value,
+                    end: addOneHour(cb.value)
                 });
+            });
 
             if (!times.length) {
-                alert('Select at least one time slot');
+                alert('Select at least one time slot.');
                 return;
             }
         }
-
-        // const dates = datepicker.getDate();
-        const normalizedDates = (Array.isArray(dates) ? dates : [dates])
-            .map(d => formatDateLocal(d));
 
         const payload = {
             scope: document.querySelector('input[name="scope"]:checked').value,
             category_id: categorySelect?.value || null,
             product_id: productSelect?.value || null,
-            dates: normalizedDates,
+            dates,
             is_all_day: isAllDay,
             times
         };
@@ -1304,19 +1288,18 @@ document.addEventListener('DOMContentLoaded', function () {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json', 
+                'Accept': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
             },
             body: JSON.stringify(payload)
         });
 
         if (!res.ok) {
-            alert('Failed to save block');
+            alert('Failed to save blocks');
             return;
         }
 
         calendar.refetchEvents();
-
         resetForm();
     });
     
@@ -1348,6 +1331,18 @@ document.addEventListener('DOMContentLoaded', function () {
         const m = String(date.getMonth() + 1).padStart(2, '0');
         const d = String(date.getDate()).padStart(2, '0');
         return `${y}-${m}-${d}`;
+    }
+
+    function expandDateRange(start, end) {
+        const dates = [];
+        let current = new Date(start);
+
+        while (current <= end) {
+            dates.push(formatDateLocal(current));
+            current.setDate(current.getDate() + 1);
+        }
+
+        return dates;
     }
 
     let selectedEvent = null;
