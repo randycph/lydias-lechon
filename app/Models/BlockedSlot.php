@@ -14,5 +14,6 @@ class BlockedSlot extends Model
         'start_time',
         'end_time',
         'is_all_day',
+        'block_type',
     ];
 }

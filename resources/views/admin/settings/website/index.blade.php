@@ -150,6 +150,38 @@ Website Settings
                         <input class="form-check-input" type="checkbox" id="allday">
                         <label for="allday" class="form-check-label fw-bold">Block whole day</label>
                     </div>
+
+                    <hr>
+
+                    <!-- Block Type -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Block Type</label>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="block_type" id="blockBoth" value="both"
+                                checked>
+                            <label class="form-check-label" for="blockBoth">
+                                Disable Delivery & Pickup
+                            </label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="block_type" id="blockDelivery"
+                                value="delivery">
+                            <label class="form-check-label" for="blockDelivery">
+                                Disable Delivery Only
+                            </label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="block_type" id="blockPickup"
+                                value="pickup">
+                            <label class="form-check-label" for="blockPickup">
+                                Disable Pickup Only
+                            </label>
+                        </div>
+                    </div>
+
                 </div>
 
                 <button type="button" class="btn btn-dark px-4" id="addBlock">
@@ -325,7 +357,8 @@ Website Settings
                 <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                     <div class="col-md-6 mg-t-15">
                         <p class="tx-13 mg-b-40"><i data-feather="zap" class="wd-12"></i><strong> Tip</strong>
-                            <br />{{__('standard.settings.website.tip_helper')}}</p>
+                            <br />{{__('standard.settings.website.tip_helper')}}
+                        </p>
                         <form method="POST" action="{{route('contacts.update',$web->id)}}" id="selectForm2"
                             class="parsley-style-1" data-parsley-validate novalidate>
                             @csrf
@@ -833,6 +866,9 @@ Website Settings
 
                     <dt class="col-4">Scope</dt>
                     <dd class="col-8" id="modalScope"></dd>
+
+                    <dt class="col-4">Block Type</dt>
+                    <dd class="col-8" id="modalBlockType"></dd>
 
                     <dt class="col-4">Category</dt>
                     <dd class="col-8" id="modalCategory">—</dd>
@@ -1420,8 +1456,13 @@ Website Settings
             }
         }
 
+        const blockType = document.querySelector(
+            'input[name="block_type"]:checked'
+            ).value;
+
         const payload = {
             scope: document.querySelector('input[name="scope"]:checked').value,
+            block_type: blockType,
             category_id: categorySelect?.value || null,
             product_id: productSelect?.value || null,
             dates,
@@ -1508,6 +1549,18 @@ Website Settings
 
         document.getElementById('modalProduct').innerText =
             props.product_id ? productMap[props.product_id] : '—';
+
+        let type = '';
+        
+        if (props.block_type) {
+
+            if (props.block_type === 'delivery') type = 'DELIVERY';
+            else if (props.block_type === 'pickup') type = 'PICKUP';
+            else type = props.block_type.toUpperCase();
+        }
+
+        document.getElementById('modalBlockType').innerText =
+            type + ' BLOCK';
 
         // Date (range-aware)
         if (props.start_date !== props.end_date) {

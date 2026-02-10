@@ -22,6 +22,7 @@ class BlockSlotController extends Controller
                 $b->is_all_day,
                 $b->start_time,
                 $b->end_time,
+                $b->block_type,
             ]);
         });
 
@@ -59,6 +60,7 @@ class BlockSlotController extends Controller
                         'start_time' => $block->start_time,
                         'end_time' => $block->end_time,
                         'is_all_day' => $block->is_all_day,
+                        'block_type' => $block->block_type,
                     ];
                 }
             }
@@ -75,6 +77,7 @@ class BlockSlotController extends Controller
     {
         $validated = $request->validate([
             'scope' => 'required|in:all,category,product',
+            'block_type' => 'required|in:both,delivery,pickup',
 
             'category_id' => 'nullable|required_if:scope,category',
             'product_id'  => 'nullable|required_if:scope,product',
@@ -97,6 +100,7 @@ class BlockSlotController extends Controller
                 if ($validated['is_all_day']) {
                     BlockedSlot::create([
                         'scope'       => $validated['scope'],
+                        'block_type'  => $validated['block_type'],
                         'category_id' => $validated['category_id'] ?? null,
                         'product_id'  => $validated['product_id'] ?? null,
                         'date'        => $date,
@@ -111,6 +115,7 @@ class BlockSlotController extends Controller
                 foreach ($validated['times'] as $time) {
                     BlockedSlot::create([
                         'scope'       => $validated['scope'],
+                        'block_type'  => $validated['block_type'],
                         'category_id' => $validated['category_id'] ?? null,
                         'product_id'  => $validated['product_id'] ?? null,
                         'date'        => $date,
@@ -142,6 +147,7 @@ class BlockSlotController extends Controller
         return [
             'id' => $b['id'],
             'title' => strtoupper($b['scope']) . ' BLOCKED',
+            'block_type' => $b['block_type'],
             'start' => $b['is_all_day']
                 ? $b['start']
                 : $b['start'] . 'T' . $b['start_time'],
