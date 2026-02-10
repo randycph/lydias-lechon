@@ -21,10 +21,60 @@ class SalesHeader extends Model
     protected $keyType = 'int';
 
     protected $table = 'ecommerce_sales_headers';
-    protected $fillable = ['updated_at', 'created_at', 'user_id', 'order_number', 'response_code', 'customer_name', 'customer_contact_number', 'customer_address', 'customer_delivery_adress', 'delivery_tracking_number', 'delivery_fee_amount',
-        'gross_amount', 'parent_sales_header_id', 'has_sub', 'is_sub', 'has_dispatched', 'has_transited', 'is_new_order', 'tax_amount', 'net_amount', 'discount_amount', 'payment_status', 'province', 'city', 'barangay',
-        'delivery_status', 'status', 'for_deletion', 'currency','order_source','payment_type','delivery_type','order_type','outlet','receipt_number','instruction','agent','customer_location','email','payment_used','payment_remarks','contact_person','isConfirm','confirmed_by','confirmed_on','confirm_remarks','origin','delivery_branch','forecast_date', 'is_multiple_address'];
-
+    protected $fillable = [
+        'updated_at',
+        'created_at',
+        'user_id',
+        'order_number',
+        'response_code',
+        'customer_name',
+        'customer_contact_number',
+        'customer_address',
+        'customer_delivery_adress',
+        'delivery_tracking_number',
+        'delivery_fee_amount',
+        'gross_amount',
+        'parent_sales_header_id',
+        'has_sub',
+        'is_sub',
+        'has_dispatched',
+        'has_transited',
+        'is_new_order',
+        'tax_amount',
+        'net_amount',
+        'discount_amount',
+        'payment_status',
+        'province',
+        'city',
+        'barangay',
+        'delivery_status',
+        'temp_prod_branch',
+        'status',
+        'for_deletion',
+        'currency',
+        'order_source',
+        'payment_type',
+        'delivery_type',
+        'order_type',
+        'outlet',
+        'receipt_number',
+        'instruction',
+        'agent',
+        'customer_location',
+        'email',
+        'payment_used',
+        'payment_remarks',
+        'contact_person',
+        'isConfirm',
+        'confirmed_by',
+        'confirmed_on',
+        'confirm_remarks',
+        'origin',
+        'delivery_branch',
+        'forecast_date',
+        'is_multiple_address'
+    ];
+    
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -160,6 +210,13 @@ class SalesHeader extends Model
         //     return 'PAID';
         // }
         $balance = $amount - $paid;
+
+        if ($paid > 0) {
+            if ($this->delivery_status == 'Waiting for Payment' || $this->delivery_status == '' || is_null($this->delivery_status)) {
+                SalesHeader::whereId($this->id)->update(['delivery_status' => 'Processing Stock']);
+            }
+        }
+
         if($balance <= 0){
             return 'PAID';
         }
@@ -286,15 +343,25 @@ class SalesHeader extends Model
         // // Normalize legacy 'Completed' to PAID
         // return in_array($current, ['PAID', 'Completed'], true) ? 'PAID' : 'UNPAID';
 
-        $paid = SalesPayment::where('sales_header_id',$this->id)->whereStatus('PAID')->sum('amount');
+        $sales = SalesHeader::withTrashed()->whereId($this->id)->first();
 
-        if($paid >= $this->net_amount){
-            $tag_as_paid = SalesHeader::whereId($this->id)->update(['payment_status' => 'PAID']);
-            if($this->delivery_status == 'Waiting for Payment' || $this->delivery_status == '' ){
-                $update_delivery_status = SalesHeader::whereId($this->id)->update(['delivery_status' => 'Processing Stock']);
+        if ($sales->is_sub == 1) {
+            $paid = SalesPayment::where('sales_header_id',$sales->parent_sales_header_id)->where('status', 'PAID')->sum('amount');
+        } else {
+            $paid = SalesPayment::where('sales_header_id',$this->id)->where('status', 'PAID')->sum('amount');
+        }
+        
+        if ($paid > 0) {
+            if ($this->delivery_status == 'Waiting for Payment' || $this->delivery_status == '' || is_null($this->delivery_status)) {
+                SalesHeader::whereId($this->id)->update(['delivery_status' => 'Processing Stock']);
             }
+        }
+
+        if ($paid >= $this->net_amount) {
+            SalesHeader::whereId($this->id)->update(['payment_status' => 'PAID']);
+
             return 'PAID';
-        }else{
+        } else {
             return 'UNPAID';
         }
     }

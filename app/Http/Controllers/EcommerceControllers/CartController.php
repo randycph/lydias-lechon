@@ -871,37 +871,58 @@ class CartController extends Controller
         }
 
         if (auth()->guest()) {
-            // $user = User::find(9999);
-            // if (empty($user)) {
-            //     $user = $this->create_guest_account();
-            // }
-
             $customer_name = $request->name ?? 'Guest';
 
-            // update or create guest user based on email
             $user = User::where('email', $request->email)->first();
+            
             if ($user) {
-                // update user info
-                $user->update([
-                    'name' => $request->name ?? 'Guest',
-                    'contact_mobile' => $request->mobile,
-                    'firstname' => $request->name,
-                    'lastname' => $request->name,
-                ]);
-            } else {
-                // create new guest user
-                $user = User::create([
-                    'name' => $request->name ?? 'Guest',
-                    'contact_mobile' => $request->mobile,
-                    'email' => $request->email ?? 'wsiphproduction@gmail.com',
-                    'registration_type' => 'guest',
-                    'registration_source' => 'Guest',
-                    'password' => Hash::make(Str::random(10)),
-                    'firstname' => $request->name,
-                    'lastname' => $request->name,
-                    'is_active' => 1
-                ]);
+                $existingUser = User::where('email', $request->email)
+                    ->first();
+                if (!$existingUser) {
+                    $newEmail = $this->generateUniqueEmail($request->email);
+                    $request->merge(['email' => $newEmail]);
+                }
             }
+
+            $firstName = explode(' ', trim($request->name))[0] ?? 'Guest';
+            $lastName = trim(str_replace($firstName, '', trim($request->name))) ?: 'Guest';
+
+            // create new guest user
+            $user = User::create([
+                'name' => $customer_name,
+                'contact_mobile' => $request->mobile,
+                'email' => $request->email ?? 'wsiphproduction@gmail.com',
+                'valid_email' => $request->email ?? null,
+                'registration_type' => 'guest',
+                'registration_source' => 'Guest',
+                'password' => Hash::make(Str::random(10)),
+                'firstname' => $firstName,
+                'lastname' => $lastName,
+                'is_active' => 1
+            ]);
+
+            // if ($user) {
+            //     // update user info
+            //     $user->update([
+            //         'name' => $request->name ?? 'Guest',
+            //         'contact_mobile' => $request->mobile,
+            //         'firstname' => $request->name,
+            //         'lastname' => $request->name,
+            //     ]);
+            // } else {
+            //     // create new guest user
+            //     $user = User::create([
+            //         'name' => $request->name ?? 'Guest',
+            //         'contact_mobile' => $request->mobile,
+            //         'email' => $request->email ?? 'wsiphproduction@gmail.com',
+            //         'registration_type' => 'guest',
+            //         'registration_source' => 'Guest',
+            //         'password' => Hash::make(Str::random(10)),
+            //         'firstname' => $request->name,
+            //         'lastname' => $request->name,
+            //         'is_active' => 1
+            //     ]);
+            // }
 
             // $user = User::create([
             //     'name' => $request->name ?? 'Guest',
@@ -1055,6 +1076,7 @@ class CartController extends Controller
                 'delivery_type' => $delivery_type,
                 'delivery_fee_amount' => $delivery_fee,
                 'order_source' => 'Web',
+                'delivery_branch' => $delivery_type == 'Door to door delivery' ? 'Tandang Sora Delivery' : '',
                 'gross_amount' => $totalPrice,
                 'tax_amount' => 0,
                 'net_amount' => $netAmount,
@@ -1128,6 +1150,7 @@ class CartController extends Controller
                 'delivery_type' => $delivery_type,
                 'delivery_fee_amount' => $delivery_fee,
                 'order_source' => 'Web',
+                'delivery_branch' => $delivery_type == 'Door to door delivery' ? 'Tandang Sora Delivery' : '',
                 'gross_amount' => $request->order_amount,
                 'tax_amount' => 0,
                 'net_amount' => $netAmount,
@@ -1206,6 +1229,7 @@ class CartController extends Controller
                             'delivery_type' => 'Door to door delivery',
                             'delivery_fee_amount' => $delivery->delivery_fee,
                             'order_source' => 'Web',
+                            'delivery_branch' => 'Tandang Sora Delivery',
                             'gross_amount' => $request->order_amount,
                             'tax_amount' => 0,
                             'net_amount' => $netAmount,
@@ -1240,7 +1264,8 @@ class CartController extends Controller
                             $subSalesHeader->save();
                         }
 
-                        $subSalesHeader->order_number = sprintf('%07d', $salesHeader->id) . '-' . ($k+1);
+                        // $subSalesHeader->order_number = sprintf('%07d', $salesHeader->id) . '-' . ($k+1);
+                        $subSalesHeader->order_number = sprintf('%07d', $subSalesHeader->id);
                         $subSalesHeader->save();
 
                         ProductDeliveryAddress::create([
@@ -1417,7 +1442,7 @@ class CartController extends Controller
         //     }
         // }
 
-        $recipient = $user->email ?: $request->email;
+        $recipient = $user->valid_email ?? $user->email ?? $request->email;
         $salesHeader = SalesHeader::with(['couponUsed', 'deliveryAddress'])->find($salesHeader->id);
         if (auth()->guest()) {
             try {
@@ -2042,5 +2067,19 @@ class CartController extends Controller
             'success' => true,
             'message' => 'Product removed from cart'
         ]);
+    }
+
+    public function generateUniqueEmail($baseEmail) {
+        $emailParts = explode('@', $baseEmail);
+        $localPart = $emailParts[0];
+        $domainPart = $emailParts[1];
+        $counter = 1;
+
+        while (User::where('email', $baseEmail)->exists()) {
+            $baseEmail = $localPart . '-' . $counter . '@' . $domainPart;
+            $counter++;
+        }
+
+        return $baseEmail;
     }
 }

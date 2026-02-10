@@ -107,6 +107,7 @@ Delivery Report {{$date_display}}
                                         @isset($_GET['branch'])
                                             <option value="{{$_GET['branch']}}" selected="selected">{{ $_GET['branch'] }}</option>
                                         @endisset
+                                        <option value="Web">Web</option>
                                     </select>
                                 </div>
                             </div>

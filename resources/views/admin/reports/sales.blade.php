@@ -194,7 +194,7 @@
                                     <label class="tx-13">Order Type</label>
                                     <select name="ordertype" id="order_type" class="form-control">
                                         <option value="">- Select Order Type -</option>
-                                        @foreach (['Whole', 'Reserved', 'Additional'] as $type)
+                                        @foreach (['Buhat', 'Additional', 'Reserve', 'Miscellaneous'] as $type)
                                             {{-- fix this --}}
                                             <option value="{{ $type }}" {{ request('ordertype') == $type ? 'selected' : '' }}>{{ $type }}</option>
                                         @endforeach
@@ -248,8 +248,25 @@
                             @forelse($rs as $r)   
                                 @php 
                                     $pays = '';
-                                    foreach(\App\EcommerceModel\SalesPayment::where('sales_header_id',$r->sales_header_id)->whereStatus('PAID')->get() as $pay){
-                                        $pays.=' '.number_format($pay->amount,2).' ('.$pay->payment_type.'),';
+                                    $s = \App\EcommerceModel\SalesHeader::find($r->sales_header_id);
+
+                                    if (!$s) {
+                                        $pays = '';
+                                    }
+
+                                    if (isset($s->is_sub) && $s->is_sub == 1) {
+                                        $parentSale = \App\EcommerceModel\SalesHeader::where('id', $s->parent_sales_header_id)->first();
+                                        $payments = \App\EcommerceModel\SalesPayment::where('sales_header_id', $parentSale->id)->where('status', 'PAID')->get();
+                                        
+                                        foreach ($payments as $pay) {
+                                            $pays .= ' ' . number_format($pay->amount, 2) . ' (' . $pay->payment_type . '),';
+                                        }
+                                    } else {
+                                        $payments = \App\EcommerceModel\SalesPayment::where('sales_header_id', $s->id)->where('status', 'PAID')->get();
+
+                                        foreach ($payments as $pay) {
+                                            $pays .= ' ' . number_format($pay->amount, 2) . ' (' . $pay->payment_type . '),';
+                                        }
                                     }
                                     $pays = rtrim($pays,",");
                                 @endphp                             

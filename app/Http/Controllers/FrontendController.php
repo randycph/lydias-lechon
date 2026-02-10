@@ -291,13 +291,38 @@ class FrontendController extends Controller
         $minimum_order_amount_pickup = $setting ? $setting->minimum_order_pickup : 0;
         $minimum_processing_hours = $setting ? $setting->minimum_processing_hours : 24;
         $minimum_processing_hours_misc = $setting ? $setting->minimum_processing_hours_misc : 12;
+        $minimum_processing_hours_baka = $setting ? $setting->minimum_processing_hours_baka : 72;
         $minimum_order_misc = $setting ? $setting->minimum_order_misc : 0;
 
         $hasCochinillo = $carts->contains(function ($cart) {
             return $cart->product_id === 165;
         });
 
-        return view('v2.checkout', compact('triples', 'provinces', 'cities', 'page', 'dataPrivacyRender', 'carts', 'pickupBranches', 'locations', 'deliveryBranches', 'disabledPickupDates', 'disabledDeliveryDates', 'disabledDeliveryMiscDates', 'haslechon', 'hasbaka', 'hasMisc', 'eligibleCoupons', 'minimum_order_amount_door_to_door', 'minimum_order_amount_pickup', 'minimum_processing_hours', 'minimum_processing_hours_misc', 'minimum_order_misc', 'hasCochinillo'));
+        return view('v2.checkout', compact(
+            'triples', 
+            'provinces', 
+            'cities', 
+            'page', 
+            'dataPrivacyRender', 
+            'carts', 
+            'pickupBranches', 
+            'locations', 
+            'deliveryBranches', 
+            'disabledPickupDates', 
+            'disabledDeliveryDates', 
+            'disabledDeliveryMiscDates', 
+            'haslechon', 
+            'hasbaka', 
+            'hasMisc', 
+            'eligibleCoupons', 
+            'minimum_order_amount_door_to_door', 
+            'minimum_order_amount_pickup', 
+            'minimum_processing_hours', 
+            'minimum_processing_hours_misc', 
+            'minimum_processing_hours_baka', 
+            'minimum_order_misc', 
+            'hasCochinillo')
+        );
     }
 
     public function confirmation($id)
@@ -649,6 +674,7 @@ class FrontendController extends Controller
                     'lastname' => $request->org_name,
                     'password' => Hash::make($request->password),
                     'email' => $request->email,
+                    'valid_email' => $request->email ?? null,
                     'organization' => $request->org_name ?? $request->organization,
                     'address_street' => $request->address_street,
                     'address_municipality' => $request->address_municipality,
@@ -676,6 +702,7 @@ class FrontendController extends Controller
                     'lastname' => $request->last_name,
                     'password' => Hash::make($request->password),
                     'email' => $request->email,
+                    'valid_email' => $request->email ?? null,
                     'birthday' => $request->birth_date,
                     'country' => $request->country,
                     'address_street' => $request->address_street,

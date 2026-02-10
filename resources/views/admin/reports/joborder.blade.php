@@ -233,6 +233,9 @@
                                 </th>   
                                 <td>{{date('Y-m-d',strtotime($r->delivery_date))}}</td>
                                 <td>{{date('h:i A',strtotime($r->delivery_date))}}</td>
+
+                                {{-- <td>{{date('Y-m-d',strtotime($r->date_needed))}}</td>
+                                <td>{{date('h:i A',strtotime($r->date_needed))}}</td> --}}
                                 <th>{{$r->instruction}}</th>
                                 <th>{{$r->jnum ?? $r->ordnum}}</th>
                                 

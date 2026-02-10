@@ -96,6 +96,11 @@ class ForecasterController extends Controller
             ->where('jo_order_type', $salesdetail->header->order_type ?? ' ')
             ->first();
 
+        if ($request->has('branch_id')) {
+            $salesdetail->header->temp_prod_branch = $request->branch_id;
+            $salesdetail->header->save();
+        }
+
         if ($existingJo) {
             $existingPo = ProductionOrder::where('branch_id', $request->branch_id)
                 ->where('joborder_id', $existingJo->id)

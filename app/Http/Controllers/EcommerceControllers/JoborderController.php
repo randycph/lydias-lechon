@@ -324,6 +324,7 @@ class JoborderController extends Controller
                     'firstname' => $request->fname,
                     'lastname' => $request->lname,
                     'email' => $email_cs,
+                    'valid_email' => $request->email ?? null,
                     'user_type' => 'customer',
                     'address_street' => $request->house_no.' '.$request->street,
                     'address_municipality' => $request->barangay ?? '',
@@ -413,7 +414,8 @@ class JoborderController extends Controller
             'agent' => $request->agent ?? Auth::user()->name,
             'delivery_branch' => $request->delivery_type == 1 ? $request->delivery_branch : NULL,
             'contact_person' => $contact_pers,
-            'temp_prod_branch' => $request->pb
+            'temp_prod_branch' => $request->pb ?? 0,
+            'is_new_order' => 1,
         ]);
 
 
@@ -546,8 +548,10 @@ class JoborderController extends Controller
                 'confirmed_on' => date('Y-m-d H:i:s')
             ]);
 
-            $sh = new SalesHeader();
-            $sh->assign_to_production_branch($sales, $request->pb);
+            if (auth()->user()->user_role->name != 'Cashier') {
+                $sh = new SalesHeader();
+                $sh->assign_to_production_branch($sales, $request->pb);
+            }
         }
 
         //$sms = new Sms();

@@ -30,8 +30,24 @@ class SalesPayment extends Model
     public static function get_types()
     {
         return [
-            "Bank Deposit","Cash","Check Payment","COD","Credit/Debit Card","Discount (Promo)","Discount (VAT)","Discount (Senior Citizen)",
-            "Ex-deal","Gcash","Gift Certificate","M Lhuillier","Ok Order","Online Bank Transfer","Open Date Order","Oth","Paymaya","Sign-Chit"
+            "Bank Deposit",
+            "Cash",
+            "Check Payment",
+            "COD",
+            "Credit/Debit Card",
+            "Discount (Promo)",
+            "Discount (VAT)",
+            "Discount (Senior Citizen)",
+            "Ex-deal",
+            "Gcash",
+            "Gift Certificate",
+            "M Lhuillier",
+            "Ok Order",
+            "Online Bank Transfer",
+            "Open Date Order",
+            "Oth",
+            "Paymaya",
+            "Sign-Chit"
         ];
        
     }

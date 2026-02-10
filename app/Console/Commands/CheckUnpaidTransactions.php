@@ -21,7 +21,7 @@ class CheckUnpaidTransactions extends Command
             ->where('status', '!=', 'CANCELLED')
             ->whereDate('created_at', '<=', $now->copy()->subDays(2))
             ->whereDate('created_at', '>', $now->copy()->subDays(5))
-            ->whereDate('created_at', '>=', '2025-06-01')
+            ->whereDate('created_at', '>=', '2025-12-29')
             ->get();
 
         foreach ($remind as $order) {
@@ -32,7 +32,7 @@ class CheckUnpaidTransactions extends Command
         $cancel = SalesHeader::where('payment_status', '!=', 'PAID')
             ->where('status', '!=', 'CANCELLED')
             ->whereDate('created_at', '<=', $now->copy()->subDays(5))
-            ->whereDate('created_at', '>=', '2025-06-01')
+            ->whereDate('created_at', '>=', '2025-12-29')
             ->get();
 
         foreach ($cancel as $order) {

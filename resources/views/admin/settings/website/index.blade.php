@@ -492,6 +492,16 @@
                                 <div class="col-md-7">
                                     <div class="form-group">
                                         <div id="title" class="parsley-input">
+                                            <label>Minimum Preparation Hours for Baka</label>
+                                            <input type="number" min="0" name="minimum_processing_hours_baka" class="form-control" value="{{ old('minimum_processing_hours_baka',$web->minimum_processing_hours_baka) }}">
+                                        </div>
+                                    </div>   
+                                </div>  
+
+
+                                <div class="col-md-7">
+                                    <div class="form-group">
+                                        <div id="title" class="parsley-input">
                                             <label>Minimum Lechon Processing Hours</label>
                                             <input type="number" min="0" name="minimum_processing_hours" class="form-control" value="{{ old('minimum_processing_hours',$web->minimum_processing_hours) }}">
                                         </div>

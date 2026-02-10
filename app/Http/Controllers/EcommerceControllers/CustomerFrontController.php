@@ -50,6 +50,7 @@ class CustomerFrontController extends Controller
                 'name' => $request->organization,
                 'password' => Hash::make($request->password),
                 'email' => $request->email,
+                'valid_email' => $request->email ?? null,
                 'lastname' => $request->organization,                
                 'address_street' => $request->address_street,
                 'address_municipality' => $request->address_municipality,

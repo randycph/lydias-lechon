@@ -356,7 +356,7 @@
                                     <label class="tx-13">Order Source</label>
                                     <select name="order_source" id="order_source" class="form-control">
                                         <option value="">- Select Source -</option>
-                                        @forelse(\App\EcommerceModel\SalesHeader::select('order_source')->distinct('order_source')->orderBy('order_source')->get() as $cus)
+                                        @forelse(\App\EcommerceModel\SalesHeader::select('order_source')->where('created_at', '>=', '2025-10-01')->distinct('order_source')->orderBy('order_source')->get() as $cus)
                                             <option value="{{$cus->order_source}}">{{$cus->order_source}}</option>
                                         @empty
                                         @endforelse
@@ -372,9 +372,10 @@
                                     <label class="tx-13">Order Type</label>
                                     <select name="order_type" id="order_type" class="form-control">
                                         <option value="">- Select Item Type -</option>
-                                        <option value="Whole">Whole</option>
-                                        <option value="Reserved">Reserved</option>                                                                           
+                                        <option value="Buhat">Buhat</option>
                                         <option value="Additional">Additional</option>                                                                           
+                                        <option value="Reserve">Reserve</option>                                                                                    
+                                        <option value="Miscellaneous">Miscellaneous</option>                                                                            
                                         @isset($_GET['order_type'])
                                             <option value="{{$_GET['order_type']}}" selected="selected">{{ $_GET['order_type'] }}</option>
                                         @endisset
@@ -563,8 +564,22 @@
     /** 3) Preload payments for sales */
     $allHids = $results->filter(fn($r) => ($r->trantype ?? '') === 'sales')
                        ->pluck('hid')->filter()->unique()->values()->all();
+
+
+    $ids = [];                 
+    $headers = \App\EcommerceModel\SalesHeader::whereIn('id', $allHids)->get();
+
+    foreach($headers as $head){
+        if (isset($head->is_sub) && $head->is_sub == 1) {
+            $parentSale = \App\EcommerceModel\SalesHeader::where('id', $head->parent_sales_header_id)->first();
+            $ids[] = $parentSale->id;
+        } else {
+            $ids[] = $head->id;
+        }
+    }
+
     $paymentsByHid = $allHids
-        ? \App\EcommerceModel\SalesPayment::whereIn('sales_header_id', $allHids)->get()->groupBy('sales_header_id')
+        ? \App\EcommerceModel\SalesPayment::whereIn('sales_header_id', $ids)->get()->groupBy('sales_header_id')
         : collect();
 
     // Helpers
@@ -619,7 +634,7 @@
 
         // “group-level” values (for sales; JO prints per row)
         $addressHtml   = $formatAddress($r);
-        $payments      = $isSales ? ($paymentsByHid->get($r->hid ?? 0, collect())) : collect();
+        $payments      = $isSales ? ($paymentsByHid->get($r->parent_sales_header_id > 0 ? $r->parent_sales_header_id : ($r->hid ?? 0), collect())) : collect();
         $custAddrSafe  = strip_tags($r->customer_delivery_adress ?? '');
         $contactMerged = $r->contact_person ?? $r->customer_name ?? '';
         $deliveryDate  = $fmtDate($r->delivery_date);
@@ -635,7 +650,7 @@
         $contactNo     = (string)($r->customer_contact_number ?? '');
         $delFee        = number_format((float)($r->delivery_fee_amount ?? 0), 2);
         $orderSource   = (string)($r->order_source ?? '');
-        $receiver      = (string)($r->receiver ?? '');
+        $receiver      = (string)($r->outlet ?? '');
         $username      = (string)($r->username ?? '');
         $forecastDt    = (string)($r->forecast_dt ?? '');
         $branch        = (string)(($r->mbranch ?? '') ?: ($r->del_branch ?? ''));

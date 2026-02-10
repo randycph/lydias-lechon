@@ -59,9 +59,13 @@
                         <label class="d-block">Select Branch:</label>
                         <select name="branch_source" id="branch_source" required="required" class="form-control">
                             <option value="">- Select Branch -</option>
-                            @foreach($branches_store as $b)
-                                <option value="{{$b->name}}|{{$b->rate}}" {{ old('branch_source') == $b->name.'|'.$b->rate ? 'selected' : '' }}>{{$b->name}}</option>
-                            @endforeach
+                            @if (session()->has('login_branch') && auth()->user()->user_role->name == 'Cashier')
+                                <option value="{{ session('login_branch') }}|" selected>{{ session('login_branch') }}</option>
+                            @else
+                                @foreach($branches_store as $b)
+                                    <option value="{{$b->name}}|{{$b->rate}}" {{ old('branch_source') == $b->name.'|'.$b->rate ? 'selected' : '' }}>{{$b->name}}</option>
+                                @endforeach
+                            @endif
                         </select>
                     </div>
                 @endif
@@ -211,13 +215,13 @@
                             <option value="Buhat" {{ old('order_type') == 'Buhat' ? 'selected' : '' }}>Buhat</option>
                             <option value="Additional" {{ old('order_type') == 'Additional' ? 'selected' : '' }}>Additional</option>
                             <option value="Reserve" {{ old('order_type') == 'Reserve' ? 'selected' : '' }}>Reserve</option>
-                            <option value="Miscellaneous" {{ old('order_type') == 'Miscellaneous' ? 'selected' : '' }}>Miscellaneous</option>
                         </select>
                     </div>
 
                     <div class="delivery-pickup-place">
 
-                        <div class="form-group">
+                        @if (auth()->user()->user_role->name == 'Admin' || auth()->user()->user_role->name == 'Forecaster')
+                        <div class="form-group"> 
                             <label class="d-block">Production Branch <span class="tx-danger">*</span></label>
                             <select required class="form-control mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select Production Branch" data-width="100%" id="pb" name="pb">
                                 <option value=""> - Select -</option>
@@ -227,6 +231,7 @@
                                 @endforeach
                             </select>
                         </div>
+                        @endif
 
                         <div class="form-group">
                             <label class="d-block">Delivery Type <span class="tx-danger">*</span></label>
@@ -243,7 +248,7 @@
                                 <option value="">- Select Branch -</option>
                                 @php 
                                     $name='delivery';
-                                    $brr = $branches_store->where('delivery_branch','1')
+                                    $brr = \App\EcommerceModel\Branch::where('status', 1)->where('delivery_branch','1')->orderBy('name','asc')->get();
                                 @endphp
                                 @foreach($brr as $b)
                                     <option value="{{$b->name}}" {{ old('delivery_branch') == $b->name ? 'selected' : '' }}>{{$b->name}}</option>
@@ -261,7 +266,8 @@
                                 <option value="">- Select Branch -</option>
                                 @php 
                                     $name='delivery';
-                                    $prr = $branches_store->where('pickup_branch','1')->filter(function ($item) use($name){
+                                    $prr = \App\EcommerceModel\Branch::where('status', 1)->where('pickup_branch','1')->orderBy('name','asc')->get();
+                                    $prr = $prr->filter(function ($item) use($name){
                                                  return false === stristr($item->name, $name);
                                             })
                                 @endphp
@@ -421,24 +427,13 @@
                                         <td valign="top">
                                             <select name="payment_method{{$i}}" id="payment_method{{$i}}" class="form-control payments_created" onchange="check_payment_type($(this).val(),{{$i}})">
                                                 <option value="">-Select -</option> 
-                                                <option value="Bank Deposit">Bank Deposit</option>
-                                                <option value="Cash">Cash</option>
-                                                <option value="Check Payment">Check Payment</option>
-                                                <option value="COD">COD</option>
-                                                <option value="Credit/Debit Card">Credit/Debit Card</option>
-                                                <option value="Discount (Promo)">Discount (Promo)</option>
-                                                <option value="Discount (VAT)">Discount (VAT)</option>
-                                                <option value="Discount (Senior Citizen)">Discount (Senior Citizen)</option>
-                                                <option value="Ex-deal">Ex-deal</option>
-                                                <option value="Gcash">Gcash</option>
-                                                <option value="Gift Certificate">Gift Certificate</option> 
-                                                <option value="M Lhuillier">M Lhuillier</option>
-                                                <option value="Ok Order">Ok Order</option>
-                                                <option value="Online Bank Transfer">Online Bank Transfer</option>
-                                                <option value="Open Date Order">Open Date Order</option>
-                                                <option value="Oth">Oth</option>
-                                                <option value="Paymaya">Paymaya</option>
-                                                <option value="Sign-Chit">Sign-Chit</option>
+                                                @foreach (\App\EcommerceModel\SalesPayment::get_types() as $pm)
+                                                    @php $allowed_payments = explode(',', auth()->user()->allowed_payments); @endphp
+                                                    @if (auth()->user()->user_role->name == 'Cashier' && !in_array($pm, $allowed_payments))
+                                                        @continue
+                                                    @endif
+                                                    <option value="{{ $pm }}">{{ $pm }}</option>
+                                                @endforeach
                                             </select>
                                         </td>
                                         <td valign="top"><input type="number" class="form-control payments" min="0" name="payment_amount{{$i}}" id="payment_amount{{$i}}" value="0"></td>
@@ -706,7 +701,7 @@
             });
         });
 
-        var dateToday = new Date(); 
+        var dateToday = new Date('2025-12-30'); 
 
         $(function(){
             'use strict'

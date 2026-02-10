@@ -42,6 +42,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -106,12 +107,38 @@ Route::post('/admin/login', function(Request $request) {
     try {
         $credentials = $request->only('email', 'password');
 
+        session()->forget('login_branch');
+
+        if ($request->has('is_kiosk')) {
+            session(['is_kiosk' => true]);
+        } else {
+            session()->forget('is_kiosk');
+        }
+
         if (Auth::attempt($credentials)) {
 
             $user = Auth::user();
 
             if ($user->role_id == config('auth.driver_role_id') ) {
                 return redirect()->route('sales-transaction.driver_sales_transaction');
+            }
+
+            $exludeBranch = [
+                'web',
+                'admin',
+                'forecaster'
+            ];
+
+            if (auth()->user()->user_role->name == 'Cashier' && !in_array($request->branch, $exludeBranch)) {
+                if ($request->has('branch')) {
+                    session(['login_branch' => $request->branch]);
+                } else {
+                    session()->forget('login_branch');
+                }
+            }
+
+            if ($request->has('branch') && $request->branch == 'forecaster') {
+                return redirect()->intended('admin/forecaster');
             }
 
             return redirect()->intended('admin/dashboard');
@@ -853,6 +880,23 @@ Route::get('tests/sms', function() {
     }
 });
 
+Route::get('update-order-number', function() {
+    try {
+        $orders = SalesHeader::withTrashed()->where('order_number', 'like', '%-%')->get();
+
+        foreach ($orders as $order) {
+            $order->order_number = sprintf('%07d', $order->id);
+            $order->save();
+        }
+
+        return response()->json([
+            'message' => 'Order numbers updated successfully!'
+        ]);
+    } catch (\Throwable $th) {
+        throw $th;
+    }
+});
+
 Route::get('export-delivery-location', function() {
     $filename = 'deliverable_cities_' . now()->format('Y-m-d_His') . '.xlsx';
     return Excel::download(new DeliverablecitiesExport, $filename);
@@ -976,6 +1020,58 @@ Route::get('driver', function() {
 
 Route::get('/blocks/events', [BlockSlotController::class, 'events'])->name('blocks.events');
 Route::post('/blocks', [BlockSlotController::class, 'store'])->name('blocks.store');
+Route::get('paymaya-payment-check/{id}', function($id) {
+    if (auth()->guest()) {
+        return response()->json([
+            'status' => 401,
+            'message' => 'Unauthorized.'
+        ], 401);
+    }
+
+    if (!$id) {
+        return response()->json([
+            'status' => 400,
+            'message' => 'Receipt number is required.'
+        ], 400);
+    }
+
+    $receipt_number = $id;
+    
+    $salesPayment = SalesPayment::where('receipt_number', $receipt_number)->first();
+
+    if (!$salesPayment) {
+        return response()->json([
+            'status' => 404,
+            'message' => 'Sales payment not found.'
+        ], 404);
+    }
+
+    $sk = config('services.paymaya.secret_key');
+    $url = config('services.paymaya.url');
+
+    $res = Http::withOptions(['verify' => false])
+            ->withHeaders([
+                'Authorization' => 'Basic ' . base64_encode($sk . ':'), // sk:
+                'Content-Type'  => 'application/json',
+            ])
+            ->get($url . '/' . $salesPayment->receipt_number);
+        
+        $data = $res->json();
+
+        if (!$res->successful()) {
+            return response()->json([
+                'payment_status' => $data['paymentStatus'] ?? null,
+                'status' => $res->status(),
+                'message' => $res->body(),
+            ], 500);
+        }
+
+        return response()->json([
+            'payment_status' => $data['paymentStatus'] ?? null,
+            'status' => $res->status(),
+            'data' => $res->json(),
+        ]);
+})->name('paymaya.payment.check');
 
 Route::get('/{slug}', [FrontendController::class, 'page'])->name('page');
 
