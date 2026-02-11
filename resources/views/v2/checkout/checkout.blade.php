@@ -192,10 +192,23 @@ populateMultiDeliveryTimes(index) {
     delivery.availableHours = hours
 
     this.$nextTick(() => {
-        delivery.need_time = hours.length
-            ? this.formatHourValue(hours[0])
-            : ''
+
+        if (!hours.length) {
+            delivery.need_time = ''
+            return
+        }
+
+        const firstHour = this.formatHourValue(hours[0])
+
+        const currentIsValid = hours.some(h =>
+            this.formatHourValue(h) === delivery.need_time
+        )
+
+        delivery.need_time = currentIsValid
+            ? delivery.need_time
+            : firstHour
     })
+
 },
 
 
@@ -1537,8 +1550,6 @@ populateDeliveryTimes(minHour = null) {
                     let hours = 0
 
                     delivery.orders.forEach(order => {
-
-                        console.log('Calculating hours for order:', order)
 
                         if (order.product.id === 178) {
                             hours = Math.max(hours, parseInt(window.minimum_processing_hours_baka))

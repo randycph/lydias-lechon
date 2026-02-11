@@ -147,7 +147,7 @@
                             >
                                 <option value="">Select Hour</option>
 
-                                <template x-for="hour in delivery.availableHours">
+                                <template x-for="hour in delivery.availableHours" :key="hour">
                                     <option :value="formatHourValue(hour)"
                                             x-text="formatAMPM(hour)">
                                     </option>
