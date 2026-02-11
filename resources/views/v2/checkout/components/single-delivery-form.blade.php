@@ -77,7 +77,7 @@
                     <option value="">Choose a city</option>
 
                     <template x-for="(c, i) in filteredCities" :key="i">
-                        <option :value="c.city" x-text="c.city"></option>
+                        <option :value="c" x-text="c"></option>
                     </template>
                 </select>
 
@@ -104,8 +104,8 @@
                 <option value="">Choose a barangay</option>
 
                 <template x-for="(b, i) in filteredBarangay()" :key="i">
-                    <option :value="b.barangay"
-                            x-text="b.barangay">
+                    <option :value="b"
+                            x-text="b">
                     </option>
                 </template>
             </select>
@@ -121,14 +121,28 @@
                     Select Date <span class="text-red-600">*</span>
                 </label>
 
-                <input
-                    type="text"
-                    x-model="need_date"
-                    readonly
-                    @change="validateSingleDeliveryField('date')"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-                    :class="{'border-red-500': singleDeliveryErrors.date}"
-                >
+                <div class="relative">
+                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500"
+                             xmlns="http://www.w3.org/2000/svg"
+                             fill="currentColor"
+                             viewBox="0 0 20 20">
+                            <path
+                                d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Z" />
+                        </svg>
+                    </div>
+
+                    <input
+                        x-ref="deliveryDate"
+                        type="text"
+                        x-model="need_date"
+                        readonly
+                        x-init="initSingleDeliveryDatepicker($el)"
+                        @change="validateSingleDeliveryField('date')"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 ps-10"
+                        :class="{'border-red-500': singleDeliveryErrors.date}"
+                    >
+                </div>
 
                 <template x-if="singleDeliveryErrors.date">
                     <p class="text-red-500 text-xs mt-1"
@@ -142,22 +156,22 @@
                     Select Time <span class="text-red-600">*</span>
                 </label>
 
-                <select
-                    x-model="need_time"
-                    @change="validateSingleDeliveryField('time')"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-                    :class="{'border-red-500': singleDeliveryErrors.time}"
-                >
-                    <option value="">Select Hour</option>
+                <div class="relative">
+                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-gray-500">
+                        <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <select x-model="need_time" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full ps-10 p-2.5">
+                        <option value="">Select Hour</option>
 
-                    <template x-for="hour in allHours" :key="hour">
-                        <template x-if="!isTimeDisabled(hour)">
+                        <template x-for="hour in availableDeliveryHours">
                             <option :value="formatHourValue(hour)"
                                     x-text="formatAMPM(hour)">
                             </option>
                         </template>
-                    </template>
-                </select>
+                    </select>
+                </div>
 
                 <template x-if="singleDeliveryErrors.time">
                     <p class="text-red-500 text-xs mt-1"

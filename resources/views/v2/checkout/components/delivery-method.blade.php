@@ -2,8 +2,8 @@
 
     {{-- HEADER --}}
     <div class="px-4 py-3 border-b border-[#DFDFDF]">
-        <h2 class="text-lg lg:text-2xl font-semibold">
-            Delivery Method
+        <h2 class="text-lg lg:text-3xl font-semibold">
+            Delivery Information
         </h2>
     </div>
 

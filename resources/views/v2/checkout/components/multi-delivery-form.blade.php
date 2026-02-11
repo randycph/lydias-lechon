@@ -39,40 +39,52 @@
 
                     <div class="space-y-2">
 
-                        <template x-for="order in getAvailableOrders()" :key="order.id">
+                        <template x-for="order in orders" :key="order.id">
+                            <template x-if="getRemainingQty(order) > 0 || isOrderChecked(delivery, order)">
 
-                            <div class="flex justify-between items-center">
+                                <div class="flex justify-between items-center">
 
-                                <div class="flex items-center gap-2">
-                                    <input
-                                        type="checkbox"
-                                        :checked="isOrderChecked(delivery, order)"
-                                        @change="onOrderCheckToggle(delivery, order, $event.target.checked)"
+                                    <div class="flex items-center gap-2">
+                                        <input
+                                            :id="'order-' + order.id + '-delivery-' + index"
+                                            type="checkbox"
+                                            :checked="isOrderChecked(delivery, order)"
+                                            @input="clearDeliveryFieldError(delivery, 'orders')"
+                                            @change="onOrderCheckToggle(index, delivery, order, $event.target.checked)"
+                                        >
+
+                                        <label 
+                                            :for="'order-' + order.id + '-delivery-' + index"
+                                            x-text="order.product.name">
+                                        </label>
+
+                                        <span
+                                            x-show="order.is_free_product"
+                                            class="text-green-600 text-xs font-semibold"
+                                        >
+                                            (Free)
+                                        </span>
+                                    </div>
+
+                                    <select
+                                        class="border rounded px-2 py-1"
+                                        :disabled="!isOrderChecked(delivery, order)"
+                                        :value="getSelectedQty(delivery, order)"
+                                        @change="updateSelectedQty(delivery, order, $event.target.value)"
                                     >
+                                        <template x-for="i in getAvailableQtyForDropdown(delivery, order)">
+                                            <option :value="i" x-text="i"></option>
+                                        </template>
+                                    </select>
 
-                                    <span x-text="order.product.name"></span>
-
-                                    <span
-                                        x-show="order.is_free_product"
-                                        class="text-green-600 text-xs font-semibold"
-                                    >
-                                        (Free)
-                                    </span>
                                 </div>
+                            </template>
 
-                                <select
-                                    class="border rounded px-2 py-1"
-                                    :disabled="!isOrderChecked(delivery, order)"
-                                    :value="getSelectedQty(delivery, order)"
-                                    @change="updateSelectedQty(delivery, order, $event.target.value)"
-                                >
-                                    <template x-for="i in getAvailableQtyForDropdown(delivery, order)">
-                                        <option :value="i" x-text="i"></option>
-                                    </template>
-                                </select>
+                        </template>
 
-                            </div>
-
+                        <template x-if="delivery.errors?.orders">
+                            <p class="text-red-500 text-xs mt-2"
+                            x-text="delivery.errors.orders"></p>
                         </template>
 
                     </div>
@@ -88,19 +100,28 @@
                             Select Date <span class="text-red-600">*</span>
                         </label>
 
-                        <input
-                            type="text"
-                            x-model="delivery.need_date"
-                            readonly
-                            @change="validateDelivery(index, 'date')"
-                            class="bg-white border border-gray-300 text-sm rounded-lg block w-full p-2.5"
-                            :class="{'border-red-500': errors[index]?.need_date}"
-                        >
+                        <div class="relative">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-500"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20">
+                                    <path
+                                        d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Z" />
+                                </svg>
+                            </div>
 
-                        <template x-if="errors[index]?.need_date">
-                            <p class="text-red-500 text-xs mt-1"
-                               x-text="errors[index]?.need_date"></p>
-                        </template>
+                            <input
+                                x-ref="multiDateInputs"
+                                type="text"
+                                x-model="delivery.need_date"
+                                readonly
+                                :disabled="!delivery.orders.length"
+                                x-init="initMultiDeliveryDatepicker($el, index)"
+                                @change="validateDelivery(index, 'date')"
+                                class="bg-white border border-gray-300 text-sm rounded-lg block w-full p-2.5 ps-10"
+                            >
+                        </div>
                     </div>
 
 
@@ -110,25 +131,33 @@
                             Select Time <span class="text-red-600">*</span>
                         </label>
 
-                        <select
-                            x-model="delivery.need_time"
-                            @change="validateDelivery(index, 'time')"
-                            class="bg-white border border-gray-300 text-sm rounded-lg block w-full p-2.5"
-                            :class="{'border-red-500': errors[index]?.need_time}"
-                        >
-                            <option value="">Select Hour</option>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-gray-500">
+                                <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
 
-                            <template x-for="hour in getAvailableHours(delivery)" :key="hour">
-                                <option
-                                    :value="formatHourValue(hour)"
-                                    x-text="formatAMPM(hour)">
-                                </option>
-                            </template>
-                        </select>
+                            <select 
+                                :disabled="!delivery.orders.length"
+                                x-model="delivery.need_time" 
+                                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full ps-10 p-2.5"
+                                :class="{'border-red-500': delivery.errors?.need_time}"
+                                @input="clearDeliveryFieldError(delivery, 'need_time')"
+                            >
+                                <option value="">Select Hour</option>
 
-                        <template x-if="errors[index]?.need_time">
+                                <template x-for="hour in delivery.availableHours">
+                                    <option :value="formatHourValue(hour)"
+                                            x-text="formatAMPM(hour)">
+                                    </option>
+                                </template>
+                            </select>
+                        </div>
+
+                        <template x-if="delivery.errors?.need_time">
                             <p class="text-red-500 text-xs mt-1"
-                               x-text="errors[index]?.need_time"></p>
+                               x-text="delivery.errors.need_time"></p>
                         </template>
                     </div>
 
@@ -146,12 +175,13 @@
                         @blur="validateDelivery(index, 'address')"
                         rows="2"
                         class="bg-white border border-gray-300 text-sm rounded-md block w-full p-2.5"
-                        :class="{'border-red-500': errors[index]?.address}"
+                        :class="{'border-red-500': delivery.errors?.address}"
+                        @input="clearDeliveryFieldError(delivery, 'address')"
                     ></textarea>
 
-                    <template x-if="errors[index]?.address">
+                    <template x-if="delivery.errors?.address">
                         <p class="text-red-500 text-xs mt-1"
-                           x-text="errors[index]?.address"></p>
+                        x-text="delivery.errors.address"></p>
                     </template>
                 </div>
 
@@ -168,6 +198,8 @@
                             x-model="delivery.province"
                             @change="onMultiProvinceChange(index)"
                             class="bg-white border border-gray-300 text-sm rounded-lg block w-full p-2.5"
+                            :class="{'border-red-500': delivery.errors?.province}"
+                            @input="clearDeliveryFieldError(delivery, 'province')"
                         >
                             <option value="">Choose province</option>
 
@@ -177,6 +209,11 @@
                                 </option>
                             @endforeach
                         </select>
+
+                        <template x-if="delivery.errors?.province">
+                            <p class="text-red-500 text-xs mt-1"
+                            x-text="delivery.errors.province"></p>
+                        </template>
                     </div>
 
 
@@ -190,13 +227,21 @@
                             @change="getDeliveryFeeForMultiple(index)"
                             :disabled="!delivery.province"
                             class="bg-white border border-gray-300 text-sm rounded-lg block w-full p-2.5"
+                            :class="{'border-red-500': delivery.errors?.city}"
+                            @input="clearDeliveryFieldError(delivery, 'city')"
                         >
                             <option value="">Choose city</option>
 
                             <template x-for="c in multipleFilteredCities(index)">
-                                <option :value="c.city" x-text="c.city"></option>
+                                <option :value="c" x-text="c"></option>
                             </template>
                         </select>
+
+                        <template x-if="delivery.errors?.city">
+                            <p class="text-red-500 text-xs mt-1"
+                            x-text="delivery.errors.city"></p>
+                        </template>
+
                     </div>
 
                 </div>
@@ -213,14 +258,21 @@
                         @change="getDeliveryFeeForMultiple(index)"
                         :disabled="!delivery.city"
                         class="bg-white border border-gray-300 text-sm rounded-lg block w-full p-2.5"
+                        :class="{'border-red-500': delivery.errors?.location}"
+                        @input="clearDeliveryFieldError(delivery, 'location')"
                     >
                         <option value="">Choose barangay</option>
 
                         <template x-for="b in filteredMultipleBarangay(index)">
-                            <option :value="b.barangay"
-                                    x-text="b.barangay"></option>
+                            <option :value="b"
+                                    x-text="b"></option>
                         </template>
                     </select>
+
+                    <template x-if="delivery.errors?.location">
+                        <p class="text-red-500 text-xs mt-1"
+                        x-text="delivery.errors.location"></p>
+                    </template>
                 </div>
 
 
@@ -237,7 +289,14 @@
                             x-model="delivery.name"
                             @blur="validateDelivery(index, 'name')"
                             class="bg-white border border-gray-300 text-sm rounded-md block w-full p-2.5"
+                            :class="{'border-red-500': delivery.errors?.name}"
+                            @input="clearDeliveryFieldError(delivery, 'name')"
                         >
+
+                        <template x-if="delivery.errors?.name">
+                            <p class="text-red-500 text-xs mt-1"
+                            x-text="delivery.errors.name"></p>
+                        </template>
                     </div>
 
                     <div>
@@ -250,7 +309,14 @@
                             x-model="delivery.phone"
                             @blur="validateDelivery(index, 'phone')"
                             class="bg-white border border-gray-300 text-sm rounded-md block w-full p-2.5"
+                            :class="{'border-red-500': delivery.errors?.phone}"
+                            @input="clearDeliveryFieldError(delivery, 'phone')"
                         >
+
+                        <template x-if="delivery.errors?.phone">
+                            <p class="text-red-500 text-xs mt-1"
+                            x-text="delivery.errors.phone"></p>
+                        </template>
                     </div>
 
                 </div>
@@ -275,14 +341,19 @@
 
 
         {{-- ADD DELIVERY BUTTON --}}
-        <div>
+        <div x-show="hasRemainingOrders()">
             <button
                 type="button"
-                @click="addDelivery()"
+                @click="validateBeforeAddDelivery"
                 class="bg-green-700 text-white px-4 py-2 rounded-md text-sm"
             >
                 Add Another Delivery
             </button>
+        </div>
+
+        <div x-show="!hasRemainingOrders()"
+            class="text-sm text-gray-500 italic">
+            All items have been assigned to deliveries.
         </div>
 
     </div>

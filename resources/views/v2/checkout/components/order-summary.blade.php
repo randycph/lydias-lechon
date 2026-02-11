@@ -23,7 +23,7 @@
                 <div class="w-20 h-20 min-w-20 min-h-20 rounded-md overflow-hidden bg-gray-100">
                     <img
                         :src="itemImage(item)"
-                        @error="$event.target.src='{{ asset('images/no-image.jpg') }}'"
+                        onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'"
                         class="w-full h-full object-cover"
                         :alt="item?.product?.name"
                     />
