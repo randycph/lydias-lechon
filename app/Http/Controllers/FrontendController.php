@@ -298,7 +298,7 @@ class FrontendController extends Controller
             return $cart->product_id === 165;
         });
 
-        return view('v2.checkout', compact(
+        return view('v2.checkout.checkout', compact(
             'triples', 
             'provinces', 
             'cities', 

@@ -1,0 +1,133 @@
+<div class="w-full rounded-lg border bg-white border-[#DFDFDF] shadow-md">
+
+    {{-- HEADER --}}
+    <div class="px-4 py-3 border-b border-[#DFDFDF]">
+        <h2 class="text-lg lg:text-2xl font-semibold">
+            Pickup Information
+        </h2>
+    </div>
+
+    <div class="px-4 py-5 space-y-6">
+
+        {{-- BRANCH --}}
+        <div>
+            <label class="block font-bold mb-2">
+                Select Branch <span class="text-red-600">*</span>
+            </label>
+
+            <select
+                name="delivery_branch"
+                x-model="pickup_branch"
+                @change="onPickupBranchChange"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+                :class="{'border-red-500': pickupErrors.branch}"
+                required
+            >
+                <option value="">Choose a branch</option>
+
+                @foreach ($pickupBranches as $branch)
+                    <option value="{{ $branch->name }}">
+                        {{ $branch->name }}
+                    </option>
+                @endforeach
+            </select>
+
+            <template x-if="pickupErrors.branch">
+                <p class="text-red-500 text-xs mt-1" x-text="pickupErrors.branch"></p>
+            </template>
+        </div>
+
+
+        {{-- DATE + TIME --}}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+            {{-- DATE --}}
+            <div>
+                <label class="block font-bold mb-2">
+                    Select Date <span class="text-red-600">*</span>
+                </label>
+
+                <div class="relative">
+                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg class="w-4 h-4 text-gray-500"
+                             xmlns="http://www.w3.org/2000/svg"
+                             fill="currentColor"
+                             viewBox="0 0 20 20">
+                            <path
+                                d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Z" />
+                        </svg>
+                    </div>
+
+                    <input
+                        type="text"
+                        x-model="pickup_date"
+                        @change="validatePickupDateTime"
+                        readonly
+                        placeholder="Select date"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full ps-10 p-2.5"
+                        :class="{'border-red-500': pickupErrors.date}"
+                    >
+                </div>
+
+                <template x-if="pickupErrors.date">
+                    <p class="text-red-500 text-xs mt-1" x-text="pickupErrors.date"></p>
+                </template>
+            </div>
+
+
+            {{-- TIME --}}
+            <div>
+                <label class="block font-bold mb-2">
+                    Select Time <span class="text-red-600">*</span>
+                </label>
+
+                <select
+                    x-model="pickup_time"
+                    @change="validatePickupDateTime"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+                    :class="{'border-red-500': pickupErrors.time}"
+                >
+                    <option value="">Select Hour</option>
+
+                    <template x-for="hour in availablePickupHours" :key="hour">
+                        <option
+                            :value="formatHourValue(hour)"
+                            x-text="formatAMPM(hour)"
+                        ></option>
+                    </template>
+                </select>
+
+                <template x-if="pickupErrors.time">
+                    <p class="text-red-500 text-xs mt-1" x-text="pickupErrors.time"></p>
+                </template>
+            </div>
+
+        </div>
+
+
+        {{-- NOTE --}}
+        <div>
+            <label class="block font-bold mb-2">
+                Note
+            </label>
+
+            <textarea
+                name="instruction"
+                x-model="pickup_note"
+                rows="4"
+                placeholder="Add instructions or notes about your pickup."
+                class="w-full border border-gray-300 p-2 rounded-md"
+            ></textarea>
+        </div>
+
+
+        {{-- WARNING MESSAGE --}}
+        <template x-if="pickupWarning">
+            <div class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 rounded">
+                <span x-text="pickupWarning"></span>
+            </div>
+        </template>
+
+    </div>
+
+</div>
