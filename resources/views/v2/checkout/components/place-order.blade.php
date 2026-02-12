@@ -7,85 +7,210 @@
         </h2>
     </div>
 
-    <div class="px-4 py-5 space-y-5">
+    <div class="px-4 py-5 space-y-6">
 
-        {{-- ERROR MESSAGE --}}
-        <template x-if="hasErrorMessage">
-            <div class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 rounded">
-                We are not able to accommodate your order based on your selected
-                date and time. Please adjust your schedule or contact our hotline.
+        {{-- ============================= --}}
+        {{-- ORDER ITEMS --}}
+        {{-- ============================= --}}
+        <div>
+            <h3 class="font-bold mb-3">Order Items</h3>
+
+            <template x-for="item in carts" :key="item.id">
+                <div class="flex justify-between border-b py-2 text-sm">
+                    <div>
+                        <span x-text="item.product.name"></span>
+                        <span class="text-gray-500 text-xs">
+                            (x<span x-text="item.qty"></span>)
+                        </span>
+                    </div>
+
+                    <div class="font-semibold">
+                        <span x-text="item.is_free_product
+                                ? '₱0.00'
+                                : formatMoney(item.price)"></span>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        {{-- ============================= --}}
+        {{-- METHOD --}}
+        {{-- ============================= --}}
+        <div>
+            <h3 class="font-bold mb-2">Fulfillment Method</h3>
+
+            <p class="text-sm">
+                <span class="font-semibold">Type:</span>
+                <span x-text="method === 'pickup' ? 'Store Pickup' : 'Delivery'"></span>
+            </p>
+        </div>
+
+        {{-- ============================= --}}
+        {{-- PICKUP DETAILS --}}
+        {{-- ============================= --}}
+        <template x-if="method === 'pickup'">
+            <div class="text-sm space-y-1">
+                <p><span class="font-semibold">Date:</span> <span x-text="pickup_date"></span></p>
+                <p><span class="font-semibold">Time:</span> <span x-text="pickup_time"></span></p>
             </div>
         </template>
 
-
-        {{-- WARNING MESSAGE --}}
-        <template x-if="warningMessage">
-            <div class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 rounded"
-                 x-html="warningMessage">
+        {{-- ============================= --}}
+        {{-- SINGLE DELIVERY --}}
+        {{-- ============================= --}}
+        <template x-if="method === 'delivery' && !allowMultiple">
+            <div class="text-sm space-y-1">
+                <p x-show="delivery_address"><span class="font-semibold">Address:</span> <span x-text="delivery_address"></span></p>
+                <p x-show="location || city || province">
+                    <span x-text="location"></span>,
+                    <span x-text="city"></span>,
+                    <span x-text="province"></span>
+                </p>
+                <p x-show="need_date"><span class="font-semibold">Date:</span> <span x-text="need_date"></span></p>
+                <p x-show="need_time"><span class="font-semibold">Time:</span> <span x-text="need_time"></span></p>
+                <p x-show="instruction"><span class="font-semibold">Instruction:</span> <span x-text="instruction"></span></p>
             </div>
         </template>
 
+        {{-- ============================= --}}
+        {{-- MULTI DELIVERY --}}
+        {{-- ============================= --}}
+        <template x-if="method === 'delivery' && allowMultiple">
+            <div class="space-y-4">
 
-        {{-- SUMMARY QUICK CHECK --}}
-        <div class="text-sm text-gray-600 space-y-1">
+                <template x-for="(delivery, index) in deliveries" :key="index">
+                    <div class="border rounded p-3 text-sm space-y-1 bg-gray-50">
 
-            <div>
-                <span class="font-medium">Method:</span>
-                <span x-text="method === 'pickup' ? 'Pickup' : 'Delivery'"></span>
+                        <p class="font-semibold">
+                            Delivery <span x-text="index + 1"></span>
+                        </p>
+
+                        <p x-text="delivery.address"></p>
+                        <p>
+                            <span x-text="delivery.location"></span>,
+                            <span x-text="delivery.city"></span>,
+                            <span x-text="delivery.province"></span>
+                        </p>
+
+                        <p>
+                            <span class="font-semibold">Date:</span>
+                            <span x-text="delivery.need_date"></span>
+                        </p>
+
+                        <p>
+                            <span class="font-semibold">Time:</span>
+                            <span x-text="delivery.need_time"></span>
+                        </p>
+
+                        <div class="mt-2">
+                            <p class="font-semibold">Assigned Orders:</p>
+
+                            <template x-for="order in delivery.orders" :key="order.product_id">
+                                <p>
+                                    Product ID:
+                                    <span x-text="getProductName(order.product_id)"></span>
+                                    (x<span x-text="order.qty"></span>)
+                                </p>
+                            </template>
+                        </div>
+
+                    </div>
+                </template>
+
+            </div>
+        </template>
+
+        {{-- ============================= --}}
+        {{-- CONTACT INFO --}}
+        {{-- ============================= --}}
+        <div x-show="contact.name || contact.mobile || contact.email || contact.agent" class="border-t pt-4">
+            <h3 class="font-bold mb-2">Contact Information</h3>
+
+            <p x-show="contact.name" class="text-sm"><span class="font-semibold">Name:</span> <span x-text="contact.name"></span></p>
+            <p x-show="contact.mobile" class="text-sm"><span class="font-semibold">Mobile:</span> <span x-text="contact.mobile"></span></p>
+            <p x-show="contact.email" class="text-sm"><span class="font-semibold">Email:</span> <span x-text="contact.email"></span></p>
+            <p x-show="contact.agent" class="text-sm"><span class="font-semibold">Agent Code:</span> <span x-text="contact.agent"></span></p>
+        </div>
+
+        <div class="flex flex-col">
+            {{-- SUBTOTAL --}}
+            <div class="flex justify-between border-t py-3 relative">
+                <span class="font-medium text-gray-800">Subtotal</span>
+                <span class="font-medium" x-text="formattedSubtotal"></span>
             </div>
 
-            <template x-if="method === 'delivery' && !allowMultiple">
-                <div>
-                    <span class="font-medium">Deliver To:</span>
-                    <span x-text="delivery_address"></span>
+            {{-- SINGLE DELIVERY --}}
+            <template x-if="method === 'delivery' && !allowMultiple && deliveryFee > 0">
+                <div class="flex justify-between">
+                    <span class="font-medium text-gray-800">Delivery Fee</span>
+                    <span x-text="formatMoney(deliveryFee)"></span>
                 </div>
             </template>
 
-            <template x-if="method === 'delivery' && allowMultiple">
-                <div>
-                    <span class="font-medium">Delivery Addresses:</span>
-                    <span x-text="deliveries.length + ' locations'"></span>
+            {{-- MULTIPLE DELIVERY --}}
+            <template x-if="allowMultiple && deliveryFees.length">
+                <div class="space-y-1">
+                    <template x-for="(fee, i) in deliveryFees" :key="i">
+                        <div class="flex justify-between text-gray-600 text-sm">
+                            <span x-text="`Delivery Fee (${fee.location})`"></span>
+
+                            <div class="flex items-center gap-1">
+                                <template x-if="fee.discount > 0">
+                                    <span class="line-through text-red-600 italic"
+                                        x-text="formatMoney(fee.fee)">
+                                    </span>
+                                </template>
+                                <span x-text="formatMoney(fee.fee - (fee.discount || 0))"></span>
+                            </div>
+                        </div>
+                    </template>
                 </div>
             </template>
 
-            <div>
-                <span class="font-medium">Total:</span>
-                <span x-text="computeTotal()"></span>
+            {{-- COUPONS --}}
+            <template x-if="coupons.length">
+                <div class="space-y-1 mt-2">
+                    <template x-for="(coupon, i) in coupons" :key="i">
+                        <div class="flex justify-between text-red-700 italic">
+                            <span>
+                                Coupon (<span x-text="coupon.code"></span>)
+                                <span
+                                    class="text-xs underline cursor-pointer ml-1"
+                                    @click="removeCoupon(i)"
+                                >
+                                    Remove
+                                </span>
+                            </span>
+
+                            <span x-text="couponDiscountLabel(coupon)"></span>
+                        </div>
+                    </template>
+                </div>
+            </template>
+
+            {{-- ============================= --}}
+            {{-- TOTAL --}}
+            {{-- ============================= --}}
+            <div class="border-t pt-4">
+                <div class="flex justify-between font-bold text-lg">
+                    <span>Total</span>
+                    <span x-text="computeTotal()"></span>
+                </div>
             </div>
 
         </div>
 
-
+        {{-- ============================= --}}
         {{-- PLACE ORDER BUTTON --}}
-        <button
-            type="submit"
-            :disabled="isSubmitting"
-            class="bg-primary hover:bg-primary-dark text-white px-6 py-4 w-full rounded-md disabled:opacity-50 disabled:bg-gray-400 transition"
-        >
-            <span x-show="!isSubmitting">
+        {{-- ============================= --}}
+        <div>
+            <button
+                type="submit"
+                class="bg-primary text-white w-full py-3 rounded-md hover:bg-primary-dark transition"
+            >
                 Place Order
-            </span>
-
-            <span x-show="isSubmitting" class="flex items-center justify-center gap-2">
-
-                <svg class="animate-spin h-5 w-5 text-white"
-                     xmlns="http://www.w3.org/2000/svg"
-                     fill="none"
-                     viewBox="0 0 24 24">
-                    <circle class="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            stroke-width="4"></circle>
-                    <path class="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8v8z"></path>
-                </svg>
-
-                Processing...
-            </span>
-        </button>
+            </button>
+        </div>
 
     </div>
 </div>

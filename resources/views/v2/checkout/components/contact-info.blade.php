@@ -130,21 +130,5 @@
                  x-html="warningMessage">
             </div>
         </template>
-
-
-        {{-- SUBMIT --}}
-        <button
-            type="submit"
-            :disabled="isSubmitting"
-            class="bg-primary text-white px-6 py-4 w-full rounded-md disabled:opacity-50"
-        >
-            <span x-show="!isSubmitting">Place Order</span>
-
-            <span x-show="isSubmitting">
-                Processing...
-            </span>
-        </button>
-
     </div>
-
 </div>
