@@ -151,71 +151,63 @@
                     return `${year}-${month}-${day}`
                 },
 
-generateHours() {
-    const hours = []
+                generateHours() {
+                    const hours = []
 
-    for (let h = this.openHour; h < this.closeHour; h++) {
-        hours.push(h)
-    }
+                    for (let h = this.openHour; h < this.closeHour; h++) {
+                        hours.push(h)
+                    }
 
-    return hours
-},
+                    return hours
+                },
 
 
-populateMultiDeliveryTimes(index) {
+                populateMultiDeliveryTimes(index) {
 
-    const delivery = this.deliveries[index]
+                    const delivery = this.deliveries[index]
 
-    // 🔒 If no order selected → reset & disable
-    if (!delivery.orders.length) {
+                    // If no order selected → reset
+                    if (!delivery.orders.length) {
 
-        delivery.need_date = ''
-        delivery.need_time = ''
-        delivery.availableHours = []
+                        delivery.need_date = ''
+                        delivery.need_time = ''
+                        delivery.availableHours = []
 
-        return
-    }
+                        return
+                    }
 
-    let hours = this.generateHours()
+                    let hours = this.generateHours()
 
-    const earliest = this.getEarliestDateTimeForDelivery(delivery)
-    const parts = this.formatDateTimeParts(earliest)
+                    const earliest = this.getEarliestDateTimeForDelivery(delivery)
+                    const parts = this.formatDateTimeParts(earliest)
 
-    delivery._datepicker?.setOptions({
-        minDate: earliest
-    })
+                    delivery._datepicker?.setOptions({
+                        minDate: earliest
+                    })
 
-    delivery.need_date = parts.date
+                    delivery.need_date = parts.date
 
-    hours = hours.filter(h => h >= parts.hour)
+                    hours = hours.filter(h => h >= parts.hour)
 
-    delivery.availableHours = hours
+                    delivery.availableHours = hours
 
-    this.$nextTick(() => {
+                    this.$nextTick(() => {
 
-        if (!hours.length) {
-            delivery.need_time = ''
-            return
-        }
+                        if (!hours.length) {
+                            delivery.need_time = ''
+                            return
+                        }
 
-        const firstHour = this.formatHourValue(hours[0])
-
-        const currentIsValid = hours.some(h =>
-            this.formatHourValue(h) === delivery.need_time
-        )
-
-        delivery.need_time = currentIsValid
-            ? delivery.need_time
-            : firstHour
-    })
-
-},
+                        const firstHour = this.formatHourValue(hours[0])
+                        delivery.need_time = firstHour
+                    })
+                },
 
 
 
 
 
-                allHours: [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+
 
                 availableDeliveryHours: [],
 
@@ -311,31 +303,31 @@ populateMultiDeliveryTimes(index) {
 
 
 
-initMultiDeliveryDatepicker(el, index) {
+                initMultiDeliveryDatepicker(el, index) {
 
-    if (el._datepicker) {
-        el._datepicker.destroy()
-    }
+                    if (el._datepicker) {
+                        el._datepicker.destroy()
+                    }
 
-    const picker = new Datepicker(el, {
-        autohide: true,
-        format: 'yyyy-mm-dd',
-        todayHighlight: true,
-        placeholder: 'Select date',
-    })
+                    const picker = new Datepicker(el, {
+                        autohide: true,
+                        format: 'yyyy-mm-dd',
+                        todayHighlight: true,
+                        placeholder: 'Select date',
+                    })
 
-    el._datepicker = picker
+                    el._datepicker = picker
 
-    el.addEventListener('changeDate', (e) => {
+                    el.addEventListener('changeDate', (e) => {
 
-        if (!this.deliveries[index].orders.length) return
+                        if (!this.deliveries[index].orders.length) return
 
-        this.deliveries[index].need_date =
-            this.formatDate(e.detail.date)
+                        this.deliveries[index].need_date =
+                            this.formatDate(e.detail.date)
 
-        this.populateMultiDeliveryTimes(index)
-    })
-},
+                        this.populateMultiDeliveryTimes(index)
+                    })
+                },
 
                 populatePickupTimes(minHour = null) {
 
@@ -347,53 +339,57 @@ initMultiDeliveryDatepicker(el, index) {
                     const parts = this.formatDateTimeParts(earliest)
 
                     if (this.pickup_date === parts.date) {
-
                         const requiredHour = minHour ?? parts.hour
-
                         hours = hours.filter(h => h >= requiredHour)
                     }
 
                     this.availablePickupHours = hours
 
                     this.$nextTick(() => {
-                        this.pickup_time = hours.length
-                            ? this.formatHourValue(hours[0])
-                            : ''
+
+                        if (!hours.length) {
+                            this.pickup_time = ''
+                            return
+                        }
+
+                        const firstHour = this.formatHourValue(hours[0])
+                        this.pickup_time = firstHour
                     })
-
-console.log('POPULATE PICKUP CALLED')
-console.log('Generated hours:', hours)
-
                 },
 
 
 
 
 
-populateDeliveryTimes(minHour = null) {
 
-    if (!this.need_date) return
+                populateDeliveryTimes(minHour = null) {
 
-    let hours = this.generateHours()
+                    if (!this.need_date) return
 
-    const earliest = this.getEarliestForPickupAndSingle()
-    const parts = this.formatDateTimeParts(earliest)
+                    let hours = this.generateHours()
 
-    if (this.need_date === parts.date) {
+                    const earliest = this.getEarliestForPickupAndSingle()
+                    const parts = this.formatDateTimeParts(earliest)
 
-        const requiredHour = minHour ?? parts.hour
+                    if (this.need_date === parts.date) {
+                        const requiredHour = minHour ?? parts.hour
+                        hours = hours.filter(h => h >= requiredHour)
+                    }
 
-        hours = hours.filter(h => h >= requiredHour)
-    }
+                    this.availableDeliveryHours = hours
 
-    this.availableDeliveryHours = hours
+                    this.$nextTick(() => {
 
-    this.$nextTick(() => {
-        this.need_time = hours.length
-            ? this.formatHourValue(hours[0])
-            : ''
-    })
-},
+                        if (!hours.length) {
+                            this.need_time = ''
+                            return
+                        }
+
+                        const firstHour = this.formatHourValue(hours[0])
+                        this.need_time = firstHour
+                    })
+                },
+
 
 
 
@@ -514,20 +510,27 @@ populateDeliveryTimes(minHour = null) {
                 },
 
                 changeMethod(type) {
+
                     this.method = type
 
-                    // Reset delivery-specific state safely
                     if (type === 'pickup') {
                         this.allowMultiple = false
                         this.deliveryFee = 0
                         this.deliveryFees = []
+                        this.pickup_time = ''
                     }
 
                     if (type === 'delivery') {
-                        // Optional defaults
-                        if (!this.need_date) this.autoSelectEarliestDate?.()
+                        this.allowMultiple = false
+
+                        // 🔥 reset single delivery state cleanly
+                        this.need_time = ''
+                        this.availableDeliveryHours = []
                     }
+
                 },
+
+
 
 
                 /* ==========================
@@ -1027,7 +1030,7 @@ populateDeliveryTimes(minHour = null) {
 
                     const res = await fetch(
                         '{{ asset('addresses/philippine_provinces_cities_municipalities_and_barangays_2019v2.json') }}'
-                        )
+                    )
 
                     this.phData = await res.json()
 
@@ -1208,6 +1211,13 @@ populateDeliveryTimes(minHour = null) {
                         }]
 
                         this.deliveryFee = 0
+
+                        if (this.method === 'delivery') {
+                            this.allowMultiple = false
+
+                            this.need_time = ''
+                            this.availableDeliveryHours = []
+                        }
                     }
                 },
 
@@ -1249,7 +1259,8 @@ populateDeliveryTimes(minHour = null) {
                             product_id: order.product_id,
                             qty: 1,
                             product: order.product,
-                            product_name: isPaella ? order.product.name + ' Boneless with Paella' : order.product.name,
+                            product_name: isPaella ? order.product.name + ' Boneless with Paella' : order.product
+                                .name,
                         })
                     }
 
