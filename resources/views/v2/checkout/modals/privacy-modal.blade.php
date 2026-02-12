@@ -26,7 +26,7 @@
                 {{-- HEADER --}}
                 <div class="px-6 py-4 border-b flex justify-between items-center">
                     <h2 class="text-xl font-semibold">
-                        Privacy Protection Policy
+                        Data Privacy Policy
                     </h2>
 
                     <button
@@ -40,7 +40,11 @@
 
 
                 {{-- BODY --}}
-                <div class="px-6 py-6 max-h-[500px] overflow-y-auto text-sm text-gray-700 leading-relaxed">
+                <div 
+                    class="px-6 py-6 max-h-[500px] overflow-y-auto text-sm text-gray-700 leading-relaxed" 
+                    x-ref="policyContent" 
+                    @scroll="checkScroll"
+                 >
 
                     {{-- Rendered Privacy HTML --}}
                     <div>
@@ -62,8 +66,10 @@
                     </button>
 
                     <button
+                        :disabled="!canAgree"
                         type="button"
                         @click="agreePrivacy"
+                        :class="canAgree ? 'px-6 py-2 bg-primary text-white rounded-md text-sm' : 'bg-gray-400 cursor-not-allowed'"
                         class="px-6 py-2 bg-primary text-white rounded-md text-sm"
                     >
                         Agree
