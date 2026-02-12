@@ -6,7 +6,7 @@
 @section('alpine.plugins')
 <link rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/css/datepicker.min.css">
-    @endsection
+@endsection
 
 @section('content')
 

@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Auth;
 use App\EcommerceModel\GiftCertificate;
 use App\Models\ActivityLog;
 use App\Models\ProductDeliveryAddress;
+use App\Models\Setting as ModelsSetting;
 use Redirect;
 use DateTime;
 
@@ -840,36 +841,205 @@ class CartController extends Controller
         }
     }
 
-    public function save_sales(Request $request) 
+    private function validateProcessingHours($date, $time, $minimumHours)
     {
-        // dd($request->all());
-        $request->validate([
-            'mobile' => [
-                'required',
-                'regex:/^(09|\+639)\d{9}$/'
-            ],
-            'name' => 'required',
-            'email' => 'required|email:rfc,dns',
-            'delivery_branch' => 'required_if:shipping_type,pickup',
-        ], [
-            'mobile.regex' => 'The mobile number must start with 09 or +639 and be followed by 9 digits. No spaces allowed.',
-        ]);
-
-        if ($request->shipping_type != 'pickup' && !$request->has('deliveries')) {
-            $request->validate([
-                'city' => 'required',
-                'province' => 'required',
-            ], [
-                'city.required' => 'The city field is required.',
-                'province.required' => 'The province field is required.',
-            ]);
+        try {
+            $requested = Carbon::parse($date . ' ' . $time);
+        } catch (\Exception $e) {
+            return false;
         }
 
-        if ($request->has('deliveries') && count(json_decode($request->deliveries)) > 1) {
-            $request->validate([
-                'city' => 'required',
-                'delivery_address' => 'required',
-            ]);
+        $now = Carbon::now();
+
+        return $requested->greaterThanOrEqualTo(
+            $now->copy()->addHours($minimumHours)
+        );
+    }
+
+
+    public function save_sales(Request $request) 
+    {
+        $carts = auth()->check()
+            ? Cart::where('user_id', auth()->id())->with('product')->get()
+            : collect(session('cart', []));
+        
+        $setting = ModelsSetting::first();
+        $minimum_processing_hours = $setting ? $setting->minimum_processing_hours : 24;
+        $minimum_processing_hours_misc = $setting ? $setting->minimum_processing_hours_misc : 12;
+        $minimum_processing_hours_baka = $setting ? $setting->minimum_processing_hours_baka : 72;
+
+        $hasLechon = $carts->contains(fn($c) => $c->product->category_id == 1);
+        $hasBaka   = $carts->contains(fn($c) => $c->product->slug == 'lechon-baka');
+        $hasMisc   = $carts->contains(fn($c) => $c->product->is_misc == 1);
+
+        $minHours = $minimum_processing_hours;
+
+        if ($hasBaka) {
+            $minHours = $minimum_processing_hours_baka;
+        } elseif ($hasMisc) {
+            $minHours = $minimum_processing_hours_misc;
+        }
+
+        $validator = Validator::make($request->all(), [
+            'mobile' => ['required','regex:/^(09|\+639)\d{9}$/'],
+            'name' => 'required',
+            'email' => 'required|email:rfc,dns',
+        ], [
+            'mobile.regex' => 'The mobile number must start with 09 or +639 and be followed by 9 digits.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        if (!$request->has('deliveries') || empty($request->deliveries)) {
+
+            if (!$request->need_date || !$request->need_time) {
+                if (!$request->need_date) {
+                    return response()->json([
+                        'errors' => [
+                            'need_date' => ['Date is required']
+                        ]
+                    ], 422);
+                }
+
+                if (!$request->need_time) {
+                    return response()->json([
+                        'errors' => [
+                            'need_time' => ['Time is required']
+                        ]
+                    ], 422);
+                }
+            }
+
+            if (!$this->validateProcessingHours(
+                $request->need_date,
+                $request->need_time,
+                $minHours
+            )) {
+                return response()->json([
+                    'errors' => [
+                        'need_date' => ['Selected date/time does not meet minimum processing hours.']
+                    ]
+                ], 422);
+            }
+        }
+
+        if (!$request->has('deliveries') && $request->shipping_type == 'delivery') {
+
+            if (!$request->delivery_address)
+                return response()->json(['errors' => ['delivery_address' => ['Address is required.']]], 422);
+
+            if (!$request->province)
+                return response()->json(['errors' => ['province' => ['Province is required.']]], 422);
+
+            if (!$request->city)
+                return response()->json(['errors' => ['city' => ['City is required.']]], 422);
+
+            if (!$request->location)
+                return response()->json(['errors' => ['location' => ['Barangay is required.']]], 422);
+        }
+
+        if ($request->has('deliveries')) {
+
+            $deliveries = json_decode($request->deliveries ?? '[]');
+
+            if (!is_array($deliveries)) {
+                return response()->json([
+                    'errors' => ['deliveries' => ['Invalid delivery format.']]
+                ], 422);
+            }
+
+            foreach ($deliveries as $index => $delivery) {
+
+                if (empty($delivery->orders)) {
+                    return response()->json([
+                        'errors' => [
+                            "deliveries.$index.orders" =>
+                                ["Please assign at least one order."]
+                        ]
+                    ], 422);
+                }
+
+                if (empty($delivery->need_time)) {
+                    return response()->json([
+                        'errors' => [
+                            "deliveries.$index.need_time" =>
+                                ["Time is required for delivery ".($index+1)."."]]
+                    ], 422);
+                }
+
+                if (empty($delivery->need_date)) {
+                    return response()->json([
+                        'errors' => [
+                            "deliveries.$index.need_date" =>
+                                ["Date is required for delivery ".($index+1)."."]]
+                    ], 422);
+                }   
+
+                if (empty($delivery->address))
+                    return response()->json(['errors' => ["deliveries.$index.address" => ["Address is required."]]], 422);
+
+                if (empty($delivery->province))
+                    return response()->json(['errors' => ["deliveries.$index.province" => ["Province is required."]]], 422);
+
+                if (empty($delivery->city))
+                    return response()->json(['errors' => ["deliveries.$index.city" => ["City is required."]]], 422);
+
+                if (empty($delivery->location))
+                    return response()->json(['errors' => ["deliveries.$index.location" => ["Barangay is required."]]], 422);
+
+                if (empty($delivery->name))
+                    return response()->json(['errors' => ["deliveries.$index.name" => ["Contact person is required."]]], 422);
+
+                if (empty($delivery->phone)) {
+                    return response()->json(['errors' => ["deliveries.$index.phone" => ["Contact number is required."]]], 422);
+                }
+                    
+                if (!preg_match('/^(09|\+639)\d{9}$/', $delivery->phone)) {
+                    return response()->json([
+                        'errors' => [
+                            "deliveries.$index.phone" => ["Invalid mobile number format."]
+                        ]
+                    ], 422);
+                }
+
+                if (empty($delivery->need_date) || empty($delivery->need_time))
+                    return response()->json(['errors' => ["deliveries.$index.need_date" => ["Date and time are required."]]], 422);
+
+
+                // PROCESSING HOURS PER DELIVERY
+
+                $deliveryMinHours = $minimum_processing_hours;
+
+                foreach ($delivery->orders as $order) {
+
+                    if (!isset($order->product)) continue;
+
+                    if ($order->product->slug === 'lechon-baka') {
+                        $deliveryMinHours = $minimum_processing_hours_baka;
+                    } elseif ($order->product->is_misc == 1) {
+                        $deliveryMinHours = max($deliveryMinHours, $minimum_processing_hours_misc);
+                    } elseif ($order->product->category_id == 1) {
+                        $deliveryMinHours = max($deliveryMinHours, $minimum_processing_hours);
+                    }
+                }
+
+                if (!$this->validateProcessingHours(
+                    $delivery->need_date,
+                    $delivery->need_time,
+                    $deliveryMinHours
+                )) {
+                    return response()->json([
+                        'errors' => [
+                            "deliveries.$index.need_date" =>
+                                ["Delivery ".($index+1)." does not meet processing hours requirement."]
+                        ]
+                    ], 422);
+                }
+            }
         }
 
         if (auth()->guest()) {
@@ -1465,9 +1635,7 @@ class CartController extends Controller
         $coupon_code = 0;
         $coupon_amount = 0;
         $saved_items = '';
-//        $carts = Cart::where('user_id',$user->id)->get();
-        // convert to collection above
-        $carts = collect($carts);
+        //        $carts = Cart::where('user_id',$user->id)->get();
         foreach ($carts as $cart) {
             if(!empty($cart->coupon_code)){
                 

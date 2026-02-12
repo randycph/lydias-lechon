@@ -179,7 +179,7 @@ class FrontendController extends Controller
         return view('v2.lechon-menu', compact('categories'));
     }
 
-    public function checkout()
+    public function checkout2()
     {
         $page = 'checkout';
 
@@ -353,6 +353,152 @@ class FrontendController extends Controller
             'disable_delivery_misc_dates',
             'lechonBakaService'
             )
+        );
+    }
+
+    public function checkout()
+    {
+        $page = 'checkout';
+
+        if (Auth::check() && Auth()->user()->role_id != 6) {
+            return redirect()->route('my-account')->with('error', 'You are not allowed to access this page. Please contact support for assistance.');
+        }
+
+        if (Auth::check()) {
+            $carts = Cart::where('user_id', Auth::id())->with('product.photos')->get();
+        } else {
+            $carts = collect(session('cart', [])); 
+        }
+
+        $pickupBranches = Branch::where('status', 1)->orderBy('name', 'asc')->where('pickup_branch', 1)->get();
+
+        $deliveryBranches = Branch::where('status', 1)->orderBy('name', 'asc')->where('delivery_branch', 1)->get();
+
+        // $locations = Deliverablecities::distinct()->orderBy('name')->get(['name']);
+
+        $table = (new Deliverablecities)->getTable();
+
+        $pickOnePerName = Deliverablecities::selectRaw('MAX(id) AS id')->where('is_active', 1)
+            ->groupBy('name');
+
+        $locations = Deliverablecities::query()
+            ->where('is_active', 1)
+            ->joinSub($pickOnePerName, 'p', "$table.id", '=', 'p.id')
+            ->orderBy("$table.name")
+            ->get(); // full rows, unique by name
+
+        $provinces = Deliverablecities::query()
+            ->select('province')
+            ->where('is_active', 1)
+            ->whereNotNull('province')->where('province', '!=', '')
+            ->distinct()
+            ->orderBy('province')
+            ->pluck('province');
+
+        // $cities = Deliverablecities::query()
+        //     ->select('city')
+        //     ->whereNotNull('city')->where('city', '!=', '')
+        //     ->distinct()
+        //     ->orderBy('city')
+        //     ->pluck('city');
+
+        $cities = Deliverablecities::query()
+            ->select('city', 'province')
+            ->where('is_active', 1)
+            ->whereNotNull('city')->where('city', '!=', '')
+            ->distinct()
+            ->orderBy('city')->get();
+
+        $triples = Deliverablecities::query()
+            ->select('city', 'province')
+            ->where('is_active', 1)
+            ->whereNotNull('city')->where('city', '!=', '')
+            ->whereNotNull('province')->where('province', '!=', '')
+            ->distinct()
+            ->orderBy('city')->orderBy('province')->orderBy('barangay')
+            ->get();
+
+        $setting = Setting::first();
+
+        $disabledPickupDates = explode(',', $setting->disable_pickup_dates ?? '');
+        $disabledDeliveryDates = explode(',', $setting->disable_delivery_dates ?? '');
+        $disabledDeliveryMiscDates = explode(',', $setting->disable_delivery_misc_dates ?? '');
+
+        $haslechon  = $carts->contains(function ($cart) {
+            return $cart->product->category_id == 1;
+        });
+
+        $hasbaka = $carts->contains(function ($cart) {
+            return $cart->product->slug == 'lechon-baka';
+        });
+
+        $hasMisc = $carts->contains(function ($cart) {
+            return $cart->product->is_misc == 1;
+        });
+
+        $dataPrivacy = Page::where('slug', 'data-privacy')->first();
+
+        $dataPrivacyRender = view('v2.data-privacy', compact('dataPrivacy'))->render();
+
+        $now = now()->toDateTimeString();
+        $uid = Auth::id();
+
+        $eligibleCoupons = Coupon::query()
+            ->where('status', 'ACTIVE')
+            ->whereRaw("CONCAT(start_date, ' ', start_time) <= ?", [$now])
+            ->whereRaw("CONCAT(end_date, ' ', end_time) >= ?", [$now])
+            ->where(function ($q) use ($uid) {
+                // visible to everyone
+                $q->whereNull('customer_scope')->orWhere('customer_scope', 'all')
+                // visible only if user's ID is in the list
+                ->orWhere(function ($x) use ($uid) {
+                    $x->where('customer_scope', 'specific')
+                        ->whereRaw(
+                            "FIND_IN_SET(?, REPLACE(REPLACE(scope_customer_id, ' ', ''), '|', ','))",
+                            [$uid]
+                        );
+                });
+            })
+            ->get();
+
+        // dd($eligibleCoupons);
+
+        $setting = Setting::first();
+        $minimum_order_amount_door_to_door = $setting ? $setting->minimum_order : 0;
+        $minimum_order_amount_pickup = $setting ? $setting->minimum_order_pickup : 0;
+        $minimum_processing_hours = $setting ? $setting->minimum_processing_hours : 24;
+        $minimum_processing_hours_misc = $setting ? $setting->minimum_processing_hours_misc : 12;
+        $minimum_processing_hours_baka = $setting ? $setting->minimum_processing_hours_baka : 72;
+        $minimum_order_misc = $setting ? $setting->minimum_order_misc : 0;
+
+        $hasCochinillo = $carts->contains(function ($cart) {
+            return $cart->product_id === 165;
+        });
+
+        return view('v2.checkout.checkout', compact(
+            'triples', 
+            'provinces', 
+            'cities', 
+            'page', 
+            'dataPrivacyRender', 
+            'carts', 
+            'pickupBranches', 
+            'locations', 
+            'deliveryBranches', 
+            'disabledPickupDates', 
+            'disabledDeliveryDates', 
+            'disabledDeliveryMiscDates', 
+            'haslechon', 
+            'hasbaka', 
+            'hasMisc', 
+            'eligibleCoupons', 
+            'minimum_order_amount_door_to_door', 
+            'minimum_order_amount_pickup', 
+            'minimum_processing_hours', 
+            'minimum_processing_hours_misc', 
+            'minimum_processing_hours_baka', 
+            'minimum_order_misc', 
+            'hasCochinillo')
         );
     }
 
