@@ -2079,6 +2079,18 @@
                 },
 
                 backendErrors: {},
+
+                formatTime(time) {
+                    if (!time) return '';
+
+                    const [h, m] = time.split(':');
+                    const hour24 = parseInt(h, 10);
+
+                    const hour12 = ((hour24 + 11) % 12) + 1;
+                    const suffix = hour24 >= 12 ? 'PM' : 'AM';
+
+                    return `${hour12}:${m} ${suffix}`;
+                }
             }
         }
     </script>

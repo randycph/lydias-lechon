@@ -64,7 +64,7 @@
         <template x-if="method === 'pickup'">
             <div class="text-sm space-y-1">
                 <p><span class="font-semibold">Date:</span> <span x-text="need_date"></span></p>
-                <p><span class="font-semibold">Time:</span> <span x-text="need_time"></span></p>
+                <p><span class="font-semibold">Time:</span> <span x-text="formatTime(need_time)"></span></p>
             </div>
         </template>
 
@@ -75,7 +75,7 @@
             <div class="text-sm space-y-1">
                 <p x-show="delivery_address"><span class="font-semibold">Address:</span> <span x-text="delivery_address"></span></p>
                 <p x-show="need_date"><span class="font-semibold">Date:</span> <span x-text="need_date"></span></p>
-                <p x-show="need_time"><span class="font-semibold">Time:</span> <span x-text="need_time"></span></p>
+                <p x-show="need_time"><span class="font-semibold">Time:</span> <span x-text="formatTime(need_time)"></span></p>
                 <p x-show="instruction"><span class="font-semibold">Instruction:</span> <span x-text="instruction"></span></p>
             </div>
         </template>
@@ -102,7 +102,7 @@
 
                         <p>
                             <span class="font-semibold">Time:</span>
-                            <span x-text="delivery.need_time"></span>
+                            <span x-text="formatTime(delivery.need_time)"></span>
                         </p>
 
                         <div class="mt-2">
