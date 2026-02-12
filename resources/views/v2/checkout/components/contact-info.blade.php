@@ -99,12 +99,15 @@
         <div class="flex items-center gap-2">
 
             <input
+                id="privacy"
                 type="checkbox"
                 x-model="privacy"
                 class="w-4 h-4"
+                :class="{'border-red-500': errors.privacy}"
+                @input="errors.privacy = null"
             >
 
-            <span class="text-sm">
+            <label for="privacy" class="text-sm">
                 I agree to the
                 <button
                     type="button"
@@ -113,7 +116,7 @@
                 >
                     Privacy Protection Policy
                 </button>
-            </span>
+            </label>
 
         </div>
 
