@@ -26,7 +26,7 @@
                 {{-- HEADER --}}
                 <div class="px-6 py-4 border-b flex justify-between items-center">
                     <h2 class="text-xl font-semibold">
-                        Privacy Protection Policy
+                        Data Privacy Policy
                     </h2>
 
                     <button
