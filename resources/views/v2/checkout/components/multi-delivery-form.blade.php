@@ -172,7 +172,9 @@
 
                     <textarea
                         x-model="delivery.address"
-                        @blur="validateDelivery(index, 'address')"
+                        @focus="startMultiEditing(index)"
+                        @input="onMultiAddressInput(index)"
+                        @blur="validateDelivery(index, 'address'); finishMultiEditing(index)"
                         rows="2"
                         class="bg-white border border-gray-300 text-sm rounded-md block w-full p-2.5"
                         :class="{'border-red-500': delivery.errors?.address}"
@@ -224,7 +226,7 @@
 
                         <select
                             x-model="delivery.city"
-                            @change="getDeliveryFeeForMultiple(index)"
+                            @change="getDeliveryFeeForMultiple(index); onMultiCityChange(index)"
                             :disabled="!delivery.province"
                             class="bg-white border border-gray-300 text-sm rounded-lg block w-full p-2.5"
                             :class="{'border-red-500': delivery.errors?.city}"
@@ -255,7 +257,7 @@
 
                     <select
                         x-model="delivery.location"
-                        @change="getDeliveryFeeForMultiple(index)"
+                        @change="onMultiBarangayChange(index)"
                         :disabled="!delivery.city"
                         class="bg-white border border-gray-300 text-sm rounded-lg block w-full p-2.5"
                         :class="{'border-red-500': delivery.errors?.location}"

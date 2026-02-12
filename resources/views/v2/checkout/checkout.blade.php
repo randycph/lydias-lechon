@@ -670,8 +670,26 @@
                 },
 
                 onMultiProvinceChange(index) {
-                    this.deliveries[index].city = ''
-                    this.deliveries[index].location = ''
+
+                    const d = this.deliveries[index]
+
+                    d.city = ''
+                    d.location = ''
+
+                    this.rebuildMultiAddress(index)
+                },
+
+                onMultiCityChange(index) {
+
+                    const d = this.deliveries[index]
+
+                    d.location = ''
+
+                    this.rebuildMultiAddress(index)
+                },
+
+                onMultiBarangayChange(index) {
+                    this.rebuildMultiAddress(index)
                 },
 
                 deliveries: [{
@@ -686,7 +704,9 @@
                     phone: '',
                     note: '',
                     delivery_fee: 0,
-                    errors: {}
+                    errors: {},
+                    isEditingAddress: false,
+                    street: '',
                 }],
 
                 errors: {},
@@ -704,7 +724,9 @@
                         phone: '',
                         note: '',
                         delivery_fee: 0,
-                        errors: {}
+                        errors: {},
+                        isEditingAddress: false,
+                        street: '',
                     })
                 },
 
@@ -1406,7 +1428,9 @@
                         note: '',
                         delivery_fee: 0,
                         orders: [],
-                        errors: {}
+                        errors: {},
+                        isEditingAddress: false,
+                        street: '',
                     })
                 },
 
@@ -1722,6 +1746,55 @@
                         parts.push(this.province)
 
                     this.delivery_address = parts.join(', ')
+                },
+
+                startMultiEditing(index) {
+
+                    const d = this.deliveries[index]
+
+                    d.isEditingAddress = true
+
+                    // Remove appended parts while editing
+                    d.address = d.street
+                },
+
+                onMultiAddressInput(index) {
+
+                    const d = this.deliveries[index]
+
+                    d.street = d.address
+                },
+
+                finishMultiEditing(index) {
+
+                    const d = this.deliveries[index]
+
+                    d.isEditingAddress = false
+
+                    this.rebuildMultiAddress(index)
+                },
+
+                rebuildMultiAddress(index) {
+
+                    const d = this.deliveries[index]
+
+                    if (d.isEditingAddress) return
+
+                    const parts = []
+
+                    if (d.street)
+                        parts.push(d.street)
+
+                    if (d.location)
+                        parts.push(d.location)
+
+                    if (d.city)
+                        parts.push(d.city)
+
+                    if (d.province)
+                        parts.push(d.province)
+
+                    d.address = parts.join(', ')
                 },
 
 
