@@ -1933,6 +1933,19 @@
                     const suffix = hour24 >= 12 ? 'PM' : 'AM';
 
                     return `${hour12}:${m} ${suffix}`;
+                },
+
+                canAgree: false,
+
+                checkScroll() {
+                    const el = this.$refs.policyContent;
+
+                    const scrolledToBottom =
+                        el.scrollTop + el.clientHeight >= el.scrollHeight - 5;
+
+                    if (scrolledToBottom) {
+                        this.canAgree = true;
+                    }
                 }
             }
         }
