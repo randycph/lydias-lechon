@@ -142,13 +142,13 @@
                         x-init="initSingleDeliveryDatepicker($el)"
                         @change="validateSingleDeliveryField('date')"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 ps-10"
-                        :class="{'border-red-500': singleDeliveryErrors.date}"
+                        :class="{'border-red-500': singleDeliveryErrors.need_date}"
                     >
                 </div>
 
-                <template x-if="singleDeliveryErrors.date">
+                <template x-if="singleDeliveryErrors.need_date">
                     <p class="text-red-500 text-xs mt-1"
-                       x-text="singleDeliveryErrors.date"></p>
+                       x-text="singleDeliveryErrors.need_date"></p>
                 </template>
             </div>
 
@@ -164,7 +164,10 @@
                         <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clip-rule="evenodd" />
                         </svg>
                     </div>
-                    <select x-model="need_time" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full ps-10 p-2.5">
+                    <select 
+                        x-model="need_time" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full ps-10 p-2.5"
+                        :class="{'border-red-500': singleDeliveryErrors.need_time}"
+                    >
                         <option value="">Select Hour</option>
 
                         <template x-for="hour in availableDeliveryHours" :key="hour">
@@ -175,9 +178,9 @@
                     </select>
                 </div>
 
-                <template x-if="singleDeliveryErrors.time">
+                <template x-if="singleDeliveryErrors.need_time">
                     <p class="text-red-500 text-xs mt-1"
-                       x-text="singleDeliveryErrors.time"></p>
+                       x-text="singleDeliveryErrors.need_time"></p>
                 </template>
             </div>
         </div>

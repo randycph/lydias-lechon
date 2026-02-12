@@ -83,10 +83,12 @@
                         </template>
 
                         <template x-if="delivery.errors?.orders">
-                            <p class="text-red-500 text-xs mt-2"
-                            x-text="delivery.errors.orders"></p>
+                            <div>
+                                <p class="text-red-500 text-xs mt-2" x-text="delivery.errors.orders"></p>
+                                <div class="border-red-500"></div>
+                            </div>
                         </template>
-
+                        
                     </div>
                 </div>
 
@@ -184,12 +186,11 @@
                     <textarea
                         x-model="delivery.address"
                         @focus="startMultiEditing(index)"
-                        @input="onMultiAddressInput(index)"
+                        @input="onMultiAddressInput(index);clearDeliveryFieldError(delivery, 'address')"
                         @blur="validateDelivery(index, 'address'); finishMultiEditing(index)"
                         rows="2"
                         class="bg-white border border-gray-300 text-sm rounded-md block w-full p-2.5"
                         :class="{'border-red-500': delivery.errors?.address}"
-                        @input="clearDeliveryFieldError(delivery, 'address')"
                     ></textarea>
 
                     <template x-if="delivery.errors?.address">

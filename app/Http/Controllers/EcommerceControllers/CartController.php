@@ -858,8 +858,6 @@ class CartController extends Controller
 
     public function save_sales(Request $request) 
     {
-        dd($request->all());
-
         $carts = auth()->check()
             ? Cart::where('user_id', auth()->id())->with('product')->get()
             : collect(session('cart', []));
@@ -898,12 +896,21 @@ class CartController extends Controller
         if (!$request->has('deliveries') || empty($request->deliveries)) {
 
             if (!$request->need_date || !$request->need_time) {
-                return response()->json([
-                    'errors' => [
-                        'need_date' => ['Date is required'],
-                        'need_time' => ['Time is required']
-                    ]
-                ], 422);
+                if (!$request->need_date) {
+                    return response()->json([
+                        'errors' => [
+                            'need_date' => ['Date is required']
+                        ]
+                    ], 422);
+                }
+
+                if (!$request->need_time) {
+                    return response()->json([
+                        'errors' => [
+                            'need_time' => ['Time is required']
+                        ]
+                    ], 422);
+                }
             }
 
             if (!$this->validateProcessingHours(
@@ -934,7 +941,6 @@ class CartController extends Controller
                 return response()->json(['errors' => ['location' => ['Barangay is required.']]], 422);
         }
 
-
         if ($request->has('deliveries')) {
 
             $deliveries = json_decode($request->deliveries ?? '[]');
@@ -955,6 +961,22 @@ class CartController extends Controller
                         ]
                     ], 422);
                 }
+
+                if (empty($delivery->need_time)) {
+                    return response()->json([
+                        'errors' => [
+                            "deliveries.$index.need_time" =>
+                                ["Time is required for delivery ".($index+1)."."]]
+                    ], 422);
+                }
+
+                if (empty($delivery->need_date)) {
+                    return response()->json([
+                        'errors' => [
+                            "deliveries.$index.need_date" =>
+                                ["Date is required for delivery ".($index+1)."."]]
+                    ], 422);
+                }   
 
                 if (empty($delivery->address))
                     return response()->json(['errors' => ["deliveries.$index.address" => ["Address is required."]]], 422);

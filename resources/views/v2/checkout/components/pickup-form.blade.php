@@ -61,18 +61,19 @@
                     <input
                         x-ref="pickupDate"
                         type="text"
-                        x-model="pickup_date"
+                        x-model="need_date"
                         @change="validatePickupDateTime"
                         readonly
                         x-init="initPickupDatepicker($el)"
                         placeholder="Select date"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full ps-10 p-2.5"
-                        :class="{'border-red-500': pickupErrors.date}"
+                        :class="{'border-red-500': errors.need_date}"
                     >
                 </div>
 
-                <template x-if="pickupErrors.date">
-                    <p class="text-red-500 text-xs mt-1" x-text="pickupErrors.date"></p>
+                <template x-if="errors.need_date">
+                    <p class="text-red-500 text-xs mt-1"
+                    x-text="errors.need_date"></p>
                 </template>
             </div>
 
@@ -91,7 +92,10 @@
                         </svg>
                     </div>
 
-                    <select x-model="pickup_time" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full ps-10 p-2.5">
+                    <select 
+                        x-model="need_time" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full ps-10 p-2.5"
+                        :class="{'border-red-500': errors.need_time}"
+                    >
                         <option value="">Select Hour</option>
 
                         <template x-for="hour in availablePickupHours" :key="hour">
@@ -102,8 +106,9 @@
                     </select>
                 </div>
 
-                <template x-if="pickupErrors.time">
-                    <p class="text-red-500 text-xs mt-1" x-text="pickupErrors.time"></p>
+                <template x-if="errors.need_time">
+                    <p class="text-red-500 text-xs mt-1"
+                    x-text="errors.need_time"></p>
                 </template>
             </div>
 

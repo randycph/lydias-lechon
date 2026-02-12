@@ -63,34 +63,47 @@
                             method, and finalize your purchase to enjoy your Lydia's Lechon meal.</h3>
                     @endif
                 </div>
-                {{-- @include('v2.checkout.components.header', ['title' => "Delivery Information"]) --}}
 
-                <div class="flex flex-col lg:flex-row gap-4 mt-10">
-                    {{-- LEFT --}}
-                    <div class="w-full lg:w-3/5 space-y-4">
-                        @include('v2.checkout.components.delivery-method')
-
-                        <template x-if="method === 'pickup'">
-                            @include('v2.checkout.components.pickup-form')
-                        </template>
-
-                        <template x-if="method === 'delivery' && !allowMultiple">
-                            @include('v2.checkout.components.single-delivery-form')
-                        </template>
-
-                        <template x-if="method === 'delivery' && allowMultiple">
-                            @include('v2.checkout.components.multi-delivery-form')
-                        </template>
-
-                        @include('v2.checkout.components.contact-info')
-                        @include('v2.checkout.components.place-order')
+                @if ($carts->isEmpty())
+                    <div class="flex flex-col items-center justify-center h-96">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                            stroke="currentColor" class="size-20">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                        </svg>
+                        <h2 class="text-xl font-semibold mt-4">Your cart is empty</h2>
+                        <p class="text-gray-500">Looks like you haven't added anything to your cart yet.</p>
+                        <a href="menu" class="mt-4 bg-primary text-white px-4 py-2 rounded-md">Start
+                            Shopping</a>
                     </div>
+                @else
+                    <div class="flex flex-col lg:flex-row gap-4 mt-10">
+                        {{-- LEFT --}}
+                        <div class="w-full lg:w-3/5 space-y-4">
+                            @include('v2.checkout.components.delivery-method')
 
-                    {{-- RIGHT --}}
-                    <div class="w-full lg:w-2/5">
-                        @include('v2.checkout.components.order-summary')
+                            <template x-if="method === 'pickup'">
+                                @include('v2.checkout.components.pickup-form')
+                            </template>
+
+                            <template x-if="method === 'delivery' && !allowMultiple">
+                                @include('v2.checkout.components.single-delivery-form')
+                            </template>
+
+                            <template x-if="method === 'delivery' && allowMultiple">
+                                @include('v2.checkout.components.multi-delivery-form')
+                            </template>
+
+                            @include('v2.checkout.components.contact-info')
+                            @include('v2.checkout.components.place-order')
+                        </div>
+
+                        {{-- RIGHT --}}
+                        <div class="w-full lg:w-2/5">
+                            @include('v2.checkout.components.order-summary')
+                        </div>
                     </div>
-                </div>
+                @endif
             </form>
 
             @include('v2.checkout.modals.coupon-modal')
@@ -191,8 +204,6 @@
                     const earliest = this.getEarliestDateTimeForDelivery(delivery)
                     const nowRounded = this.roundUpToNextHour(new Date())
                     const finalMinDate = earliest > nowRounded ? earliest : nowRounded
-
-                    console.log(finalMinDate)
 
                     // Update datepicker minimum date dynamically
                     delivery._datepicker?.setOptions({
@@ -314,7 +325,7 @@
 
                     el._datepicker = picker
 
-                    this.pickup_date = parts.date
+                    this.need_date = parts.date
                     picker.setDate(parts.date)
 
                     // auto populate time correctly
@@ -323,7 +334,7 @@
                     })
 
                     el.addEventListener('changeDate', (e) => {
-                        this.pickup_date = this.formatDate(e.detail.date)
+                        this.need_date = this.formatDate(e.detail.date)
                         this.populatePickupTimes()
                     })
                 },
@@ -375,14 +386,14 @@
 
                 populatePickupTimes(minHour = null) {
 
-                    if (!this.pickup_date) return
+                    if (!this.need_date) return
 
                     let hours = this.generateHours()
 
                     const earliest = this.getEarliestForPickupAndSingle()
                     const parts = this.formatDateTimeParts(earliest)
 
-                    if (this.pickup_date === parts.date) {
+                    if (this.need_date === parts.date) {
                         const requiredHour = minHour ?? parts.hour
                         hours = hours.filter(h => h >= requiredHour)
                     }
@@ -392,12 +403,12 @@
                     this.$nextTick(() => {
 
                         if (!hours.length) {
-                            this.pickup_time = ''
+                            this.need_time = ''
                             return
                         }
 
                         const firstHour = this.formatHourValue(hours[0])
-                        this.pickup_time = firstHour
+                        this.need_time = firstHour
                     })
                 },
 
@@ -552,7 +563,7 @@
                         this.allowMultiple = false
                         this.deliveryFee = 0
                         this.deliveryFees = []
-                        this.pickup_time = ''
+                        this.need_time = ''
                     }
 
                     if (type === 'delivery') {
@@ -580,14 +591,14 @@
 
                 populatePickupTimes(minHour = null) {
 
-                    if (!this.pickup_date) return
+                    if (!this.need_date) return
 
                     let hours = this.generateHours()
 
                     const earliest = this.getEarliestAllowedDateTime()
                     const parts = this.formatDateTimeParts(earliest)
 
-                    if (this.pickup_date === parts.date) {
+                    if (this.need_date === parts.date) {
 
                         const requiredHour = minHour ?? parts.hour
 
@@ -597,7 +608,7 @@
                     this.availablePickupHours = hours
 
                     this.$nextTick(() => {
-                        this.pickup_time = hours.length ?
+                        this.need_time = hours.length ?
                             this.formatHourValue(hours[0]) :
                             ''
                     })
@@ -620,11 +631,11 @@
                     this.pickupErrors.date = ''
                     this.pickupErrors.time = ''
 
-                    if (!this.pickup_date) {
+                    if (!this.need_date) {
                         this.pickupErrors.date = 'Please select a date.'
                     }
 
-                    if (!this.pickup_time) {
+                    if (!this.need_time) {
                         this.pickupErrors.time = 'Please select a time.'
                     }
                 },
@@ -868,13 +879,13 @@
                             valid = false
                         }
 
-                        if (!this.pickup_date) {
-                            this.errors.pickup_date = 'Please select a date.'
+                        if (!this.need_date) {
+                            this.errors.need_date = 'Please select a date.'
                             valid = false
                         }
 
-                        if (!this.pickup_time) {
-                            this.errors.pickup_time = 'Please select a time.'
+                        if (!this.need_time) {
+                            this.errors.need_time = 'Please select a time.'
                             valid = false
                         }
                     }
@@ -978,10 +989,12 @@
 
                 async submitForm() {
 
+                    if (this.isSubmitting) return
+
+                    this.isSubmitting = true
+
                     this.formSubmitting = true
                     this.backendErrors = {}
-
-                    console.log(this.method)
 
                     try {
 
@@ -1007,8 +1020,8 @@
                         if (this.method === 'pickup') {
 
                             payload.delivery_branch = this.pickup_branch
-                            payload.need_date = this.pickup_date
-                            payload.need_time = this.pickup_time
+                            payload.need_date = this.need_date
+                            payload.need_time = this.need_time
                             payload.instruction = this.pickup_note
                         }
 
@@ -1042,7 +1055,35 @@
 
                             payload.delivery_fee = this.deliveryFees?.reduce((a,b)=>a+b,0) || 0
 
-                            payload.deliveries = JSON.stringify(this.deliveries)
+                            payload.deliveries = JSON.stringify(
+                                this.deliveries.map(d => ({
+                                    orders: d.orders.map(o => ({
+                                        product_id: o.product_id,
+                                        paella: o.paella,
+                                        is_free_product: o.is_free_product,
+                                        qty: o.qty,
+                                        product: o.product,
+                                        product_name: o.product_name,
+                                    })),
+                                    need_date: d.need_date,
+                                    need_time: d.need_time,
+                                    address: d.address,
+                                    province: d.province,
+                                    city: d.city,
+                                    location: d.location,
+                                    name: d.name,
+                                    phone: d.phone,
+                                    note: d.note,
+                                    delivery_fee: d.delivery_fee,
+                                    errors: d.errors,
+                                    isEditingAddress: d.isEditingAddress,
+                                    street: d.street,
+                                    sms: d.sms ?? false,
+                                    cochinillo_warning: d.cochinillo_warning,
+                                    paella: d.paella,
+                                    availableHours: d.availableHours,
+                                }))
+                            )
                         }
 
                         try {
@@ -1062,15 +1103,15 @@
 
                             if (!response.ok) {
                                 this.handleBackendErrors(data.errors)
+                                this.isSubmitting = false
                                 return
                             }
-
-                            console.log("Order success", data)
 
                             // redirect or open payment modal
                             this.onOrderSuccess(data)
 
                         } catch (e) {
+                            this.isSubmitting = false
                             console.error(e)
                         }
 
@@ -1078,6 +1119,104 @@
                         console.error(error)
                         this.formSubmitting = false
                     }
+                },
+
+                handleBackendErrors(errors) {
+
+                    if (!errors) return
+
+                    // Reset existing errors
+                    this.errors = {}
+                    this.singleDeliveryErrors = {}
+
+                    if (this.deliveries) {
+                        this.deliveries.forEach(d => d.errors = {})
+                    }
+
+                    Object.keys(errors).forEach(key => {
+
+                        const message = Array.isArray(errors[key])
+                            ? errors[key][0]
+                            : errors[key]
+
+                        // Multi delivery errors
+                        if (key.startsWith('deliveries.')) {
+
+                            const parts = key.split('.')
+                            const index = parseInt(parts[1])
+                            const field = parts[2]
+
+                            if (this.deliveries[index]) {
+                                this.deliveries[index].errors[field] = message
+                            }
+
+                            return
+                        }
+
+                        // Single delivery specific fields
+                        if ([
+                            'delivery_address',
+                            'province',
+                            'city',
+                            'location',
+                        ].includes(key)) {
+
+                            this.singleDeliveryErrors[key] = message
+                            return
+                        }
+
+                        // Date/time — depends on shipping type
+                        if (['need_date', 'need_time'].includes(key)) {
+
+                            if (this.method === 'delivery' && !this.allowMultiple) {
+                                this.singleDeliveryErrors[key] = message
+                            } else {
+                                this.errors[key] = message
+                            }
+
+                            return
+                        }
+
+                        // Contact info / global errors
+                        this.errors[key] = message
+                    })
+
+                    // Scroll to first error
+                    this.$nextTick(() => {
+                        const firstError = document.querySelector('.border-red-500')
+                        if (firstError) {
+                            firstError.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'center'
+                            })
+                        }
+                    })
+                },
+
+                onOrderSuccess(data) {
+                    if (data.success) {
+                        this.paymentDetails = {
+                            sales_header_id: data.sales_header_id,
+                            order_number: data.order_number,
+                            customer_contact_number: data.customer_contact_number,
+                            customer_name: data.customer_name,
+                            amount: data.amount,
+                            signature: data.signature,
+                            saved_items: data.saved_items
+                        };
+
+                        if (data.amount <= 0) {
+                            window.location.href = '/sales-summary/' + data.sales_header_id;
+                            return;
+                        }
+
+                        this.paymentModal = true;
+
+                        // this.isSubmitting = false;
+                    } else {
+                        this.isSubmitting = false
+                        this.warningMessage = data.message;
+                    };
                 },
 
                 isGuest: {{ auth()->guest() ? 'true' : 'false' }},
