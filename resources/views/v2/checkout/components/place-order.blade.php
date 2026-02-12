@@ -63,8 +63,8 @@
         {{-- ============================= --}}
         <template x-if="method === 'pickup'">
             <div class="text-sm space-y-1">
-                <p><span class="font-semibold">Date:</span> <span x-text="pickup_date"></span></p>
-                <p><span class="font-semibold">Time:</span> <span x-text="pickup_time"></span></p>
+                <p><span class="font-semibold">Date:</span> <span x-text="need_date"></span></p>
+                <p><span class="font-semibold">Time:</span> <span x-text="need_time"></span></p>
             </div>
         </template>
 
