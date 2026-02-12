@@ -18,7 +18,9 @@
 
             <textarea
                 x-model="delivery_address"
-                @blur="validateSingleDeliveryField('address')"
+                @focus="startEditingAddress"
+                @input="onAddressInput"
+                @blur="validateSingleDeliveryField('address'); finishEditingAddress()"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5"
                 :class="{'border-red-500': singleDeliveryErrors.address}"
                 rows="3"
@@ -97,7 +99,7 @@
 
             <select
                 x-model="location"
-                @change="getDeliveryFee"
+                @change="getDeliveryFee(); onBarangayChange()"
                 :disabled="!city"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 disabled:bg-gray-100"
             >

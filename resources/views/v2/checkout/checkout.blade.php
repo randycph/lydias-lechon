@@ -598,6 +598,7 @@
                 SINGLE DELIVERY STATE
                 ========================== */
 
+                delivery_address_street: '',
                 delivery_address: '',
                 province: '',
                 city: '',
@@ -605,6 +606,7 @@
                 need_date: '',
                 need_time: '',
                 instruction: '',
+                isEditingAddress: false,
 
                 singleDeliveryErrors: {},
 
@@ -650,12 +652,21 @@
                     this.city = ''
                     this.location = ''
                     this.validateSingleDeliveryField('province')
+
+                    this.rebuildAddress()
                 },
 
                 onCityChange() {
                     this.location = ''
                     this.getDeliveryFee?.()
                     this.validateSingleDeliveryField('city')
+
+                    this.rebuildAddress()
+
+                },
+
+                onBarangayChange() {
+                    this.rebuildAddress()
                 },
 
                 onMultiProvinceChange(index) {
@@ -1657,8 +1668,61 @@
                     return earliest
                 },
 
+                getProductName(productId) {
+                    const item = this.carts.find(c => c.product_id === productId)
+                    return item?.product?.name ?? ''
+                },
 
+                rebuildSingleDeliveryAddress() {
 
+                    const street = this.delivery_address_street || ''
+
+                    const parts = [
+                        street,
+                        this.location || '',
+                        this.city || '',
+                        this.province || ''
+                    ].filter(Boolean)
+
+                    this.delivery_address = parts.join(', ')
+                },
+
+                startEditingAddress() {
+                    this.isEditingAddress = true
+
+                    // Strip appended parts while editing
+                    this.delivery_address = this.delivery_address_street
+                },
+
+                onAddressInput() {
+                    this.delivery_address_street = this.delivery_address
+                },
+
+                finishEditingAddress() {
+                    this.isEditingAddress = false
+                    this.rebuildAddress()
+                },
+
+                rebuildAddress() {
+
+                    if (this.isEditingAddress) return
+
+                    const parts = []
+
+                    if (this.delivery_address_street)
+                        parts.push(this.delivery_address_street)
+
+                    if (this.location)
+                        parts.push(this.location)
+
+                    if (this.city)
+                        parts.push(this.city)
+
+                    if (this.province)
+                        parts.push(this.province)
+
+                    this.delivery_address = parts.join(', ')
+                },
 
 
             }
