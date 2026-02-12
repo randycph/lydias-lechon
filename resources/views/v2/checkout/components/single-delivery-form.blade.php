@@ -182,6 +182,10 @@
             </div>
         </div>
 
+        <div
+            class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
+            <div>We've pre-selected the earliest available time for your order. You may adjust the date and time to your preference. For bookings earlier that our pre-selected schedule, please contact our <a href="/contact-us" target="_blank" class="underline">Hotline</a> directly.</div>
+        </div>
 
         {{-- NOTE --}}
         <div>

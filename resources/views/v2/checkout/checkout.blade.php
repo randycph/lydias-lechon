@@ -34,6 +34,21 @@
         }
     </style>
 
+    @php
+        $deliveryFee = 0;
+        $total = 0;
+
+        foreach ($carts as $cart) {
+            $qty = $cart['qty'] ?? 1;
+            $paella_price = $cart['paella_price'] > 0 ? $cart['product']['paella_price'] : 0;
+            $price = $cart['price'] ?? 0;
+
+            $isFree = $cart['is_free_product'] ?? false;
+
+            $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
+        }
+    @endphp
+
     <div class="bg-cream">
         <div x-data="checkoutForm()" x-init="init()" class="container">
             <form id="checkoutForm" method="POST" action="{{ route('cart.temp_sales') }}" @submit.prevent="submitForm"
@@ -166,40 +181,53 @@
 
                     const delivery = this.deliveries[index]
 
-                    // If no order selected → reset
                     if (!delivery.orders.length) {
-
                         delivery.need_date = ''
                         delivery.need_time = ''
                         delivery.availableHours = []
-
                         return
+                    }
+
+                    const earliest = this.getEarliestDateTimeForDelivery(delivery)
+                    const nowRounded = this.roundUpToNextHour(new Date())
+                    const finalMinDate = earliest > nowRounded ? earliest : nowRounded
+
+                    console.log(finalMinDate)
+
+                    // Update datepicker minimum date dynamically
+                    delivery._datepicker?.setOptions({
+                        minDate: finalMinDate
+                    })
+
+                    const parts = this.formatDateTimeParts(finalMinDate)
+
+                    // Only force date if empty or invalid
+                    if (!delivery.need_date || delivery.need_date < parts.date) {
+                        delivery.need_date = parts.date
+                        delivery._datepicker?.setDate(parts.date)
                     }
 
                     let hours = this.generateHours()
 
-                    const earliest = this.getEarliestDateTimeForDelivery(delivery)
-                    const parts = this.formatDateTimeParts(earliest)
-
-                    delivery._datepicker?.setOptions({
-                        minDate: earliest
-                    })
-
-                    delivery.need_date = parts.date
-
-                    hours = hours.filter(h => h >= parts.hour)
+                    if (delivery.need_date === parts.date) {
+                        hours = hours.filter(h => h >= parts.hour)
+                    }
 
                     delivery.availableHours = hours
 
                     this.$nextTick(() => {
-
                         if (!hours.length) {
                             delivery.need_time = ''
                             return
                         }
 
                         const firstHour = this.formatHourValue(hours[0])
-                        delivery.need_time = firstHour
+
+                        const valid = hours.some(h =>
+                            this.formatHourValue(h) === delivery.need_time
+                        )
+
+                        delivery.need_time = valid ? delivery.need_time : firstHour
                     })
                 },
 
@@ -246,7 +274,7 @@
                         autohide: true,
                         format: 'yyyy-mm-dd',
                         minDate: earliest,
-                        todayHighlight: true,
+                        
                         placeholder: 'Select date'
                     })
 
@@ -280,7 +308,7 @@
                         autohide: true,
                         format: 'yyyy-mm-dd',
                         minDate: earliest,
-                        todayHighlight: true,
+                        
                         placeholder: 'Select date'
                     })
 
@@ -289,7 +317,7 @@
                     this.pickup_date = parts.date
                     picker.setDate(parts.date)
 
-                    // 🔥 auto populate time correctly
+                    // auto populate time correctly
                     this.$nextTick(() => {
                         this.populatePickupTimes(parts.hour)
                     })
@@ -300,9 +328,6 @@
                     })
                 },
 
-
-
-
                 initMultiDeliveryDatepicker(el, index) {
 
                     if (el._datepicker) {
@@ -312,11 +337,30 @@
                     const picker = new Datepicker(el, {
                         autohide: true,
                         format: 'yyyy-mm-dd',
-                        todayHighlight: true,
                         placeholder: 'Select date',
+                        beforeShowDay: (date) => {
+
+                            const delivery = this.deliveries[index]
+
+                            if (!delivery || !delivery.orders.length) {
+                                return { enabled: false }
+                            }
+
+                            const nowRounded = this.roundUpToNextHour(new Date())
+                            const earliest = this.getEarliestDateTimeForDelivery(delivery)
+                            const finalMinDate = earliest > nowRounded ? earliest : nowRounded
+
+                            // Disable dates before allowed
+                            if (date < finalMinDate.setHours(0,0,0,0)) {
+                                return { enabled: false }
+                            }
+
+                            return { enabled: true }
+                        }
                     })
 
                     el._datepicker = picker
+                    this.deliveries[index]._datepicker = picker
 
                     el.addEventListener('changeDate', (e) => {
 
@@ -357,11 +401,6 @@
                     })
                 },
 
-
-
-
-
-
                 populateDeliveryTimes(minHour = null) {
 
                     if (!this.need_date) return
@@ -389,9 +428,6 @@
                         this.need_time = firstHour
                     })
                 },
-
-
-
 
                 formatDateTimeParts(dateObj) {
 
@@ -422,7 +458,6 @@
 
                     return rounded
                 },
-
 
                 /* ==========================
                  * FORMATTERS
@@ -500,6 +535,9 @@
                     const deliveryTotal = this.allowMultiple
                         ? this.deliveries.reduce((sum, d) => sum + (parseFloat(d.delivery_fee) || 0), 0)
                         : (parseFloat(this.deliveryFee) || 0)
+
+                    this.total_amount = itemsTotal + deliveryTotal
+                    this.deposit = this.total_amount.toFixed(2);
 
                     return '₱' + (itemsTotal + deliveryTotal)
                         .toLocaleString(undefined, { minimumFractionDigits: 2 })
@@ -704,6 +742,9 @@
                     errors: {},
                     isEditingAddress: false,
                     street: '',
+                    sms: false,
+                    cochinillo_warning: false,
+                    paella: false,
                 }],
 
                 errors: {},
@@ -724,6 +765,9 @@
                         errors: {},
                         isEditingAddress: false,
                         street: '',
+                        sms: false,
+                        cochinillo_warning: false,
+                        paella: false,
                     })
                 },
 
@@ -761,9 +805,9 @@
                 },
 
                 contact: {
-                    name: '',
-                    mobile: '',
-                    email: '',
+                    name: '{{ auth()->user()->name ?? '' }}',
+                    mobile: '{{ auth()->user()->contact_mobile ?? '' }}',
+                    email: '{{ auth()->user()->email ?? '' }}',
                     agent: ''
                 },
 
@@ -927,23 +971,113 @@
                 },
 
 
-                submitForm() {
+                order_amount: {{ $total }},
+                total_amount: 0,
+                discount_amount: 0,
+                deposit: '',
 
-                    if (this.isSubmitting) return
+                async submitForm() {
 
-                    this.isSubmitting = true
+                    this.formSubmitting = true
+                    this.backendErrors = {}
 
-                    const isValid = this.validateBeforeSubmit()
+                    console.log(this.method)
 
-                    if (!isValid) {
-                        this.isSubmitting = false
-                        return
+                    try {
+
+                        let payload = {
+                            name: this.contact.name,
+                            mobile: this.contact.mobile,
+                            email: this.contact.email,
+                            agent: this.contact.agent,
+                            shipping_type: this.method,
+                            coupons: JSON.stringify(this.coupons.map(c => c.code)),
+                            coupon_data: JSON.stringify(this.coupons),
+                            discount_amount: this.discount_amount || 0,
+                            order_amount: this.order_amount,
+                            delivery_fee: this.deliveryFee || 0,
+                            deposit: this.deposit,
+                            total_amount: this.total_amount,
+                        }
+
+                        /* ==========================
+                        PICKUP
+                        ========================== */
+
+                        if (this.method === 'pickup') {
+
+                            payload.delivery_branch = this.pickup_branch
+                            payload.need_date = this.pickup_date
+                            payload.need_time = this.pickup_time
+                            payload.instruction = this.pickup_note
+                        }
+
+
+                        /* ==========================
+                        SINGLE DELIVERY
+                        ========================== */
+
+                        if (this.method === 'delivery' && !this.allowMultiple) {
+
+                            payload.delivery_address = this.delivery_address
+                            payload.province = this.province
+                            payload.city = this.city
+                            payload.location = this.location
+                            payload.need_date = this.need_date
+                            payload.need_time = this.need_time
+                            payload.instruction = this.pickup_note
+                        }
+
+                        /* ==========================
+                        MULTI DELIVERY
+                        ========================== */
+
+                        if (this.method === 'delivery' && this.allowMultiple) {
+
+                            payload.delivery_address = this.deliveries[0]?.address ?? ''
+                            payload.province = this.deliveries[0]?.province ?? ''
+                            payload.city = this.deliveries[0]?.city ?? ''
+                            payload.location = this.deliveries[0]?.location ?? ''
+                            payload.need_time = this.deliveries[0]?.need_time ?? ''
+
+                            payload.delivery_fee = this.deliveryFees?.reduce((a,b)=>a+b,0) || 0
+
+                            payload.deliveries = JSON.stringify(this.deliveries)
+                        }
+
+                        try {
+
+                            payload._token = document.querySelector('meta[name="csrf-token"]').content
+
+                            const response = await fetch("{{ route('cart.temp_sales') }}", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content
+                                },
+                                body: JSON.stringify(payload)
+                            })
+
+                            const data = await response.json()
+
+                            if (!response.ok) {
+                                this.handleBackendErrors(data.errors)
+                                return
+                            }
+
+                            console.log("Order success", data)
+
+                            // redirect or open payment modal
+                            this.onOrderSuccess(data)
+
+                        } catch (e) {
+                            console.error(e)
+                        }
+
+                    } catch (error) {
+                        console.error(error)
+                        this.formSubmitting = false
                     }
-
-                    // Submit normal form
-                    this.$nextTick(() => {
-                        document.getElementById('checkoutForm').submit()
-                    })
                 },
 
                 isGuest: {{ auth()->guest() ? 'true' : 'false' }},
@@ -1424,6 +1558,9 @@
                         errors: {},
                         isEditingAddress: false,
                         street: '',
+                        sms: false,
+                        cochinillo_warning: false,
+                        paella: false,
                     })
                 },
 
@@ -1687,7 +1824,7 @@
 
                 getProductName(productId) {
                     const item = this.carts.find(c => c.product_id === productId)    
-                                    
+
                     return item?.product?.name ?? ''
                 },
 
@@ -1802,6 +1939,7 @@
                     return `${o.product_id}_${o.paella ? 1 : 0}_${o.is_free_product ? 1 : 0}`
                 },
 
+                backendErrors: {},
             }
         }
     </script>

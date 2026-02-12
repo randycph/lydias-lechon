@@ -160,7 +160,18 @@
                                x-text="delivery.errors.need_time"></p>
                         </template>
                     </div>
+                </div>
 
+                <template x-if="delivery.cochinillo_warning">
+                    <div
+                        class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
+                        Our Cochinillo is not available on December 24. Please select another size.
+                    </div>
+                </template>
+
+                <div
+                    class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
+                    <div>We've pre-selected the earliest available time for your order. You may adjust the date and time to your preference. For bookings earlier that our pre-selected schedule, please contact our <a href="/contact-us" target="_blank" class="underline">Hotline</a> directly.</div>
                 </div>
 
 
@@ -321,6 +332,16 @@
                         </template>
                     </div>
 
+                    <div class="w-full flex gap-2">
+                        <input :id="'sms-' + index" type="checkbox"
+                            x-model="delivery.sms" class="border border-gray-300 p-2" />
+                        <label 
+                            class="block text-sm mb-1" 
+                            :for="'sms-' + index">
+                            Notify recipient through SMS?
+                        </label>
+                    </div>
+
                 </div>
 
 
@@ -333,6 +354,7 @@
                     <textarea
                         x-model="delivery.note"
                         rows="2"
+                        placeholder="Add instructions or notes about your delivery."
                         class="bg-white border border-gray-300 text-sm rounded-md block w-full p-2.5"
                     ></textarea>
                 </div>
