@@ -61,11 +61,6 @@
         <template x-if="method === 'delivery' && !allowMultiple">
             <div class="text-sm space-y-1">
                 <p x-show="delivery_address"><span class="font-semibold">Address:</span> <span x-text="delivery_address"></span></p>
-                <p x-show="location || city || province">
-                    <span x-text="location"></span>,
-                    <span x-text="city"></span>,
-                    <span x-text="province"></span>
-                </p>
                 <p x-show="need_date"><span class="font-semibold">Date:</span> <span x-text="need_date"></span></p>
                 <p x-show="need_time"><span class="font-semibold">Time:</span> <span x-text="need_time"></span></p>
                 <p x-show="instruction"><span class="font-semibold">Instruction:</span> <span x-text="instruction"></span></p>
@@ -141,7 +136,7 @@
 
             {{-- SINGLE DELIVERY --}}
             <template x-if="method === 'delivery' && !allowMultiple && deliveryFee > 0">
-                <div class="flex justify-between">
+                <div class="flex justify-between pb-3 relative">
                     <span class="font-medium text-gray-800">Delivery Fee</span>
                     <span x-text="formatMoney(deliveryFee)"></span>
                 </div>
