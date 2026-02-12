@@ -39,14 +39,14 @@
 
                     <div class="space-y-2">
 
-                        <template x-for="order in orders" :key="order.id">
+                        <template x-for="(order, index2) in orders" :key="index2">
                             <template x-if="getRemainingQty(order) > 0 || isOrderChecked(delivery, order)">
 
                                 <div class="flex justify-between items-center">
 
                                     <div class="flex items-center gap-2">
                                         <input
-                                            :id="'order-' + order.id + '-delivery-' + index"
+                                            :id="'order-' + order.id + '-' + index + '-' + index2 + '-' + (order.paella_price > 0 ? 'paella' : 'nopaella')"
                                             type="checkbox"
                                             :checked="isOrderChecked(delivery, order)"
                                             @input="clearDeliveryFieldError(delivery, 'orders')"
@@ -54,8 +54,8 @@
                                         >
 
                                         <label 
-                                            :for="'order-' + order.id + '-delivery-' + index"
-                                            x-text="order.product.name">
+                                            :for="'order-' + order.id + '-' + index + '-' + index2 + '-' + (order.paella_price > 0 ? 'paella' : 'nopaella')"
+                                            x-html="order.product.name + (order.paella_price > 0 ? ' <strong>Boneless with Paella</strong>' : '') + (getRemainingQty(order) <= 0 && !isOrderChecked(delivery, order) ? ' (Fully Assigned)' : '')">
                                         </label>
 
                                         <span

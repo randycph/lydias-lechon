@@ -487,27 +487,24 @@
                  * TOTAL
                  * ========================== */
                 computeTotal() {
-                    let total = this.carts.reduce((sum, item) => {
-                        const qty = Number(item.qty) || 1
-                        const base = item.is_free_product ? 0 : Number(item.price) || 0
-                        const paella = item.paella_price > 0 ?
-                            Number(item.product?.paella_price || 0) :
-                            0
-                        return sum + ((base + paella) * qty)
+
+                    const itemsTotal = this.carts.reduce((sum, item) => {
+
+                        const price = parseFloat(item.price || 0)
+                        const paella = parseFloat(item.paella_price || 0)
+
+                        return sum + ((price + paella) * item.qty)
+
                     }, 0)
 
-                    if (this.method === 'delivery' && !this.allowMultiple) {
-                        total += this.deliveryFee || 0
-                    }
+                    const deliveryTotal = this.allowMultiple
+                        ? this.deliveries.reduce((sum, d) => sum + (parseFloat(d.delivery_fee) || 0), 0)
+                        : (parseFloat(this.deliveryFee) || 0)
 
-                    if (this.allowMultiple) {
-                        total += this.deliveryFees.reduce((s, d) =>
-                            s + (d.fee - (d.discount || 0)), 0)
-                    }
-
-                    // coupon effects already reflected in deliveryFees / discounts
-                    return this.formatMoney(total)
+                    return '₱' + (itemsTotal + deliveryTotal)
+                        .toLocaleString(undefined, { minimumFractionDigits: 2 })
                 },
+
 
                 changeMethod(type) {
 
@@ -1257,13 +1254,10 @@
                 orders: @json($carts),
 
                 isOrderChecked(delivery, order) {
-                    const isPaella = parseFloat(order.paella_price) > 0;
-                    const isFree = !!order.is_free_product;
+                    const key = this.getOrderKey(order)
 
                     return delivery.orders?.some(o =>
-                        o.product_id === order.product_id &&
-                        !!o.paella === isPaella &&
-                        !!o.is_free_product === isFree
+                       this.getDeliveryOrderKey(o) === key
                     );
                 },
 
@@ -1272,6 +1266,7 @@
                     if (!delivery.orders) delivery.orders = []
 
                     const remaining = this.getRemainingQty(order)
+                    const key = this.getOrderKey(order)
 
                     const hasPaella = parseFloat(order.paella_price) > 0;
                     const isPaella = parseFloat(order.paella_price) > 0;
@@ -1280,20 +1275,20 @@
                     if (checked && remaining <= 0) return
 
                     const orderIndex = delivery.orders.findIndex(o =>
-                        o.product_id === order.product_id &&
-                        !!o.paella === isPaella &&
-                        !!o.is_free_product === isFree
+                        this.getDeliveryOrderKey(o) === key
                     )
 
                     if (checked && orderIndex === -1) {
                         delivery.orders.push({
-                            paella: isPaella,
-                            is_free_product: isFree,
                             product_id: order.product_id,
+                            paella: parseFloat(order.paella_price || 0) > 0,
+                            is_free_product: !!order.is_free_product,
                             qty: 1,
                             product: order.product,
-                            product_name: isPaella ? order.product.name + ' Boneless with Paella' : order.product
-                                .name,
+                            product_name:
+                                parseFloat(order.paella_price || 0) > 0
+                                    ? order.product.name + ' Boneless with Paella'
+                                    : order.product.name,
                         })
                     }
 
@@ -1309,22 +1304,20 @@
 
 
                 getSelectedQty(delivery, order) {
+                    const key = this.getOrderKey(order)
 
                     const found = delivery.orders?.find(o =>
-                        o.product_id === order.product_id &&
-                        !!o.paella === !!order.product.paella_price &&
-                        !!o.is_free_product === !!order.is_free_product
+                        this.getDeliveryOrderKey(o) === key
                     )
 
                     return found ? found.qty : 1
                 },
 
                 updateSelectedQty(delivery, order, newQty) {
+                    const key = this.getOrderKey(order)
 
                     const found = delivery.orders?.find(o =>
-                        o.product_id === order.product_id &&
-                        !!o.paella === !!order.product.paella_price &&
-                        !!o.is_free_product === !!order.is_free_product
+                        this.getDeliveryOrderKey(o) === key
                     )
 
                     if (found) {
@@ -1335,17 +1328,18 @@
                         this.cleanupEmptyDeliveries()
                     })
 
-                    this.populateMultiDeliveryTimes(index)
+                    // this.populateMultiDeliveryTimes(index)
                 },
 
                 getAvailableQtyForDropdown(delivery, order) {
 
                     const totalQty = parseInt(order.qty)
+                    const key = this.getOrderKey(order)
 
                     const assignedQty = this.deliveries.reduce((sum, d) => {
 
                         const found = d.orders?.find(o =>
-                            o.product_id === order.product_id
+                            this.getDeliveryOrderKey(o) === key
                         )
 
                         return sum + (found ? parseInt(found.qty) : 0)
@@ -1362,13 +1356,12 @@
                 },
 
                 getAssignedQty(order) {
+                    const key = this.getOrderKey(order)
 
                     return this.deliveries.reduce((sum, delivery) => {
 
                         const found = delivery.orders?.find(o =>
-                            o.product_id === order.product_id &&
-                            !!o.paella === !!order.product.paella_price &&
-                            !!o.is_free_product === !!order.is_free_product
+                            this.getDeliveryOrderKey(o) === key
                         )
 
                         return sum + (found ? parseInt(found.qty) : 0)
@@ -1693,7 +1686,8 @@
                 },
 
                 getProductName(productId) {
-                    const item = this.carts.find(c => c.product_id === productId)
+                    const item = this.carts.find(c => c.product_id === productId)    
+                                    
                     return item?.product?.name ?? ''
                 },
 
@@ -1797,6 +1791,16 @@
                     d.address = parts.join(', ')
                 },
 
+                getOrderKey(order) {
+                    const isPaella = parseFloat(order.paella_price || 0) > 0
+                    const isFree = !!order.is_free_product
+
+                    return `${order.product_id}_${isPaella ? 1 : 0}_${isFree ? 1 : 0}`
+                },
+
+                getDeliveryOrderKey(o) {
+                    return `${o.product_id}_${o.paella ? 1 : 0}_${o.is_free_product ? 1 : 0}`
+                },
 
             }
         }

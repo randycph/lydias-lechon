@@ -95,20 +95,21 @@
         </template>
 
         {{-- MULTIPLE DELIVERY --}}
-        <template x-if="allowMultiple && deliveryFees.length">
-            <div class="space-y-1">
-                <template x-for="(fee, i) in deliveryFees" :key="i">
-                    <div class="flex justify-between text-gray-600 text-sm">
-                        <span x-text="`Delivery Fee (${fee.location})`"></span>
+        <template x-if="method === 'delivery' && allowMultiple">
+            <div class="mt-3 space-y-1 text-sm">
 
-                        <div class="flex items-center gap-1">
-                            <template x-if="fee.discount > 0">
-                                <span class="line-through text-red-600 italic"
-                                      x-text="formatMoney(fee.fee)">
-                                </span>
-                            </template>
-                            <span x-text="formatMoney(fee.fee - (fee.discount || 0))"></span>
-                        </div>
+                <template x-for="(delivery, index) in deliveries" :key="index">
+                    <div class="flex justify-between" x-show="delivery.delivery_fee > 0">
+
+                        <span class="text-slate-600">
+                            Delivery Fee
+                            (<span x-text="delivery.city + ', ' + delivery.province"></span>)
+                        </span>
+
+                        <span>
+                            ₱<span x-text="(delivery.delivery_fee || 0).toLocaleString(undefined,{minimumFractionDigits:2})"></span>
+                        </span>
+
                     </div>
                 </template>
             </div>

@@ -18,7 +18,20 @@
             <template x-for="item in carts" :key="item.id">
                 <div class="flex justify-between border-b py-2 text-sm">
                     <div>
-                        <span x-text="item.product.name"></span>
+                        <span x-text="item.product?.name"></span>
+                        <span
+                            x-show="parseFloat(item.paella_price) > 0"
+                            class="italic text-sm"
+                        >
+                            (Boneless with Paella)
+                        </span>
+
+                        <span
+                            x-show="item.is_free_product"
+                            class="ml-2 px-2 py-0.5 text-xs rounded bg-green-100 text-green-700"
+                        >
+                            FREE
+                        </span>
                         <span class="text-gray-500 text-xs">
                             (x<span x-text="item.qty"></span>)
                         </span>
@@ -81,11 +94,6 @@
                         </p>
 
                         <p x-text="delivery.address"></p>
-                        <p>
-                            <span x-text="delivery.location"></span>,
-                            <span x-text="delivery.city"></span>,
-                            <span x-text="delivery.province"></span>
-                        </p>
 
                         <p>
                             <span class="font-semibold">Date:</span>
@@ -100,14 +108,27 @@
                         <div class="mt-2">
                             <p class="font-semibold">Assigned Orders:</p>
 
-                            <template x-for="order in delivery.orders" :key="order.product_id">
-                                <p>
-                                    Product ID:
-                                    <span x-text="getProductName(order.product_id)"></span>
-                                    (x<span x-text="order.qty"></span>)
-                                </p>
-                            </template>
+                            <ul class="list-disc pl-10">
+                                <template x-for="(order, index) in delivery.orders" :key="index">
+                                    <li>
+                                        <span x-text="order.product_name"></span>
+
+                                        <span
+                                            x-show="order.is_free_product"
+                                            class="text-green-600 text-xs font-semibold ml-1"
+                                        >
+                                            (Free)
+                                        </span>
+                                        (x<span x-text="order.qty"></span>)
+                                    </li>
+                                </template>
+                            </ul>
                         </div>
+
+                        <p>
+                            <span class="font-semibold">Delivery Fee:</span>
+                            <span x-text="formatMoney(delivery.delivery_fee)"></span>
+                        </p>
 
                     </div>
                 </template>
@@ -143,20 +164,21 @@
             </template>
 
             {{-- MULTIPLE DELIVERY --}}
-            <template x-if="allowMultiple && deliveryFees.length">
-                <div class="space-y-1">
-                    <template x-for="(fee, i) in deliveryFees" :key="i">
-                        <div class="flex justify-between text-gray-600 text-sm">
-                            <span x-text="`Delivery Fee (${fee.location})`"></span>
+            <template x-if="method === 'delivery' && allowMultiple">
+                <div class="space-y-1 text-sm pb-4">
 
-                            <div class="flex items-center gap-1">
-                                <template x-if="fee.discount > 0">
-                                    <span class="line-through text-red-600 italic"
-                                        x-text="formatMoney(fee.fee)">
-                                    </span>
-                                </template>
-                                <span x-text="formatMoney(fee.fee - (fee.discount || 0))"></span>
-                            </div>
+                    <template x-for="(delivery, index) in deliveries" :key="index">
+                        <div class="flex justify-between" x-show="delivery.delivery_fee > 0">
+
+                            <span class="text-slate-600">
+                                Delivery Fee
+                                (<span x-text="delivery.city + ', ' + delivery.province"></span>)
+                            </span>
+
+                            <span>
+                                ₱<span x-text="(delivery.delivery_fee || 0).toLocaleString(undefined,{minimumFractionDigits:2})"></span>
+                            </span>
+
                         </div>
                     </template>
                 </div>
