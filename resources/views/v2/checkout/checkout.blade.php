@@ -144,19 +144,12 @@
         function checkoutForm() {
             return {
 
-                /* ==========================
-                 * STATE
-                 * ========================== */
                 carts: window.initialCarts || [],
                 coupons: [],
                 method: 'pickup',
                 allowMultiple: false,
                 deliveryFee: 0,
                 deliveryFees: [],
-
-                /* ==========================
-                PICKUP STATE
-                ========================== */
 
                 pickup_branch: '',
                 pickup_date: '',
@@ -188,7 +181,6 @@
 
                     return hours
                 },
-
 
                 populateMultiDeliveryTimes(index) {
 
@@ -242,16 +234,7 @@
                     })
                 },
 
-
-
-
-
-
-
                 availableDeliveryHours: [],
-
-
-
 
                 formatAMPM(hour) {
                     const suffix = hour >= 12 ? 'PM' : 'AM'
@@ -470,9 +453,6 @@
                     return rounded
                 },
 
-                /* ==========================
-                 * FORMATTERS
-                 * ========================== */
                 formatMoney(value) {
                     return '₱' + (parseFloat(value) || 0)
                         .toLocaleString(undefined, {
@@ -480,9 +460,6 @@
                         })
                 },
 
-                /* ==========================
-                 * COMPUTED GETTERS
-                 * ========================== */
                 get formattedSubtotal() {
                     const total = this.carts.reduce((sum, item) => {
                         const qty = Number(item.qty) || 1
@@ -497,9 +474,6 @@
                     return this.formatMoney(total)
                 },
 
-                /* ==========================
-                 * HELPERS
-                 * ========================== */
                 itemLineTotal(item) {
                     if (item.is_free_product) return '₱0.00'
 
@@ -576,13 +550,6 @@
 
                 },
 
-
-
-
-                /* ==========================
-                PICKUP HOURS
-                ========================== */
-
                 availablePickupHours: [],
 
                 openHour: 9,
@@ -618,10 +585,6 @@
                 formatHourValue(hour) {
                     return (hour < 10 ? '0' + hour : hour) + ':00'
                 },
-
-                /* ==========================
-                EVENTS
-                ========================== */
 
                 onPickupBranchChange() {
                     this.pickupErrors.branch = ''
@@ -844,144 +807,6 @@
                     this.privacyModal = false
                 },
 
-                validateBeforeSubmit() {
-
-                    let valid = true
-                    this.errors = {}
-
-                    /* =========================
-                    CONTACT VALIDATION
-                    ========================== */
-
-                    if (!this.contact?.name) {
-                        this.errors.name = 'Name is required.'
-                        valid = false
-                    }
-
-                    if (!this.contact?.mobile) {
-                        this.errors.mobile = 'Mobile number is required.'
-                        valid = false
-                    }
-
-                    if (!this.contact?.email) {
-                        this.errors.email = 'Email is required.'
-                        valid = false
-                    }
-
-                    /* =========================
-                    PICKUP VALIDATION
-                    ========================== */
-
-                    if (this.method === 'pickup') {
-
-                        if (!this.pickup_branch) {
-                            this.errors.pickup_branch = 'Please select a branch.'
-                            valid = false
-                        }
-
-                        if (!this.need_date) {
-                            this.errors.need_date = 'Please select a date.'
-                            valid = false
-                        }
-
-                        if (!this.need_time) {
-                            this.errors.need_time = 'Please select a time.'
-                            valid = false
-                        }
-                    }
-
-                    /* =========================
-                    SINGLE DELIVERY VALIDATION
-                    ========================== */
-
-                    if (this.method === 'delivery' && !this.allowMultiple) {
-
-                        if (!this.delivery_address) {
-                            this.errors.delivery_address = 'Address is required.'
-                            valid = false
-                        }
-
-                        if (!this.province) {
-                            this.errors.province = 'Province is required.'
-                            valid = false
-                        }
-
-                        if (!this.city) {
-                            this.errors.city = 'City is required.'
-                            valid = false
-                        }
-
-                        if (!this.need_date) {
-                            this.errors.need_date = 'Please select a date.'
-                            valid = false
-                        }
-
-                        if (!this.need_time) {
-                            this.errors.need_time = 'Please select a time.'
-                            valid = false
-                        }
-                    }
-
-                    /* =========================
-                    MULTI DELIVERY VALIDATION
-                    ========================== */
-
-                    if (this.method === 'delivery' && this.allowMultiple) {
-
-                        this.deliveries.forEach((delivery, index) => {
-
-                            if (!delivery.address) {
-                                if (!this.errors[index]) this.errors[index] = {}
-                                this.errors[index].address = 'Address required'
-                                valid = false
-                            }
-
-                            if (!delivery.need_date) {
-                                if (!this.errors[index]) this.errors[index] = {}
-                                this.errors[index].need_date = 'Date required'
-                                valid = false
-                            }
-
-                            if (!delivery.need_time) {
-                                if (!this.errors[index]) this.errors[index] = {}
-                                this.errors[index].need_time = 'Time required'
-                                valid = false
-                            }
-
-                            if (!delivery.name) {
-                                if (!this.errors[index]) this.errors[index] = {}
-                                this.errors[index].name = 'Name required'
-                                valid = false
-                            }
-
-                            if (!delivery.phone) {
-                                if (!this.errors[index]) this.errors[index] = {}
-                                this.errors[index].phone = 'Phone required'
-                                valid = false
-                            }
-
-                            if (!delivery.orders || delivery.orders.length === 0) {
-                                if (!this.errors[index]) this.errors[index] = {}
-                                this.errors[index].orders = 'Assign at least one order.'
-                                valid = false
-                            }
-
-                        })
-                    }
-
-                    /* =========================
-                    PRIVACY VALIDATION (guest)
-                    ========================== */
-
-                    if (this.isGuest && !this.privacy) {
-                        this.errors.privacy = 'You must agree to the privacy policy.'
-                        valid = false
-                    }
-
-                    return valid
-                },
-
-
                 order_amount: {{ $total }},
                 total_amount: 0,
                 discount_amount: 0,
@@ -994,7 +819,18 @@
                     this.isSubmitting = true
 
                     this.formSubmitting = true
-                    this.backendErrors = {}
+
+                    if (this.isGuest && !this.privacy) {
+                        this.errors.privacy = 'You must agree to the privacy policy.'
+                        this.isSubmitting = false
+                        this.formSubmitting = false
+
+                        this.$nextTick(() => {
+                            this.smoothScroll('.border-red-500')
+                        })
+
+                        return
+                    }
 
                     try {
 
@@ -1183,14 +1019,20 @@
 
                     // Scroll to first error
                     this.$nextTick(() => {
-                        const firstError = document.querySelector('.border-red-500')
-                        if (firstError) {
-                            firstError.scrollIntoView({
-                                behavior: 'smooth',
-                                block: 'center'
-                            })
-                        }
+                        this.smoothScroll('.border-red-500')
                     })
+                },
+
+                smoothScroll(selector) {
+                    if (!selector) return
+                    
+                    const el = document.querySelector(selector)
+                    if (el) {
+                        el.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        })
+                    }
                 },
 
                 onOrderSuccess(data) {
@@ -1510,7 +1352,13 @@
                             need_time: '',
                             note: '',
                             delivery_fee: 0,
-                            orders: []
+                            orders: [],
+                            errors: {},
+                            isEditingAddress: false,
+                            street: '',
+                            sms: false,
+                            cochinillo_warning: false,
+                            paella: false,
                         }]
 
                         this.deliveryFee = 0
@@ -1839,22 +1687,19 @@
 
                 adjustToOpeningHours(dateObj) {
 
-                    const openHour = 9
-                    const closeHour = 20
-
                     let adjusted = new Date(dateObj)
 
                     const hour = adjusted.getHours()
 
                     // If before opening → move to 9AM
-                    if (hour < openHour) {
-                        adjusted.setHours(openHour, 0, 0, 0)
+                    if (hour < this.openHour) {
+                        adjusted.setHours(this.openHour, 0, 0, 0)
                     }
 
-                    // If after closing → move to next day 9AM
-                    if (hour >= closeHour) {
+                    // If after closing move to next day 9AM
+                    if (hour >= this.closeHour) {
                         adjusted.setDate(adjusted.getDate() + 1)
-                        adjusted.setHours(openHour, 0, 0, 0)
+                        adjusted.setHours(this.openHour, 0, 0, 0)
                     }
 
                     return adjusted
@@ -2077,8 +1922,6 @@
                 getDeliveryOrderKey(o) {
                     return `${o.product_id}_${o.paella ? 1 : 0}_${o.is_free_product ? 1 : 0}`
                 },
-
-                backendErrors: {},
 
                 formatTime(time) {
                     if (!time) return '';
