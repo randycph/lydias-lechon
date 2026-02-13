@@ -8,12 +8,31 @@ class BlockedSlot extends Model
 {
     protected $fillable = [
         'scope',
-        'category_id',
-        'product_id',
         'date',
         'start_time',
         'end_time',
         'is_all_day',
         'block_type',
     ];
+
+    public function products()
+    {
+        return $this->belongsToMany(
+            Product::class,
+            'blocked_slot_products',
+            'blocked_slot_id',
+            'product_id'
+        );
+    }
+
+    public function categories()
+    {
+        return $this->belongsToMany(
+            ProductCategory::class,
+            'blocked_slot_categories',
+            'blocked_slot_id', 
+            'category_id'
+        );
+    }
+
 }

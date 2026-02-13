@@ -2046,14 +2046,26 @@
                     const cartProductIds = this.carts.map(i => i.product_id)
                     const cartCategoryIds = this.carts.map(i => i.product.category_id)
 
-                    if (block.scope === 'all') return true
+                    if (block.scope === 'all') {
+                        return true
+                    }
 
                     if (block.scope === 'product') {
-                        return cartProductIds.includes(block.product_id)
+
+                        if (!block.products || !block.products.length) return false
+
+                        const blockProductIds = block.products.map(p => p.id)
+
+                        return cartProductIds.some(id => blockProductIds.includes(id))
                     }
 
                     if (block.scope === 'category') {
-                        return cartCategoryIds.includes(block.category_id)
+
+                        if (!block.categories || !block.categories.length) return false
+
+                        const blockCategoryIds = block.categories.map(c => c.id)
+
+                        return cartCategoryIds.some(id => blockCategoryIds.includes(id))
                     }
 
                     return false

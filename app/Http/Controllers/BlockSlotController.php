@@ -12,56 +12,66 @@ class BlockSlotController extends Controller
 {
     public function events()
     {
-        $blocks = BlockedSlot::orderBy('date')->get();
+        $blocks = BlockedSlot::with([
+                'products:id,name',
+                'categories:id,name'
+            ])
+            ->orderBy('date')
+            ->get();
 
-        // 1. Group by block signature
+        // Group by full block signature (including pivot sets)
         $groups = $blocks->groupBy(function ($b) {
+
+            $productIds = $b->products->pluck('id')->sort()->implode(',');
+            $categoryIds = $b->categories->pluck('id')->sort()->implode(',');
+
             return implode('|', [
                 $b->scope,
-                $b->category_id,
-                $b->product_id,
+                $b->block_type,
                 $b->is_all_day,
                 $b->start_time,
                 $b->end_time,
-                $b->block_type,
+                $productIds,
+                $categoryIds,
             ]);
         });
 
         $events = [];
 
-        // 2. Process each group independently
+        // Process each group independently
         foreach ($groups as $group) {
+
             $group = $group->sortBy('date')->values();
 
             $current = null;
 
             foreach ($group as $block) {
+
                 if (
                     $current &&
                     \Carbon\Carbon::parse($current['end'])
                         ->addDay()
                         ->toDateString() === $block->date
                 ) {
-                    // Extend range
+                    // Extend date range
                     $current['end'] = $block->date;
                 } else {
-                    // Push previous
+
                     if ($current) {
                         $events[] = $this->formatEvent($current);
                     }
 
-                    // Start new
                     $current = [
                         'id' => $block->id,
                         'scope' => $block->scope,
-                        'category_id' => $block->category_id,
-                        'product_id' => $block->product_id,
+                        'block_type' => $block->block_type,
                         'start' => $block->date,
                         'end' => $block->date,
                         'start_time' => $block->start_time,
                         'end_time' => $block->end_time,
                         'is_all_day' => $block->is_all_day,
-                        'block_type' => $block->block_type,
+                        'products' => $block->products,
+                        'categories' => $block->categories,
                     ];
                 }
             }
@@ -80,8 +90,11 @@ class BlockSlotController extends Controller
             'scope' => 'required|in:all,category,product',
             'block_type' => 'required|in:both,delivery,pickup',
 
-            'category_id' => 'nullable|required_if:scope,category',
-            'product_id'  => 'nullable|required_if:scope,product',
+            'category_ids' => 'nullable|array',
+            'category_ids.*' => 'integer|exists:product_categories,id',
+
+            'product_ids' => 'nullable|array',
+            'product_ids.*' => 'integer|exists:products,id',
 
             'dates' => 'required|array|min:1',
             'dates.*' => 'date',
@@ -90,43 +103,59 @@ class BlockSlotController extends Controller
 
             'times' => 'nullable|array',
             'times.*.start' => 'required_if:is_all_day,false|date_format:H:i',
-            'times.*.end'   => 'required_if:is_all_day,false|date_format:H:i',
+            'times.*.end' => 'required_if:is_all_day,false|date_format:H:i',
         ]);
 
         DB::transaction(function () use ($validated) {
 
             foreach ($validated['dates'] as $date) {
 
-                // ALL DAY BLOCK
                 if ($validated['is_all_day']) {
-                    BlockedSlot::create([
+
+                    $blockedSlot = BlockedSlot::create([
                         'scope'       => $validated['scope'],
                         'block_type'  => $validated['block_type'],
-                        'category_id' => $validated['category_id'] ?? null,
-                        'product_id'  => $validated['product_id'] ?? null,
                         'date'        => $date,
                         'start_time'  => null,
                         'end_time'    => null,
                         'is_all_day'  => true,
                     ]);
+
+                    // Attach products
+                    if (!empty($validated['product_ids'])) {
+                        $blockedSlot->products()->attach($validated['product_ids']);
+                    }
+
+                    // Attach categories
+                    if (!empty($validated['category_ids'])) {
+                        $blockedSlot->categories()->attach($validated['category_ids']);
+                    }
+
                     continue;
                 }
 
-                // TIME SLOTS
                 foreach ($validated['times'] as $time) {
-                    BlockedSlot::create([
+
+                    $blockedSlot = BlockedSlot::create([
                         'scope'       => $validated['scope'],
                         'block_type'  => $validated['block_type'],
-                        'category_id' => $validated['category_id'] ?? null,
-                        'product_id'  => $validated['product_id'] ?? null,
                         'date'        => $date,
                         'start_time'  => $time['start'],
                         'end_time'    => $time['end'],
                         'is_all_day'  => false,
                     ]);
+
+                    if (!empty($validated['product_ids'])) {
+                        $blockedSlot->products()->attach($validated['product_ids']);
+                    }
+
+                    if (!empty($validated['category_ids'])) {
+                        $blockedSlot->categories()->attach($validated['category_ids']);
+                    }
                 }
             }
         });
+
 
         return response()->json([
             'message' => 'Blocked dates saved successfully'
@@ -136,6 +165,15 @@ class BlockSlotController extends Controller
     public function destroy($id)
     {
         $block = BlockedSlot::findOrFail($id);
+        
+        if ($block->products()->count() > 0) {
+            $block->products()->detach();
+        }
+
+        if ($block->categories()->count() > 0) {
+            $block->categories()->detach();
+        }
+
         $block->delete();
 
         return response()->json([
@@ -143,29 +181,29 @@ class BlockSlotController extends Controller
         ]);
     }
 
-    public function formatEvent($b)
+    private function formatEvent($b)
     {
         return [
             'id' => $b['id'],
             'title' => strtoupper($b['scope']) . ' BLOCKED',
-            'block_type' => $b['block_type'],
             'start' => $b['is_all_day']
                 ? $b['start']
                 : $b['start'] . 'T' . $b['start_time'],
+
             'end' => $b['is_all_day']
-                ? Carbon::parse($b['end'])->addDay()->toDateString()
+                ? \Carbon\Carbon::parse($b['end'])->addDay()->toDateString()
                 : $b['end'] . 'T' . $b['end_time'],
+
             'allDay' => $b['is_all_day'],
 
             'extendedProps' => [
                 'scope' => $b['scope'],
-                'category_id' => $b['category_id'],
-                'product_id' => $b['product_id'],
-                'start_date' => $b['start'],
-                'end_date' => $b['end'],
+                'block_type' => $b['block_type'],
                 'start_time' => $b['start_time'],
                 'end_time' => $b['end_time'],
                 'is_all_day' => $b['is_all_day'],
+                'products' => $b['products'],
+                'categories' => $b['categories'],
             ]
         ];
     }
@@ -188,32 +226,39 @@ class BlockSlotController extends Controller
 
         $today = Carbon::today()->toDateString();
 
-        $blocks = BlockedSlot::whereDate('date', '>=', $today) // 👈 ONLY TODAY & FUTURE
+        $blocks = BlockedSlot::with([
+                'products:id',
+                'categories:id'
+            ])
+            ->whereDate('date', '>=', $today)
             ->where(function ($query) use ($productIds, $categoryIds) {
 
-                // ALL products
+                // ALL scope
                 $query->where('scope', 'all')
 
-                // PRODUCT specific
+                // PRODUCT scope
                 ->orWhere(function ($q) use ($productIds) {
                     $q->where('scope', 'product')
-                    ->whereIn('product_id', $productIds);
+                    ->whereHas('products', function ($sub) use ($productIds) {
+                        $sub->whereIn('products.id', $productIds);
+                    });
                 })
 
-                // CATEGORY specific
+                // CATEGORY scope
                 ->orWhere(function ($q) use ($categoryIds) {
                     $q->where('scope', 'category')
-                    ->whereIn('category_id', $categoryIds);
+                    ->whereHas('categories', function ($sub) use ($categoryIds) {
+                        $sub->whereIn('product_categories.id', $categoryIds);
+                    });
                 });
 
             })
             ->orderBy('date')
             ->get([
+                'id',
                 'date',
                 'scope',
                 'block_type',
-                'product_id',
-                'category_id',
                 'is_all_day',
                 'start_time',
                 'end_time',
