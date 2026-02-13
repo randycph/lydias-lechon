@@ -347,7 +347,7 @@
                                 this.blockAppliesToMethod(b)
                             )
 
-                            // If any full-day block exists → disable entire date
+                            // If any full-day block exists then we disable entire date
                             const hasAllDayBlock = blockedForThisDate.some(b => b.is_all_day == 1)
 
                             if (hasAllDayBlock) {
@@ -426,22 +426,21 @@
 
                     let hours = this.generateHours()
 
-                    const dateBlocks = this.blockedDetails.filter(b =>
-                        b.date === this.need_date &&
-                        this.blockAppliesToCart(b) &&
-                        this.blockAppliesToMethod(b) &&
-                        b.is_all_day == 0
-                    )
+                    const dateBlocks = this.getBlockedTimeRangesForDate(this.need_date)
 
                     hours = hours.filter(hour => {
 
-                        const timeStr = this.formatHourValue(hour)
+                        const timeStr = this.formatHourValue(hour) // "11:00"
 
-                        const blocked = dateBlocks.some(b => {
-                            return timeStr >= b.start_time && timeStr < b.end_time
+                        const isBlocked = dateBlocks.some(b => {
+
+                            const start = this.normalizeTime(b.start_time)
+                            const end   = this.normalizeTime(b.end_time)
+
+                            return timeStr >= start && timeStr < end
                         })
 
-                        return !blocked
+                        return !isBlocked
                     })
 
                     const earliest = this.getEarliestForPickupAndSingle()
@@ -455,14 +454,9 @@
                     this.availablePickupHours = hours
 
                     this.$nextTick(() => {
-
-                        if (!hours.length) {
-                            this.need_time = ''
-                            return
-                        }
-
-                        const firstHour = this.formatHourValue(hours[0])
-                        this.need_time = firstHour
+                        this.need_time = hours.length
+                            ? this.formatHourValue(hours[0])
+                            : ''
                     })
                 },
 
@@ -472,22 +466,21 @@
 
                     let hours = this.generateHours()
 
-                    const dateBlocks = this.blockedDetails.filter(b =>
-                        b.date === this.need_date &&
-                        this.blockAppliesToCart(b) &&
-                        this.blockAppliesToMethod(b) &&
-                        b.is_all_day == 0
-                    )
+                    const dateBlocks = this.getBlockedTimeRangesForDate(this.need_date)
 
                     hours = hours.filter(hour => {
 
                         const timeStr = this.formatHourValue(hour)
 
-                        const blocked = dateBlocks.some(b => {
-                            return timeStr >= b.start_time && timeStr < b.end_time
+                        const isBlocked = dateBlocks.some(b => {
+
+                            const start = this.normalizeTime(b.start_time)
+                            const end   = this.normalizeTime(b.end_time)
+
+                            return timeStr >= start && timeStr < end
                         })
 
-                        return !blocked
+                        return !isBlocked
                     })
 
                     const earliest = this.getEarliestForPickupAndSingle()
@@ -501,14 +494,9 @@
                     this.availableDeliveryHours = hours
 
                     this.$nextTick(() => {
-
-                        if (!hours.length) {
-                            this.need_time = ''
-                            return
-                        }
-
-                        const firstHour = this.formatHourValue(hours[0])
-                        this.need_time = firstHour
+                        this.need_time = hours.length
+                            ? this.formatHourValue(hours[0])
+                            : ''
                     })
                 },
 
@@ -645,32 +633,6 @@
                 openHour: 9,
                 closeHour: 20,
                 availableDeliveryHours: [],
-
-                populatePickupTimes(minHour = null) {
-
-                    if (!this.need_date) return
-
-                    let hours = this.generateHours()
-
-                    const earliest = this.getEarliestAllowedDateTime()
-                    const parts = this.formatDateTimeParts(earliest)
-
-                    if (this.need_date === parts.date) {
-
-                        const requiredHour = minHour ?? parts.hour
-
-                        hours = hours.filter(h => h >= requiredHour)
-                    }
-
-                    this.availablePickupHours = hours
-
-                    this.$nextTick(() => {
-                        this.need_time = hours.length ?
-                            this.formatHourValue(hours[0]) :
-                            ''
-                    })
-                },
-
 
                 formatHourValue(hour) {
                     return (hour < 10 ? '0' + hour : hour) + ':00'
@@ -2102,6 +2064,20 @@
                     if (block.block_type === 'both') return true
 
                     return block.block_type === this.method
+                },
+
+                getBlockedTimeRangesForDate(date) {
+                    return this.blockedDetails.filter(b =>
+                        b.date === date &&
+                        this.blockAppliesToCart(b) &&
+                        this.blockAppliesToMethod(b) &&
+                        b.is_all_day == 0
+                    )
+                },
+
+                normalizeTime(timeStr) {
+                    if (!timeStr) return null
+                    return timeStr.substring(0,5) // from "11:00:00" to "11:00"
                 }
             }
         }
