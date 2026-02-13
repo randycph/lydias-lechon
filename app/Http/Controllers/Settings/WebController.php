@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Setting;
 use App\Models\MediaAccounts;
 use App\Models\DeliveryFeePromo;
+use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\User;
 
@@ -74,7 +75,8 @@ class WebController extends Controller
         $web = Setting::find($id);
         $medias = MediaAccounts::get();
         $deliveryfees = DeliveryFeePromo::get();
-        $categories = ProductCategory::where('status','PUBLISHED')->get();
+        $categories = ProductCategory::where('status','PUBLISHED')->orderBy('name')->get();
+        $products = Product::where('status','PUBLISHED')->orderBy('name')->get();
 
         $selectedIds = DeliveryFeePromo::where('type', 'customer')->pluck('ref_id');
 
@@ -86,7 +88,14 @@ class WebController extends Controller
                 return $u;
             });
 
-        return view('admin.settings.website.index',compact('web','medias','deliveryfees','categories','selectedCustomers'));
+        return view('admin.settings.website.index', compact(
+            'web', 
+            'medias', 
+            'deliveryfees', 
+            'categories', 
+            'products', 
+            'selectedCustomers'
+        ));
     }
 
     /**
