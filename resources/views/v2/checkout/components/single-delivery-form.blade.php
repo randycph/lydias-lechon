@@ -101,6 +101,7 @@
                 x-model="location"
                 @change="getDeliveryFee(); onBarangayChange()"
                 :disabled="!city"
+                :class="{'border-red-500': singleDeliveryErrors.location}"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 disabled:bg-gray-100"
             >
                 <option value="">Choose a barangay</option>
@@ -111,6 +112,11 @@
                     </option>
                 </template>
             </select>
+
+            <template x-if="singleDeliveryErrors.location">
+                <p class="text-red-500 text-xs mt-1"
+                    x-text="singleDeliveryErrors.location"></p>
+            </template>
         </div>
 
 
