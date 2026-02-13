@@ -114,14 +114,17 @@
                             </div>
 
                             <input
-                                x-ref="multiDateInputs"
                                 type="text"
                                 x-model="delivery.need_date"
                                 readonly
+                                placeholder="Select Date"
                                 :disabled="!delivery.orders.length"
                                 x-init="initMultiDeliveryDatepicker($el, index)"
                                 @change="validateDelivery(index, 'date')"
                                 class="bg-white border border-gray-300 text-sm rounded-lg block w-full p-2.5 ps-10"
+                                :class="{
+                                    'bg-gray-100 text-gray-400 cursor-not-allowed': !delivery.orders.length
+                                }"
                             >
                         </div>
                     </div>
