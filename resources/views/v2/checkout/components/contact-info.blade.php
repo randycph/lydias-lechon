@@ -40,7 +40,6 @@
                 type="tel"
                 name="mobile"
                 x-model="contact.mobile"
-                placeholder="e.g. 09171234567"
                 class="bg-gray-50 border border-gray-300 text-sm rounded-md block w-full p-2.5"
                 :class="{'border-red-500': errors.mobile}"
             >

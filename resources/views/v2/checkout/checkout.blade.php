@@ -159,7 +159,9 @@
                 pickupWarning: '',
 
                 init() {
-
+                    const cookie = document.cookie.split('; ').find(row => row.startsWith('shipping_method='));
+                    this.changeMethod(cookie ? cookie.split('=')[1] : 'pickup')
+                    
                     this.loadPhilippineData()
                 },
 
@@ -543,7 +545,7 @@
                     if (type === 'delivery') {
                         this.allowMultiple = false
 
-                        // 🔥 reset single delivery state cleanly
+                        // reset single delivery state cleanly
                         this.need_time = ''
                         this.availableDeliveryHours = []
                     }
