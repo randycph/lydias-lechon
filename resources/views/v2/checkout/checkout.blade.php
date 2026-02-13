@@ -79,7 +79,7 @@
                 @else
                     <div class="flex flex-col lg:flex-row gap-4 mt-10">
                         {{-- LEFT --}}
-                        <div class="w-full lg:w-3/5 space-y-4">
+                        <div class="w-full lg:w-3/5 space-y-4 order-2 lg:order-1">
                             @include('v2.checkout.components.delivery-method')
 
                             <template x-if="method === 'pickup'">
@@ -99,7 +99,7 @@
                         </div>
 
                         {{-- RIGHT --}}
-                        <div class="w-full lg:w-2/5">
+                        <div class="w-full lg:w-2/5 order-1 lg:order-2">
                             @include('v2.checkout.components.order-summary')
                         </div>
                     </div>
