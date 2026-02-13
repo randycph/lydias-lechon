@@ -70,7 +70,7 @@
                         type="button"
                         @click="agreePrivacy"
                         :class="canAgree ? 'px-6 py-2 bg-primary text-white rounded-md text-sm' : 'bg-gray-400 cursor-not-allowed'"
-                        class="px-6 py-2 bg-primary text-white rounded-md text-sm"
+                        class="px-6 py-2 text-white rounded-md text-sm"
                     >
                         Agree
                     </button>
