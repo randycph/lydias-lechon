@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BlockedSlot;
+use App\Models\Product;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -167,5 +168,57 @@ class BlockSlotController extends Controller
                 'is_all_day' => $b['is_all_day'],
             ]
         ];
+    }
+
+    public function getCheckoutBlocks(Request $request)
+    {
+        $validated = $request->validate([
+            'product_ids' => 'required|array|min:1',
+            'product_ids.*' => 'integer|exists:products,id',
+        ]);
+
+        $productIds = $validated['product_ids'];
+
+        // Get category IDs from cart products
+        $categoryIds = Product::whereIn('id', $productIds)
+            ->pluck('category_id')
+            ->unique()
+            ->values()
+            ->toArray();
+
+        $today = Carbon::today()->toDateString();
+
+        $blocks = BlockedSlot::whereDate('date', '>=', $today) // 👈 ONLY TODAY & FUTURE
+            ->where(function ($query) use ($productIds, $categoryIds) {
+
+                // ALL products
+                $query->where('scope', 'all')
+
+                // PRODUCT specific
+                ->orWhere(function ($q) use ($productIds) {
+                    $q->where('scope', 'product')
+                    ->whereIn('product_id', $productIds);
+                })
+
+                // CATEGORY specific
+                ->orWhere(function ($q) use ($categoryIds) {
+                    $q->where('scope', 'category')
+                    ->whereIn('category_id', $categoryIds);
+                });
+
+            })
+            ->orderBy('date')
+            ->get([
+                'date',
+                'scope',
+                'block_type',
+                'product_id',
+                'category_id',
+                'is_all_day',
+                'start_time',
+                'end_time',
+            ]);
+
+        return response()->json($blocks);
     }
 }
