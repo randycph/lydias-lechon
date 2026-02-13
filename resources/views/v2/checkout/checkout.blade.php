@@ -532,6 +532,7 @@
 
 
                 changeMethod(type) {
+                    if (type == this.method) return
 
                     this.method = type
 
