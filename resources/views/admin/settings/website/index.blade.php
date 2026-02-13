@@ -66,7 +66,7 @@ Website Settings
         </div>
 
         <!-- Form Section -->
-        <div class="row g-4">
+        <div class="row g-4 align-items-start">
 
             <!-- LEFT COLUMN -->
             <div class="col-md-6">
@@ -91,8 +91,13 @@ Website Settings
                 <!-- Category -->
                 <div class="mb-3">
                     <label class="form-label">Select Category</label>
-                    <select class="form-select" id="category" name="category" disabled>
-                        <option selected>Select category</option>
+                    <select 
+                        class=" select2 form-control" 
+                        id="category"
+                        name="category_ids[]"
+                        multiple
+                        disabled
+                    >
                         @foreach ($categories as $category)
                         <option value="{{ $category->id }}">{{ $category->name }}</option>
                         @endforeach
@@ -102,8 +107,13 @@ Website Settings
                 <!-- Product -->
                 <div class="mb-3">
                     <label class="form-label">Select Product</label>
-                    <select class="form-select" id="product" name="product" disabled>
-                        <option selected>Select product</option>
+                    <select 
+                        class=" select2 form-control" 
+                        id="product"
+                        name="product_ids[]"
+                        multiple
+                        disabled
+                    >
                         @foreach ($products as $product)
                         <option value="{{ $product->id }}">{{ $product->name }}</option>
                         @endforeach
@@ -133,7 +143,7 @@ Website Settings
                 <label class="form-label fw-bold">Select Time Slot(s)</label>
 
                 <div class="border rounded p-3 mb-3" id="times">
-                    @foreach (range(7, 19) as $hour)
+                    @foreach (range(9, 19) as $hour)
                     <div class="form-check">
                         <input id="timeSlot{{ $hour }}" class="form-check-input time-slot" type="checkbox"
                             value="{{ sprintf('%02d:00', $hour) }}">
@@ -204,7 +214,7 @@ Website Settings
 
 
 
-    <div class="row row-sm">
+    {{-- <div class="row row-sm">
         <div class="col-lg-12">
             <ul class="nav nav-tabs" id="myTab" role="tablist">
                 <li class="nav-item">
@@ -847,7 +857,7 @@ Website Settings
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 </div>
 <div class="modal fade" role="dialog" id="blockModal" tabindex="-1">
     <div class="modal-dialog" role="document">
@@ -870,11 +880,11 @@ Website Settings
                     <dt class="col-4">Block Type</dt>
                     <dd class="col-8" id="modalBlockType"></dd>
 
-                    <dt class="col-4">Category</dt>
-                    <dd class="col-8" id="modalCategory">—</dd>
+                    <dt class="col-4 category-view-dt">Category</dt>
+                    <dd class="col-8 category-view-dd" id="modalCategory">—</dd>
 
-                    <dt class="col-4">Product</dt>
-                    <dd class="col-8" id="modalProduct">—</dd>
+                    <dt class="col-4 product-view-dt">Product</dt>
+                    <dd class="col-8 product-view-dd" id="modalProduct">—</dd>
 
                     <dt class="col-4">Date</dt>
                     <dd class="col-8" id="modalDate"></dd>
@@ -1352,8 +1362,8 @@ Website Settings
     * 1. ELEMENT REFERENCES
     * --------------------------------------------------- */
     const scopeRadios    = document.querySelectorAll('input[name="scope"]');
-    const categorySelect = document.querySelector('select[name="category"]');
-    const productSelect  = document.querySelector('select[name="product"]');
+    const categorySelect = document.querySelector('select[name="category_ids[]"]');
+    const productSelect  = document.querySelector('select[name="product_ids[]"]');
     const addBlockBtn    = document.getElementById('addBlock');
     const dateInput      = document.getElementById('blockDates');
     const allDayCheckbox = document.getElementById('allday');
@@ -1361,6 +1371,16 @@ Website Settings
 
     const categoryMap = @json($categories->pluck('name', 'id'));
     const productMap  = @json($products->pluck('name', 'id'));
+
+    $('#category').select2({
+        placeholder: "Select category",
+        width: '100%'
+    });
+
+    $('#product').select2({
+        placeholder: "Select product",
+        width: '100%'
+    });
 
     /* ---------------------------------------------------
     * 2. DATEPICKER INITIALIZATION
@@ -1404,11 +1424,18 @@ Website Settings
     * --------------------------------------------------- */
     scopeRadios.forEach(radio => {
         radio.addEventListener('change', () => {
-            const value = radio.id;
+            const value = radio.value;
 
-            // Enable/disable category and product selects based on scope
-            categorySelect.disabled = value !== 'scopeCategory';
-            productSelect.disabled  = value !== 'scopeProduct';
+            categorySelect.disabled = value !== 'category';
+            productSelect.disabled  = value !== 'product';
+
+            if (categorySelect.disabled) {
+                categorySelect.selectedIndex = -1;
+            }
+
+            if (productSelect.disabled) {
+                productSelect.selectedIndex = -1;
+            }
         });
     });
 
@@ -1460,11 +1487,17 @@ Website Settings
             'input[name="block_type"]:checked'
             ).value;
 
+        const categoryIds = Array.from(categorySelect.selectedOptions)
+            .map(opt => opt.value);
+
+        const productIds = Array.from(productSelect.selectedOptions)
+            .map(opt => opt.value);
+
         const payload = {
             scope: document.querySelector('input[name="scope"]:checked').value,
             block_type: blockType,
-            category_id: categorySelect?.value || null,
-            product_id: productSelect?.value || null,
+            category_ids: categoryIds.length ? categoryIds : null,
+            product_ids: productIds.length ? productIds : null,
             dates,
             is_all_day: isAllDay,
             times
@@ -1484,6 +1517,10 @@ Website Settings
             alert('Failed to save blocks');
             return;
         }
+
+        document
+            .querySelectorAll('#dateRangeInputs input')
+            .forEach(input => input.value = '');
 
         calendar.refetchEvents();
         resetForm();
@@ -1519,6 +1556,13 @@ Website Settings
         return `${y}-${m}-${d}`;
     }
 
+    function formatTimeDisplay(time) {
+        const [h, m] = time.split(':');
+        const hour = ((h % 12) || 12);
+        const ampm = h < 12 ? 'AM' : 'PM';
+        return `${hour}:${m} ${ampm}`;
+    }
+
     function expandDateRange(start, end) {
         const dates = [];
         let current = new Date(start);
@@ -1543,12 +1587,28 @@ Website Settings
         document.getElementById('modalScope').innerText =
             props.scope.toUpperCase();
 
-        // Category / Product (lookup names if you have maps)
-        document.getElementById('modalCategory').innerText =
-            props.category_id ? categoryMap[props.category_id] : '—';
+        document.getElementById('modalBlockType').innerText =
+            formatBlockType(props.block_type);
 
-        document.getElementById('modalProduct').innerText =
-            props.product_id ? productMap[props.product_id] : '—';
+        // MULTIPLE CATEGORIES
+        const categoryEl = document.getElementById('modalCategory');
+        if (props.categories && props.categories.length) {
+            categoryEl.innerHTML = props.categories
+                .map(c => `<span class="badge badge-pill badge-light border mr-1">${c.name}</span>`)
+                .join('');
+        } else {
+            categoryEl.innerText = '—';
+        }
+
+        // MULTIPLE PRODUCTS
+        const productEl = document.getElementById('modalProduct');
+        if (props.products && props.products.length) {
+            productEl.innerHTML = props.products
+                .map(p => `<span class="badge badge-secondary mr-1">${p.name}</span>`)
+                .join('');
+        } else {
+            productEl.innerText = '—';
+        }
 
         let type = '';
         
@@ -1563,22 +1623,31 @@ Website Settings
             type + ' BLOCK';
 
         // Date (range-aware)
-        if (props.start_date !== props.end_date) {
-            document.getElementById('modalDate').innerText =
-                `${props.start_date} → ${props.end_date}`;
+        // format date to Feb 05, 2026
+        if (info.event.start !== info.event.end) {
+            document.getElementById('modalDate').innerText = formatDateLocal(info.event.start) + ' - ' + formatDateLocal(info.event.end);
         } else {
             document.getElementById('modalDate').innerText =
-                props.start_date;
+                formatDateLocal(info.event.start);
         }
 
         // Time
         document.getElementById('modalTime').innerText =
             props.is_all_day
                 ? 'Whole day'
-                : `${props.start_time} – ${props.end_time}`;
+                : formatTimeDisplay(props.start_time) + ' - ' + formatTimeDisplay(props.end_time);
 
         $('#blockModal').modal('show');
     });
+
+    function formatBlockType(type) {
+        switch (type) {
+            case 'both': return 'Delivery & Pickup Disabled';
+            case 'delivery': return 'Delivery Disabled';
+            case 'pickup': return 'Pickup Disabled';
+            default: return type;
+        }
+    }
 
     document.getElementById('deleteBlock').addEventListener('click', async () => {
         if (!selectedEvent) return;
