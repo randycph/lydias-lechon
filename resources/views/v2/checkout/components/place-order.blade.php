@@ -130,6 +130,11 @@
                             <span x-text="formatMoney(delivery.delivery_fee)"></span>
                         </p>
 
+                        <p x-show="delivery.sms">
+                            <span class="font-semibold">Send Notification:</span>
+                            <span x-text="delivery.sms ? 'Yes' : 'No'"></span>
+                        </p>
+
                     </div>
                 </template>
 
