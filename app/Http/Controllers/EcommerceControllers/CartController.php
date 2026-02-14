@@ -1011,16 +1011,18 @@ class CartController extends Controller
 
                 // PROCESSING HOURS PER DELIVERY
 
-                $deliveryMinHours = $minimum_processing_hours;
+                $deliveryMinHours = 0;
 
                 foreach ($delivery->orders as $order) {
 
                     if (!isset($order->product)) continue;
 
                     if ($order->product->slug === 'lechon-baka') {
-                        $deliveryMinHours = $minimum_processing_hours_baka;
+                        $deliveryMinHours = max($deliveryMinHours, $minimum_processing_hours_baka);
+
                     } elseif ($order->product->is_misc == 1) {
                         $deliveryMinHours = max($deliveryMinHours, $minimum_processing_hours_misc);
+
                     } elseif ($order->product->category_id == 1) {
                         $deliveryMinHours = max($deliveryMinHours, $minimum_processing_hours);
                     }

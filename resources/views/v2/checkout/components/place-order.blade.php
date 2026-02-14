@@ -229,7 +229,7 @@
             <button
                 type="submit"
                 :disabled="isSubmitting"
-                class="w-full bg-primary text-white font-bold py-3 rounded-lg transition flex items-center justify-center gap-2"
+                class="w-full bg-primary text-white font-bold py-3 rounded-lg transition flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 :class="{
                     'opacity-50 cursor-not-allowed': isSubmitting
                 }"
