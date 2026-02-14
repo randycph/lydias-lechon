@@ -2069,9 +2069,7 @@
 
                     this.blockedDetails = Array.isArray(blocks) ? blocks : [];
 
-                    console.log('Blocked dates:', this.blockedDetails);
-
-                    // 🔥 FORCE DATEPICKER REFRESH
+                    // FORCE DATEPICKER REFRESH
                     this.$nextTick(() => {
 
                         if (this.$refs.pickupDate?._datepicker) {
