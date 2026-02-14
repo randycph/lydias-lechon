@@ -227,6 +227,30 @@
 
                     let hours = this.generateHours()
 
+                    // REMOVE BLOCKED TIME SLOTS (per delivery)
+                    const dateBlocks = this.blockedDetails.filter(b =>
+                        b.date === delivery.need_date &&
+                        this.blockAppliesToDelivery(b, delivery) &&
+                        (b.block_type === 'both' || b.block_type === 'delivery') &&
+                        b.is_all_day == 0
+                    )
+
+                    hours = hours.filter(hour => {
+
+                        const timeStr = this.formatHourValue(hour)
+
+                        const blocked = dateBlocks.some(b => {
+
+                            // normalize time format
+                            const start = b.start_time?.substring(0,5)
+                            const end   = b.end_time?.substring(0,5)
+
+                            return timeStr >= start && timeStr < end
+                        })
+
+                        return !blocked
+                    })
+
                     if (delivery.need_date === parts.date) {
                         hours = hours.filter(h => h >= parts.hour)
                     }
@@ -393,17 +417,44 @@
                                 return { enabled: false }
                             }
 
+                            const formatted = this.formatDate(date)
+
+                            // BLOCK (per delivery)
+                            const blockedForThisDate = this.blockedDetails.filter(b =>
+                                b.date === formatted &&
+                                this.blockAppliesToDelivery(b, delivery) &&
+                                (
+                                    b.block_type === 'both' ||
+                                    b.block_type === 'delivery'
+                                )
+                            )
+
+                            const hasAllDayBlock = blockedForThisDate.some(b => b.is_all_day == 1)
+
+                            if (hasAllDayBlock) {
+                                return {
+                                    enabled: false,
+                                }
+                            }
+
+                            // MIN DATE LOGIC
                             const nowRounded = this.roundUpToNextHour(new Date())
                             const earliest = this.getEarliestDateTimeForDelivery(delivery)
                             const finalMinDate = earliest > nowRounded ? earliest : nowRounded
 
-                            // Disable dates before allowed
-                            if (date < finalMinDate.setHours(0,0,0,0)) {
+                            const compareDate = new Date(date)
+                            compareDate.setHours(0,0,0,0)
+
+                            const minCompare = new Date(finalMinDate)
+                            minCompare.setHours(0,0,0,0)
+
+                            if (compareDate < minCompare) {
                                 return { enabled: false }
                             }
 
                             return { enabled: true }
                         }
+
                     })
 
                     el._datepicker = picker
@@ -2090,7 +2141,43 @@
                 normalizeTime(timeStr) {
                     if (!timeStr) return null
                     return timeStr.substring(0,5) // from "11:00:00" to "11:00"
+                },
+
+                blockAppliesToDelivery(block, delivery) {
+
+                    if (!delivery || !delivery.orders?.length) return false
+
+                    const deliveryProductIds = delivery.orders.map(o => o.product_id)
+
+                    const deliveryCategoryIds = delivery.orders
+                        .map(o => o.product?.category_id)
+                        .filter(Boolean)
+
+                    if (block.scope === 'all') {
+                        return true
+                    }
+
+                    if (block.scope === 'product') {
+
+                        if (!block.products?.length) return false
+
+                        const blockProductIds = block.products.map(p => p.id)
+
+                        return deliveryProductIds.some(id => blockProductIds.includes(id))
+                    }
+
+                    if (block.scope === 'category') {
+
+                        if (!block.categories?.length) return false
+
+                        const blockCategoryIds = block.categories.map(c => c.id)
+
+                        return deliveryCategoryIds.some(id => blockCategoryIds.includes(id))
+                    }
+
+                    return false
                 }
+
             }
         }
     </script>
