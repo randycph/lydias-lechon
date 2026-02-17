@@ -33,11 +33,6 @@ class SalesPayment extends Model
         'is_discount'
     ];
 
-    public function approval()
-    {
-        return $this->hasOne(Approvals::class, 'reference_id', 'sales_header_id');
-    }
-
     public static function check_if_has_added_payments($id)
     {
         $data = SalesPayment::where('sales_header_id',$id)->where('status','PAID')->exists();
