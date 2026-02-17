@@ -1686,7 +1686,7 @@ class SalesController extends Controller
 
     public function payments()
     {
-        $payments = SalesPayment::where('sales_header_id','>',0)->orderBy('id','desc');
+        $payments = SalesPayment::with('latestApproval.user')->where('sales_header_id','>',0)->orderBy('id','desc');
         if(isset($_GET['status']) && $_GET['status']){
             $payments = $payments->where('status',$_GET['status']);
         }

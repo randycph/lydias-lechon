@@ -151,7 +151,7 @@
                                     <td>{{ $p->status }}</td>
                                     <td>{{ number_format($p->amount,2) }}</td>
                                     <td>@if(!empty($p->file_url))<a href="{{$p->file_url}}" target="_blank">View</a>@endif {!!$approval_code!!}</td>
-                                    <td>{{ $approved_by }}</td>
+                                    <td>{{ $p->latestApproval?->user?->name }}</td>
                                     <td>{{ $approved_date }}</td>
                                     <td>
                                         @if($p->status == 'PENDING')
