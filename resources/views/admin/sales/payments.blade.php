@@ -126,7 +126,7 @@
                                     $approved_by = '';
                                     $approved_date = '';
                                     if($p->status == 'PAID'){
-                                        $b = \App\Models\Approvals::where('reference_id',$r->sales_header_id)->where('approval_type','Payment')->get();
+                                        $b = \App\Models\Approvals::where('reference_id',$p->sales_header_id)->where('approval_type','Payment')->get();
                                         if($b){
                                             $h = 0;
                                             foreach($b as $a){
@@ -135,7 +135,7 @@
                                                     $approvalcode = $a->approval_code;
                                                     $approval_by = $a->user->name;
                                                     $approvalremarks=$a->remarks;
-                                                    $approved_date = date('Y-m-d h:i A',strtotime($payment_approval->created_at));
+                                                    $approved_date = date('Y-m-d h:i A',strtotime($a->created_at));
                                                 }
                                             }
                                         }
