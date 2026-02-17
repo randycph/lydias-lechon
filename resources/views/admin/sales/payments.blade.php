@@ -151,8 +151,8 @@
                                     <td>{{ $p->status }}</td>
                                     <td>{{ number_format($p->amount,2) }}</td>
                                     <td>@if(!empty($p->file_url))<a href="{{$p->file_url}}" target="_blank">View</a>@endif {!!$approval_code!!}</td>
-                                    <td>{{ $p->latestApproval?->user?->name }}</td>
-                                    <td>{{ $approved_date }}</td>
+                                    <td>{{ $p->approval?->user?->name }}</td>
+                                    <td>{{ $p->approval?->created_at }}</td>
                                     <td>
                                         @if($p->status == 'PENDING')
                                             @if(in_array(strtolower($p->payment_type),array_map('strtolower',$alls)) || auth()->user()->role_id == 1)

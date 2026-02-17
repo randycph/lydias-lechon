@@ -16,9 +16,9 @@ class SalesPayment extends Model
     ,'order_number','remark','trans_id','err_desc','signature','cc_name','cc_no','bank_name','country','file_url'
 ];
 
-    public function approvals()
+    public function approval()
     {
-        return $this->hasMany(Approvals::class, 'reference_id', 'sales_header_id');
+        return $this->hasOne(Approvals::class, 'reference_id', 'id');
     }
         
     public function latestApproval()
