@@ -19,7 +19,7 @@ class SalesPayment extends Model
     public function approval()
     {
         return $this->hasOne(Approvals::class, 'payment_id', 'id')
-                    ->where('approval_type', 'payment');
+                    ->where('approval_type', 'Payment');
     }
 
     public static function check_if_has_added_payments($id)
