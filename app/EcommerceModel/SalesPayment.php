@@ -2,6 +2,7 @@
 
 namespace App\EcommerceModel;
 
+use App\Models\Approvals;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Concerns\LogsActivityDiff;
@@ -15,7 +16,17 @@ class SalesPayment extends Model
     ,'order_number','remark','trans_id','err_desc','signature','cc_name','cc_no','bank_name','country','file_url'
 ];
 
-    
+    public function approvals()
+    {
+        return $this->hasMany(Approvals::class, 'reference_id', 'sales_header_id');
+    }
+        
+    public function latestApproval()
+    {
+        return $this->hasOne(Approvals::class, 'reference_id', 'sales_header_id')
+                    ->latestOfMany();
+    }
+
     public static function check_if_has_added_payments($id)
     {
         $data = SalesPayment::where('sales_header_id',$id)->where('status','PAID')->exists();
