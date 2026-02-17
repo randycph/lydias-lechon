@@ -33,9 +33,9 @@ class SalesPayment extends Model
         'is_discount'
     ];
 
-    public function approvals()
+    public function approval()
     {
-        return $this->hasMany(Approvals::class, 'reference_id', 'sales_header_id');
+        return $this->hasOne(Approvals::class, 'reference_id', 'id');
     }
         
     public function latestApproval()
