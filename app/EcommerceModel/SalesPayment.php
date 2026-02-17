@@ -35,13 +35,7 @@ class SalesPayment extends Model
 
     public function approval()
     {
-        return $this->hasOne(Approvals::class, 'reference_id', 'id');
-    }
-        
-    public function latestApproval()
-    {
-        return $this->hasOne(Approvals::class, 'reference_id', 'sales_header_id')
-                    ->latestOfMany();
+        return $this->hasOne(Approvals::class, 'reference_id', 'sales_header_id');
     }
 
     public static function check_if_has_added_payments($id)
