@@ -434,6 +434,7 @@ class SalesController extends Controller
                                     ]);
                                 });
             if($update_gift_cert){
+                $coupon_amount = 0;
                 $discounts = SalesPayment::where('sales_header_id',$data->sales_header_id)->whereStatus('PAID')->sum('amount');
                 $grand_gross = $data->gross_amount - $discounts;
                 $coupon_amount = $discounts;
@@ -447,6 +448,9 @@ class SalesController extends Controller
             }
         }
 
+        if ($data->is_discount == 1) {
+            $discount = $data->amount;
+        }
 
         $ran = microtime();
         $today = getdate();
@@ -467,6 +471,12 @@ class SalesController extends Controller
 
 
         $sales = SalesHeader::whereId($data->sales_header_id)->first();
+
+        if ($discount > 0) {
+            $sales->discount_amount = floatval($sales->discount_amount) + floatval($discount);
+            $sales->net_amount = floatval($sales->net_amount) - floatval($discount);
+            $sales->save();
+        }
 
         $sms = new Sms();
         $sms->send_sms($sales->customer_contact_number, 'payment_update', $data);
