@@ -384,6 +384,7 @@ class SalesController extends Controller
                 'receipt_number' => $request->confirm_payment_ref ?? $orig_payment->receipt_number
             ]
         );
+        $discount = 0;
         $data = SalesPayment::whereId($request->confirm_payment_id)->first();
         if($data->payment_type == 'Gift Cert'){
 
@@ -394,6 +395,7 @@ class SalesController extends Controller
                                     'approved_on' => date('Y-m-d')
                                 ]);
             if($update_gift_cert){
+                $coupon_amount = 0;
                 $discounts = SalesPayment::where('sales_header_id',$data->sales_header_id)->whereStatus('PAID')->sum('amount');
                 $grand_gross = $data->gross_amount - $discounts;
                 $update_sales_header = SalesHeader::whereId($data->sales_header_id)->update([
@@ -403,6 +405,9 @@ class SalesController extends Controller
             }
         }
 
+        if ($data->is_discount == 1) {
+            $discount = $data->amount;
+        }
 
         $ran = microtime();
         $today = getdate();
@@ -422,6 +427,12 @@ class SalesController extends Controller
 
 
         $sales = SalesHeader::whereId($data->sales_header_id)->first();
+
+        if ($discount > 0) {
+            $sales->discount_amount = floatval($sales->discount_amount) + floatval($discount);
+            $sales->net_amount = floatval($sales->net_amount) - floatval($discount);
+            $sales->save();
+        }
 
         $sms = new Sms();
         $sms->send_sms($sales->customer_contact_number, 'payment_update', $data);
