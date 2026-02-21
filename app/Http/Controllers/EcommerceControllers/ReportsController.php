@@ -276,6 +276,9 @@ class ReportsController extends Controller
             if(isset($_GET['production_branch']) && $_GET['production_branch']<>''){
                 $qry.= " and pb.id='".$_GET['production_branch']."'";
             }
+            if (isset($_GET['size']) && $_GET['size']<>''){
+                $qry.= " and p.size='".$_GET['size']."'";
+            }
 
             // $qry.= " and pb.name='Tandang Sora'";
             
@@ -467,6 +470,10 @@ class ReportsController extends Controller
             if(isset($_GET['production_branch']) && $_GET['production_branch']<>''){
                 $mqry.= " and pb.id='".$_GET['production_branch']."'";
             }
+
+            if (isset($_GET['size']) && $_GET['size']<>''){
+                $mqry.= " and p.size='".$_GET['size']."'";
+            }
             
             // $mqry.= " and pb.name='Tandang Sora'";
             
@@ -568,6 +575,10 @@ class ReportsController extends Controller
             }
             if(isset($_GET['start_time']) && $_GET['start_time']<>''){
                 $jos.= " and time(jo.date_needed)='".$_GET['start_time']."'";
+            }
+            
+            if (isset($_GET['size']) && $_GET['size']<>''){
+                $jos.= " and p.size='".$_GET['size']."'";
             }
 
             

@@ -553,7 +553,8 @@
                                 <th>Delivery Branch</th>
                                 <th>Encoded Date</th>  
                                 <th>Encoded Time</th>   
-                                <th>Delivery Status</th>                     
+                                <th>Delivery Status</th>
+                                <th>Size</th>                     
                             </tr>
                             </thead>
                                 <tbody>
@@ -682,6 +683,7 @@
         $delTime       = $fmtTime($r->deldate);
         $deliveryType  = (string)($r->delivery_type ?? '');
         $delstat       = (string)($r->delstat ?? '');
+        $size          = (string)($r->size ?? '');
         $agent         = (string)($r->agent ?? '');
         $orderNoText   = (string)($r->order_number ?? '');
         $customerName  = (string)($r->customer_name ?? '');
@@ -872,6 +874,11 @@
         {{-- Delivery Status (duplicate of status; merged for sales; JO per-row) --}}
         <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $delstat }}">
             {{ $isSales ? ($isMerged ? '' : e($delstat)) : e($r->delstat ?? '') }}
+        </td>
+
+        {{-- Size (duplicate of status; merged for sales; JO per-row) --}}
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $size }}">
+            {{ $isSales ? ($isMerged ? '' : e($size)) : e($r->size ?? '') }}
         </td>
     </tr>
 
@@ -1168,7 +1175,23 @@
                     }
                 }
             },
-            'colvis'
+            {
+                extend: 'colvis',
+                text: 'Column visibility',
+                buttons: [
+                    {
+                        extend: 'colvisGroup',
+                        text: 'Show all columns',
+                        show: ':hidden'
+                    },
+                    {
+                        extend: 'colvisGroup',
+                        text: 'Hide extra columns',
+                        hide: [2,4,5,7,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34]
+                    },
+                    'columnsToggle'
+                ]
+            }
         ],
         columnDefs: [
             // keep this list in sync with your actual header count

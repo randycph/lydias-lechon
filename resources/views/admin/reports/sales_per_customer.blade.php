@@ -257,7 +257,23 @@
                         columns: ':visible'
                     }
                 },
-                'colvis'
+                {
+                    extend: 'colvis',
+                    text: 'Column visibility',
+                    buttons: [
+                        {
+                            extend: 'colvisGroup',
+                            text: 'Show all columns',
+                            show: ':hidden'
+                        },
+                        {
+                            extend: 'colvisGroup',
+                            text: 'Hide extra columns',
+                            hide: [4,5,6,7,10,11,12]
+                        },
+                        'columnsToggle'
+                    ]
+                }
             ],
             columnDefs: [ {
                 targets: [4,5,6,7,10,11,12],
