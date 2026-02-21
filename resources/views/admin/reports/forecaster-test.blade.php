@@ -354,8 +354,7 @@
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13">Order Source</label>
-                                    <select name="order_source[]" id="order_source" class="form-control" multiple>
-                                        <option value="">- Select Source -</option>
+                                    <select name="order_source[]" id="order_source" class="form-control order-sources-multiple" placeholder="Select Order Source" multiple>
                                         @forelse($order_sources as $cus)
                                             <option value="{{$cus->order_source}}" {{ (isset($_GET['order_source']) && in_array($cus->order_source, (array)$_GET['order_source'])) ? 'selected' : '' }}>{{$cus->order_source}}</option>
                                         @empty
@@ -367,8 +366,7 @@
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13">Sizes</label>
-                                    <select name="size[]" id="size" class="form-control" multiple>
-                                        <option value="">- Select Size -</option>                                                                        
+                                    <select name="size[]" id="size" class="form-control sizes-multiple" placeholder="Select Sizes" multiple>
                                         @foreach($sizes as $cus)
                                             <option value="{{$cus->name}}" {{ (isset($_GET['size']) && in_array($cus->name, (array)$_GET['size'])) ? 'selected' : '' }}>{{$cus->name}}</option>
                                         @endforeach
@@ -394,8 +392,7 @@
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13">Item Type</label>
-                                    <select name="item_type[]" id="item_type" class="form-control" multiple="multiple">
-                                        <option value="">- Select Item Type -</option>
+                                    <select name="item_type[]" id="item_type" class="form-control item-type-multiple" placeholder="Select Item Type" multiple>
                                         <option @if(isset($_GET['item_type']) && in_array("Miscellaneous",$_GET['item_type'])) selected="selected" @endif value="Miscellaneous">Miscellaneous</option>
                                         <option @if(isset($_GET['item_type']) && in_array("WRA",$_GET['item_type'])) selected="selected" @endif value="WRA">WRA</option>
                                         <option @if(isset($_GET['item_type']) && in_array("Belly Pantaga",$_GET['item_type'])) selected="selected" @endif value="Belly Pantaga">Belly Pantaga</option>
@@ -1204,6 +1201,21 @@
         $(document).ready(function() {
             $('.receiver-branch-multiple').select2({
                 placeholder: "Select a branch",
+                width: '300px',
+                dropdownAutoWidth: true
+            });
+            $('.sizes-multiple').select2({
+                placeholder: "Select a size",
+                width: '300px',
+                dropdownAutoWidth: true
+            });
+            $('.order-sources-multiple').select2({
+                placeholder: "Select an order source",
+                width: '300px',
+                dropdownAutoWidth: true
+            });
+            $('.item-type-multiple').select2({
+                placeholder: "Select an item type",
                 width: '300px',
                 dropdownAutoWidth: true
             });

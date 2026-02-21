@@ -214,7 +214,7 @@ class ReportsController extends Controller
 
 
     public function forecaster(Request $request)
-    {       
+    {
         $wra="(";
         $wra_array=[];
         $products = Product::where('production_item',1)->where('is_misc',0)->get();
@@ -269,15 +269,18 @@ class ReportsController extends Controller
                 $qry.= " and h.order_type='".$_GET['order_type']."'";
             }
             if(isset($_GET['order_source']) && $_GET['order_source']<>''){
-
-                $qry.= " and h.order_source in ('".implode("','",(array)$_GET['order_source'])."')";
+                $order_sources = is_array($_GET['order_source']) ? $_GET['order_source'] : [$_GET['order_source']];
+                $order_sources = array_filter($order_sources, function($value) { return !is_null($value) && $value !== ''; });
+                $qry.= " and h.order_source in ('".implode("','",$order_sources)."')";
                 $no_jo = 1;
             }
             if(isset($_GET['production_branch']) && $_GET['production_branch']<>''){
                 $qry.= " and pb.id='".$_GET['production_branch']."'";
             }
             if (isset($_GET['size']) && $_GET['size']<>''){
-                $qry.= " and p.size in ('".implode("','",(array)$_GET['size'])."')";
+                $sizes = is_array($_GET['size']) ? $_GET['size'] : [$_GET['size']];
+                $sizes = array_filter($sizes, function($value) { return !is_null($value) && $value !== ''; });
+                $qry.= " and p.size in ('".implode("','",$sizes)."')";
             }
 
             // $qry.= " and pb.name='Tandang Sora'";
@@ -464,7 +467,9 @@ class ReportsController extends Controller
                 $mqry.= " and h.order_type='".$_GET['order_type']."'";
             }
             if(isset($_GET['order_source']) && $_GET['order_source']<>''){
-                $mqry.= " and h.order_source in ('".implode("','",(array)$_GET['order_source'])."')";
+                $order_sources = is_array($_GET['order_source']) ? $_GET['order_source'] : [$_GET['order_source']];
+                $order_sources = array_filter($order_sources, function($value) { return !is_null($value) && $value !== ''; });
+                $mqry.= " and h.order_source in ('".implode("','",$order_sources)."')";
                 
             }
             if(isset($_GET['production_branch']) && $_GET['production_branch']<>''){
@@ -472,7 +477,9 @@ class ReportsController extends Controller
             }
 
             if (isset($_GET['size']) && $_GET['size']<>''){
-                $mqry.= " and p.size in ('".implode("','",(array)$_GET['size'])."')";
+                $sizes = is_array($_GET['size']) ? $_GET['size'] : [$_GET['size']];
+                $sizes = array_filter($sizes, function($value) { return !is_null($value) && $value !== ''; });
+                $mqry.= " and p.size in ('".implode("','",$sizes)."')";
             }
             
             // $mqry.= " and pb.name='Tandang Sora'";
@@ -578,7 +585,9 @@ class ReportsController extends Controller
             }
             
             if (isset($_GET['size']) && $_GET['size']<>''){
-                $jos.= " and p.size in ('".implode("','",(array)$_GET['size'])."')";
+                $sizes = is_array($_GET['size']) ? $_GET['size'] : [$_GET['size']];
+                $sizes = array_filter($sizes, function($value) { return !is_null($value) && $value !== ''; });
+                $jos.= " and p.size in ('".implode("','",$sizes)."')";
             }
 
             
