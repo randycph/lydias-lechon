@@ -255,7 +255,7 @@ table.dataTable thead .sorting::before, table.dataTable thead .sorting::after {
                                 <a href="{{route('admin.report.forecaster')}}" class="btn btn-info mg-t-7 mg-r-5 btn-sm">Reset</a>
                             </div>
                         </div>
-                        <div class="row" id="adv" style="display:none;">
+                        <div class="row align-items-start" id="adv" style="display:none;">
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13">Time Needed</label>
@@ -358,15 +358,12 @@ table.dataTable thead .sorting::before, table.dataTable thead .sorting::after {
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13">Order Source</label>
-                                    <select name="order_source" id="order_source" class="form-control">
+                                    <select name="order_source[]" id="order_source" class="form-control" multiple>
                                         <option value="">- Select Source -</option>
-                                        @forelse(\App\EcommerceModel\SalesHeader::select('order_source')->where('created_at', '>=', '2025-10-01')->distinct('order_source')->orderBy('order_source')->get() as $cus)
-                                            <option value="{{$cus->order_source}}">{{$cus->order_source}}</option>
+                                        @forelse($order_sources as $cus)
+                                            <option value="{{$cus->order_source}}" {{ (isset($_GET['order_source']) && in_array($cus->order_source, (array)$_GET['order_source'])) ? 'selected' : '' }}>{{$cus->order_source}}</option>
                                         @empty
                                         @endforelse
-                                        @isset($_GET['order_source'])
-                                            <option value="{{$_GET['order_source']}}" selected="selected">{{ $_GET['order_source'] }}</option>
-                                        @endisset
                                     </select>
                                 </div>
                             </div>
@@ -374,10 +371,10 @@ table.dataTable thead .sorting::before, table.dataTable thead .sorting::after {
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13">Sizes</label>
-                                    <select name="size" id="size" class="form-control" >
+                                    <select name="size[]" id="size" class="form-control" multiple>
                                         <option value="">- Select Size -</option>                                                                        
-                                        @foreach(\App\Models\Product::select('size')->whereNotNull('size')->where('size','!=','')->distinct('size')->orderBy('size')->get() as $cus)
-                                            <option value="{{$cus->size}}" {{ (isset($_GET['size']) && $_GET['size'] == $cus->size) ? 'selected' : '' }}>{{$cus->size}}</option>
+                                        @foreach($sizes as $cus)
+                                            <option value="{{$cus->name}}" {{ (isset($_GET['size']) && in_array($cus->name, (array)$_GET['size'])) ? 'selected' : '' }}>{{$cus->name}}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -502,7 +499,7 @@ table.dataTable thead .sorting::before, table.dataTable thead .sorting::after {
                             <td width="40%" valign="top">
                                 <table class="print-table" border="1" width="100%" style="font-size:14px; font-weight:bold;">
                                     <tr>
-                                        <td colspan="2" align="center">SIZE BREAKDOWN</td>
+                                        <td colspan="2" align="center">Whole Lechon Breakdown</td>
                                     </tr>
 
                                     @foreach ($sizeCounts as $size => $count)
