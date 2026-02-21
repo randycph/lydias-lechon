@@ -277,7 +277,7 @@ class ReportsController extends Controller
                 $qry.= " and pb.id='".$_GET['production_branch']."'";
             }
             if (isset($_GET['size']) && $_GET['size']<>''){
-                $qry.= " and p.size='".$_GET['size']."'";
+                $qry.= " and p.size in ('".implode("','",(array)$_GET['size'])."')";
             }
 
             // $qry.= " and pb.name='Tandang Sora'";
@@ -472,7 +472,7 @@ class ReportsController extends Controller
             }
 
             if (isset($_GET['size']) && $_GET['size']<>''){
-                $mqry.= " and p.size='".$_GET['size']."'";
+                $mqry.= " and p.size in ('".implode("','",(array)$_GET['size'])."')";
             }
             
             // $mqry.= " and pb.name='Tandang Sora'";
@@ -578,7 +578,7 @@ class ReportsController extends Controller
             }
             
             if (isset($_GET['size']) && $_GET['size']<>''){
-                $jos.= " and p.size='".$_GET['size']."'";
+                $jos.= " and p.size in ('".implode("','",(array)$_GET['size'])."')";
             }
 
             
@@ -686,10 +686,6 @@ class ReportsController extends Controller
         } elseif (isset($_GET['filter']) && $_GET['filter'] == 'pantaga') {
             $results = $results
                 ->where('jo_category', 'Pantaga')
-                ->values();
-        } elseif (isset($_GET['size']) && $_GET['size']) {
-            $results = $results
-                ->whereIn('size', (array)$_GET['size'])
                 ->values();
         }
 
