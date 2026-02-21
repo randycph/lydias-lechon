@@ -21,6 +21,7 @@ use App\Models\Permission;
 use App\Models\Product;
 use App\Models\ProductDeliveryAddress;
 use App\Models\User;
+use App\Models\ProductSize;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -213,8 +214,7 @@ class ReportsController extends Controller
 
 
     public function forecaster(Request $request)
-    {
-       
+    {       
         $wra="(";
         $wra_array=[];
         $products = Product::where('production_item',1)->where('is_misc',0)->get();
@@ -269,7 +269,8 @@ class ReportsController extends Controller
                 $qry.= " and h.order_type='".$_GET['order_type']."'";
             }
             if(isset($_GET['order_source']) && $_GET['order_source']<>''){
-                $qry.= " and h.order_source='".$_GET['order_source']."'";
+
+                $qry.= " and h.order_source in ('".implode("','",(array)$_GET['order_source'])."')";
                 $no_jo = 1;
             }
             if(isset($_GET['production_branch']) && $_GET['production_branch']<>''){
@@ -460,7 +461,7 @@ class ReportsController extends Controller
                 $mqry.= " and h.order_type='".$_GET['order_type']."'";
             }
             if(isset($_GET['order_source']) && $_GET['order_source']<>''){
-                $mqry.= " and h.order_source='".$_GET['order_source']."'";
+                $mqry.= " and h.order_source in ('".implode("','",(array)$_GET['order_source'])."')";
                 
             }
             if(isset($_GET['production_branch']) && $_GET['production_branch']<>''){
@@ -620,14 +621,25 @@ class ReportsController extends Controller
 
         $original_results = $results;
 
-        $sizeCounts = $results
-            ->map(function ($item) {
+        // Get all published sizes
+        $sizes = ProductSize::where('status', 'PUBLISHED')
+            ->orderBy('name')
+            ->get();
+
+        // Count qty per size from results
+        $sizeCountsFromResults = collect($results)
+            ->groupBy(function ($item) {
                 return trim($item->size ?? '') !== ''
                     ? $item->size
                     : 'Size Undefined';
             })
-            ->countBy()
-            ->sortKeys();
+            ->map->sum('qty');
+
+        $sizeCounts = $sizes->mapWithKeys(function ($size) use ($sizeCountsFromResults) {
+            return [
+                $size->name => $sizeCountsFromResults[$size->name] ?? 0
+            ];
+        });
 
         if (isset($_GET['filter']) && $_GET['filter'] == 'whole-lechon') {
             $results = $results
@@ -664,7 +676,19 @@ class ReportsController extends Controller
             $results = $results
                 ->where('jo_category', 'Pantaga')
                 ->values();
+        } elseif (isset($_GET['size']) && $_GET['size']) {
+            $results = $results
+                ->whereIn('size', (array)$_GET['size'])
+                ->values();
         }
+
+        $order_sources = session('order_sources', $_GET['order_sources'] ?? null);
+
+        if (empty($order_sources)) {
+            $order_sources = SalesHeader::select('order_source')->where('created_at', '>=', '2025-10-01')->distinct('order_source')->orderBy('order_source')->get();
+        }
+
+        session(['order_sources' => $order_sources]);
         
         if(isset($_GET['toexcel'])) {
             return view('admin.reports.forecaster_excel', compact(
@@ -682,7 +706,9 @@ class ReportsController extends Controller
                 'wra_array',
                 'mrs',
                 'original_results',
-                'sizeCounts'
+                'sizeCounts',
+                'order_sources',
+                'sizes'
             ));
         }
             
