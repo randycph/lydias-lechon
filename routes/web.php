@@ -616,6 +616,7 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::get('/admin/ajax/search-users', [ReportsController::class, 'searchUsers'])->name('ajax.search-users');
     Route::get('/admin/ajax/search-customers', [ReportsController::class, 'searchCustomers'])->name('ajax.search-customers');
 
+    Route::get('/admin/ajax/search-users-forecaster', [ReportsController::class, 'searchUsersForecaster'])->name('ajax.search-users-forecaster');
 
 
     //

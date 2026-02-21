@@ -307,7 +307,18 @@ table.dataTable thead .sorting::before, table.dataTable thead .sorting::after {
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13">Customer</label>
-                                    <select name="customer" id="customer" class="form-control">
+                                    <select id="customer" name="customer" class="form-control select2-ajax" style="width:100%">
+                                        @if(request('customer'))
+                                            @php
+                                                $selectedUser = \App\Models\User::find(request('customer'));
+                                            @endphp
+                                            @if($selectedUser)
+                                                <option value="{{ $selectedUser->id }}" selected>{{ $selectedUser->name }}</option>
+                                            @endif
+                                        @endif
+                                    </select>
+
+                                    {{-- <select name="customer" id="customer" class="form-control">
                                         <option value="">- Select Customer -</option>
                                         @forelse(\App\EcommerceModel\SalesHeader::select('customer_name')->distinct('customer_name')->orderBy('customer_name')->get() as $cus)
 
@@ -317,7 +328,7 @@ table.dataTable thead .sorting::before, table.dataTable thead .sorting::after {
                                         @isset($_GET['customer'])
                                             <option value="{{$_GET['customer']}}" selected="selected">{{ $_GET['customer'] }}</option>
                                         @endisset
-                                    </select>
+                                    </select> --}}
                                 </div>
                             </div>                            
                             <div class="col-md-2">
@@ -358,8 +369,7 @@ table.dataTable thead .sorting::before, table.dataTable thead .sorting::after {
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13">Order Source</label>
-                                    <select name="order_source[]" id="order_source" class="form-control" multiple>
-                                        <option value="">- Select Source -</option>
+                                    <select name="order_source[]" id="order_source" class="form-control order-sources-multiple" placeholder="Select Order Source" multiple>
                                         @forelse($order_sources as $cus)
                                             <option value="{{$cus->order_source}}" {{ (isset($_GET['order_source']) && in_array($cus->order_source, (array)$_GET['order_source'])) ? 'selected' : '' }}>{{$cus->order_source}}</option>
                                         @empty
@@ -371,8 +381,7 @@ table.dataTable thead .sorting::before, table.dataTable thead .sorting::after {
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13">Sizes</label>
-                                    <select name="size[]" id="size" class="form-control" multiple>
-                                        <option value="">- Select Size -</option>                                                                        
+                                    <select name="size[]" id="size" class="form-control sizes-multiple" placeholder="Select Sizes" multiple>
                                         @foreach($sizes as $cus)
                                             <option value="{{$cus->name}}" {{ (isset($_GET['size']) && in_array($cus->name, (array)$_GET['size'])) ? 'selected' : '' }}>{{$cus->name}}</option>
                                         @endforeach
@@ -399,8 +408,7 @@ table.dataTable thead .sorting::before, table.dataTable thead .sorting::after {
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13">Item Type</label>
-                                    <select name="item_type[]" id="item_type" class="form-control" multiple="multiple">
-                                        <option value="">- Select Item Type -</option>
+                                    <select name="item_type[]" id="item_type" class="form-control item-type-multiple" placeholder="Select Item Type" multiple>
                                         <option @if(isset($_GET['item_type']) && in_array("Miscellaneous",$_GET['item_type'])) selected="selected" @endif value="Miscellaneous">Miscellaneous</option>
                                         <option @if(isset($_GET['item_type']) && in_array("WRA",$_GET['item_type'])) selected="selected" @endif value="WRA">WRA</option>
                                         <option @if(isset($_GET['item_type']) && in_array("Belly Pantaga",$_GET['item_type'])) selected="selected" @endif value="Belly Pantaga">Belly Pantaga</option>
@@ -1212,6 +1220,21 @@ table.dataTable thead .sorting::before, table.dataTable thead .sorting::after {
                 width: '300px',
                 dropdownAutoWidth: true
             });
+            $('.sizes-multiple').select2({
+                placeholder: "Select a size",
+                width: '300px',
+                dropdownAutoWidth: true
+            });
+            $('.order-sources-multiple').select2({
+                placeholder: "Select an order source",
+                width: '300px',
+                dropdownAutoWidth: true
+            });
+            $('.item-type-multiple').select2({
+                placeholder: "Select an item type",
+                width: '300px',
+                dropdownAutoWidth: true
+            });
         });
     } );
 
@@ -1455,7 +1478,26 @@ function twoColTotals_forPrint() {
 //   };
 }
 
-
+    $('.select2-ajax').select2({
+        placeholder: 'Select a user',
+        ajax: {
+            url: '{{ route("ajax.search-users-forecaster") }}',
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                    q: params.term // search term
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: data.results
+                };
+            },
+            cache: true
+        },
+        minimumInputLength: 1
+    });
 
 
 </script>
