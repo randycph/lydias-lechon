@@ -257,7 +257,10 @@ class ReportsController extends Controller
                 $qry.= " and h.agent='".$_GET['agent']."'";
             }
             if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $qry.= " and h.customer_name='".$_GET['customer']."'";
+                $customer = User::find($_GET['customer']);
+                if ($customer) {
+                    $qry.= " and h.customer_name='".$customer->name."'";
+                }
             }
             if(isset($_GET['product']) && $_GET['product']<>''){
                 $qry.= " and d.product_name='".$_GET['product']."'";
@@ -455,7 +458,10 @@ class ReportsController extends Controller
                 $mqry.= " and h.agent='".$_GET['agent']."'";
             }
             if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $mqry.= " and h.customer_name='".$_GET['customer']."'";
+                $customer = User::find($_GET['customer']);
+                if ($customer) {
+                    $mqry.= " and h.customer_name='".$customer->name."'";
+                }
             }
             if(isset($_GET['product']) && $_GET['product']<>''){
                 $mqry.= " and d.product_name='".$_GET['product']."'";
@@ -1634,6 +1640,30 @@ class ReportsController extends Controller
             'results' => $users->map(fn($user) => [
                 'id' => $user->id,
                 'text' => $user->name." (".$user->email.")"
+            ])
+        ]);
+    }
+
+    public function searchUsersForecaster(Request $request)
+    {
+        $search = $request->input('q');
+
+        // $users = User::where('role_id', '<>', env('CUSTOMER_ROLE_ID'))
+        //             ->when($search, fn($query) => $query->where('name', 'like', "%{$search}%"))
+        //             ->orderBy('name')
+        //             ->limit(20)
+        //             ->get();
+            $users = User::where('role_id', '=', 6)
+                     ->when($search, fn($query) => $query->where('name', 'like', "%{$search}%"))
+                    ->orderBy('name')
+                    ->limit(20)
+                    ->get();
+
+
+        return response()->json([
+            'results' => $users->map(fn($user) => [
+                'id' => $user->id,
+                'text' => $user->name
             ])
         ]);
     }

@@ -303,7 +303,18 @@
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13">Customer</label>
-                                    <select name="customer" id="customer" class="form-control">
+                                    <select id="customer" name="customer" class="form-control select2-ajax" style="width:100%">
+                                        @if(request('customer'))
+                                            @php
+                                                $selectedUser = \App\Models\User::find(request('customer'));
+                                            @endphp
+                                            @if($selectedUser)
+                                                <option value="{{ $selectedUser->id }}" selected>{{ $selectedUser->name }}</option>
+                                            @endif
+                                        @endif
+                                    </select>
+
+                                    {{-- <select name="customer" id="customer" class="form-control">
                                         <option value="">- Select Customer -</option>
                                         @forelse(\App\EcommerceModel\SalesHeader::select('customer_name')->distinct('customer_name')->orderBy('customer_name')->get() as $cus)
 
@@ -313,7 +324,7 @@
                                         @isset($_GET['customer'])
                                             <option value="{{$_GET['customer']}}" selected="selected">{{ $_GET['customer'] }}</option>
                                         @endisset
-                                    </select>
+                                    </select> --}}
                                 </div>
                             </div>                            
                             <div class="col-md-2">
@@ -1462,7 +1473,26 @@ function twoColTotals_forPrint() {
 //   };
 }
 
-
+    $('.select2-ajax').select2({
+        placeholder: 'Select a user',
+        ajax: {
+            url: '{{ route("ajax.search-users-forecaster") }}',
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                    q: params.term // search term
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: data.results
+                };
+            },
+            cache: true
+        },
+        minimumInputLength: 1
+    });
 
 
 </script>

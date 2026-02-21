@@ -536,7 +536,7 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::get('/admin/report/gift_cert', 'EcommerceControllers\ReportsController@gift_cert')->name('admin.report.gift_cert');
 
     Route::get('/admin/ajax/search-users', [ReportsController::class, 'searchUsers'])->name('ajax.search-users');
-
+    Route::get('/admin/ajax/search-users-forecaster', [ReportsController::class, 'searchUsersForecaster'])->name('ajax.search-users-forecaster');
 
 
     //
