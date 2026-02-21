@@ -293,10 +293,6 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">
-                        Review Later
-                    </button>
-                    
                     @php
                         // get all ids of tomorrow unpaid transactions
                         $ids = $tomorrowUnpaid->pluck('id')->join(',');
