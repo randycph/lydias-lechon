@@ -161,6 +161,12 @@
                 <div class="col-lg-6">
                     <div class="form-group">
                         <label class="d-block">Size</label>
+                        <select name="size" id="size" class="selectpicker mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select size" data-width="100%">
+                            <option value="0" >-- Select Size --</option>
+                            @foreach($sizes as $size)
+                                <option value="{{$size->name}}">{{strtoupper($size->name)}}</option>
+                            @endforeach
+                        </select>
                         <x-error-message inputName="size" />
                     </div>
                     <div class="form-group">

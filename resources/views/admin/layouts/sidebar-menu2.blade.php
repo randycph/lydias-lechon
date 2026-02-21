@@ -321,6 +321,14 @@
                                 <li @if (\Route::current()->getName() == 'product-categories.create') class="active" @endif><a href="{{ route('product-categories.create') }}">Create a Category</a></li>
                             @endif
                         @endif
+                        @if (auth()->user()->has_access_to_route('sizes.index') || auth()->user()->has_access_to_route('sizes.create'))
+                            @if (auth()->user()->has_access_to_route('sizes.index'))
+                            <li @if (\Route::current()->getName() == 'sizes.index' || \Route::current()->getName() == 'sizes.edit') class="active" @endif><a href="{{ route('sizes.index') }}">Manage Sizes</a></li>
+                            @endif
+                            @if(auth()->user()->has_access_to_route('sizes.create'))
+                                <li @if (\Route::current()->getName() == 'sizes.create') class="active" @endif><a href="{{ route('sizes.create') }}">Create a Size</a></li>
+                            @endif
+                        @endif
                     </ul>
                 </li>
             @endif

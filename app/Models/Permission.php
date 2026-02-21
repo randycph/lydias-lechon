@@ -89,6 +89,7 @@ class Permission extends Model
             'driver_sale_transaction' => 'Driver Sale Transactions',
             'sales_transaction_payment' => 'Sales Transaction Payment',
             'mailing_list' => 'Mailing List',
+            'size' => 'Sizes',
         ];
     }
     
