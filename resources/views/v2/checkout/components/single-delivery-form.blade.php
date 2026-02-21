@@ -20,15 +20,15 @@
                 x-model="delivery_address"
                 @focus="startEditingAddress"
                 @input="onAddressInput"
-                @blur="validateSingleDeliveryField('address'); finishEditingAddress()"
+                @blur="validateSingleDeliveryField('delivery_address'); finishEditingAddress()"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5"
-                :class="{'border-red-500': singleDeliveryErrors.address}"
+                :class="{'border-red-500': singleDeliveryErrors.delivery_address}"
                 rows="3"
             ></textarea>
 
-            <template x-if="singleDeliveryErrors.address">
+            <template x-if="singleDeliveryErrors.delivery_address">
                 <p class="text-red-500 text-xs mt-1"
-                   x-text="singleDeliveryErrors.address"></p>
+                   x-text="singleDeliveryErrors.delivery_address"></p>
             </template>
         </div>
 
