@@ -447,6 +447,8 @@ class SalesController extends Controller
                     });
             }
         }
+        
+        $discount = 0;
 
         if ($data->is_discount == 1) {
             $discount = $data->amount;
