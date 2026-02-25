@@ -25,6 +25,9 @@ class CheckUnpaidTransactions extends Command
             ->get();
 
         foreach ($remind as $order) {
+            if (!$order->user || !$order->user->email) {
+                continue; // Skip if no user or email
+            }
             Mail::to($order->user->email)->send(new \App\Mail\UnpaidReminderMail($order));
         }
 
@@ -38,7 +41,9 @@ class CheckUnpaidTransactions extends Command
         foreach ($cancel as $order) {
             $order->update(['status' => 'CANCELLED']);
 
-            Mail::to($order->user->email)->send(new \App\Mail\OrderCancelledMail($order));
+            if ($order->user && $order->user->email) {
+                Mail::to($order->user->email)->send(new \App\Mail\OrderCancelledMail($order));
+            }
         }
 
         $this->info('Unpaid transaction reminders sent and expired orders cancelled.');
