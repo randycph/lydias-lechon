@@ -557,6 +557,18 @@ class SalesHeader extends Model
         return true;
     }
 
+    public function isDeliveryDateIsFuture()
+    {
+        $item = $this->items->first();
+        if (!$item) {
+            return false;
+        }
+
+        $deliveryDate = Carbon::parse($item->delivery_date);
+
+        return $deliveryDate->isFuture();
+    }
+
     public function isConfirmedAndPastCutoffAndForecasted()
     {
         return $this->isConfirm == 1 && $this->pastForecastedTime() && $this->isForecasted();
