@@ -307,6 +307,10 @@ trait LogsActivityDiff
             return auth()->id();
         }
 
+        if (app()->runningInConsole() || !request()->hasSession()) {
+            return null;
+        }
+
         return ActivityLog::where('session_id', request()->session()->getId())
             ->whereNotNull('session_owner_id')
             ->value('session_owner_id');
