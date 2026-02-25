@@ -877,7 +877,7 @@ class JoborderController extends Controller
                 'order_source' => 'forecaster',
                 'product_id' => $product->id,
                 'product_name' => $product->name,
-                'product_size' => $product->size,
+                'product_size' => $request->size ?? $product->size,
                 'product_weight' => $product->weight,
                 'product_category' => $product->category_id,
                 'date_needed' => $request->date_needed.' '.$request->time_needed,

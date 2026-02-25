@@ -216,6 +216,14 @@
                     </div>
 
                     <div class="form-group">
+                        <label class="d-block">Size </label>
+                        <input name="size" class="form-control" value="{{ old('size') }}"></input>
+                        @error('size')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
                         <label class="d-block">Additional Instruction </label>
                         <textarea name="remarks" class="form-control">{{ old('remarks') }}</textarea>
                         @error('remarks')
