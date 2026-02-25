@@ -203,7 +203,23 @@
                         columns: ':visible'
                     }
                 },
-                'colvis'
+                {
+                    extend: 'colvis',
+                    text: 'Column visibility',
+                    buttons: [
+                        {
+                            extend: 'colvisGroup',
+                            text: 'Show all columns',
+                            show: ':hidden'
+                        },
+                        {
+                            extend: 'colvisGroup',
+                            text: 'Hide extra columns',
+                            hide: [1,2,7,9,10,11]
+                        },
+                        'columnsToggle'
+                    ]
+                }
             ],
             order: [[13, 'desc'], [14, 'asc']],
 
