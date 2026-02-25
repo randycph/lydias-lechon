@@ -176,7 +176,7 @@
                                                         </td>
 
                                                         <td>
-                                                            {{ optional(safe_date($sale->nearest_delivery_date))->format('M d, Y') ?? '—' }}
+                                                            {{ optional(safe_date($sale->nearest_delivery_date ?? $sale->items->first()->delivery_date))->format('M d, Y') ?? '—' }}
                                                         </td>
 
                                                         <td class="text-end">
@@ -264,7 +264,7 @@
             <div class="modal-content">
                 <div class="modal-header bg-warning text-dark">
                     <h5 class="modal-title">
-                        ⚠️ Pending Payments Alert
+                        Pending Payments Alert
                     </h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>

@@ -23,22 +23,58 @@ class DashboardController extends Controller
 
         $cutoffDate = now()->addDays(3)->endOfDay();
         $today = now()->startOfDay();
+        $thirtyDaysAgo = now()->subDays(30)->startOfDay();
+
+        // $pendingPayments = SalesHeader::with(['user', 'items', 'payments'])
+        //     ->whereRaw("payment_status != 'PAID'")
+        //     ->whereHas('items', function ($q) use ($today, $cutoffDate) {
+        //         $q->whereNotNull('delivery_date')
+        //         ->where('delivery_date', '!=', '0000-00-00 00:00:00')
+        //         ->whereBetween('delivery_date', [$today, $cutoffDate]);
+        //     })
+        //     ->orderBy(
+        //         SalesDetail::selectRaw('MIN(delivery_date)')
+        //             ->whereColumn('sales_header_id', 'ecommerce_sales_headers.id')
+        //             ->whereNotNull('delivery_date')
+        //             ->where('delivery_date', '!=', '0000-00-00 00:00:00')
+        //             ->where('delivery_date', '>=', $today),
+        //         'desc'
+        //     )
+        //     ->get();
 
         $pendingPayments = SalesHeader::with(['user', 'items', 'payments'])
-            ->whereRaw("payment_status != 'PAID'")
-            ->whereHas('items', function ($q) use ($today, $cutoffDate) {
-                $q->whereNotNull('delivery_date')
-                ->where('delivery_date', '!=', '0000-00-00 00:00:00')
-                ->whereBetween('delivery_date', [$today, $cutoffDate]);
+            ->where(function ($query) use ($today, $cutoffDate, $thirtyDaysAgo) {
+                // unpaid + upcoming deliveries
+                $query->where(function ($q) use ($today, $cutoffDate) {
+                    $q->whereRaw("payment_status != 'PAID'")
+                    ->whereHas('items', function ($q2) use ($today, $cutoffDate) {
+                        $q2->whereNotNull('delivery_date')
+                            ->where('delivery_date', '!=', '0000-00-00 00:00:00')
+                            ->whereBetween('delivery_date', [$today, $cutoffDate]);
+                    });
+                })
+
+                // Sign-Chit within last 30 days
+                ->orWhere(function ($q) use ($thirtyDaysAgo) {
+                    $q->whereRaw("payment_status != 'PAID'")
+                    ->whereHas('payments', function ($p) {
+                        $p->where('payment_type', 'Sign-Chit');
+                    })
+                    ->whereHas('items', function ($q2) use ($thirtyDaysAgo) {
+                        $q2->whereNotNull('delivery_date')
+                        ->where('delivery_date', '!=', '0000-00-00 00:00:00')
+                        ->where('delivery_date', '>=', $thirtyDaysAgo);
+                    });
+                });
             })
             ->orderBy(
                 SalesDetail::selectRaw('MIN(delivery_date)')
                     ->whereColumn('sales_header_id', 'ecommerce_sales_headers.id')
                     ->whereNotNull('delivery_date')
-                    ->where('delivery_date', '!=', '0000-00-00 00:00:00')
-                    ->where('delivery_date', '>=', $today),
-                'desc'
+                    ->where('delivery_date', '!=', '0000-00-00 00:00:00'),
+                'asc'
             )
+
             ->get();
 
         $tomorrow = now()->addDay()->startOfDay();
