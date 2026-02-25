@@ -56,7 +56,8 @@ class DashboardController extends Controller
 
                 // Sign-Chit within last 30 days
                 ->orWhere(function ($q) use ($thirtyDaysAgo) {
-                    $q->whereHas('payments', function ($p) {
+                    $q->whereRaw("payment_status != 'PAID'")
+                    ->whereHas('payments', function ($p) {
                         $p->where('payment_type', 'Sign-Chit');
                     })
                     ->whereHas('items', function ($q2) use ($thirtyDaysAgo) {
@@ -70,9 +71,8 @@ class DashboardController extends Controller
                 SalesDetail::selectRaw('MIN(delivery_date)')
                     ->whereColumn('sales_header_id', 'ecommerce_sales_headers.id')
                     ->whereNotNull('delivery_date')
-                    ->where('delivery_date', '!=', '0000-00-00 00:00:00')
-                    ->where('delivery_date', '>=', $today),
-                'desc'
+                    ->where('delivery_date', '!=', '0000-00-00 00:00:00'),
+                'asc'
             )
 
             ->get();

@@ -176,7 +176,7 @@
                                                         </td>
 
                                                         <td>
-                                                            {{ optional(safe_date($sale->nearest_delivery_date))->format('M d, Y') ?? '—' }}
+                                                            {{ optional(safe_date($sale->nearest_delivery_date ?? $sale->items->first()->delivery_date))->format('M d, Y') ?? '—' }}
                                                         </td>
 
                                                         <td class="text-end">
