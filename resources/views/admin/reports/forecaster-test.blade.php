@@ -840,7 +840,7 @@
 
         {{-- Size (duplicate of status; merged for sales; JO per-row) --}}
         <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $size }}">
-            {{ $isSales ? ($isMerged ? '' : e($size)) : e($r->size ?? '') }}
+            {{ $isSales ? ($isMerged ? '' : e($size)) : e($size ?? '') }}
         </td>
     </tr>
 
