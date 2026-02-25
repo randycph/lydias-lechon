@@ -190,6 +190,11 @@
                     </div>
 
                     <div class="form-group">
+                        <label class="d-block">Size</label>
+                        <input name="size" class="form-control" value="{{ $jo->product_size }}"></input>
+                    </div>
+
+                    <div class="form-group">
                         <label class="d-block">Additional Instruction <span class="tx-danger">*</span></label>
                         <textarea name="remarks" class="form-control">{!! $jo->remarks !!}</textarea>
                     </div>
