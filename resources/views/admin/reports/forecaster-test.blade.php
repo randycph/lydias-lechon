@@ -696,7 +696,7 @@ table.dataTable thead .sorting::before, table.dataTable thead .sorting::after {
         $delTime       = $fmtTime($r->deldate);
         $deliveryType  = (string)($r->delivery_type ?? '');
         $delstat       = (string)($r->delstat ?? '');
-        $size          = (string)($r->size ?? '');
+        $size          = (string)($r->size ?? $r->product_size ?? '');
         $agent         = (string)($r->agent ?? '');
         $orderNoText   = (string)($r->order_number ?? '');
         $customerName  = (string)($r->customer_name ?? '');
