@@ -513,7 +513,7 @@ table.dataTable thead .sorting::before, table.dataTable thead .sorting::after {
                                     @foreach ($sizeCounts as $size => $count)
                                         <tr>
                                             <td>{{ strtoupper($size) }}</td>
-                                            <td align="center">{{ $count }}</td>
+                                            <td align="center"><a href="{{ request()->fullUrlWithQuery(['filter' => 'whole-lechon', 'size' => $size]) }}">{{ $count }}</a></td>
                                         </tr>
                                     @endforeach
                                 </table>
