@@ -408,8 +408,12 @@
                                                         <div class="dropdown-menu dropdown-menu-right">
                                                             <a class="dropdown-item" title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale->id) }}">View Sales Summary</a>
                                                             
-                                                                @if ( auth()->user()->has_access_to_route('sales-transaction.update') && !$sale->isConfirmedAndPastCutoffAndForecasted()
-                                                                ) <a class="dropdown-item" href="{{ route('sales.update_details',$sale->id) }}" title="Update Sales Details & Items">
+                                                                
+                                                                @if (
+                                                                    auth()->user()->has_access_to_route('sales-transaction.update') &&
+                                                                    !$sale->isConfirmedAndPastCutoffAndForecasted() && !$sale->isDeliveryDateIsFuture()
+                                                                ) 
+                                                                <a class="dropdown-item" href="{{ route('sales.update_details',$sale->id) }}" title="Update Sales Details & Items">
                                                                     Update Sales Details </a> 
                                                                 @endif
    
