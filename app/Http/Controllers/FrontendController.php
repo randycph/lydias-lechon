@@ -475,6 +475,8 @@ class FrontendController extends Controller
             return $cart->product_id === 165;
         });
 
+        $lechonBakaService = floatval(Product::whereId(270)->first()->price * ($bakaQty ?? 1));
+
         return view('v2.checkout.checkout', compact(
             'triples', 
             'provinces', 
