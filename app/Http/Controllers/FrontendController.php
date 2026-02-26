@@ -498,6 +498,7 @@ class FrontendController extends Controller
             'minimum_processing_hours_misc', 
             'minimum_processing_hours_baka', 
             'minimum_order_misc', 
+            'lechonBakaService',
             'hasCochinillo')
         );
     }
