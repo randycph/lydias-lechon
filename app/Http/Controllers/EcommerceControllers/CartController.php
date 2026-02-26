@@ -859,7 +859,6 @@ class CartController extends Controller
 
     public function save_sales(Request $request) 
     {
-        dd($request->all());
         $carts = auth()->check()
             ? Cart::where('user_id', auth()->id())->with('product')->get()
             : collect(session('cart', []));
