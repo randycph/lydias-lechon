@@ -58,7 +58,10 @@ class DashboardController extends Controller
                 ->orWhere(function ($q) use ($thirtyDaysAgo) {
                     $q->whereRaw("payment_status != 'PAID'")
                     ->whereHas('payments', function ($p) {
-                        $p->where('payment_type', 'Sign-Chit')->where('status', '!=', 'CANCELLED');
+                        $p->where('payment_type', 'Sign-Chit');
+                    })
+                    ->whereHas('payments', function ($p) {
+                        $p->where('status', '!=', 'CANCELLED');
                     })
                     ->whereHas('items', function ($q2) use ($thirtyDaysAgo) {
                         $q2->whereNotNull('delivery_date')
