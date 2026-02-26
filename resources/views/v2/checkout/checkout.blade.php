@@ -694,13 +694,15 @@
                     }, 0)
 
                     const deliveryTotal = this.allowMultiple
-                        ? this.deliveries.reduce((sum, d) => sum + (parseFloat(d.delivery_fee) || 0), 0)
-                        : (parseFloat(this.deliveryFee) || 0)
+                        ? this.deliveries.reduce((sum, d) => sum + (parseFloat(d.delivery_fee + d.lechon_baka_service) || 0), 0)
+                        : (parseFloat(this.deliveryFee + this.lechonBakaService) || 0)
 
-                    this.total_amount = itemsTotal + deliveryTotal + this.lechonBakaService;
+                    console.log(itemsTotal, deliveryTotal)
+
+                    this.total_amount = itemsTotal + deliveryTotal;
                     this.deposit = this.total_amount.toFixed(2);
 
-                    return '₱' + (itemsTotal + deliveryTotal + this.lechonBakaService)
+                    return '₱' + (itemsTotal + deliveryTotal)
                         .toLocaleString(undefined, { minimumFractionDigits: 2 })
                 },
 
@@ -1001,6 +1003,8 @@
                             delivery_fee: this.deliveryFee || 0,
                             deposit: this.deposit,
                             total_amount: this.total_amount,
+                            isBaka: this.hasBaka ? 1 : 0,
+                            lechon_baka_service: this.lechonBakaService,
                         }
 
                         /* ==========================
@@ -1525,7 +1529,7 @@
                         delivery.lechon_baka_service = data.lechon_baka_service_total;
 
                         this.deliveryFee = this.deliveries.reduce((sum, d) => sum + (parseFloat(d.delivery_fee || 0)) + (parseFloat(d.lechon_baka_service || 0)), 0);
-                    
+                        
                     } catch (e) {
                         console.error(`Failed to fetch delivery fee for ${city + ', ' + province}`, e);
                         delivery.delivery_fee = 0;
