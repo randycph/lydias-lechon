@@ -842,27 +842,10 @@ class CartController extends Controller
 
     private function validateProcessingHours($date, $time, $minimumHours)
     {
-        // dd($request->all());
-        $request->validate([
-            'mobile' => [
-                'required',
-                'regex:/^(09|\+639)\d{9}$/'
-            ],
-            'name' => 'required',
-            'email' => 'required|email:rfc,dns',
-            'delivery_branch' => 'required_if:shipping_type,pickup',
-        ], [
-            'mobile.regex' => 'The mobile number must start with 09 or +639 and be followed by 9 digits. No spaces allowed.',
-        ]);
-
-        if ($request->shipping_type != 'pickup' && !$request->has('deliveries')) {
-            $request->validate([
-                'city' => 'required',
-                'province' => 'required',
-            ], [
-                'city.required' => 'The city field is required.',
-                'province.required' => 'The province field is required.',
-            ]);
+        try {
+            $requested = Carbon::parse($date . ' ' . $time);
+        } catch (\Exception $e) {
+            return false;
         }
 
         $now = Carbon::now();
