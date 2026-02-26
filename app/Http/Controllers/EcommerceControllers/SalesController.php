@@ -60,7 +60,8 @@ class SalesController extends Controller
         return view('admin.sales.update_items',compact('items','products'));
     }
 
-    public function update_items(Request $request){
+    public function update_items(Request $request)
+    {
         $head = SalesHeader::whereId($request->ui_sales_id)->first();
         $date_needed = '';
         foreach($head->items as $item){
@@ -1013,7 +1014,14 @@ class SalesController extends Controller
         $salesdetail = SalesDetail::where('sales_header_id',$id)->first();
         $salesheader = SalesHeader::with('deliveryAddress')->find($id);
 
-        $products = Product::orderBy('name')->get();
+        $specialId = 270;
+
+        $products = Product::where(function ($q) use ($specialId) {
+                $q->where('status', 'PUBLISHED')
+                ->orWhere('id', $specialId);
+            })
+            ->orderBy('name')
+            ->get();
 
         $dateneeded = '';
         $date_only = '';

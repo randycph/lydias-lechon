@@ -193,7 +193,15 @@ class JoborderController extends Controller
     public function create()
     {
         try {
-            $miscelaneous = Product::where('is_misc',1)->orderBy('name','asc')->get();
+            $specialId = 270;
+
+            $miscelaneous = Product::where(function ($q) use ($specialId) {
+                    $q->where('is_misc', 1)->where('status', 'PUBLISHED')
+                    ->orWhere('id', $specialId);
+                })
+                ->orderBy('name')
+                ->get();
+
             $products = Product::where('production_item',1)->where('status','PUBLISHED')->orderBy('name','asc')->get();
             $branches_store = Branch::where('status', 1)->where('jo_select_branch', 1)->orderBy('name','asc')->get();
             $pbs = ProductionBranch::orderBy('name','asc')->get();
