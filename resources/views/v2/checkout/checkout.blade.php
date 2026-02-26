@@ -1479,7 +1479,7 @@
                     this.$nextTick(() => {
                         this.isBaka = data.is_baka;
                         this.lechonBakaService = data.lechon_baka_service;
-                        this.location = location;
+                        // this.location = location;
                     })
                 },
 
