@@ -1042,7 +1042,6 @@
                                         qty: o.qty,
                                         product: o.product,
                                         product_name: o.product_name,
-                                        isBaka: o.isBaka,
                                     })),
                                     need_date: d.need_date,
                                     need_time: d.need_time,
@@ -1061,6 +1060,8 @@
                                     cochinillo_warning: d.cochinillo_warning,
                                     paella: d.paella,
                                     availableHours: d.availableHours,
+                                    isBaka: d.isBaka ?? false,
+                                    lechon_baka_service: d.lechon_baka_service ?? 0,
                                 }))
                             )
                         }
@@ -1474,6 +1475,8 @@
                     const data = await response.json()
 
                     delivery.delivery_fee = parseFloat(data.fee || 0)
+                    delivery.isBaka = data.is_baka ?? false
+                    delivery.lechon_baka_service = data.lechon_baka_service ?? 0;
 
                     this.deliveryFee = this.deliveries.reduce((sum, d) => {
                         return sum + parseFloat(d.delivery_fee || 0)
@@ -1502,6 +1505,8 @@
                             sms: false,
                             cochinillo_warning: false,
                             paella: false,
+                            isBaka: false,
+                            lechon_baka_service: 0,
                         }]
 
                         this.deliveryFee = 0
@@ -1692,6 +1697,8 @@
                         sms: false,
                         cochinillo_warning: false,
                         paella: false,
+                        isBaka: false,
+                        lechon_baka_service: 0,
                     })
                 },
 
