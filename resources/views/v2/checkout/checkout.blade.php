@@ -1044,7 +1044,6 @@
                                         qty: o.qty,
                                         product: o.product,
                                         product_name: o.product_name,
-                                        isBaka: o.isBaka,
                                     })),
                                     need_date: d.need_date,
                                     need_time: d.need_time,
@@ -1063,6 +1062,7 @@
                                     cochinillo_warning: d.cochinillo_warning,
                                     paella: d.paella,
                                     availableHours: d.availableHours,
+                                    isBaka: d.isBaka,
                                 }))
                             )
                         }
