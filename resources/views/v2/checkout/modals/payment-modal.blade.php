@@ -95,7 +95,7 @@
 
                     <button
                         type="button"
-                        @click="closePaymentModal"
+                        @click="cancelPayment()"
                         class="px-4 py-2 border rounded-md text-sm"
                     >
                         Cancel
