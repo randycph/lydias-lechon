@@ -1502,8 +1502,8 @@ class CartController extends Controller
                             'is_multiple_address' => 0,
                             'is_new_order' => 1,
                             'is_sub' => 1,
-                            'has_baka' => $delivery->isBaka ? 1 : 0,
-                            'lechon_baka_service' => $delivery->lechon_baka_service ?? 0,
+                            'has_baka' => $delivery?->isBaka ? 1 : 0,
+                            'lechon_baka_service' => $delivery?->lechon_baka_service ?? 0,
                             // 'date_needed' => $delivery->need_date . ' ' . $delivery->need_time,
                             // 'delivery_fee' => $delivery->delivery_fee,
                             // 'note' => $delivery->note,
@@ -1545,8 +1545,8 @@ class CartController extends Controller
                             'province' => $delivery->province,
                             'city' => $delivery->city,
                             'barangay' => $delivery->location ?? '',
-                            'has_baka' => $delivery->isBaka ? 1 : 0,
-                            'lechon_baka_service' => $delivery->lechon_baka_service ?? 0,
+                            'has_baka' => $delivery?->isBaka ? 1 : 0,
+                            'lechon_baka_service' => $delivery?->lechon_baka_service ?? 0,
                         ]);
 
                         if ($delivery->phone && $delivery->sms) {
@@ -1588,8 +1588,8 @@ class CartController extends Controller
                                     'other_cost_description' => '',
                                     'created_by' => $user->id,
                                     'delivery_date' => $delivery->need_date . ' ' . $delivery->need_time,
-                                    'has_baka' => $delivery->isBaka ? 1 : 0,
-                                    'lechon_baka_service' => $delivery->lechon_baka_service ?? 0,
+                                    'has_baka' => $delivery?->isBaka ? 1 : 0,
+                                    'lechon_baka_service' => $delivery?->lechon_baka_service ?? 0,
                                 ]);
 
                                 if ($product->id == 178) {
@@ -1621,8 +1621,8 @@ class CartController extends Controller
                                         'other_cost_description' => '',
                                         'created_by' => $user->id,
                                         'delivery_date' => $delivery->need_date . ' ' . $delivery->need_time,
-                                        'has_baka' => $delivery->isBaka ? 1 : 0,
-                                        'lechon_baka_service' => $delivery->lechon_baka_service ?? 0,
+                                        'has_baka' => $delivery?->isBaka ? 1 : 0,
+                                        'lechon_baka_service' => $delivery?->lechon_baka_service ?? 0,
                                     ]);
                                 }
                             }
@@ -2259,7 +2259,7 @@ class CartController extends Controller
             }
         }
 
-        if ($baka == 1 && $location_lechon->outside_manila == 0) {
+        if ($baka == 1 && $location_lechon?->outside_manila == 0) {
             $rate = 0;
         }
 

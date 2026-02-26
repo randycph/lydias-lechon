@@ -174,12 +174,15 @@
         window.hasCochinillo = @json($hasCochinillo);
         window.minimum_processing_hours_baka = @json($minimum_processing_hours_baka);
         window.initialCarts = @json($carts);
+        window.lechonBakaService = @json($lechonBakaService);
     </script>
 
     <script>
         function checkoutForm() {
             return {
-
+                lechonBakaService: window.lechonBakaService,
+                isBaka: false,
+                hasBaka: window.hasBaka,
                 carts: window.initialCarts || [],
                 coupons: [],
                 method: 'pickup',
@@ -214,6 +217,12 @@
 
                     if (this.isGuest) {
                         this.openPrivacyModal()
+                    }
+
+
+
+                    if (!this.allowMultiple && this.hasBaka && this.lechonBakaService > 0) {
+                        console.log('1111')
                     }
                 },
 
@@ -688,13 +697,12 @@
                         ? this.deliveries.reduce((sum, d) => sum + (parseFloat(d.delivery_fee) || 0), 0)
                         : (parseFloat(this.deliveryFee) || 0)
 
-                    this.total_amount = itemsTotal + deliveryTotal
+                    this.total_amount = itemsTotal + deliveryTotal + this.lechonBakaService;
                     this.deposit = this.total_amount.toFixed(2);
 
-                    return '₱' + (itemsTotal + deliveryTotal)
+                    return '₱' + (itemsTotal + deliveryTotal + this.lechonBakaService)
                         .toLocaleString(undefined, { minimumFractionDigits: 2 })
                 },
-
 
                 async changeMethod(type) {
                     if (type == this.method) return
@@ -716,6 +724,10 @@
                         this.availableDeliveryHours = []
                     }
 
+                    this.deliveryFee = 0;
+                    this.lechonBakaService = window.lechonBakaService;
+
+                    this.computeTotal()
                 },
 
                 availablePickupHours: [],
@@ -1031,7 +1043,7 @@
                             payload.location = this.deliveries[0]?.location ?? ''
                             payload.need_time = this.deliveries[0]?.need_time ?? ''
 
-                            payload.delivery_fee = this.deliveryFees?.reduce((a,b)=>a+b,0) || 0
+                            payload.delivery_fee = this.deliveryFees?.reduce((a,b)=>a+b.fee,0) || 0
 
                             payload.deliveries = JSON.stringify(
                                 this.deliveries.map(d => ({
@@ -1437,6 +1449,8 @@
 
                     if (!this.province || !this.city) return
 
+                    this.isBaka = false;
+
                     const response = await fetch('{{ route('cart.front.get_shipping_fee') }}', {
                         method: 'POST',
                         headers: {
@@ -1452,35 +1466,72 @@
                     const data = await response.json()
 
                     this.deliveryFee = parseFloat(data.fee || 0)
+
+                    this.$nextTick(() => {
+                        this.isBaka = data.is_baka;
+                        this.lechonBakaService = data.lechon_baka_service;
+                        this.location = location;
+                    })
                 },
 
                 async getDeliveryFeeForMultiple(index) {
+                    const delivery = this.deliveries[index];
 
-                    const delivery = this.deliveries[index]
+                    const city = delivery.city;
+                    const province = delivery.province;
 
-                    if (!delivery.province || !delivery.city) return
+                    // include qty in products
+                    const products = delivery?.orders?.map(o => ({ product_id: o.product_id, qty: o.qty }));
 
-                    const response = await fetch('{{ route('cart.front.get_shipping_fee') }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: JSON.stringify({
-                            province: delivery.province,
-                            city: delivery.city
-                        })
-                    })
+                    if (!delivery?.orders && !delivery?.orders?.length) {
+                        delivery.city = '';
+                        delivery.province = '';
 
-                    const data = await response.json()
+                        if (this.errors[index]) {
+                            this.errors[index].location = 'Please select at least one product for this delivery.';
+                        } else {
+                            this.errors[index] = { location: 'Please select at least one product for this delivery.' };
+                        }
+                        return;
+                    }
 
-                    delivery.delivery_fee = parseFloat(data.fee || 0)
-                    delivery.isBaka = data.is_baka ?? false
-                    delivery.lechon_baka_service = data.lechon_baka_service ?? 0;
+                    if (!city || !province || products?.length === 0 || products == undefined) return;
 
-                    this.deliveryFee = this.deliveries.reduce((sum, d) => {
-                        return sum + parseFloat(d.delivery_fee || 0)
-                    }, 0)
+                    try {
+                        const response = await fetch('{{ route('cart.front.get_shipping_fee_for_multiple_address_new') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            },
+                            body: JSON.stringify({ locations: [{ city, province }], products }),
+                        });
+
+                        if (!response.ok) throw new Error('Network error');
+
+                        const data = await response.json()
+                        const fee = parseFloat(data.fee || 0);
+
+                        this.deliveryFees[index] = { 
+                            location: city + ', ' + province, 
+                            fee, 
+                            isBaka: data.has_baka, 
+                            lechon_baka_service: 
+                            data.lechon_baka_service_total
+                        };
+
+                        delivery.delivery_fee = fee;
+                        delivery.isBaka = data.has_baka;
+                        delivery.lechon_baka_service = data.lechon_baka_service_total;
+
+                        this.deliveryFee = this.deliveries.reduce((sum, d) => sum + (parseFloat(d.delivery_fee || 0)) + (parseFloat(d.lechon_baka_service || 0)), 0);
+                    
+                    } catch (e) {
+                        console.error(`Failed to fetch delivery fee for ${city + ', ' + province}`, e);
+                        delivery.delivery_fee = 0;
+                        delivery.isBaka = false;
+                        delivery.lechon_baka_service = 0;
+                    }
                 },
 
                 onChangeMultipleAddress() {
@@ -1517,7 +1568,17 @@
                             this.need_time = ''
                             this.availableDeliveryHours = []
                         }
+
+                        this.isBaka = window.hasBaka;
+                        this.lechonBakaService = window.lechonBakaService;
+                    } else {
+                        this.isBaka = false;
+                        this.lechonBakaService = 0;
                     }
+                
+                    this.deliveryFees = [];
+                    this.deliveryFee = 0;
+                    
                 },
 
                 orders: @json($carts),

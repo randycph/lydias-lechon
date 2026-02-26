@@ -94,11 +94,22 @@
             </div>
         </template>
 
+        <template
+            x-if="!allowMultiple && hasBaka && lechonBakaService > 0">
+            <div>
+                <div class="flex justify-between lg:mt-2">
+                    <span class="font-medium text-gray-800 italic">Lechon Baka Service</span>
+                    <span class="font-medium"
+                        x-text="lechonBakaService > 0 ? '₱' + lechonBakaService.toLocaleString(undefined, { minimumFractionDigits: 2 }) : 'Free'"></span>
+                </div>
+            </div>
+        </template>
+
         {{-- MULTIPLE DELIVERY --}}
         <template x-if="method === 'delivery' && allowMultiple">
             <div class="mt-3 space-y-1 text-sm">
 
-                <template x-for="(delivery, index) in deliveries" :key="index">
+                {{-- <template x-for="(delivery, index) in deliveries" :key="index">
                     <div class="flex justify-between" x-show="delivery.delivery_fee > 0">
 
                         <span class="text-slate-600">
@@ -111,7 +122,38 @@
                         </span>
 
                     </div>
+                </template> --}}
+
+                <template x-if="deliveryFees.length > 0">
+                    <div class="flex flex-col gap-1 mt-2">
+                        <template x-for="(item, i) in deliveryFees" :key="i">
+                            <div>
+                                <div class="flex justify-between text-gray-500 text-sm">
+                                    <span x-text="'Delivery Fee (' + item.location + ')'"></span>
+                                    <div class="flex items-center gap-1">
+                                        <template x-if="item.discount && item.discount > 0">
+                                            <span class="line-through text-red-700 italic"
+                                                x-text="'₱' + item.fee.toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+                                        </template>
+                                        <span
+                                            x-text="'₱' + (item.fee - (item.discount || 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+                                    </div>
+                                </div>
+
+                                <template x-if="item.isBaka && item.lechon_baka_service > 0 && allowMultiple && method == 'delivery'">
+                                    <ul class="pl-6 list-disc">
+                                        <li class="flex justify-between text-gray-500 text-sm">
+                                            <span class="italic ">Lechon Baka Service</span>
+                                            <span
+                                                x-text="'₱' + item.lechon_baka_service.toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+                                        </li>
+                                    </ul>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
                 </template>
+
             </div>
         </template>
 
