@@ -88,6 +88,9 @@ class DashboardController extends Controller
             ->whereHas('items', function ($q) use ($tomorrow, $endTomorrow) {
                 $q->whereBetween('delivery_date', [$tomorrow, $endTomorrow]);
             })
+            ->whereDoesntHave('payments', function ($p) {
+                $p->where('status', 'CANCELLED');
+            })
             ->whereNotIn('status', ['ABANDONED', 'CANCELLED'])
             ->get()
             ->filter(fn ($sale) => $sale->balance($sale->id) > 0);
