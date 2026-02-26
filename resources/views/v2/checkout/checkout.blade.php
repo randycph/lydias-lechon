@@ -861,6 +861,7 @@
                     sms: false,
                     cochinillo_warning: false,
                     paella: false,
+                    isBaka: false,
                 }],
 
                 errors: {},
@@ -884,6 +885,7 @@
                         sms: false,
                         cochinillo_warning: false,
                         paella: false,
+                        isBaka: false,
                     })
                 },
 
@@ -1042,6 +1044,7 @@
                                         qty: o.qty,
                                         product: o.product,
                                         product_name: o.product_name,
+                                        isBaka: o.isBaka,
                                     })),
                                     need_date: d.need_date,
                                     need_time: d.need_time,
@@ -1545,6 +1548,7 @@
                         delivery.orders.push({
                             product_id: order.product_id,
                             paella: parseFloat(order.paella_price || 0) > 0,
+                            isBaka: order.product_id === 178,
                             is_free_product: !!order.is_free_product,
                             qty: 1,
                             product: order.product,
