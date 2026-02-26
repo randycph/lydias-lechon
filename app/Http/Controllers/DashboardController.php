@@ -67,6 +67,7 @@ class DashboardController extends Controller
                     });
                 });
             })
+            ->whereNotIn('status', ['ABANDONED', 'CANCELLED'])
             ->orderBy(
                 SalesDetail::selectRaw('MIN(delivery_date)')
                     ->whereColumn('sales_header_id', 'ecommerce_sales_headers.id')
