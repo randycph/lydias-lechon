@@ -1242,6 +1242,11 @@
                     this.paymentModal = false
                 },
 
+                cancelPayment() {
+                    this.paymentModal = false
+                    window.location.href = '/sales-summary/' + this.paymentDetails.sales_header_id
+                },
+
                 submitPayment() {
 
                     if (this.isProcessingPayment) return
