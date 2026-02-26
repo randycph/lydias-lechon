@@ -43,6 +43,9 @@ class DashboardController extends Controller
         //     ->get();
 
         $pendingPayments = SalesHeader::with(['user', 'items', 'payments'])
+            ->whereDoesntHave('payments', function ($p) {
+                $p->where('status', 'CANCELLED');
+            })
             ->where(function ($query) use ($today, $cutoffDate, $thirtyDaysAgo) {
                 // unpaid + upcoming deliveries
                 $query->where(function ($q) use ($today, $cutoffDate) {
@@ -59,9 +62,6 @@ class DashboardController extends Controller
                     $q->whereRaw("payment_status != 'PAID'")
                     ->whereHas('payments', function ($p) {
                         $p->where('payment_type', 'Sign-Chit');
-                    })
-                    ->whereHas('payments', function ($p) {
-                        $p->where('status', '!=', 'CANCELLED');
                     })
                     ->whereHas('items', function ($q2) use ($thirtyDaysAgo) {
                         $q2->whereNotNull('delivery_date')
