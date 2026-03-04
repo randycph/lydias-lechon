@@ -342,7 +342,7 @@ class SalesController extends Controller
                     'customer_delivery_adress' => $request->new_delivery_address,
                     'instruction' => $request->new_instruction,
                     'delivery_fee_amount' => $delivery_amount,
-                    'gross_amount' => $amt,
+                    'gross_amount' => $sales->items->sum('gross_amount'),
                     'net_amount' => $amt,
                     'customer_address' => '',
                     'delivery_branch' => $request->delivery_branch
