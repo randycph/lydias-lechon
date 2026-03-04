@@ -154,6 +154,7 @@ class SalesController extends Controller
 
     public function update_all(Request $request)
     {
+        // dd($request->all());
         $request->merge(['from_update_all' => true]);
 
         $this->update_dateneeded($request);
