@@ -639,7 +639,8 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     //
 
     //Sales Transaction
-    Route::resource('/admin/sales-transaction', 'EcommerceControllers\SalesController');
+    Route::resource('/admin/sales-transaction', 'EcommerceControllers\SalesController');    
+    Route::post('/admin/sales-transaction/update-all', 'EcommerceControllers\SalesController@update_all')->name('sales-transaction.update_all');
     Route::get('/admin/sales-transaction/{sales}/restore', 'EcommerceControllers\SalesController@restore')->name('sales-transaction.restore');
     Route::post('/admin/sales-transaction/change-status', 'EcommerceControllers\SalesController@change_status')->name('sales-transaction.change.status');
     Route::post('/admin/sales-transaction/cancel', 'EcommerceControllers\SalesController@cancel')->name('sales-transaction.cancel');
