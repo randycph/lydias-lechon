@@ -156,7 +156,7 @@
                                                 <fieldset disabled>
                                                     <div class="d-flex justify-content-between flex-column 3">
                                                         @foreach ($salesheader->items as $item)
-                                                            <div class="d-flex justify-content-between product-row"
+                                                            <div class="d-flex justify-content-between product-row d-none"
                                                                 data-product-id="{{ $item->product_id }}">
                                                                 <div class="form-check me-2 d-flex align-items-center">
                                                                     <input class="form-check-input product-checkbox"
@@ -296,8 +296,8 @@
                                                         <input type="text" class="form-control contact_tel" />
                                                     </div>
 
-                                                    <button type="button"
-                                                        class="btn btn-sm btn-danger remove-address">Remove</button>
+                                                    {{-- <button type="button"
+                                                        class="btn btn-sm btn-danger remove-address">Remove</button> --}}
                                                 </fieldset>
                                             </div>
 
