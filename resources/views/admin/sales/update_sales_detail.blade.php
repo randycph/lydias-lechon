@@ -155,8 +155,9 @@
                                             <div id="addressSectionTemplate" class="address-section d-none" aria-hidden="true">
                                                 <fieldset disabled>
                                                     <div class="d-flex justify-content-between flex-column 3">
+                                                        <div class="d-none">
                                                         @foreach ($salesheader->items as $item)
-                                                            <div class="d-flex justify-content-between product-row d-none"
+                                                            <div class="d-flex justify-content-between product-row"
                                                                 data-product-id="{{ $item->product_id }}">
                                                                 <div class="form-check me-2 d-flex align-items-center">
                                                                     <input class="form-check-input product-checkbox"
@@ -180,6 +181,7 @@
                                                                 </div>
                                                             </div>
                                                         @endforeach
+                                                        </div>
                                                     </div>
                                                     <div class="mb-3">
                                                         <label class="form-label fw-bold address-label">Address</label>
