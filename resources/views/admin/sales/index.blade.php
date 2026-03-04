@@ -286,7 +286,9 @@
                                             <a title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale->id) }}">{{$sale->order_number }}</a><br>
                                         </div>
                                     </th>
-                                    <td class="{{ isUnreadTransaction($sale->id) ? 'font-weight-bold' : '' }}">{{ $sale->customer_name ?? $sale->contact_person }}</td>
+                                    <td class="{{ isUnreadTransaction($sale->id) ? 'font-weight-bold' : '' }}">
+                                        {{ $sale?->singleContact?->contact_person ?? $sale->customer_name ?? $sale->contact_person }}
+                                    </td>
                                     <td>{{ $sale->customer_name }}</td>
                                     <td>{{ $sale->order_source }}</td>
                                     <td>{{ $sale->delivery_type == 'Store Pickup' ? $sale->outlet : $sale->delivery_branch }}</td>
