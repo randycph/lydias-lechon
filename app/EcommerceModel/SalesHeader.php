@@ -556,6 +556,11 @@ class SalesHeader extends Model
         return $this->hasMany(ProductDeliveryAddress::class, 'sales_header_id')->orderBy('id', 'asc');
     }
 
+    public function singleContact()
+    {
+        return $this->hasOne(ProductDeliveryAddress::class, 'sales_header_id')->orderBy('id', 'asc');
+    }
+
     public function deliveryStatuses()
     {
         return $this->hasMany(DeliveryStatus::class, 'order_id', 'id');
