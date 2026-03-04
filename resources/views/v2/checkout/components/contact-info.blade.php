@@ -94,7 +94,6 @@
 
 
         {{-- PRIVACY AGREEMENT --}}
-        @if(auth()->guest())
         <div class="flex items-center gap-2">
 
             <input
@@ -123,7 +122,6 @@
             <p class="text-red-500 text-xs"
                x-text="errors.privacy"></p>
         </template>
-        @endif
 
 
         {{-- GLOBAL WARNING --}}

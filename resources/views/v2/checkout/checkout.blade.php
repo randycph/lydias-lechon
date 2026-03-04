@@ -942,7 +942,7 @@
                 },
 
                 note: '',
-                privacy: false,
+                privacy: {{ auth()->check() ? 'true' : 'false' }},
 
                 isSubmitting: false,
                 hasErrorMessage: false,
