@@ -39,513 +39,355 @@
         </div>
         <div class="row row-sm">
             <div class="col-lg-6">
-                @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102 || auth()->user()->has_access_to_route('sales-transaction.restore'))
-
-                    @if ($dateneeded > date('Y-m-d H:i:s') || $salesheader->delivery_status == 'Open Date')
-                        <form method="post" action="{{ route('update_dateneeded') }}" id="updatefrm">
-                            @csrf
-                            <div class="order-details-place">
-                                <br>
-                                <input type="hidden" name="update_dateneeded_id" value="{{ $salesheader->id }}">
-                                <input type="hidden" name="update_dateneeded_deliverytype"
-                                    value="{{ $salesheader->delivery_type }}">
-
-                                <div class="form-group">
-                                    <label for="shipping_type" class="control-label" id="shipping_type_label">Shipping Type</label>
-                                    <select name="shipping_type" id="shipping_type" class="form-control"
-                                        required="required">
-                                        <option value="d2d" @if ($salesheader->delivery_type == 'Door to door delivery') selected="selected" @endif>
-                                            Door to door</option>
-                                        <option value="storepickup"
-                                            @if ($salesheader->delivery_type == 'Store Pickup') selected="selected" @endif>Pick up at nearest
-                                            store</option>
-                                    </select>
-                                </div>
-
-
-                                <h5 style="display:none;">Old Date Needed : {{ $dateneeded }}<br>Old Location :
-                                    {{ $locationed }} ( {{ $salesheader->delivery_type }} )</h5>
-                                <br>
-
-
-                                @if (auth()->user()->has_access_to_route('sales.update_delivery_branch'))
-                                    <div class="form-group divd2d"
-                                        @if ($salesheader->delivery_type != 'Door to door delivery') style="display:none;" @endif>
-
-                                        @if (count($salesheader?->deliveryAddress) == 0)
-                                            <label class="d-block">Delivery Branch <span class="tx-danger">*</span></label>
-                                            <select class="selectpicker mg-b-5"
-                                                data-style="btn btn-outline-light btn-md btn-block tx-left"
-                                                title="Select branch to deliver" data-width="100%" name="delivery_branch"
-                                                id="delivery_branch">
-                                                <option value="">- Select Branch -</option>
-                                                @foreach (\App\EcommerceModel\Branch::where('status', 1)->where('delivery_branch', 1)->orderBy('name')->get() as $b)
-                                                    <option @if ($salesheader->delivery_branch == $b->name) selected @endif
-                                                        value="{{ $b->name }}">{{ $b->name }}</option>
-                                                @endforeach
-                                            </select>
-                                        @endif
-
-                                    </div>
-
-                                    <div class="form-group">    
-                                        <label class="d-block">Location <span class="tx-danger">*</span></label>
-
-                                        <div class="divd2d" @if ($salesheader->delivery_type != 'Door to door delivery')
-                                                style="display:none;" @endif>
-                                                <select class="selectpicker mg-b-5"
-                                                    data-style="btn btn-outline-light btn-md btn-block tx-left"
-                                                    title="Choose New Location" data-width="100%" name="update_dateneeded_d2d"
-                                                    id="update_dateneeded_d2d">
-                                                    @foreach ($locations as $b)
-                                                    <option @if ($b->name == $locationed) selected @endif
-                                                        value="{{$b->name}}">{{$b->name}}</option>
-                                                    @endforeach
-                                                    <option value="Other" @if ($locationed == 'Other') selected @endif>Other
-                                                    </option>
-                                                </select>
-                                                <div id="delivery_fee_amount_div" @if ($locationed != 'Other')
-                                                    style="display:none;" @endif>
-                                                    Delivery Fee:
-                                                    <input class="form-control" type="number" step="0.01" min="0.00"
-                                                        value="{{ old('delivery_fee_amount', number_format((float) $salesheader->delivery_fee_amount, 2, '.', '')) }}"
-                                                        name="delivery_fee_amount" id="delivery_fee_amount">
-
-                                                </div>
-                                        </div>
-
-                                        <div class="divsp" @if ($salesheader->delivery_type != 'Store Pickup')
-                                                style="display:none;" @endif >
-                                                <select class="selectpicker mg-b-5"
-                                                    data-style="btn btn-outline-light btn-md btn-block tx-left"
-                                                    title="Choose New Location" data-width="100%" name="update_dateneeded_sp"
-                                                    id="update_dateneeded_sp">
-                                                    @foreach (\App\EcommerceModel\Branch::where('status', 1)->where('pickup_branch', 1)->orderBy('name')->get() as $b)
-                                                    <option @if ($b->name == $locationed) selected @endif
-                                                        value="{{$b->name}}">{{$b->name}}</option>
-                                                    @endforeach
-                                                </select>
-                                                
-                                                @if ($errors->has('update_dateneeded_sp'))
-                                                    <span class="text-danger">{{ $errors->first('update_dateneeded_sp') }}</span>
-                                                @endif
-                                        </div>
-
-
-
-                                        <!-- Allow Multiple Address Toggle -->
-                                        {{-- <div class="form-check mb-3 mt-3">
-                                            <input class="form-check-input" type="checkbox" value=""
-                                                id="allowMultiple" />
-                                            <label class="form-check-label" for="allowMultiple">
-                                                Allow multiple address
-                                            </label>
-                                        </div> --}}
-
-                                        <!-- Dynamic Address Sections -->
-                                        <div id="multipleAddressesWrapper"></div>
-
-                                        <!-- Add More Button -->
-                                        <button type="button" class="btn btn-outline-primary mt-3 d-none" id="addMoreBtn">
-                                            + Add More Address
-                                        </button>
-
-                                        <!-- Hidden Template (NO name or required attributes) -->
-                                        <div id="addressSectionTemplate" class="address-section d-none" aria-hidden="true">
-                                            <fieldset disabled>
-                                                <div class="d-flex justify-content-between flex-column 3">
-                                                    @foreach ($salesheader->items as $item)
-                                                        <div class="d-flex justify-content-between product-row"
-                                                            data-product-id="{{ $item->product_id }}">
-                                                            <div class="form-check me-2 d-flex align-items-center">
-                                                                <input class="form-check-input product-checkbox"
-                                                                    type="checkbox" value="{{ $item->product_id }}"
-                                                                    data-product-id="{{ $item->product_id }}"
-                                                                    data-name="product_ids"
-                                                                    id="item_{{ $item->product_id }}">
-                                                                <label
-                                                                    class="form-check-label">{!! highlightPaella($item?->product_name) !!}</label>
-                                                            </div>
-                                                            <div>
-                                                                <select class="form-select form-select-sm mb-2 product-qty"
-                                                                    data-product-id="{{ $item->product_id }}"
-                                                                    data-name="product_qty"
-                                                                    id="item_qty_{{ $item->product_id }}">
-                                                                    @for ($i = 1; $i <= $item->qty; $i++)
-                                                                        <option value="{{ $i }}">
-                                                                            {{ $i }}</option>
-                                                                    @endfor
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                    @endforeach
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label fw-bold address-label">Address</label>
-                                                    <textarea rows="5" class="form-control address"></textarea>
-                                                </div>
-
-                                                <div class="form-row">
-                                                    <div class="col-md-8">
-                                                        <div class="form-group">
-                                                            <label class="d-block">Date & Time Needed <i
-                                                                    class="text-danger">*</i></label>
-                                                            <input type="text" class="form-control date-field"
-                                                                placeholder="Choose Date" />
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <div class="form-group">
-                                                            <label class="d-block">&nbsp;</label>
-                                                            <div class="input-group timepicker">
-                                                                <select class="form-control time-field ">
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <input type="hidden" class="delivery-fee" name="delivery_fee[]"
-                                                    value="0" />
-
-                                                {{-- <div class="form-group">
-                                            <label class="control-label">Location Type</label>
-                                            <select class="form-control location">
-                                                <option value="">Select Location</option>
-                                                @foreach ($locations as $location)
-                                                <option value="{{ $location->name }}">{{ $location->name }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div> --}}
-
-                                                <div class="form-group d-none">
-                                                    <label class="d-block">Region *</label>
-                                                    <select class="form-control region" id="region_select"
-                                                        style="width:100%">
-                                                        <option value="">Select Region</option>
-                                                    </select>
-                                                    @if ($errors->has('region'))
-                                                        <span class="text-danger">{{ $errors->first('region') }}</span>
-                                                    @endif
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label class="d-block">Province *</label>
-                                                    <select class="form-control province" id="province_select"
-                                                        style="width:100%">
-                                                        <option value="">Select Province</option>
-                                                        @foreach ($provinces as $province)
-                                                            <option value="{{ $province }}">{{ $province }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                    @if ($errors->has('province'))
-                                                        <span class="text-danger">{{ $errors->first('province') }}</span>
-                                                    @endif
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label class="d-block">City/Municipality *</label>
-                                                    <select class="form-control city" id="city_select" style="width:100%"
-                                                        disabled>
-                                                        <option value="">Select City/Municipality</option>
-                                                    </select>
-                                                    @if ($errors->has('city'))
-                                                        <span class="text-danger">{{ $errors->first('city') }}</span>
-                                                    @endif
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label class="d-block">Barangay *</label>
-                                                    <select class="form-control barangay" id="barangay_select"
-                                                        style="width:100%" disabled>
-                                                        <option value="">Select Barangay</option>
-                                                    </select>
-                                                    @if ($errors->has('barangay'))
-                                                        <span class="text-danger">{{ $errors->first('barangay') }}</span>
-                                                    @endif
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label class="d-block">Delivery Branch <span
-                                                            class="tx-danger">*</span></label>
-                                                    <select class="form-control branch">
-                                                        <option value="">- Select Branch -</option>
-                                                        @foreach (\App\EcommerceModel\Branch::where('status', 1)->where('delivery_branch', 1)->orderBy('name')->get() as $b)
-                                                            <option value="{{ $b->name }}">{{ $b->name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-
-                                                <div class="mb-3">
-                                                    <label class="form-label fw-bold note-label">Note</label>
-                                                    <textarea class="form-control note"></textarea>
-                                                </div>
-
-                                                <div class="mb-3">
-                                                    <label class="form-label fw-bold contact_person-label">Contact
-                                                        Person</label>
-                                                    <input type="text" class="form-control contact_person" />
-                                                </div>
-
-                                                <div class="mb-3">
-                                                    <label class="form-label fw-bold contact_tel-label">Contact
-                                                        Number</label>
-                                                    <input type="text" class="form-control contact_tel" />
-                                                </div>
-
-                                                <button type="button"
-                                                    class="btn btn-sm btn-danger remove-address">Remove</button>
-                                            </fieldset>
-                                        </div>
-
-
-
-                                        <button type="button" class="btn btn-outline-primary mt-3 d-none"
-                                            id="addMoreBtn">
-                                            + Add More Address
-                                        </button>
-
-
-                                    </div>
-                                @endif
-                                
-                                @if ($salesheader->deliveryAddress->count() == 0)
-                                    <div class="form-row datetime_field">
-                                        <div class="col-md-8">
-                                            <div class="form-group">
-                                                <label class="d-block">Date & Time Needed <i class="text-danger">*</i></label>
-                                                <input type="text" name="update_dateneeded_date" class="form-control"
-                                                    placeholder="Choose Date" id="date2" value="{{$date_only}}">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label class="d-block">&nbsp;</label>
-                                                <div class="input-group timepicker">
-                                                    <select class="selectpicker"
-                                                        data-style="btn btn-outline-light btn-md btn-block tx-left tx-black"
-                                                        title="Choose Time" data-width="100%" name="update_dateneeded_time">
-                                                        <option @if ($time_only == '05:00') selected @endif value="05:00">05:00 AM
-                                                        </option>
-                                                        <option @if ($time_only == '06:00') selected @endif value="06:00">06:00 AM
-                                                        </option>
-                                                        <option @if ($time_only == '07:00') selected @endif value="07:00">07:00 AM
-                                                        </option>
-                                                        <option @if ($time_only == '08:00') selected @endif value="08:00">08:00 AM
-                                                        </option>
-                                                        <option @if ($time_only == '09:00') selected @endif value="09:00">09:00 AM
-                                                        </option>
-                                                        <option @if ($time_only == '10:00') selected @endif value="10:00">10:00 AM
-                                                        </option>
-                                                        <option @if ($time_only == '11:00') selected @endif value="11:00">11:00 AM
-                                                        </option>
-                                                        <option @if ($time_only == '12:00') selected @endif value="12:00">12:00 NN
-                                                        </option>
-                                                        <option @if ($time_only == '13:00') selected @endif value="13:00">01:00 PM
-                                                        </option>
-                                                        <option @if ($time_only == '14:00') selected @endif value="14:00">02:00 PM
-                                                        </option>
-                                                        <option @if ($time_only == '15:00') selected @endif value="15:00">03:00 PM
-                                                        </option>
-                                                        <option @if ($time_only == '16:00') selected @endif value="16:00">04:00 PM
-                                                        </option>
-                                                        <option @if ($time_only == '17:00') selected @endif value="17:00">05:00 PM
-                                                        </option>
-                                                        <option @if ($time_only == '18:00') selected @endif value="18:00">06:00 PM
-                                                        </option>
-                                                        <option @if ($time_only == '19:00') selected @endif value="19:00">07:00 PM
-                                                        </option>
-                                                        <option @if ($time_only == '20:00') selected @endif value="20:00">08:00 PM
-                                                        </option>
-                                                        <option @if ($time_only == '21:00') selected @endif value="21:00">09:00 PM
-                                                        </option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group divd2d" @if ($salesheader->delivery_type !=
-                                        'Door to door delivery')
-                                            style="display:none;" @endif>
-                                            <label class="d-block">Delivery Address <span class="tx-danger">*</span></label>
-                                            <textarea name="new_delivery_address" class="form-control" rows="5"
-                                                @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102) @else style="pointer-events: none;background-color:#E9ECEF" @endif>{{ $salesheader->customer_delivery_adress }}</textarea>
-                                    </div>
-
-
-                                    <div class="form-group">
-                                        <label class="d-block">Note <span class="tx-danger">*</span></label>
-                                        <textarea name="new_instruction" class="form-control"
-                                            @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102) @else style="pointer-events: none;background-color:#E9ECEF" @endif>{{ $salesheader->instruction }}</textarea>
-                                    </div>
-                                @endif
-
-                            
-
-
-                                {{-- @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102)
-                            <div class="form-group">
-                                <label class="d-block">Location <span class="tx-danger">*</span></label>
-
-                                <div class="divd2d" @if ($salesheader->delivery_type != 'Door to door delivery')
-                                        style="display:none;" @endif>
-                                        <select class="selectpicker mg-b-5"
-                                            data-style="btn btn-outline-light btn-md btn-block tx-left"
-                                            title="Choose New Location" data-width="100%" name="update_dateneeded_d2d"
-                                            id="update_dateneeded_d2d">
-                                            @foreach ($locations as $b)
-                                            <option @if ($b->name == $locationed) selected @endif
-                                                value="{{$b->name}}">{{$b->name}}</option>
-                                            @endforeach
-                                            <option value="Other" @if ($locationed == 'Other') selected @endif>Other
-                                            </option>
-                                        </select>
-                                        <div id="delivery_fee_amount_div" @if ($locationed != 'Other')
-                                            style="display:none;" @endif>
-                                            Delivery Fee:
-                                            <input class="form-control" type="number" step="0.01" min="0.00"
-                                                value="{{number_format($salesheader->delivery_fee_amount,2)}}"
-                                                name="delivery_fee_amount" id="delivery_fee_amount">
-                                        </div>
-                                </div>
-
-                                <div class="divsp" @if ($salesheader->delivery_type != 'Store Pickup')
-                                        style="display:none;" @endif >
-                                        <select class="selectpicker mg-b-5"
-                                            data-style="btn btn-outline-light btn-md btn-block tx-left"
-                                            title="Choose New Location" data-width="100%" name="update_dateneeded_sp"
-                                            id="update_dateneeded_sp">
-                                            @foreach (\App\EcommerceModel\Branch::orderBy('name')->get() as $b)
-                                            <option @if ($b->name == $locationed) selected @endif
-                                                value="{{$b->name}}">{{$b->name}}</option>
-                                            @endforeach
-                                        </select>
-                                </div>
-
-                            </div>
-
-                            <div class="form-row datetime_field">
-                                <div class="col-md-8">
-                                    <div class="form-group">
-                                        <label class="d-block">Date & Time Needed <i class="text-danger">*</i></label>
-                                        <input type="text" name="update_dateneeded_date" class="form-control"
-                                            placeholder="Choose Date" id="date2" value="{{$date_only}}">
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label class="d-block">&nbsp;</label>
-                                        <div class="input-group timepicker">
-                                            <select class="selectpicker"
-                                                data-style="btn btn-outline-light btn-md btn-block tx-left tx-black"
-                                                title="Choose Time" data-width="100%" name="update_dateneeded_time">
-                                                <option @if ($time_only == '05:00') selected @endif value="05:00">05:00 AM
-                                                </option>
-                                                <option @if ($time_only == '06:00') selected @endif value="06:00">06:00 AM
-                                                </option>
-                                                <option @if ($time_only == '07:00') selected @endif value="07:00">07:00 AM
-                                                </option>
-                                                <option @if ($time_only == '08:00') selected @endif value="08:00">08:00 AM
-                                                </option>
-                                                <option @if ($time_only == '09:00') selected @endif value="09:00">09:00 AM
-                                                </option>
-                                                <option @if ($time_only == '10:00') selected @endif value="10:00">10:00 AM
-                                                </option>
-                                                <option @if ($time_only == '11:00') selected @endif value="11:00">11:00 AM
-                                                </option>
-                                                <option @if ($time_only == '12:00') selected @endif value="12:00">12:00 NN
-                                                </option>
-                                                <option @if ($time_only == '13:00') selected @endif value="13:00">01:00 PM
-                                                </option>
-                                                <option @if ($time_only == '14:00') selected @endif value="14:00">02:00 PM
-                                                </option>
-                                                <option @if ($time_only == '15:00') selected @endif value="15:00">03:00 PM
-                                                </option>
-                                                <option @if ($time_only == '16:00') selected @endif value="16:00">04:00 PM
-                                                </option>
-                                                <option @if ($time_only == '17:00') selected @endif value="17:00">05:00 PM
-                                                </option>
-                                                <option @if ($time_only == '18:00') selected @endif value="18:00">06:00 PM
-                                                </option>
-                                                <option @if ($time_only == '19:00') selected @endif value="19:00">07:00 PM
-                                                </option>
-                                                <option @if ($time_only == '20:00') selected @endif value="20:00">08:00 PM
-                                                </option>
-                                                <option @if ($time_only == '21:00') selected @endif value="21:00">09:00 PM
-                                                </option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            @else
-                            <div class="form-group">
-                                <label class="d-block">Location <span class="tx-danger">*</span></label>
-
-                                <input type="text" name="update_dateneeded_d2d" class="form-control divd2d"
-                                    value="{{$locationed}}"
-                                    style="pointer-events: none;background-color:#E9ECEF; @if ($salesheader->delivery_type != 'Door to door delivery') display:none; @endif">
-
-                                <input type="text" name="update_dateneeded_sp" class="form-control divsp"
-                                    value="{{$locationed}}"
-                                    style="pointer-events: none;background-color:#E9ECEF; @if ($salesheader->delivery_type != 'Store Pickup') display:none; @endif">
-
-                            </div>
-
-                            <div class="form-row">
-                                <div class="col-md-8">
-                                    <div class="form-group">
-                                        <label class="d-block">Date & Time Needed <i class="text-danger">*</i></label>
-                                        <input type="text" name="update_dateneeded_date" class="form-control"
-                                            value="{{$date_only}}"
-                                            style="pointer-events: none;background-color:#E9ECEF">
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group"
-                                        title="{{\Carbon\Carbon::parse($time_only)->format('h:i A')}}">
-                                        <label class="d-block">&nbsp;</label>
-                                        <div class="input-group timepicker">
-                                            <input type="text" name="update_dateneeded_time" class="form-control"
-                                                value="{{\Carbon\Carbon::parse($time_only)->format('H:i')}}"
-                                                style="pointer-events: none;background-color:#E9ECEF">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            @endif --}}
-
-
-                                {{-- <div class="form-group divd2d" @if ($salesheader->delivery_type !=
-    'Door to door
-                                    delivery')
-                                    style="display:none;" @endif>
-                                    <label class="d-block">Delivery Address <span class="tx-danger">*</span></label>
-                                    <textarea name="new_delivery_address" class="form-control" rows="5"
-                                        @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102) @else style="pointer-events: none;background-color:#E9ECEF" @endif>{{ $salesheader->customer_delivery_adress }}</textarea>
-                            </div>
-
-
-                            <div class="form-group">
-                                <label class="d-block">Note <span class="tx-danger">*</span></label>
-                                <textarea name="new_instruction" class="form-control"
-                                    @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102) @else style="pointer-events: none;background-color:#E9ECEF" @endif>{{ $salesheader->instruction }}</textarea>
-                            </div> --}}
-
-                                <div class="form-group">
-                                    <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitBtn">Save
-                                        Changes</button>
-                                </div>
-                            </div>
-                        </form>
-                    @endif
-                @endif
-                <br>
-                <form action="{{ route('sales-transaction.update_items') }}" method="post" id="items_form" autocomplete="off">
+                <form action="{{ route('sales-transaction.update_all') }}" method="post" id="items_form" autocomplete="off">
                     @csrf
+                    @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102 || auth()->user()->has_access_to_route('sales-transaction.restore'))
+
+                        @if ($dateneeded > date('Y-m-d H:i:s') || $salesheader->delivery_status == 'Open Date')
+                            
+                                <div class="order-details-place">
+                                    <br>
+                                    <input type="hidden" name="update_dateneeded_id" value="{{ $salesheader->id }}">
+                                    <input type="hidden" name="update_dateneeded_deliverytype"
+                                        value="{{ $salesheader->delivery_type }}">
+
+                                    <div class="form-group">
+                                        <label for="shipping_type" class="control-label" id="shipping_type_label">Shipping Type</label>
+                                        <select name="shipping_type" id="shipping_type" class="form-control"
+                                            required="required">
+                                            <option value="d2d" @if ($salesheader->delivery_type == 'Door to door delivery') selected="selected" @endif>
+                                                Door to door</option>
+                                            <option value="storepickup"
+                                                @if ($salesheader->delivery_type == 'Store Pickup') selected="selected" @endif>Pick up at nearest
+                                                store</option>
+                                        </select>
+                                    </div>
+
+
+                                    <h5 style="display:none;">Old Date Needed : {{ $dateneeded }}<br>Old Location :
+                                        {{ $locationed }} ( {{ $salesheader->delivery_type }} )</h5>
+                                    <br>
+
+
+                                    @if (auth()->user()->has_access_to_route('sales.update_delivery_branch'))
+                                        <div class="form-group divd2d"
+                                            @if ($salesheader->delivery_type != 'Door to door delivery') style="display:none;" @endif>
+
+                                            @if (count($salesheader?->deliveryAddress) == 0)
+                                                <label class="d-block">Delivery Branch <span class="tx-danger">*</span></label>
+                                                <select class="selectpicker mg-b-5"
+                                                    data-style="btn btn-outline-light btn-md btn-block tx-left"
+                                                    title="Select branch to deliver" data-width="100%" name="delivery_branch"
+                                                    id="delivery_branch">
+                                                    <option value="">- Select Branch -</option>
+                                                    @foreach (\App\EcommerceModel\Branch::where('status', 1)->where('delivery_branch', 1)->orderBy('name')->get() as $b)
+                                                        <option @if ($salesheader->delivery_branch == $b->name) selected @endif
+                                                            value="{{ $b->name }}">{{ $b->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            @endif
+
+                                        </div>
+
+                                        <div class="form-group">    
+                                            <label class="d-block">Location <span class="tx-danger">*</span></label>
+
+                                            <div class="divd2d" @if ($salesheader->delivery_type != 'Door to door delivery')
+                                                    style="display:none;" @endif>
+                                                    <select class="selectpicker mg-b-5"
+                                                        data-style="btn btn-outline-light btn-md btn-block tx-left"
+                                                        title="Choose New Location" data-width="100%" name="update_dateneeded_d2d"
+                                                        id="update_dateneeded_d2d">
+                                                        @foreach ($locations as $b)
+                                                        <option @if ($b->name == $locationed) selected @endif
+                                                            value="{{$b->name}}">{{$b->name}}</option>
+                                                        @endforeach
+                                                        <option value="Other" @if ($locationed == 'Other') selected @endif>Other
+                                                        </option>
+                                                    </select>
+                                                    <div id="delivery_fee_amount_div" @if ($locationed != 'Other')
+                                                        style="display:none;" @endif>
+                                                        Delivery Fee:
+                                                        <input class="form-control" type="number" step="0.01" min="0.00"
+                                                            value="{{ old('delivery_fee_amount', number_format((float) $salesheader->delivery_fee_amount, 2, '.', '')) }}"
+                                                            name="delivery_fee_amount" id="delivery_fee_amount">
+
+                                                    </div>
+                                            </div>
+
+                                            <div class="divsp" @if ($salesheader->delivery_type != 'Store Pickup')
+                                                    style="display:none;" @endif >
+                                                    <select class="selectpicker mg-b-5"
+                                                        data-style="btn btn-outline-light btn-md btn-block tx-left"
+                                                        title="Choose New Location" data-width="100%" name="update_dateneeded_sp"
+                                                        id="update_dateneeded_sp">
+                                                        @foreach (\App\EcommerceModel\Branch::where('status', 1)->where('pickup_branch', 1)->orderBy('name')->get() as $b)
+                                                        <option @if ($b->name == $locationed) selected @endif
+                                                            value="{{$b->name}}">{{$b->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    
+                                                    @if ($errors->has('update_dateneeded_sp'))
+                                                        <span class="text-danger">{{ $errors->first('update_dateneeded_sp') }}</span>
+                                                    @endif
+                                            </div>
+
+
+
+                                            <!-- Allow Multiple Address Toggle -->
+                                            {{-- <div class="form-check mb-3 mt-3">
+                                                <input class="form-check-input" type="checkbox" value=""
+                                                    id="allowMultiple" />
+                                                <label class="form-check-label" for="allowMultiple">
+                                                    Allow multiple address
+                                                </label>
+                                            </div> --}}
+
+                                            <!-- Dynamic Address Sections -->
+                                            <div id="multipleAddressesWrapper"></div>
+
+                                            <!-- Add More Button -->
+                                            <button type="button" class="btn btn-outline-primary mt-3 d-none" id="addMoreBtn">
+                                                + Add More Address
+                                            </button>
+
+                                            <!-- Hidden Template (NO name or required attributes) -->
+                                            <div id="addressSectionTemplate" class="address-section d-none" aria-hidden="true">
+                                                <fieldset disabled>
+                                                    <div class="d-flex justify-content-between flex-column 3">
+                                                        @foreach ($salesheader->items as $item)
+                                                            <div class="d-flex justify-content-between product-row"
+                                                                data-product-id="{{ $item->product_id }}">
+                                                                <div class="form-check me-2 d-flex align-items-center">
+                                                                    <input class="form-check-input product-checkbox"
+                                                                        type="checkbox" value="{{ $item->product_id }}"
+                                                                        data-product-id="{{ $item->product_id }}"
+                                                                        data-name="product_ids"
+                                                                        id="item_{{ $item->product_id }}">
+                                                                    <label
+                                                                        class="form-check-label">{!! highlightPaella($item?->product_name) !!}</label>
+                                                                </div>
+                                                                <div>
+                                                                    <select class="form-select form-select-sm mb-2 product-qty"
+                                                                        data-product-id="{{ $item->product_id }}"
+                                                                        data-name="product_qty"
+                                                                        id="item_qty_{{ $item->product_id }}">
+                                                                        @for ($i = 1; $i <= $item->qty; $i++)
+                                                                            <option value="{{ $i }}">
+                                                                                {{ $i }}</option>
+                                                                        @endfor
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold address-label">Address</label>
+                                                        <textarea rows="5" class="form-control address"></textarea>
+                                                    </div>
+
+                                                    <div class="form-row">
+                                                        <div class="col-md-8">
+                                                            <div class="form-group">
+                                                                <label class="d-block">Date & Time Needed <i
+                                                                        class="text-danger">*</i></label>
+                                                                <input type="text" class="form-control date-field"
+                                                                    placeholder="Choose Date" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <div class="form-group">
+                                                                <label class="d-block">&nbsp;</label>
+                                                                <div class="input-group timepicker">
+                                                                    <select class="form-control time-field ">
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <input type="hidden" class="delivery-fee" name="delivery_fee[]"
+                                                        value="0" />
+
+                                                    {{-- <div class="form-group">
+                                                <label class="control-label">Location Type</label>
+                                                <select class="form-control location">
+                                                    <option value="">Select Location</option>
+                                                    @foreach ($locations as $location)
+                                                    <option value="{{ $location->name }}">{{ $location->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div> --}}
+
+                                                    <div class="form-group d-none">
+                                                        <label class="d-block">Region *</label>
+                                                        <select class="form-control region" id="region_select"
+                                                            style="width:100%">
+                                                            <option value="">Select Region</option>
+                                                        </select>
+                                                        @if ($errors->has('region'))
+                                                            <span class="text-danger">{{ $errors->first('region') }}</span>
+                                                        @endif
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label class="d-block">Province *</label>
+                                                        <select class="form-control province" id="province_select"
+                                                            style="width:100%">
+                                                            <option value="">Select Province</option>
+                                                            @foreach ($provinces as $province)
+                                                                <option value="{{ $province }}">{{ $province }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                        @if ($errors->has('province'))
+                                                            <span class="text-danger">{{ $errors->first('province') }}</span>
+                                                        @endif
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label class="d-block">City/Municipality *</label>
+                                                        <select class="form-control city" id="city_select" style="width:100%"
+                                                            disabled>
+                                                            <option value="">Select City/Municipality</option>
+                                                        </select>
+                                                        @if ($errors->has('city'))
+                                                            <span class="text-danger">{{ $errors->first('city') }}</span>
+                                                        @endif
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label class="d-block">Barangay *</label>
+                                                        <select class="form-control barangay" id="barangay_select"
+                                                            style="width:100%" disabled>
+                                                            <option value="">Select Barangay</option>
+                                                        </select>
+                                                        @if ($errors->has('barangay'))
+                                                            <span class="text-danger">{{ $errors->first('barangay') }}</span>
+                                                        @endif
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <label class="d-block">Delivery Branch <span
+                                                                class="tx-danger">*</span></label>
+                                                        <select class="form-control branch">
+                                                            <option value="">- Select Branch -</option>
+                                                            @foreach (\App\EcommerceModel\Branch::where('status', 1)->where('delivery_branch', 1)->orderBy('name')->get() as $b)
+                                                                <option value="{{ $b->name }}">{{ $b->name }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold note-label">Note</label>
+                                                        <textarea class="form-control note"></textarea>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold contact_person-label">Contact
+                                                            Person</label>
+                                                        <input type="text" class="form-control contact_person" />
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold contact_tel-label">Contact
+                                                            Number</label>
+                                                        <input type="text" class="form-control contact_tel" />
+                                                    </div>
+
+                                                    <button type="button"
+                                                        class="btn btn-sm btn-danger remove-address">Remove</button>
+                                                </fieldset>
+                                            </div>
+
+
+
+                                            <button type="button" class="btn btn-outline-primary mt-3 d-none"
+                                                id="addMoreBtn">
+                                                + Add More Address
+                                            </button>
+
+
+                                        </div>
+                                    @endif
+                                    
+                                    @if ($salesheader->deliveryAddress->count() == 0)
+                                        <div class="form-row datetime_field">
+                                            <div class="col-md-8">
+                                                <div class="form-group">
+                                                    <label class="d-block">Date & Time Needed <i class="text-danger">*</i></label>
+                                                    <input type="text" name="update_dateneeded_date" class="form-control"
+                                                        placeholder="Choose Date" id="date2" value="{{$date_only}}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="form-group">
+                                                    <label class="d-block">&nbsp;</label>
+                                                    <div class="input-group timepicker">
+                                                        <select class="selectpicker"
+                                                            data-style="btn btn-outline-light btn-md btn-block tx-left tx-black"
+                                                            title="Choose Time" data-width="100%" name="update_dateneeded_time">
+                                                            <option @if ($time_only == '05:00') selected @endif value="05:00">05:00 AM
+                                                            </option>
+                                                            <option @if ($time_only == '06:00') selected @endif value="06:00">06:00 AM
+                                                            </option>
+                                                            <option @if ($time_only == '07:00') selected @endif value="07:00">07:00 AM
+                                                            </option>
+                                                            <option @if ($time_only == '08:00') selected @endif value="08:00">08:00 AM
+                                                            </option>
+                                                            <option @if ($time_only == '09:00') selected @endif value="09:00">09:00 AM
+                                                            </option>
+                                                            <option @if ($time_only == '10:00') selected @endif value="10:00">10:00 AM
+                                                            </option>
+                                                            <option @if ($time_only == '11:00') selected @endif value="11:00">11:00 AM
+                                                            </option>
+                                                            <option @if ($time_only == '12:00') selected @endif value="12:00">12:00 NN
+                                                            </option>
+                                                            <option @if ($time_only == '13:00') selected @endif value="13:00">01:00 PM
+                                                            </option>
+                                                            <option @if ($time_only == '14:00') selected @endif value="14:00">02:00 PM
+                                                            </option>
+                                                            <option @if ($time_only == '15:00') selected @endif value="15:00">03:00 PM
+                                                            </option>
+                                                            <option @if ($time_only == '16:00') selected @endif value="16:00">04:00 PM
+                                                            </option>
+                                                            <option @if ($time_only == '17:00') selected @endif value="17:00">05:00 PM
+                                                            </option>
+                                                            <option @if ($time_only == '18:00') selected @endif value="18:00">06:00 PM
+                                                            </option>
+                                                            <option @if ($time_only == '19:00') selected @endif value="19:00">07:00 PM
+                                                            </option>
+                                                            <option @if ($time_only == '20:00') selected @endif value="20:00">08:00 PM
+                                                            </option>
+                                                            <option @if ($time_only == '21:00') selected @endif value="21:00">09:00 PM
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group divd2d" @if ($salesheader->delivery_type !=
+                                            'Door to door delivery')
+                                                style="display:none;" @endif>
+                                                <label class="d-block">Delivery Address <span class="tx-danger">*</span></label>
+                                                <textarea name="new_delivery_address" class="form-control" rows="5"
+                                                    @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102) @else style="pointer-events: none;background-color:#E9ECEF" @endif>{{ $salesheader->customer_delivery_adress }}</textarea>
+                                        </div>
+
+
+                                        <div class="form-group">
+                                            <label class="d-block">Note <span class="tx-danger">*</span></label>
+                                            <textarea name="new_instruction" class="form-control"
+                                                @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102) @else style="pointer-events: none;background-color:#E9ECEF" @endif>{{ $salesheader->instruction }}</textarea>
+                                        </div>
+                                    @endif
+                                </div>
+                        @endif
+                    @endif
+                    <br>
+                
                     <input type="hidden" name="ui_sales_id" value="{{ $salesheader->id }}">
                     <input type="hidden" name="ui_total_new" id="ui_total_new" value="0">
 
@@ -624,9 +466,10 @@
                             <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitItemsBtn">Save Changes</button>
                         </div>
                     </div>
-                </form>
-                <a href="{{ route('sales-transaction.index') }}"
-                    class="btn btn-outline-secondary btn-sm btn-uppercase">Back to Sales Transaction</a>
+                    <a href="{{ route('sales-transaction.index') }}"
+                        class="btn btn-outline-secondary btn-sm btn-uppercase">Back to Sales Transaction</a>
+                
+                </form>    
             </div>
 
 
@@ -679,10 +522,21 @@
                 $('#delivery_fee_amount_div').hide();
             }
         })
-        $("#updatefrm").submit(function() {
-            const btn = document.getElementById('submitBtn');
-            btn.disabled = true;
-            btn.innerText = 'Saving...';
+        // $("#updatefrm").submit(function() {
+        //     const btn = document.getElementById('submitBtn');
+        //     btn.disabled = true;
+        //     btn.innerText = 'Saving...';
+        //     if ($('#shipping_type').val() == 'd2d') {
+        //         if ($('#delivery_branch').val() == '') {
+        //             alert('Please select Delivery Branch');
+        //             return false;
+        //         } else {
+        //             return true;
+        //         }
+        //     }
+
+        // });
+        $("#items_form").submit(function() {
             if ($('#shipping_type').val() == 'd2d') {
                 if ($('#delivery_branch').val() == '') {
                     alert('Please select Delivery Branch');
@@ -691,9 +545,6 @@
                     return true;
                 }
             }
-
-        });
-        $("#items_form").submit(function() {
             const btn = document.getElementById('submitItemsBtn');
             btn.disabled = true;
             btn.innerText = 'Saving...';
