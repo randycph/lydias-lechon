@@ -708,6 +708,12 @@ class ReportsController extends Controller
                 ->values();
         }
 
+        if (isset($_GET['filter_size']) && $_GET['filter_size'] != '') {
+            $results = $results
+                ->where('size', $_GET['filter_size'])
+                ->values();
+        }
+
         $order_sources = session('order_sources', $_GET['order_sources'] ?? null);
 
         if (empty($order_sources)) {
