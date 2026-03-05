@@ -130,37 +130,29 @@ Route::post('/admin/login', function(Request $request) {
 
             if (auth()->user()->user_role->name != 'Admin' && !in_array($request->branch, $exludeBranch)) {
                 
-                $branchName = trim($request->branch);
+                if ($user->user_role->name == 'Forecaster') {
+                    return redirect()->intended('admin/forecaster');
+                }
 
-                $branch = Branch::where('name', $branchName)
-                    ->where('status', 1)
-                    ->first();
+                $branch = null;
+
+                $firstbranch = $user->branches->first();
+
+                if ($firstbranch) {
+                    $branch = $firstbranch->branch->name;
+                }
+
+                $branch = $user->branches->first();
+                
+                $branch = Branch::where('name', $branch)->first();
 
                 if (!$branch) {
                     session()->forget('login_branch');
-                    auth()->logout();
-                    return back()->withErrors([
-                        'branch' => 'Selected branch does not exist or is inactive.'
-                    ]);
                 }
 
-                $isAllowed = $user->branches()
-                    ->where('branch_id', $branch->id)
-                    ->exists();
-
-                if (!$isAllowed) {
-                    session()->forget('login_branch');
-                    auth()->logout();
-                    return back()->withErrors([
-                        'branch' => 'You are not authorized to access the selected branch.'
-                    ]);
+                if ($branch) {
+                    session(['login_branch' => $branch]);
                 }
-
-                session(['login_branch' => $request->branch]);
-            }
-
-            if ($request->has('branch') && $request->branch == 'forecaster') {
-                return redirect()->intended('admin/forecaster');
             }
 
             return redirect()->intended('admin/dashboard');
