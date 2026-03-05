@@ -279,14 +279,16 @@ class PaymayaController extends Controller
     public function pay(Request $request)
     {        
         try {
-            $sales = SalesHeader::find($request->sales_header_id); 
+            $sales = SalesHeader::where('order_number', $request->sales_header_id)->first();
+
+            $request['sales_header_id'] = $sales->id;
 
             if ($sales && $sales->items && count($sales->items) == 0) {
                 return Redirect::back()->withErrors(['error' => 'No items found in the sales order.']);
             }
 
             $payment = SalesPayment::create([
-                'sales_header_id' => $request->sales_header_id,
+                'sales_header_id' => $sales->id,
                 'payment_type' => 'Paymaya',
                 'amount' => $request->amount,
                 'status'  => 'PENDING',
