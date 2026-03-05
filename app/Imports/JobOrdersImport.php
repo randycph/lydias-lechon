@@ -159,14 +159,10 @@ class JobOrdersImport implements ToCollection, WithHeadingRow
             if($salesHeader){
                 if ($salesHeader) {
                     $lastOrder = SalesHeader::whereNull('parent_sales_header_id')
-                        ->orderByDesc('id')
-                        ->first();
+                        ->whereRaw('order_number REGEXP "^[0-9]{7}$"')
+                        ->max('order_number');
 
-                    if ($lastOrder) {
-                        $nextOrder = intval($lastOrder->order_number) + 1;
-                    } else {
-                        $nextOrder = 1;
-                    }
+                    $nextOrder = $lastOrder ? intval($lastOrder) + 1 : 1;
 
                     $orderNumber = sprintf('%07d', $nextOrder);
 
