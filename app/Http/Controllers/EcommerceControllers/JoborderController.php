@@ -373,7 +373,8 @@ class JoborderController extends Controller
                     'registration_source' => $request->branch_source,
                     'contact_mobile' => $request->mobile,
                     'password' => \Hash::make('password', array('rounds'=>12)),
-                    'is_active' => 1
+                    'is_active' => 1,
+                    'role_id' => 6
                 ]);
                 $id  = $customer->id;
             }

@@ -1072,7 +1072,8 @@ class CartController extends Controller
                 'password' => Hash::make(Str::random(10)),
                 'firstname' => $firstName,
                 'lastname' => $lastName,
-                'is_active' => 1
+                'is_active' => 1,
+                'role_id' => 6
             ]);
 
             // if ($user) {
