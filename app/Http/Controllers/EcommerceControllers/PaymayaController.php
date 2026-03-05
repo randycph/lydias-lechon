@@ -266,7 +266,7 @@ class PaymayaController extends Controller
                 'status'  => 'PENDING',
                 'payment_date'  => date('Y-m-d'),
                 'receipt_number'  => '',
-                'created_by' => $sales->user_id
+                'created_by' => $sales?->user_id
             ]);
 
             $checkoutId = $this->get_checkoutId($request, $payment);
