@@ -213,6 +213,8 @@
                                                 @endforelse
                                             </tbody>
                                         </table>
+
+                                        {{ $pendingPayments->links() }}
                                     </div>
 
                                 </div>
@@ -258,7 +260,7 @@
         </div>
     </div>
 
-    @if($tomorrowUnpaid->count())
+    @if($tomorrowUnpaid->count() && !request()->has('page'))
     <div class="modal fade" id="pendingPaymentModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">

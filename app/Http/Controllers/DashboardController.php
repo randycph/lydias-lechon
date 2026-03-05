@@ -79,7 +79,7 @@ class DashboardController extends Controller
                 'asc'
             )
 
-            ->get();
+            ->paginate(10);
 
         $tomorrow = now()->addDay()->startOfDay();
         $endTomorrow = now()->addDay()->endOfDay();
