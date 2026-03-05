@@ -662,8 +662,11 @@ class ReportsController extends Controller
         $original_results = $results;
 
         // Get all published sizes
-        $sizes = ProductSize::where('status', 'PUBLISHED')
-            ->orderBy('name')
+        $sizes = ProductSize::select('product_sizes.*')
+            ->join('products', 'products.id', '=', 'product_sizes.product_id')
+            ->where('product_sizes.status', 'PUBLISHED')
+            ->orderBy('products.order')
+            ->orderBy('product_sizes.name')
             ->get();
 
         // Count qty per size from results
@@ -675,6 +678,7 @@ class ReportsController extends Controller
             })
             ->map->sum('qty');
 
+        // Map counts to sizes (default 0)
         $sizeCounts = $sizes->mapWithKeys(function ($size) use ($sizeCountsFromResults) {
             return [
                 $size->name => $sizeCountsFromResults[$size->name] ?? 0
