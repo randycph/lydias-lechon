@@ -1446,18 +1446,16 @@ class CartController extends Controller
         $formattedOrderNumber = sprintf('%07d', $salesHeader->id);
 
         $lastOrder = SalesHeader::whereNull('parent_sales_header_id')
-            ->orderByDesc('id')
+            ->selectRaw('MAX(CAST(order_number AS UNSIGNED)) as max_order')
             ->first();
 
-        if ($lastOrder) {
-            $nextOrder = intval($lastOrder->order_number) + 1;
-        } else {
-            $nextOrder = 1;
-        }
+        $nextOrder = ($lastOrder->max_order ?? 0) + 1;
 
         $orderNumber = sprintf('%07d', $nextOrder);
 
-        $salesHeader->update(['order_number' => $orderNumber]);
+        $salesHeader->update([
+            'order_number' => $orderNumber
+        ]);
         $salesHeader->order_number = $orderNumber;
         $salesHeader->save();
 
