@@ -160,8 +160,6 @@ Route::post('/admin/login', function(Request $request) {
                 if ($firstbranch) {
                     $branch = $firstbranch->branch->name;
                 }
-
-                $branch = $user->branches->first();
                 
                 $branch = Branch::where('name', $branch)->first();
 
@@ -170,7 +168,7 @@ Route::post('/admin/login', function(Request $request) {
                 }
 
                 if ($branch) {
-                    session(['login_branch' => $branch]);
+                    session(['login_branch' => $branch->name]);
                 }
             }
 
