@@ -158,7 +158,7 @@ class JobOrdersImport implements ToCollection, WithHeadingRow
 
             if($salesHeader){
                 if ($salesHeader) {
-                    $lastOrder = SalesHeader::whereNull('parent_sales_header_id')
+                    $lastOrder = SalesHeader::withTrashed()->whereNull('parent_sales_header_id')
                         ->whereRaw('order_number REGEXP "^[0-9]{7}$"')
                         ->max('order_number');
 
