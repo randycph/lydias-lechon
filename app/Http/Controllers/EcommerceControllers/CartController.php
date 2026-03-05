@@ -1446,10 +1446,10 @@ class CartController extends Controller
         $formattedOrderNumber = sprintf('%07d', $salesHeader->id);
 
         $lastOrder = SalesHeader::whereNull('parent_sales_header_id')
-            ->selectRaw('MAX(CAST(order_number AS UNSIGNED)) as max_order')
-            ->first();
+            ->whereRaw('order_number REGEXP "^[0-9]{7}$"')
+            ->max('order_number');
 
-        $nextOrder = ($lastOrder->max_order ?? 0) + 1;
+        $nextOrder = $lastOrder ? intval($lastOrder) + 1 : 1;
 
         $orderNumber = sprintf('%07d', $nextOrder);
 
