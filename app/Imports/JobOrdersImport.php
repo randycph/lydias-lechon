@@ -163,7 +163,7 @@ class JobOrdersImport implements ToCollection, WithHeadingRow
                         ->first();
 
                     if ($lastOrder) {
-                        $nextOrder = (int)$lastOrder->order_number + 1;
+                        $nextOrder = intval($lastOrder->order_number) + 1;
                     } else {
                         $nextOrder = 1;
                     }
