@@ -200,6 +200,7 @@ class CustomerController extends Controller
             'valid_email'           => $request->email,
             'registration_source'   => $request->registration_source,
             'agent_code'            => $request->agent_code,
+            'role_id'               => 6,
 
         ]);
 
