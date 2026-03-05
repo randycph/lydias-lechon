@@ -177,6 +177,25 @@ class CheckoutController extends Controller
             'sponsor_rank' => (!empty($member->sponsor_id) ? $member->sponsor->class : 0),
         ]);
 
+
+        if ($salesHeader) {
+            $lastOrder = SalesHeader::whereNull('parent_sales_header_id')
+                ->orderByDesc('id')
+                ->first();
+
+            if ($lastOrder) {
+                $nextOrder = (int)$lastOrder->order_number + 1;
+            } else {
+                $nextOrder = 1;
+            }
+
+            $orderNumber = sprintf('%07d', $nextOrder);
+
+            $salesHeader->update([
+                'order_number' => $orderNumber
+            ]);
+        }
+
         $autoShip = null;
         if ($isAutoShiped) {
             if ($isAutoShiped == 2) {
