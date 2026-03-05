@@ -209,9 +209,23 @@ class KioskController extends Controller
             'forecast_date' => $forecast_date
         ]);
 
-        $salesHeader->update([
-            'order_number' => sprintf('%07d', $salesHeader->id)
-        ]);
+        if ($salesHeader) {
+            $lastOrder = SalesHeader::whereNull('parent_sales_header_id')
+                ->orderByDesc('id')
+                ->first();
+
+            if ($lastOrder) {
+                $nextOrder = (int)$lastOrder->order_number + 1;
+            } else {
+                $nextOrder = 1;
+            }
+
+            $orderNumber = sprintf('%07d', $nextOrder);
+
+            $salesHeader->update([
+                'order_number' => $orderNumber
+            ]);
+        }
 
         $grand_gross = 0;
         $grand_tax = 0;
@@ -344,9 +358,23 @@ class KioskController extends Controller
             'forecast_date' => date('Y-m-d')
         ]);
 
-        $salesHeader->update([
-            'order_number' => sprintf('%07d', $salesHeader->id)
-        ]);
+        if ($salesHeader) {
+            $lastOrder = SalesHeader::whereNull('parent_sales_header_id')
+                ->orderByDesc('id')
+                ->first();
+
+            if ($lastOrder) {
+                $nextOrder = (int)$lastOrder->order_number + 1;
+            } else {
+                $nextOrder = 1;
+            }
+
+            $orderNumber = sprintf('%07d', $nextOrder);
+
+            $salesHeader->update([
+                'order_number' => $orderNumber
+            ]);
+        }
 
         $grand_gross = 0;
         $grand_tax = 0;

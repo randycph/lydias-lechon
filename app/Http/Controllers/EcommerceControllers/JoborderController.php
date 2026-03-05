@@ -467,8 +467,21 @@ class JoborderController extends Controller
 
 
         if($salesHeader){
+
+            $lastOrder = SalesHeader::whereNull('parent_sales_header_id')
+                ->orderByDesc('id')
+                ->first();
+
+            if ($lastOrder) {
+                $nextOrder = (int)$lastOrder->order_number + 1;
+            } else {
+                $nextOrder = 1;
+            }
+
+            $orderNumber = sprintf('%07d', $nextOrder);
+
             $salesHeader->update([
-                'order_number' => sprintf('%07d', $salesHeader->id)
+                'order_number' => $orderNumber
             ]);
             //dd($request);
             $data = $request->all();
