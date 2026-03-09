@@ -64,7 +64,9 @@ class CustomerController extends Controller
 
         $searchType = 'simple_search';
 
-        dd($users);
+        $users = $users->filter(function ($user) {
+            return !is_null($user->created_at) && !is_null($user->updated_at);
+        });
 
         return view('admin.customers.index',compact('users','filter', 'searchType'));
     }
