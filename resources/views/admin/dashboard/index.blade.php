@@ -140,7 +140,7 @@
                         </div>
                     </div>
                     <div class="col-lg-9 col-md-8">
-                        
+                        @if (auth()->user()->has_access_to_route('dashboard'))
                         <div class="card dashboard-recent mg-t-20">
                             <div class="card-header">
                                 <div>Pending Payments</div>
@@ -228,6 +228,7 @@
                                 </div>
                             </div>
                         </div>
+                        @endif
                         
                         <div class="card dashboard-recent mg-t-20">
                             <div class="card-header">
@@ -260,7 +261,7 @@
         </div>
     </div>
 
-    @if($tomorrowUnpaid->count() && !request()->has('page'))
+    @if($tomorrowUnpaid->count() && !request()->has('page') && auth()->user()->has_access_to_route('dashboard'))
     <div class="modal fade" id="pendingPaymentModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
