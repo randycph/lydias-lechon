@@ -50,7 +50,7 @@ trait LogsActivityDiff
                     'subject_type'       => get_class($model),
                     'subject_id'         => $model->getKey(),
                     'ip_address'         => Request::ip(),
-                    'session_id'         => Request::session()->getId(),
+                    'session_id'         => self::resolveSessionId(),
                 ]);
             });
         });
@@ -129,7 +129,7 @@ trait LogsActivityDiff
                         'ip_address'         => Request::ip(),
                         'email'             => optional(auth()->user())->email,
                         'role'              => optional(auth()->user()?->user_role)->name,
-                        'session_id'         => Request::session()->getId(),
+                        'session_id'         => self::resolveSessionId(),
                     ]);
                 });
             }
@@ -184,7 +184,7 @@ trait LogsActivityDiff
                     'ip_address'         => Request::ip(),
                     'email'             => optional(auth()->user())->email,
                     'role'              => optional(auth()->user()?->user_role)->name,
-                    'session_id'         => Request::session()->getId(),
+                    'session_id'         => self::resolveSessionId(),
                 ]);
             });
         });
@@ -221,7 +221,7 @@ trait LogsActivityDiff
                         'ip_address'         => request()->ip(),
                         'email'             => optional(auth()->user())->email,
                         'role'              => optional(auth()->user()?->user_role)->name,
-                        'session_id'         => Request::session()->getId(),
+                        'session_id'         => self::resolveSessionId(),
                     ]);
                 });
             });
@@ -299,6 +299,19 @@ trait LogsActivityDiff
         }
 
         return $value;
+    }
+
+    protected static function resolveSessionId(): ?string
+    {
+        try {
+            if (app()->runningInConsole() || !request()->hasSession()) {
+                return null;
+            }
+
+            return request()->session()->getId();
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 
     protected static function resolveActorId(): ?int
