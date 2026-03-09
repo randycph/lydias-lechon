@@ -64,6 +64,8 @@ class CustomerController extends Controller
 
         $searchType = 'simple_search';
 
+        dd($users);
+
         return view('admin.customers.index',compact('users','filter', 'searchType'));
     }
 
