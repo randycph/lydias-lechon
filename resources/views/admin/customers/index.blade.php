@@ -113,6 +113,9 @@
                             </thead>
                             <tbody>
                                 @forelse($users as $user)
+                                    @if ($user->created_at == null || $user->updated_at == null)
+                                        @continue
+                                    @endif
                                     <tr>
                                         <th>
                                             <strong @if($user->is_active == 0) style="text-decoration:line-through;" @endif> {{$user->fullname}}</strong>
