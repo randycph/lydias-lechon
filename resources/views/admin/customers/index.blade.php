@@ -136,9 +136,9 @@
                             </thead>
                             <tbody>
                                 @forelse($users as $user)
-                                @if ($user->created_at == null || $user->updated_at == null)
-                                    @continue
-                                @endif
+                                    @if ($user->created_at == null || $user->updated_at == null)
+                                        @continue
+                                    @endif
                                     <tr>
                                         <th>
                                             <div class="custom-control custom-checkbox">
