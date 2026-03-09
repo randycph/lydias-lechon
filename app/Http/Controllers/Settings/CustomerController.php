@@ -68,6 +68,8 @@ class CustomerController extends Controller
             return !is_null($user->created_at) && !is_null($user->updated_at);
         });
 
+        $users = collect($users)->values();
+
         return view('admin.customers.index',compact('users','filter', 'searchType'));
     }
 
