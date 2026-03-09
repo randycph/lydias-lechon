@@ -36,6 +36,14 @@ class CheckUnpaidTransactions extends Command
             ->where('status', '!=', 'CANCELLED')
             ->whereDate('created_at', '<=', $now->copy()->subDays(5))
             ->whereDate('created_at', '>=', '2025-12-29')
+
+            // Exclude Sign-Chit transactions within 30 days
+            ->where(function ($q) use ($now) {
+                $q->whereDoesntHave('payments', function ($p) {
+                    $p->where('payment_type', 'Sign-Chit');
+                })
+                ->orWhereDate('created_at', '<=', $now->copy()->subDays(30));
+            })
             ->get();
 
         foreach ($cancel as $order) {
