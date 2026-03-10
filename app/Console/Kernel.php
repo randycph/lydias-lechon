@@ -14,9 +14,10 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
         $schedule->command('cart:check')->daily();
-        $schedule->command('transactions:check-unpaid')->daily();
+        $schedule->command('transactions:check-unpaid')->dailyAt('01:00');
+        $schedule->command('users:delete-old-guests')->dailyAt('02:00');
 
-        $schedule->command('sitemap:generate')->dailyAt('02:00');
+        $schedule->command('sitemap:generate')->dailyAt('03:00');
         $schedule->command('update:deliverable-cities-schedules')->everyFiveMinutes();
     }
 
