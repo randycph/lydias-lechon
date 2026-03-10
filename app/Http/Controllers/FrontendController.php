@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Intervention\Image\Colors\Rgb\Channels\Red;
+use Illuminate\Validation\Rule;
 
 class FrontendController extends Controller
 {
@@ -946,7 +947,14 @@ return view('v2.my-coupons', compact('page', 'eligibleCoupons'));
                 'required',
                 'regex:/^(09|\+639)\d{9}$/'
             ],
-            'email' => 'required|email:rfc,dns|max:191|unique:users,email,' . Auth::id(), 
+            'email' => [
+                'required',
+                'email:rfc,dns',
+                'max:191',
+                Rule::unique('users', 'email')
+                    ->where(fn ($q) => $q->where('registration_type', 'registered'))
+                    ->ignore(Auth::id())
+            ],
         ], [
             'contact_mobile.regex' => 'The mobile number must start with 09 or +639 and be followed by 9 digits.',
         ]);
