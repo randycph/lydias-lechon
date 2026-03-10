@@ -16,10 +16,11 @@
             </label>
 
             <input
+                :readonly="!isGuest && contact.name"
                 type="text"
                 name="name"
                 x-model="contact.name"
-                class="bg-gray-50 border border-gray-300 text-sm rounded-md block w-full p-2.5"
+                class="bg-gray-50 border border-gray-300 text-sm rounded-md block w-full p-2.5 read-only:bg-gray-100 read-only:cursor-not-allowed"
                 :class="{'border-red-500': errors.name}"
             >
 
@@ -37,10 +38,11 @@
             </label>
 
             <input
+                :readonly="!isGuest && contact.mobile"
                 type="tel"
                 name="mobile"
                 x-model="contact.mobile"
-                class="bg-gray-50 border border-gray-300 text-sm rounded-md block w-full p-2.5"
+                class="bg-gray-50 border border-gray-300 text-sm rounded-md block w-full p-2.5 read-only:bg-gray-100 read-only:cursor-not-allowed"
                 :class="{'border-red-500': errors.mobile}"
             >
 
@@ -58,10 +60,11 @@
             </label>
 
             <input
+                :readonly="!isGuest && contact.email"
                 type="email"
                 name="email"
                 x-model="contact.email"
-                class="bg-gray-50 border border-gray-300 text-sm rounded-md block w-full p-2.5"
+                class="bg-gray-50 border border-gray-300 text-sm rounded-md block w-full p-2.5 read-only:bg-gray-100 read-only:cursor-not-allowed"
                 :class="{'border-red-500': errors.email}"
             >
 
