@@ -668,4 +668,11 @@ class SalesHeader extends Model
         );
     }
 
+    public function hasPartialPayment()
+    {
+        $payments = $this->payments()->where('status', 'PAID')->get();
+        $paidAmount = $payments->sum('amount');
+
+        return $paidAmount > 0 && $paidAmount < $this->net_amount; 
+    }
 }

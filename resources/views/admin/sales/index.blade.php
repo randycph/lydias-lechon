@@ -532,7 +532,7 @@
                                                             @if (
                                                                     auth()->user()->has_access_to_route('sales-transaction.cancel') && 
                                                                     ($sale->status != 'CANCELLED' && $sale->status != 'ABANDONED') && 
-                                                                    $sale->delivery_status != 'Delivered/Picked Up'
+                                                                    $sale->delivery_status != 'Delivered/Picked Up' && !$sale->hasPartialPayment()
                                                                 )
                                                                 <a class="dropdown-item" href="javascript:void(0)" onclick="cancel_sales({{$sale->id}},'{{$sale->order_number}}')" title="Cancel Transaction">Cancel Transaction</a>
                                                             @endif
