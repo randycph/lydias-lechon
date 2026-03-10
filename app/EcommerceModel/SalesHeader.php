@@ -466,6 +466,6 @@ class SalesHeader extends Model
         $payments = $this->payments()->where('status', 'PAID')->get();
         $paidAmount = $payments->sum('amount');
 
-        return $paidAmount > 0 && $paidAmount < $this->net_amount; 
+        return $paidAmount > 0 || $this->isConfirm == 1; 
     }
 }
