@@ -23,6 +23,7 @@ use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -183,6 +184,15 @@ class UserController extends Controller
             'fname' => ['required','string','regex:/^(?!\.)(?!.*\.\.)(?!.*\.$)[\p{L}](?:[\p{L}\d\s\-]*|\.[\p{L}\d]+)*$/u'],
             'lname' => ['required','string','regex:/^(?!\.)(?!.*\.\.)(?!.*\.$)[\p{L}](?:[\p{L}\d\s\-]*|\.[\p{L}\d]+)*$/u'],
             'email' => 'required|email|max:191|unique:users,email,'.$user->id,
+
+            'email' => [
+                'required',
+                'email:rfc,dns',
+                'max:191',
+                Rule::unique('users', 'email')
+                    ->where(fn ($q) => $q->where('registration_type', 'registered'))
+                    ->ignore($user->id)
+            ],
             'role' => 'required|exists:role,id',
         ]);
 
