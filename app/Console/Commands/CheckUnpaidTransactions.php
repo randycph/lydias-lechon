@@ -36,16 +36,42 @@ class CheckUnpaidTransactions extends Command
         // Transactions unpaid for 5+ days — cancel them
         $cancel = SalesHeader::where('payment_status', '!=', 'PAID')
             ->whereNotIn('status', $statuses)
-            ->whereDate('created_at', '<=', $now->copy()->subDays(5))
             ->whereDate('created_at', '>=', '2025-12-29')
 
-            // Exclude Sign-Chit transactions within 30 days
+            // CANCEL CONDITIONS
             ->where(function ($q) use ($now) {
+
+                // Case 1: delivery already passed
+                $q->whereHas('items', function ($i) use ($now) {
+                    $i->where('delivery_date', '<', $now);
+                })
+
+                // Case 2: future delivery but order older than 5 days
+                ->orWhere(function ($q2) use ($now) {
+                    $q2->whereDate('created_at', '<=', $now->copy()->subDays(5))
+                    ->whereHas('items', function ($i) use ($now) {
+                            $i->where('delivery_date', '>=', $now);
+                    });
+                });
+            })
+
+            // SIGN-CHIT EXCEPTION
+            ->where(function ($q) use ($now) {
+
+                // NOT Sign-Chit
                 $q->whereDoesntHave('payments', function ($p) {
                     $p->where('payment_type', 'Sign-Chit');
                 })
-                ->orWhereDate('created_at', '<=', $now->copy()->subDays(30));
+
+                // OR Sign-Chit but older than 30 days
+                ->orWhere(function ($q2) use ($now) {
+                    $q2->whereHas('payments', function ($p) {
+                        $p->where('payment_type', 'Sign-Chit');
+                    })
+                    ->whereDate('created_at', '<=', $now->copy()->subDays(30));
+                });
             })
+
             ->get();
 
         foreach ($cancel as $order) {
