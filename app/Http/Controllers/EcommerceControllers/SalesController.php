@@ -552,7 +552,7 @@ class SalesController extends Controller
     public function index()
     {
         if (!auth()->user()->has_access_to_route('sales-transaction.index')) {
-            abort('403','Unauthorized page access');
+            return response()->view('components.unauthorize-access');
         }
         
         if (auth()->user()->role_id == config('auth.driver_role_id')) {
