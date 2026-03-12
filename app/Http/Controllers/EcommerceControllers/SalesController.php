@@ -51,7 +51,7 @@ class SalesController extends Controller
 
     public function __construct()
     {
-        Permission::module_init($this, 'sales_transaction');
+        // Permission::module_init($this, 'sales_transaction');
     }
 
     public function edit_items(){
