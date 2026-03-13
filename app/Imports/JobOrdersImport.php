@@ -53,6 +53,8 @@ class JobOrdersImport implements ToCollection, WithHeadingRow
                         'birthday'          => $row['birthdate'],
                         'address'           => $row['address'],
                         'contact_mobile'    => $row['contact_number'],
+                        'user_type'         => 'customer',
+                        'role_id'           => 6,
                     ]);
                 } else {
                     $id = $check_if_exist->id;
