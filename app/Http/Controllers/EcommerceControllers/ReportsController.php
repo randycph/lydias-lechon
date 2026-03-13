@@ -263,9 +263,9 @@ class ReportsController extends Controller
             if(isset($_GET['agent']) && $_GET['agent']<>''){
                 $qry.= " and h.agent='".$_GET['agent']."'";
             }
-            if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
-            }
+            // if(isset($_GET['customer']) && $_GET['customer']<>''){
+            //     $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
+            // }
             if(isset($_GET['product']) && $_GET['product']<>''){
                 $qry.= " and d.product_name='".$_GET['product']."'";
             }
@@ -464,9 +464,9 @@ class ReportsController extends Controller
             if(isset($_GET['agent']) && $_GET['agent']<>''){
                 $mqry.= " and h.agent='".$_GET['agent']."'";
             }
-            if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $mqry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
-            }
+            // if(isset($_GET['customer']) && $_GET['customer']<>''){
+            //     $mqry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
+            // }
             if(isset($_GET['product']) && $_GET['product']<>''){
                 $mqry.= " and d.product_name='".$_GET['product']."'";
             }
@@ -719,6 +719,12 @@ class ReportsController extends Controller
         if (isset($_GET['filter_size']) && $_GET['filter_size'] != '') {
             $results = $results
                 ->where('size', $_GET['filter_size'])
+                ->values();
+        }
+
+        if (isset($_GET['customer']) && $_GET['customer'] != '') {
+            $results = $results
+                ->where('customer_name', $_GET['customer'])
                 ->values();
         }
 
