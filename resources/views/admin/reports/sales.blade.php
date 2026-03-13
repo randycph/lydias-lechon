@@ -90,14 +90,15 @@
 
                                     <label class="tx-13">Customer</label>
                                     <select id="pb" name="customer" class="form-control select2-ajax" style="width:100%">
-                                        @if(request('customer'))
+                                        @isset($_GET['customer'])
                                             @php
-                                                $selectedUser = \App\EcommerceModel\SalesHeader::select('customer_name')->where('customer_name', request('customer'))->first();
+                                                $customer = \App\Models\User::where('name', $_GET['customer'])->first();
                                             @endphp
-                                            @if($selectedUser)
-                                                <option value="{{ $selectedUser->customer_name }}" selected>{{ $selectedUser->customer_name }}</option>
+
+                                            @if ($customer)
+                                                <option value="{{ $customer->name }}" selected="selected">{{ $customer->name }}</option>
                                             @endif
-                                        @endif
+                                        @endisset
                                     </select>
                                 </div>
                             </div>
@@ -363,7 +364,7 @@
         $('.select2-ajax').select2({
             placeholder: 'Select a customer',
             ajax: {
-                url: '{{ route("ajax.search-customers") }}',
+                url: '{{ route("ajax.search-users-forecaster") }}',
                 dataType: 'json',
                 delay: 250,
                 data: function (params) {
