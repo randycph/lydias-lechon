@@ -651,6 +651,14 @@ class ReportsController extends Controller
             })
             ->values();
 
+        if (isset($_GET['customer']) && $_GET['customer'] != '') {
+            $search = strtolower($_GET['customer']);
+
+            $results = $results->filter(function ($item) use ($search) {
+                return str_contains(strtolower($item->customer_name), $search);
+            })->values();
+        }
+
         $ex_array = ['Pantaga','Display','Alpha Size','Belly Pantaga'];
 
         $original_results = $results;
@@ -720,14 +728,6 @@ class ReportsController extends Controller
             $results = $results
                 ->where('size', $_GET['filter_size'])
                 ->values();
-        }
-
-        if (isset($_GET['customer']) && $_GET['customer'] != '') {
-            $search = strtolower($_GET['customer']);
-
-            $results = $results->filter(function ($item) use ($search) {
-                return str_contains(strtolower($item->customer_name), $search);
-            })->values();
         }
 
         $order_sources = session('order_sources', $_GET['order_sources'] ?? null);
