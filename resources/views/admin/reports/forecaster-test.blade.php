@@ -308,14 +308,9 @@ table.dataTable thead .sorting::before, table.dataTable thead .sorting::after {
                                 <div class="form-group">
                                     <label class="tx-13">Customer</label>
                                     <select id="customer" name="customer" class="form-control select2-ajax" style="width:100%">
-                                        @if(request('customer'))
-                                            @php
-                                                $selectedUser = \App\Models\User::find(request('customer'));
-                                            @endphp
-                                            @if($selectedUser)
-                                                <option value="{{ $selectedUser->id }}" selected>{{ $selectedUser->name }}</option>
-                                            @endif
-                                        @endif
+                                        @isset($_GET['customer'])
+                                            <option value="{{$_GET['customer']}}" selected="selected">{{ $_GET['customer'] }}</option>
+                                        @endisset
                                     </select>
 
                                     {{-- <select name="customer" id="customer" class="form-control">
