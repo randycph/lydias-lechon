@@ -1296,6 +1296,14 @@ class CartController extends Controller
 
         if (session()->has('edit_sales_header_id') && !empty(session()->get('edit_sales_header_id'))) {
             $salesHeader = SalesHeader::find(session()->get('edit_sales_header_id'));
+
+            if ($salesHeader->has_sub) {
+                $subSalesHeaders = SalesHeader::where('parent_sales_header_id', $salesHeader->id)->get();
+                foreach ($subSalesHeaders as $sub) {
+                    $sub->delete();
+                }
+            }
+
             SalesHeader::where('id', $salesHeader->id)->update([
                 'user_id' => $user->id,
                 'email' => $request->email ?? $user->email,
@@ -1333,6 +1341,8 @@ class CartController extends Controller
                 'lechon_baka_service' => $lechonBakaSevice,
                 'has_baka' => $request->isBaka == 1 ? 1 : 0,
             ]);
+
+
             $salesHeader = SalesHeader::find($salesHeader->id);
             if (!$salesHeader) {
                 session()->forget('edit_sales_header_id');
