@@ -1779,21 +1779,17 @@ class ReportsController extends Controller
     {
         $search = $request->input('q');
 
-        $users = SalesHeader::select('customer_name')
-            ->where('customer_name', 'LIKE', "%{$search}%")
-            ->distinct()
-            ->orderBy('customer_name')
-            ->limit(20)
-            ->get();
-
+        $users = SalesHeader::where('customer_name', 'like', "%{$search}%")                    
+                    ->orderBy('name')
+                    ->limit(20)
+                    ->get();
 
         return response()->json([
-            'results' => $users->map(fn ($user) => [
-                'id'   => $user->customer_name,
-                'text' => $user->customer_name,
+            'results' => $users->map(fn($user) => [
+                'id' => $user->id,
+                'text' => $user->name
             ])
         ]);
-
     }
 
     public function audit_trail_per_sales(Request $request){
