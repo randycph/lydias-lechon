@@ -722,12 +722,12 @@ class ReportsController extends Controller
                 ->values();
         }
 
-        dd($results);
-
         if (isset($_GET['customer']) && $_GET['customer'] != '') {
-            $results = $results
-                ->where('customer_name', 'LIKE', '%' . $_GET['customer'] . '%')
-                ->values();
+            $search = strtolower($_GET['customer']);
+
+            $results = $results->filter(function ($item) use ($search) {
+                return str_contains(strtolower($item->customer_name), $search);
+            })->values();
         }
 
         $order_sources = session('order_sources', $_GET['order_sources'] ?? null);
