@@ -305,7 +305,13 @@
                                     <label class="tx-13">Customer</label>
                                     <select id="customer" name="customer" class="form-control select2-ajax" style="width:100%">
                                         @isset($_GET['customer'])
-                                            <option value="{{$_GET['customer']}}" selected="selected">{{ $_GET['customer'] }}</option>
+                                            @php
+                                                $customer = \App\Models\User::where('name', $_GET['customer'])->first();
+                                            @endphp
+
+                                            @if ($customer)
+                                                <option value="{{ $customer->name }}" selected="selected">{{ $customer->name }}</option>
+                                            @endif
                                         @endisset
                                     </select>
 
