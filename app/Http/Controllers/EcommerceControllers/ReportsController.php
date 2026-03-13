@@ -1770,15 +1770,14 @@ class ReportsController extends Controller
     {
         $search = $request->input('q');
 
-        $users = SalesHeader::select('customer_name')->where('customer_name', 'like', "%{$search}%")    
-                    ->distinct()                
+        $users = SalesHeader::select('id', 'customer_name')->where('customer_name', 'like', "%{$search}%")                    
                     ->orderBy('customer_name')
                     ->limit(20)
                     ->get();
 
         return response()->json([
             'results' => $users->map(fn($user) => [
-                'id' => $user->customer_name,
+                'id' => $user->id,
                 'text' => $user->customer_name
             ])
         ]);
