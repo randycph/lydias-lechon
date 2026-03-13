@@ -1756,10 +1756,7 @@ class ReportsController extends Controller
             })
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('firstname', 'like', "%{$search}%")
-                    ->orWhere('lastname', 'like', "%{$search}%")
-                    ->orWhere('organization', 'like', "%{$search}%");
+                    $q->where('name', 'like', "%{$search}%");
                 });
             })
             ->select('name')
