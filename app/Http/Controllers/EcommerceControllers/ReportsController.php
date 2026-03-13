@@ -1750,26 +1750,15 @@ class ReportsController extends Controller
         //             ->orderBy('name')
         //             ->limit(20)
         //             ->get();
-        $users = User::where(function ($query) {
-                $query->where('role_id', 6)
-                    ->orWhere('user_type', 'customer');
-            })
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%");
-                });
-            })
-            ->select('name')
-            ->distinct()
-            ->orderBy('name')
-            ->limit(20)
-            ->get();
-
+        $users = SalesHeader::select('id', 'customer_name')->where('customer_name', 'like', "%{$search}%")                    
+                    ->orderBy('customer_name')
+                    ->limit(20)
+                    ->get();
 
         return response()->json([
             'results' => $users->map(fn($user) => [
-                'id' => $user->name,
-                'text' => $user->name
+                'id' => $user->customer_name,
+                'text' => $user->customer_name
             ])
         ]);
     }
