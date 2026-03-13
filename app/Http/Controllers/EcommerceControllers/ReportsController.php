@@ -722,13 +722,14 @@ class ReportsController extends Controller
                 ->values();
         }
 
-        dd($results);
-
         if (isset($_GET['customer']) && $_GET['customer'] != '') {
             $results = $results
-                ->where('customer_name', $_GET['customer'])
+                ->where('customer_name', 'LIKE', '%' . $_GET['customer'] . '%')
                 ->values();
         }
+
+                dd($results);
+
 
         $order_sources = session('order_sources', $_GET['order_sources'] ?? null);
 
