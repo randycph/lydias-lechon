@@ -257,10 +257,7 @@ class ReportsController extends Controller
                 $qry.= " and h.agent='".$_GET['agent']."'";
             }
             if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $customer = User::find($_GET['customer']);
-                if ($customer) {
-                    $qry.= " and h.customer_name='".$customer->name."'";
-                }
+                $qry.= " and h.customer_name='".$_GET['customer']."'";
             }
             if(isset($_GET['product']) && $_GET['product']<>''){
                 $qry.= " and d.product_name='".$_GET['product']."'";
@@ -458,10 +455,7 @@ class ReportsController extends Controller
                 $mqry.= " and h.agent='".$_GET['agent']."'";
             }
             if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $customer = User::find($_GET['customer']);
-                if ($customer) {
-                    $mqry.= " and h.customer_name='".$customer->name."'";
-                }
+                $mqry.= " and h.customer_name='".$_GET['customer']."'";
             }
             if(isset($_GET['product']) && $_GET['product']<>''){
                 $mqry.= " and d.product_name='".$_GET['product']."'";
@@ -1685,6 +1679,8 @@ class ReportsController extends Controller
                     ->orWhere('organization', 'like', "%{$search}%");
                 });
             })
+            ->select('name')
+            ->distinct()
             ->orderBy('name')
             ->limit(20)
             ->get();
@@ -1692,7 +1688,7 @@ class ReportsController extends Controller
 
         return response()->json([
             'results' => $users->map(fn($user) => [
-                'id' => $user->id,
+                'id' => $user->name,
                 'text' => $user->name
             ])
         ]);
