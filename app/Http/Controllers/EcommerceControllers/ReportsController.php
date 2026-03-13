@@ -1750,9 +1750,10 @@ class ReportsController extends Controller
         //             ->orderBy('name')
         //             ->limit(20)
         //             ->get();
-        $users = SalesHeader::select('id', 'customer_name')->where('customer_name', 'like', "%{$search}%")                    
+        $users = SalesHeader::select('customer_name')->where('customer_name', 'like', "%{$search}%")                    
                     ->orderBy('customer_name')
                     ->limit(20)
+                    ->distinct()
                     ->get();
 
         return response()->json([
