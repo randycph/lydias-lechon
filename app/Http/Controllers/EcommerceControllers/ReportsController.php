@@ -1716,16 +1716,8 @@ class ReportsController extends Controller
         //             ->orderBy('name')
         //             ->limit(20)
         //             ->get();
-
-            // include name, email, role, firstname, lastname, organization in the search
-            $users = User::when($search, fn($query) => $query->where(function($q) use ($search) {
-                            $q->where('name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%")
-                            ->orWhere('firstname', 'like', "%{$search}%")
-                            ->orWhere('lastname', 'like', "%{$search}%")
-                            ->orWhere('organization', 'like', "%{$search}%");
-                        })
-                     )
+            $users = User::where('role_id', '=', 6)->orWhere('user_type', 'customer')
+                    ->when($search, fn($query) => $query->where('name', 'like', "%{$search}%"))
                     ->orderBy('name')
                     ->limit(20)
                     ->get();
@@ -1748,8 +1740,8 @@ class ReportsController extends Controller
         //             ->orderBy('name')
         //             ->limit(20)
         //             ->get();
-            $users = User::where('role_id', '=', 6)
-                     ->when($search, fn($query) => $query->where('name', 'like', "%{$search}%"))
+            $users = User::where('role_id', '=', 6)->orWhere('user_type', 'customer')
+                    ->when($search, fn($query) => $query->where('name', 'like', "%{$search}%"))
                     ->orderBy('name')
                     ->limit(20)
                     ->get();

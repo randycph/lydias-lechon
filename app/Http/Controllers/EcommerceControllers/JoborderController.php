@@ -374,7 +374,7 @@ class JoborderController extends Controller
                     'contact_mobile' => $request->mobile,
                     'password' => \Hash::make('password', array('rounds'=>12)),
                     'is_active' => 1,
-                    'role_id' => 6
+                    'role_id' => 6,
                 ]);
                 $id  = $customer->id;
             }

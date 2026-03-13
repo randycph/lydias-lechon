@@ -1073,6 +1073,7 @@ class CartController extends Controller
                 'firstname' => $firstName,
                 'lastname' => $lastName,
                 'is_active' => 1,
+                'user_type' => 'customer',
                 'role_id' => 6
             ]);
 

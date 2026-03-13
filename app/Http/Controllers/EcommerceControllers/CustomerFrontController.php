@@ -66,7 +66,9 @@ class CustomerFrontController extends Controller
                 'remember_token' => Str::random(10),
                 'is_active' => 1,
                 'is_org' => 1,
-                'is_subscribe' => $request->issubscribe ?? 0
+                'is_subscribe' => $request->issubscribe ?? 0,
+                'role_id' => 6,
+                'user_type' => 'customer'
             ]);
         } else {
             $user = User::create([
@@ -89,7 +91,9 @@ class CustomerFrontController extends Controller
                 'agent_code' => $request->agent_code,
                 'remember_token' => Str::random(10),
                 'is_active' => 1,
-                'is_subscribe' => $request->issubscribe ?? 0
+                'is_subscribe' => $request->issubscribe ?? 0,
+                'role_id' => 6,
+                'user_type' => 'customer'
             ]);   
         }
 
