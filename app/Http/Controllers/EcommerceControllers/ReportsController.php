@@ -1639,11 +1639,21 @@ class ReportsController extends Controller
         //             ->orderBy('name')
         //             ->limit(20)
         //             ->get();
-            $users = User::where('role_id', '=', 6)->orWhere('user_type', 'customer')
-                    ->when($search, fn($query) => $query->where('name', 'like', "%{$search}%"))
-                    ->orderBy('name')
-                    ->limit(20)
-                    ->get();
+        $users = User::where(function ($query) {
+                $query->where('role_id', 6)
+                    ->orWhere('user_type', 'customer');
+            })
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('firstname', 'like', "%{$search}%")
+                    ->orWhere('lastname', 'like', "%{$search}%")
+                    ->orWhere('organization', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('name')
+            ->limit(20)
+            ->get();
 
 
         return response()->json([
@@ -1663,11 +1673,21 @@ class ReportsController extends Controller
         //             ->orderBy('name')
         //             ->limit(20)
         //             ->get();
-            $users = User::where('role_id', '=', 6)->orWhere('user_type', 'customer')
-                    ->when($search, fn($query) => $query->where('name', 'like', "%{$search}%"))
-                    ->orderBy('name')
-                    ->limit(20)
-                    ->get();
+        $users = User::where(function ($query) {
+                $query->where('role_id', 6)
+                    ->orWhere('user_type', 'customer');
+            })
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('firstname', 'like', "%{$search}%")
+                    ->orWhere('lastname', 'like', "%{$search}%")
+                    ->orWhere('organization', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('name')
+            ->limit(20)
+            ->get();
 
 
         return response()->json([
