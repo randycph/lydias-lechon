@@ -264,6 +264,7 @@ class ReportsController extends Controller
                 $qry.= " and h.agent='".$_GET['agent']."'";
             }
             if(isset($_GET['customer']) && $_GET['customer']<>''){
+                dd($_GET['customer']);
                 $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
             }
             if(isset($_GET['product']) && $_GET['product']<>''){
