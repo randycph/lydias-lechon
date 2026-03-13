@@ -1476,7 +1476,7 @@ function twoColTotals_forPrint() {
     $('.select2-ajax').select2({
         placeholder: 'Select a user',
         ajax: {
-            url: '{{ route("ajax.search-users-forecaster") }}',
+            url: '{{ route("ajax.search-customers") }}',
             dataType: 'json',
             delay: 250,
             data: function (params) {
