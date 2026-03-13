@@ -1698,22 +1698,22 @@ class ReportsController extends Controller
         ]);
     }
 
-    // public function searchCustomers(Request $request)
-    // {
-    //     $search = $request->input('q');
+    public function searchCustomers(Request $request)
+    {
+        $search = $request->input('q');
 
-    //     $users = SalesHeader::where('customer_name', 'like', "%{$search}%")                    
-    //                 ->orderBy('name')
-    //                 ->limit(20)
-    //                 ->get();
+        $users = SalesHeader::where('customer_name', 'like', "%{$search}%")                    
+                    ->orderBy('name')
+                    ->limit(20)
+                    ->get();
 
-    //     return response()->json([
-    //         'results' => $users->map(fn($user) => [
-    //             'id' => $user->id,
-    //             'text' => $user->name
-    //         ])
-    //     ]);
-    // }
+        return response()->json([
+            'results' => $users->map(fn($user) => [
+                'id' => $user->id,
+                'text' => $user->name
+            ])
+        ]);
+    }
 
     public function audit_trail_per_sales(Request $request){
         $rs = '';
