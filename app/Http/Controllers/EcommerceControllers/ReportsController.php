@@ -723,6 +723,7 @@ class ReportsController extends Controller
         }
 
         if (isset($_GET['customer']) && $_GET['customer'] != '') {
+            dd($_GET['customer']);
             $results = $results
                 ->where('customer_name', 'LIKE', '%' . $_GET['customer'] . '%')
                 ->values();
