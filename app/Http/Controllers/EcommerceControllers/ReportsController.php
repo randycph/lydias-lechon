@@ -264,7 +264,6 @@ class ReportsController extends Controller
                 $qry.= " and h.agent='".$_GET['agent']."'";
             }
             if(isset($_GET['customer']) && $_GET['customer']<>''){
-                dd($_GET['customer']);
                 $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
             }
             if(isset($_GET['product']) && $_GET['product']<>''){
@@ -610,9 +609,9 @@ class ReportsController extends Controller
                 $jos.= " and jo.pickup_branch in ".$id_opts."";
             }
 
-            if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $jos.= " and jo.id='-1'";
-            }
+            // if(isset($_GET['customer']) && $_GET['customer']<>''){
+            //     $jos.= " and jo.id='-1'";
+            // }
 
             if($no_jo == 1){
                 $jos.= " and jo.id='-1'"; // exclude all jo record
