@@ -13,10 +13,16 @@ use App\Helpers\ListingHelper;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+<<<<<<< Updated upstream
+=======
+use App\Http\Controllers\EcommerceControllers\CouponController;
+>>>>>>> Stashed changes
 use App\Http\Controllers\EcommerceControllers\ReportsController;
 use App\Http\Controllers\FacebookController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\GlobalSearchController;
+use App\Http\Controllers\logincontroller;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Settings\UserController;
 use App\Http\Controllers\Settings\WebController;
 use App\Mail\CartReminderMail;
@@ -106,38 +112,12 @@ Route::post('/admin/login', function(Request $request) {
     try {
         $credentials = $request->only('email', 'password');
 
-        session()->forget('login_branch');
-
-        if ($request->has('is_kiosk')) {
-            session(['is_kiosk' => true]);
-        } else {
-            session()->forget('is_kiosk');
-        }
-
         if (Auth::attempt($credentials)) {
 
             $user = Auth::user();
 
             if ($user->role_id == config('auth.driver_role_id') ) {
                 return redirect()->route('sales-transaction.driver_sales_transaction');
-            }
-
-            $exludeBranch = [
-                'web',
-                'admin',
-                'forecaster'
-            ];
-
-            if (auth()->user()->user_role->name == 'Cashier' && !in_array($request->branch, $exludeBranch)) {
-                if ($request->has('branch')) {
-                    session(['login_branch' => $request->branch]);
-                } else {
-                    session()->forget('login_branch');
-                }
-            }
-
-            if ($request->has('branch') && $request->branch == 'forecaster') {
-                return redirect()->intended('admin/forecaster');
             }
 
             return redirect()->intended('admin/dashboard');
@@ -197,7 +177,17 @@ Route::get('/products-list', 'Product\Front\ProductFrontController@list')->name(
 Route::get('/order', 'Product\Front\ProductFrontController@show_forsale')->name('product.front.show_forsale');
 Route::get('/products/{slug}', 'Product\Front\ProductFrontController@show')->name('product.front.show');
 
-
+//coupon_sec
+Route::get('/products_list', [CouponController::class, 'getProducts']);
+Route::get('/category_list', [CouponController::class, 'getCategories']);
+Route::post('/insert_coupon', [CouponController::class, 'insert_coupons'])->name('coupon.insert');
+Route::post('/delete_coupon/{id}', [CouponController::class, 'delete_coupon'])->name('coupon.delete');
+Route::get('/coupon_edit/{id}', [CouponController::class, 'edit_coupon'])->name('coupon.edit');
+Route::post('/coupon_update/{id}', [CouponController::class, 'update_coupon'])->name('coupon.update');
+Route::post('/redeem-coupon/{id}', [CouponController::class, 'redeem']);
+Route::get('/user-coupons', [CouponController::class, 'getUserCoupons'])->name('user.coupons');
+Route::post('/cart/auto-free-delivery', [CouponController::class, 'autoFreeDelivery'])->name('cart.autoFreeDelivery');
+Route::post('/coupon/validate', [CouponController::class, 'validateCoupon'])->name('coupon.validate');
 //// MAILING LIST ////
 Route::post('/subscribe', 'MailingList\SubscriberFrontController@subscribe')->name('mailing-list.front.subscribe');
 Route::get('/unsubscribe/{subscriber}/{code}', 'MailingList\SubscriberFrontController@unsubscribe')->name('mailing-list.front.unsubscribe');
@@ -261,6 +251,7 @@ Route::post('cart-remove-product','EcommerceControllers\CartController@remove_pr
 
 Route::post('/add-manual-coupon','EcommerceControllers\CouponController@add_manual_coupon')->name('add-manual-coupon');
 Route::get('/add-auto-coupon','EcommerceControllers\CouponController@get_auto_coupons')->name('get-auto-coupons');
+Route::get('/coupon/check-auto-eligibility', [CouponController::class, 'checkAutoCouponEligibility'])->name('coupon.check-auto-eligibility');
 Route::get('checkout-as-guest', 'EcommerceControllers\CheckoutController@checkout_as_guest')->name('cart.front.checkout-as-guest');
 Route::post('/temp_save','EcommerceControllers\CartController@save_sales')->name('cart.temp_sales');
 Route::get('guest/view/{id}', 'FrontController@show_sales_summary_guest')->name('profile.show_sales_summary_guest');
@@ -692,7 +683,7 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
 
 
     // Coupon
-    Route::resource('/admin/coupons','EcommerceControllers\CouponController');
+    Route::resource('admin/coupons', CouponController::class);
     Route::get('/admin/coupon/{id}/{status}', 'EcommerceControllers\CouponController@update_status')->name('coupon.change-status');
     Route::post('/admin/coupon-single-delete', 'EcommerceControllers\CouponController@single_delete')->name('coupon.single.delete');
     Route::get('/admin/coupon-restore/{id}', 'EcommerceControllers\CouponController@restore')->name('coupon.restore');

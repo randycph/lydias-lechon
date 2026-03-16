@@ -3,11 +3,14 @@
 @section('title', 'Checkout')
 @section('meta_description', 'Complete your order at Lydia\'s Lechon. Review your cart, choose delivery or pickup, and finalize your purchase for a delicious meal.')
 
+<<<<<<< Updated upstream
 @section('alpine.plugins')
 <link rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/css/datepicker.min.css">
     @endsection
 
+=======
+>>>>>>> Stashed changes
 @section('content')
 
 @php
@@ -23,8 +26,72 @@
 
         $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
     }
+    
+    // Get auto coupons from controller
+    $autoCoupons = isset($autoCoupons) ? $autoCoupons : collect([]);
+    // Merge with eligible coupons
+    $allCoupons = $eligibleCoupons->merge($autoCoupons);
 @endphp
-
+<style>
+    .coupon-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        background-color: #f9fafb;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .coupon-card:hover {
+        background-color: #f3f4f6;
+        border-color: #d1d5db;
+    }
+    
+    .coupon-card input[type="radio"] {
+        margin-top: 0.25rem;
+    }
+    
+    .coupon-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.5rem;
+    }
+    
+    .coupon-title {
+        font-weight: 600;
+        color: #111827;
+    }
+    
+    .coupon-tag {
+        font-size: 0.75rem;
+        padding: 0.125rem 0.5rem;
+        background-color: #e0e7ff;
+        color: #3730a3;
+        border-radius: 9999px;
+    }
+    
+    .coupon-desc {
+        font-size: 0.875rem;
+        color: #4b5563;
+        margin-bottom: 0.5rem;
+    }
+    
+    .coupon-validity {
+        font-size: 0.75rem;
+        color: #6b7280;
+    }
+    
+    .discount-value {
+        font-weight: 700;
+        color: #059669;
+        font-size: 1.125rem;
+        margin-top: 0.25rem;
+    }
+</style>
 <style>
     :root {
         --page-bg: #fff;
@@ -37,18 +104,13 @@
     .vertical-rl {
         writing-mode: vertical-rl;
     }
-
-    .datepicker-dropdown {
-        width: 100% !important;
-    }
-
-    .datepicker-view {
-        width: 100% !important;
-    }
 </style>
 
-<div class="bg-cream">
-    <div x-data="checkoutForm" init="init()" class="container">
+<div x-data="checkoutForm()"
+     x-init="init()"
+     @coupons-updated.window="coupons = $event.detail.coupons"
+     class="container">
+     
         <form action="{{ route('cart.temp_sales') }}" method="POST" id="checkoutForm" enctype="multipart/form-data"
             @submit.prevent="submitForm" class="pb-20 px-4">
             <div class="pt-20 pb-5 px-4">
@@ -82,6 +144,7 @@
             <div class="flex flex-col lg:flex-row gap-4 w-full mt-10">
 
                 @csrf
+<<<<<<< Updated upstream
                 <div class="w-full order-1 lg:order-2 rounded-lg border bg-white border-[#DFDFDF] shadow-md ">
                     <div class="px-4 py-3 border-b border-[#DFDFDF]">
                         <h2 class="text-lg lg:text-3xl font-semibold text-left">Order Summary</h2>
@@ -97,63 +160,61 @@
                             x-text="'₱' + carts.reduce((sum, item) => sum + item.paella_price + (item.is_free_product ? 0 : item.price * item.qty), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })"
                             --}}></div>
                     </div>
+=======
+<div
+    class="w-full order-1 lg:order-2 rounded-lg border bg-white border-[#DFDFDF] shadow-md"
+    x-data="couponSection(@js($carts), {{ $total ?? 0 }})"
+    x-init="
+        coupons = $root.__x.$data.coupons || [];
+        deliveryFee = $root.__x.$data.deliveryFee || 0;
+        method = $root.__x.$data.method || 'pickup';
+        allowMultiple = $root.__x.$data.allowMultiple || false;
+        deliveryFees = $root.__x.$data.deliveryFees || [];
+    "
+    @coupons-updated.window="coupons = $event.detail.coupons"
+>
+    <div class="px-4 py-3 border-b border-[#DFDFDF]">
+        <h2 class="text-lg lg:text-3xl font-semibold text-left">Order Summary</h2>
+    </div>
+    <div class="flex items-center text-sm lg:text-base justify-between px-4 py-3 border-b border-[#DFDFDF]">
+        <div x-text="carts.length + ' items'"></div>
+        <div class="font-bold" x-text="'₱' + carts.reduce((sum, item) => 
+                sum + 
+                ((Number((item?.paella_price > 0 ? item?.product?.paella_price : 0)) || 0) * (Number(item.qty) || 1)) + 
+                (item.is_free_product ? 0 : (Number(item.price) || 0) * (Number(item.qty) || 1))
+            , 0).toLocaleString(undefined, { minimumFractionDigits: 2 })"></div>
+    </div>
+>>>>>>> Stashed changes
 
-                    <div class="flex flex-col items-center gap-4 px-4 py-3 border-b border-[#DFDFDF] w-full">
-                        <template x-for="(item, index) in carts" :key="index">
-                            <div class="flex gap-4 items-start w-full relative  border-gray-200 py-3">
-                                <!-- Image -->
-                                <div class="w-20 h-20 min-w-20 min-h-20 bg-center rounded-md overflow-hidden">
-                                    <img x-ref="productImage" x-init="
-                                            let img = $refs.productImage;
-                                            img.onerror = () => {
-                                                img.src = '{{ asset('images/no-image.jpg') }}';
-                                            };
-                                            img.src = item?.product?.photos?.length > 0
-                                                ? item.product.photos[item.product.photos.length - 1]?.url
-                                                : '{{ asset('images/no-image.jpg') }}';
-                                        " :alt="item?.product?.name"
-                                        class="w-20 h-20 object-cover rounded-md scale-110" />
-                                </div>
+    <div class="flex flex-col items-center gap-4 px-4 py-3 border-b border-[#DFDFDF] w-full">
+        <template x-for="(item, index) in carts" :key="index">
+            <div class="flex gap-4 items-start w-full relative  border-gray-200 py-3">
+                <!-- Image -->
+                <div class="w-20 h-20 min-w-20 min-h-20 bg-center rounded-md overflow-hidden">
+                    <img x-ref="productImage" x-init="
+                            let img = $refs.productImage;
+                            img.onerror = () => {
+                                img.src = '{{ asset('images/no-image.jpg') }}';
+                            };
+                            img.src = item?.product?.photos?.length > 0
+                                ? item.product.photos[item.product.photos.length - 1]?.url
+                                : '{{ asset('images/no-image.jpg') }}';
+                        " :alt="item?.product?.name"
+                        class="w-20 h-20 object-cover rounded-md scale-110" />
+                </div>
 
-                                <!-- Info -->
-                                <div class="flex flex-col flex-grow">
-                                    <div class="">
-                                        <span class="font-bold" x-text="item?.product?.name"></span> <span
-                                            class="italic"
-                                            x-text="parseFloat(item.paella_price) > 0 ? 'Boneless with Paella' : ''"></span>
-                                        <template x-if="item.is_free_product">
-                                            <span
-                                                class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">FREE</span>
-                                        </template>
-                                    </div>
-                                    <div class="text-sm text-gray-600 font-medium">
-                                        Price:
-                                        <span
-                                            x-text="item.is_free_product 
-                                            ? '₱0.00' 
-                                            : '₱' + parseFloat(item.price).toLocaleString(undefined, { minimumFractionDigits: 2 })">
-                                        </span>
-                                        <span class="italic"
-                                            x-text="item?.paella_price > 0 ? '+ ₱' + parseFloat(item?.product?.paella_price).toLocaleString(undefined, { minimumFractionDigits: 2 }) : ''"></span>
-                                    </div>
-                                    <div class="text-sm text-gray-600 font-medium">
-                                        QTY: <span x-text="item.qty"></span>
-                                    </div>
-                                </div>
-
-                                <!-- Total -->
-                                <div
-                                    class="absolute right-0 bottom-2 text-sm lg:text-base font-bold text-black text-right">
-                                    <span
-                                        x-text="item.is_free_product 
-                                        ? '₱0.00' 
-                                        : '₱' + ((parseFloat(item.price) + parseFloat(item?.paella_price > 0 ? item?.product?.paella_price || 0 : 0)) * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2 })">
-                                    </span>
-                                </div>
-                            </div>
+                <!-- Info -->
+                <div class="flex flex-col flex-grow">
+                    <div class="">
+                        <span class="font-bold" x-text="item?.product?.name"></span> <span
+                            class="italic"
+                            x-text="parseFloat(item.paella_price) > 0 ? 'Boneless with Paella' : ''"></span>
+                        <template x-if="item.is_free_product">
+                            <span
+                                class="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">FREE</span>
                         </template>
-
                     </div>
+<<<<<<< Updated upstream
 
                     <!-- Coupon Code Section -->
                     <div class="bg-white rounded-md mt-2 text-sm">
@@ -315,8 +376,287 @@
                                 <span class="font-bold" x-text="computeTotal()"></span>
                             </div>
                         </div>
+=======
+                    <div class="text-sm text-gray-600 font-medium">
+                        Price:
+                        <span
+                            x-text="item.is_free_product 
+                            ? '₱0.00' 
+                            : '₱' + parseFloat(item.price).toLocaleString(undefined, { minimumFractionDigits: 2 })">
+                        </span>
+                        <span class="italic"
+                            x-text="item?.paella_price > 0 ? '+ ₱' + parseFloat(item?.product?.paella_price).toLocaleString(undefined, { minimumFractionDigits: 2 }) : ''"></span>
+                    </div>
+                    <div class="text-sm text-gray-600 font-medium">
+                        QTY: <span x-text="item.qty"></span>
+>>>>>>> Stashed changes
                     </div>
                 </div>
+
+                <!-- Total -->
+                <div
+                    class="absolute right-0 bottom-2 text-sm lg:text-base font-bold text-black text-right">
+                    <span
+                        x-text="item.is_free_product 
+                        ? '₱0.00' 
+                        : '₱' + ((parseFloat(item.price) + parseFloat(item?.paella_price > 0 ? item?.product?.paella_price || 0 : 0)) * item.qty).toLocaleString(undefined, { minimumFractionDigits: 2 })">
+                    </span>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Coupon Code Section -->
+    <div class="bg-white rounded-md mt-2 text-sm px-3 py-3 border-b border-[#DFDFDF]">
+        <!-- Auto-applied coupons notification -->
+        <template x-if="autoAppliedCoupons.length > 0">
+            <div class="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-blue-600 mr-2">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="font-medium text-blue-800">
+                        <span x-text="autoAppliedCoupons.length"></span> coupon(s) auto-applied to your order!
+                    </span>
+                </div>
+            </div>
+        </template>
+
+        <div class="flex justify-between items-center mb-3">
+            <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                    class="size-6 fill-[#ff8545]">
+                    <path fill-rule="evenodd"
+                        d="M1.5 6.375c0-1.036.84-1.875 1.875-1.875h17.25c1.035 0 1.875.84 1.875 1.875v3.026a.75.75 0 0 1-.375.65 2.249 2.249 0 0 0 0 3.898.75.75 0 0 1 .375.65v3.026c0 1.035-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 17.625v-3.026a.75.75 0 0 1 .374-.65 2.249 2.249 0 0 0 0-3.898.75.75 0 0 1-.374-.65V6.375Zm15-1.125a.75.75 0 0 1 .75.75v.75a.75.75 0 0 1-1.5 0V6a.75.75 0 0 1 .75-.75Zm.75 4.5a.75.75 0 0 0-1.5 0v.75a.75.75 0 0 0 1.5 0v-.75Zm-.75 3a.75.75 0 0 1 .75.75v.75a.75.75 0 0 1-1.5 0v-.75a.75.75 0 0 1 .75-.75Zm.75 4.5a.75.75 0 0 0-1.5 0V18a.75.75 0 0 0 1.5 0v-.75ZM6 12a.75.75 0 0 1 .75-.75H12a.75.75 0 0 1 0 1.5H6.75A.75.75 0 0 1 6 12Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"
+                        clip-rule="evenodd" />
+                </svg>
+                <span class="font-medium">Shop Coupon</span>
+            </div>
+            <div class="cursor-pointer flex items-center justify-between text-[#ff8545] font-bold"
+                @click="couponModal = true">
+                Select Coupon
+            </div>
+        </div>
+
+        <!-- Coupon Input -->
+        <div class="flex items-center border border-gray-200 rounded-md overflow-hidden mb-3">
+            <input @input="couponCode = $event.target.value.toUpperCase()" x-model="couponCode"
+                type="text" placeholder="Enter coupon code"
+                class="w-full p-3 outline-none border-none text-gray-700">
+            <button @click="submitCouponCode()" type="button"
+                class="bg-primary hover:bg-primary-dark text-white px-6 py-3 text-sm">Apply</button>
+        </div>
+
+        <!-- Display Applied Coupons -->
+<template x-if="coupons.length > 0">
+    <div class="mt-2 space-y-2">
+        <template x-for="(item, i) in coupons" :key="i">
+            <div class="flex justify-between">
+                <div class="font-medium text-red-700 italic flex items-center flex-wrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                        fill="currentColor" class="size-4 text-green-600 mr-1">
+                        <path fill-rule="evenodd"
+                            d="M4.5 2A2.5 2.5 0 0 0 2 4.5v2.879a2.5 2.5 0 0 0 .732 1.767l4.5 4.5a2.5 2.5 0 0 0 3.536 0l2.878-2.878a2.5 2.5 0 0 0 0-3.536l-4.5-4.5A2.5 2.5 0 0 0 7.38 2H4.5ZM5 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    Coupon (<span x-text="formatCouponName(item)"></span>)
+                    <span class="text-xs ml-1 underline cursor-pointer" @click="removeCoupon(i)">Remove</span>
+                </div>
+
+                <span class="font-medium italic text-red-700">
+                    <template x-if="item.free_shipping || item.reward === 'free-shipping-optn'">
+                        <span>
+                            - ₱<span x-text="Number(deliveryFee || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })"></span>
+                            (Free Shipping)
+                        </span>
+                    </template>
+
+                    <template x-if="!(item.free_shipping || item.reward === 'free-shipping-optn')">
+                        <span>
+                            - ₱<span x-text="getCouponDiscount(item).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })"></span>
+                        </span>
+                    </template>
+                </span>
+            </div>
+
+            <pre x-text="JSON.stringify(item, null, 2)" class="text-xs text-black bg-gray-100 p-2 mt-1 rounded"></pre>
+        </template>
+    </div>
+</template>
+    </div>
+
+    <!-- Subtotal Section -->
+    <div class="px-3 py-4 gap-1 flex flex-col text-sm lg:text-base">
+        <div class="flex justify-between">
+            <span class="font-medium text-gray-800">Subtotal</span>
+            <span class="font-medium" x-text="'₱' + carts.reduce((sum, item) => 
+                        sum + 
+                        ((Number((item?.paella_price > 0 ? item?.product?.paella_price : 0)) || 0) * (Number(item.qty) || 1)) + 
+                        (item.is_free_product ? 0 : (Number(item.price) || 0) * (Number(item.qty) || 1))
+                    , 0).toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+        </div>
+        
+        <!-- Delivery Fee -->
+        <div class="flex justify-between lg:mt-2">
+            <span class="font-medium text-gray-800">Delivery Fee</span>
+            <span class="font-medium">
+                <template x-if="getCurrentDeliveryFee() === 0">
+                    <span class="text-green-600">Free</span>
+                </template>
+                <template x-if="getCurrentDeliveryFee() > 0">
+                    <span>
+                        <template x-if="coupons.some(c => c.free_shipping)">
+                            <span class="line-through text-red-700 italic mr-2">
+                                ₱<span x-text="deliveryFee.toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+                            </span>
+                        </template>
+                        ₱<span x-text="getCurrentDeliveryFee().toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+                    </span>
+                </template>
+            </span>
+        </div>
+        
+        <!-- Coupon Discounts -->
+        <template x-if="coupons.length > 0">
+            <div class="mt-2 space-y-2">
+                <template x-for="(item, i) in coupons" :key="i">
+                    <div class="flex justify-between">
+                        <div class="font-medium text-red-700 italic flex items-center flex-wrap">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                fill="currentColor" class="size-4 text-green-600 mr-1">
+                                <path fill-rule="evenodd"
+                                    d="M4.5 2A2.5 2.5 0 0 0 2 4.5v2.879a2.5 2.5 0 0 0 .732 1.767l4.5 4.5a2.5 2.5 0 0 0 3.536 0l2.878-2.878a2.5 2.5 0 0 0 0-3.536l-4.5-4.5A2.5 2.5 0 0 0 7.38 2H4.5ZM5 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            Coupon (<span x-text="formatCouponName(item)"></span>)
+                            <span class="text-xs ml-1 underline cursor-pointer"
+                                @click="removeCoupon(i)">Remove</span>
+                        </div>
+
+                        <span class="font-medium italic text-red-700">
+                            <template x-if="item.reward === 'free-shipping-optn'">
+                                <span>- ₱<span x-text="deliveryFee.toLocaleString(undefined, { minimumFractionDigits: 2 })"></span> (Free Shipping)</span>
+                            </template>
+                            <template x-if="item.reward === 'discount-amount-optn'">
+                                <span>- ₱<span x-text="getCouponDiscount(item).toLocaleString(undefined, { minimumFractionDigits: 2 })"></span></span>
+                            </template>
+                            <template x-if="item.reward === 'discount-percentage-optn'">
+                                <span>- ₱<span x-text="getCouponDiscount(item).toLocaleString(undefined, { minimumFractionDigits: 2 })"></span></span>
+                            </template>
+                        </span>
+                    </div>
+                </template>
+            </div>
+        </template>
+    </div>
+
+    <!-- Total -->
+    <div class="border-t border-gray-200 mt-2 py-4 gap-1 flex flex-col text-sm lg:text-base px-3">
+        <div class="flex justify-between">
+            <span class="font-medium text-gray-800">Total</span>
+            <span class="font-bold" x-text="computeTotal()"></span>
+        </div>
+    </div>
+
+    <!-- Coupon Modal -->
+    <div x-show="couponModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="couponModal = false">
+        <div class="bg-white rounded-lg p-6 m-4 max-w-md w-full max-h-[80vh] overflow-y-auto" @click.stop>
+            <h3 class="font-bold text-xl mb-4 text-center">Available Coupons</h3>
+            
+            <!-- Auto-applied section -->
+            <div x-show="autoAppliedCoupons.length > 0" class="mb-4">
+                <h4 class="font-semibold text-green-600 mb-2">Auto-Applied Coupons</h4>
+                <div class="space-y-2">
+                    <template x-for="coupon in autoAppliedCoupons" :key="coupon.id">
+                        <div class="p-3 bg-green-50 border border-green-200 rounded-md">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span class="font-medium" x-text="formatCouponName(coupon)"></span>
+                                    <span class="text-xs text-green-600 ml-2">(Auto-applied)</span>
+                                </div>
+                                <button @click="removeCoupon(coupons.findIndex(c => c.id === coupon.id))" 
+                                        class="text-red-600 hover:text-red-800 text-sm">
+                                    Remove
+                                </button>
+                            </div>
+                            <div class="text-sm text-gray-600 mt-1" x-text="formatCouponDesc(coupon)"></div>
+                            
+                        </div>
+                    </template>
+                </div>
+            </div>
+            <template x-if="availableCoupons.filter(c => !coupons.some(applied => applied.id === c.id)).length === 0">
+                <div class="text-center py-8 text-gray-500">
+                    No other coupons available at the moment.
+                </div>
+            </template>
+            
+            <div class="space-y-3" x-show="availableCoupons.filter(c => !coupons.some(applied => applied.id === c.id)).length > 0">
+                <template x-for="coupon in availableCoupons" :key="coupon.id">
+                    <!-- Skip already applied coupons -->
+                    <template x-if="!coupons.some(c => c.id === coupon.id)">
+                        <div class="coupon-card" @click="applyCoupon(coupon)">
+                            <input type="radio" name="coupon" :checked="false">
+                            <div class="flex flex-col w-full">
+                                <div class="coupon-header">
+                                    <div class="flex items-center gap-2">
+                                        <div class="coupon-title" x-text="formatCouponName(coupon)"></div>
+                                        <template x-if="coupon.activation_type === 'auto'">
+                                            <span class="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                                                Auto-apply
+                                            </span>
+                                        </template>
+                                    </div>
+                                    <div class="coupon-tag" x-text="getDiscountDisplay(coupon)"></div>
+                                </div>
+                                <div class="text-sm font-semibold text-primary mt-1">
+                                <template x-if="coupon.reward === 'free-shipping-optn' || coupon.free_shipping">
+                                    <span>
+                                        Discount: Free Shipping
+                                        <template x-if="Number(deliveryFee || 0) > 0">
+                                            <span>
+                                                (₱<span x-text="Number(deliveryFee || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })"></span>)
+                                            </span>
+                                        </template>
+                                    </span>
+                                </template>
+
+                                <template x-if="coupon.reward === 'discount-amount-optn'">
+                                    <span>
+                                        Discount: ₱<span x-text="Number(coupon.amount ?? coupon.discount ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })"></span>
+                                    </span>
+                                </template>
+
+                                <template x-if="coupon.reward === 'discount-percentage-optn'">
+                                    <span>
+                                        Discount: <span x-text="Number(coupon.percentage ?? coupon.discount ?? 0)"></span>%
+                                        <span>
+                                            (₱<span x-text="(orderAmount * (Number(coupon.percentage ?? coupon.discount ?? 0) / 100)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })"></span>)
+                                        </span>
+                                    </span>
+                                </template>
+
+                                <template x-if="coupon.reward === 'free-product-optn'">
+                                    <span>Discount: Free Product</span>
+                                </template>
+                            </div>
+                                <template x-if="coupon.purchase_amount">
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        Min. order: ₱<span x-text="parseFloat(coupon.purchase_amount || 0).toFixed(2)"></span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+                </template>
+            </div>
+            
+            <button class="mt-4 w-full bg-gray-300 py-2 rounded hover:bg-gray-400" @click="couponModal = false">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
 
                 <div class="w-full  order-2 lg:order-1 rounded-lg border bg-white border-[#DFDFDF] shadow-md">
                     <div>
@@ -361,8 +701,14 @@
                                     <input @change="onChangeMultipleAddress()" x-model="allowMultiple" checked
                                         id="multiple-address" type="checkbox" value=""
                                         class="w-5 h-5 text-primary bg-gray-100 border-gray-300 rounded-sm focus:ring-primary-dark focus:ring-2">
+<<<<<<< Updated upstream
                                     <label for="multiple-address" class="ms-2 text-base font-medium text-gray-900">Allow multiple delivery address</label>
                                 </div> --}}
+=======
+                                    <label for="multiple-address" class="ms-2 text-base font-medium text-gray-900">Allow
+                                        multiple delivery address</label>
+                                </div>
+>>>>>>> Stashed changes
 
                                 <template x-if="allowMultiple">
                                     <div class="space-y-6">
@@ -434,26 +780,13 @@
                                                                         d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
                                                                 </svg>
                                                             </div>
-                                                            {{-- <input :class="{'border-red-500': errors[index]?.need_date}"
+                                                            <input :class="{'border-red-500': errors[index]?.need_date}"
                                                                 onkeydown="return false" :min="minimumDate"
                                                                 @change="validateDeliveryDateTime(delivery)"
                                                                 x-model="delivery.need_date" name="need_date"
                                                                 type="date"
                                                                 class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3"
-                                                                placeholder="Select date"> --}}
-
-                                                                <input
-                                                                    :id="`need_date_${index}`"
-                                                                    x-ref="needDateInputs"
-                                                                    type="text"
-                                                                readonly
-                                                                    x-model="delivery.need_date"
-                                                                    :class="{'border-red-500': errors[index]?.need_date}"
-                                                                    class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-3"
-                                                                    placeholder="Select date"
-                                                                >
-
-
+                                                                placeholder="Select date">
 
                                                             <template x-if="errors[index]?.need_date">
                                                                 <div class="text-red-500 text-xs mt-1"
@@ -504,13 +837,6 @@
                                                         </div>
                                                     </div>
                                                 </div>
-
-                                                <template x-if="delivery.cochinillo_warning">
-                                                    <div
-                                                        class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
-                                                        Our Cochinillo is not available on December 24. Please select another size.
-                                                    </div>
-                                                </template>
 
                                                 <div
                                                     class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
@@ -608,27 +934,6 @@
                                                             least one order for this delivery address.
                                                         </p>
                                                     </div>
-
-
-                                                    {{-- <div class="w-full flex gap-4">
-                                                        <div class="w-full">
-                                                            <label :for="'locations' + index"
-                                                                class="font-bold text-gray-900">Barangay</label>
-                                                            <textarea :disabled="!delivery.city || !delivery.province"
-                                                                x-model="delivery.location" :id="'locations' + index"
-                                                                name="location"
-                                                                @change="validateDeliveryAddress(delivery, 'location', index); applyMultipleCityProvince(index)"
-                                                                required
-                                                                class="disabled:bg-gray-100 bg-gray-50 mt-2 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ">
-                                                        </textarea>
-
-                                                            <p x-show="(!delivery.orders || delivery.orders.length === 0) && delivery.location"
-                                                                class="mt-1 text-red-600">
-                                                                Order is required to get delivery fee. Please select at
-                                                                least one order for this delivery address.
-                                                            </p>
-                                                        </div>
-                                                    </div> --}}
 
                                                     <div class="w-full flex gap-4">
                                                         <div class="w-full lg:w-1/2">
@@ -845,7 +1150,8 @@
                                 <template x-if="!allowMultiple">
                                     <div class="w-full flex gap-4">
                                         <div class="my-2 w-full lg:w-1/2">
-                                            <label for="date" class="block mb-2 text-sm font-bold text-gray-900">Select Date <span class="text-red-700">*</span></label>
+                                            <label for="date" class="block mb-2 text-sm font-bold text-gray-900">Select
+                                                Date <span class="text-red-700">*</span></label>
                                             <div class="relative">
                                                 <div
                                                     class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
@@ -856,8 +1162,8 @@
                                                             d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
                                                     </svg>
                                                 </div>
-                                                <input onkeydown="return false" :min="minDate" id="need_date"
-                                                     x-model="need_date" type="text"
+                                                <input onkeydown="return false" :min="minDate"
+                                                    @change="validateDateTime" x-model="need_date" type="date"
                                                     name="need_date"
                                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 "
                                                     placeholder="Select date">
@@ -891,10 +1197,6 @@
                                         </div>
                                     </div>
                                 </template>
-                                <div x-show="withConchinilloOnDec24Selected"
-                                    class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
-                                    Our Cochinillo is not available on December 24. Please select another size.
-                                </div>
                                 <template x-if="!allowMultiple">
                                     <div
                                         class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
@@ -924,7 +1226,7 @@
                                     <label  class="flex items-center space-x-2">
                                         <input x-model="privacy" name="privacy" type="checkbox">
                                     </label>
-                                    <span class="cursor-pointer" @click="onCheckboxChange">I agree Lydia’s Lechon’s Privacy Protection Policy</span>
+                                    <span class="cursor-pointer" @click="onCheckboxChange">I agree Lydia's Lechon's Privacy Protection Policy</span>
                                 </div>
                                 <template x-if="errors.privacy">
                                     <p class="text-red-500 text-xs mt-1" x-text="errors.privacy[0]"></p>
@@ -961,6 +1263,7 @@
 
         </form>
 
+        <!-- Additional modals (kept from original) -->
         <div x-cloak x-show="couponModal" class="fixed inset-0 z-50">
             <!-- backdrop -->
             <div class="fixed inset-0 bg-black/50" @click="close()"></div>
@@ -1001,7 +1304,7 @@
 
                             <!-- List -->
                             <div class="grid grid-cols-1 gap-4">
-                                @foreach ($eligibleCoupons as $c)
+                                @foreach ($allCoupons as $c)
                                 @php
                                 $expires = \Carbon\Carbon::parse(($c->end_date ?? '') . ' ' . ($c->end_time ??
                                 '00:00'))->format('d M Y');
@@ -1231,12 +1534,9 @@
 
 <x-footer-component />
 
-<script src="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/js/datepicker.min.js"></script>
-
 <script>
     window.disabledPickupDates = @json($disabledPickupDates);
     window.disabledDeliveryDates = @json($disabledDeliveryDates);
-    window.disabledDeliveryMiscDates = @json($disabledDeliveryMiscDates);
     window.fullUrl = @json(config('app.url'));
     window.hasBaka = @json($hasbaka);
     window.hasMisc = @json($hasMisc);
@@ -1247,58 +1547,567 @@
     window.minimum_processing_hours = @json($minimum_processing_hours);
     window.minimum_processing_hours_misc = @json($minimum_processing_hours_misc);
     window.minimum_order_misc = @json($minimum_order_misc);
+<<<<<<< Updated upstream
     window.hasCochinillo = @json($hasCochinillo);
     window.minimum_processing_hours_baka = @json($minimum_processing_hours_baka);
+=======
+>>>>>>> Stashed changes
 </script>
 
 <script>
+    function couponSection(initialCarts = [], initialOrderAmount = 0) {
+        return {
+            // CART DATA
+        carts: initialCarts || [],
+        orderAmount: Number(initialOrderAmount || 0),
+
+        // TOTAL TRACKERS
+        totalDiscountAmount: 0,
+        shippingDiscountAmount: 0,
+        totalAmount: 0,
+        deposit: 0,
+
+        // COUPON UI
+        couponCode: '',
+        couponModal: false,
+
+        deliveryFees: [],
+        shippingDiscountLists: [],
+        allowMultiple: false,
+        method: 'delivery',
+
+        deliveryFee: 100,
+        originalDeliveryFee: 100,
+
+        coupons: [],
+        autoAppliedCoupons: [],
+
+  availableCoupons: @json($allCoupons),
+    autoCoupons: @json($eligibleAutoCoupons),
+        syncCouponsToParent() {
+        this.$dispatch('coupons-updated', { coupons: this.coupons });
+    },
+    syncFromParent() {
+    const parentEl = this.$root.closest('.container');
+    if (!parentEl || !parentEl._x_dataStack || !parentEl._x_dataStack[0]) return;
+
+    const parent = parentEl._x_dataStack[0];
+
+    this.coupons = parent.coupons || [];
+    this.deliveryFee = parent.deliveryFee || 0;
+    this.deliveryFees = parent.deliveryFees || [];
+    this.method = parent.method || 'pickup';
+    this.allowMultiple = parent.allowMultiple || false;
+},
+
+        getCouponDiscount(coupon) {
+    const subtotal = this.carts.reduce((sum, item) => {
+        const qty = Number(item?.qty || 1);
+        const paellaAddon =
+            (Number(item?.paella_price) > 0)
+                ? (Number(item?.product?.paella_price || 0) * qty)
+                : 0;
+
+        const itemTotal = item?.is_free_product
+            ? 0
+            : (Number(item?.price || 0) * qty);
+
+        return sum + paellaAddon + itemTotal;
+    }, 0);
+
+    if (!coupon) return 0;
+
+    // free shipping
+    if (coupon.free_shipping || coupon.reward === 'free-shipping-optn') {
+        return Number(this.deliveryFee || 0);
+    }
+
+    // fixed amount discount
+    if (coupon.reward === 'discount-amount-optn') {
+        return Math.min(
+            Number(
+                coupon.discount ??
+                coupon.amount ??
+                coupon.discount_amount ??
+                coupon.discount_value ??
+                0
+            ),
+            subtotal
+        );
+    }
+
+    // percentage discount
+    if (coupon.reward === 'discount-percentage-optn') {
+        const percent = Number(
+            coupon.discount ??
+            coupon.percentage ??
+            coupon.discount_percent ??
+            coupon.discount_percentage ??
+            0
+        );
+
+        return subtotal * (percent / 100);
+    }
+
+    return 0;
+},
+            
+            // Initialize function
+            init() {
+            this.updateOrderAmount();
+
+            this.syncFromParent();
+            this.autoApplyCoupons();
+            this.syncCouponsToParent();
+
+            this.$watch('coupons', () => {
+                this.syncCouponsToParent();
+            });
+
+            setInterval(() => {
+                this.syncFromParent();
+                this.recomputeCouponTotals();
+            }, 500);
+        },
+            
+            // Calculate order amount from carts
+            updateOrderAmount() {
+                this.orderAmount = this.carts.reduce((sum, item) => {
+                    return sum + 
+                        ((Number((item?.paella_price > 0 ? item?.product?.paella_price : 0)) || 0) * (Number(item.qty) || 1)) + 
+                        (item.is_free_product ? 0 : (Number(item.price) || 0) * (Number(item.qty) || 1));
+                }, 0);
+            },
+            
+            // Auto apply coupons based on conditions
+            autoApplyCoupons() {
+            this.autoCoupons.forEach(coupon => {
+                if (this.shouldAutoApplyCoupon(coupon)) {
+                    this.applyCoupon(coupon, true);
+                }
+            });
+        },
+            
+            // Check if coupon should be auto-applied
+            shouldAutoApplyCoupon(coupon) {
+                // Skip if already applied
+                if (this.coupons.some(c => c.id === coupon.id)) {
+                    return false;
+                }
+                
+                // Check minimum order amount
+                if (coupon.purchase_amount && this.orderAmount < parseFloat(coupon.purchase_amount)) {
+                    return false;
+                }
+                
+                // Check cart quantity conditions
+                if (coupon.purchase_qty && coupon.purchase_qty > 0) {
+                    const cartQty = this.carts.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
+                    
+                    if (coupon.purchase_qty_type === 'min' && cartQty < coupon.purchase_qty) {
+                        return false;
+                    }
+                    if (coupon.purchase_qty_type === 'max' && cartQty > coupon.purchase_qty) {
+                        return false;
+                    }
+                }
+                
+                // Check product requirements
+                if (coupon.purchase_product_id) {
+                    const requiredIds = coupon.purchase_product_id.split('|').filter(id => id.trim());
+                    const cartProductIds = this.carts.map(item => String(item.product_id));
+                    
+                    const hasRequiredProduct = requiredIds.some(requiredId => 
+                        cartProductIds.includes(requiredId.trim())
+                    );
+                    
+                    if (!hasRequiredProduct) {
+                        return false;
+                    }
+                }
+                
+                // Check excluded category (category_id = 1)
+                const hasExcludedCategory = this.carts.some(item => 
+                    item.product?.category_id == 1
+                );
+                
+                if (hasExcludedCategory) {
+                    return false;
+                }
+                
+                return true;
+            },
+            
+            // Apply a coupon
+            applyCoupon(coupon, isAuto = false) {
+            // normalize coupon shape first
+            const normalizedCoupon = {
+                ...coupon,
+                code: coupon.code ?? coupon.coupon_code ?? '',
+                name: coupon.name ?? coupon.coupon_name ?? coupon.coupon_code ?? 'Coupon',
+                reward: coupon.reward ?? '',
+                free_shipping: coupon.free_shipping ?? (coupon.reward === 'free-shipping-optn'),
+                discount: Number(
+                    coupon.discount ??
+                    coupon.amount ??
+                    coupon.discount_amount ??
+                    coupon.discount_value ??
+                    coupon.percentage ??
+                    coupon.discount_percent ??
+                    coupon.discount_percentage ??
+                    0
+                ),
+            };
+
+            // prevent duplicates
+            if (this.coupons.some(c => c.id === normalizedCoupon.id || c.code === normalizedCoupon.code)) {
+                if (!isAuto) {
+                    alert('This coupon is already applied.');
+                }
+                return;
+            }
+
+            // minimum order check
+            if (normalizedCoupon.purchase_amount && this.orderAmount < parseFloat(normalizedCoupon.purchase_amount)) {
+                if (!isAuto) {
+                    alert(`Coupon requires minimum order of ₱${normalizedCoupon.purchase_amount}`);
+                }
+                return;
+            }
+
+            // combination rules
+            if (normalizedCoupon.combination_allowed === false && this.coupons.length > 0) {
+                if (!isAuto) {
+                    alert('This coupon cannot be combined with other coupons.');
+                }
+                return;
+            }
+
+            if (normalizedCoupon.combination_allowed === true) {
+                const nonCombinableCoupon = this.coupons.find(c => c.combination_allowed === false);
+                if (nonCombinableCoupon) {
+                    if (!isAuto) {
+                        alert('A non-combinable coupon has already been applied.');
+                    }
+                    return;
+                }
+            }
+
+            if (isAuto) {
+                normalizedCoupon.auto_applied = true;
+                this.autoAppliedCoupons.push(normalizedCoupon);
+            }
+
+            this.coupons.push(normalizedCoupon);
+
+            if (normalizedCoupon.free_products && normalizedCoupon.free_products.length > 0) {
+                this.addFreeProducts(normalizedCoupon.free_products, normalizedCoupon.code);
+            }
+
+            if (this.couponModal && !isAuto) {
+                this.couponModal = false;
+            }
+
+            this.recomputeCouponTotals();
+            this.syncCouponsToParent();
+
+            if (!isAuto) {
+                alert('Coupon applied successfully!');
+            }
+        },
+            
+            // Add free products to cart
+            addFreeProducts(freeProducts, couponCode) {
+                freeProducts.forEach(fp => {
+                    if (!this.carts.find(item => item.is_free_product && item.product_id === fp.id)) {
+                        this.carts.push({
+                            product_id: fp.id,
+                            product: {
+                                name: fp.name,
+                                photos: fp.photos || [],
+                                paella_price: 0,
+                                category_id: fp.category_id || null
+                            },
+                            qty: 1,
+                            price: 0,
+                            paella_price: 0,
+                            is_free_product: true,
+                            coupon_code: couponCode,
+                        });
+                    }
+                });
+                
+                this.updateOrderAmount();
+            },
+            
+            // Apply coupon from code input
+            async submitCouponCode() {
+                if (!this.couponCode.trim()) {
+                    alert('Please enter a coupon code');
+                    return;
+                }
+                
+                // Check local available coupons first
+                const localCoupon = this.availableCoupons.find(c => 
+                String(c.coupon_code || c.code || '').toLowerCase() === this.couponCode.toLowerCase()
+            );
+                
+                if (localCoupon) {
+                    this.applyCoupon(localCoupon);
+                    this.couponCode = '';
+                    return;
+                }
+                
+                // If not found locally, check with server
+                try {
+                    const response = await fetch('{{ route("coupon.validate") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        },
+                        body: JSON.stringify({
+                            coupon_code: this.couponCode,
+                            order_amount: this.orderAmount,
+                            cart_items: this.carts
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.applyCoupon(data.coupon);
+                        this.couponCode = '';
+                        
+                        // Add to available coupons if not already there
+                        if (!this.availableCoupons.some(c => c.id === data.coupon.id)) {
+                            this.availableCoupons.push(data.coupon);
+                        }
+                    } else {
+                        alert(data.message || 'Invalid coupon code');
+                    }
+                } catch (error) {
+                    console.error('Error validating coupon:', error);
+                    alert('Error validating coupon. Please try again.');
+                }
+            },
+            
+            // Remove a coupon
+            removeCoupon(index) {
+                const removedCoupon = this.coupons[index];
+                
+                // Don't allow removal of auto-applied coupons (optional)
+                if (removedCoupon.auto_applied) {
+                    if (!confirm('This coupon was automatically applied. Remove it?')) {
+                        return;
+                    }
+                }
+                
+                this.coupons.splice(index, 1);
+                
+                
+                // Remove from autoAppliedCoupons if it was auto-applied
+                this.autoAppliedCoupons = this.autoAppliedCoupons.filter(c => c.id !== removedCoupon.id);
+                
+                // Remove free products associated with this coupon
+                if (removedCoupon.free_products) {
+                    this.carts = this.carts.filter(item => 
+                        !(item.is_free_product && item.coupon_code === removedCoupon.coupon_code)
+                    );
+                }
+                
+                this.updateOrderAmount();
+                this.recomputeCouponTotals();
+                this.syncCouponsToParent();
+            },
+            
+            // Recompute totals with all discounts
+            recomputeCouponTotals() {
+                const subtotal = this.carts.reduce((sum, item) => {
+                    const qty = Number(item?.qty || 1);
+
+                    const paellaAddon =
+                        (Number(item?.paella_price) > 0)
+                            ? (Number(item?.product?.paella_price || 0) * qty)
+                            : 0;
+
+                    const itemTotal =
+                        item?.is_free_product
+                            ? 0
+                            : (Number(item?.price || 0) * qty);
+
+                    return sum + paellaAddon + itemTotal;
+                }, 0);
+
+                this.totalDiscountAmount = 0;
+                this.shippingDiscountAmount = 0;
+
+                const baseDeliveryFee = Number(this.deliveryFee || 0);
+
+                this.coupons.forEach(coupon => {
+                    if (coupon.free_shipping || coupon.reward === 'free-shipping-optn') {
+                        this.shippingDiscountAmount = baseDeliveryFee;
+                        return;
+                    }
+
+                    if (coupon.reward === 'discount-amount-optn') {
+                        this.totalDiscountAmount += Number(
+                            coupon.discount ??
+                            coupon.amount ??
+                            coupon.discount_amount ??
+                            coupon.discount_value ??
+                            0
+                        );
+                        return;
+                    }
+
+                    if (coupon.reward === 'discount-percentage-optn') {
+                        const percent = Number(
+                            coupon.discount ??
+                            coupon.percentage ??
+                            coupon.discount_percent ??
+                            coupon.discount_percentage ??
+                            0
+                        );
+
+                        this.totalDiscountAmount += subtotal * (percent / 100);
+                        return;
+                    }
+                });
+
+                this.totalDiscountAmount = Math.min(this.totalDiscountAmount, subtotal);
+
+                this.computeTotal();
+            },
+
+            
+            // Calculate discount for a specific coupon
+            
+            
+            // Get current delivery fee after discounts
+            getCurrentDeliveryFee() {
+                let deliveryFee = this.deliveryFee;
+                
+                // Apply free shipping coupons
+                this.coupons.forEach(coupon => {
+                    if (coupon.free_shipping) {
+                        deliveryFee = 0;
+                    }
+                });
+                
+                return deliveryFee;
+            },
+            
+            // Format coupon description for display
+            formatCouponDesc(coupon) {
+            if (coupon.description) return coupon.description;
+
+            if (coupon.free_shipping || coupon.reward === 'free-shipping-optn') {
+                return 'Free shipping on your order';
+            }
+
+            if (coupon.discount_type === 'percent') {
+                return `${coupon.discount}% off your order`;
+            }
+
+            if (coupon.discount_type === 'amount') {
+                return `₱${Number(coupon.discount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} off your order`;
+            }
+
+            if (coupon.reward === 'free-product-optn') {
+                return 'Free product with your order';
+            }
+
+            return coupon.description || 'Special offer';
+        },
+            
+            // Format coupon display name
+            formatCouponName(coupon) {
+                return coupon.name || coupon.coupon_name || coupon.coupon_code;
+            },
+            
+            // Format coupon validity
+            formatCouponValidity(coupon) {
+                if (!coupon.end_date) return 'No expiration';
+                
+                const endDate = new Date(coupon.end_date + (coupon.end_time ? ' ' + coupon.end_time : ''));
+                return endDate.toLocaleDateString('en-PH', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            },
+            
+            // Get discount display value
+            getDiscountDisplay(coupon) {
+            if (coupon.free_shipping || coupon.reward === 'free-shipping-optn') {
+                return 'FREE SHIPPING';
+            }
+
+            if (coupon.discount_type === 'percent') {
+                return `${coupon.discount}% OFF`;
+            }
+
+            if (coupon.discount_type === 'amount') {
+                return `₱${Number(coupon.discount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} OFF`;
+            }
+
+            if (coupon.reward === 'free-product-optn') {
+                return 'FREE PRODUCT';
+            }
+
+            return 'DISCOUNT';
+        },
+            
+            // Compute total for display
+            computeTotal() {
+            const orderAmount = parseFloat(this.orderAmount) || 0;
+            const couponDiscount = parseFloat(this.totalDiscountAmount) || 0;
+            const shippingDiscount = parseFloat(this.shippingDiscountAmount) || 0;
+
+            let deliveryFeeFinal = parseFloat(this.deliveryFee) || 0;
+            if (this.method === 'pickup') deliveryFeeFinal = 0;
+
+            // apply shipping discount to delivery fee only
+            deliveryFeeFinal = Math.max(0, deliveryFeeFinal - shippingDiscount);
+
+            let total = orderAmount + deliveryFeeFinal - couponDiscount;
+            total = total <= 0 ? 0 : total;
+
+            this.totalAmount = total;
+            this.deposit = total.toFixed(2);
+
+            return new Intl.NumberFormat('en-PH', {
+                style: 'currency',
+                currency: 'PHP'
+            }).format(total);
+        },
+        }
+    }
+
     function checkoutForm() {
         return {
             today: new Date(),
             hasbaka: window.hasBaka || false,
-            hasCochinillo: window.hasCochinillo || false,
             haslechon: window.hasLechon || false,
             hasMisc: window.hasMisc || false,
             minimum_order_amount_door_to_door: window.minimum_order_amount_door_to_door || 0,
             minimum_order_amount_pickup: window.minimum_order_amount_pickup || 0,
             minimum_processing_hours: window.minimum_processing_hours || 0,
             minimum_processing_hours_misc: window.minimum_processing_hours_misc || 0,
-            minimum_processing_hours_baka: window.minimum_processing_hours_baka || 0,
-            minimum_processing_hours_lechon: window.minimum_processing_hours || 0,
             minimum_order_misc: window.minimum_order_misc || 0,
             minDate() {
-                const d = new Date(this.today);
-
-                // convert hours to day
-                const bakaDay = this.minimum_processing_hours_baka / 24;
-                const lechonDay = this.minimum_processing_hours_lechon / 24;
-
-                if (this.hasbaka) {
-                    d.setDate(d.getDate() + (bakaDay || 3));
-                } else if (this.haslechon) {
-                    d.setDate(d.getDate() + (lechonDay || 1));
-                } else if (this.hasMisc) {
-                    const hours = this.minimum_processing_hours_misc || 24;
-
-                    // add processing hours
-                    d.setTime(d.getTime() + (hours * 60 * 60 * 1000));
-
-                    // set hours enforcement
-                    const hour = d.getHours();
-                    const minute = d.getMinutes();
-
-                    // After 8:00 PM go to next day 9:00 AM
-                    if (hour >= 20) {
-                        d.setDate(d.getDate() + 1);
-                        d.setHours(9, 0, 0, 0);
-                    }
-                    // Before 9:00 AM will be same day 9:00 AM
-                    else if (hour < 9) {
-                        d.setHours(9, 0, 0, 0);
-                    }
+                if (this.hasbaka == true) {
+                    const day = new Date(this.today);
+                    day.setDate(day.getDate() + 3);
+                    return day.toISOString().split('T')[0];
+                } else if (this.haslechon == true) {
+                    const tomorrow = new Date(this.today);
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    return tomorrow.toISOString().split('T')[0];
+                } else {
+                    return this.today.toISOString().split('T')[0];
                 }
-
-                return d;
             },
             paymentDetails: {
                 sales_header_id: '',
@@ -1312,7 +2121,6 @@
             couponModal: false,
             disabledDeliveryDates: window.disabledDeliveryDates,
             disabledPickupDates: window.disabledPickupDates,
-            disabledDeliveryMiscDates: window.disabledDeliveryMiscDates,
             paymentMode: '',
             currentDate: new Date()?.toISOString()?.split('T')[0],
             method: 'pickup',
@@ -1337,12 +2145,11 @@
                     city: '',
                     province: '',
                     order: '', 
-                    need_date: this.minDate,
+                    need_date: '',
                     need_time: '',
                     note: '', 
                     delivery_fee: 0,
                     paella: false,
-                    cochinillo_warning: false,
                 }
             ],
             allowMultiple: false,
@@ -1365,7 +2172,6 @@
                     note: '',
                     paella: false,
                     delivery_fee: 0,
-                    cochinillo_warning: false,
                 }];
                 this.deliveryFees = [];
                 this.deliveryFee = 0;
@@ -1381,7 +2187,7 @@
             showMessage: false,
             need_date: '',
             need_time: '',
-            allHours: Array.from({ length: 12 }, (_, i) => i + 9),
+            allHours: Array.from({ length: 14 }, (_, i) => i + 7),
             warningMessage: '',
             errorMessage: '',
             hasErrorMessage: false,
@@ -1475,6 +2281,7 @@
 
                 // Recompute totals
                 this.recomputeCouponTotals();
+            
 
                 this.couponMessage = 'Voucher code successfully applied.';
                 this.couponMessageType = 'success';
@@ -1647,7 +2454,7 @@
 
                     this.carts = this.carts.filter(item => !item.is_free_product);
                 }
-
+                
                 this.recomputeCouponTotals();
             },
 
@@ -1663,8 +2470,6 @@
                 this.couponMessage = '';
                 this.deliveryFees = [];
                 this.removeCoupon();
-
-                this.initPicker();
 
                 // this.loadAutoCoupons();
 
@@ -1693,6 +2498,9 @@
             isMiscOnly: false,
 
             submitForm() {
+                
+                console.log('submitForm coupons:', this.coupons);
+                 console.log('submitForm coupons JSON:', JSON.stringify(this.coupons));
                 this.formEl = document.getElementById('checkoutForm');
 
                 const formData = new FormData(this.formEl);
@@ -1754,14 +2562,6 @@
                     this.isSubmitting = false;
                     return;
                 }
-
-                const selectedDate = new Date(this.need_date);
-
-                if (this.hasCochinillo && selectedDate.getDate() === 24 && selectedDate.getMonth() === 11) {
-                    this.withConchinilloOnDec24Selected = true;
-                    this.isSubmitting = false;
-                    return;
-                }
                 
                 if (this.hasErrorMessage) {
                     this.isSubmitting = false;
@@ -1779,7 +2579,7 @@
 
                 if (this.method === 'delivery' && this.allowMultiple) {
                     if (!this.validateAllDeliveryFields()) {
-                        this.qtyValidationMessage = 'Please check all errors in the delivery entries.';
+                        this.qtyValidationMessage = 'Please fill all quantity fields.';
                         this.isSubmitting = false;
                         return;
                     }
@@ -1790,8 +2590,13 @@
                     }
                 }
 
-                const couponsWithDiscountUsed = this.coupons.map(c => {
+                
+                const couponsWithDiscountUsed = (this.coupons || []).map(c => {
                     let discountUsed = 0;
+
+                    // NOTE:
+                    // - We must always send "code" (backend expects coupon['code'])
+                    // - Do NOT append the "coupons" FormData key twice (Laravel may read it as an array / wrong value)
 
                     if (c.free_shipping) {
                         const allowedLocations = (c.location || '')
@@ -1800,7 +2605,7 @@
                             .filter(l => l !== '');
 
                         // Loop through each delivery fee entry and apply if location matches
-                        this.deliveryFees.forEach(row => {
+                        (this.deliveryFees || []).forEach(row => {
                             const isAllowed =
                                 allowedLocations.includes(row.location) ||
                                 allowedLocations.includes('all');
@@ -1815,32 +2620,53 @@
                             }
                         });
                     } else {
-                        if (c.discount_type === 'amount') {
-                            discountUsed = parseFloat(c.discount ?? 0);
-                        } else if (c.discount_type === 'percent') {
-                            discountUsed = (parseFloat(this.orderAmount) * parseFloat(c.discount ?? 0)) / 100;
-                        }
+                    if (c.reward === 'discount-amount-optn' || c.discount_type === 'amount') {
+                        discountUsed = parseFloat(
+                            c.discount ??
+                            c.amount ??
+                            c.discount_amount ??
+                            0
+                        );
+                    } else if (c.reward === 'discount-percentage-optn' || c.discount_type === 'percent') {
+                        const percent = parseFloat(
+                            c.discount ??
+                            c.percentage ??
+                            c.discount_percent ??
+                            c.discount_percentage ??
+                            0
+                        );
+
+                        discountUsed = (parseFloat(this.orderAmount || 0) * percent) / 100;
                     }
+                }
 
                     return {
-                        ...c,
+                        // keep identifiers if needed
+                        id: c.id ?? null,
+                        coupon_id: c.id ?? null,
+
+                        // IMPORTANT: backend expects "code"
+                        code: String((c.code || c.coupon_code || '')).toUpperCase(),
+
+                        reward: c.reward ?? null,
+                        free_shipping: !!c.free_shipping,
+
+                        // amount used (can be 0 — backend should still save coupon usage)
                         discount_used: parseFloat(discountUsed.toFixed(2)),
                     };
                 });
 
-
                 // Add dynamic fields
                 formData.append('shipping_type', this.method);
-                formData.append('coupons', JSON.stringify(this.coupons.map(c => c.code)));
-                formData.append('coupons', JSON.stringify(couponsWithDiscountUsed));
 
-                // Get total discount_used
+                // compute total discount
                 const discounted_amount = couponsWithDiscountUsed.reduce((sum, c) => {
                     return sum + parseFloat(c.discount_used || 0);
                 }, 0);
 
                 console.log('Total discount used:', discounted_amount);
 
+<<<<<<< Updated upstream
 
                 formData.append('discount_amount', couponsWithDiscountUsed.reduce((sum, c) => sum + (c.discount_used || 0), 0));
                 formData.append('coupon_data', JSON.stringify(this.coupons));
@@ -1848,6 +2674,16 @@
                 formData.append('delivery_fee', this.deliveryFee);
                 formData.append('deposit', this.deposit);
                 formData.append('total_amount', this.totalAmount);
+=======
+                // send coupon data
+                formData.set('coupons', JSON.stringify(couponsWithDiscountUsed));
+                formData.set('discount_amount', discounted_amount);
+                formData.set('coupon_data', JSON.stringify(this.coupons || []));
+                formData.set('order_amount', this.orderAmount);
+                formData.set('delivery_fee', this.deliveryFee);
+                formData.set('deposit', this.deposit);
+                formData.set('total_amount', this.totalAmount);
+>>>>>>> Stashed changes
 
                 if (this.allowMultiple) {
                     formData.append('deliveries', JSON.stringify(this.deliveries));
@@ -1932,7 +2768,6 @@
                     return (
                         delivery.need_time &&
                         delivery.need_date &&
-                        delivery.cochinillo_warning === false &&
                         delivery.city &&
                         delivery.province &&
                         hasValidProducts
@@ -2012,7 +2847,7 @@
 
                         // Passed logic check → push to coupons
                         this.coupons.push(autoCoupon);
-
+                        this.recomputeCouponTotals();
                         // Handle free products if any
                         if (autoCoupon.free_products?.length > 0) {
                             autoCoupon.free_products.forEach(fp => {
@@ -2020,11 +2855,13 @@
                                     this.haslechon = true;
 
                                     this.need_date = this.minDate();
+                                    this.deliveries[0].need_date = this.minDate();
                                 }
                                 if (fp.slug == 'lechon-baka') {
                                     this.hasbaka = true;
 
                                     this.need_date = this.minDate();
+                                    this.deliveries[0].need_date = this.minDate();
                                 }
 
 
@@ -2174,13 +3011,12 @@
 
             async init() {
                 this.checkMultipleDeliveries();
-
-                this.isMiscOnly = this.carts.length > 0 && this.carts.every(cart => cart.product?.is_misc == 1);
                 
                 const cookie = document.cookie.split('; ').find(row => row.startsWith('shipping_method='));
                 this.method = cookie ? cookie.split('=')[1] : 'pickup';
 
                 this.need_date = this.minDate();
+                this.deliveries[0].need_date = this.minDate();
 
                 // this.loadAutoCoupons();
 
@@ -2263,10 +3099,10 @@
                     // 1) remove the OLD location from the field (if present)
                     if (old) this.delivery_address = this._removePlace(this.delivery_address, old);
 
-                    // 2) recompute core from what’s visible now (no current tokens)
+                    // 2) recompute core from what's visible now (no current tokens)
                     this._addressCore = this._stripCurrentPlaces(this.delivery_address);
 
-                    // 3) append the NEW location (and city/province) only if there’s user-typed core
+                    // 3) append the NEW location (and city/province) only if there's user-typed core
                     if (hasCore()) this._rebuildAddress();
                 });
 
@@ -2293,15 +3129,6 @@
                     this.showModal = true;
                 }
 
-                this.initPicker();
-
-                this.$nextTick(() => this.initAllDatePickers());
-
-                if (!this.allowMultiple) {
-                    this.$nextTick(() => {
-                        this.validateDateTime();
-                    });
-                }
             },
 
             _rebuildAllowedCitySetForProvince(provinceLabel) {
@@ -2879,16 +3706,14 @@
                 if (type === 'lechon') {
                     this.$nextTick(() => {
                         let d = new Date();
-                        const lechonDay = this.minimum_processing_hours_lechon ? Math.ceil(this.minimum_processing_hours_lechon / 24) : 2;
-                        d.setDate(d.getDate() + lechonDay);
+                        d.setDate(d.getDate() + 1);
                         delivery.need_date = d.toISOString().split('T')[0];
                         this.minimumDate(d)
                     });
                 } else if (type === 'baka') {
                     this.$nextTick(() => {
                         let d = new Date();
-                        const bakaDay = this.minimum_processing_hours_baka ? Math.ceil(this.minimum_processing_hours_baka / 24) : 3;
-                        d.setDate(d.getDate() + bakaDay);
+                        d.setDate(d.getDate() + 3);
                         delivery.need_date = d.toISOString().split('T')[0];
                         this.minimumDate(d)
                     });
@@ -3028,11 +3853,9 @@
                 const productTypes = delivery.orders.map(o => this.getProductType(o));
                 let offsetHours = 0;
 
-                console.log(this.minimum_processing_hours_lechon)
-
-                if (productTypes.includes('baka')) offsetHours = Math.max(offsetHours, this.minimum_processing_hours_baka || 72);
-                if (productTypes.includes('lechon')) offsetHours = Math.max(offsetHours, this.minimum_processing_hours_lechon || 24);
-                if (productTypes.includes('misc')) offsetHours = Math.max(offsetHours, this.minimum_processing_hours_misc || 12);
+                if (productTypes.includes('baka')) offsetHours = Math.max(offsetHours, 72);
+                if (productTypes.includes('lechon')) offsetHours = Math.max(offsetHours, 24);
+                if (productTypes.includes('misc')) offsetHours = Math.max(offsetHours, 6);
 
                 const minAllowedTime = new Date(now.getTime() + offsetHours * 60 * 60 * 1000);
 
@@ -3080,9 +3903,9 @@
 
                 // Get the maximum offset required
                 let offsetHours = 0;
-                if (productTypes.includes('baka')) offsetHours = Math.max(offsetHours, this.minimum_processing_hours_baka || 72);
-                if (productTypes.includes('lechon')) offsetHours = Math.max(offsetHours, this.minimum_processing_hours_lechon || 24);
-                if (productTypes.includes('misc')) offsetHours = Math.max(offsetHours, this.minimum_processing_hours_misc || 12);
+                if (productTypes.includes('baka')) offsetHours = Math.max(offsetHours, 72);
+                if (productTypes.includes('lechon')) offsetHours = Math.max(offsetHours, 24);
+                if (productTypes.includes('misc')) offsetHours = Math.max(offsetHours, 6);
 
                 let minAllowedDateTime = new Date(now.getTime() + offsetHours * 60 * 60 * 1000);
 
@@ -3093,8 +3916,8 @@
                     delivery.need_date = minAllowedDateTime.toISOString().split('T')[0];
                 }
 
-                // Filter hours from 9 AM to 8 PM only
-                const availableHours = this.getAvailableHours(delivery).filter(h => h >= 9 && h <= 20);
+                // Filter hours from 7 AM to 8 PM only
+                const availableHours = this.getAvailableHours(delivery).filter(h => h >= 7 && h <= 20);
 
                 const selectedDateTime = delivery.need_time
                     ? new Date(`${delivery.need_date}T${delivery.need_time}`)
@@ -3118,7 +3941,7 @@
                         nextDay.setDate(nextDay.getDate() + 1);
                         delivery.need_date = nextDay.toISOString().split('T')[0];
 
-                        const hoursNextDay = this.getAvailableHours(delivery).filter(h => h >= 9 && h <= 20);
+                        const hoursNextDay = this.getAvailableHours(delivery).filter(h => h >= 7 && h <= 20);
                         const firstHour = hoursNextDay[0];
 
                         delivery.need_time = firstHour !== undefined
@@ -3136,19 +3959,12 @@
                 if (
                     productTypes.includes('lechon') &&
                     finalSelectedDateTime &&
-                    (finalSelectedDateTime - now) / 3600000 < (this.minimum_processing_hours_lechon || 24)
+                    (finalSelectedDateTime - now) / 3600000 < 24
                 ) {
-                    delivery.warningMessage = `Warning! The date and time you've selected (${delivery.need_date} - ${this.formatTime(delivery.need_time)}) is less than ${this.minimum_processing_hours_lechon || 24} hours from now. You can still proceed by contacting our <span class='underline text-blue-600 cursor-pointer' @click='openHotline = true'>Hotline</span>.`;
+                    delivery.warningMessage = `⚠️ Warning! The date and time you've selected (${delivery.need_date} - ${this.formatTime(delivery.need_time)}) is less than 24 hours from now. You can still proceed by contacting our <span class='underline text-blue-600 cursor-pointer' @click='openHotline = true'>Hotline</span>.`;
                 }
 
-                const hasCochinillo = delivery.orders.some(o => o.product_id === 165);
-                if (hasCochinillo && selectedDate.getDate() === 24 && selectedDate.getMonth() === 11) {
-                    delivery.cochinillo_warning = true;
-                    this.clearToProceed = false;
-                } else {
-                    delivery.cochinillo_warning = false;
-                    this.clearToProceed = true;
-                }
+                this.clearToProceed = true;
             },
 
             // Get previously selected qty in *this delivery* to allow it again in dropdown
@@ -3195,7 +4011,6 @@
                         product_id: order.product_id,
                         qty: parseInt(newQty) || 0,
                         product: order.product,
-                        cochinillo_warning: false,
                         product_name: isPaella ? order.product.name + ' Boneless with Paella' : order.product.name,
                     });
                 }
@@ -3398,8 +4213,7 @@
                     need_time: '',
                     note: '',
                     delivery_fee: 0,
-                    sms: false,
-                    cochinillo_warning: false,
+                    sms: false
                 });
 
                 this.qtyValidationMessage = '';
@@ -3410,16 +4224,16 @@
                 const productTypes = delivery.orders?.map(o => this.getProductType(o)) || [];
 
                 let offset = 0;
-                if (productTypes.includes('baka')) offset = this.minimum_processing_hours_baka || 72;
-                else if (productTypes.includes('lechon')) offset = this.minimum_processing_hours_lechon || 24;
-                else if (productTypes.includes('misc')) offset = this.minimum_processing_hours_misc || 12;
+                if (productTypes.includes('baka')) offset = 72;
+                else if (productTypes.includes('lechon')) offset = 24;
+                else if (productTypes.includes('misc')) offset = 6;
 
                 const minAllowedTime = new Date(now.getTime() + offset * 3600 * 1000);
                 const deliveryDate = new Date(delivery.need_date + 'T00:00');
 
                 return this.allHours.filter(hour => {
                     const testTime = new Date(`${delivery.need_date}T${hour < 10 ? '0' + hour : hour}:00`);
-                    return testTime >= minAllowedTime && hour >= 9 && hour <= 20;
+                    return testTime >= minAllowedTime && hour >= 7 && hour <= 20;
                 });
             },
 
@@ -3472,25 +4286,8 @@
                         return true;
                     }
 
-                    const productTypes = delivery.orders?.map(o => this.getProductType(o)) || [];
-
                     const timeStr = (hour < 10 ? '0' + hour : hour) + ':00';
-
-                    // if its productTypes includes misc only then use this.disabledDeliveryMiscDates.includes(`${delivery.need_date} ${timeStr}`);
-                    // but if productTypes includes other that misc then use this.disabledDeliveryDates.includes(`${delivery.need_date} ${timeStr}`);
-                    // but if productTypes includes both misc and others then combine the disabledDeliveryMiscDates and disabledDeliveryDates.
-
-                    if (productTypes.includes('misc') && !productTypes.includes('lechon') && !productTypes.includes('baka')) {
-                        return this.disabledDeliveryMiscDates.includes(`${delivery.need_date} ${timeStr}`);
-                    } else if ((productTypes.includes('lechon') || productTypes.includes('baka')) && !productTypes.includes('misc')) {
-                        return this.disabledDeliveryDates.includes(`${delivery.need_date} ${timeStr}`);
-                    }
-
-                    // if (productTypes.includes('misc')) {
-                    //     return this.disabledDeliveryMiscDates.includes(`${delivery.need_date} ${timeStr}`);
-                    // } else {
-                    //     return this.disabledDeliveryDates.includes(`${delivery.need_date} ${timeStr}`);
-                    // }
+                    return this.disabledDeliveryDates.includes(`${delivery.need_date} ${timeStr}`);
                 };
             },
 
@@ -3502,139 +4299,6 @@
                 return `${adjustedHours}:${minutes} ${isPM ? 'PM' : 'AM'}`;
             },
 
-            formatLocalYMD(date) {
-                const y = date.getFullYear();
-                const m = String(date.getMonth() + 1).padStart(2, '0');
-                const d = String(date.getDate()).padStart(2, '0');
-                return `${y}-${m}-${d}`;
-            },
-
-            formatLocalYMD(date) {
-                const y = date.getFullYear();
-                const m = String(date.getMonth() + 1).padStart(2, '0');
-                const d = String(date.getDate()).padStart(2, '0');
-                return `${y}-${m}-${d}`;
-            },
-
-            picker: null,
-
-            pickers: null,
-
-            blockedDates: [
-                '2025-12-19',
-                '2025-12-24',
-                '2025-12-25',
-                '2025-12-31'
-            ],
-
-            blockedDatesMisc: [
-                '2025-12-13','2025-12-14','2025-12-15','2025-12-16','2025-12-17','2025-12-18',
-                '2025-12-19','2025-12-20','2025-12-21','2025-12-22','2025-12-23','2025-12-24',
-                '2025-12-25','2025-12-26','2025-12-27','2025-12-28','2025-12-29','2025-12-30','2025-12-31'
-            ],
-
-            initPicker() {
-                if (this.picker) this.picker.destroy();
-
-                const el = document.getElementById('need_date');
-
-                this.picker = new Datepicker(el, {
-                    minDate: this.minDate(),
-                    autohide: true,
-                    format: 'yyyy-mm-dd',
-                    beforeShowDay: (date) => {
-                        if (this.method !== 'delivery') return true;
-
-                        if (this.hasCochinillo && !this.allowMultiple) {
-                            if (date.getMonth() === 11 && date.getDate() === 24) return false;
-                        }
-
-                        const ymd = this.formatLocalYMD(date);
-
-                        if (this.isMiscOnly) {
-                            return !this.blockedDatesMisc.includes(ymd);
-                        }
-
-                        return !this.blockedDates.includes(ymd);
-                    }
-                });
-
-                el.addEventListener('changeDate', (e) => {
-                    this.need_date = e.target.value;
-                    this.validateDateTime();
-                });
-
-                // Force initial selection to first allowed date
-                this.$nextTick(() => {
-                    let d = this.minDate();
-
-                    const isAllowed = (dt) => {
-                        if (this.method !== 'delivery') return true;
-
-                        if (this.hasCochinillo && !this.allowMultiple) {
-                            if (dt.getMonth() === 11 && dt.getDate() === 24) return false;
-                        }
-
-                        const ymd = this.formatLocalYMD(dt);
-
-                        if (this.isMiscOnly) return !this.blockedDatesMisc.includes(ymd);
-
-                        return !this.blockedDates.includes(ymd);
-                    };
-
-                    while (!isAllowed(d)) d.setDate(d.getDate() + 1);
-
-                    const firstValid = this.formatLocalYMD(d);
-                    this.need_date = firstValid;
-                    this.picker.setDate(firstValid, { render: true });
-                });
-            },
-
-            initAllDatePickers() {
-                const els = this.$refs.needDateInputs;
-
-                const inputs = Array.isArray(els) ? els : [els];
-
-                inputs.forEach((el, index) => this.initDatePickerFor(index, el));
-            },
-
-            initDatePickerFor(index, el) {
-                if (!this.allowMultiple) return;
-
-                if (this.pickers[index]) {
-                    this.pickers[index].destroy();
-                    delete this.pickers[index];
-                }
-
-                const picker = new Datepicker(el, {
-                    minDate: this.minimumDate(),
-                    autohide: true,
-                    format: 'yyyy-mm-dd',
-                    beforeShowDay: (date) => {
-                    const ymd = this.formatLocalYMD(date);
-
-                    // only block special dates if delivery
-                    if (this.method === 'delivery' && this.blockedDates.includes(ymd)) return false;
-
-                    // block Dec 24 if hasCochinillo
-                    if (this.hasCochinillo && date.getMonth() === 11 && date.getDate() === 24) return false;
-
-                    return true;
-                    }
-                });
-
-                // IMPORTANT: listen to datepicker event (not @change)
-                el.addEventListener('changeDate', (e) => {
-                    this.deliveries[index].need_date = e.target.value;
-                    this.validateDeliveryDateTime(this.deliveries[index], index);
-                });
-
-                this.pickers[index] = picker;
-            },
-
-
-            withConchinilloOnDec24Selected: false,
-
             validateDateTime() {
                 const now = new Date();
 
@@ -3643,17 +4307,7 @@
                     return;
                 }
 
-                this.noNeededDate = false
-
                 const selectedDate = new Date(this.need_date);
-
-                if (this.hasCochinillo && selectedDate.getDate() === 24 && selectedDate.getMonth() === 11) {
-                    this.withConchinilloOnDec24Selected = true;
-                    if (this.picker) this.picker.setDate({ clear: true });
-                    return;
-                } else  {
-                    this.withConchinilloOnDec24Selected = false;
-                }
 
                 if (!this.need_time || this.isTimeDisabled(parseInt(this.need_time.split(':')[0]))) {
                     // Auto-select first valid hour
@@ -3706,9 +4360,9 @@
 
                 // Determine offset by product type
                 let requiredOffset = 0;
-                if (this.hasbaka) requiredOffset = this.minimum_processing_hours_baka || 72;
-                else if (this.haslechon) requiredOffset = this.minimum_processing_hours_lechon || 24;
-                else if (this.hasMisc) requiredOffset = this.minimum_processing_hours_misc || 12;
+                if (this.hasbaka) requiredOffset = 72;
+                else if (this.haslechon) requiredOffset = 24;
+                else if (this.hasMisc) requiredOffset = 6;
 
                 // Compose full datetime for that hour
                 const timeStr = (hour < 10 ? '0' + hour : hour) + ':00';
@@ -3724,11 +4378,7 @@
                 if (this.method === 'pickup') {
                     return this.disabledPickupDates.includes(fullStr);
                 } else {
-                    if (this.hasMisc && !this.haslechon && !this.hasbaka) {
-                        return this.disabledDeliveryMiscDates.includes(fullStr);
-                    } else if ((this.haslechon || this.hasbaka) && !this.hasMisc) {
-                       return this.disabledDeliveryDates.includes(fullStr);
-                    } 
+                    return this.disabledDeliveryDates.includes(fullStr);
                 }
             },
 

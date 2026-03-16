@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Intervention\Image\Colors\Rgb\Channels\Red;
 
 class FrontendController extends Controller
@@ -179,6 +180,7 @@ class FrontendController extends Controller
         return view('v2.lechon-menu', compact('categories'));
     }
 
+<<<<<<< Updated upstream
     public function checkout()
     {
         $page = 'checkout';
@@ -325,12 +327,401 @@ class FrontendController extends Controller
         );
     }
 
+=======
+
+    public function checkout()
+{
+    $page = 'checkout';
+
+    if (Auth::check() && Auth()->user()->role_id != 6) {
+        return redirect()->route('my-account')->with('error', 'You are not allowed to access this page. Please contact support for assistance.');
+    }
+
+    // Initialize carts with consistent structure
+    $cartItems = [];
+    $haslechon = false;
+    $hasbaka = false;
+    $hasMisc = false;
+    $hasCochinillo = false;
+    
+    if (Auth::check()) {
+        $dbCarts = Cart::where('user_id', Auth::id())->with('product.photos')->get();
+        
+        foreach ($dbCarts as $cart) {
+            $cartItem = [
+                'id' => $cart->id,
+                'product_id' => $cart->product_id,
+                'qty' => $cart->qty,
+                'price' => $cart->price,
+                'paella_price' => $cart->paella_price,
+                'is_free_product' => $cart->is_free_product ?? false,
+                'product' => [
+                    'id' => $cart->product->id,
+                    'name' => $cart->product->name,
+                    'slug' => $cart->product->slug,
+                    'category_id' => $cart->product->category_id,
+                    'is_misc' => $cart->product->is_misc ?? 0,
+                    'paella_price' => $cart->product->paella_price ?? 0,
+                    'photos' => $cart->product->photos ?? []
+                ]
+            ];
+            
+            $cartItems[] = $cartItem;
+            
+            // Check product types
+            if ($cart->product->category_id == 1) {
+                $haslechon = true;
+            }
+            if ($cart->product->slug == 'lechon-baka') {
+                $hasbaka = true;
+            }
+            if ($cart->product->is_misc == 1) {
+                $hasMisc = true;
+            }
+            if ($cart->product_id === 165) {
+                $hasCochinillo = true;
+            }
+        }
+        
+        $carts = collect($cartItems);
+    } else {
+        $sessionCarts = session('cart', []);
+        $carts = collect($sessionCarts);
+        
+        foreach ($sessionCarts as $key => $cart) {
+            $cartItem = [
+                'id' => $key,
+                'product_id' => $cart['product_id'] ?? $key,
+                'qty' => $cart['qty'] ?? 1,
+                'price' => $cart['price'] ?? 0,
+                'paella_price' => $cart['paella_price'] ?? 0,
+                'is_free_product' => $cart['is_free_product'] ?? false,
+                'product' => [
+                    'id' => $cart['product']['id'] ?? $key,
+                    'name' => $cart['product']['name'] ?? 'Product',
+                    'slug' => $cart['product']['slug'] ?? '',
+                    'category_id' => $cart['product']['category_id'] ?? null,
+                    'is_misc' => $cart['product']['is_misc'] ?? 0,
+                    'paella_price' => $cart['product']['paella_price'] ?? 0,
+                    'photos' => $cart['product']['photos'] ?? []
+                ]
+            ];
+            
+            $cartItems[] = $cartItem;
+            
+            // Check product types from session
+            if (isset($cart['product']['category_id']) && $cart['product']['category_id'] == 1) {
+                $haslechon = true;
+            }
+            if (isset($cart['product']['slug']) && $cart['product']['slug'] == 'lechon-baka') {
+                $hasbaka = true;
+            }
+            if (isset($cart['product']['is_misc']) && $cart['product']['is_misc'] == 1) {
+                $hasMisc = true;
+            }
+            if (isset($cart['product_id']) && $cart['product_id'] === 165) {
+                $hasCochinillo = true;
+            }
+        }
+        
+        $carts = collect($cartItems);
+    }
+
+    $pickupBranches = Branch::where('status', 1)->orderBy('name', 'asc')->where('pickup_branch', 1)->get();
+
+    $deliveryBranches = Branch::where('status', 1)->orderBy('name', 'asc')->where('delivery_branch', 1)->get();
+
+    $table = (new Deliverablecities)->getTable();
+
+    $pickOnePerName = Deliverablecities::selectRaw('MAX(id) AS id')->where('is_active', 1)
+        ->groupBy('name');
+
+    $locations = Deliverablecities::query()
+        ->where('is_active', 1)
+        ->joinSub($pickOnePerName, 'p', "$table.id", '=', 'p.id')
+        ->orderBy("$table.name")
+        ->get();
+
+    $provinces = Deliverablecities::query()
+        ->select('province')
+        ->where('is_active', 1)
+        ->whereNotNull('province')->where('province', '!=', '')
+        ->distinct()
+        ->orderBy('province')
+        ->pluck('province');
+
+    $cities = Deliverablecities::query()
+        ->select('city', 'province')
+        ->where('is_active', 1)
+        ->whereNotNull('city')->where('city', '!=', '')
+        ->distinct()
+        ->orderBy('city')->get();
+
+    $triples = Deliverablecities::query()
+        ->select('city', 'province')
+        ->where('is_active', 1)
+        ->whereNotNull('city')->where('city', '!=', '')
+        ->whereNotNull('province')->where('province', '!=', '')
+        ->distinct()
+        ->orderBy('city')->orderBy('province')->orderBy('barangay')
+        ->get();
+
+    $setting = Setting::first();
+
+    $disabledPickupDates = explode(',', $setting->disable_pickup_dates ?? '');
+    $disabledDeliveryDates = explode(',', $setting->disable_delivery_dates ?? '');
+    $disabledDeliveryMiscDates = explode(',', $setting->disable_delivery_misc_dates ?? '');
+
+    $dataPrivacy = Page::where('slug', 'data-privacy')->first();
+
+    $dataPrivacyRender = view('v2.data-privacy', compact('dataPrivacy'))->render();
+
+    $now = now()->toDateTimeString();
+    $uid = Auth::id();
+
+    // Get eligible regular coupons (non-auto)
+    $eligibleCoupons = Coupon::query()
+    ->withoutGlobalScope(SoftDeletingScope::class)
+    ->from('coupons as c')
+    ->whereNull('c.deleted_at')
+    ->where('c.activation_type', '<>', 'auto')
+    ->select('c.*')
+    ->selectRaw("
+        CASE
+            WHEN c.status <> 'ACTIVE' THEN 0
+            WHEN COALESCE(
+                    STR_TO_DATE(CONCAT(c.start_date,' ', c.start_time), '%Y-%m-%d %H:%i:%s'),
+                    STR_TO_DATE(CONCAT(c.start_date,' ', c.start_time, ':00'), '%Y-%m-%d %H:%i:%s')
+                 ) > NOW() THEN 0
+            WHEN COALESCE(
+                    STR_TO_DATE(CONCAT(c.end_date,' ', c.end_time), '%Y-%m-%d %H:%i:%s'),
+                    STR_TO_DATE(CONCAT(c.end_date,' ', c.end_time, ':00'), '%Y-%m-%d %H:%i:%s')
+                 ) < NOW() THEN 0
+            ELSE 1
+        END AS is_currently_valid
+    ")
+    ->get()
+    ->filter(function ($coupon) use ($uid) {
+        if ($coupon->is_currently_valid != 1) {
+            return false;
+        }
+
+        if (Auth::check()) {
+            $alreadyUsed = DB::table('coupon_sales')
+                ->where('coupon_id', $coupon->id)
+                ->where('customer_id', $uid)
+                ->exists();
+
+            if ($alreadyUsed) {
+                return false;
+            }
+        }
+
+        return true;
+    })
+    ->values();
+
+    // Get auto coupons separately
+    $autoCoupons = Coupon::query()
+        ->where('activation_type', 'auto')
+        ->where('status', 'ACTIVE')
+        ->whereRaw("CONCAT(start_date, ' ', start_time) <= ?", [$now])
+        ->whereRaw("CONCAT(end_date, ' ', end_time) >= ?", [$now])
+        ->where(function ($q) use ($uid) {
+            $q->whereNull('customer_scope')->orWhere('customer_scope', 'all')
+            ->orWhere(function ($x) use ($uid) {
+                $x->where('customer_scope', 'specific')
+                    ->whereRaw(
+                        "FIND_IN_SET(?, REPLACE(REPLACE(scope_customer_id, ' ', ''), '|', ','))",
+                        [$uid]
+                    );
+            });
+        })
+        ->get();
+
+    // Check cart eligibility for auto coupons
+    $eligibleAutoCoupons = collect([]);
+    
+    if ($carts->count() > 0) {
+        // Calculate cart metrics
+        $cartQty = $carts->sum('qty');
+        $cartTotal = $carts->sum(function($item) {
+            $price = $item['price'] ?? 0;
+            $qty = $item['qty'] ?? 1;
+            $paellaPrice = ($item['paella_price'] > 0) ? ($item['product']['paella_price'] ?? 0) : 0;
+            
+            return (($price + $paellaPrice) * $qty);
+        });
+        
+        $cartProductIds = $carts->pluck('product_id')->map(fn($id) => (string)$id)->toArray();
+
+        // Check for excluded category (category_id = 1)
+        $cartHasExcludedCategory = $carts->contains(function ($item) {
+            return isset($item['product']['category_id']) && $item['product']['category_id'] == 1;
+        });
+
+        // Only process auto coupons if no excluded category
+        if (!$cartHasExcludedCategory) {
+            foreach ($autoCoupons as $coupon) {
+            if (Auth::check()) {
+                $alreadyUsed = DB::table('coupon_sales')
+                    ->where('coupon_id', $coupon->id)
+                    ->where('customer_id', $uid)
+                    ->exists();
+
+                if ($alreadyUsed) {
+                    continue;
+                }
+            }
+
+            $totalUsed = CouponCart::where('coupon_id', $coupon->id)->where('status', 1)->sum('total_usage');
+
+            $customerUsed = 0;
+            if (Auth::check()) {
+                $customerUsed = CouponCart::where('coupon_id', $coupon->id)
+                    ->where('status', 1)
+                    ->where('customer_id', $uid)
+                    ->sum('total_usage');
+            }
+
+            if ($coupon->usage_limit !== null && $totalUsed >= $coupon->usage_limit) continue;
+            if ($coupon->customer_limit !== null && $customerUsed >= $coupon->customer_limit) continue;
+
+
+                // Check purchase combination conditions
+                $shouldSkip = false;
+                
+                if ($coupon->purchase_combination) {
+                    if ($coupon->purchase_qty && $coupon->purchase_qty > 0) {
+                        if ($coupon->purchase_qty_type === 'min' && $cartQty < $coupon->purchase_qty) {
+                            $shouldSkip = true;
+                        }
+                        if ($coupon->purchase_qty_type === 'max' && $cartQty > $coupon->purchase_qty) {
+                            $shouldSkip = true;
+                        }
+                    }
+
+                    if (!$shouldSkip) {
+                        $combi = explode('|', $coupon->purchase_combination ?? '');
+                        
+                        if (in_array('amount', $combi) && $coupon->purchase_amount && $coupon->purchase_amount > 0) {
+                            if ($cartTotal < $coupon->purchase_amount) {
+                                $shouldSkip = true;
+                            }
+                        }
+
+                        if (!$shouldSkip && in_array('product', $combi) && $coupon->purchase_product_id) {
+                            $requiredIds = explode('|', $coupon->purchase_product_id);
+                            $hasRequiredProduct = false;
+                            foreach ($requiredIds as $requiredId) {
+                                if (in_array((string)$requiredId, $cartProductIds)) {
+                                    $hasRequiredProduct = true;
+                                    break;
+                                }
+                            }
+                            if (!$hasRequiredProduct) {
+                                $shouldSkip = true;
+                            }
+                        }
+                    }
+                }
+                
+                if ($shouldSkip) continue;
+
+                // Get free products if any
+                $free_products = null;
+                if ($coupon->free_product_id) {
+                    $freeProductIds = explode('|', $coupon->free_product_id);
+                    $freeProductIds = array_filter($freeProductIds, fn($val) => !is_null($val) && $val !== '');
+                    $free_products = Product::with('photos')->whereIn('id', $freeProductIds)->get();
+                }
+
+                // Format coupon data
+                $couponData = [
+                    'id' => $coupon->id,
+                    'code' => $coupon->coupon_code,
+                    'name' => $coupon->name,
+                    'description' => $coupon->description,
+                    'terms' => $coupon->terms_and_conditions,
+                    'type' => $coupon->amount_discount_type == 1 ? 'amount' : 'product',
+                    'discount_type' => $coupon->reward == 'free-shipping-optn'
+                        ? ($coupon->location_discount_type == 'partial' ? 'amount' : 'percent')
+                        : ($coupon->percentage > 0 ? 'percent' : 'amount'),
+                    'discount' => $coupon->percentage > 0 ? $coupon->percentage : $coupon->amount,
+                    'applies_to' => $coupon->free_product_id ? 'free_product' : ($coupon->purchase_product_id ? 'product' : 'cart'),
+                    'purchase_product_id' => $coupon->purchase_product_id,
+                    'free_products' => $free_products ?? [],
+                    'combination_allowed' => $coupon->combination == 1,
+                    'total_usage_limit' => $coupon->usage_limit,
+                    'total_usage_used' => $totalUsed,
+                    'customer_limit' => $coupon->customer_limit,
+                    'customer_usage_used' => $customerUsed,
+                    'status' => 'valid',
+                    'location' => $coupon->location,
+                    'reward' => $coupon->reward,
+                    'free_shipping' => $coupon->reward == 'free-shipping-optn',
+                    'free_shipping_discount_amount' => $coupon->reward == 'free-shipping-optn'
+                        ? ($coupon->location_discount_type == 'partial' ? $coupon->location_discount_amount : 100)
+                        : 0,
+                    'activation_type' => $coupon->activation_type,
+                    'shipping_method' => $coupon->shipping_method,
+                    'purchase_amount' => $coupon->purchase_amount,
+                    'purchase_qty' => $coupon->purchase_qty,
+                    'purchase_qty_type' => $coupon->purchase_qty_type,
+                    'exclude_category_id' => $coupon->exclude_category_id,
+                    'auto_applied' => $coupon->activation_type === 'auto',
+                ];
+
+                $eligibleAutoCoupons->push($couponData);
+            }
+        }
+    }
+
+    $setting = Setting::first();
+    $minimum_order_amount_door_to_door = $setting ? $setting->minimum_order : 0;
+    $minimum_order_amount_pickup = $setting ? $setting->minimum_order_pickup : 0;
+    $minimum_processing_hours = $setting ? $setting->minimum_processing_hours : 24;
+    $minimum_processing_hours_misc = $setting ? $setting->minimum_processing_hours_misc : 12;
+    $minimum_order_misc = $setting ? $setting->minimum_order_misc : 0;
+
+    // Merge all coupons for display in modal
+    $allCoupons = collect($eligibleCoupons->values()->toArray())
+    ->merge($eligibleAutoCoupons->values())
+    ->values();
+
+return view('v2.checkout', compact(
+    'triples',
+    'provinces',
+    'cities',
+    'page',
+    'dataPrivacyRender',
+    'carts',
+    'pickupBranches',
+    'locations',
+    'deliveryBranches',
+    'disabledPickupDates',
+    'disabledDeliveryDates',
+    'disabledDeliveryMiscDates',
+    'haslechon',
+    'hasbaka',
+    'hasMisc',
+    'eligibleCoupons',
+    'eligibleAutoCoupons',
+    'allCoupons',
+    'minimum_order_amount_door_to_door',
+    'minimum_order_amount_pickup',
+    'minimum_processing_hours',
+    'minimum_processing_hours_misc',
+    'minimum_order_misc',
+    'hasCochinillo'
+));
+}
+
+>>>>>>> Stashed changes
     public function confirmation($id)
     {
         $page = 'confirmation';
-
         $undecodeId = $id;
-        
         if (ctype_digit($id)) {
             $id = $undecodeId;
         } else {
@@ -410,39 +801,35 @@ class FrontendController extends Controller
 
     public function my_coupons(Request $request)
     {
-        $page = 'my-coupons';
+       $page = 'my-coupons';
 
-        $request->session()->forget('redirect_after_login');
+                $request->session()->forget('redirect_after_login');
 
-        if (!Auth::check()) {
-            return redirect()->route('login', ['redirect' => $request->fullUrl()]);
-        }
+                if (!Auth::check()) {
+                    return redirect()->route('login', ['redirect' => $request->fullUrl()]);
+                }
 
-        $now = now()->toDateTimeString();
-        $uid = Auth::id();
-
-        $eligibleCoupons = Coupon::query()
-            ->where('status', 'ACTIVE')
-            ->whereRaw("CONCAT(start_date, ' ', start_time) <= ?", [$now])
-            ->whereRaw("CONCAT(end_date, ' ', end_time) >= ?", [$now])
-            ->where(function ($q) use ($uid) {
-                // visible to everyone
-                $q->whereNull('customer_scope')->orWhere('customer_scope', 'all')
-                // visible only if user's ID is in the list
-                ->orWhere(function ($x) use ($uid) {
-                    $x->where('customer_scope', 'specific')
-                        ->whereRaw(
-                            "FIND_IN_SET(?, REPLACE(REPLACE(scope_customer_id, ' ', ''), '|', ','))",
-                            [$uid]
-                        );
-                });
-            })
-            ->get();
+                        $uid = Auth::id();
 
 
-        // dd($eligibleCoupons);
+                    DB::table('coupon_new')
+                        ->where('status', 1)
+                        ->whereRaw("CONCAT(end_date, ' ', end_time) <= NOW()")
+                        ->update(['status' => 0]);
 
-        return view('v2.my-coupons', compact('page', 'eligibleCoupons'));
+                    $eligibleCoupons = DB::table('coupon_new as c')
+                    
+                        ->where('c.status', 1)
+                        ->whereNotExists(function ($query) use ($uid) {
+                            $query->select(DB::raw(1))
+                                ->from('coupon_redemptions')
+                                ->whereColumn('coupon_redemptions.coupon_id', 'c.id')
+                                ->where('coupon_redemptions.user_id', $uid);
+                        })
+                        ->get();
+
+                return view('v2.my-coupons', compact('page', 'eligibleCoupons'));
+
     }
 
     public function my_cart(Request $request)
@@ -456,7 +843,7 @@ class FrontendController extends Controller
         if (Auth::check() && Auth()->user()->role_id != 6) {
             return redirect()->route('my-account')->with('error', 'You are not allowed to access this page. Please contact support for assistance.');
         }
-
+ 
         return view('v2.my-cart', compact('page'));
     }
 
@@ -674,7 +1061,6 @@ class FrontendController extends Controller
                     'lastname' => $request->org_name,
                     'password' => Hash::make($request->password),
                     'email' => $request->email,
-                    'valid_email' => $request->email ?? null,
                     'organization' => $request->org_name ?? $request->organization,
                     'address_street' => $request->address_street,
                     'address_municipality' => $request->address_municipality,
@@ -702,7 +1088,6 @@ class FrontendController extends Controller
                     'lastname' => $request->last_name,
                     'password' => Hash::make($request->password),
                     'email' => $request->email,
-                    'valid_email' => $request->email ?? null,
                     'birthday' => $request->birth_date,
                     'country' => $request->country,
                     'address_street' => $request->address_street,
@@ -754,7 +1139,7 @@ class FrontendController extends Controller
         $validated = $request->validate([
             'organization' => [
                 'required_if:account_type,organization',
-                'nullable',
+                'nullable', 
                 'regex:/^[A-Za-z\s\-]+$/'
             ],
             'firstname' => [
