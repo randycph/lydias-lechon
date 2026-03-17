@@ -1786,7 +1786,6 @@ class SalesController extends Controller
 
         // Return paginated to view
         $sales = $paginated;
-        }
 
         // dd($model);
 
@@ -1805,6 +1804,9 @@ class SalesController extends Controller
 
         return view('admin.sales.driver_index',compact('sales','filter','searchType'));
 
+        } else {
+            return redirect()->route('login');
+        }
     }
 
     public function pending_deletion()
