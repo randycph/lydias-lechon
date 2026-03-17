@@ -384,5 +384,12 @@
             All items have been assigned to deliveries.
         </div>
 
+        <template x-if="errors?.unused">
+            <div>
+                <p class="text-red-500 text-xs mt-2" x-text="errors.unused"></p>
+                <div class="border-red-500"></div>
+            </div>
+        </template>
+
     </div>
 </div>
