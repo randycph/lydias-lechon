@@ -1032,7 +1032,7 @@
                             payload.location = this.location
                             payload.need_date = this.need_date
                             payload.need_time = this.need_time
-                            payload.instruction = this.pickup_note
+                            payload.instruction = this.instruction
                         }
 
                         /* ==========================
