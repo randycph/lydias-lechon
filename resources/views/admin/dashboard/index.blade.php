@@ -85,7 +85,7 @@
         @endif
         <div class="col-lg-12">
             <div class="row align-items-start">
-                @if (auth()->user()->has_access_to_pages_module() || auth()->user()->has_access_to_albums_module() || auth()->user()->has_access_to_user_module() || auth()->user()->has_access_to_news_module())
+                @if (auth()->user()->has_access_to_pages_module() || auth()->user()->has_access_to_albums_module() || auth()->user()->has_access_to_user_module() || auth()->user()->has_access_to_news_module() || auth()->user()->has_access_to_route('dashboard'))
                     <div class="col-lg-3 col-md-4">
                         <div class="card dashboard-summary mg-t-20">
                             <div class="card-header">
