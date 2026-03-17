@@ -1041,6 +1041,20 @@
 
                         if (this.method === 'delivery' && this.allowMultiple) {
 
+                            if (this.hasRemainingOrders()) {
+                                this.errors.unused = 'Please assign all products to a delivery.'
+                                this.isSubmitting = false
+                                this.formSubmitting = false
+
+                                this.$nextTick(() => {
+                                    this.smoothScroll('.border-red-500')
+                                })
+
+                                return
+                            } else {
+                                this.errors.errors = ''
+                            }
+
                             payload.delivery_address = this.deliveries[0]?.address ?? ''
                             payload.province = this.deliveries[0]?.province ?? ''
                             payload.city = this.deliveries[0]?.city ?? ''
