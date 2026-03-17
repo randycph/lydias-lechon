@@ -598,11 +598,10 @@ class SalesController extends Controller
         if ($sales->delivery_status == 'Waiting for Payment' || $sales->delivery_status == '' || is_null($sales->delivery_status)) {
             SalesHeader::whereId($sales->id)->update(['delivery_status' => 'Processing Stock']);
         }
-
         $sms = new Sms();
         $sms->send_sms($sales->customer_contact_number, 'confirm_order', $sales);
         
-        return true;
+        // return true;
     }
 
     public function disapprove_payment($id){
@@ -1928,7 +1927,6 @@ class SalesController extends Controller
 
         // Return paginated to view
         $sales = $paginated;
-        }
 
         // dd($model);
 
@@ -1947,6 +1945,9 @@ class SalesController extends Controller
 
         return view('admin.sales.driver_index',compact('sales','filter','searchType'));
 
+        } else {
+            return redirect()->route('login');
+        }
     }
 
     public function pending_deletion()
