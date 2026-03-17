@@ -213,7 +213,7 @@
                                     <td>{{date('Y-m-d',strtotime($r->hcreated))}}</td>
                                     <td>{{date('h:i A',strtotime($r->hcreated))}}</td>                                
                                     <td>{{date('Y-m-d',strtotime($r->payment_date ?? $r->pcreated))}}</td>
-                                    <td>{{date('h:i A',strtotime($r->payment_date ?? $r->pcreated))}}</td>
+                                    <td>{{date('h:i A',strtotime($r->updated_at ?? $r->pcreated))}}</td>
                                     <td>{{$r->customer_name}}</td>
                                     <td>{{$r->delivery_type}}</td>
                                     <th>
