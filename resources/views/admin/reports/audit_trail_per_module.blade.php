@@ -33,19 +33,6 @@
             white-space: normal !important;
             word-break: break-word;
         }
-        .clamp-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: normal !important;
-        }
-
-        .break-all {
-            word-break: break-all;
-        }
 
     </style>
 @endsection
@@ -148,13 +135,7 @@
                                     <td>{{$r->dashboard_activity}}</td>
                                     <td>{{$r->email}}</td>
                                     <td>{{$r->role}}</td>
-                                    <td>
-                                        <div class="clamp-2 break-all"
-                                            data-toggle="tooltip"
-                                            title="{{ $r->activity_desc }}">
-                                            {{ $r->activity_desc }}
-                                        </div>
-                                    </td>
+                                    <td>{{$r->activity_desc}}</td>
                                     <td>{{$r->reference}}</td>
                                     <td>{{$r->old_value}}</td>
                                     <td>{{$r->new_value}}</td>
@@ -200,8 +181,6 @@
     });
 
     $(document).ready(function() {
-        $('[data-toggle="tooltip"]').tooltip();
-        
         $('.select2-ajax').select2({
             placeholder: 'Select a module',
         });
