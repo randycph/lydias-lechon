@@ -298,7 +298,7 @@
                 <div class="modal-footer">
                     @php
                         // get all ids of tomorrow unpaid transactions
-                        $ids = $tomorrowUnpaid->pluck('id')->join(',');
+                        $ids = $tomorrowUnpaid->pluck('order_number')->join(',');
                     @endphp
 
                     <a 
