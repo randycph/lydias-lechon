@@ -25,6 +25,15 @@
         @page {
           size: auto;
         }
+        #example {
+            table-layout: fixed;
+        }
+
+        #example td, #example th {
+            white-space: normal !important;
+            word-break: break-word;
+        }
+
     </style>
 @endsection
 
@@ -180,6 +189,22 @@
             dom: 'Bfrtip',
             pageLength: 20,
             sorting: [[ 0, "desc" ]],
+            autoWidth: false,
+
+            columnDefs: [
+                { width: "140px", targets: 0 }, // Date
+                { width: "140px", targets: 1 }, // Created by
+                { width: "120px", targets: 2 }, // Activity Type
+                { width: "120px", targets: 3 }, // Activity
+                { width: "180px", targets: 4 }, // Email
+                { width: "100px", targets: 5 }, // Role
+                { width: "300px", targets: 6 }, // Description
+                { width: "200px", targets: 7 }, // Reference
+                { width: "220px", targets: 8 }, // Old Value
+                { width: "220px", targets: 9 }, // New Value
+                { width: "150px", targets: 10 }, // Module
+                { type: 'time-uni', targets: [0] }
+            ],
             buttons: [
                 {
                     extend: 'print',
