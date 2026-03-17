@@ -1498,7 +1498,7 @@ class CartController extends Controller
                             'status' => 'active',
                             'currency' => 'PHP',
                             'customer_location' => $customer_location,
-                            'instruction' => $request->instruction,
+                            'instruction' => $delivery->note,
                             'agent' => $request->agent,
                             'contact_person' => $delivery->name,
                             'outlet' => $outlet,
