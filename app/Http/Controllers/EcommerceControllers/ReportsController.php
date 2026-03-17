@@ -1671,6 +1671,8 @@ class ReportsController extends Controller
                             Carbon::parse($end)->endOfDay()
                         ]);
                     })
+                    ->whereNotNull('created_by')
+                    ->whereNotNull('role')
                     ->when($module, function ($query) use ($module) {
                         $query->where('db_table', $module);
                     })
