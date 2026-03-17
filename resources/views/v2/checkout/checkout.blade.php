@@ -1763,6 +1763,8 @@
                         return
                     }
 
+                    this.errors.unused = ''
+
                     this.deliveries.push({
                         address: '',
                         province: '',
