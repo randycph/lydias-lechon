@@ -690,10 +690,11 @@ class ReportsController extends Controller
         if(isset($_GET['payment_type']) && $_GET['payment_type']<>''){
             $qry.= " and p.payment_type='".$_GET['payment_type']."'";
         }
-        if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-            $start = Carbon::parse($request->startdate)->startOfDay();
-            $end = Carbon::parse($request->enddate)->endOfDay();
-            $qry.= " and p.payment_date >='".$start."' and p.payment_date <='".$end."'";
+        if($request->startdate && $request->enddate){
+            $start = Carbon::parse($request->startdate)->format('Y-m-d');
+            $end = Carbon::parse($request->enddate)->format('Y-m-d');
+
+            $qry .= " AND p.payment_date >= '$start' AND p.payment_date <= '$end'";
         }
         else{
             $qry.= " and p.payment_date >='2050-01-01 00:00:00.000'";
