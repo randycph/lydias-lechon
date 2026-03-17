@@ -1555,7 +1555,7 @@ class ReportsController extends Controller
                         $query->whereBetween('activity_date', [
                             Carbon::parse($start)->startOfDay(),
                             Carbon::parse($end)->endOfDay()
-                        ]);
+                        ])->whereNotNull('created_by')->whereNotNull('role');
                     })
                     ->when($module, function ($query) use ($module) {
                         $query->where('db_table', $module);
