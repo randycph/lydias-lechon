@@ -139,124 +139,122 @@
                             @endif
                         </div>
                     </div>
-                    <div class="col-lg-9 col-md-8">
-                        @if (auth()->user()->has_access_to_route('dashboard'))
-                        <div class="card dashboard-recent mg-t-20">
-                            <div class="card-header">
-                                <div>Pending Payments</div>
-                                <small class="text-muted">
-                                    Transactions nearing their delivery dates with outstanding payments.
-                                </small>
-                            </div>
-                            <div class="card-body pt-3">
-                                <div class="list-group">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover align-middle">
-                                            <thead class="table-light">
+                @endif    
+                <div class="col-lg-9 col-md-8">
+                    @if (auth()->user()->has_access_to_route('dashboard'))
+                    <div class="card dashboard-recent mg-t-20">
+                        <div class="card-header">
+                            <div>Pending Payments</div>
+                            <small class="text-muted">
+                                Transactions nearing their delivery dates with outstanding payments.
+                            </small>
+                        </div>
+                        <div class="card-body pt-3">
+                            <div class="list-group">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Order #</th>
+                                                <th>Customer</th>
+                                                <th>Delivery Date</th>
+                                                <th class="text-end">Total Amount</th>
+                                                <th class="text-end">Paid</th>
+                                                <th class="text-end">Balance</th>
+                                                <th>Status</th>
+                                                <th class="text-center">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse ($pendingPayments as $sale)
                                                 <tr>
-                                                    <th>Order #</th>
-                                                    <th>Customer</th>
-                                                    <th>Delivery Date</th>
-                                                    <th class="text-end">Total Amount</th>
-                                                    <th class="text-end">Paid</th>
-                                                    <th class="text-end">Balance</th>
-                                                    <th>Status</th>
-                                                    <th class="text-center">Actions</th>
+                                                    <td>
+                                                        <a target="_blank" href="{{ route('sales-transaction.view', $sale->id) }}"><strong>#{{ $sale->order_number }}</strong></a>
+                                                    </td>
+
+                                                    <td>
+                                                        {{ $sale->user->name ?? '—' }}
+                                                    </td>
+
+                                                    <td>
+                                                        {{ optional(safe_date($sale->nearest_delivery_date ?? $sale->items->first()->delivery_date))->format('M d, Y') ?? '—' }}
+                                                    </td>
+
+                                                    <td class="text-end">
+                                                        ₱{{ number_format($sale->net_amount, 2) }}
+                                                    </td>
+
+                                                    <td class="text-end text-success">
+                                                        ₱{{ number_format($sale->payments->where('status', 'PAID')->sum('amount'), 2) }}
+                                                    </td>
+
+                                                    <td class="text-end text-danger fw-semibold">
+                                                        ₱{{ number_format($sale->balance($sale->id), 2) }}
+                                                    </td>
+
+                                                    <td>
+                                                        <span class="badge bg-primary text-white">
+                                                            {{ $sale->payments->where('status', 'PAID')->sum('amount') >= $sale->net_amount ? 'PAID' : ($sale->payments->where('status', 'PAID')->sum('amount') > 0 ? 'PARTIAL' : 'UNPAID'); }}
+                                                        </span>
+                                                    </td>
+
+                                                    <td class="text-center">
+                                                        <a href="{{ route('sales-transaction.index') . '/?search=' . $sale->order_number }}"
+                                                        class="btn btn-sm btn-outline-primary">
+                                                            View
+                                                        </a>
+                                                    </td>
                                                 </tr>
-                                            </thead>
-                                            <tbody>
-                                                @forelse ($pendingPayments as $sale)
-                                                    <tr>
-                                                        <td>
-                                                            <a target="_blank" href="{{ route('sales-transaction.view', $sale->id) }}"><strong>#{{ $sale->order_number }}</strong></a>
-                                                        </td>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="8" class="text-center text-muted py-4">
+                                                        No pending payments at the moment
+                                                    </td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
 
-                                                        <td>
-                                                            {{ $sale->user->name ?? '—' }}
-                                                        </td>
-
-                                                        <td>
-                                                            {{ optional(safe_date($sale->nearest_delivery_date ?? $sale->items->first()->delivery_date))->format('M d, Y') ?? '—' }}
-                                                        </td>
-
-                                                        <td class="text-end">
-                                                            ₱{{ number_format($sale->net_amount, 2) }}
-                                                        </td>
-
-                                                        <td class="text-end text-success">
-                                                            ₱{{ number_format($sale->payments->where('status', 'PAID')->sum('amount'), 2) }}
-                                                        </td>
-
-                                                        <td class="text-end text-danger fw-semibold">
-                                                            ₱{{ number_format($sale->balance($sale->id), 2) }}
-                                                        </td>
-
-                                                        <td>
-                                                            <span class="badge bg-primary text-white">
-                                                                {{ $sale->payments->where('status', 'PAID')->sum('amount') >= $sale->net_amount ? 'PAID' : ($sale->payments->where('status', 'PAID')->sum('amount') > 0 ? 'PARTIAL' : 'UNPAID'); }}
-                                                            </span>
-                                                        </td>
-
-                                                        <td class="text-center">
-                                                            <a href="{{ route('sales-transaction.index') . '/?search=' . $sale->order_number }}"
-                                                            class="btn btn-sm btn-outline-primary">
-                                                                View
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                @empty
-                                                    <tr>
-                                                        <td colspan="8" class="text-center text-muted py-4">
-                                                            No pending payments at the moment
-                                                        </td>
-                                                    </tr>
-                                                @endforelse
-                                            </tbody>
-                                        </table>
-
-                                        {{ $pendingPayments->links() }}
-                                    </div>
-
+                                    {{ $pendingPayments->links() }}
                                 </div>
-                            </div>
-                            @php
-                                $ids = $pendingPayments->pluck('id')->join(',');
-                            @endphp
-                            <div class="card-footer">
-                                <div class="d-flex justify-content-end">
-                                    <span class="tx-12 position-relative" style="top: -7px"><a href="{{ route('sales-transaction.index') . '/?orderBy=date_needed&search=' . $ids }}">Show all pending payments <i class="fa fa-arrow-right"></i></a></span>
-                                </div>
+
                             </div>
                         </div>
-                        @endif
-                        
-                        <div class="card dashboard-recent mg-t-20">
-                            <div class="card-header">
-                                My Recent Activities
-                            </div>
-                            <div class="card-body">
-                                <div class="list-group">
-                                    @forelse($logs as $log)
-                                        <p class="list-group-item list-group-item-action">
-                                            <a href="{{route('settings.audit')}}?search={{$log->id}}" target="_blank">
-                                                <span class="badge badge-dark">{{ ucwords($log->firstname) }} {{ ucwords($log->lastname) }}</span>
-                                            </a> {{ $log->dashboard_activity }} at {{ Setting::date_for_listing($log->activity_date) }}
-                                        </p>
-                                    @empty
-                                        No activities found!
-                                    @endforelse
-                                </div>
-                            </div>
-                            <div class="card-footer">
-                                <div class="d-flex justify-content-end">
-                                    <span class="tx-12"><a href="{{ route('users.show', Auth::user()->id) }}">Show all activities <i class="fa fa-arrow-right"></i></a></span>
-                                </div>
+                        @php
+                            $ids = $pendingPayments->pluck('id')->join(',');
+                        @endphp
+                        <div class="card-footer">
+                            <div class="d-flex justify-content-end">
+                                <span class="tx-12 position-relative" style="top: -7px"><a href="{{ route('sales-transaction.index') . '/?orderBy=date_needed&search=' . $ids }}">Show all pending payments <i class="fa fa-arrow-right"></i></a></span>
                             </div>
                         </div>
-
                     </div>
-                @endif
-
+                    @endif
+                    
+                    <div class="card dashboard-recent mg-t-20">
+                        <div class="card-header">
+                            My Recent Activities
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group">
+                                @forelse($logs as $log)
+                                    <p class="list-group-item list-group-item-action">
+                                        <a href="{{route('settings.audit')}}?search={{$log->id}}" target="_blank">
+                                            <span class="badge badge-dark">{{ ucwords($log->firstname) }} {{ ucwords($log->lastname) }}</span>
+                                        </a> {{ $log->dashboard_activity }} at {{ Setting::date_for_listing($log->activity_date) }}
+                                    </p>
+                                @empty
+                                    No activities found!
+                                @endforelse
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex justify-content-end">
+                                <span class="tx-12"><a href="{{ route('users.show', Auth::user()->id) }}">Show all activities <i class="fa fa-arrow-right"></i></a></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
