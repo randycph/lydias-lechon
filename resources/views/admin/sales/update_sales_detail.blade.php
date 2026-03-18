@@ -41,7 +41,7 @@
             <div class="col-lg-6">
                 <form action="{{ route('sales-transaction.update_all') }}" method="post" id="items_form" autocomplete="off">
                     @csrf
-                    @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102 || auth()->user()->has_access_to_route('sales-transaction.restore'))
+                    @if (auth()->user()->id == 10097 || auth()->user()->id == 10102 || auth()->user()->has_access_to_route('sales-transaction.restore'))
 
                         @if ($dateneeded > date('Y-m-d H:i:s') || $salesheader->delivery_status == 'Open Date')
                             
