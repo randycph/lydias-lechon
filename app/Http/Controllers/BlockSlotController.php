@@ -7,6 +7,7 @@ use App\Models\Product;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class BlockSlotController extends Controller
 {
@@ -63,6 +64,7 @@ class BlockSlotController extends Controller
 
                     $current = [
                         'id' => $block->id,
+                        'group_id' => $block->group_id,
                         'scope' => $block->scope,
                         'block_type' => $block->block_type,
                         'start' => $block->date,
@@ -108,6 +110,8 @@ class BlockSlotController extends Controller
 
         DB::transaction(function () use ($validated) {
 
+            $groupId = (string) Str::uuid();
+
             foreach ($validated['dates'] as $date) {
 
                 if ($validated['is_all_day']) {
@@ -119,6 +123,7 @@ class BlockSlotController extends Controller
                         'start_time'  => null,
                         'end_time'    => null,
                         'is_all_day'  => true,
+                        'group_id'    => $groupId,
                     ]);
 
                     // Attach products
@@ -143,6 +148,7 @@ class BlockSlotController extends Controller
                         'start_time'  => $time['start'],
                         'end_time'    => $time['end'],
                         'is_all_day'  => false,
+                        'group_id'    => $groupId,
                     ]);
 
                     if (!empty($validated['product_ids'])) {
@@ -164,20 +170,19 @@ class BlockSlotController extends Controller
 
     public function destroy($id)
     {
-        $block = BlockedSlot::findOrFail($id);
-        
-        if ($block->products()->count() > 0) {
-            $block->products()->detach();
-        }
+        DB::transaction(function () use ($id) {
 
-        if ($block->categories()->count() > 0) {
-            $block->categories()->detach();
-        }
+            $blocks = BlockedSlot::where('group_id', $id)->get();
 
-        $block->delete();
+            foreach ($blocks as $block) {
+                $block->products()->detach();
+                $block->categories()->detach();
+                $block->delete();
+            }
+        });
 
         return response()->json([
-            'message' => 'Blocked slot deleted successfully'
+            'message' => 'Block group deleted successfully'
         ]);
     }
 
@@ -197,6 +202,7 @@ class BlockSlotController extends Controller
             'allDay' => $b['is_all_day'],
 
             'extendedProps' => [
+                'group_id' => $b['group_id'],
                 'scope' => $b['scope'],
                 'block_type' => $b['block_type'],
                 'start_time' => $b['start_time'],
