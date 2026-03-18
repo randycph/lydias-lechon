@@ -60,19 +60,46 @@
                 </select>
             </div>
 
-            <!-- Date Picker -->
-            <div class="row g-2" id="dateRangeInputs">
-                <div class="col">
-                    <label class="form-label fw-bold">Start Date</label>
-                    <input type="text" class="form-control" placeholder="Start date" autocomplete="off">
+            <div class="mb-3">
+                <label class="form-label fw-bold">Date Selection Mode</label>
+
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="date_mode" value="range" checked>
+                    <label class="form-check-label">Date Range</label>
                 </div>
 
-                <div class="col">
-                    <label class="form-label fw-bold">End Date</label>
-                    <input type="text" class="form-control" placeholder="End date" autocomplete="off">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="date_mode" value="multiple">
+                    <label class="form-check-label">Multiple Dates</label>
                 </div>
             </div>
 
+            <!-- Date Picker -->
+            <div id="rangeWrapper">
+                <div class="row g-2" id="dateRangeInputs">
+                    <div class="col">
+                        <label class="form-label fw-bold">Start Date</label>
+                        <input type="text" class="form-control" placeholder="Start date" autocomplete="off">
+                    </div>
+
+                    <div class="col">
+                        <label class="form-label fw-bold">End Date</label>
+                        <input type="text" class="form-control" placeholder="End date" autocomplete="off">
+                    </div>
+                </div>
+            </div>
+
+            <div id="multipleWrapper" style="display:none;">
+
+                <label class="form-label fw-bold">Select Dates</label>
+
+                <div id="multipleDatesContainer" class="mb-2"></div>
+
+                <button type="button" class="btn btn-sm btn-outline-primary" id="addDateBtn">
+                    + Add Date
+                </button>
+
+            </div>
 
         </div>
 
@@ -138,6 +165,9 @@
                 Add Block
             </button>
 
+            <button type="button" class="btn btn-danger px-4" id="deleteEntireBlock">
+                Delete Entire Month
+            </button>
 
         </div>
     </div>
@@ -163,9 +193,21 @@
         const categorySelect = document.querySelector('select[name="category_ids[]"]');
         const productSelect  = document.querySelector('select[name="product_ids[]"]');
         const addBlockBtn    = document.getElementById('addBlock');
+        const deleteBlockBtn = document.getElementById('deleteEntireBlock');
         const dateInput      = document.getElementById('blockDates');
         const allDayCheckbox = document.getElementById('allday');
         const timeSlots      = document.querySelectorAll('.time-slot');
+
+        allDayCheckbox.checked = true;
+        timeSlots.forEach(cb => {
+            cb.disabled = allDayCheckbox.checked;
+            if (allDayCheckbox.checked) cb.checked = false;
+        });
+
+
+        let selectedEvent = null;
+        let clickedDate = null;
+        let dates = [];
 
         const categoryMap = @json($categories->pluck('name', 'id'));
         const productMap  = @json($products->pluck('name', 'id'));
@@ -183,7 +225,7 @@
         /* ---------------------------------------------------
         * 2. DATEPICKER INITIALIZATION
         * --------------------------------------------------- */
-        const datepicker = new DateRangePicker(
+        let rangePicker = new DateRangePicker(
             document.getElementById('dateRangeInputs'),
             {
                 format: 'yyyy-mm-dd',
@@ -215,6 +257,92 @@
             eventTextColor: '#000',
             eventBorderColor: '#000',
             events: '/blocks/events',
+            eventClick: function(info) {
+                selectedEvent = info.event;
+
+                const x = info.jsEvent.clientX;
+                const y = info.jsEvent.clientY;
+
+                document.querySelectorAll('[data-date]').forEach(cell => {
+                    const rect = cell.getBoundingClientRect();
+
+                    if (
+                        x >= rect.left &&
+                        x <= rect.right &&
+                        y >= rect.top &&
+                        y <= rect.bottom
+                    ) {
+                        clickedDate = cell.getAttribute('data-date');
+                    }
+                });
+
+                const props = info.event.extendedProps;
+
+                // Scope
+                document.getElementById('modalScope').innerText =
+                    props.scope.toUpperCase();
+
+                document.getElementById('modalBlockType').innerText =
+                    formatBlockType(props.block_type);
+
+                // MULTIPLE CATEGORIES
+                const categoryEl = document.getElementById('modalCategory');
+                if (props.categories && props.categories.length) {
+                    categoryEl.innerHTML = props.categories
+                        .map(c => `<span class="badge badge-pill badge-light border mr-1">${c.name}</span>`)
+                        .join('');
+                } else {
+                    categoryEl.innerText = '—';
+                }
+
+                // MULTIPLE PRODUCTS
+                const productEl = document.getElementById('modalProduct');
+                if (props.products && props.products.length) {
+                    productEl.innerHTML = props.products
+                        .map(p => `<span class="badge badge-secondary mr-1">${p.name}</span>`)
+                        .join('');
+                } else {
+                    productEl.innerText = '—';
+                }
+
+                let type = '';
+                
+                if (props.block_type) {
+
+                    if (props.block_type === 'delivery') type = 'DELIVERY';
+                    else if (props.block_type === 'pickup') type = 'PICKUP';
+                    else type = props.block_type.toUpperCase();
+                }
+
+                document.getElementById('modalBlockType').innerText =
+                    type + ' BLOCK';
+
+                // Date (range-aware)
+                // format date to Feb 05, 2026
+                if (info.event.start && info.event.end) {
+
+                    const start = info.event.start;
+                    const end = new Date(info.event.end);
+
+                    end.setDate(end.getDate() - 1);
+
+                    if (start.toDateString() !== end.toDateString()) {
+                        document.getElementById('modalDate').innerText =
+                            formatDateLocal(start) + ' - ' + formatDateLocal(end);
+                    } else {
+                        document.getElementById('modalDate').innerText =
+                            formatDateLocal(start);
+                    }
+                }
+
+                // Time
+                document.getElementById('modalTime').innerText =
+                    props.is_all_day
+                        ? 'Whole day'
+                        : formatTimeDisplay(props.start_time) + ' - ' + formatTimeDisplay(props.end_time);
+
+                $('#blockModal').modal('show');
+            }
         });
         
         calendar.render();
@@ -232,6 +360,19 @@
 
                 categorySelect.disabled = value !== 'category';
                 productSelect.disabled  = value !== 'product';
+
+                if (value === 'product') {
+                    $('#category').val(null).trigger('change');
+                }
+
+                if (value === 'category') {
+                    $('#product').val(null).trigger('change');
+                }
+
+                if (value === 'all') {
+                    $('#category').val(null).trigger('change');
+                    $('#product').val(null).trigger('change');
+                }
 
                 if (categorySelect.disabled) {
                     categorySelect.selectedIndex = -1;
@@ -258,17 +399,6 @@
         * --------------------------------------------------- */
         addBlockBtn.addEventListener('click', async () => {
 
-            const ranges = datepicker.getDates();
-
-            const startDate = ranges[0];
-            const endDate   = ranges[1];
-
-            if (!startDate || !endDate) {
-                alert('Please select start and end dates');
-                return;
-            }
-
-            const dates = expandDateRange(startDate, endDate);
             const isAllDay = allDayCheckbox.checked;
 
             let times = [];
@@ -283,6 +413,35 @@
 
                 if (!times.length) {
                     alert('Select at least one time slot.');
+                    return;
+                }
+            }
+
+            const mode = document.querySelector('input[name="date_mode"]:checked').value;
+
+            let ranges = [];
+
+            if (mode === 'range') {
+
+                ranges = rangePicker.getDates();
+
+                if (!ranges[0] || !ranges[1]) {
+                    alert('Select start and end date');
+                    return;
+                }
+
+                dates = expandDateRange(ranges[0], ranges[1]);
+
+            } else {
+
+                document.querySelectorAll('.single-date').forEach(input => {
+                    if (input.value) {
+                        dates.push(input.value);
+                    }
+                });
+
+                if (!dates.length) {
+                    alert('Select at least one date');
                     return;
                 }
             }
@@ -348,9 +507,14 @@
         }
 
         function resetForm() {
-            datepicker.setDates([null, null]);
-            timeSlots.forEach(cb => { cb.checked = false; cb.disabled = false; });
-            allDayCheckbox.checked = false;
+            rangePicker.setDates([null, null]);
+            timeSlots.forEach(cb => {
+                cb.disabled = allDayCheckbox.checked;
+                if (allDayCheckbox.checked) cb.checked = false;
+            });
+            allDayCheckbox.checked = true;
+            dates = [];
+            times = [];
         }
 
         function formatDateLocal(date) {
@@ -379,69 +543,8 @@
             return dates;
         }
 
-        let selectedEvent = null;
-
         calendar.on('eventClick', function(info) {
-
-            selectedEvent = info.event;
-
-            const props = info.event.extendedProps;
-
-            // Scope
-            document.getElementById('modalScope').innerText =
-                props.scope.toUpperCase();
-
-            document.getElementById('modalBlockType').innerText =
-                formatBlockType(props.block_type);
-
-            // MULTIPLE CATEGORIES
-            const categoryEl = document.getElementById('modalCategory');
-            if (props.categories && props.categories.length) {
-                categoryEl.innerHTML = props.categories
-                    .map(c => `<span class="badge badge-pill badge-light border mr-1">${c.name}</span>`)
-                    .join('');
-            } else {
-                categoryEl.innerText = '—';
-            }
-
-            // MULTIPLE PRODUCTS
-            const productEl = document.getElementById('modalProduct');
-            if (props.products && props.products.length) {
-                productEl.innerHTML = props.products
-                    .map(p => `<span class="badge badge-secondary mr-1">${p.name}</span>`)
-                    .join('');
-            } else {
-                productEl.innerText = '—';
-            }
-
-            let type = '';
-            
-            if (props.block_type) {
-
-                if (props.block_type === 'delivery') type = 'DELIVERY';
-                else if (props.block_type === 'pickup') type = 'PICKUP';
-                else type = props.block_type.toUpperCase();
-            }
-
-            document.getElementById('modalBlockType').innerText =
-                type + ' BLOCK';
-
-            // Date (range-aware)
-            // format date to Feb 05, 2026
-            if (info.event.start !== info.event.end) {
-                document.getElementById('modalDate').innerText = formatDateLocal(info.event.start) + ' - ' + formatDateLocal(info.event.end);
-            } else {
-                document.getElementById('modalDate').innerText =
-                    formatDateLocal(info.event.start);
-            }
-
-            // Time
-            document.getElementById('modalTime').innerText =
-                props.is_all_day
-                    ? 'Whole day'
-                    : formatTimeDisplay(props.start_time) + ' - ' + formatTimeDisplay(props.end_time);
-
-            $('#blockModal').modal('show');
+            //
         });
 
         function formatBlockType(type) {
@@ -453,19 +556,116 @@
             }
         }
 
-        document.getElementById('deleteBlock').addEventListener('click', async () => {
-            if (!selectedEvent) return;
+        deleteBlockBtn.addEventListener('click', async () => {
+            if (!confirm('This will delete all blocks for the selected month. Are you sure?')) return;
 
-            await fetch(`/blocks/${selectedEvent.id}`, {
-                method: 'DELETE',
+            const currentDate = calendar.getDate();
+
+            const year = currentDate.getFullYear();
+            const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+
+            const formattedMonth = `${year}-${month}`;
+
+            await fetch("{{ route('blocks.destroy-month') }}", {
+                method: 'POST',
                 headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
-                }
+                },
+                body: JSON.stringify({
+                    month: formattedMonth
+                })
             });
 
             calendar.refetchEvents();
             
             $('#blockModal').modal('hide');
+        });
+
+        document.getElementById('deleteBlock').addEventListener('click', async () => {
+            if (!selectedEvent) return;
+
+            if (!confirm('This will delete the entire block group. Are you sure?')) return;
+
+            const groupId = selectedEvent.extendedProps.group_id;
+
+            await fetch(`/blocks/${groupId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                },
+                body: JSON.stringify({
+                    date: clickedDate
+                })
+            });
+
+            calendar.refetchEvents();
+            
+            $('#blockModal').modal('hide');
+        });
+
+        const rangeWrapper = document.getElementById('rangeWrapper');
+        const multipleWrapper = document.getElementById('multipleWrapper');
+
+        document.querySelectorAll('input[name="date_mode"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+
+                if (radio.value === 'range' && radio.checked) {
+                    rangeWrapper.style.display = '';
+                    multipleWrapper.style.display = 'none';
+                }
+
+                if (radio.value === 'multiple' && radio.checked) {
+                    rangeWrapper.style.display = 'none';
+                    multipleWrapper.style.display = '';
+                }
+
+            });
+        });
+
+        const container = document.getElementById('multipleDatesContainer');
+        const addBtn = document.getElementById('addDateBtn');
+
+        let pickers = [];
+
+        function addDatePicker(value = '') {
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'd-flex gap-2 mb-2';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'form-control single-date';
+            input.placeholder = 'Select date';
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'btn btn-danger btn-sm';
+            removeBtn.innerText = '✕';
+
+            removeBtn.onclick = () => {
+                wrapper.remove();
+            };
+
+            wrapper.appendChild(input);
+            wrapper.appendChild(removeBtn);
+            container.appendChild(wrapper);
+
+            const picker = new Datepicker(input, {
+                format: 'yyyy-mm-dd',
+                autohide: true
+            });
+
+            pickers.push(picker);
+        }
+
+        // initial one
+        addDatePicker();
+
+        addBtn.addEventListener('click', () => {
+            addDatePicker();
         });
     });
 </script>

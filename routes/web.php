@@ -1021,6 +1021,7 @@ Route::get('driver', function() {
 
 Route::get('/blocks/events', [BlockSlotController::class, 'events'])->name('blocks.events');
 Route::post('/blocks', [BlockSlotController::class, 'store'])->name('blocks.store');
+Route::post('/blocks/delete-month', [BlockSlotController::class, 'destroyMonth'])->name('blocks.destroy-month');
 Route::post('/blocks/{id}', [BlockSlotController::class, 'destroy'])->name('blocks.destroy');
 Route::post('/checkout/blocks', [BlockSlotController::class, 'getCheckoutBlocks'])->name('checkout.blocks');
 Route::get('paymaya-payment-check/{id}', function($id) {

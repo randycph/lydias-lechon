@@ -186,6 +186,31 @@ class BlockSlotController extends Controller
         ]);
     }
 
+    public function destroyMonth(Request $request)
+    {
+        $request->validate([
+            'month' => 'required|date_format:Y-m',
+        ]);
+
+        $monthStart = Carbon::createFromFormat('Y-m', $request['month'])->startOfMonth()->toDateString();
+        $monthEnd = Carbon::createFromFormat('Y-m', $request['month'])->endOfMonth()->toDateString();
+
+        DB::transaction(function () use ($monthStart, $monthEnd) {
+
+            $blocks = BlockedSlot::whereBetween('date', [$monthStart, $monthEnd])->get();
+
+            foreach ($blocks as $block) {
+                $block->products()->detach();
+                $block->categories()->detach();
+                $block->delete();
+            }
+        });
+
+        return response()->json([
+            'message' => 'Blocks for the month deleted successfully'
+        ]);
+    }
+
     private function formatEvent($b)
     {
         return [
