@@ -1558,6 +1558,9 @@ class ReportsController extends Controller
                         ]);
                     })
                     ->whereNotNull('created_by')
+                    ->whereHas('user', function ($query) {
+                        $query->where('user_type', 'cms');
+                    })
                     ->whereNotNull('role')
                     ->when($module, function ($query) use ($module) {
                         $query->where('db_table', $module);
