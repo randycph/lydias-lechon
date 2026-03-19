@@ -743,13 +743,138 @@ Website Settings
             </div>
 
 
-            <div class="modal-footer">
-                <button class="btn btn-danger" id="deleteBlock">Delete</button>
-                <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <div class="modal-footer justify-content-between">
+                <div>
+                    <button class="btn btn-danger" id="deleteBlock">Delete</button>
+                </div>
+                <div>
+                    <button class="btn btn-primary" id="editBlock">Edit</button>
+                    {{-- <button class="btn btn-secondary" data-dismiss="modal">Close</button> --}}
+                </div>
             </div>
 
         </div>
     </div>
+</div>
+<div class="modal fade" id="editBlockModal" role="dialog" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Block</h5>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Scope -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Scope</label>
+
+          <div class="form-check">
+            <input type="radio" name="edit_scope" value="all" class="form-check-input" id="editScopeAll">
+            <label class="form-check-label" for="editScopeAll">All</label>
+          </div>
+
+          <div class="form-check">
+            <input type="radio" name="edit_scope" value="category" class="form-check-input" id="editScopeCategory">
+            <label class="form-check-label" for="editScopeCategory">Category</label>
+          </div>
+
+          <div class="form-check">
+            <input type="radio" name="edit_scope" value="product" class="form-check-input" id="editScopeProduct">
+            <label class="form-check-label" for="editScopeProduct">Product</label>
+          </div>
+        </div>
+
+        <!-- Category -->
+        <div class="mb-3" id="editCategoryWrapper">
+          <label class="form-label fw-bold">Categories</label>
+          <select id="editCategory" class="select2 form-control" name="editCategory_ids[]" disabled multiple>
+                @foreach ($categories as $category)
+                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                @endforeach
+          </select>
+        </div>
+
+        <!-- Product -->
+        <div class="mb-3" id="editProductWrapper">
+          <label class="form-label fw-bold">Products</label>
+          <select id="editProduct" class="select2 form-control" name="editProduct_ids[]" disabled multiple>
+                @foreach ($products as $product)
+                <option value="{{ $product->id }}">{{ $product->name }}</option>
+                @endforeach
+          </select>
+        </div>
+
+        <!-- Date Mode -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Date Mode</label>
+
+          <div class="form-check">
+            <input type="radio" name="edit_date_mode" value="range" class="form-check-input" id="editRangeLabel">
+            <label class="form-check-label" for="editRangeLabel">Date Range</label>
+          </div>
+
+          <div class="form-check">
+            <input type="radio" name="edit_date_mode" value="multiple" class="form-check-input" id="editMultipleLabel">
+            <label class="form-check-label" for="editMultipleLabel">Multiple Dates</label>
+          </div>
+        </div>
+
+        <!-- Date Range -->
+        <div id="editRangeWrapper">
+          <div id="editDateRangeInputs" class="row g-2">
+            <div class="col">
+              <input type="text" class="form-control edit-start">
+            </div>
+            <div class="col">
+              <input type="text" class="form-control edit-end">
+            </div>
+          </div>
+        </div>
+
+        <!-- Multiple Dates -->
+        <div id="editMultipleWrapper" style="display:none;">
+          <div id="editMultipleDates"></div>
+          <button class="btn btn-sm btn-outline-primary mt-2" id="editAddDate">+ Add Date</button>
+        </div>
+
+        <!-- Time Slots -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Time Slots</label>
+          <select id="editTimes" class="form-control select2" disabled multiple>
+            @foreach (range(9, 19) as $hour)
+                <option value="{{ sprintf('%02d:00', $hour) }}">
+                    {{ sprintf('%02d:00 %s', ($hour > 12 ? $hour - 12 : $hour), ($hour >= 12 ? 'PM' : 'AM')) }}
+                </option>
+            @endforeach
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="editAllday">
+            <label class="form-check-label" for="editAllday">Block whole day</label>
+          </div>
+        </div>
+
+        <!-- Block Type -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Block Type</label>
+          <select id="editBlockType" class="form-control">
+            <option value="both">Delivery & Pickup</option>
+            <option value="delivery">Delivery Only</option>
+            <option value="pickup">Pickup Only</option>
+          </select>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="saveEditBlock">Update</button>
+      </div>
+    </div>
+  </div>
 </div>
 @include('admin.settings.website.modal')
 @endsection

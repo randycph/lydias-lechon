@@ -297,4 +297,49 @@ class BlockSlotController extends Controller
 
         return response()->json($blocks);
     }
+
+    public function updateGroup(Request $request, $groupId)
+    {
+        dd($request->all(), $groupId);
+        DB::transaction(function () use ($groupId, $request) {
+
+            // delete existing group
+            $blocks = BlockedSlot::where('group_id', $groupId)->get();
+
+            foreach ($blocks as $block) {
+                $block->products()->detach();
+                $block->categories()->detach();
+                $block->delete();
+            }
+
+            // recreate with same group_id
+            $this->storeWithGroupId($request, $groupId);
+        });
+
+        return response()->json(['message' => 'Block updated']);
+    }
+
+    private function storeWithGroupId($validated, $groupId)
+    {
+        foreach ($validated['dates'] as $date) {
+
+            $blockedSlot = BlockedSlot::create([
+                'scope' => $validated['scope'],
+                'block_type' => $validated['block_type'],
+                'date' => $date,
+                'start_time' => $validated['is_all_day'] ? null : $validated['times'][0]['start'],
+                'end_time' => $validated['is_all_day'] ? null : $validated['times'][0]['end'],
+                'is_all_day' => $validated['is_all_day'],
+                'group_id' => $groupId,
+            ]);
+
+            if (!empty($validated['product_ids'])) {
+                $blockedSlot->products()->attach($validated['product_ids']);
+            }
+
+            if (!empty($validated['category_ids'])) {
+                $blockedSlot->categories()->attach($validated['category_ids']);
+            }
+        }
+    }
 }

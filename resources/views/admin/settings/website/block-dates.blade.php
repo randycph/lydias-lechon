@@ -197,6 +197,7 @@
         const dateInput      = document.getElementById('blockDates');
         const allDayCheckbox = document.getElementById('allday');
         const timeSlots      = document.querySelectorAll('.time-slot');
+        const editBlockBtn    = document.getElementById('editBlock');
 
         allDayCheckbox.checked = true;
         timeSlots.forEach(cb => {
@@ -208,6 +209,8 @@
         let selectedEvent = null;
         let clickedDate = null;
         let dates = [];
+
+        const isEditing = !!window.editingGroupId;
 
         const categoryMap = @json($categories->pluck('name', 'id'));
         const productMap  = @json($products->pluck('name', 'id'));
@@ -394,6 +397,17 @@
             });
         });
 
+        const editAlldayCheckbox = document.getElementById('editAllday');
+        editAlldayCheckbox.checked = true;
+        if (editAlldayCheckbox) {
+            editAlldayCheckbox.addEventListener('change', () => {
+                document.getElementById('editTimes').disabled = editAlldayCheckbox.checked;
+                if (!editAlldayCheckbox.checked) {
+                    $('#editTimes').val([]).trigger('change');
+                }
+            });
+        }
+
         /* ---------------------------------------------------
         * 6. ADD BLOCK → CALENDAR
         * --------------------------------------------------- */
@@ -544,7 +558,7 @@
         }
 
         calendar.on('eventClick', function(info) {
-            //
+            selectedEvent = info.event;
         });
 
         function formatBlockType(type) {
@@ -555,6 +569,231 @@
                 default: return type;
             }
         }
+
+        $('#editCategory').select2({ placeholder: 'Select category', width: '100%' });
+        $('#editProduct').select2({ placeholder: 'Select product', width: '100%' });
+        $('#editTimes').select2({ placeholder: 'Select time slot', width: '100%' });
+
+        const editRangePicker = new DateRangePicker(
+            document.getElementById('editDateRangeInputs'),
+            {
+                format: 'yyyy-mm-dd',
+                autohide: false
+            }
+        );
+
+        function addEditDate(date = null) {
+
+            const container = document.getElementById('editMultipleDates');
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'd-flex gap-2 mb-2';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'form-control edit-single-date';
+            input.placeholder = 'Select date';
+
+            // dont show remove button for first date if it's the only one left
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'btn btn-danger btn-sm';
+            removeBtn.innerText = '✕';
+            removeBtn.type = 'button';
+
+            if (container.children.length === 0) {
+                removeBtn.style.visibility = 'hidden';
+            }
+
+            removeBtn.onclick = () => wrapper.remove();
+
+            wrapper.appendChild(input);
+            wrapper.appendChild(removeBtn);
+            container.appendChild(wrapper);
+
+            const picker = new Datepicker(input, {
+                format: 'yyyy-mm-dd',
+                autohide: true
+            });
+
+            // set value if editing existing
+            if (date) {
+                picker.setDate(date);
+            }
+        }
+
+        function getEditDates() {
+
+            const mode = document.querySelector('input[name="edit_date_mode"]:checked').value;
+
+            let dates = [];
+
+            if (mode === 'range') {
+
+                const ranges = editRangePicker.getDates();
+
+                if (!ranges[0] || !ranges[1]) {
+                    alert('Select start and end date');
+                    return [];
+                }
+
+                dates = expandDateRange(ranges[0], ranges[1]);
+
+            } else {
+
+                document.querySelectorAll('.edit-single-date').forEach(input => {
+                    if (input.value) {
+                        dates.push(input.value);
+                    }
+                });
+
+                if (!dates.length) {
+                    alert('Select at least one date');
+                }
+            }
+
+            return [...new Set(dates)].sort();
+        }
+
+        document.getElementById('editAddDate').addEventListener('click', () => {
+            addEditDate();
+        });
+        
+        document.querySelectorAll('input[name="edit_date_mode"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+
+                if (radio.value === 'range' && radio.checked) {
+                    document.getElementById('editRangeWrapper').style.display = '';
+                    document.getElementById('editMultipleWrapper').style.display = 'none';
+                }
+
+                if (radio.value === 'multiple' && radio.checked) {
+                    document.getElementById('editRangeWrapper').style.display = 'none';
+                    document.getElementById('editMultipleWrapper').style.display = '';
+                }
+            });
+        });
+
+        editBlockBtn.addEventListener('click', () => {
+
+            const props = selectedEvent.extendedProps;
+
+            window.editingGroupId = props.group_id;
+
+            // clear multiple dates
+            document.getElementById('editMultipleDates').innerHTML = '';
+
+            // clear range
+            editRangePicker.setDates([]);
+
+            $('#editCategory').val([]).trigger('change');
+            $('#editProduct').val([]).trigger('change');
+
+            // Scope
+            // $(`input[name="edit_scope"][value="${props.scope}"]`).prop('checked', true).trigger('change');
+
+            const editScopeRadios = document.querySelectorAll('input[name="edit_scope"]');
+            const editCategorySelect = document.querySelector('select[name="editCategory_ids[]"]');
+            const editProductSelect  = document.querySelector('select[name="editProduct_ids[]"]');
+
+            editScopeRadios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    const value = radio.value;
+
+                    editCategorySelect.disabled = value !== 'category';
+                    editProductSelect.disabled  = value !== 'product';
+
+                    if (value === 'product') {
+                        $('#editCategory').val([]).trigger('change');
+                    }
+
+                    if (value === 'category') {
+                        $('#editProduct').val([]).trigger('change');
+                    }
+
+                    if (value === 'all') {
+                        $('#editCategory').val([]).trigger('change');
+                        $('#editProduct').val([]).trigger('change');
+                    }
+
+                    if (editCategorySelect.disabled) {
+                        editCategorySelect.selectedIndex = -1;
+                    }
+
+                    if (editProductSelect.disabled) {
+                        editProductSelect.selectedIndex = -1;
+                    }
+                });
+            });
+
+
+            // Block type
+            $('#editBlockType').val(props.block_type).trigger('change');
+
+            // Categories
+            if (props.categories?.length) {
+                const ids = props.categories.map(c => c.id);
+                $('#editCategory').val(ids).trigger('change');
+            }
+
+            // Products
+            if (props.products?.length) {
+                const ids = props.products.map(p => p.id);
+                $('#editProduct').val(ids).trigger('change');
+            }
+
+            // Dates
+            const start = selectedEvent.start;
+            const end = new Date(selectedEvent.end);
+            end.setDate(end.getDate() - 1);
+
+            // Detect range vs single
+            if (start.toDateString() === end.toDateString()) {
+                $('input[name="edit_date_mode"][value="multiple"]').prop('checked', true);
+                $('#editRangeWrapper').hide();
+                $('#editMultipleWrapper').show();
+                addEditDate(start);
+            } else {
+                $('input[name="edit_date_mode"][value="range"]').prop('checked', true);
+                $('#editRangeWrapper').show();
+                $('#editMultipleWrapper').hide();
+                editRangePicker.setDates([start, end]);
+            }
+
+            // Time
+            if (!props.is_all_day) {
+                $('#editTimes').val([props.start_time.slice(0,5)]).trigger('change');
+            } else {
+                $('#editTimes').val([]).trigger('change');
+            }
+
+            $('#blockModal').modal('hide');
+            $('#editBlockModal').modal('show');
+        });
+
+        document.getElementById('saveEditBlock').addEventListener('click', async () => {
+
+            const payload = {
+                scope: $('input[name="edit_scope"]:checked').val(),
+                block_type: $('#editBlockType').val(),
+                category_ids: $('#editCategory').val(),
+                product_ids: $('#editProduct').val(),
+                dates: getEditDates(),
+                is_all_day: $('#editTimes').val().length === 0,
+                times: buildTimePayload($('#editTimes').val())
+            };
+
+            await fetch(`/blocks/group/${window.editingGroupId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                },
+                body: JSON.stringify(payload)
+            });
+
+            $('#editBlockModal').modal('hide');
+            calendar.refetchEvents();
+        });
 
         deleteBlockBtn.addEventListener('click', async () => {
             if (!confirm('This will delete all blocks for the selected month. Are you sure?')) return;
@@ -644,6 +883,10 @@
             const removeBtn = document.createElement('button');
             removeBtn.className = 'btn btn-danger btn-sm';
             removeBtn.innerText = '✕';
+
+            if (container.children.length === 0) {
+                removeBtn.style.visibility = 'hidden';
+            }
 
             removeBtn.onclick = () => {
                 wrapper.remove();
