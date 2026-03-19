@@ -10,6 +10,8 @@ trait LogsActivityDiff
 {
     public static function bootLogsActivityDiff(): void
     {
+        if (app()->runningUnitTests()) return;
+
         static::updating(function (Model $model) {
             // Don’t log ActivityLog updates to avoid recursion.
             if ($model instanceof ActivityLog) {
