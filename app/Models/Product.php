@@ -8,14 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\EcommerceModel\Member;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Product extends Model
 {
     use SoftDeletes;
+    use HasFactory;
 
     public $table = 'products';
     protected $fillable = ['free', 'order', 'upsell', 'sold_out', 'code', 'category_id', 'name', 'slug', 'short_description', 'description', 'currency', 'price', 'size', 'weight', 'no_of_pax', 'for_sale', 'status', 'is_featured', 'uom', 'created_by', 'meta_title', 'meta_keyword', 'meta_description','is_group','paella_price','for_sale_web','for_sale_kiosk','is_misc','production_item' ];
-
+    
     public function get_url()
     {
         return env('APP_URL')."/products/".$this->slug;

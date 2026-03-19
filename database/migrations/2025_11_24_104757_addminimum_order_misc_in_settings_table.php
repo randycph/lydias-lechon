@@ -12,7 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('settings', function (Blueprint $table) {
-            $table->decimal('minimum_order_misc', 10, 2)->default(0)->after('minimum_processing_hours_misc');
+            if (!Schema::hasColumn('settings', 'minimum_processing_hours_misc')) {
+                $table->decimal('minimum_processing_hours_misc', 10, 2)->default(0);
+            }
+
+            if (!Schema::hasColumn('settings', 'minimum_order_misc')) {
+                $table->decimal('minimum_order_misc', 10, 2)->default(0)->after('minimum_processing_hours_misc');
+            }
         });
     }
 

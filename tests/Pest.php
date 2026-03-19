@@ -1,9 +1,13 @@
 <?php
 
-use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 
-uses(TestCase::class)->in('Feature', 'Unit');
+uses(
+    Tests\TestCase::class,
+    RefreshDatabase::class
+)->in('Feature', 'Unit');
 
-// Optional but recommended
-uses(RefreshDatabase::class)->in('Feature');
+beforeEach(function () {
+    \App\Models\Setting::factory()->create();
+});
