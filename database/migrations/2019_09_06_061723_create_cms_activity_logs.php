@@ -6,6 +6,8 @@ use Illuminate\Database\Migrations\Migration;
 return new class extends Migration {
     public function up(): void
     {
+        $tableName = env('DB_DATABASE');
+
         DB::statement('DROP VIEW IF EXISTS view_activity_logs');
 
         DB::statement("
@@ -28,12 +30,12 @@ return new class extends Migration {
             FROM
                 (
                     (
-                        `lydias_db1_test`.`cms_activity_logs` `l`
-                    LEFT JOIN `lydias_db1_test`.`users` `u`
+                        $tableName.`cms_activity_logs` `l`
+                    LEFT JOIN $tableName.`users` `u`
                     ON
                         ((`u`.`id` = `l`.`created_by`))
                     )
-                LEFT JOIN `lydias_db1_test`.`role` `r`
+                LEFT JOIN $tableName.`role` `r`
                 ON
                     ((`r`.`id` = `u`.`role_id`))
                 )

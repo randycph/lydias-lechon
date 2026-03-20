@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
+        $tableName = env('DB_DATABASE');
+        
         DB::statement('DROP VIEW IF EXISTS view_role_permission');
 
         Schema::create('cms_activity_logs', function (Blueprint $table) {
@@ -27,23 +29,23 @@ return new class extends Migration {
         DB::statement("
         CREATE VIEW view_role_permission AS
             SELECT
-                `lydias_db1_test`.`role_permission`.`user_id` AS `user_id`,
-                `lydias_db1_test`.`role_permission`.`role_id` AS `role`,
-                `lydias_db1_test`.`permission`.`name` AS `name`,
-                `lydias_db1_test`.`permission`.`module` AS `permission_module`
+                $tableName.`role_permission`.`user_id` AS `user_id`,
+                $tableName.`role_permission`.`role_id` AS `role`,
+                $tableName.`permission`.`name` AS `name`,
+                $tableName.`permission`.`module` AS `permission_module`
             FROM
                 (
-                    `lydias_db1_test`.`role_permission`
-                JOIN `lydias_db1_test`.`permission` ON
+                    $tableName.`role_permission`
+                JOIN $tableName.`permission` ON
                     (
                         (
-                            `lydias_db1_test`.`role_permission`.`permission_id` = `lydias_db1_test`.`permission`.`id`
+                            `$tableName`.`role_permission`.`permission_id` = `$tableName`.`permission`.`id`
                         )
                     )
                 )
             WHERE
                 (
-                    `lydias_db1_test`.`role_permission`.`isAllowed` = 1
+                    `$tableName`.`role_permission`.`isAllowed` = 1
                 )
 
         ");
