@@ -10,9 +10,9 @@ use App\Jobs\SendSmsJob;
 
 class NotificationService
 {
-    public function send($salesHeader, $user, $request)
+    public function send($salesHeader, $user, $request = null)
     {
-        $recipient = $user->valid_email ?? $user->email ?? $request->email;
+        $recipient = $user->valid_email ?? $user->email ?? $request?->email;
 
         // EMAILS (QUEUED AUTOMATICALLY)
         try {

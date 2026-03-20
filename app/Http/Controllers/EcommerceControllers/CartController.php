@@ -45,6 +45,8 @@ use App\Services\PaymentService;
 use App\Services\CartService;
 use App\Services\ProcessingService;
 use App\Services\SalesCalculator;
+use App\Services\SalesValidationService;
+use App\Services\SendNotification;
 
 class CartController extends Controller
 {
@@ -887,559 +889,386 @@ class CartController extends Controller
         DeliveryService $deliveryService,
         CouponService $couponService,
         NotificationService $notificationService,
-        PaymentService $paymentService
-    ) {
-        return DB::transaction(function () use (
-            $request, 
-            $cartService,
-            $processingService,
-            $calculator,
-            $deliveryService,
-            $couponService,
-            $notificationService,
-            $paymentService
-        ) {
-            // =============================
-            // 1. USER
-            // =============================
-            $user = auth()->check() ? auth()->user() : null;
+        PaymentService $paymentService,
+        SalesValidationService $salesValidationService,
+        SendNotification $sendNotification
+    ) 
+    {
+        // =============================
+        // 1. USER
+        // =============================
+        $user = auth()->check() ? auth()->user() : null;
 
-            // =============================
-            // 2. CART
-            // =============================
-            $carts = $cartService->getCart($user);
-            $carts = $cartService->attachBakaService($carts, $user);
-            $couponData = json_decode($request->input('coupon_data'), true);
-            // $carts = $couponService->applyFreeProducts($carts, $couponData);
+        // =============================
+        // 2. CART
+        // =============================
+        $carts = $cartService->getCart($user);
+        $carts = $cartService->attachBakaService($carts, $user);
+        $couponData = json_decode($request->input('coupon_data'), true);
+        // $carts = $couponService->applyFreeProducts($carts, $couponData);
 
-            // =============================
-            // 3. SETTINGS
-            // =============================
-            $setting = \App\Models\Setting::first();
+        // =============================
+        // 3. SETTINGS
+        // =============================
+        $setting = \App\Models\Setting::first();
+        $bakaProduct = Product::find(270);
+        $minHours = $processingService->resolveMinHours($carts, $setting);
+        $minimum_processing_hours = $setting ? $setting->minimum_processing_hours : 24;
+        $minimum_processing_hours_misc = $setting ? $setting->minimum_processing_hours_misc : 12;
+        $minimum_processing_hours_baka = $setting ? $setting->minimum_processing_hours_baka : 72;
 
-            $minHours = $processingService->resolveMinHours($carts, $setting);
+        $deliveries = json_decode($request->deliveries ?? '[]');
 
-            // =============================
-            // 4. VALIDATION
-            // =============================
-            $validator = Validator::make($request->all(), [
-                'mobile' => ['required','regex:/^(09|\+639)\d{9}$/'],
-                'name' => 'required',
-                'email' => 'required|email:rfc,dns',
+        // =============================
+        // 4. VALIDATION
+        // =============================
+
+        if ($res = $salesValidationService->common($request)) {
+            return $res;
+        }
+
+        if ($res = $salesValidationService->isPickup($request)) {
+            return $res;
+        }
+
+        if ($res = $salesValidationService->singleDeliveriesDatetime($request, $processingService, $minHours)) {
+            return $res;
+        }
+
+        if ($res = $salesValidationService->singleDeliveryLocation($request)) {
+            return $res;
+        }
+
+        if ($res = $salesValidationService->multiDeliveries($request, $deliveries, $processingService, $minimum_processing_hours, $minimum_processing_hours_misc, $minimum_processing_hours_baka)) {
+            return $res;
+        }
+
+        if ($res = $salesValidationService->processingTime($request, $processingService, $minHours)) {
+            return $res;
+        }
+
+        if ($res = $salesValidationService->noAmount($request)) {
+            return $res;
+        }
+
+        // =============================
+        // 5. USER (GUEST)
+        // =============================
+        if (!$user) {
+            $firstName = explode(' ', trim($request->name))[0] ?? 'Guest';
+            $lastName = trim(str_replace($firstName, '', trim($request->name))) ?: 'Guest';
+
+            $user = User::create([
+                'name' => $request->name,
+                'contact_mobile' => $request->mobile,
+                'email' => $request->email,
+                'valid_email' => $request->email,
+                'registration_type' => 'guest',
+                'registration_source' => 'Guest',
+                'password' => Hash::make(Str::random(10)),
+                'firstname' => $firstName,
+                'lastname' => $lastName,
+                'is_active' => 1,
+                'role_id' => 6
             ]);
+        }
 
-            $minimum_processing_hours = $setting ? $setting->minimum_processing_hours : 24;
-            $minimum_processing_hours_misc = $setting ? $setting->minimum_processing_hours_misc : 12;
-            $minimum_processing_hours_baka = $setting ? $setting->minimum_processing_hours_baka : 72;
-            $bakaProduct = Product::find(270);
+        $customer_name = $user->name;
 
-            if ($validator->fails()) {
-                return response()->json(['errors' => $validator->errors()], 422);
+        // =============================
+        // 6. DELIVERY
+        // =============================
+        $delivery_fee = 0;
+
+        if ($request->shipping_type == 'pickup') {
+            $delivery_type = 'Store Pickup';
+            $customer_delivery_address = $request->delivery_branch;
+            $outlet = $request->delivery_branch;
+        } else {
+            $delivery_type = 'Door to door delivery';
+            $delivery_fee = $request->delivery_fee ?? 0;
+            $customer_delivery_address = $request->delivery_address;
+            $outlet = '';
+        }
+
+        // =============================
+        // 7. BAKA LOGIC
+        // =============================
+        $bakaQty = 0;
+        foreach ($carts as $cart) {
+            if ($cart->product_id == 178) {
+                $bakaQty = $cart->qty;
+                break;
             }
+        }
 
-            if (!$request->has('deliveries') || empty($request->deliveries)) {
+        // =============================
+        // 8. TOTALS
+        // =============================
+        $totalPrice = (float)$request->order_amount + ( ($bakaProduct?->price ?? 0) * ($bakaQty ?? 0) );
+        $discount = (float)($request->discount_amount ?? 0);
+        $netAmount = $totalPrice + $delivery_fee - $discount;
 
-                if (!$request->need_date || !$request->need_time) {
-                    if (!$request->need_date) {
-                        return response()->json([
-                            'errors' => [
-                                'need_date' => ['Date is required']
-                            ]
-                        ], 422);
-                    }
+        // =============================
+        // 9. ORDER NUMBER
+        // =============================
+        $lastOrder = SalesHeader::withTrashed()
+            ->whereNull('parent_sales_header_id')
+            ->whereRaw('order_number REGEXP "^[0-9]{7}$"')
+            ->max('order_number');
 
-                    if (!$request->need_time) {
-                        return response()->json([
-                            'errors' => [
-                                'need_time' => ['Time is required']
-                            ]
-                        ], 422);
-                    }
-                }
+        $nextOrder = $lastOrder ? intval($lastOrder) + 1 : 1;
+        $orderNumber = sprintf('%07d', $nextOrder);
 
-                if (!$processingService->validate(
-                    $request->need_date,
-                    $request->need_time,
-                    $minHours
-                )) {
-                    return response()->json([
-                        'errors' => [
-                            'need_date' => ['Selected date/time does not meet minimum processing hours.']
-                        ]
-                    ], 422);
-                }
-            }
+        // =============================
+        // 10. EDIT MODE
+        // =============================
 
-            if (!$request->has('deliveries') && $request->shipping_type == 'delivery') {
+        if(Carbon::now()->format('H:i') > Setting::info()?->cutoff){
+            $forecast_date = date('Y-m-d', strtotime('+1 days'));
+        } else {
+            $forecast_date = date('Y-m-d');
+        }
 
-                if (!$request->delivery_address)
-                    return response()->json(['errors' => ['delivery_address' => ['Address is required.']]], 422);
+        if (session()->has('edit_sales_header_id') && !empty(session()->get('edit_sales_header_id'))) {
 
-                if (!$request->province)
-                    return response()->json(['errors' => ['province' => ['Province is required.']]], 422);
+            $salesHeader = SalesHeader::find(session()->get('edit_sales_header_id'));
 
-                if (!$request->city)
-                    return response()->json(['errors' => ['city' => ['City is required.']]], 422);
-
-                if (!$request->location)
-                    return response()->json(['errors' => ['location' => ['Barangay is required.']]], 422);
-            }
-
-            $deliveries = json_decode($request->deliveries ?? '[]');
-
-            if ($request->has('deliveries')) {
-
-                if (!is_array($deliveries)) {
-                    return response()->json([
-                        'errors' => ['deliveries' => ['Invalid delivery format.']]
-                    ], 422);
-                }
-
-                foreach ($deliveries as $index => $delivery) {
-
-                    if (empty($delivery->orders)) {
-                        return response()->json([
-                            'errors' => [
-                                "deliveries.$index.orders" =>
-                                    ["Please assign at least one order."]
-                            ]
-                        ], 422);
-                    }
-
-                    if (empty($delivery->need_time)) {
-                        return response()->json([
-                            'errors' => [
-                                "deliveries.$index.need_time" =>
-                                    ["Time is required for delivery ".($index+1)."."]]
-                        ], 422);
-                    }
-
-                    if (empty($delivery->need_date)) {
-                        return response()->json([
-                            'errors' => [
-                                "deliveries.$index.need_date" =>
-                                    ["Date is required for delivery ".($index+1)."."]]
-                        ], 422);
-                    }   
-
-                    if (empty($delivery->address))
-                        return response()->json(['errors' => ["deliveries.$index.address" => ["Address is required."]]], 422);
-
-                    if (empty($delivery->province))
-                        return response()->json(['errors' => ["deliveries.$index.province" => ["Province is required."]]], 422);
-
-                    if (empty($delivery->city))
-                        return response()->json(['errors' => ["deliveries.$index.city" => ["City is required."]]], 422);
-
-                    if (empty($delivery->location))
-                        return response()->json(['errors' => ["deliveries.$index.location" => ["Barangay is required."]]], 422);
-
-                    if (empty($delivery->name))
-                        return response()->json(['errors' => ["deliveries.$index.name" => ["Contact person is required."]]], 422);
-
-                    if (empty($delivery->phone)) {
-                        return response()->json(['errors' => ["deliveries.$index.phone" => ["Contact number is required."]]], 422);
-                    }
-                        
-                    if (!preg_match('/^(09|\+639)\d{9}$/', $delivery->phone)) {
-                        return response()->json([
-                            'errors' => [
-                                "deliveries.$index.phone" => ["Invalid mobile number format."]
-                            ]
-                        ], 422);
-                    }
-
-                    if (empty($delivery->need_date) || empty($delivery->need_time))
-                        return response()->json(['errors' => ["deliveries.$index.need_date" => ["Date and time are required."]]], 422);
-
-
-                    // PROCESSING HOURS PER DELIVERY
-
-                    $deliveryMinHours = 0;
-
-                    foreach ($delivery->orders as $order) {
-
-                        if (!isset($order->product)) continue;
-
-                        if ($order->product->slug === 'lechon-baka') {
-                            $deliveryMinHours = max($deliveryMinHours, $minimum_processing_hours_baka);
-
-                        } elseif ($order->product->is_misc == 1) {
-                            $deliveryMinHours = max($deliveryMinHours, $minimum_processing_hours_misc);
-
-                        } elseif ($order->product->category_id == 1) {
-                            $deliveryMinHours = max($deliveryMinHours, $minimum_processing_hours);
-                        }
-                    }
-
-                    if (!$processingService->validate(
-                        $delivery->need_date,
-                        $delivery->need_time,
-                        $deliveryMinHours
-                    )) {
-                        return response()->json([
-                            'errors' => [
-                                "deliveries.$index.need_date" =>
-                                    ["Delivery ".($index+1)." does not meet processing hours requirement."]
-                            ]
-                        ], 422);
-                    }
-                }
-            }
-
-            // =============================
-            // 5. PROCESSING TIME
-            // =============================
-            if ((!$request->need_date || !$request->need_time) && !$request->has('deliveries')) {
-                return response()->json([
-                    'errors' => ['need_date' => ['Date & time required']]
-                ], 422);
-            }
-
-            if (!$processingService->validate(
-                $request->need_date,
-                $request->need_time,
-                $minHours
-            ) && !$request->has('deliveries')) {
-                return response()->json([
-                    'errors' => ['need_date' => ['Processing time not met']]
-                ], 422);
-            }
-
-            // =============================
-            // 6. USER (GUEST)
-            // =============================
-            if (!$user) {
-                $firstName = explode(' ', trim($request->name))[0] ?? 'Guest';
-                $lastName = trim(str_replace($firstName, '', trim($request->name))) ?: 'Guest';
-
-                $user = User::create([
-                    'name' => $request->name,
-                    'contact_mobile' => $request->mobile,
-                    'email' => $request->email,
-                    'valid_email' => $request->email,
-                    'registration_type' => 'guest',
-                    'registration_source' => 'Guest',
-                    'password' => Hash::make(Str::random(10)),
-                    'firstname' => $firstName,
-                    'lastname' => $lastName,
-                    'is_active' => 1,
-                    'role_id' => 6
-                ]);
-            }
-
-            $customer_name = $user->name;
-
-            // =============================
-            // 7. DELIVERY
-            // =============================
-            $delivery_fee = 0;
-
-            if ($request->shipping_type == 'pickup') {
-                $delivery_type = 'Store Pickup';
-                $customer_delivery_address = $request->delivery_branch;
-                $outlet = $request->delivery_branch;
-            } else {
-                $delivery_type = 'Door to door delivery';
-                $delivery_fee = $request->delivery_fee ?? 0;
-                $customer_delivery_address = $request->delivery_address;
-                $outlet = '';
-            }
-
-            // =============================
-            // 8. BAKA LOGIC
-            // =============================
-            $bakaQty = 0;
-            foreach ($carts as $cart) {
-                if ($cart->product_id == 178) {
-                    $bakaQty = $cart->qty;
-                    break;
-                }
-            }
-
-            // =============================
-            // 9. TOTALS
-            // =============================
-            $totalPrice = (float)$request->order_amount + ( $bakaProduct->price * ($bakaQty ?? 0) );
-
-            $discount = (float)($request->discount_amount ?? 0);
-
-            $netAmount = $totalPrice + $delivery_fee - $discount;
-
-            // =============================
-            // 10. ORDER NUMBER
-            // =============================
-            $lastOrder = SalesHeader::withTrashed()
-                ->whereNull('parent_sales_header_id')
-                ->whereRaw('order_number REGEXP "^[0-9]{7}$"')
-                ->max('order_number');
-
-            $nextOrder = $lastOrder ? intval($lastOrder) + 1 : 1;
-            $orderNumber = sprintf('%07d', $nextOrder);
-
-            // =============================
-            // 11. EDIT MODE
-            // =============================
-
-            if(Carbon::now()->format('H:i') > Setting::info()->cutoff){
-                $forecast_date = date('Y-m-d', strtotime('+1 days'));
-            } else {
-                $forecast_date = date('Y-m-d');
-            }
-
-            if (session()->has('edit_sales_header_id') && !empty(session()->get('edit_sales_header_id'))) {
-
-                $salesHeader = SalesHeader::find(session()->get('edit_sales_header_id'));
-
-                if (!$salesHeader) {
-                    session()->forget('edit_sales_header_id');
-                    return response()->json([
-                        'error' => 'Sales record not found. Please try again.'
-                    ], 404);
-                }
-
-                // DELETE OLD RELATED
-                SalesDetail::where('sales_header_id', $salesHeader->id)->delete();
-                CouponCart::where('sales_header_id', $salesHeader->id)->delete();
-                ProductDeliveryAddress::where('sales_header_id', $salesHeader->id)->delete();
-                SalesPayment::where('sales_header_id', $salesHeader->id)->delete();
-                CouponSale::where('sales_header_id', $salesHeader->id)->delete();
-
-                $salesHeader->update([
-                    'user_id' => $user->id,
-                    'email' => $request->email,
-                    'customer_name' => $customer_name,
-                    'customer_contact_number' => $request->mobile,
-                    'customer_address' => $customer_delivery_address,
-                    'customer_delivery_adress' => $customer_delivery_address,
-                    'city' => $request->city ?? '',
-                    'province' => $request->province ?? '',
-                    'barangay' => $request->location ?? '',
-                    'delivery_type' => $delivery_type,
-                    'delivery_fee_amount' => $delivery_fee,
-                    'order_source' => 'Web',
-                    'delivery_branch' => $delivery_type == 'Door to door delivery' ? 'Tandang Sora Delivery' : '',
-                    'tax_amount' => 0,
-                    'gross_amount' => $totalPrice,
-                    'net_amount' => $netAmount,
-                    'discount_amount' => $discount,
-                    'payment_status' => $request->order_amount <= 0 ? 'PAID' : 'PENDING',
-                    'delivery_status' => '',
-                    'status' => 'active',
-                    'currency' => 'PHP',
-                    'customer_location' => $request->shipping_type == 'pickup' ? '' : ($request->delivery_address),
-                    'instruction' => $request->instruction,
-                    'agent' => $request->agent,
-                    'contact_person' => $request->name,
-                    'outlet' => $outlet,
-                    'origin' => $request->hasCookie('origin') ? Cookie::get('origin') : NULL,
-                    'forecast_date' => $forecast_date,
-                    'updated_at' => $salesHeader->created_at,
-                    'is_multiple_address' => (is_array($deliveries) && count($deliveries) > 0) ? 1 : 0,
-                    'is_new_order' => 1,
-                    'has_sub' => (is_array($deliveries) && count($deliveries) > 0) ? 1 : 0,
-                    'lechon_baka_service' => $request->isBaka == 1 ? $request->lechon_baka_service : 0,
-                    'has_baka' => $request->isBaka == 1 ? 1 : 0,
-                ]);
-
+            if (!$salesHeader) {
                 session()->forget('edit_sales_header_id');
-
-            } else {
-                $salesHeader = SalesHeader::create([
-                    'order_number' => $orderNumber,
-                    'customer_name' => $customer_name,
-                    'customer_contact_number' => $request->mobile,
-                    'customer_address' => $customer_delivery_address,
-                    'delivery_type' => $delivery_type,
-                    'delivery_fee_amount' => $delivery_fee,
-                    'gross_amount' => $totalPrice,
-                    'net_amount' => $netAmount,
-                    'discount_amount' => $discount,
-                    'currency' => 'PHP',
-                    'status' => 'active',
-                    'user_id' => $user->id,
-                    'email' => $request->email ?? $user->email,
-                    'customer_delivery_adress' => $customer_delivery_address,
-                    'city' => $request->city ?? '',
-                    'province' => $request->province ?? '',
-                    'barangay' => $request->location ?? '',
-                    'delivery_tracking_number' => '',
-                    'delivery_fee_amount' => $delivery_fee,
-                    'order_source' => 'Web',
-                    'delivery_branch' => $delivery_type == 'Door to door delivery' ? 'Tandang Sora Delivery' : '',
-                    'tax_amount' => 0,
-                    'payment_status' => $request->order_amount <= 0 ? 'PAID' : 'PENDING',
-                    'delivery_status' => '',
-                    'customer_location' => $request->shipping_type == 'pickup' ? '' : ($request->delivery_address),
-                    'instruction' => $request->instruction,
-                    'agent' => $request->agent,
-                    'contact_person' => $request->name,
-                    'outlet' => $outlet,
-                    'origin' => $request->hasCookie('origin') ? Cookie::get('origin') : NULL,
-                    'forecast_date' => $forecast_date,
-                    'is_multiple_address' => (is_array($deliveries) && count($deliveries) > 0) ? 1 : 0,
-                    'is_new_order' => 1,
-                    'has_sub' => (is_array($deliveries) && count($deliveries) > 0) ? 1 : 0,
-                    'lechon_baka_service' => $request->isBaka == 1 ? $request->lechon_baka_service : 0,
-                    'has_baka' => $request->isBaka == 1 ? 1 : 0,
-                ]);
+                return response()->json([
+                    'error' => 'Sales record not found. Please try again.'
+                ], 404);
             }
 
-            if ($request->order_amount <= 0) {
-                $salesHeader->isConfirm = 1;
-                $salesHeader->confirmed_by = 'Customer';
-                $salesHeader->confirmed_on = date('Y-m-d H:i:s');
-                $salesHeader->confirm_remarks = 'Auto confirm via Checkout';
-                $salesHeader->save();
-            }
+            // DELETE OLD RELATED
+            SalesDetail::where('sales_header_id', $salesHeader->id)->delete();
+            CouponCart::where('sales_header_id', $salesHeader->id)->delete();
+            ProductDeliveryAddress::where('sales_header_id', $salesHeader->id)->delete();
+            SalesPayment::where('sales_header_id', $salesHeader->id)->delete();
+            CouponSale::where('sales_header_id', $salesHeader->id)->delete();
 
-            if ($request->has('deliveries')) {
-
-                if (!is_array($deliveries)) {
-                    return response()->json([
-                        'errors' => ['deliveries' => ['Invalid format']]
-                    ], 422);
-                }
-
-                if ($deliveries && count($deliveries) > 0) {
-
-                    if (!$bakaProduct) {
-                        $bakaProduct = new Product(['price' => 0]);
-                    }
-
-                    $deliveryService->handleMultipleDeliveries(
-                        $deliveries,
-                        $salesHeader,
-                        $user,
-                        $request,
-                        $bakaProduct,
-                        $bakaQty
-                    );
-                }
-            }
-
-            // =============================
-            // 12. SALES DETAILS (FULL)
-            // =============================
-
-            $saved_items = '';
-            foreach ($carts as $cart) {
-
-                $product = $cart->product;
-
-                if (!$product) {
-                    continue;
-                }
-
-                $gross = ((float)$product->price + ($cart->paella_price > 0 ? $product->paella_price : 0)) * $cart->qty;
-
-                $tax = $gross - ($gross / 1.12);
-
-                if(!empty($cart->coupon_code)){
-                    
-                    $ccode = explode("|", $cart->coupon_code);
-                    foreach($ccode as $cd){
-                        $code = explode(":",$cd);
-
-                        $coupon = $this->use_coupon($code[0], $salesHeader->id);
-
-                        if(!empty($coupon)){
-
-                            SalesPayment::create([
-                                'sales_header_id' => $salesHeader->id,
-                                'payment_type' => 'Gift Cert',
-                                'amount' => $code[1],
-                                'status' => $salesHeader->payment_status == 'PAID' ? 'PAID' : 'PENDING',
-                                'payment_date' => date('Y-m-d'),
-                                'receipt_number' => $code[0],
-                                'created_by' => Auth::id()
-                            ]);
-                        }
-                    }
-                }
-
-                SalesDetail::create([
-                    'sales_header_id' => $salesHeader->id,
-                    'product_id' => $product->id,
-                    'product_name' => $product->name . ($cart->paella_price > 0 ? ' Boneless with Paella' : ''),
-                    'product_category' => $product->category_id ?? 0,
-                    'price' => $product->price,
-                    'cost' => 0,
-                    'tax_amount' => $tax,
-                    'promo_id' => 0,
-                    'promo_description' => '',
-                    'discount_amount' => 0,
-                    'gross_amount' => $gross,
-                    'net_amount' => $gross,
-                    'qty' => $cart->qty,
-                    'paella_qty' => $cart->qty,
-                    'uom' => $product->uom ?? '',
-                    'size' => $product->size ?? '',
-                    'no_of_pax' => $product->no_of_pax ?? '',
-                    'paella_price' => $cart->paella_price > 0 ? $product->paella_price : 0,
-                    'other_cost' => 0,
-                    'other_cost_description' => '',
-                    'created_by' => $user->id,
-                    'delivery_date' => $request->need_date . ' ' . $request->need_time,
-                    'has_baka' => $product->id == 178 ? 1 : 0,
-                    'lechon_baka_service' => $product->id == 178 ? ($bakaQty * ($bakaProduct?->price ?? 0)) : 0,
-                ]);
-
-                $saved_items .= $cart->qty." x ".$product->name.", ";
-            }
-
-            
-
-            // =============================
-            // 13. CLEAR CART
-            // =============================
-            if (auth()->check()) {
-                Cart::where('user_id', $user->id)->delete();
-            } else {
-                session(['cart' => []]);
-            }
-
-            // =============================
-            // 14. NOTIFICATIONS
-            // =============================
-            
-            $salesHeader = SalesHeader::with(['couponUsed', 'deliveryAddress'])->find($salesHeader->id);
-
-            try {
-                $notificationService->send($salesHeader, $user, $request);
-            } catch (\Exception $e) {
-                logger('notification_error', [$e->getMessage()]);
-            }
-
-            $payment = $paymentService->generate($salesHeader, $request->deposit);
-
-            $multipleDeliveries = ProductDeliveryAddress::where('sales_header_id', $salesHeader->id)->get();
-
-            foreach ($multipleDeliveries as $delivery) {
-                // SMS (QUEUED JOB)
-                if ($delivery?->receive_sms == 1 && strlen($delivery->contact_tel) > 1) {
-                    SendSmsJob::dispatch(
-                        $delivery->contact_tel,
-                        'new_order_delivery',
-                        $salesHeader
-                    );
-                }
-            }
-            
-            // =============================
-            // 15. RESPONSE
-            // =============================
-            return response()->json([
-                'success' => true,
-                'sales_header_id' => $salesHeader->id,
-                'order_number' => $salesHeader->order_number,
-                'customer_contact_number' => $salesHeader->customer_contact_number,
-                'customer_name' => $salesHeader->customer_name,
-                'amount' => $request->deposit,
-                'signature' => $payment['signature'],
-                'saved_items' => rtrim($saved_items, ', '),
+            $salesHeader->update([
+                'user_id' => $user->id,
+                'email' => $request->email,
+                'customer_name' => $customer_name,
+                'customer_contact_number' => $request->mobile,
+                'customer_address' => $customer_delivery_address,
+                'customer_delivery_adress' => $customer_delivery_address,
+                'city' => $request->city ?? '',
+                'province' => $request->province ?? '',
+                'barangay' => $request->location ?? '',
+                'delivery_type' => $delivery_type,
+                'delivery_fee_amount' => $delivery_fee,
+                'order_source' => 'Web',
+                'delivery_branch' => $delivery_type == 'Door to door delivery' ? 'Tandang Sora Delivery' : '',
+                'tax_amount' => 0,
+                'gross_amount' => $totalPrice,
+                'net_amount' => $netAmount,
+                'discount_amount' => $discount,
+                'payment_status' => $request->order_amount <= 0 ? 'PAID' : 'PENDING',
+                'delivery_status' => '',
+                'status' => 'active',
+                'currency' => 'PHP',
+                'customer_location' => $request->shipping_type == 'pickup' ? '' : ($request->delivery_address),
+                'instruction' => $request->instruction,
+                'agent' => $request->agent,
+                'contact_person' => $request->name,
+                'outlet' => $outlet,
+                'origin' => $request->hasCookie('origin') ? Cookie::get('origin') : NULL,
+                'forecast_date' => $forecast_date,
+                'updated_at' => $salesHeader->created_at,
+                'is_multiple_address' => (is_array($deliveries) && count($deliveries) > 0) ? 1 : 0,
+                'is_new_order' => 1,
+                'has_sub' => (is_array($deliveries) && count($deliveries) > 0) ? 1 : 0,
+                'lechon_baka_service' => $request->isBaka == 1 ? $request->lechon_baka_service : 0,
+                'has_baka' => $request->isBaka == 1 ? 1 : 0,
             ]);
-        });
+
+            session()->forget('edit_sales_header_id');
+
+        } else {
+            $salesHeader = SalesHeader::create([
+                'order_number' => $orderNumber,
+                'customer_name' => $customer_name,
+                'customer_contact_number' => $request->mobile,
+                'customer_address' => $customer_delivery_address,
+                'delivery_type' => $delivery_type,
+                'delivery_fee_amount' => $delivery_fee,
+                'gross_amount' => $totalPrice,
+                'net_amount' => $netAmount,
+                'discount_amount' => $discount,
+                'currency' => 'PHP',
+                'status' => 'active',
+                'user_id' => $user->id,
+                'email' => $request->email ?? $user->email,
+                'customer_delivery_adress' => $customer_delivery_address,
+                'city' => $request->city ?? '',
+                'province' => $request->province ?? '',
+                'barangay' => $request->location ?? '',
+                'delivery_tracking_number' => '',
+                'delivery_fee_amount' => $delivery_fee,
+                'order_source' => 'Web',
+                'delivery_branch' => $delivery_type == 'Door to door delivery' ? 'Tandang Sora Delivery' : '',
+                'tax_amount' => 0,
+                'payment_status' => $request->order_amount <= 0 ? 'PAID' : 'PENDING',
+                'delivery_status' => '',
+                'customer_location' => $request->shipping_type == 'pickup' ? '' : ($request->delivery_address),
+                'instruction' => $request->instruction,
+                'agent' => $request->agent,
+                'contact_person' => $request->name,
+                'outlet' => $outlet,
+                'origin' => $request->hasCookie('origin') ? Cookie::get('origin') : NULL,
+                'forecast_date' => $forecast_date,
+                'is_multiple_address' => (is_array($deliveries) && count($deliveries) > 0) ? 1 : 0,
+                'is_new_order' => 1,
+                'has_sub' => (is_array($deliveries) && count($deliveries) > 0) ? 1 : 0,
+                'lechon_baka_service' => $request->isBaka == 1 ? $request->lechon_baka_service : 0,
+                'has_baka' => $request->isBaka == 1 ? 1 : 0,
+            ]);
+        }
+
+        if ($request->order_amount <= 0) {
+            $salesHeader->isConfirm = 1;
+            $salesHeader->confirmed_by = 'Customer';
+            $salesHeader->confirmed_on = date('Y-m-d H:i:s');
+            $salesHeader->confirm_remarks = 'Auto confirm via Checkout';
+            $salesHeader->save();
+        }
+
+        // =============================
+        // 11. HANDLE MULTIPLE DELIVERIES
+        // =============================
+
+        if ($request->has('deliveries')) {
+
+            if (!is_array($deliveries)) {
+                return response()->json([
+                    'errors' => ['deliveries' => ['Invalid format']]
+                ], 422);
+            }
+
+            if ($deliveries && count($deliveries) > 0) {
+
+                if (!$bakaProduct) {
+                    $bakaProduct = new Product(['price' => 0]);
+                }
+
+                $deliveryService->handleMultipleDeliveries(
+                    $deliveries,
+                    $salesHeader,
+                    $user,
+                    $request,
+                    $bakaProduct,
+                    $bakaQty
+                );
+            }
+        }
+
+        // =============================
+        // 12. SALES DETAILS
+        // =============================
+
+        $saved_items = '';
+        foreach ($carts as $cart) {
+
+            $product = $cart->product;
+
+            if (!$product) {
+                continue;
+            }
+
+            $gross = ((float)$product->price + ($cart->paella_price > 0 ? $product->paella_price : 0)) * $cart->qty;
+
+            $tax = $gross - ($gross / 1.12);
+
+            if(!empty($cart->coupon_code)){
+                
+                $ccode = explode("|", $cart->coupon_code);
+                foreach($ccode as $cd){
+                    $code = explode(":",$cd);
+
+                    $coupon = $this->use_coupon($code[0], $salesHeader->id);
+
+                    if(!empty($coupon)){
+
+                        SalesPayment::create([
+                            'sales_header_id' => $salesHeader->id,
+                            'payment_type' => 'Gift Cert',
+                            'amount' => $code[1],
+                            'status' => $salesHeader->payment_status == 'PAID' ? 'PAID' : 'PENDING',
+                            'payment_date' => date('Y-m-d'),
+                            'receipt_number' => $code[0],
+                            'created_by' => Auth::id()
+                        ]);
+                    }
+                }
+            }
+
+            SalesDetail::create([
+                'sales_header_id' => $salesHeader->id,
+                'product_id' => $product->id,
+                'product_name' => $product->name . ($cart->paella_price > 0 ? ' Boneless with Paella' : ''),
+                'product_category' => $product->category_id ?? 0,
+                'price' => $product->price,
+                'cost' => 0,
+                'tax_amount' => $tax,
+                'promo_id' => 0,
+                'promo_description' => '',
+                'discount_amount' => 0,
+                'gross_amount' => $gross,
+                'net_amount' => $gross,
+                'qty' => $cart->qty,
+                'paella_qty' => $cart->qty,
+                'uom' => $product->uom ?? '',
+                'size' => $product->size ?? '',
+                'no_of_pax' => $product->no_of_pax ?? '',
+                'paella_price' => $cart->paella_price > 0 ? $product->paella_price : 0,
+                'other_cost' => 0,
+                'other_cost_description' => '',
+                'created_by' => $user->id,
+                'delivery_date' => $request->need_date . ' ' . $request->need_time,
+                'has_baka' => $product->id == 178 ? 1 : 0,
+                'lechon_baka_service' => $product->id == 178 ? ($bakaQty * ($bakaProduct?->price ?? 0)) : 0,
+            ]);
+
+            $saved_items .= $cart->qty." x ".$product->name.", ";
+        }
+
+        // =============================
+        // 13. CLEAR CART
+        // =============================
+        if (auth()->check()) {
+            Cart::where('user_id', $user->id)->delete();
+        } else {
+            session(['cart' => []]);
+        }
+
+        // =============================
+        // 14. NOTIFICATIONS
+        // =============================
+
+        $sendNotification->process($notificationService, $salesHeader, $user, $request);
+
+        // =============================
+        // 15. GENERATE PEYMENT SIGNATURE
+        // =============================
+
+        $payment = $paymentService->generate($salesHeader, $request->deposit);
+
+        // =============================
+        // 16. RESPONSE
+        // =============================
+        return response()->json([
+            'success' => true,
+            'sales_header_id' => $salesHeader->id,
+            'order_number' => $salesHeader->order_number,
+            'customer_contact_number' => $salesHeader->customer_contact_number,
+            'customer_name' => $salesHeader->customer_name,
+            'amount' => $request->deposit,
+            'signature' => $payment['signature'],
+            'saved_items' => rtrim($saved_items, ', '),
+        ]);
     }
 
     public function save_sales2(Request $request)

@@ -34,7 +34,7 @@ class DeliveryService
             $netAmount = (float) $totalPrice - (float) $request->discount_amount;
         }
         
-        if(Carbon::now()->format('H:i') > Setting::info()->cutoff){
+        if(Carbon::now()->format('H:i') > Setting::info()?->cutoff){
             $forecast_date = date('Y-m-d', strtotime('+1 days'));
         } else {
             $forecast_date = date('Y-m-d');
@@ -151,8 +151,8 @@ class DeliveryService
                         'net_amount' => $gross_amount,
                         'qty' => $order->qty,
                         'paella_qty' => $order->qty,
-                        'uom' => $product->uom,
-                        'size' => $product->size ?? "",
+                        'uom' => $product?->uom ?? "",
+                        'size' => $product?->size ?? "",
                         'no_of_pax' => $product->no_of_pax ?? "",
                         'paella_price' => $order->paella ? $product->paella_price : 0,
                         'other_cost' => 0,

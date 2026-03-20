@@ -11,10 +11,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use App\Models\Concerns\LogsActivityDiff;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class SalesHeader extends Model
 {
     use SoftDeletes, LogsActivityDiff;
+    use HasFactory;
     
     protected $primaryKey = 'id';
     public $incrementing = true;
