@@ -15,7 +15,8 @@ class BlockSlotController extends Controller
     {
         $blocks = BlockedSlot::with([
                 'products:id,name',
-                'categories:id,name'
+                'categories:id,name',
+                'comboProducts:id,name'
             ])
             ->orderBy('date')
             ->get();
@@ -25,6 +26,7 @@ class BlockSlotController extends Controller
 
             $productIds = $b->products->pluck('id')->sort()->implode(',');
             $categoryIds = $b->categories->pluck('id')->sort()->implode(',');
+            $comboIds = $b->comboProducts->pluck('id')->sort()->implode(',');
 
             return implode('|', [
                 $b->scope,
@@ -34,6 +36,7 @@ class BlockSlotController extends Controller
                 $b->end_time,
                 $productIds,
                 $categoryIds,
+                $comboIds
             ]);
         });
 
@@ -74,6 +77,7 @@ class BlockSlotController extends Controller
                         'is_all_day' => $block->is_all_day,
                         'products' => $block->products,
                         'categories' => $block->categories,
+                        'combo_products' => $block->comboProducts,
                     ];
                 }
             }
@@ -106,6 +110,9 @@ class BlockSlotController extends Controller
             'times' => 'nullable|array',
             'times.*.start' => 'required_if:is_all_day,false|date_format:H:i',
             'times.*.end' => 'required_if:is_all_day,false|date_format:H:i',
+
+            'combo_product_ids' => 'nullable|array',
+            'combo_product_ids.*' => 'integer|exists:products,id',
         ]);
 
         DB::transaction(function () use ($validated) {
@@ -134,6 +141,10 @@ class BlockSlotController extends Controller
                     // Attach categories
                     if (!empty($validated['category_ids'])) {
                         $blockedSlot->categories()->attach($validated['category_ids']);
+                    }
+
+                    if (!empty($validated['combo_product_ids'])) {
+                        $blockedSlot->comboProducts()->attach($validated['combo_product_ids']);
                     }
 
                     continue;
@@ -255,7 +266,8 @@ class BlockSlotController extends Controller
                 'is_all_day' => $b['is_all_day'],
                 'products' => $b['products'],
                 'categories' => $b['categories'],
-            ]
+                'combo_products' => $b['combo_products'],
+            ],
         ];
     }
 
@@ -279,7 +291,8 @@ class BlockSlotController extends Controller
 
         $blocks = BlockedSlot::with([
                 'products:id',
-                'categories:id'
+                'categories:id',
+                'comboProducts:id'
             ])
             ->whereDate('date', '>=', $today)
             ->where(function ($query) use ($productIds, $categoryIds) {
@@ -316,6 +329,40 @@ class BlockSlotController extends Controller
             ]);
 
         return response()->json($blocks);
+    }
+
+    public function updateSingle(Request $request)
+    {
+        $validated = $request->validate([
+            'date' => 'required|date',
+            'group_id' => 'required',
+            'start_time' => 'nullable',
+            'end_time' => 'nullable',
+
+            'combo_product_ids' => 'nullable|array',
+            'combo_product_ids.*' => 'integer|exists:products,id',
+        ]);
+
+        DB::transaction(function () use ($validated) {
+
+            $query = BlockedSlot::where('group_id', $validated['group_id'])
+                ->whereDate('date', $validated['date']);
+
+            if (!empty($validated['start_time'])) {
+                $query->where('start_time', $validated['start_time'])
+                    ->where('end_time', $validated['end_time']);
+            }
+
+            $blocks = $query->get();
+
+            foreach ($blocks as $block) {
+
+                // combo products
+                $block->comboProducts()->sync($validated['combo_product_ids'] ?? []);
+            }
+        });
+
+        return response()->json(['message' => 'Block updated']);
     }
 
     public function updateGroup(Request $request, $groupId)

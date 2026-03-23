@@ -104,7 +104,7 @@
             <div class="mb-3">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="allow-combo">
-                    <label for="allow-combo" class="form-check-label fw-bold">Allow Combo</label>
+                    <label for="allow-combo" class="form-check-label fw-bold">Allow Combo (Override Blocking)</label>
                 </div>
             </div>
 
@@ -122,6 +122,9 @@
                     @endforeach
                 </select>
             </div>
+            <small class="form-text text-muted">
+                Example: “Whole Lechon (Small)” is blocked on a specific date, but “Pancit Canton” is added under Allow Combo, customers can still place an order if their selection includes Pancit Canton.
+            </small>
 
         </div>
 
@@ -504,6 +507,13 @@
             const productIds = Array.from(productSelect.selectedOptions)
                 .map(opt => opt.value);
 
+            const comboProductIds = Array.from(commonProductInput.selectedOptions)
+                .map(opt => opt.value);
+
+                console.log({
+                    comboProductIds
+                });
+
             const payload = {
                 scope: document.querySelector('input[name="scope"]:checked').value,
                 block_type: blockType,
@@ -511,7 +521,8 @@
                 product_ids: productIds.length ? productIds : null,
                 dates,
                 is_all_day: isAllDay,
-                times
+                times,
+                combo_product_ids: comboProductIds.length ? comboProductIds : null
             };
 
             const res = await fetch('{{ route('blocks.store') }}', {
@@ -800,6 +811,20 @@
                 editRangePicker.setDates([start, end]);
             }
 
+            if (props.combo_products && props.combo_products.length) {
+                const ids = props.combo_products.map(p => p.id);
+
+                editAllowCombo.checked = true;
+                editComboProduct.disabled = false;
+
+                $('#editComboProduct').val(ids).trigger('change');
+            } else {
+                editAllowCombo.checked = false;
+                editComboProduct.disabled = true;
+
+                $('#editComboProduct').val([]).trigger('change');
+            }
+
             // Time
             if (!props.is_all_day) {
                 $('#editTimes').val([props.start_time.slice(0,5)]).trigger('change');
@@ -813,6 +838,8 @@
 
         document.getElementById('saveEditBlock').addEventListener('click', async () => {
 
+            const comboIds = $('#editComboProduct').val();
+
             const payload = {
                 scope: $('input[name="edit_scope"]:checked').val(),
                 block_type: $('#editBlockType').val(),
@@ -820,7 +847,8 @@
                 product_ids: $('#editProduct').val(),
                 dates: getEditDates(),
                 is_all_day: $('#editTimes').val().length === 0,
-                times: buildTimePayload($('#editTimes').val())
+                times: buildTimePayload($('#editTimes').val()),
+                combo_product_ids: comboIds && comboIds.length ? comboIds : null
             };
 
             await fetch(`/blocks/group/${window.editingGroupId}`, {
@@ -981,6 +1009,47 @@
             }
             
         });
+
+        const editAllowCombo = document.getElementById('editAllowCombo');
+        const editComboProduct = document.getElementById('editComboProduct');
+
+        $('#editComboProduct').select2({
+            placeholder: "Select product",
+            width: '100%'
+        });
+
+        editAllowCombo.addEventListener('change', function() {
+            if (this.checked) {
+                editComboProduct.disabled = false;
+            } else {
+                editComboProduct.disabled = true;
+                $('#editComboProduct').val([]).trigger('change');
+            }
+        });
+
+        document.getElementById('saveEditSingle').addEventListener('click', async () => {
+
+            const props = selectedEvent.extendedProps;
+
+            await fetch(`/blocks/update-single`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                },
+                body: JSON.stringify({
+                    group_id: props.group_id,
+                    date: clickedDate,
+                    start_time: props.start_time,
+                    end_time: props.end_time,
+                    combo_product_ids: $('#editComboProduct').val()
+                })
+            });
+
+            calendar.refetchEvents();
+            $('#editBlockModal').modal('hide');
+        });
+
     });
 </script>
 @endsection

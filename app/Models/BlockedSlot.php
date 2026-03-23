@@ -36,4 +36,14 @@ class BlockedSlot extends Model
         );
     }
 
+    public function comboProducts()
+    {
+        return $this->belongsToMany(
+            Product::class,
+            'blocked_slot_combo_products',
+            'blocked_slot_id',
+            'product_id'
+        );
+    }
+
 }

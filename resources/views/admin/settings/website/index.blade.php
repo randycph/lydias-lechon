@@ -745,12 +745,11 @@ Website Settings
 
             <div class="modal-footer justify-content-between">
                 <div>
-                    <button class="btn btn-danger" id="deleteBlock">Delete</button>
-                    <button class="btn btn-danger" id="deleteGroup">Delete All Blocks</button>
+                    <button class="btn btn-danger" id="deleteBlock">Delete This Only</button>
+                    <button class="btn btn-outline-danger" id="deleteGroup">Delete Entire Block</button>
                 </div>
                 <div>
-                    <button class="btn btn-primary" id="editBlock">Edit</button>
-                    {{-- <button class="btn btn-secondary" data-dismiss="modal">Close</button> --}}
+                    <button class="btn btn-secondary" id="editBlock">Edit</button>
                 </div>
             </div>
 
@@ -868,6 +867,28 @@ Website Settings
             <option value="delivery">Delivery Only</option>
             <option value="pickup">Pickup Only</option>
           </select>
+        </div>
+
+        <div class="mb-3">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="editAllowCombo">
+                <label for="editAllowCombo" class="form-check-label fw-bold">Allow Combo</label>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Select Products</label>
+            <select 
+                class="select2 form-control" 
+                id="editComboProduct"
+                name="edit_combo_products[]"
+                multiple
+                disabled
+            >
+                @foreach ($products as $product)
+                <option value="{{ $product->id }}">{{ $product->name }}</option>
+                @endforeach
+            </select>
         </div>
 
       </div>
