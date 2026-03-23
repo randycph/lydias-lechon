@@ -168,11 +168,24 @@ class BlockSlotController extends Controller
         ], 201);
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $groupId)
     {
-        DB::transaction(function () use ($id) {
+        DB::transaction(function () use ($request, $groupId) {
 
-            $blocks = BlockedSlot::where('group_id', $id)->get();
+            $query = BlockedSlot::where('group_id', $groupId);
+
+            // If specific date clicked
+            if ($request->filled('date')) {
+                $query->whereDate('date', $request->date);
+            }
+
+            // If specific time clicked (NOT all-day)
+            if ($request->filled('start_time') && $request->filled('end_time')) {
+                $query->where('start_time', $request->start_time)
+                    ->where('end_time', $request->end_time);
+            }
+
+            $blocks = $query->get();
 
             foreach ($blocks as $block) {
                 $block->products()->detach();
@@ -182,7 +195,7 @@ class BlockSlotController extends Controller
         });
 
         return response()->json([
-            'message' => 'Block group deleted successfully'
+            'message' => 'Block deleted successfully'
         ]);
     }
 
@@ -214,8 +227,9 @@ class BlockSlotController extends Controller
     private function formatEvent($b)
     {
         return [
-            'id' => $b['id'],
+            'id' => $b['id'], // keep this
             'title' => strtoupper($b['scope']) . ' BLOCKED',
+
             'start' => $b['is_all_day']
                 ? $b['start']
                 : $b['start'] . 'T' . $b['start_time'],
@@ -228,6 +242,12 @@ class BlockSlotController extends Controller
 
             'extendedProps' => [
                 'group_id' => $b['group_id'],
+
+                'date_start' => $b['start'],
+                'date_end'   => $b['end'],
+
+                'is_range' => $b['start'] !== $b['end'],
+
                 'scope' => $b['scope'],
                 'block_type' => $b['block_type'],
                 'start_time' => $b['start_time'],

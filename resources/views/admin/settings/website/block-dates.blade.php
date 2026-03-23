@@ -101,6 +101,28 @@
 
             </div>
 
+            <div class="mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="allow-combo">
+                    <label for="allow-combo" class="form-check-label fw-bold">Allow Combo</label>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-bold">Select Products</label>
+                <select 
+                    class=" select2 form-control" 
+                    id="combo-product"
+                    name="combo_products[]"
+                    multiple
+                    disabled
+                >
+                    @foreach ($products as $product)
+                    <option value="{{ $product->id }}">{{ $product->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
         </div>
 
         <!-- RIGHT COLUMN -->
@@ -198,6 +220,8 @@
         const allDayCheckbox = document.getElementById('allday');
         const timeSlots      = document.querySelectorAll('.time-slot');
         const editBlockBtn    = document.getElementById('editBlock');
+        const allowComboCheck = document.getElementById('allow-combo');
+        const commonProductInput = document.getElementById('combo-product');
 
         allDayCheckbox.checked = true;
         timeSlots.forEach(cb => {
@@ -221,6 +245,11 @@
         });
 
         $('#product').select2({
+            placeholder: "Select product",
+            width: '100%'
+        });
+
+        $('#combo-product').select2({
             placeholder: "Select product",
             width: '100%'
         });
@@ -327,7 +356,12 @@
                     const start = info.event.start;
                     const end = new Date(info.event.end);
 
-                    end.setDate(end.getDate() - 1);
+                    // check if end has time on it, if not, subtract one day to show correct date range in modal
+                    if (end.getHours() === 0 && end.getMinutes() === 0 && end.getSeconds() === 0) {
+                        end.setDate(end.getDate() - 1);
+                    } else {
+                        end.setDate(end.getDate());
+                    }
 
                     if (start.toDateString() !== end.toDateString()) {
                         document.getElementById('modalDate').innerText =
@@ -689,7 +723,9 @@
             $('#editProduct').val([]).trigger('change');
 
             // Scope
-            // $(`input[name="edit_scope"][value="${props.scope}"]`).prop('checked', true).trigger('change');
+            document.querySelectorAll('input[name="edit_scope"]').forEach(radio => {
+                radio.checked = radio.value === props.scope;
+            });
 
             const editScopeRadios = document.querySelectorAll('input[name="edit_scope"]');
             const editCategorySelect = document.querySelector('select[name="editCategory_ids[]"]');
@@ -744,7 +780,12 @@
             // Dates
             const start = selectedEvent.start;
             const end = new Date(selectedEvent.end);
-            end.setDate(end.getDate() - 1);
+
+            if (end.getHours() === 0 && end.getMinutes() === 0 && end.getSeconds() === 0) {
+                end.setDate(end.getDate() - 1);
+            } else {
+                end.setDate(end.getDate());
+            }
 
             // Detect range vs single
             if (start.toDateString() === end.toDateString()) {
@@ -825,9 +866,10 @@
         document.getElementById('deleteBlock').addEventListener('click', async () => {
             if (!selectedEvent) return;
 
-            if (!confirm('This will delete the entire block group. Are you sure?')) return;
+            if (!confirm('Delete this specific block?')) return;
 
             const groupId = selectedEvent.extendedProps.group_id;
+            const props = selectedEvent.extendedProps;
 
             await fetch(`/blocks/${groupId}`, {
                 method: 'POST',
@@ -837,12 +879,31 @@
                     'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
                 },
                 body: JSON.stringify({
-                    date: clickedDate
+                    date: clickedDate,
+                    start_time: props.is_all_day ? null : props.start_time,
+                    end_time: props.is_all_day ? null : props.end_time
                 })
             });
 
             calendar.refetchEvents();
-            
+            $('#blockModal').modal('hide');
+        });
+
+        document.getElementById('deleteGroup').addEventListener('click', async () => {
+            if (!selectedEvent) return;
+
+            if (!confirm('This will delete the entire block group. Are you sure?')) return;
+
+            const groupId = selectedEvent.extendedProps.group_id;
+
+            await fetch(`/blocks/${groupId}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                }
+            });
+
+            calendar.refetchEvents();
             $('#blockModal').modal('hide');
         });
 
@@ -909,6 +970,16 @@
 
         addBtn.addEventListener('click', () => {
             addDatePicker();
+        });
+
+        allowComboCheck.addEventListener('change', function() {
+            if (this.checked) {
+                commonProductInput.disabled = false;
+            } else {
+                commonProductInput.disabled = true;
+                $('#combo-product').val([]).trigger('change');
+            }
+            
         });
     });
 </script>

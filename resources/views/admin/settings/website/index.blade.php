@@ -746,6 +746,7 @@ Website Settings
             <div class="modal-footer justify-content-between">
                 <div>
                     <button class="btn btn-danger" id="deleteBlock">Delete</button>
+                    <button class="btn btn-danger" id="deleteGroup">Delete All Blocks</button>
                 </div>
                 <div>
                     <button class="btn btn-primary" id="editBlock">Edit</button>
