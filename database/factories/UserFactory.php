@@ -26,7 +26,7 @@ class UserFactory extends Factory
     {
         return [
             'name' => $this->faker->word(),
-            "mobile" => $this->faker->phone(),
+            "contact_mobile" => '09175278392',
             "email" => $this->faker->email(),
 
             'name' => $this->faker->word(),

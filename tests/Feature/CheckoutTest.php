@@ -1,12 +1,17 @@
 <?php
 
 use App\EcommerceModel\SalesHeader;
+use App\Jobs\SendSmsJob;
+use App\Mail\SalesCompleted;
+use App\Mail\SalesCompletedAdmin;
 use App\Models\User;
 use App\Services\NotificationService;
 use App\Services\PaymentService;
 use App\Services\SendNotification;
 use Carbon\Carbon;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 
 it('creates single pickup transaction', function() {
 
@@ -208,17 +213,25 @@ it('creates multi-delivery transaction', function() {
 
 it('should send sms and email', function () {
 
-    $notificationService = Mockery::mock(NotificationService::class);
+    Mail::fake();
+    Queue::fake();
 
-    $notificationService->shouldReceive('sendSms')->once();
-    $notificationService->shouldReceive('sendEmail')->once();
+    $notificationService = app(NotificationService::class);
 
-    $sendNotification = app(SendNotification::class);
+    $salesHeader = SalesHeader::factory()->create([
+        'customer_contact_number' => '09123456789'
+    ]);
 
-    $salesHeader = SalesHeader::factory()->create();
-    $user = User::factory()->create();
+    $user = User::factory()->create([
+        'registration_type' => 'guest',
+        'email' => 'test@test.com'
+    ]);
 
-    $sendNotification->process($notificationService, $salesHeader, $user, null);
+    $notificationService->send($salesHeader, $user, null);
 
-    expect(true)->toBeTrue();
+    Mail::assertQueued(SalesCompleted::class);
+
+    Mail::assertQueued(SalesCompletedAdmin::class);
+
+    Queue::assertPushed(SendSmsJob::class);
 });
