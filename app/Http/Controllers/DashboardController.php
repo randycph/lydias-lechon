@@ -8,7 +8,8 @@ use \App\EcommerceModel\SalesDetail;
 use \App\EcommerceModel\SalesHeader;
 use \App\EcommerceModel\Product;
 use \App\Models\Logs;
-
+use App\Models\Role;
+use App\Models\UserBranch;
 use Carbon\CarbonPeriod;
 use Carbon\Carbon;
 use DateTime;
@@ -25,70 +26,188 @@ class DashboardController extends Controller
         $today = now()->startOfDay();
         $thirtyDaysAgo = now()->subDays(30)->startOfDay();
 
-        // $pendingPayments = SalesHeader::with(['user', 'items', 'payments'])
-        //     ->whereRaw("payment_status != 'PAID'")
-        //     ->whereHas('items', function ($q) use ($today, $cutoffDate) {
-        //         $q->whereNotNull('delivery_date')
-        //         ->where('delivery_date', '!=', '0000-00-00 00:00:00')
-        //         ->whereBetween('delivery_date', [$today, $cutoffDate]);
-        //     })
-        //     ->orderBy(
-        //         SalesDetail::selectRaw('MIN(delivery_date)')
-        //             ->whereColumn('sales_header_id', 'ecommerce_sales_headers.id')
-        //             ->whereNotNull('delivery_date')
-        //             ->where('delivery_date', '!=', '0000-00-00 00:00:00')
-        //             ->where('delivery_date', '>=', $today),
-        //         'desc'
-        //     )
-        //     ->get();
+        $today = now();
 
-        $pendingPayments = SalesHeader::with(['user', 'items', 'payments'])
-            ->where(function ($query) use ($today, $cutoffDate, $thirtyDaysAgo) {
-                // unpaid + upcoming deliveries
-                $query->where(function ($q) use ($today, $cutoffDate) {
-                    $q->whereRaw("payment_status != 'PAID'")
-                    ->whereHas('items', function ($q2) use ($today, $cutoffDate) {
-                        $q2->whereNotNull('delivery_date')
+        $roleId        = auth()->user()->role_id;
+        $role          = Role::find($roleId);
+        $hasBranches   = (int) $role->has_branches === 1;
+        $hasProdBranch = (int) $role->has_production_branch === 1;
+
+        $branches   = UserBranch::accessBranch();
+        $locations  = [];
+        foreach ($branches as $branch) {
+            $locations[] = $branch?->branch?->name ?? $branch?->name ?? null;
+        }
+
+        if (auth()->user()->role_id == 1) {
+            array_push($locations, 'Web');
+        }
+
+        if (in_array('Tandang Sora Head Office', $locations)) {
+            array_push($locations, 'Web');
+        }
+
+        $isDispatcher = auth()->user()->role_id == 5;
+
+
+        if(auth()->user()->role_id == 1 || $hasProdBranch || auth()->user()->role_id == 3 || $hasBranches || auth()->user()->role_id == 5){
+            
+            if ($hasProdBranch || $hasBranches) {
+                $productionBranches = $hasProdBranch
+                    ? explode(',', auth()->user()->production_branch_id)
+                    : [];
+
+                if (in_array(1, $productionBranches)) {
+                    array_push($locations, 'Web');
+                }
+
+                // Subquery of eligible sales_header ids
+                $eligible = DB::table('ecommerce_sales_details as d')
+                    ->join('job_orders as jo', 'jo.sales_detail_id', '=', 'd.id')
+                    ->join('production_orders as po', 'po.joborder_id', '=', 'jo.id')
+                    ->when(count($productionBranches) > 0, function ($q) use ($productionBranches) {
+                        $q->whereIn('po.branch_id', $productionBranches);
+                    })
+                    ->where('d.delivery_date', '>=', $today->startOfDay()->toDateTimeString())
+                    ->select('d.sales_header_id');
+
+                $model = SalesHeader::with(['items' => function ($q) {
+                        $q->orderBy('delivery_date', 'asc');
+                    }])
+                    ->paidOnlyForForecasterRole()
+                    ->where('has_sub', 0)
+                    ->when($isDispatcher == true,
+                        fn ($q) => $q->where('isConfirm', 1)
+                    )
+                    // apply production / branch filters without plucking IDs
+                    ->where(function ($q) use ($hasProdBranch, $eligible, $hasBranches, $locations) {
+                        if ($hasProdBranch) {
+                            // this becomes: where id in (select sales_header_id from ...)
+                            $q->orWhereIn('id', $eligible);
+                        }
+
+                        if ($hasBranches && count($locations) > 0) {
+                            $q->orWhere(function ($q2) use ($locations) {
+                                $q2->whereIn('outlet', $locations)
+                                ->orWhereIn('order_source', $locations)
+                                ->orWhereIn('delivery_branch', $locations);
+                            });
+                        }
+                    });
+            } elseif (auth()->user()->role_id == 3) {
+                $eligible = DB::table('ecommerce_sales_details as d')
+                    ->join('job_orders as jo', 'jo.sales_detail_id', '=', 'd.id')
+                    ->join('production_orders as po', 'po.joborder_id', '=', 'jo.id')
+                    ->where('d.delivery_date', '>=', $today->startOfDay()->toDateTimeString())
+                    ->select('d.sales_header_id');
+
+                $model = SalesHeader::with([
+                        'items' => function ($q) {
+                            $q->orderBy('delivery_date', 'asc');
+                        }
+                    ])
+                    ->paidOnlyForForecasterRole()
+                    ->whereIn('id', $eligible) 
+                    ->when($hasBranches && count($locations) > 0,
+                        fn ($q) => $q->where(function ($q2) use ($locations) {
+                            $q2->whereIn('outlet', $locations)
+                            ->orWhereIn('order_source', $locations)
+                            ->orWhereIn('delivery_branch', $locations);
+                        })
+                    );
+            } else {
+                $model = SalesHeader::where('id','>',0)
+                        ->with('items', function($q) use($today) {
+                            $q->where('delivery_date', '>=', $today->startOfDay()->toDateTimeString())
+                            ->orderBy('delivery_date', 'desc');
+                        })
+                        ->paidOnlyForForecasterRole()
+                        ->where('has_sub', 0)
+                        ->when($isDispatcher == true,
+                            fn ($q) => $q->where('isConfirm', 1)
+                        )
+                        ->when($hasBranches && count($locations) > 0,
+                            fn ($q) => $q->where(function ($q2) use ($locations) {
+                                $q2->whereIn('outlet', $locations)
+                                ->orWhereIn('order_source', $locations)
+                                ->orWhereIn('delivery_branch', $locations);
+                            }),
+                            fn ($q) => $q
+                        );
+            }
+        }else{
+            if ($role->has_branches == 1) {
+                $branches = UserBranch::accessBranch();
+
+                $locations = [];
+                foreach($branches as $branch){
+                    array_push($locations, $branch->branch->name);
+                }
+                if (auth()->user()->role_id == 1) {
+                    array_push($locations, 'Web');
+                }
+
+                $model = SalesHeader::where('id','>',0)
+                        ->when($isDispatcher == true,
+                            fn ($q) => $q->where('payment_status', '==', 'PAID')->orWhere('isConfirm', 1)
+                        )
+                        ->where(function ($query) use($locations) {
+                            $query->whereIn('outlet', $locations)
+                                ->orWhereIn('order_source', $locations)
+                                ->orWhereIn('delivery_branch', $locations);
+                        });
+            } else {
+                $model = SalesHeader::where('id','>',0)
+                        ->when($isDispatcher == true,
+                            fn ($q) => $q->where('payment_status', '==', 'PAID')->orWhere('isConfirm', 1)
+                        );
+            }
+        }
+
+        $pendingPayments = $model
+                ->where(function ($query) use ($today, $cutoffDate, $thirtyDaysAgo) {
+                    // unpaid + upcoming deliveries
+                    $query->where(function ($q) use ($today, $cutoffDate) {
+                        $q->whereRaw("payment_status != 'PAID'")
+                        ->whereHas('items', function ($q2) use ($today, $cutoffDate) {
+                            $q2->whereNotNull('delivery_date')
+                                ->where('delivery_date', '!=', '0000-00-00 00:00:00')
+                                ->whereBetween('delivery_date', [$today, $cutoffDate]);
+                        });
+                    })
+
+                    // Sign-Chit within last 30 days
+                    ->orWhere(function ($q) use ($thirtyDaysAgo) {
+                        $q->whereRaw("payment_status != 'PAID'")
+                        ->whereHas('payments', function ($p) {
+                            $p->where('payment_type', 'Sign-Chit');
+                        })
+                        ->whereHas('items', function ($q2) use ($thirtyDaysAgo) {
+                            $q2->whereNotNull('delivery_date')
                             ->where('delivery_date', '!=', '0000-00-00 00:00:00')
-                            ->whereBetween('delivery_date', [$today, $cutoffDate]);
+                            ->where('delivery_date', '>=', $thirtyDaysAgo);
+                        });
                     });
                 })
+                ->whereNotIn('status', ['ABANDONED', 'CANCELLED'])
+                ->orderBy(
+                    SalesDetail::selectRaw('MIN(delivery_date)')
+                        ->whereColumn('sales_header_id', 'ecommerce_sales_headers.id')
+                        ->whereNotNull('delivery_date')
+                        ->where('delivery_date', '!=', '0000-00-00 00:00:00'),
+                    'asc'
+                )->paginate(10);
 
-                // Sign-Chit within last 30 days
-                ->orWhere(function ($q) use ($thirtyDaysAgo) {
-                    $q->whereRaw("payment_status != 'PAID'")
-                    ->whereHas('payments', function ($p) {
-                        $p->where('payment_type', 'Sign-Chit');
+            $tomorrow = now()->addDay()->startOfDay();
+            $endTomorrow = now()->addDay()->endOfDay();
+
+            $tomorrowUnpaid = $model->whereHas('items', function ($q) use ($tomorrow, $endTomorrow) {
+                        $q->whereBetween('delivery_date', [$tomorrow, $endTomorrow]);
                     })
-                    ->whereHas('items', function ($q2) use ($thirtyDaysAgo) {
-                        $q2->whereNotNull('delivery_date')
-                        ->where('delivery_date', '!=', '0000-00-00 00:00:00')
-                        ->where('delivery_date', '>=', $thirtyDaysAgo);
-                    });
-                });
-            })
-            ->whereNotIn('status', ['ABANDONED', 'CANCELLED'])
-            ->orderBy(
-                SalesDetail::selectRaw('MIN(delivery_date)')
-                    ->whereColumn('sales_header_id', 'ecommerce_sales_headers.id')
-                    ->whereNotNull('delivery_date')
-                    ->where('delivery_date', '!=', '0000-00-00 00:00:00'),
-                'asc'
-            )
-
-            ->paginate(10);
-
-        $tomorrow = now()->addDay()->startOfDay();
-        $endTomorrow = now()->addDay()->endOfDay();
-
-        $tomorrowUnpaid = SalesHeader::with(['items', 'payments'])
-            ->whereHas('items', function ($q) use ($tomorrow, $endTomorrow) {
-                $q->whereBetween('delivery_date', [$tomorrow, $endTomorrow]);
-            })
-            ->whereNotIn('status', ['ABANDONED', 'CANCELLED'])
-            ->get()
-            ->filter(fn ($sale) => $sale->balance($sale->id) > 0);
-
+                    ->whereNotIn('status', ['ABANDONED', 'CANCELLED'])
+                    ->get()
+                    ->filter(fn ($sale) => $sale->balance($sale->id) > 0);
+        
         return view('admin.dashboard.index', compact(
             'logs',
             'pendingPayments',
