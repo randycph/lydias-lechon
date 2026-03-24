@@ -782,16 +782,22 @@
 
             $('#editCategory').val([]).trigger('change');
             $('#editProduct').val([]).trigger('change');
-
-            // Scope
-            document.querySelectorAll('input[name="edit_scope"]').forEach(radio => {
-                radio.checked = radio.value === props.scope;
-            });
+            $('#editLocation').val([]).trigger('change');
 
             const editScopeRadios = document.querySelectorAll('input[name="edit_scope"]');
             const editCategorySelect = document.querySelector('select[name="editCategory_ids[]"]');
             const editProductSelect  = document.querySelector('select[name="editProduct_ids[]"]');
             const editLocationSelect = document.querySelector('select[name="editLocation_ids[]"]');
+
+            editScopeRadios.forEach(radio => {
+                radio.checked = radio.value === props.scope;
+            });
+
+            const selectedScope = document.querySelector('input[name="edit_scope"]:checked');
+
+            if (selectedScope) {
+                selectedScope.dispatchEvent(new Event('change'));
+            }
 
             editScopeRadios.forEach(radio => {
                 radio.addEventListener('change', () => {
@@ -821,18 +827,6 @@
                         $('#editProduct').val([]).trigger('change');
                         $('#editLocation').val([]).trigger('change');
                     }
-
-                    if (editLocationSelect.disabled) {
-                        editLocationSelect.selectedIndex = -1;
-                    }
-
-                    if (editCategorySelect.disabled) {
-                        editCategorySelect.selectedIndex = -1;
-                    }
-
-                    if (editProductSelect.disabled) {
-                        editProductSelect.selectedIndex = -1;
-                    }
                 });
             });
 
@@ -850,6 +844,12 @@
             if (props.products?.length) {
                 const ids = props.products.map(p => p.id);
                 $('#editProduct').val(ids).trigger('change');
+            }
+
+            // Locations
+            if (props.locations?.length) {
+                const ids = props.locations.map(l => l.id);
+                $('#editLocation').val(ids).trigger('change');
             }
 
             // Dates
@@ -909,6 +909,7 @@
                 block_type: $('#editBlockType').val(),
                 category_ids: $('#editCategory').val(),
                 product_ids: $('#editProduct').val(),
+                location_ids: $('#editLocation').val(),
                 dates: getEditDates(),
                 is_all_day: $('#editTimes').val().length === 0,
                 times: buildTimePayload($('#editTimes').val()),
@@ -1095,20 +1096,20 @@
 
             const props = selectedEvent.extendedProps;
 
-            await fetch(`/blocks/update-single`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
-                },
-                body: JSON.stringify({
-                    group_id: props.group_id,
-                    date: clickedDate,
-                    start_time: props.start_time,
-                    end_time: props.end_time,
-                    combo_product_ids: $('#editComboProduct').val()
-                })
-            });
+            // await fetch(`/blocks/update-single`, {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //         'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+            //     },
+            //     body: JSON.stringify({
+            //         group_id: props.group_id,
+            //         date: clickedDate,
+            //         start_time: props.start_time,
+            //         end_time: props.end_time,
+            //         combo_product_ids: $('#editComboProduct').val()
+            //     })
+            // });
 
             calendar.refetchEvents();
             $('#editBlockModal').modal('hide');

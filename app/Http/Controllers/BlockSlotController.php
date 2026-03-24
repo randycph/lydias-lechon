@@ -97,7 +97,7 @@ class BlockSlotController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'scope' => 'required|in:all,category,product',
+            'scope' => 'required|in:all,category,product,location',
             'block_type' => 'required|in:both,delivery,pickup',
 
             'category_ids' => 'nullable|array',
@@ -107,7 +107,10 @@ class BlockSlotController extends Controller
             'product_ids.*' => 'integer|exists:products,id',
 
             'location_ids' => 'nullable|array',
-            'location_ids.*' => 'integer|exists:locations,id',
+            'location_ids.*' => 'integer|exists:branches,id',
+
+            'combo_product_ids' => 'nullable|array',
+            'combo_product_ids.*' => 'integer|exists:products,id',
 
             'dates' => 'required|array|min:1',
             'dates.*' => 'date',
@@ -223,6 +226,7 @@ class BlockSlotController extends Controller
                 $block->products()->detach();
                 $block->categories()->detach();
                 $block->locations()->detach();
+                $block->comboProducts()->detach();
                 $block->delete();
             }
         });
@@ -249,6 +253,7 @@ class BlockSlotController extends Controller
                 $block->products()->detach();
                 $block->categories()->detach();
                 $block->locations()->detach();
+                $block->comboProducts()->detach();
                 $block->delete();
             }
         });
@@ -300,9 +305,13 @@ class BlockSlotController extends Controller
         $validated = $request->validate([
             'product_ids' => 'required|array|min:1',
             'product_ids.*' => 'integer|exists:products,id',
+
+            'location_ids' => 'required|array|min:1',
+            'location_ids.*' => 'integer|exists:branches,id',
         ]);
 
         $productIds = $validated['product_ids'];
+        $locationIds = $validated['location_ids'];
 
         // Get category IDs from cart products
         $categoryIds = Product::whereIn('id', $productIds)
@@ -319,7 +328,7 @@ class BlockSlotController extends Controller
                 'comboProducts:id'
             ])
             ->whereDate('date', '>=', $today)
-            ->where(function ($query) use ($productIds, $categoryIds) {
+            ->where(function ($query) use ($productIds, $categoryIds, $locationIds) {
 
                 // ALL scope
                 $query->where('scope', 'all')
@@ -337,6 +346,14 @@ class BlockSlotController extends Controller
                     $q->where('scope', 'category')
                     ->whereHas('categories', function ($sub) use ($categoryIds) {
                         $sub->whereIn('product_categories.id', $categoryIds);
+                    });
+                })
+
+                // LOCATION scope
+                ->orWhere(function ($q) use ($locationIds) {
+                    $q->where('scope', 'location')
+                    ->whereHas('locations', function ($sub) use ($locationIds) {
+                        $sub->whereIn('locations.id', $locationIds);
                     });
                 });
 
@@ -434,6 +451,10 @@ class BlockSlotController extends Controller
 
             if (!empty($validated['location_ids'])) {
                 $blockedSlot->locations()->attach($validated['location_ids']);
+            }
+
+            if (!empty($validated['combo_product_ids'])) {
+                $blockedSlot->comboProducts()->attach($validated['combo_product_ids']);
             }
         }
     }

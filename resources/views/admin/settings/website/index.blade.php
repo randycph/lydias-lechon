@@ -732,8 +732,8 @@ Website Settings
                     <dt class="col-4 product-view-dt">Product</dt>
                     <dd class="col-8 product-view-dd" id="modalProduct">—</dd>
 
-                    <dt class="col-4 product-view-dt">Location</dt>
-                    <dd class="col-8 product-view-dd" id="modalLocation">—</dd>
+                    <dt class="col-4 location-view-dt">Location</dt>
+                    <dd class="col-8 location-view-dd" id="modalLocation">—</dd>
 
                     <dt class="col-4">Date</dt>
                     <dd class="col-8" id="modalDate"></dd>
