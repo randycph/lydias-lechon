@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\EcommerceModel\Branch;
 use Illuminate\Database\Eloquent\Model;
 
 class BlockedSlot extends Model
@@ -46,4 +47,13 @@ class BlockedSlot extends Model
         );
     }
 
+    public function locations()
+    {
+        return $this->belongsToMany(
+            Branch::class,
+            'blocked_slot_locations',
+            'blocked_slot_id',
+            'location_id'
+        );
+    }
 }

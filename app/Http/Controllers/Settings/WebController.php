@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\EcommerceModel\Branch;
 use App\Models\Permission;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -88,13 +89,16 @@ class WebController extends Controller
                 return $u;
             });
 
+        $locations = Branch::with('numbers')->where('status', 1)->get();
+
         return view('admin.settings.website.index', compact(
             'web', 
             'medias', 
             'deliveryfees', 
             'categories', 
             'products', 
-            'selectedCustomers'
+            'selectedCustomers',
+            'locations'
         ));
     }
 

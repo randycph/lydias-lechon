@@ -26,6 +26,26 @@
                     <input class="form-check-input" type="radio" name="scope" id="scopeProduct" value="product">
                     <label class="form-check-label" for="scopeProduct">By Product</label>
                 </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="scope" id="scopeLocation" value="location">
+                    <label class="form-check-label" for="scopeLocation">By Location</label>
+                </div>
+            </div>
+
+            <!-- Category -->
+            <div class="mb-3">
+                <label class="form-label">Select Location</label>
+                <select 
+                    class="select2 form-control" 
+                    id="location"
+                    name="location_ids[]"
+                    multiple
+                    disabled
+                >
+                    @foreach ($locations as $location)
+                    <option value="{{ $location->id }}">{{ $location->name }}</option>
+                    @endforeach
+                </select>
             </div>
 
             <!-- Category -->
@@ -64,13 +84,13 @@
                 <label class="form-label fw-bold">Date Selection Mode</label>
 
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="date_mode" value="range" checked>
-                    <label class="form-check-label">Date Range</label>
+                    <input class="form-check-input" type="radio" name="date_mode" value="range" checked id="dateModeRange">
+                    <label class="form-check-label" for="dateModeRange">Date Range</label>
                 </div>
 
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="date_mode" value="multiple">
-                    <label class="form-check-label">Multiple Dates</label>
+                    <input class="form-check-input" type="radio" name="date_mode" value="multiple" id="dateModeMultiple">
+                    <label class="form-check-label" for="dateModeMultiple">Multiple Dates</label>
                 </div>
             </div>
 
@@ -93,12 +113,11 @@
 
                 <label class="form-label fw-bold">Select Dates</label>
 
-                <div id="multipleDatesContainer" class="mb-2"></div>
+                <div id="multipleDatesContainer" class=""></div>
 
-                <button type="button" class="btn btn-sm btn-outline-primary" id="addDateBtn">
+                <button type="button" class="btn btn-sm btn-outline-primary mb-3" id="addDateBtn">
                     + Add Date
                 </button>
-
             </div>
 
             <div class="mb-3">
@@ -216,6 +235,7 @@
         * --------------------------------------------------- */
         const scopeRadios    = document.querySelectorAll('input[name="scope"]');
         const categorySelect = document.querySelector('select[name="category_ids[]"]');
+        const locationSelect = document.querySelector('select[name="location_ids[]"]');
         const productSelect  = document.querySelector('select[name="product_ids[]"]');
         const addBlockBtn    = document.getElementById('addBlock');
         const deleteBlockBtn = document.getElementById('deleteEntireBlock');
@@ -244,6 +264,11 @@
 
         $('#category').select2({
             placeholder: "Select category",
+            width: '100%'
+        });
+
+        $('#location').select2({
+            placeholder: "Select location",
             width: '100%'
         });
 
@@ -340,6 +365,16 @@
                     productEl.innerText = '—';
                 }
 
+                // MULTIPLE LOCATIONS
+                const locationEl = document.getElementById('modalLocation');
+                if (props.locations && props.locations.length) {
+                    locationEl.innerHTML = props.locations
+                        .map(l => `<span class="badge badge-info mr-1">${l.name}</span>`)
+                        .join('');
+                } else {
+                    locationEl.innerText = '—';
+                }
+
                 let type = '';
                 
                 if (props.block_type) {
@@ -400,18 +435,31 @@
 
                 categorySelect.disabled = value !== 'category';
                 productSelect.disabled  = value !== 'product';
+                locationSelect.disabled = value !== 'location';
+
+                if (value === 'location') {
+                    $('#category').val(null).trigger('change');
+                    $('#product').val(null).trigger('change');
+                }
 
                 if (value === 'product') {
                     $('#category').val(null).trigger('change');
+                    $('#location').val(null).trigger('change');
                 }
 
                 if (value === 'category') {
                     $('#product').val(null).trigger('change');
+                    $('#location').val(null).trigger('change');
                 }
 
                 if (value === 'all') {
                     $('#category').val(null).trigger('change');
                     $('#product').val(null).trigger('change');
+                    $('#location').val(null).trigger('change');
+                }
+
+                if (locationSelect.disabled) {
+                    locationSelect.selectedIndex = -1;
                 }
 
                 if (categorySelect.disabled) {
@@ -507,12 +555,11 @@
             const productIds = Array.from(productSelect.selectedOptions)
                 .map(opt => opt.value);
 
-            const comboProductIds = Array.from(commonProductInput.selectedOptions)
+            const locationIds = Array.from(locationSelect.selectedOptions)
                 .map(opt => opt.value);
 
-                console.log({
-                    comboProductIds
-                });
+            const comboProductIds = Array.from(commonProductInput.selectedOptions)
+                .map(opt => opt.value);
 
             const payload = {
                 scope: document.querySelector('input[name="scope"]:checked').value,
@@ -522,7 +569,8 @@
                 dates,
                 is_all_day: isAllDay,
                 times,
-                combo_product_ids: comboProductIds.length ? comboProductIds : null
+                combo_product_ids: comboProductIds.length ? comboProductIds : null,
+                location_ids: locationIds.length ? locationIds : null
             };
 
             const res = await fetch('{{ route('blocks.store') }}', {
@@ -562,6 +610,7 @@
             const selected = document.querySelector('input[name="scope"]:checked').id;
             if (selected === 'scopeProduct') return 'PRODUCT BLOCKED';
             if (selected === 'scopeCategory') return 'CATEGORY BLOCKED';
+            if (selected === 'scopeLocation') return 'LOCATION BLOCKED';
             return 'ALL PRODUCTS BLOCKED';
         }
 
@@ -618,6 +667,7 @@
         $('#editCategory').select2({ placeholder: 'Select category', width: '100%' });
         $('#editProduct').select2({ placeholder: 'Select product', width: '100%' });
         $('#editTimes').select2({ placeholder: 'Select time slot', width: '100%' });
+        $('#editLocation').select2({ placeholder: 'Select location', width: '100%' });
 
         const editRangePicker = new DateRangePicker(
             document.getElementById('editDateRangeInputs'),
@@ -741,6 +791,7 @@
             const editScopeRadios = document.querySelectorAll('input[name="edit_scope"]');
             const editCategorySelect = document.querySelector('select[name="editCategory_ids[]"]');
             const editProductSelect  = document.querySelector('select[name="editProduct_ids[]"]');
+            const editLocationSelect = document.querySelector('select[name="editLocation_ids[]"]');
 
             editScopeRadios.forEach(radio => {
                 radio.addEventListener('change', () => {
@@ -748,18 +799,31 @@
 
                     editCategorySelect.disabled = value !== 'category';
                     editProductSelect.disabled  = value !== 'product';
+                    editLocationSelect.disabled = value !== 'location';
+
+                    if (value === 'location') {
+                        $('#editCategory').val([]).trigger('change');
+                        $('#editProduct').val([]).trigger('change');
+                    }
 
                     if (value === 'product') {
                         $('#editCategory').val([]).trigger('change');
+                        $('#editLocation').val([]).trigger('change');
                     }
 
                     if (value === 'category') {
                         $('#editProduct').val([]).trigger('change');
+                        $('#editLocation').val([]).trigger('change');
                     }
 
                     if (value === 'all') {
                         $('#editCategory').val([]).trigger('change');
                         $('#editProduct').val([]).trigger('change');
+                        $('#editLocation').val([]).trigger('change');
+                    }
+
+                    if (editLocationSelect.disabled) {
+                        editLocationSelect.selectedIndex = -1;
                     }
 
                     if (editCategorySelect.disabled) {

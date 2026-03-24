@@ -16,7 +16,8 @@ class BlockSlotController extends Controller
         $blocks = BlockedSlot::with([
                 'products:id,name',
                 'categories:id,name',
-                'comboProducts:id,name'
+                'comboProducts:id,name',
+                'locations:id,name'
             ])
             ->orderBy('date')
             ->get();
@@ -26,6 +27,7 @@ class BlockSlotController extends Controller
 
             $productIds = $b->products->pluck('id')->sort()->implode(',');
             $categoryIds = $b->categories->pluck('id')->sort()->implode(',');
+            $locationIds = $b->locations->pluck('id')->sort()->implode(',');
             $comboIds = $b->comboProducts->pluck('id')->sort()->implode(',');
 
             return implode('|', [
@@ -36,6 +38,7 @@ class BlockSlotController extends Controller
                 $b->end_time,
                 $productIds,
                 $categoryIds,
+                $locationIds,
                 $comboIds
             ]);
         });
@@ -78,6 +81,7 @@ class BlockSlotController extends Controller
                         'products' => $block->products,
                         'categories' => $block->categories,
                         'combo_products' => $block->comboProducts,
+                        'locations' => $block->locations
                     ];
                 }
             }
@@ -101,6 +105,9 @@ class BlockSlotController extends Controller
 
             'product_ids' => 'nullable|array',
             'product_ids.*' => 'integer|exists:products,id',
+
+            'location_ids' => 'nullable|array',
+            'location_ids.*' => 'integer|exists:locations,id',
 
             'dates' => 'required|array|min:1',
             'dates.*' => 'date',
@@ -142,9 +149,15 @@ class BlockSlotController extends Controller
                     if (!empty($validated['category_ids'])) {
                         $blockedSlot->categories()->attach($validated['category_ids']);
                     }
-
+                    
+                    // Attach combo products
                     if (!empty($validated['combo_product_ids'])) {
                         $blockedSlot->comboProducts()->attach($validated['combo_product_ids']);
+                    }
+
+                    // Attach locations
+                    if (!empty($validated['location_ids'])) {
+                        $blockedSlot->locations()->attach($validated['location_ids']);
                     }
 
                     continue;
@@ -168,6 +181,14 @@ class BlockSlotController extends Controller
 
                     if (!empty($validated['category_ids'])) {
                         $blockedSlot->categories()->attach($validated['category_ids']);
+                    }
+
+                    if (!empty($validated['location_ids'])) {
+                        $blockedSlot->locations()->attach($validated['location_ids']);
+                    }
+
+                    if (!empty($validated['combo_product_ids'])) {
+                        $blockedSlot->comboProducts()->attach($validated['combo_product_ids']);
                     }
                 }
             }
@@ -201,6 +222,7 @@ class BlockSlotController extends Controller
             foreach ($blocks as $block) {
                 $block->products()->detach();
                 $block->categories()->detach();
+                $block->locations()->detach();
                 $block->delete();
             }
         });
@@ -226,6 +248,7 @@ class BlockSlotController extends Controller
             foreach ($blocks as $block) {
                 $block->products()->detach();
                 $block->categories()->detach();
+                $block->locations()->detach();
                 $block->delete();
             }
         });
@@ -266,7 +289,8 @@ class BlockSlotController extends Controller
                 'is_all_day' => $b['is_all_day'],
                 'products' => $b['products'],
                 'categories' => $b['categories'],
-                'combo_products' => $b['combo_products'],
+                'locations' => $b['locations'],
+                'combo_products' => $b['combo_products']
             ],
         ];
     }
@@ -367,7 +391,6 @@ class BlockSlotController extends Controller
 
     public function updateGroup(Request $request, $groupId)
     {
-        dd($request->all(), $groupId);
         DB::transaction(function () use ($groupId, $request) {
 
             // delete existing group
@@ -376,6 +399,7 @@ class BlockSlotController extends Controller
             foreach ($blocks as $block) {
                 $block->products()->detach();
                 $block->categories()->detach();
+                $block->locations()->detach();
                 $block->delete();
             }
 
@@ -406,6 +430,10 @@ class BlockSlotController extends Controller
 
             if (!empty($validated['category_ids'])) {
                 $blockedSlot->categories()->attach($validated['category_ids']);
+            }
+
+            if (!empty($validated['location_ids'])) {
+                $blockedSlot->locations()->attach($validated['location_ids']);
             }
         }
     }

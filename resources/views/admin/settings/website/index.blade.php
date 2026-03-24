@@ -732,6 +732,9 @@ Website Settings
                     <dt class="col-4 product-view-dt">Product</dt>
                     <dd class="col-8 product-view-dd" id="modalProduct">—</dd>
 
+                    <dt class="col-4 product-view-dt">Location</dt>
+                    <dd class="col-8 product-view-dd" id="modalLocation">—</dd>
+
                     <dt class="col-4">Date</dt>
                     <dd class="col-8" id="modalDate"></dd>
 
@@ -750,6 +753,8 @@ Website Settings
                 </div>
                 <div>
                     <button class="btn btn-secondary" id="editBlock">Edit</button>
+                    <button class="btn btn-primary" id="saveEditSingle">Update This Only</button>
+                    <button class="btn btn-dark" id="saveEditGroup">Update Entire Group</button>
                 </div>
             </div>
 
@@ -785,6 +790,21 @@ Website Settings
             <input type="radio" name="edit_scope" value="product" class="form-check-input" id="editScopeProduct">
             <label class="form-check-label" for="editScopeProduct">Product</label>
           </div>
+
+          <div class="form-check">
+            <input type="radio" name="edit_scope" value="location" class="form-check-input" id="editScopeLocation">
+            <label class="form-check-label" for="editScopeLocation">Location</label>
+          </div>
+        </div>
+
+        <!-- Location -->
+        <div class="mb-3" id="editLocationWrapper">
+          <label class="form-label fw-bold">Locations</label>
+          <select id="editLocation" class="select2 form-control" name="editLocation_ids[]" disabled multiple>
+                @foreach ($locations as $location)
+                <option value="{{ $location->id }}">{{ $location->name }}</option>
+                @endforeach
+          </select>
         </div>
 
         <!-- Category -->
