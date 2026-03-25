@@ -747,6 +747,9 @@ Website Settings
                     <dt class="col-4">Time</dt>
                     <dd class="col-8" id="modalTime"></dd>
 
+                    <dt class="col-4">Blocking Override</dt>
+                    <dd class="col-8" id="modalBlockingOverride"></dd>
+
                 </dl>
 
             </div>

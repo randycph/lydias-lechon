@@ -99,12 +99,12 @@
                 <div class="row g-2" id="dateRangeInputs">
                     <div class="col">
                         <label class="form-label fw-bold">Start Date</label>
-                        <input type="text" class="form-control" placeholder="Start date" autocomplete="off">
+                        <input type="text" class="form-control start-date" placeholder="Start date" autocomplete="off">
                     </div>
 
                     <div class="col">
                         <label class="form-label fw-bold">End Date</label>
-                        <input type="text" class="form-control" placeholder="End date" autocomplete="off">
+                        <input type="text" class="form-control end-date" placeholder="End date" autocomplete="off">
                     </div>
                 </div>
             </div>
@@ -429,6 +429,16 @@
                         ? 'Whole day'
                         : formatTimeDisplay(props.start_time) + ' - ' + formatTimeDisplay(props.end_time);
 
+                // Allow Combo 
+                const comboEl = document.getElementById('modalBlockingOverride');
+                if (props.combo_products && props.combo_products.length) {
+                    comboEl.innerHTML = props.combo_products
+                        .map(p => `<span class="badge badge-success mr-1">${p.name}</span>`)
+                        .join('');
+                } else {
+                    comboEl.innerText = '—';
+                }
+                
                 $('#blockModal').modal('show');
             }
         });
@@ -567,6 +577,8 @@
             const comboProductIds = Array.from(commonProductInput.selectedOptions)
                 .map(opt => opt.value);
 
+            addBlockBtn.disabled = true
+
             const payload = {
                 scope: document.querySelector('input[name="scope"]:checked').value,
                 block_type: blockType,
@@ -598,9 +610,12 @@
             document
                 .querySelectorAll('#dateRangeInputs input')
                 .forEach(input => input.value = '');
+                
+            resetForm();
 
             calendar.refetchEvents();
-            resetForm();
+
+            addBlockBtn.disabled = false;
         });
         
 
@@ -622,14 +637,49 @@
         }
 
         function resetForm() {
-            rangePicker.setDates([null, null]);
+            rangePicker.destroy();
+
+            rangePicker = new DateRangePicker(
+                document.getElementById('dateRangeInputs'),
+                {
+                    format: 'yyyy-mm-dd',
+                    autohide: true,
+                    clearBtn: true,
+                }
+            );
+                    
             timeSlots.forEach(cb => {
                 cb.disabled = allDayCheckbox.checked;
                 if (allDayCheckbox.checked) cb.checked = false;
             });
+
             allDayCheckbox.checked = true;
+
             dates = [];
             times = [];
+            categoryIds = [];
+            productIds = [];
+            locationIds = [];
+            comboProductIds = [];
+
+            categorySelect.value = null;
+            productSelect.value = null;
+            locationSelect.value = null;
+
+            $('#category').val(null).trigger('change');
+            $('#product').val(null).trigger('change');
+            $('#location').val(null).trigger('change');
+            $('#combo-product').val([]).trigger('change');
+
+            document.querySelector('input[name="scope"][value="all"]').checked = true;
+            document.querySelector('input[name="scope"][value="all"]')
+                .dispatchEvent(new Event('change'));
+
+            $('#dateModeRange').prop('checked', true).trigger('change');
+            rangeWrapper.style.display = '';
+            multipleWrapper.style.display = 'none';
+
+            commonProductInput.disabled = false;
         }
 
         function formatDateLocal(date) {
@@ -679,7 +729,8 @@
             document.getElementById('editDateRangeInputs'),
             {
                 format: 'yyyy-mm-dd',
-                autohide: false
+                autohide: false,
+                clearBtn: true,
             }
         );
 
@@ -955,7 +1006,8 @@
             document.getElementById('editGroupDateRangeInputs'),
             {
                 format: 'yyyy-mm-dd',
-                autohide: false
+                autohide: false,
+                clearBtn: true,
             }
         );
 
@@ -1167,7 +1219,9 @@
             $('#blockModal').modal('hide');
         });
 
-        document.getElementById('saveEditGroup').addEventListener('click', async () => {
+        const saveEditGroupBtn = document.getElementById('saveEditGroup');
+
+        saveEditGroupBtn.addEventListener('click', async () => {
 
             const dates = getEditGroupDates();
 
