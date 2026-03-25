@@ -611,46 +611,6 @@ class BlockSlotController extends Controller
         $block->locations()->sync($locationIds);
         $block->comboProducts()->sync($comboIds);
     }
-    
-    private function storeWithGroupId($validated, $groupId)
-    {
-        foreach ($validated['dates'] as $date) {
-
-            if ($validated['is_all_day']) {
-
-                $blockedSlot = BlockedSlot::create([
-                    'scope' => $validated['scope'],
-                    'block_type' => $validated['block_type'],
-                    'date' => $date,
-                    'start_time' => null,
-                    'end_time' => null,
-                    'is_all_day' => true,
-                    'group_id' => $groupId,
-                    'date_mode' => $validated['date_mode'],
-                ]);
-
-                $this->attachRelations($blockedSlot, $validated);
-
-                continue;
-            }
-
-            foreach ($validated['times'] as $time) {
-
-                $blockedSlot = BlockedSlot::create([
-                    'scope' => $validated['scope'],
-                    'block_type' => $validated['block_type'],
-                    'date' => $date,
-                    'start_time' => $time['start'],
-                    'end_time' => $time['end'],
-                    'is_all_day' => false,
-                    'group_id' => $groupId,
-                    'date_mode' => $validated['date_mode']
-                ]);
-
-                $this->attachRelations($blockedSlot, $validated);
-            }
-        }
-    }
 
     private function attachRelations($blockedSlot, $validated)
     {

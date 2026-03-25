@@ -89,6 +89,10 @@ Website Settings
                     <a class="nav-link" id="kiosk-tab" data-toggle="tab" href="#kiosk" role="tab" aria-controls="kiosk"
                         aria-selected="false">Kiosk</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="block-dates-tab" data-toggle="tab" href="#block-dates" role="tab" aria-controls="block-dates"
+                        aria-selected="false">Block Dates & Times</a>
+                </li>
 
             </ul>
             <div class="tab-content rounded bd bd-gray-300 bd-t-0 pd-20" id="myTabContent">
@@ -397,6 +401,11 @@ Website Settings
                     </div>
                 </div>
 
+                <!-- Block Dates & Times -->
+                <div class="tab-pane fade" id="block-dates" role="tabpanel" aria-labelledby="block-dates-tab">
+                    @include('admin.settings.website.block-dates')
+                </div>
+
                 <!-- Ecommerce Setting -->
                 <div class="tab-pane fade" id="ecommerce" role="tabpanel" aria-labelledby="ecommerce-tab">
                     <div class="col-lg-12 mg-t-15">
@@ -573,9 +582,6 @@ Website Settings
                                         </div>
                                 </div>
                             </div> --}}
-
-
-                            @include('admin.settings.website.block-dates')
 
                             <div class="col-md-7">
                                 <div class="form-group">
