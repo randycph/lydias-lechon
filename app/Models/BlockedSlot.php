@@ -15,6 +15,7 @@ class BlockedSlot extends Model
         'is_all_day',
         'block_type',
         'group_id',
+        'date_mode',
     ];
 
     public function products()

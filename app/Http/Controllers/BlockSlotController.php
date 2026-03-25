@@ -123,6 +123,8 @@ class BlockSlotController extends Controller
 
             'combo_product_ids' => 'nullable|array',
             'combo_product_ids.*' => 'integer|exists:products,id',
+
+            'date_mode' => 'required|in:range,multiple',
         ]);
 
         DB::transaction(function () use ($validated) {
@@ -141,6 +143,7 @@ class BlockSlotController extends Controller
                         'end_time'    => null,
                         'is_all_day'  => true,
                         'group_id'    => $groupId,
+                        'date_mode'   => $validated['date_mode']
                     ]);
 
                     // Attach products
@@ -176,6 +179,7 @@ class BlockSlotController extends Controller
                         'end_time'    => $time['end'],
                         'is_all_day'  => false,
                         'group_id'    => $groupId,
+                        'date_mode'   => $validated['date_mode']
                     ]);
 
                     if (!empty($validated['product_ids'])) {
@@ -266,7 +270,7 @@ class BlockSlotController extends Controller
     private function formatEvent($b)
     {
         return [
-            'id' => $b['id'], // keep this
+            'id' => $b['id'],
             'title' => strtoupper($b['scope']) . ' BLOCKED',
 
             'start' => $b['is_all_day']
@@ -410,6 +414,15 @@ class BlockSlotController extends Controller
     {
         DB::transaction(function () use ($groupId, $request) {
 
+            $validated = $request->validate([
+                'scope' => 'required',
+                'dates' => 'required|array',
+                'block_type' => 'required',
+                'is_all_day' => 'required|boolean',
+                'times' => 'nullable|array',
+                'date_mode' => 'required|in:range,multiple',
+            ]);
+
             // delete existing group
             $blocks = BlockedSlot::where('group_id', $groupId)->get();
 
@@ -421,7 +434,7 @@ class BlockSlotController extends Controller
             }
 
             // recreate with same group_id
-            $this->storeWithGroupId($request, $groupId);
+            $this->storeWithGroupId($validated, $groupId);
         });
 
         return response()->json(['message' => 'Block updated']);
@@ -431,31 +444,114 @@ class BlockSlotController extends Controller
     {
         foreach ($validated['dates'] as $date) {
 
-            $blockedSlot = BlockedSlot::create([
-                'scope' => $validated['scope'],
-                'block_type' => $validated['block_type'],
-                'date' => $date,
-                'start_time' => $validated['is_all_day'] ? null : $validated['times'][0]['start'],
-                'end_time' => $validated['is_all_day'] ? null : $validated['times'][0]['end'],
-                'is_all_day' => $validated['is_all_day'],
-                'group_id' => $groupId,
-            ]);
+            if ($validated['is_all_day']) {
 
-            if (!empty($validated['product_ids'])) {
-                $blockedSlot->products()->attach($validated['product_ids']);
+                $blockedSlot = BlockedSlot::create([
+                    'scope' => $validated['scope'],
+                    'block_type' => $validated['block_type'],
+                    'date' => $date,
+                    'start_time' => null,
+                    'end_time' => null,
+                    'is_all_day' => true,
+                    'group_id' => $groupId,
+                    'date_mode' => $validated['date_mode'],
+                ]);
+
+                $this->attachRelations($blockedSlot, $validated);
+
+                continue;
             }
 
-            if (!empty($validated['category_ids'])) {
-                $blockedSlot->categories()->attach($validated['category_ids']);
-            }
+            foreach ($validated['times'] as $time) {
 
-            if (!empty($validated['location_ids'])) {
-                $blockedSlot->locations()->attach($validated['location_ids']);
-            }
+                $blockedSlot = BlockedSlot::create([
+                    'scope' => $validated['scope'],
+                    'block_type' => $validated['block_type'],
+                    'date' => $date,
+                    'start_time' => $time['start'],
+                    'end_time' => $time['end'],
+                    'is_all_day' => false,
+                    'group_id' => $groupId,
+                    'date_mode' => $validated['date_mode']
+                ]);
 
-            if (!empty($validated['combo_product_ids'])) {
-                $blockedSlot->comboProducts()->attach($validated['combo_product_ids']);
+                $this->attachRelations($blockedSlot, $validated);
             }
         }
     }
+
+    private function attachRelations($blockedSlot, $validated)
+    {
+        if (!empty($validated['product_ids'])) {
+            $blockedSlot->products()->attach($validated['product_ids']);
+        }
+
+        if (!empty($validated['category_ids'])) {
+            $blockedSlot->categories()->attach($validated['category_ids']);
+        }
+
+        if (!empty($validated['location_ids'])) {
+            $blockedSlot->locations()->attach($validated['location_ids']);
+        }
+
+        if (!empty($validated['combo_product_ids'])) {
+            $blockedSlot->comboProducts()->attach($validated['combo_product_ids']);
+        }
+    }
+
+    public function show($id)
+    {
+        $block = BlockedSlot::with([
+            'products:id,name',
+            'categories:id,name',
+            'locations:id,name',
+            'comboProducts:id,name'
+        ])->findOrFail($id);
+
+        return response()->json($block);
+    }
+
+    public function showGroup($groupId)
+    {
+        $blocks = BlockedSlot::with([
+            'products:id,name',
+            'categories:id,name',
+            'locations:id,name',
+            'comboProducts:id,name'
+        ])
+        ->where('group_id', $groupId)
+        ->orderBy('date')
+        ->get();
+
+        if ($blocks->isEmpty()) {
+            return response()->json(['message' => 'Not found'], 404);
+        }
+
+        $dates = $blocks->pluck('date')->unique()->values();
+
+        $timeSlots = $blocks
+            ->pluck('start_time')
+            ->filter()
+            ->unique()
+            ->values();
+
+        $first = $blocks->first();
+
+        return response()->json([
+            'group_id' => $groupId,
+            'scope' => $first->scope,
+            'block_type' => $first->block_type,
+            'is_all_day' => $first->is_all_day,
+
+            'products' => $first->products,
+            'categories' => $first->categories,
+            'locations' => $first->locations,
+            'combo_products' => $first->comboProducts,
+
+            'dates' => $dates,
+            'time_slots' => $timeSlots,
+            'date_mode' => $first->date_mode
+        ]);
+    }
+    
 }

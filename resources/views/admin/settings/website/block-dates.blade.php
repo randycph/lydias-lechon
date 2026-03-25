@@ -383,9 +383,22 @@
                     else if (props.block_type === 'pickup') type = 'PICKUP';
                     else type = props.block_type.toUpperCase();
                 }
+                
+                let badgeClass = 'secondary';
+                let blockTypeText = '';
+                if (type === 'DELIVERY') {
+                    badgeClass = 'danger';
+                    blockTypeText = 'DELIVERY';
+                } else if (type === 'PICKUP') {
+                    badgeClass = 'warning';
+                    blockTypeText = 'PICKUP';
+                } else {
+                    badgeClass = 'dark';
+                    blockTypeText = 'DELIVERY & PICKUP';
+                }
 
-                document.getElementById('modalBlockType').innerText =
-                    type + ' BLOCK';
+                document.getElementById('modalBlockType').innerHTML =
+                    type ? `<span class="badge badge-${badgeClass} mr-1">${blockTypeText}</span>` : '—';
 
                 // Date (range-aware)
                 // format date to Feb 05, 2026
@@ -570,7 +583,8 @@
                 is_all_day: isAllDay,
                 times,
                 combo_product_ids: comboProductIds.length ? comboProductIds : null,
-                location_ids: locationIds.length ? locationIds : null
+                location_ids: locationIds.length ? locationIds : null,
+                date_mode: mode
             };
 
             const res = await fetch('{{ route('blocks.store') }}', {
@@ -626,10 +640,9 @@
         }
 
         function formatDateLocal(date) {
-            const y = date.getFullYear();
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            const d = String(date.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
+            return date.getFullYear() + '-' +
+                String(date.getMonth() + 1).padStart(2, '0') + '-' +
+                String(date.getDate()).padStart(2, '0');
         }
 
         function formatTimeDisplay(time) {
@@ -768,138 +781,6 @@
             });
         });
 
-        editBlockBtn.addEventListener('click', () => {
-
-            const props = selectedEvent.extendedProps;
-
-            window.editingGroupId = props.group_id;
-
-            // clear multiple dates
-            document.getElementById('editMultipleDates').innerHTML = '';
-
-            // clear range
-            editRangePicker.setDates([]);
-
-            $('#editCategory').val([]).trigger('change');
-            $('#editProduct').val([]).trigger('change');
-            $('#editLocation').val([]).trigger('change');
-
-            const editScopeRadios = document.querySelectorAll('input[name="edit_scope"]');
-            const editCategorySelect = document.querySelector('select[name="editCategory_ids[]"]');
-            const editProductSelect  = document.querySelector('select[name="editProduct_ids[]"]');
-            const editLocationSelect = document.querySelector('select[name="editLocation_ids[]"]');
-
-            editScopeRadios.forEach(radio => {
-                radio.checked = radio.value === props.scope;
-            });
-
-            const selectedScope = document.querySelector('input[name="edit_scope"]:checked');
-
-            if (selectedScope) {
-                selectedScope.dispatchEvent(new Event('change'));
-            }
-
-            editScopeRadios.forEach(radio => {
-                radio.addEventListener('change', () => {
-                    const value = radio.value;
-
-                    editCategorySelect.disabled = value !== 'category';
-                    editProductSelect.disabled  = value !== 'product';
-                    editLocationSelect.disabled = value !== 'location';
-
-                    if (value === 'location') {
-                        $('#editCategory').val([]).trigger('change');
-                        $('#editProduct').val([]).trigger('change');
-                    }
-
-                    if (value === 'product') {
-                        $('#editCategory').val([]).trigger('change');
-                        $('#editLocation').val([]).trigger('change');
-                    }
-
-                    if (value === 'category') {
-                        $('#editProduct').val([]).trigger('change');
-                        $('#editLocation').val([]).trigger('change');
-                    }
-
-                    if (value === 'all') {
-                        $('#editCategory').val([]).trigger('change');
-                        $('#editProduct').val([]).trigger('change');
-                        $('#editLocation').val([]).trigger('change');
-                    }
-                });
-            });
-
-
-            // Block type
-            $('#editBlockType').val(props.block_type).trigger('change');
-
-            // Categories
-            if (props.categories?.length) {
-                const ids = props.categories.map(c => c.id);
-                $('#editCategory').val(ids).trigger('change');
-            }
-
-            // Products
-            if (props.products?.length) {
-                const ids = props.products.map(p => p.id);
-                $('#editProduct').val(ids).trigger('change');
-            }
-
-            // Locations
-            if (props.locations?.length) {
-                const ids = props.locations.map(l => l.id);
-                $('#editLocation').val(ids).trigger('change');
-            }
-
-            // Dates
-            const start = selectedEvent.start;
-            const end = new Date(selectedEvent.end);
-
-            if (end.getHours() === 0 && end.getMinutes() === 0 && end.getSeconds() === 0) {
-                end.setDate(end.getDate() - 1);
-            } else {
-                end.setDate(end.getDate());
-            }
-
-            // Detect range vs single
-            if (start.toDateString() === end.toDateString()) {
-                $('input[name="edit_date_mode"][value="multiple"]').prop('checked', true);
-                $('#editRangeWrapper').hide();
-                $('#editMultipleWrapper').show();
-                addEditDate(start);
-            } else {
-                $('input[name="edit_date_mode"][value="range"]').prop('checked', true);
-                $('#editRangeWrapper').show();
-                $('#editMultipleWrapper').hide();
-                editRangePicker.setDates([start, end]);
-            }
-
-            if (props.combo_products && props.combo_products.length) {
-                const ids = props.combo_products.map(p => p.id);
-
-                editAllowCombo.checked = true;
-                editComboProduct.disabled = false;
-
-                $('#editComboProduct').val(ids).trigger('change');
-            } else {
-                editAllowCombo.checked = false;
-                editComboProduct.disabled = true;
-
-                $('#editComboProduct').val([]).trigger('change');
-            }
-
-            // Time
-            if (!props.is_all_day) {
-                $('#editTimes').val([props.start_time.slice(0,5)]).trigger('change');
-            } else {
-                $('#editTimes').val([]).trigger('change');
-            }
-
-            $('#blockModal').modal('hide');
-            $('#editBlockModal').modal('show');
-        });
-
         document.getElementById('saveEditBlock').addEventListener('click', async () => {
 
             const comboIds = $('#editComboProduct').val();
@@ -913,11 +794,12 @@
                 dates: getEditDates(),
                 is_all_day: $('#editTimes').val().length === 0,
                 times: buildTimePayload($('#editTimes').val()),
-                combo_product_ids: comboIds && comboIds.length ? comboIds : null
+                combo_product_ids: comboIds && comboIds.length ? comboIds : null,
+                date_mode: $('input[name="edit_date_mode"]:checked').val()
             };
 
-            await fetch(`/blocks/group/${window.editingGroupId}`, {
-                method: 'PUT',
+            await fetch(`/blocks/update/${window.editingGroupId}`, {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
@@ -956,49 +838,23 @@
             $('#blockModal').modal('hide');
         });
 
-        document.getElementById('deleteBlock').addEventListener('click', async () => {
-            if (!selectedEvent) return;
+        // document.getElementById('deleteGroup').addEventListener('click', async () => {
+        //     if (!selectedEvent) return;
 
-            if (!confirm('Delete this specific block?')) return;
+        //     if (!confirm('This will delete the entire block group. Are you sure?')) return;
 
-            const groupId = selectedEvent.extendedProps.group_id;
-            const props = selectedEvent.extendedProps;
+        //     const groupId = selectedEvent.extendedProps.group_id;
 
-            await fetch(`/blocks/${groupId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
-                },
-                body: JSON.stringify({
-                    date: clickedDate,
-                    start_time: props.is_all_day ? null : props.start_time,
-                    end_time: props.is_all_day ? null : props.end_time
-                })
-            });
+        //     await fetch(`/blocks/${groupId}`, {
+        //         method: 'POST',
+        //         headers: {
+        //             'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+        //         }
+        //     });
 
-            calendar.refetchEvents();
-            $('#blockModal').modal('hide');
-        });
-
-        document.getElementById('deleteGroup').addEventListener('click', async () => {
-            if (!selectedEvent) return;
-
-            if (!confirm('This will delete the entire block group. Are you sure?')) return;
-
-            const groupId = selectedEvent.extendedProps.group_id;
-
-            await fetch(`/blocks/${groupId}`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
-                }
-            });
-
-            calendar.refetchEvents();
-            $('#blockModal').modal('hide');
-        });
+        //     calendar.refetchEvents();
+        //     $('#blockModal').modal('hide');
+        // });
 
         const rangeWrapper = document.getElementById('rangeWrapper');
         const multipleWrapper = document.getElementById('multipleWrapper');
@@ -1092,28 +948,352 @@
             }
         });
 
-        document.getElementById('saveEditSingle').addEventListener('click', async () => {
+        /* ---------------------------------------------------
+        * GROUP EDIT LOGIC
+        * --------------------------------------------------- */
+        $('#editGroupCategory').select2({ placeholder: 'Select category', width: '100%' });
+        $('#editGroupProduct').select2({ placeholder: 'Select product', width: '100%' });
+        $('#editGroupLocation').select2({ placeholder: 'Select location', width: '100%' });
+        $('#editGroupTimes').select2({ placeholder: 'Select time', width: '100%' });
+        $('#editGroupComboProduct').select2({ placeholder: 'Select product', width: '100%' });
 
+        // DATE RANGE
+        const editGroupRangePicker = new DateRangePicker(
+            document.getElementById('editGroupDateRangeInputs'),
+            {
+                format: 'yyyy-mm-dd',
+                autohide: false
+            }
+        );
+
+        const editGroupAllday = document.getElementById('editGroupAllday');
+
+        editGroupAllday.addEventListener('change', () => {
+
+            const isAllDay = editGroupAllday.checked;
+            const timeSelect = document.getElementById('editGroupTimes');
+
+            timeSelect.disabled = isAllDay;
+
+            if (isAllDay) {
+                $('#editGroupTimes').val([]).trigger('change');
+            }
+        });
+
+        const groupScopeRadios = document.querySelectorAll('input[name="group_scope"]');
+        const groupCategory = document.getElementById('editGroupCategory');
+        const groupProduct  = document.getElementById('editGroupProduct');
+        const groupLocation = document.getElementById('editGroupLocation');
+
+        groupScopeRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                const val = radio.value;
+
+                groupCategory.disabled = val !== 'category';
+                groupProduct.disabled  = val !== 'product';
+                groupLocation.disabled = val !== 'location';
+
+                if (val === 'location') {
+                    $('#editGroupCategory').val([]).trigger('change');
+                    $('#editGroupProduct').val([]).trigger('change');
+                }
+
+                if (val === 'product') {
+                    $('#editGroupCategory').val([]).trigger('change');
+                    $('#editGroupLocation').val([]).trigger('change');
+                }
+
+                if (val === 'category') {
+                    $('#editGroupProduct').val([]).trigger('change');
+                    $('#editGroupLocation').val([]).trigger('change');
+                }
+
+                if (val === 'all') {
+                    $('#editGroupCategory').val([]).trigger('change');
+                    $('#editGroupProduct').val([]).trigger('change');
+                    $('#editGroupLocation').val([]).trigger('change');
+                }
+            });
+        });
+
+        const editGroupAllowCombo = document.getElementById('editGroupAllowCombo');
+        const editGroupComboProduct = document.getElementById('editGroupComboProduct');
+
+        editGroupAllowCombo.addEventListener('change', function () {
+            editGroupComboProduct.disabled = !this.checked;
+
+            if (!this.checked) {
+                $('#editGroupComboProduct').val([]).trigger('change');
+            }
+        });
+
+        document.querySelectorAll('input[name="edit_group_date_mode"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+
+                if (radio.value === 'range' && radio.checked) {
+                    document.getElementById('editGroupRangeWrapper').style.display = '';
+                    document.getElementById('editGroupMultipleWrapper').style.display = 'none';
+                }
+
+                if (radio.value === 'multiple' && radio.checked) {
+                    document.getElementById('editGroupRangeWrapper').style.display = 'none';
+                    document.getElementById('editGroupMultipleWrapper').style.display = '';
+                }
+            });
+        });
+
+        document.getElementById('editGroupAddDate').addEventListener('click', () => {
+            addEditGroupDate();
+        });
+
+        document.getElementById('editGroup').addEventListener('click', async () => {
+
+            const groupId = selectedEvent.extendedProps.group_id;
+
+            const res = await fetch(`/blocks/group/${groupId}`);
+            const data = await res.json();
+
+            window.editingGroupId = groupId;
+
+            // RESET
+            document.getElementById('editGroupMultipleDates').innerHTML = '';
+            editGroupRangePicker.setDates([]);
+
+            // 🔥 DETECT MODE
+            const dates = data.dates;
+
+            const mode = data.date_mode;
+
+            let isContinuous = true;
+
+            for (let i = 1; i < dates.length; i++) {
+
+                const prev = parseLocalDate(dates[i - 1]);
+                prev.setDate(prev.getDate() + 1);
+
+                if (formatDateLocal(prev) !== dates[i]) {
+                    isContinuous = false;
+                    break;
+                }
+            }
+
+            if (mode === 'range') {
+
+                document.getElementById('editGroupRangeLabel').checked = true;
+                document.getElementById('editGroupRangeWrapper').style.display = '';
+                document.getElementById('editGroupMultipleWrapper').style.display = 'none';
+
+                editGroupRangePicker.setDates([]);
+                editGroupRangePicker.setDates(
+                    dates[0],
+                    dates[dates.length - 1]
+                );
+
+            } else {
+
+                document.getElementById('editGroupMultipleLabel').checked = true;
+                document.getElementById('editGroupRangeWrapper').style.display = 'none';
+                document.getElementById('editGroupMultipleWrapper').style.display = '';
+
+                dates.forEach(d => addEditGroupDate(d));
+            }
+            
+            // 🔥 SCOPE
+            document.querySelectorAll('input[name="group_scope"]').forEach(r => {
+                r.checked = r.value === data.scope;
+            });
+
+            document.querySelector('input[name="group_scope"]:checked')
+                ?.dispatchEvent(new Event('change'));
+
+            // 🔥 BLOCK TYPE
+            $('#editGroupBlockType').val(data.block_type).trigger('change');
+
+            // 🔥 RELATIONS
+            $('#editGroupCategory').val(data.categories.map(c => c.id)).trigger('change');
+            $('#editGroupProduct').val(data.products.map(p => p.id)).trigger('change');
+            $('#editGroupLocation').val(data.locations.map(l => l.id)).trigger('change');
+
+            // 🔥 COMBO
+            if (data.combo_products.length) {
+                $('#editGroupAllowCombo').prop('checked', true);
+                $('#editGroupComboProduct')
+                    .prop('disabled', false)
+                    .val(data.combo_products.map(p => p.id))
+                    .trigger('change');
+            } else {
+                $('#editGroupAllowCombo').prop('checked', false);
+                $('#editGroupComboProduct').prop('disabled', true).val([]).trigger('change');
+            }
+
+            // 🔥 TIME
+            if (!data.is_all_day && data.time_slots.length) {
+                $('#editGroupTimes')
+                    .val(data.time_slots.map(t => t.slice(0,5)))
+                    .trigger('change');
+
+                $('#editGroupTimes').prop('disabled', false);
+                $('#editGroupAllday').prop('checked', false);
+
+            } else {
+                $('#editGroupTimes').val([]).trigger('change');
+                $('#editGroupTimes').prop('disabled', true);
+                $('#editGroupAllday').prop('checked', true);
+            }
+
+            $('#blockModal').modal('hide');
+            $('#editGroupModal').modal('show');
+        });
+
+        document.getElementById('deleteBlock').addEventListener('click', async () => {
+            if (!selectedEvent) return;
+
+            if (!confirm('Delete this specific block?')) return;
+
+            const groupId = selectedEvent.extendedProps.group_id;
             const props = selectedEvent.extendedProps;
 
-            // await fetch(`/blocks/update-single`, {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //         'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
-            //     },
-            //     body: JSON.stringify({
-            //         group_id: props.group_id,
-            //         date: clickedDate,
-            //         start_time: props.start_time,
-            //         end_time: props.end_time,
-            //         combo_product_ids: $('#editComboProduct').val()
-            //     })
-            // });
+            await fetch(`/blocks/${groupId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                },
+                body: JSON.stringify({
+                    date: clickedDate,
+                    start_time: props.is_all_day ? null : props.start_time,
+                    end_time: props.is_all_day ? null : props.end_time
+                })
+            });
 
             calendar.refetchEvents();
-            $('#editBlockModal').modal('hide');
+            $('#blockModal').modal('hide');
         });
+
+        document.getElementById('saveEditGroup').addEventListener('click', async () => {
+
+            const dates = getEditGroupDates();
+
+            if (!dates.length) return;
+
+            const isAllDay = document.getElementById('editGroupAllday').checked;
+
+            const payload = {
+                scope: document.querySelector('input[name="group_scope"]:checked').value,
+                block_type: $('#editGroupBlockType').val(),
+                category_ids: $('#editGroupCategory').val(),
+                product_ids: $('#editGroupProduct').val(),
+                location_ids: $('#editGroupLocation').val(),
+                dates: dates,
+                is_all_day: isAllDay,
+                times: isAllDay ? [] : buildTimePayload($('#editGroupTimes').val()),
+                combo_product_ids: $('#editGroupComboProduct').val(),
+                date_mode: document.querySelector('input[name="edit_group_date_mode"]:checked').value
+            };
+
+            const res = await fetch(`/blocks/update/${window.editingGroupId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                alert('Failed to update group');
+                return;
+            }
+
+            $('#editGroupModal').modal('hide');
+            calendar.refetchEvents();
+        });
+
+        function parseLocalDate(dateStr) {
+            const [y, m, d] = dateStr.split('-').map(Number);
+            return new Date(y, m - 1, d);
+        }
+
+        function addEditGroupDate(date = null) {
+
+            const container = document.getElementById('editGroupMultipleDates');
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'd-flex gap-2 mb-2';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'form-control';
+            input.placeholder = 'Select date';
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'btn btn-danger btn-sm';
+            removeBtn.innerText = '✕';
+            removeBtn.type = 'button';
+
+            removeBtn.onclick = () => wrapper.remove();
+
+            wrapper.appendChild(input);
+            wrapper.appendChild(removeBtn);
+            container.appendChild(wrapper);
+
+            const picker = new Datepicker(input, {
+                format: 'yyyy-mm-dd',
+                autohide: true
+            });
+
+            if (date) picker.setDate(date);
+        }
+
+        function buildTimePayload(selectedTimes) {
+
+            if (!selectedTimes || !selectedTimes.length) {
+                return [];
+            }
+
+            return selectedTimes.map(time => {
+                const [h, m] = time.split(':').map(Number);
+
+                const endH = (h + 1) % 24;
+
+                return {
+                    start: time,
+                    end: String(endH).padStart(2, '0') + ':' + String(m).padStart(2, '0')
+                };
+            });
+        }
+
+        function getEditGroupDates() {
+
+            const mode = document.querySelector('input[name="edit_group_date_mode"]:checked').value;
+
+            let dates = [];
+
+            if (mode === 'range') {
+
+                const ranges = editGroupRangePicker.getDates();
+
+                if (!ranges[0] || !ranges[1]) {
+                    alert('Select start and end date');
+                    return [];
+                }
+
+                dates = expandDateRange(ranges[0], ranges[1]);
+
+            } else {
+
+                document.querySelectorAll('#editGroupMultipleDates input').forEach(input => {
+                    if (input.value) dates.push(input.value);
+                });
+
+                if (!dates.length) {
+                    alert('Select at least one date');
+                }
+            }
+
+            return [...new Set(dates)].sort();
+        }
 
     });
 </script>
