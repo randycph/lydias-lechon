@@ -444,43 +444,36 @@
         * --------------------------------------------------- */
         scopeRadios.forEach(radio => {
             radio.addEventListener('change', () => {
+
                 const value = radio.value;
 
-                categorySelect.disabled = value !== 'category';
-                productSelect.disabled  = value !== 'product';
-                locationSelect.disabled = value !== 'location';
+                // reset all
+                categorySelect.disabled = true;
+                productSelect.disabled  = true;
+                locationSelect.disabled = true;
 
-                if (value === 'location') {
-                    $('#category').val(null).trigger('change');
-                    $('#product').val(null).trigger('change');
-                }
+                // clear all
+                $('#category').val(null).trigger('change');
+                $('#product').val(null).trigger('change');
+                $('#location').val(null).trigger('change');
 
-                if (value === 'product') {
-                    $('#category').val(null).trigger('change');
-                    $('#location').val(null).trigger('change');
+                if (value === 'all') {
+                    // everything stays disabled
+                    return;
                 }
 
                 if (value === 'category') {
-                    $('#product').val(null).trigger('change');
-                    $('#location').val(null).trigger('change');
+                    categorySelect.disabled = false;
                 }
 
-                if (value === 'all') {
-                    $('#category').val(null).trigger('change');
-                    $('#product').val(null).trigger('change');
-                    $('#location').val(null).trigger('change');
+                if (value === 'product') {
+                    productSelect.disabled = false;
                 }
 
-                if (locationSelect.disabled) {
-                    locationSelect.selectedIndex = -1;
-                }
-
-                if (categorySelect.disabled) {
-                    categorySelect.selectedIndex = -1;
-                }
-
-                if (productSelect.disabled) {
-                    productSelect.selectedIndex = -1;
+                if (value === 'location') {
+                    categorySelect.disabled = false;
+                    productSelect.disabled  = false;
+                    locationSelect.disabled = false;
                 }
             });
         });

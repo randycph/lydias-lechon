@@ -131,6 +131,30 @@ class BlockSlotController extends Controller
 
             $groupId = (string) Str::uuid();
 
+            $scope = $validated['scope'];
+
+            // FILTER BASED ON SCOPE
+            $productIds  = $validated['product_ids'] ?? [];
+            $categoryIds = $validated['category_ids'] ?? [];
+            $locationIds = $validated['location_ids'] ?? [];
+            $comboProductIds = $validated['combo_product_ids'] ?? [];
+
+            if ($scope === 'category') {
+                $productIds = [];
+                $locationIds = [];
+            }
+
+            if ($scope === 'product') {
+                $categoryIds = [];
+                $locationIds = [];
+            }
+
+            if ($scope === 'all') {
+                $productIds = [];
+                $categoryIds = [];
+                $locationIds = [];
+            }
+            
             foreach ($validated['dates'] as $date) {
 
                 if ($validated['is_all_day']) {
@@ -147,23 +171,23 @@ class BlockSlotController extends Controller
                     ]);
 
                     // Attach products
-                    if (!empty($validated['product_ids'])) {
-                        $blockedSlot->products()->attach($validated['product_ids']);
+                    if (!empty($productIds)) {
+                        $blockedSlot->products()->sync($productIds);
                     }
 
                     // Attach categories
-                    if (!empty($validated['category_ids'])) {
-                        $blockedSlot->categories()->attach($validated['category_ids']);
+                    if (!empty($categoryIds)) {
+                        $blockedSlot->categories()->sync($categoryIds);
                     }
                     
                     // Attach combo products
-                    if (!empty($validated['combo_product_ids'])) {
-                        $blockedSlot->comboProducts()->attach($validated['combo_product_ids']);
+                    if (!empty($comboProductIds)) {
+                        $blockedSlot->comboProducts()->sync($comboProductIds);
                     }
 
                     // Attach locations
-                    if (!empty($validated['location_ids'])) {
-                        $blockedSlot->locations()->attach($validated['location_ids']);
+                    if (!empty($locationIds)) {
+                        $blockedSlot->locations()->sync($locationIds);
                     }
 
                     continue;
@@ -182,20 +206,20 @@ class BlockSlotController extends Controller
                         'date_mode'   => $validated['date_mode']
                     ]);
 
-                    if (!empty($validated['product_ids'])) {
-                        $blockedSlot->products()->attach($validated['product_ids']);
+                    if (!empty($productIds)) {
+                        $blockedSlot->products()->sync($productIds);
                     }
 
-                    if (!empty($validated['category_ids'])) {
-                        $blockedSlot->categories()->attach($validated['category_ids']);
+                    if (!empty($categoryIds)) {
+                        $blockedSlot->categories()->sync($categoryIds);
                     }
 
-                    if (!empty($validated['location_ids'])) {
-                        $blockedSlot->locations()->attach($validated['location_ids']);
+                    if (!empty($locationIds)) {
+                        $blockedSlot->locations()->sync($locationIds);
                     }
 
-                    if (!empty($validated['combo_product_ids'])) {
-                        $blockedSlot->comboProducts()->attach($validated['combo_product_ids']);
+                    if (!empty($comboProductIds)) {
+                        $blockedSlot->comboProducts()->sync($comboProductIds);
                     }
                 }
             }
@@ -205,6 +229,73 @@ class BlockSlotController extends Controller
         return response()->json([
             'message' => 'Blocked dates saved successfully'
         ], 201);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'scope' => 'required|in:all,category,product,location',
+            'block_type' => 'required|in:both,delivery,pickup',
+            'is_all_day' => 'required|boolean',
+
+            'product_ids' => 'nullable|array',
+            'category_ids' => 'nullable|array',
+            'location_ids' => 'nullable|array',
+            'combo_product_ids' => 'nullable|array',
+
+            'start_time' => 'nullable',
+            'end_time' => 'nullable',
+        ]);
+
+        $block = BlockedSlot::findOrFail($id);
+
+        $scope = $validated['scope'];
+
+        // FILTER BASED ON SCOPE
+        $productIds  = $validated['product_ids'] ?? [];
+        $categoryIds = $validated['category_ids'] ?? [];
+        $locationIds = $validated['location_ids'] ?? [];
+
+        if ($scope === 'category') {
+            $productIds = [];
+            $locationIds = [];
+        }
+
+        if ($scope === 'product') {
+            $categoryIds = [];
+            $locationIds = [];
+        }
+
+        if ($scope === 'all') {
+            $productIds = [];
+            $categoryIds = [];
+            $locationIds = [];
+        }
+
+        // UPDATE BLOCK
+        $block->update([
+            'scope' => $scope,
+            'block_type' => $validated['block_type'],
+            'is_all_day' => $validated['is_all_day'],
+            'start_time' => $validated['is_all_day'] ? null : ($validated['start_time'] ?? null),
+            'end_time' => $validated['is_all_day'] ? null : ($validated['end_time'] ?? null),
+        ]);
+
+        // SYNC RELATIONS
+        $block->products()->sync($productIds);
+        $block->categories()->sync($categoryIds);
+        $block->locations()->sync($locationIds);
+        $block->comboProducts()->sync($validated['combo_product_ids'] ?? []);
+
+        return response()->json([
+            'message' => 'Block updated successfully',
+            'data' => $block->load([
+                'products:id,name',
+                'categories:id,name',
+                'locations:id,name',
+                'comboProducts:id,name'
+            ])
+        ]);
     }
 
     public function destroy(Request $request, $groupId)
