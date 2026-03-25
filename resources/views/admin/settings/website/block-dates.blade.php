@@ -986,25 +986,26 @@
                 groupProduct.disabled  = val !== 'product';
                 groupLocation.disabled = val !== 'location';
 
-                if (val === 'location') {
-                    $('#editGroupCategory').val([]).trigger('change');
-                    $('#editGroupProduct').val([]).trigger('change');
-                }
+                $('#editGroupCategory').val([]).trigger('change');
+                $('#editGroupProduct').val([]).trigger('change');
+                $('#editGroupLocation').val([]).trigger('change');
 
-                if (val === 'product') {
-                    $('#editGroupCategory').val([]).trigger('change');
-                    $('#editGroupLocation').val([]).trigger('change');
+                if (val === 'all') {
+                    return;
                 }
 
                 if (val === 'category') {
-                    $('#editGroupProduct').val([]).trigger('change');
-                    $('#editGroupLocation').val([]).trigger('change');
+                    groupCategory.disabled = false;
                 }
 
-                if (val === 'all') {
-                    $('#editGroupCategory').val([]).trigger('change');
-                    $('#editGroupProduct').val([]).trigger('change');
-                    $('#editGroupLocation').val([]).trigger('change');
+                if (val === 'product') {
+                    groupProduct.disabled = false;
+                }
+
+                if (val === 'location') {
+                    groupCategory.disabled = false;
+                    groupProduct.disabled  = false;
+                    groupLocation.disabled = false;
                 }
             });
         });
@@ -1039,7 +1040,9 @@
             addEditGroupDate();
         });
 
-        document.getElementById('editGroup').addEventListener('click', async () => {
+        const editGroupBtn = document.getElementById('editGroup');
+
+        editGroupBtn.addEventListener('click', async () => {
 
             const groupId = selectedEvent.extendedProps.group_id;
 
@@ -1052,7 +1055,7 @@
             document.getElementById('editGroupMultipleDates').innerHTML = '';
             editGroupRangePicker.setDates([]);
 
-            // 🔥 DETECT MODE
+            // DETECT MODE
             const dates = data.dates;
 
             const mode = data.date_mode;
@@ -1091,7 +1094,7 @@
                 dates.forEach(d => addEditGroupDate(d));
             }
             
-            // 🔥 SCOPE
+            // SCOPE
             document.querySelectorAll('input[name="group_scope"]').forEach(r => {
                 r.checked = r.value === data.scope;
             });
@@ -1099,15 +1102,15 @@
             document.querySelector('input[name="group_scope"]:checked')
                 ?.dispatchEvent(new Event('change'));
 
-            // 🔥 BLOCK TYPE
+            // BLOCK TYPE
             $('#editGroupBlockType').val(data.block_type).trigger('change');
 
-            // 🔥 RELATIONS
+            // RELATIONS
             $('#editGroupCategory').val(data.categories.map(c => c.id)).trigger('change');
             $('#editGroupProduct').val(data.products.map(p => p.id)).trigger('change');
             $('#editGroupLocation').val(data.locations.map(l => l.id)).trigger('change');
 
-            // 🔥 COMBO
+            // COMBO
             if (data.combo_products.length) {
                 $('#editGroupAllowCombo').prop('checked', true);
                 $('#editGroupComboProduct')
@@ -1119,7 +1122,7 @@
                 $('#editGroupComboProduct').prop('disabled', true).val([]).trigger('change');
             }
 
-            // 🔥 TIME
+            // TIME
             if (!data.is_all_day && data.time_slots.length) {
                 $('#editGroupTimes')
                     .val(data.time_slots.map(t => t.slice(0,5)))

@@ -506,31 +506,112 @@ class BlockSlotController extends Controller
         DB::transaction(function () use ($groupId, $request) {
 
             $validated = $request->validate([
-                'scope' => 'required',
+                'scope' => 'required|in:all,category,product,location',
+                'block_type' => 'required|in:both,delivery,pickup',
+
+                'category_ids' => 'nullable|array',
+                'product_ids' => 'nullable|array',
+                'location_ids' => 'nullable|array',
+                'combo_product_ids' => 'nullable|array',
+
                 'dates' => 'required|array',
-                'block_type' => 'required',
+                'dates.*' => 'date',
+
                 'is_all_day' => 'required|boolean',
+
                 'times' => 'nullable|array',
+                'times.*.start' => 'required_if:is_all_day,false',
+                'times.*.end' => 'required_if:is_all_day,false',
+
                 'date_mode' => 'required|in:range,multiple',
             ]);
 
-            // delete existing group
+            // DELETE EXISTING GROUP
             $blocks = BlockedSlot::where('group_id', $groupId)->get();
 
             foreach ($blocks as $block) {
                 $block->products()->detach();
                 $block->categories()->detach();
                 $block->locations()->detach();
+                $block->comboProducts()->detach();
                 $block->delete();
             }
 
-            // recreate with same group_id
-            $this->storeWithGroupId($validated, $groupId);
+            // APPLY SCOPE FILTERING (SAME AS STORE)
+            $scope = $validated['scope'];
+
+            $productIds  = $validated['product_ids'] ?? [];
+            $categoryIds = $validated['category_ids'] ?? [];
+            $locationIds = $validated['location_ids'] ?? [];
+            $comboIds    = $validated['combo_product_ids'] ?? [];
+
+            if ($scope === 'category') {
+                $productIds = [];
+                $locationIds = [];
+            }
+
+            if ($scope === 'product') {
+                $categoryIds = [];
+                $locationIds = [];
+            }
+
+            if ($scope === 'all') {
+                $productIds = [];
+                $categoryIds = [];
+                $locationIds = [];
+            }
+
+            // RECREATE BLOCKS (SAME GROUP ID)
+            foreach ($validated['dates'] as $date) {
+
+                // ALL DAY
+                if ($validated['is_all_day']) {
+
+                    $block = BlockedSlot::create([
+                        'scope'       => $scope,
+                        'block_type'  => $validated['block_type'],
+                        'date'        => $date,
+                        'start_time'  => null,
+                        'end_time'    => null,
+                        'is_all_day'  => true,
+                        'group_id'    => $groupId,
+                        'date_mode'   => $validated['date_mode'],
+                    ]);
+
+                    $this->syncRelations($block, $productIds, $categoryIds, $locationIds, $comboIds);
+                    continue;
+                }
+
+                // TIME SLOTS
+                foreach ($validated['times'] ?? [] as $time) {
+
+                    $block = BlockedSlot::create([
+                        'scope'       => $scope,
+                        'block_type'  => $validated['block_type'],
+                        'date'        => $date,
+                        'start_time'  => $time['start'],
+                        'end_time'    => $time['end'],
+                        'is_all_day'  => false,
+                        'group_id'    => $groupId,
+                        'date_mode'   => $validated['date_mode'],
+                    ]);
+
+                    $this->syncRelations($block, $productIds, $categoryIds, $locationIds, $comboIds);
+                }
+            }
         });
 
         return response()->json(['message' => 'Block updated']);
     }
 
+    private function syncRelations($block, $productIds, $categoryIds, $locationIds, $comboIds)
+    {
+        $block->products()->sync($productIds);
+        $block->categories()->sync($categoryIds);
+        $block->locations()->sync($locationIds);
+        $block->comboProducts()->sync($comboIds);
+    }
+    
     private function storeWithGroupId($validated, $groupId)
     {
         foreach ($validated['dates'] as $date) {
