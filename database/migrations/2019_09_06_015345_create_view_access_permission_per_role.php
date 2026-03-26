@@ -1,30 +1,26 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateViewAccessPermissionPerRole extends Migration
-{
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
+return new class extends Migration {
+    public function up(): void
     {
-        DB::statement("CREATE VIEW view_access_permission_per_role AS SELECT user_id, role, GROUP_CONCAT(name SEPARATOR '|') AS permissions
-                            FROM view_role_permission
-                                GROUP BY user_id, role");
+        DB::statement('DROP VIEW IF EXISTS view_access_permission_per_role');
+
+        DB::statement("
+            CREATE VIEW view_access_permission_per_role AS
+            SELECT
+                vrp.user_id,
+                vrp.role,
+                GROUP_CONCAT(vrp.name SEPARATOR '|') AS permissions
+            FROM view_role_permission vrp
+            GROUP BY vrp.user_id, vrp.role
+        ");
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
+    public function down(): void
     {
-        DB::statement("DROP VIEW view_access_permission_per_role");
+        DB::statement('DROP VIEW IF EXISTS view_access_permission_per_role');
     }
-}
+};

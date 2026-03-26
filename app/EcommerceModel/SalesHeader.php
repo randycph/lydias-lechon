@@ -14,10 +14,12 @@ use App\Models\Concerns\LogsActivityDiff;
 use App\EcommerceModel\ProductionOrder;
 use App\Helpers\Webfocus\Setting;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class SalesHeader extends Model
 {
     use SoftDeletes, LogsActivityDiff;
+    use HasFactory;
     
     protected $primaryKey = 'id';
     public $incrementing = true;

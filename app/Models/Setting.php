@@ -5,11 +5,13 @@ namespace App\Models;
 use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Setting extends Model
 {
     use SoftDeletes;
     use LogsActivityDiff;
+    use HasFactory;
 
     protected $table = 'settings';
     protected $fillable = [

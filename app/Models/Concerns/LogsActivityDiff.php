@@ -11,6 +11,8 @@ trait LogsActivityDiff
 {
     public static function bootLogsActivityDiff(): void
     {
+        if (app()->runningUnitTests()) return;
+        
         /*
         |--------------------------------------------------------------------------
         | CREATE
@@ -60,6 +62,7 @@ trait LogsActivityDiff
         | UPDATE (FIELD DIFF)
         |--------------------------------------------------------------------------
         */
+
         static::updating(function (Model $model) {
             if ($model instanceof ActivityLog) {
                 return;

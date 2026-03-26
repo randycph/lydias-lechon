@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
 class CreateViewActivityLogs extends Migration
 {
@@ -13,6 +14,8 @@ class CreateViewActivityLogs extends Migration
      */
     public function up()
     {
+        DB::statement('DROP VIEW IF EXISTS view_activity_logs');
+    
         DB::statement("CREATE VIEW view_activity_logs AS SELECT l.*, u.email, u.firstname, u.lastname, r.name as role_name from cms_activity_logs AS l 
                             LEFT JOIN users AS u ON u.id = l.created_by
                             LEFT JOIN role AS r ON r.id = u.role_id");

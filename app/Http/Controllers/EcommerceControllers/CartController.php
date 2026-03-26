@@ -27,6 +27,7 @@ use App\Models\Page;
 use Illuminate\Support\Facades\Auth;
 use App\EcommerceModel\GiftCertificate;
 use App\Models\ActivityLog;
+use App\Jobs\SendSmsJob;
 use App\Models\ProductDeliveryAddress;
 use App\Models\Setting as ModelsSetting;
 use Redirect;
@@ -38,6 +39,15 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Fluent;
 
+use App\Services\DeliveryService;
+use App\Services\CouponService;
+use App\Services\NotificationService;
+use App\Services\PaymentService;
+use App\Services\CartService;
+use App\Services\ProcessingService;
+use App\Services\SalesCalculator;
+use App\Services\SalesValidationService;
+use App\Services\SendNotification;
 
 class CartController extends Controller
 {
@@ -856,14 +866,419 @@ class CartController extends Controller
         );
     }
 
+    private function saveSalesHeader(Request $request, $userId = null)
+    {
+        return SalesHeader::create([
+            'user_id' => $userId,
+            'name' => $request->name,
+            'email' => $request->email,
+            'mobile' => $request->mobile,
+            'remarks' => $request->remarks,
+            'shipping_type' => $request->shipping_type,
+            'delivery_address' => $request->delivery_address,
+            'province' => $request->province,
+            'city' => $request->city,
+            'location' => $request->location,
+        ]);
+    }
 
-    public function save_sales(Request $request) 
+    public function save_sales(
+        Request $request,
+        CartService $cartService,
+        ProcessingService $processingService,
+        SalesCalculator $calculator,
+        DeliveryService $deliveryService,
+        CouponService $couponService,
+        NotificationService $notificationService,
+        PaymentService $paymentService,
+        SalesValidationService $salesValidationService,
+        SendNotification $sendNotification
+    ) 
+    {
+        // =============================
+        // 1. USER
+        // =============================
+        $user = auth()->check() ? auth()->user() : null;
+
+        // =============================
+        // 2. CART
+        // =============================
+        $carts = $cartService->getCart($user);
+        $carts = $cartService->attachBakaService($carts, $user);
+        $couponData = json_decode($request->input('coupon_data'), true);
+        // $carts = $couponService->applyFreeProducts($carts, $couponData);
+
+        // =============================
+        // 3. SETTINGS
+        // =============================
+        $setting = \App\Models\Setting::first();
+        $bakaProduct = Product::find(270);
+        $minHours = $processingService->resolveMinHours($carts, $setting);
+        $minimum_processing_hours = $setting ? $setting->minimum_processing_hours : 24;
+        $minimum_processing_hours_misc = $setting ? $setting->minimum_processing_hours_misc : 12;
+        $minimum_processing_hours_baka = $setting ? $setting->minimum_processing_hours_baka : 72;
+
+        $deliveries = json_decode($request->deliveries ?? '[]');
+
+        // =============================
+        // 4. VALIDATION
+        // =============================
+
+        if ($res = $salesValidationService->common($request)) {
+            return $res;
+        }
+
+        if ($res = $salesValidationService->isPickup($request)) {
+            return $res;
+        }
+
+        if ($res = $salesValidationService->singleDeliveriesDatetime($request, $processingService, $minHours)) {
+            return $res;
+        }
+
+        if ($res = $salesValidationService->singleDeliveryLocation($request)) {
+            return $res;
+        }
+
+        if ($res = $salesValidationService->multiDeliveries($request, $deliveries, $processingService, $minimum_processing_hours, $minimum_processing_hours_misc, $minimum_processing_hours_baka)) {
+            return $res;
+        }
+
+        if ($res = $salesValidationService->processingTime($request, $processingService, $minHours)) {
+            return $res;
+        }
+
+        if ($res = $salesValidationService->noAmount($request)) {
+            return $res;
+        }
+
+        // =============================
+        // 5. USER (GUEST)
+        // =============================
+        if (!$user) {
+            $firstName = explode(' ', trim($request->name))[0] ?? 'Guest';
+            $lastName = trim(str_replace($firstName, '', trim($request->name))) ?: 'Guest';
+
+            $user = User::create([
+                'name' => $request->name,
+                'contact_mobile' => $request->mobile,
+                'email' => $request->email,
+                'valid_email' => $request->email,
+                'registration_type' => 'guest',
+                'registration_source' => 'Guest',
+                'password' => Hash::make(Str::random(10)),
+                'firstname' => $firstName,
+                'lastname' => $lastName,
+                'is_active' => 1,
+                'role_id' => 6
+            ]);
+        }
+
+        $customer_name = $user->name;
+
+        // =============================
+        // 6. DELIVERY
+        // =============================
+        $delivery_fee = 0;
+
+        if ($request->shipping_type == 'pickup') {
+            $delivery_type = 'Store Pickup';
+            $customer_delivery_address = $request->delivery_branch;
+            $outlet = $request->delivery_branch;
+        } else {
+            $delivery_type = 'Door to door delivery';
+            $delivery_fee = $request->delivery_fee ?? 0;
+            $customer_delivery_address = $request->delivery_address;
+            $outlet = '';
+        }
+
+        // =============================
+        // 7. BAKA LOGIC
+        // =============================
+        $bakaQty = 0;
+        foreach ($carts as $cart) {
+            if ($cart->product_id == 178) {
+                $bakaQty = $cart->qty;
+                break;
+            }
+        }
+
+        // =============================
+        // 8. TOTALS
+        // =============================
+        $totalPrice = (float)$request->order_amount + ( ($bakaProduct?->price ?? 0) * ($bakaQty ?? 0) );
+        $discount = (float)($request->discount_amount ?? 0);
+        $netAmount = $totalPrice + $delivery_fee - $discount;
+
+        // =============================
+        // 9. ORDER NUMBER
+        // =============================
+        $lastOrder = SalesHeader::withTrashed()
+            ->whereNull('parent_sales_header_id')
+            ->whereRaw('order_number REGEXP "^[0-9]{7}$"')
+            ->max('order_number');
+
+        $nextOrder = $lastOrder ? intval($lastOrder) + 1 : 1;
+        $orderNumber = sprintf('%07d', $nextOrder);
+
+        // =============================
+        // 10. EDIT MODE
+        // =============================
+
+        if(Carbon::now()->format('H:i') > Setting::info()?->cutoff){
+            $forecast_date = date('Y-m-d', strtotime('+1 days'));
+        } else {
+            $forecast_date = date('Y-m-d');
+        }
+
+        if (session()->has('edit_sales_header_id') && !empty(session()->get('edit_sales_header_id'))) {
+
+            $salesHeader = SalesHeader::find(session()->get('edit_sales_header_id'));
+
+            if (!$salesHeader) {
+                session()->forget('edit_sales_header_id');
+                return response()->json([
+                    'error' => 'Sales record not found. Please try again.'
+                ], 404);
+            }
+
+            // DELETE OLD RELATED
+            SalesDetail::where('sales_header_id', $salesHeader->id)->delete();
+            CouponCart::where('sales_header_id', $salesHeader->id)->delete();
+            ProductDeliveryAddress::where('sales_header_id', $salesHeader->id)->delete();
+            SalesPayment::where('sales_header_id', $salesHeader->id)->delete();
+            CouponSale::where('sales_header_id', $salesHeader->id)->delete();
+
+            $salesHeader->update([
+                'user_id' => $user->id,
+                'email' => $request->email,
+                'customer_name' => $customer_name,
+                'customer_contact_number' => $request->mobile,
+                'customer_address' => $customer_delivery_address,
+                'customer_delivery_adress' => $customer_delivery_address,
+                'city' => $request->city ?? '',
+                'province' => $request->province ?? '',
+                'barangay' => $request->location ?? '',
+                'delivery_type' => $delivery_type,
+                'delivery_fee_amount' => $delivery_fee,
+                'order_source' => 'Web',
+                'delivery_branch' => $delivery_type == 'Door to door delivery' ? 'Tandang Sora Delivery' : '',
+                'tax_amount' => 0,
+                'gross_amount' => $totalPrice,
+                'net_amount' => $netAmount,
+                'discount_amount' => $discount,
+                'payment_status' => $request->order_amount <= 0 ? 'PAID' : 'PENDING',
+                'delivery_status' => '',
+                'status' => 'active',
+                'currency' => 'PHP',
+                'customer_location' => $request->shipping_type == 'pickup' ? '' : ($request->delivery_address),
+                'instruction' => $request->instruction,
+                'agent' => $request->agent,
+                'contact_person' => $request->name,
+                'outlet' => $outlet,
+                'origin' => $request->hasCookie('origin') ? Cookie::get('origin') : NULL,
+                'forecast_date' => $forecast_date,
+                'updated_at' => $salesHeader->created_at,
+                'is_multiple_address' => (is_array($deliveries) && count($deliveries) > 0) ? 1 : 0,
+                'is_new_order' => 1,
+                'has_sub' => (is_array($deliveries) && count($deliveries) > 0) ? 1 : 0,
+                'lechon_baka_service' => $request->isBaka == 1 ? $request->lechon_baka_service : 0,
+                'has_baka' => $request->isBaka == 1 ? 1 : 0,
+            ]);
+
+            session()->forget('edit_sales_header_id');
+
+        } else {
+            $salesHeader = SalesHeader::create([
+                'order_number' => $orderNumber,
+                'customer_name' => $customer_name,
+                'customer_contact_number' => $request->mobile,
+                'customer_address' => $customer_delivery_address,
+                'delivery_type' => $delivery_type,
+                'delivery_fee_amount' => $delivery_fee,
+                'gross_amount' => $totalPrice,
+                'net_amount' => $netAmount,
+                'discount_amount' => $discount,
+                'currency' => 'PHP',
+                'status' => 'active',
+                'user_id' => $user->id,
+                'email' => $request->email ?? $user->email,
+                'customer_delivery_adress' => $customer_delivery_address,
+                'city' => $request->city ?? '',
+                'province' => $request->province ?? '',
+                'barangay' => $request->location ?? '',
+                'delivery_tracking_number' => '',
+                'delivery_fee_amount' => $delivery_fee,
+                'order_source' => 'Web',
+                'delivery_branch' => $delivery_type == 'Door to door delivery' ? 'Tandang Sora Delivery' : '',
+                'tax_amount' => 0,
+                'payment_status' => $request->order_amount <= 0 ? 'PAID' : 'PENDING',
+                'delivery_status' => '',
+                'customer_location' => $request->shipping_type == 'pickup' ? '' : ($request->delivery_address),
+                'instruction' => $request->instruction,
+                'agent' => $request->agent,
+                'contact_person' => $request->name,
+                'outlet' => $outlet,
+                'origin' => $request->hasCookie('origin') ? Cookie::get('origin') : NULL,
+                'forecast_date' => $forecast_date,
+                'is_multiple_address' => (is_array($deliveries) && count($deliveries) > 0) ? 1 : 0,
+                'is_new_order' => 1,
+                'has_sub' => (is_array($deliveries) && count($deliveries) > 0) ? 1 : 0,
+                'lechon_baka_service' => $request->isBaka == 1 ? $request->lechon_baka_service : 0,
+                'has_baka' => $request->isBaka == 1 ? 1 : 0,
+            ]);
+        }
+
+        if ($request->order_amount <= 0) {
+            $salesHeader->isConfirm = 1;
+            $salesHeader->confirmed_by = 'Customer';
+            $salesHeader->confirmed_on = date('Y-m-d H:i:s');
+            $salesHeader->confirm_remarks = 'Auto confirm via Checkout';
+            $salesHeader->save();
+        }
+
+        // =============================
+        // 11. HANDLE MULTIPLE DELIVERIES
+        // =============================
+
+        if ($request->has('deliveries')) {
+
+            if (!is_array($deliveries)) {
+                return response()->json([
+                    'errors' => ['deliveries' => ['Invalid format']]
+                ], 422);
+            }
+
+            if ($deliveries && count($deliveries) > 0) {
+
+                if (!$bakaProduct) {
+                    $bakaProduct = new Product(['price' => 0]);
+                }
+
+                $deliveryService->handleMultipleDeliveries(
+                    $deliveries,
+                    $salesHeader,
+                    $user,
+                    $request,
+                    $bakaProduct,
+                    $bakaQty
+                );
+            }
+        }
+
+        // =============================
+        // 12. SALES DETAILS
+        // =============================
+
+        $saved_items = '';
+        foreach ($carts as $cart) {
+
+            $product = $cart->product;
+
+            if (!$product) {
+                continue;
+            }
+
+            $gross = ((float)$product->price + ($cart->paella_price > 0 ? $product->paella_price : 0)) * $cart->qty;
+
+            $tax = $gross - ($gross / 1.12);
+
+            if(!empty($cart->coupon_code)){
+                
+                $ccode = explode("|", $cart->coupon_code);
+                foreach($ccode as $cd){
+                    $code = explode(":",$cd);
+
+                    $coupon = $this->use_coupon($code[0], $salesHeader->id);
+
+                    if(!empty($coupon)){
+
+                        SalesPayment::create([
+                            'sales_header_id' => $salesHeader->id,
+                            'payment_type' => 'Gift Cert',
+                            'amount' => $code[1],
+                            'status' => $salesHeader->payment_status == 'PAID' ? 'PAID' : 'PENDING',
+                            'payment_date' => date('Y-m-d'),
+                            'receipt_number' => $code[0],
+                            'created_by' => Auth::id()
+                        ]);
+                    }
+                }
+            }
+
+            SalesDetail::create([
+                'sales_header_id' => $salesHeader->id,
+                'product_id' => $product->id,
+                'product_name' => $product->name . ($cart->paella_price > 0 ? ' Boneless with Paella' : ''),
+                'product_category' => $product->category_id ?? 0,
+                'price' => $product->price,
+                'cost' => 0,
+                'tax_amount' => $tax,
+                'promo_id' => 0,
+                'promo_description' => '',
+                'discount_amount' => 0,
+                'gross_amount' => $gross,
+                'net_amount' => $gross,
+                'qty' => $cart->qty,
+                'paella_qty' => $cart->qty,
+                'uom' => $product->uom ?? '',
+                'size' => $product->size ?? '',
+                'no_of_pax' => $product->no_of_pax ?? '',
+                'paella_price' => $cart->paella_price > 0 ? $product->paella_price : 0,
+                'other_cost' => 0,
+                'other_cost_description' => '',
+                'created_by' => $user->id,
+                'delivery_date' => $request->need_date . ' ' . $request->need_time,
+                'has_baka' => $product->id == 178 ? 1 : 0,
+                'lechon_baka_service' => $product->id == 178 ? ($bakaQty * ($bakaProduct?->price ?? 0)) : 0,
+            ]);
+
+            $saved_items .= $cart->qty." x ".$product->name.", ";
+        }
+
+        // =============================
+        // 13. CLEAR CART
+        // =============================
+        if (auth()->check()) {
+            Cart::where('user_id', $user->id)->delete();
+        } else {
+            session(['cart' => []]);
+        }
+
+        // =============================
+        // 14. NOTIFICATIONS
+        // =============================
+
+        $sendNotification->process($notificationService, $salesHeader, $user, $request);
+
+        // =============================
+        // 15. GENERATE PEYMENT SIGNATURE
+        // =============================
+
+        $payment = $paymentService->generate($salesHeader, $request->deposit);
+
+        // =============================
+        // 16. RESPONSE
+        // =============================
+        return response()->json([
+            'success' => true,
+            'sales_header_id' => $salesHeader->id,
+            'order_number' => $salesHeader->order_number,
+            'customer_contact_number' => $salesHeader->customer_contact_number,
+            'customer_name' => $salesHeader->customer_name,
+            'amount' => $request->deposit,
+            'signature' => $payment['signature'],
+            'saved_items' => rtrim($saved_items, ', '),
+        ]);
+    }
+
+    public function save_sales2(Request $request)
     {
         $carts = auth()->check()
             ? Cart::where('user_id', auth()->id())->with('product')->get()
             : collect(session('cart', []));
         
-        $setting = ModelsSetting::first();
+        $setting = \App\Models\Setting::first();
         $minimum_processing_hours = $setting ? $setting->minimum_processing_hours : 24;
         $minimum_processing_hours_misc = $setting ? $setting->minimum_processing_hours_misc : 12;
         $minimum_processing_hours_baka = $setting ? $setting->minimum_processing_hours_baka : 72;
@@ -1284,7 +1699,7 @@ class CartController extends Controller
             }
         }
 
-        $totalPrice = $request->order_amount + ( $bakaProduct->price * $qty );
+        $totalPrice = $request->order_amount + ( $bakaProduct->price * ($qty ?? 0) );
         $discount = 0;
         // $delivery_fee = $request->shipping_type == 'pickup' ? 0 : $request->delivery_fee;
         $netAmount = $totalPrice + $delivery_fee;
@@ -1669,7 +2084,7 @@ class CartController extends Controller
         $coupon_code = 0;
         $coupon_amount = 0;
         $saved_items = '';
-//        $carts = Cart::where('user_id',$user->id)->get();
+        //        $carts = Cart::where('user_id',$user->id)->get();
         // convert to collection above
         $carts = collect($carts);
         foreach ($carts as $cart) {
