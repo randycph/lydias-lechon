@@ -216,9 +216,13 @@ class JoborderController extends Controller
             
             $userBranches = Auth::user()
                 ->branches()
+                ->whereHas('branch', function ($q) {
+                    $q->where('status', 1)
+                    ->where('jo_select_branch', 1);
+                })
                 ->with('branch')
                 ->get()
-                ->sortBy(fn($b) => $b->branch?->name);
+                ->sortBy(fn($b) => $b->branch->name);
 
             $provinces = Deliverablecities::query()
                 ->select('province', 'region')
