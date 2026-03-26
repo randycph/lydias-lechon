@@ -68,6 +68,15 @@
                             <div>{{ \Carbon\Carbon::parse($sales->created_at)->format('g:i A') }}</div>
                         </div>
                     </div>
+                    @if ($sales->has_sub == 0)
+                    <div class="flex items-center text-sm justify-between px-4 py-3 border-b border-gray-200">
+                        <div>Delivery Date</div>
+                        <div class="text-right">
+                            <div>{{ \Carbon\Carbon::parse($sales->items()->first()->delivery_date)->format('F d, Y') }}</div>
+                            <div>{{ \Carbon\Carbon::parse($sales->items()->first()->delivery_date)->format('g:i A') }}</div>
+                        </div>
+                    </div>
+                    @endif
                     <div class="flex items-center text-sm justify-between px-4 py-3 border-b border-gray-200">
                         <div>Order Type</div>
                         <div class="text-right">
