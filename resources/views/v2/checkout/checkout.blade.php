@@ -730,7 +730,7 @@
                     }
 
                     this.deliveryFee = 0;
-                    this.lechonBakaService = window.lechonBakaService;
+                    this.lechonBakaService = this.hasBaka ? window.lechonBakaService : 0;
 
                     this.computeTotal()
                 },
