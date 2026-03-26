@@ -180,7 +180,7 @@
     <script>
         function checkoutForm() {
             return {
-                lechonBakaService: window.lechonBakaService,
+                lechonBakaService: window.hasBaka ? window.lechonBakaService : 0,
                 isBaka: false,
                 hasBaka: window.hasBaka,
                 carts: window.initialCarts || [],
