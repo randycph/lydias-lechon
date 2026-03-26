@@ -144,7 +144,7 @@ class Sms
 	public function new_order($receiver, $order){
 		
 		try {
-			$message = "Happy Day, $order->customer_name!. Thank you for choosing Lydia's Lechon. Your order ".$order->order_number." is currently being processed. Kindly wait as we validate your payment and confirm your order.";
+			$message = "Happy Day, $order->customer_name!. Thank you for choosing Lydia's Lechon. Your order ".$order->order_number." for order date ".date('m/d/Y', strtotime($order->created_at))." is currently being processed. Kindly wait as we validate your payment and confirm your order.";
 
 			$sms = new ItextmoSmsService();
 			$sms->send($receiver, $message);
@@ -156,7 +156,7 @@ class Sms
 	public function confirm_order($receiver, $order)
 	{
 		try {
-			$message = "Happy Day, $order->customer_name!. Your order is now confirmed. Thank you for choosing Lydia's Lechon!";
+			$message = "Happy Day, $order->customer_name!. Your order for order date ".date('m/d/Y', strtotime($order->created_at))." is now confirmed. Thank you for choosing Lydia's Lechon!";
 
 			$sms = new ItextmoSmsService();
 			$sms->send($receiver, $message);
