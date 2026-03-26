@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\EcommerceModel\Branch;
 use App\Models\BlockedSlot;
 use App\Models\Product;
 use Carbon\Carbon;
@@ -401,12 +402,11 @@ class BlockSlotController extends Controller
             'product_ids' => 'required|array|min:1',
             'product_ids.*' => 'integer|exists:products,id',
 
-            'location_ids' => 'nullable|array|min:1',
-            'location_ids.*' => 'integer|exists:branches,id',
+            'location' => 'nullable|string',
         ]);
 
         $productIds = $validated['product_ids'];
-        $locationIds = $validated['location_ids'] ?? [];
+        $location = $validated['location'] ?? null;
 
         // Get category IDs from cart products
         $categoryIds = Product::whereIn('id', $productIds)
@@ -417,10 +417,14 @@ class BlockSlotController extends Controller
 
         $today = Carbon::today()->toDateString();
 
+        $branch = Branch::where('name', $location)->first();
+        $locationIds = $branch ? [$branch->id] : [];
+
         $blocks = BlockedSlot::with([
                 'products:id',
                 'categories:id',
-                'comboProducts:id'
+                'comboProducts:id',
+                'locations:id,name'
             ])
             ->whereDate('date', '>=', $today)
             ->where(function ($query) use ($productIds, $categoryIds, $locationIds) {
@@ -448,7 +452,7 @@ class BlockSlotController extends Controller
                 ->orWhere(function ($q) use ($locationIds) {
                     $q->where('scope', 'location')
                     ->whereHas('locations', function ($sub) use ($locationIds) {
-                        $sub->whereIn('locations.id', $locationIds);
+                        $sub->whereIn('branches.id', $locationIds);
                     });
                 });
 

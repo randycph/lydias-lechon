@@ -89,7 +89,7 @@ class WebController extends Controller
                 return $u;
             });
 
-        $locations = Branch::with('numbers')->where('status', 1)->get();
+        $locations = Branch::with('numbers')->where('status', 1)->orderBy('name', 'asc')->where('pickup_branch', 1)->get();
 
         return view('admin.settings.website.index', compact(
             'web', 
