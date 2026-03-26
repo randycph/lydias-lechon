@@ -216,6 +216,8 @@ class JoborderController extends Controller
             
             $userBranches   = UserBranch::accessBranch();
 
+            dd($userBranches);
+
             $provinces = Deliverablecities::query()
                 ->select('province', 'region')
                 ->where('is_active', 1)
