@@ -287,20 +287,40 @@ if (!function_exists('unreadForecastersTransactions')) {
 }
 
 if (!function_exists('canAddPayment')) {
-
-    function canAddPayment(SalesHeader $sale, int $days = 30): bool
+    function canAddPayment(SalesHeader $sale): bool
     {
-        // OVERRIDE via URL
-        if (request()->boolean('force_over_30')) {
-            $isOverDays = true;
-        } else {
-            $isOverDays = $sale->created_at->diffInDays(now()) >= $days;
+        if (auth()->user()->is_an_admin()) {
+            return true;
         }
+
+        $daysPassed = $sale->created_at->diffInDays(now());
+
+        $hasCheckPayment = $sale->payments()
+            ->where('payment_type', 'Check Payment')
+            ->exists();
 
         $hasSignChit = $sale->payments()
             ->where('payment_type', 'Sign-Chit')
             ->exists();
 
-        return !($hasSignChit && $isOverDays);
+        // PRIORITY: Check Payment (3 days)
+        if ($hasCheckPayment) {
+            if (request()->boolean('force_over_3')) {
+                return true;
+            }
+
+            return $daysPassed < 3;
+        }
+
+        // Sign-Chit (30 days)
+        if ($hasSignChit) {
+            if (request()->boolean('force_over_30')) {
+                return true;
+            }
+
+            return $daysPassed < 30;
+        }
+
+        return true;
     }
 }
