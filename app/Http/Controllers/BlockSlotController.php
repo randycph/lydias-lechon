@@ -466,7 +466,35 @@ class BlockSlotController extends Controller
                 'is_all_day',
                 'start_time',
                 'end_time',
-            ]);
+            ])
+            ->filter(function ($block) use ($productIds, $categoryIds, $locationIds) {
+
+                $matchProduct = $block->products->isEmpty()
+                    || $block->products->pluck('id')->intersect($productIds)->isNotEmpty();
+
+                $matchCategory = $block->categories->isEmpty()
+                    || $block->categories->pluck('id')->intersect($categoryIds)->isNotEmpty();
+
+                $matchLocation = $block->locations->isEmpty()
+                    || $block->locations->pluck('id')->intersect($locationIds)->isNotEmpty();
+
+                $hasCombo = $block->comboProducts->isNotEmpty();
+
+                if ($hasCombo) {
+
+                    $comboMatch = $block->comboProducts
+                        ->pluck('id')
+                        ->intersect($productIds)
+                        ->isNotEmpty();
+
+                    if ($comboMatch) {
+                        return false;
+                    }
+                }
+                
+                return $matchProduct && $matchCategory && $matchLocation;
+            })
+            ->values();;
 
         return response()->json($blocks);
     }
@@ -541,7 +569,7 @@ class BlockSlotController extends Controller
                 $block->delete();
             }
 
-            // APPLY SCOPE FILTERING (SAME AS STORE)
+            // APPLY SCOPE FILTERING
             $scope = $validated['scope'];
 
             $productIds  = $validated['product_ids'] ?? [];
@@ -565,7 +593,7 @@ class BlockSlotController extends Controller
                 $locationIds = [];
             }
 
-            // RECREATE BLOCKS (SAME GROUP ID)
+            // RECREATE BLOCKS
             foreach ($validated['dates'] as $date) {
 
                 // ALL DAY

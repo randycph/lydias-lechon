@@ -363,7 +363,8 @@
                             const blockedForThisDate = this.blockedDetails.filter(b =>
                                 b.date === formatted &&
                                 this.blockAppliesToCart(b) &&
-                                this.blockAppliesToMethod(b)
+                                this.blockAppliesToMethod(b) &&
+                                this.isBlockedWithCombo(b)
                             )
 
                             // If any full-day block exists → disable entire date
@@ -2230,6 +2231,19 @@
 
                 closeBlockModal() {
                     this.blockModal = false
+                },
+
+                isBlockedWithCombo(block) {
+
+                    if (!block.combo_products?.length) return true
+
+                    const cartProductIds = this.carts.map(i => i.product_id)
+
+                    const hasCombo = block.combo_products.some(p =>
+                        cartProductIds.includes(p.id)
+                    )
+
+                    return !hasCombo
                 },
 
                 blockAppliesToCart(block) {
