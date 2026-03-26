@@ -89,6 +89,10 @@ Website Settings
                     <a class="nav-link" id="kiosk-tab" data-toggle="tab" href="#kiosk" role="tab" aria-controls="kiosk"
                         aria-selected="false">Kiosk</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="block-dates-tab" data-toggle="tab" href="#block-dates" role="tab" aria-controls="block-dates"
+                        aria-selected="false">Block Dates & Times</a>
+                </li>
 
             </ul>
             <div class="tab-content rounded bd bd-gray-300 bd-t-0 pd-20" id="myTabContent">
@@ -397,6 +401,11 @@ Website Settings
                     </div>
                 </div>
 
+                <!-- Block Dates & Times -->
+                <div class="tab-pane fade" id="block-dates" role="tabpanel" aria-labelledby="block-dates-tab">
+                    @include('admin.settings.website.block-dates')
+                </div>
+
                 <!-- Ecommerce Setting -->
                 <div class="tab-pane fade" id="ecommerce" role="tabpanel" aria-labelledby="ecommerce-tab">
                     <div class="col-lg-12 mg-t-15">
@@ -574,9 +583,6 @@ Website Settings
                                 </div>
                             </div> --}}
 
-
-                            @include('admin.settings.website.block-dates')
-
                             <div class="col-md-7">
                                 <div class="form-group">
                                     <div id="title" class="parsley-input">
@@ -732,24 +738,27 @@ Website Settings
                     <dt class="col-4 product-view-dt">Product</dt>
                     <dd class="col-8 product-view-dd" id="modalProduct">—</dd>
 
+                    <dt class="col-4 location-view-dt">Location</dt>
+                    <dd class="col-8 location-view-dd" id="modalLocation">—</dd>
+
                     <dt class="col-4">Date</dt>
                     <dd class="col-8" id="modalDate"></dd>
 
                     <dt class="col-4">Time</dt>
                     <dd class="col-8" id="modalTime"></dd>
 
+                    <dt class="col-4">Blocking Override</dt>
+                    <dd class="col-8" id="modalBlockingOverride"></dd>
                 </dl>
 
             </div>
-
 
             <div class="modal-footer justify-content-between">
                 <div>
                     <button class="btn btn-danger" id="deleteBlock">Delete</button>
                 </div>
                 <div>
-                    <button class="btn btn-primary" id="editBlock">Edit</button>
-                    {{-- <button class="btn btn-secondary" data-dismiss="modal">Close</button> --}}
+                    <button class="btn btn-secondary" id="editGroup">Edit</button>
                 </div>
             </div>
 
@@ -785,6 +794,21 @@ Website Settings
             <input type="radio" name="edit_scope" value="product" class="form-check-input" id="editScopeProduct">
             <label class="form-check-label" for="editScopeProduct">Product</label>
           </div>
+
+          <div class="form-check">
+            <input type="radio" name="edit_scope" value="location" class="form-check-input" id="editScopeLocation">
+            <label class="form-check-label" for="editScopeLocation">Location</label>
+          </div>
+        </div>
+
+        <!-- Location -->
+        <div class="mb-3" id="editLocationWrapper">
+          <label class="form-label fw-bold">Locations</label>
+          <select id="editLocation" class="select2 form-control" name="editLocation_ids[]" disabled multiple>
+                @foreach ($locations as $location)
+                <option value="{{ $location->id }}">{{ $location->name }}</option>
+                @endforeach
+          </select>
         </div>
 
         <!-- Category -->
@@ -869,9 +893,188 @@ Website Settings
           </select>
         </div>
 
+        <div class="mb-3">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="editAllowCombo">
+                <label for="editAllowCombo" class="form-check-label fw-bold">Allow Combo</label>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Select Products</label>
+            <select 
+                class="select2 form-control" 
+                id="editComboProduct"
+                name="edit_combo_products[]"
+                multiple
+                disabled
+            >
+                @foreach ($products as $product)
+                <option value="{{ $product->id }}">{{ $product->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
       </div>
       <div class="modal-footer">
         <button class="btn btn-primary" id="saveEditBlock">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="editGroupModal" role="dialog" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Entire Block Group</h5>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Scope -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Scope</label>
+
+          <div class="form-check">
+            <input type="radio" name="group_scope" value="all" class="form-check-input" id="editGroupScopeAll">
+            <label class="form-check-label" for="editGroupScopeAll">All</label>
+          </div>
+
+          <div class="form-check">
+            <input type="radio" name="group_scope" value="category" class="form-check-input" id="editGroupScopeCategory">
+            <label class="form-check-label" for="editGroupScopeCategory">Category</label>
+          </div>
+
+          <div class="form-check">
+            <input type="radio" name="group_scope" value="product" class="form-check-input" id="editGroupScopeProduct">
+            <label class="form-check-label" for="editGroupScopeProduct">Product</label>
+          </div>
+
+          <div class="form-check">
+            <input type="radio" name="group_scope" value="location" class="form-check-input" id="editGroupScopeLocation">
+            <label class="form-check-label" for="editGroupScopeLocation">Location</label>
+          </div>
+        </div>
+
+        <!-- Location -->
+        <div class="mb-3" id="editGroupLocationWrapper">
+          <label class="form-label fw-bold">Locations</label>
+          <select id="editGroupLocation" class="select2 form-control" name="editGroupLocation_ids[]" disabled multiple>
+                @foreach ($locations as $location)
+                <option value="{{ $location->id }}">{{ $location->name }}</option>
+                @endforeach
+          </select>
+        </div>
+
+        <!-- Category -->
+        <div class="mb-3" id="editGroupCategoryWrapper">
+          <label class="form-label fw-bold">Categories</label>
+          <select id="editGroupCategory" class="select2 form-control" name="editGroupCategory_ids[]" disabled multiple>
+                @foreach ($categories as $category)
+                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                @endforeach
+          </select>
+        </div>
+
+        <!-- Product -->
+        <div class="mb-3" id="editGroupProductWrapper">
+          <label class="form-label fw-bold">Products</label>
+          <select id="editGroupProduct" class="select2 form-control" name="editGroupProduct_ids[]" disabled multiple>
+                @foreach ($products as $product)
+                <option value="{{ $product->id }}">{{ $product->name }}</option>
+                @endforeach
+          </select>
+        </div>
+
+        <!-- Date Mode -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Date Mode</label>
+
+          <div class="form-check">
+            <input type="radio" name="edit_group_date_mode" value="range" class="form-check-input" id="editGroupRangeLabel">
+            <label class="form-check-label" for="editGroupRangeLabel">Date Range</label>
+          </div>
+
+          <div class="form-check">
+            <input type="radio" name="edit_group_date_mode" value="multiple" class="form-check-input" id="editGroupMultipleLabel">
+            <label class="form-check-label" for="editGroupMultipleLabel">Multiple Dates</label>
+          </div>
+        </div>
+
+        <!-- Date Range -->
+        <div id="editGroupRangeWrapper">
+          <div id="editGroupDateRangeInputs" class="row g-2">
+            <div class="col">
+              <input type="text" class="form-control edit-group-start">
+            </div>
+            <div class="col">
+              <input type="text" class="form-control edit-group-end">
+            </div>
+          </div>
+        </div>
+
+        <!-- Multiple Dates -->
+        <div id="editGroupMultipleWrapper" style="display:none;">
+          <div id="editGroupMultipleDates"></div>
+          <button class="btn btn-sm btn-outline-primary mt-2" id="editGroupAddDate">+ Add Date</button>
+        </div>
+
+        <!-- Time Slots -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Time Slots</label>
+          <select id="editGroupTimes" class="form-control select2" disabled multiple>
+            @foreach (range(9, 19) as $hour)
+                <option value="{{ sprintf('%02d:00', $hour) }}">
+                    {{ sprintf('%02d:00 %s', ($hour > 12 ? $hour - 12 : $hour), ($hour >= 12 ? 'PM' : 'AM')) }}
+                </option>
+            @endforeach
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="editGroupAllday">
+            <label class="form-check-label" for="editGroupAllday">Block whole day</label>
+          </div>
+        </div>
+
+        <!-- Block Type -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Block Type</label>
+          <select id="editGroupBlockType" class="form-control">
+            <option value="both">Delivery & Pickup</option>
+            <option value="delivery">Delivery Only</option>
+            <option value="pickup">Pickup Only</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="editGroupAllowCombo">
+                <label for="editGroupAllowCombo" class="form-check-label fw-bold">Allow Combo</label>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Select Products</label>
+            <select 
+                class="select2 form-control" 
+                id="editGroupComboProduct"
+                name="edit_group_combo_products[]"
+                multiple
+                disabled
+            >
+                @foreach ($products as $product)
+                <option value="{{ $product->id }}">{{ $product->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-dark" id="saveEditGroup">Update Entire Group</button>
       </div>
     </div>
   </div>

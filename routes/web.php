@@ -1020,8 +1020,12 @@ Route::get('driver', function() {
 })->name('driver.home');
 
 Route::get('/blocks/events', [BlockSlotController::class, 'events'])->name('blocks.events');
+
+Route::get('/blocks/{id}', [BlockSlotController::class, 'show']);
+Route::get('/blocks/group/{groupId}', [BlockSlotController::class, 'showGroup']);
 Route::post('/blocks', [BlockSlotController::class, 'store'])->name('blocks.store');
 Route::post('/blocks/delete-month', [BlockSlotController::class, 'destroyMonth'])->name('blocks.destroy-month');
+Route::post('/blocks/update-single', [BlockSlotController::class, 'updateSingle'])->name('blocks.update-single');
 Route::post('/blocks/{id}', [BlockSlotController::class, 'destroy'])->name('blocks.destroy');
 Route::post('/blocks/update/{id}', [BlockSlotController::class, 'updateGroup'])->name('blocks.update');
 Route::post('/checkout/blocks', [BlockSlotController::class, 'getCheckoutBlocks'])->name('checkout.blocks');
