@@ -151,7 +151,7 @@
                                                 @endforeach
                                             </ul>
                                         @else
-                                            {{ $r->old_value }}
+                                            {{ $r->old_value == '(empty)' ? '' : $r->old_value }}
                                         @endif
                                     </td>
                                     <td>
@@ -168,7 +168,7 @@
                                                 @endforeach
                                             </ul>
                                         @else
-                                            {{ $r->new_value }}
+                                            {{ $r->new_value == '(empty)' ? '' : $r->new_value }}
                                         @endif
                                     </td>
                                     <td>{{$r->db_table}}</td>

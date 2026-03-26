@@ -1527,12 +1527,31 @@ class ReportsController extends Controller
         $start = $request->input('startdate') ?? Carbon::now()->format('Y-m-d');
         $end = $request->input('enddate') ?? Carbon::now()->format('Y-m-d');
         $pb = $request->input('pb') ?? null; 
+
+        $exclude = [
+            'cart-count',
+            'get-carts',
+            'images/category',
+            'dashforge.demo.css',
+            'lib/bootstrap',
+            'lib/feather-icons',
+            'js/perfect-scrollbar',
+            'checkout/blocks',
+            'blocks',
+            'get_shipping_fee'
+        ];
         
         $rs = ActivityLog::with('user')->when($start && $end, function ($query) use ($start, $end) {
                         $query->whereBetween('activity_date', [
                             Carbon::parse($start)->startOfDay(),
                             Carbon::parse($end)->endOfDay()
                         ]);
+                    })
+                    // remove records if reference contains from exlude list
+                    ->where(function ($query) use ($exclude) {
+                        foreach ($exclude as $item) {
+                            $query->where('reference', 'not like', "%{$item}%");
+                        }
                     })
                     ->when($pb, function ($query) use ($pb) {
                         $query->where('created_by', $pb);
