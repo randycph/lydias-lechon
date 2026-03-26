@@ -343,6 +343,21 @@ class JoborderController extends Controller
             ]);
         }
 
+        if ($request->has('open_date') && $request->open_date == 'on') {
+            $request->validate([
+                'delivery_date' => 'nullable|date',
+                'delivery_time' => 'nullable',
+            ]);
+        } else {
+            $request->validate([
+                'delivery_date' => 'required|date',
+                'delivery_time' => 'required',
+            ], [
+                'delivery_date.required' => 'The delivery date field is required unless open date is checked.',
+                'delivery_time.required' => 'The delivery time field is required unless open date is checked.',
+            ]);
+        }
+
         if ($request->delivery_type == 2) {
             $request->validate([
                 'outlet_pickup' => 'required',
@@ -451,7 +466,7 @@ class JoborderController extends Controller
             'discount_amount' => $discount_amount,
             'net_amount' => $request->gross,
             'payment_status' => 'UNPAID',
-            'delivery_status' => '',
+            'delivery_status' => $request->has('open_date') && $request->open_date == 'on' ? 'Open Date' : '',
             'status' => 'active',
             'payment_date' => Carbon::today(),
             'delivery_type' => $request->delivery_type == 1 ? 'Door to door delivery' : 'Store Pickup',

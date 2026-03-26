@@ -177,14 +177,20 @@
 
                     <div id="products"></div>
 
-                    <div class="justify-content-between mg-b-5 text-right">
-                    <a href="#" class="btn btn-success btn-xs" data-toggle="modal" data-target="#addmiscellaneous">Add miscellaneous</a>
+                    <div class="d-flex justify-content-between mg-b-5">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="open_date" id="open-date" :checked="old('open_date') ? true : false">
+                            <label class="form-check-label" for="open-date">Is Open Date?</label>
+                        </div>
+                        <div class="">
+                            <a href="#" class="btn btn-success btn-xs" data-toggle="modal" data-target="#addmiscellaneous">Add miscellaneous</a>
+                        </div>
                     </div>
                     
                     <div class="form-row">
                         <div class="col-md-8">
                             <div class="form-group">
-                                <label class="d-block">Delivery/Pickup Date & Time <i class="text-danger">*</i></label>
+                                <label class="d-block">Delivery/Pickup Date & Time <i class="text-danger asterisk-date">*</i></label>
                                 <input required type="text" name="delivery_date" class="form-control" placeholder="Choose date" id="date1" value="{{ old('delivery_date') }}">
                             </div>
                         </div>
@@ -193,6 +199,7 @@
                                 <label class="d-block">&nbsp;</label>
                                 <div class="input-group timepicker">
                                     <select required class="form-control" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select delivery time" data-width="100%" name="delivery_time" id="delivery_time" onchange="check_time($(this).val());">                                       
+                                        <option value="" disabled selected>Select time</option>
                                         <option value="05:00" {{ old('delivery_time') == '05:00' ? 'selected' : '' }}>05:00 AM</option>
                                         <option value="06:00" {{ old('delivery_time') == '06:00' ? 'selected' : '' }}>06:00 AM</option>
                                         <option value="07:00" {{ old('delivery_time') == '07:00' ? 'selected' : '' }}>07:00 AM</option>
@@ -214,6 +221,12 @@
                                 </div>
                             </div>
                         </div>
+                        @if ($errors->has('delivery_date'))
+                            <span class="text-danger">{{ $errors->first('delivery_date') }}</span>
+                        @endif
+                        @if ($errors->has('delivery_time'))
+                            <span class="text-danger">{{ $errors->first('delivery_time') }}</span>
+                        @endif
                     </div>
 
                     <div class="form-group">
@@ -2116,6 +2129,19 @@
                 });
                 if (found !== null) { $el.val(found).trigger('change.select2'); }
             }
+
+            $('#open-date').on('change', function() {
+                console.log('Checked:', $(this).is(':checked'));
+                if ($(this).is(':checked')) {
+                    $('#date1').prop('required', false);
+                    $('#delivery_time').prop('required', false);
+                    $('.asterisk-date').text('');
+                } else {
+                    $('#date1').prop('required', true);
+                    $('#delivery_time').prop('required', true);
+                    $('.asterisk-date').text('*');
+                }
+            });
         });
     </script>
 
