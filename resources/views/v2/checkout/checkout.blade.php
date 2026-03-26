@@ -1603,7 +1603,7 @@
                         }
 
                         this.isBaka = window.hasBaka;
-                        this.lechonBakaService = window.lechonBakaService;
+                        this.lechonBakaService = this.isBaka ? window.lechonBakaService : 0;
                     } else {
                         this.isBaka = false;
                         this.lechonBakaService = 0;
