@@ -61,7 +61,7 @@
                             <option value="">- Select Branch -</option>
                             @if (session()->has('login_branch') && (auth()->user()->user_role->name == 'Cashier' || auth()->user()->user_role->name == 'Supervisor'))
                                 @foreach ($userBranches as $b)
-                                    <option value="{{ $b->name }}|" selected>{{ $b->name }}</option>
+                                    <option value="{{ $b->branch->name }}|" selected>{{ $b->branch->name }}</option>
                                 @endforeach
                             @else
                                 @foreach($branches_store as $b)
