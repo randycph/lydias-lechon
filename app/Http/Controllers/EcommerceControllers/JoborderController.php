@@ -199,7 +199,11 @@ class JoborderController extends Controller
             $pbs = ProductionBranch::orderBy('name','asc')->get();
             $branches  = Deliverablecities::distinct()->where('is_active', 1)->orderBy('name')->get(['name']);
             
-            $userBranches   = Auth::user()->branches()->with('branch')->orderBy('branch.name')->get();
+            $userBranches = Auth::user()
+                ->branches()
+                ->with('branch')
+                ->get()
+                ->sortBy(fn($b) => $b->branch?->name);
 
             $provinces = Deliverablecities::query()
                 ->select('province', 'region')
