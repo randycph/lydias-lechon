@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\EcommerceModel\Branch;
 use Illuminate\Database\Eloquent\Model;
 
 class BlockedSlot extends Model
@@ -13,6 +14,8 @@ class BlockedSlot extends Model
         'end_time',
         'is_all_day',
         'block_type',
+        'group_id',
+        'date_mode',
     ];
 
     public function products()
@@ -35,4 +38,23 @@ class BlockedSlot extends Model
         );
     }
 
+    public function comboProducts()
+    {
+        return $this->belongsToMany(
+            Product::class,
+            'blocked_slot_combo_products',
+            'blocked_slot_id',
+            'product_id'
+        );
+    }
+
+    public function locations()
+    {
+        return $this->belongsToMany(
+            Branch::class,
+            'blocked_slot_locations',
+            'blocked_slot_id',
+            'location_id'
+        );
+    }
 }

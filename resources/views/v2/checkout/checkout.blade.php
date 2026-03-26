@@ -363,7 +363,8 @@
                             const blockedForThisDate = this.blockedDetails.filter(b =>
                                 b.date === formatted &&
                                 this.blockAppliesToCart(b) &&
-                                this.blockAppliesToMethod(b)
+                                this.blockAppliesToMethod(b) &&
+                                this.isBlockedWithCombo(b)
                             )
 
                             // If any full-day block exists → disable entire date
@@ -742,8 +743,15 @@
                     return (hour < 10 ? '0' + hour : hour) + ':00'
                 },
 
-                onPickupBranchChange() {
+                async onPickupBranchChange() {
                     this.pickupErrors.branch = ''
+                    this.getBlockDates().then(() => {
+                        this.$nextTick(() => {
+                            if (this.$refs.pickupDate) {
+                                this.initPickupDatepicker(this.$refs.pickupDate)
+                            }
+                        })
+                    })
                 },
 
                 validatePickupDateTime() {
@@ -1474,7 +1482,7 @@
 
                     this.isBaka = false;
 
-                    const response = await fetch('{{ route('cart.front.get_shipping_fee') }}', {
+                const response = await fetch('{{ route('cart.front.get_shipping_fee') }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -2195,7 +2203,8 @@
                             'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
                         },
                         body: JSON.stringify({
-                            product_ids: cartProductIds
+                            product_ids: cartProductIds,
+                            location: this.method === 'pickup' ? this.pickup_branch : ''
                         })
                     });
 
@@ -2224,6 +2233,19 @@
                     this.blockModal = false
                 },
 
+                isBlockedWithCombo(block) {
+
+                    if (!block.combo_products?.length) return true
+
+                    const cartProductIds = this.carts.map(i => i.product_id)
+
+                    const hasCombo = block.combo_products.some(p =>
+                        cartProductIds.includes(p.id)
+                    )
+
+                    return !hasCombo
+                },
+
                 blockAppliesToCart(block) {
 
                     const cartProductIds = this.carts.map(i => i.product_id)
@@ -2249,6 +2271,17 @@
                         const blockCategoryIds = block.categories.map(c => c.id)
 
                         return cartCategoryIds.some(id => blockCategoryIds.includes(id))
+                    }
+
+                    if (block.scope === 'location') {
+
+                        if (!block.locations || !block.locations.length) return false
+
+                        if (this.method === 'pickup') {
+                            return block.locations.some(loc => loc.name === this.pickup_branch)
+                        }
+
+                        return false;
                     }
 
                     return false
