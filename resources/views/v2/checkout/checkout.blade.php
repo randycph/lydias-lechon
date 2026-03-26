@@ -245,9 +245,11 @@
                     return hours
                 },
 
-                populateMultiDeliveryTimes(index) {
+                async populateMultiDeliveryTimes(index) {
 
                     const delivery = this.deliveries[index]
+                    
+                    await this.getBlockDatesForMulti(delivery.orders);
 
                     if (!delivery.orders.length) {
                         delivery.need_date = ''
@@ -2191,6 +2193,32 @@
                     if (scrolledToBottom) {
                         this.canAgree = true;
                     }
+                },
+
+                async getBlockDatesForMulti(orders) {
+                    this.blockedDetails = [];
+                    
+                    const cartProductIds = orders.map(i => i.product_id);
+
+                    console.log('Fetching block dates for products:', cartProductIds);
+
+                    const response = await fetch('{{ route('checkout.blocks') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content
+                        },
+                        body: JSON.stringify({
+                            product_ids: cartProductIds,
+                        })
+                    });
+
+                    const blocks = await response.json();
+
+                    this.blockedDetails = Array.isArray(blocks) ? blocks : [];
+
+                    // this.initMultiDeliveryDatepicker(el, index)
+
                 },
 
                 async getBlockDates() {
