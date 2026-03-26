@@ -153,8 +153,40 @@
                                     <td>{{$r->role}}</td>
                                     <td>{{$r->activity_desc}}</td>
                                     <td>{{$r->reference}}</td>
-                                    <td>{{$r->old_value}}</td>
-                                    <td>{{$r->new_value}}</td>
+                                    <td>
+                                        @php
+                                            $data = json_decode($r->old_value, true);
+                                        @endphp
+                                        @if(is_array($data))
+                                            <ul style="padding-left: 15px;">
+                                                @foreach($data as $key => $value)
+                                                    <li>
+                                                        <strong>{{ Str::headline($key) }}:</strong>
+                                                        {{ is_array($value) ? json_encode($value) : $value }}
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            {{ $r->old_value == '(empty)' ? '' : $r->old_value }}
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @php
+                                            $data = json_decode($r->new_value, true);
+                                        @endphp
+                                        @if(is_array($data))
+                                            <ul style="padding-left: 15px;">
+                                                @foreach($data as $key => $value)
+                                                    <li>
+                                                        <strong>{{ Str::headline($key) }}:</strong>
+                                                        {{ is_array($value) ? json_encode($value) : $value }}
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            {{ $r->new_value == '(empty)' ? '' : $r->new_value }}
+                                        @endif
+                                    </td>
                                     <td>{{$r->db_table}}</td>
                                 </tr>
                             @endforeach
