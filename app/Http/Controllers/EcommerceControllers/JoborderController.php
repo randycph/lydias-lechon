@@ -214,7 +214,7 @@ class JoborderController extends Controller
             $pbs = ProductionBranch::orderBy('name','asc')->get();
             $branches  = Deliverablecities::distinct()->where('is_active', 1)->orderBy('name')->get(['name']);
             
-            $userBranches   = Auth::user()->branches()->with('branch')->get(); // Assuming 'name' is the field you want from the branches table
+            $userBranches   = Auth::user()->branches()->with('branch')->orderBy('branch.name')->get();
 
             $provinces = Deliverablecities::query()
                 ->select('province', 'region')
