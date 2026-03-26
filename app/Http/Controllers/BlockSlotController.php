@@ -401,12 +401,12 @@ class BlockSlotController extends Controller
             'product_ids' => 'required|array|min:1',
             'product_ids.*' => 'integer|exists:products,id',
 
-            'location_ids' => 'required|array|min:1',
+            'location_ids' => 'nullable|array|min:1',
             'location_ids.*' => 'integer|exists:branches,id',
         ]);
 
         $productIds = $validated['product_ids'];
-        $locationIds = $validated['location_ids'];
+        $locationIds = $validated['location_ids'] ?? [];
 
         // Get category IDs from cart products
         $categoryIds = Product::whereIn('id', $productIds)
