@@ -512,9 +512,24 @@ table.dataTable thead .sorting::before, table.dataTable thead .sorting::after {
                                     </tr>
 
                                     @foreach ($sizeCounts as $size => $count)
+
+                                        @php
+                                            $isPaella = str_contains($size, 'Boneless with Paella');
+                                            $baseSize = $isPaella
+                                                ? str_replace(' Boneless with Paella', '', $size)
+                                                : $size;
+                                        @endphp
+
                                         <tr>
                                             <td>{{ strtoupper($size) }}</td>
-                                            <td align="center"><a href="{{ request()->fullUrlWithQuery(['filter_size' => $size]) }}">{{ $count }}</a></td>
+                                            <td align="center">
+                                                <a href="{{ request()->fullUrlWithQuery([
+                                                    'filter_size' => $baseSize,
+                                                    'filter_type' => $isPaella ? 'paella' : 'regular'
+                                                ]) }}">
+                                                    {{ $count }}
+                                                </a>
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </table>
