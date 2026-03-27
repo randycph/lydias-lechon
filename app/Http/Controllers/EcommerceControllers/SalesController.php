@@ -223,9 +223,20 @@ class SalesController extends Controller
         //     SalesHeader::whereId($request->update_dateneeded_id)->update(['delivery_branch' => $request->delivery_branch]);
         // }
         
-        $update = SalesHeader::whereId($request->update_dateneeded_id)->update([
-            'delivery_status' => ''
-        ]);
+        if ($request->has('open_date') && $request->open_date == 'on') {
+            SalesHeader::whereId($request->update_dateneeded_id)->update([
+                'delivery_status' => 'Open Date'
+            ]);
+
+            SalesDetail::where('sales_header_id',$request->update_dateneeded_id)->update([
+                'delivery_date' => null
+            ]);
+
+        } else {
+            SalesHeader::whereId($request->update_dateneeded_id)->update([
+                'delivery_status' => $sales->delivery_status // keep existing status if not open date
+            ]);
+        }
 
         if ($request->has('update_dateneeded_date') && $request->has('update_dateneeded_time')) {
             $update_date_needed = SalesDetail::where('sales_header_id',$request->update_dateneeded_id)->update([
