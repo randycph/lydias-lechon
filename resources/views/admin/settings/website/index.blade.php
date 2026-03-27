@@ -927,7 +927,7 @@ Website Settings
     <div class="modal-content">
 
       <div class="modal-header">
-        <h5 class="modal-title">Edit Entire Block Group</h5>
+        <h5 class="modal-title">Edit Block Group</h5>
         <button type="button" class="close" data-dismiss="modal">&times;</button>
       </div>
 
@@ -1053,9 +1053,26 @@ Website Settings
         <div class="mb-3">
             <div class="form-check">
                 <input type="checkbox" class="form-check-input" id="editGroupAllowCombo">
-                <label for="editGroupAllowCombo" class="form-check-label fw-bold">Allow Combo</label>
+                <label for="editGroupAllowCombo" class="form-check-label fw-bold">Allow Combo (Override Blocking)</label>
             </div>
         </div>
+
+        <div class="">
+            <label class="form-label fw-bold">Select Category</label>
+            <select 
+                class="select2 form-control" 
+                id="editGroupComboCategory"
+                name="edit_group_combo_categories[]"
+                multiple
+                disabled
+            >
+                @foreach ($categories as $category)
+                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="text-muted">- OR -</div>
 
         <div class="mb-3">
             <label class="form-label fw-bold">Select Products</label>
@@ -1074,7 +1091,7 @@ Website Settings
 
       </div>
       <div class="modal-footer">
-        <button class="btn btn-dark" id="saveEditGroup">Update Entire Group</button>
+        <button class="btn btn-dark" id="saveEditGroup">Update Block</button>
       </div>
     </div>
   </div>
