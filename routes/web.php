@@ -564,6 +564,7 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     //Reports
     //Route::resource('/admin/forecaster/reports', 'EcommerceControllers\ReportController');
     Route::get('/admin/report/customer-details', 'EcommerceControllers\ReportsController@customerSalesReport')->name('admin.report.customer-details');
+    Route::post('/admin/report/customer-details-purchases', 'EcommerceControllers\ReportsController@customerPurchases')->name('admin.report.customer-details-purchases');
 
     Route::get('/admin/report/sales', 'EcommerceControllers\ReportsController@sales')->name('admin.report.sales');
     Route::get('/admin/report/sales_payments', 'EcommerceControllers\ReportsController@sales_payment')->name('admin.report.sales_payment');

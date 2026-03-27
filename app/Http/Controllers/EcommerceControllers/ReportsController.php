@@ -173,51 +173,97 @@ class ReportsController extends Controller
     {
         $filters = [];
 
-        $qry = "SELECT 
-            h.customer_name,
-            u.email,
-            u.birthday,
-            u.contact_mobile,
-            COUNT(d.id) as total_products_purchased,
-            SUM(d.price) as total_amount_paid
-        FROM ecommerce_sales_headers h
-        LEFT JOIN ecommerce_sales_details d ON d.sales_header_id = h.id
-        LEFT JOIN products p ON p.id = d.product_id
-        LEFT JOIN job_orders jo ON jo.sales_detail_id = d.id
-        LEFT JOIN users u ON u.id = h.user_id
-        WHERE h.deleted_at IS NULL AND h.for_deletion = 0
-        AND jo.deleted_at IS NULL AND d.deleted_at IS NULL AND h.has_sub = 0
-        ";
+        $rs = DB::table('ecommerce_sales_headers as h')
 
+            ->selectRaw("
+                h.customer_name,
+                h.user_id,
+                u.email,
+                u.birthday,
+                u.contact_mobile,
 
-        // Apply filters
-        if ($request->has('agent') && $request->agent != '') {
-            $qry .= " AND h.agent = '".$request->agent."'";
-        }
-        if ($request->has('customer') && $request->customer != '') {
-            $qry .= " AND h.customer_name = '".$request->customer."'";
-        }
-        if ($request->has('order_source') && $request->order_source != '') {
-            $qry .= " AND h.order_source = '".$request->order_source."'";
-        }
-        if ($request->has('startdate') && $request->startdate != '') {
-            $start = Carbon::parse($request->startdate)->startOfDay();
-            $end = Carbon::parse($request->enddate)->endOfDay();
-            $qry .= " AND h.created_at BETWEEN '$start' AND '$end'";
-        }
+                SUM(COALESCE(dsum.total_qty, 0)) as total_products_purchased,
+                SUM(COALESCE(sp.total_paid, 0)) as total_amount_paid
+            ")
 
-        if (!($request->has('startdate'))) {
-            $qry .= " AND h.created_at >= '2050-01-01 00:00:00.000'"; // same logic you use
-        }
+            ->leftJoin(DB::raw("
+                (SELECT 
+                    CASE 
+                        WHEN parent_sales_header_id IS NOT NULL 
+                        THEN parent_sales_header_id
+                        ELSE id
+                    END as root_id,
+                    id
+                FROM ecommerce_sales_headers
+                ) as hmap
+            "), 'hmap.id', '=', 'h.id')
 
-        $qry .= " GROUP BY h.customer_name
-                ORDER BY total_amount_paid DESC"; // optional: order highest paying customer first
+            ->leftJoin(DB::raw("
+                (SELECT sales_header_id, SUM(qty) as total_qty
+                FROM ecommerce_sales_details
+                WHERE deleted_at IS NULL
+                GROUP BY sales_header_id
+                ) as dsum
+            "), 'dsum.sales_header_id', '=', 'h.id')
 
-        $rs = DB::select($qry);
+            ->leftJoin(DB::raw("
+                (SELECT sales_header_id, SUM(amount) as total_paid
+                FROM ecommerce_sales_payments
+                WHERE status = 'PAID'
+                AND is_discount = 0
+                GROUP BY sales_header_id
+                ) as sp
+            "), 'sp.sales_header_id', '=', 'hmap.root_id')
+
+            ->leftJoin('users as u', 'u.id', '=', 'h.user_id')
+
+            ->where('h.status', 'active')
+            ->where('h.delivery_status', '<>', 'Open Date')
+            ->whereNull('h.deleted_at')
+            ->whereRaw('h.id NOT IN (SELECT sales_header_id FROM product_delivery_addresses)')
+
+            // ->where('h.has_sub', 0)
+
+            ->when($request->startdate && $request->enddate, function ($query) use ($request) {
+                $startDate = Carbon::parse($request->startdate)->startOfDay();
+                $endDate   = Carbon::parse($request->enddate)->endOfDay();
+                return $query->whereBetween('h.created_at', [$startDate, $endDate]);
+            })
+
+            ->groupBy('h.user_id')
+            ->orderByDesc('total_amount_paid')
+            ->get();
 
         return view('admin.reports.customer_details', compact('rs'));
     }
 
+    public function customerPurchases(Request $request)
+    {
+        $user_id = $request->user_id;
+        $start = $request->start_date;
+        $end = $request->end_date;
+
+        $startDate = Carbon::parse($start)->startOfDay()->toDateTimeString();
+        $endDate   = Carbon::parse($end)->endOfDay()->toDateTimeString();
+
+        $user = User::find($user_id);
+
+        $rs = SalesDetail::with('header')
+            ->whereIn('sales_header_id', function($query) use ($user_id, $startDate, $endDate) { 
+                $query
+                    ->select('id')
+                    ->from('ecommerce_sales_headers')
+                    ->where('status','active')
+                    ->where('has_sub', 0)
+                    ->where('user_id', $user_id)
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->whereNull('deleted_at'); 
+            })
+            ->orderBy('delivery_date', 'desc')
+            ->get();
+
+        return view('admin.reports.customer_purchases', compact('rs', 'user'))->render();
+    }
 
     public function forecaster(Request $request)
     {
