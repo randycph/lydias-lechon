@@ -735,10 +735,25 @@ class ReportsController extends Controller
                 ->values();
         }
 
-        if (isset($_GET['filter_size']) && $_GET['filter_size'] != '') {
-            $results = $results
-                ->where('size', $_GET['filter_size'])
-                ->values();
+        if (request('filter_size')) {
+
+            $results = $results->where('size', request('filter_size'));
+
+            if (request('filter_type') === 'paella') {
+                $results = $results->filter(function ($item) {
+                    return str_contains(strtolower($item->product_name ?? ''), 'paella')
+                        || str_contains(strtolower($item->catname ?? ''), 'paella');
+                });
+            }
+
+            if (request('filter_type') === 'regular') {
+                $results = $results->reject(function ($item) {
+                    return str_contains(strtolower($item->product_name ?? ''), 'paella')
+                        || str_contains(strtolower($item->catname ?? ''), 'paella');
+                });
+            }
+
+            $results = $results->values();
         }
 
         $order_sources = session('order_sources', $_GET['order_sources'] ?? null);
