@@ -657,6 +657,17 @@ class ReportsController extends Controller
             ->orderBy('product_sizes.name')
             ->get();
 
+        $paellaCounts = collect($results)
+            ->filter(function ($item) {
+                return ($item->paella_price && $item->paella_price > 0);
+            })
+            ->groupBy(function ($item) {
+                return trim($item->size ?? '') !== ''
+                    ? $item->size
+                    : 'Size Undefined';
+            })
+            ->map->sum('qty');
+
         // Count qty per size from results
         $sizeCountsFromResults = collect($results)
             ->groupBy(function ($item) {
@@ -667,11 +678,25 @@ class ReportsController extends Controller
             ->map->sum('qty');
 
         // Map counts to sizes (default 0)
-        $sizeCounts = $sizes->mapWithKeys(function ($size) use ($sizeCountsFromResults) {
-            return [
-                $size->name => $sizeCountsFromResults[$size->name] ?? 0
-            ];
-        });
+        $sizeCounts = collect();
+
+        foreach ($sizes as $size) {
+
+            $sizeName = $size->name;
+
+            $total = $sizeCountsFromResults[$sizeName] ?? 0;
+            $paella = $paellaCounts[$sizeName] ?? 0;
+
+            $regular = $total - $paella;
+
+            // Regular (deduct paella)
+            $sizeCounts[$sizeName] = max($regular, 0);
+
+            // Add paella row if exists
+            if ($paella > 0) {
+                $sizeCounts[$sizeName . ' Boneless with Paella'] = $paella;
+            }
+        }
 
         if (isset($_GET['filter']) && $_GET['filter'] == 'whole-lechon') {
             $results = $results
