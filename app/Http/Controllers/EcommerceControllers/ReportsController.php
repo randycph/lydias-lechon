@@ -173,6 +173,12 @@ class ReportsController extends Controller
     {
         $filters = [];
 
+        if (!$request->startdate || !$request->enddate) {
+            $rs = [];
+            
+            return view('admin.reports.customer_details', compact('rs'));
+        }
+
         $rs = DB::table('ecommerce_sales_headers as h')
 
             ->selectRaw("
