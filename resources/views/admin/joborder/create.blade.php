@@ -179,7 +179,13 @@
 
                     <div class="d-flex justify-content-between mg-b-5">
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="open_date" id="open-date" :checked="old('open_date') ? true : false">
+                            <input 
+                                class="form-check-input" 
+                                type="checkbox" 
+                                name="open_date" 
+                                id="open-date"
+                                @checked(old('open_date'))
+                            >
                             <label class="form-check-label" for="open-date">Is Open Date?</label>
                         </div>
                         <div class="">
@@ -187,7 +193,7 @@
                         </div>
                     </div>
                     
-                    <div class="form-row">
+                    <div class="form-row datetime">
                         <div class="col-md-8">
                             <div class="form-group">
                                 <label class="d-block">Delivery/Pickup Date & Time <i class="text-danger asterisk-date">*</i></label>
@@ -2136,10 +2142,12 @@
                     $('#date1').prop('required', false);
                     $('#delivery_time').prop('required', false);
                     $('.asterisk-date').text('');
+                    $('.datetime').hide();
                 } else {
                     $('#date1').prop('required', true);
                     $('#delivery_time').prop('required', true);
                     $('.asterisk-date').text('*');
+                    $('.datetime').show();
                 }
             });
         });
