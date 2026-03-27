@@ -228,6 +228,35 @@ class ReportsController extends Controller
             ->whereNull('h.deleted_at')
             ->whereRaw('h.id NOT IN (SELECT sales_header_id FROM product_delivery_addresses)')
 
+            ->when($request->customer, function ($query) use ($request) {
+                return $query->where('h.customer_name', 'LIKE', '%' . $request->customer . '%');
+            })
+            ->when($request->product, function ($query) use ($request) {
+                return $query->whereIn('h.id', function($subQuery) use ($request) {
+                    $subQuery->select('sales_header_id')
+                        ->from('ecommerce_sales_details')
+                        ->where('product_name', 'LIKE', '%' . $request->product . '%')
+                        ->whereNull('deleted_at');
+                });
+            })
+            ->when($request->agent, function ($query) use ($request) {
+                return $query->where('h.agent', 'LIKE', '%' . $request->agent . '%');
+            })
+            ->when($request->order_source, function ($query) use ($request) {
+                return $query->where('h.order_source', 'LIKE', '%' . $request->order_source . '%');
+            })
+            ->when($request->category, function ($query) use ($request) {
+                return $query->whereIn('h.id', function($subQuery) use ($request) {
+                    $subQuery->select('sales_header_id')
+                        ->from('ecommerce_sales_details')
+                        ->where('product_category', $request->category)
+                        ->whereNull('deleted_at');
+                });
+            })
+            ->when($request->item_type, function ($query) use ($request) {
+                return $query->where('h.order_type', $request->item_type);
+            })
+
             // ->where('h.has_sub', 0)
 
             ->when($request->startdate && $request->enddate, function ($query) use ($request) {
