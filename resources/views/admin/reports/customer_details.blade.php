@@ -23,6 +23,12 @@
         @page {
           size: auto;
         }
+        .cursor-pointer {
+            cursor: pointer;
+        }
+        .w-min-content {
+            width: min-content;
+        }
     </style>
 @endsection
 
@@ -180,22 +186,28 @@
                         <table id="example" class="display nowrap" style="width:100%;font: normal 13px/150% Arial, sans-serif, Helvetica;">
                             <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>Customer Name</th>
                                 <th>Email</th>
                                 <th>Phone</th>
                                 <th>Birthday</th>
-                                <th>Totoal Product Purchased</th>
+                                <th>Total Product Purchased</th>
                                 <th>Total Amount Paid</th>
                             </tr>
                             </thead>
                             <tbody>
                             @forelse($rs as $r)                      
                                 <tr style="text-align: left">
+                                    <td>{{$r->user_id}}</td>
                                     <td>{{$r->customer_name}}</td>
                                     <td>{{$r->email}}</td>
                                     <td>{{$r->contact_mobile}}</td>
                                     <td>{{$r->birthday}}</td>
-                                    <td>{{$r->total_products_purchased}}</td>
+                                    <td>
+                                        <div class="cursor-pointer text-primary w-min-content" title="View Purchased Products" onclick="openModal({{ $r->user_id }}, '{{ request()->input('startdate') }}', '{{ request()->input('enddate') }}')">
+                                            {{ $r->total_products_purchased }}
+                                        </div>
+                                    </td>
                                     <td>₱{{number_format($r->total_amount_paid,2)}}</td>
                                 </tr>
                             @empty
@@ -211,6 +223,24 @@
 
         </div>
         <!-- container -->
+
+        <div class="modal fade" id="customerPurchasesModal" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Customer Purchases</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="modalContent">
+                            <div class="text-center py-3">
+                                Loading...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
    
 
@@ -287,7 +317,32 @@
             },{ type: 'time-uni', targets: [] } ]
         } );
     } );
+    
 </script>
+
+<script>
+    function openModal(userId, startDate, endDate) {
+        let modal = new bootstrap.Modal(document.getElementById('customerPurchasesModal'));
+        modal.show();
+
+        $('#modalContent').html('Loading...');
+
+        $.ajax({
+            url: "{{ route('admin.report.customer-details-purchases') }}",
+            type: "POST",
+            data: {
+                user_id: userId,
+                start_date: startDate,
+                end_date: endDate,
+                _token: "{{ csrf_token() }}"
+            },
+            success: function(response) {
+                $('#modalContent').html(response);
+            }
+        });
+    }
+</script>
+
 @endsection
 
 
