@@ -685,10 +685,10 @@
         $payments      = $isSales ? ($paymentsByHid->get($r->parent_sales_header_id > 0 ? $r->parent_sales_header_id : ($r->hid ?? 0), collect())) : collect();
         $custAddrSafe  = strip_tags($r->customer_delivery_adress ?? '');
         $contactMerged = $r->contact_person ?? $r->customer_name ?? '';
-        $deliveryDate  = $fmtDate($r->delivery_date);
+        $deliveryDate  = \Carbon\Carbon::parse($r->delivery_date)->format('Y-m-d');
         $deliveryTime  = $fmtTime($r->delivery_date);
         $noteChunked   = $chunkWords($r->instruction ?? '');
-        $delDate       = $fmtDate($r->deldate);
+        $delDate       = \Carbon\Carbon::parse($r->deldate)->format('Y-m-d');
         $delTime       = $fmtTime($r->deldate);
         $deliveryType  = (string)($r->delivery_type ?? '');
         $delstat       = (string)($r->delstat ?? '');
