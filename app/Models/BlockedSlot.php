@@ -48,6 +48,16 @@ class BlockedSlot extends Model
         );
     }
 
+    public function comboCategories()
+    {
+        return $this->belongsToMany(
+            ProductCategory::class,
+            'blocked_slot_combo_categories',
+            'blocked_slot_id',
+            'category_id'
+        );
+    }
+
     public function locations()
     {
         return $this->belongsToMany(

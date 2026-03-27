@@ -2267,11 +2267,13 @@
 
                     const cartProductIds = this.carts.map(i => i.product_id)
 
-                    const hasCombo = block.combo_products.some(p =>
-                        cartProductIds.includes(p.id)
-                    )
+                    const comboProductMatch =
+                        block.combo_products?.some(p => cartProductIds.includes(p.id))
 
-                    return !hasCombo
+                    const comboCategoryMatch =
+                        block.combo_categories?.some(c => cartCategoryIds.includes(c.id))
+
+                    return !(comboProductMatch || comboCategoryMatch)
                 },
 
                 blockAppliesToCart(block) {
