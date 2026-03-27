@@ -131,7 +131,23 @@ class SalesController extends Controller
             }
         }
         $this->update_header_details($head);
+
+        if(!request()->has('from_update_all')){
+            return back()->with('success','Sales details has been updated!');
+        }
+
         return back()->with('success','Successfully updated sales record');
+    }
+
+    public function update_all(Request $request)
+    {
+        // dd($request->all());
+        $request->merge(['from_update_all' => true]);
+
+        $this->update_dateneeded($request);
+        $this->update_items($request);
+
+        return back()->with('success', 'Sales details and items successfully updated!');
     }
 
     public function update_header_details($sales){
@@ -337,7 +353,7 @@ class SalesController extends Controller
                     'customer_delivery_adress' => $request->new_delivery_address,
                     'instruction' => $request->new_instruction,
                     'delivery_fee_amount' => $delivery_amount,
-                    'gross_amount' => $amt,
+                    'gross_amount' => $sales->items->sum('gross_amount'),
                     'net_amount' => $amt,
                     'customer_address' => '',
                     'delivery_branch' => $request->delivery_branch
@@ -373,6 +389,10 @@ class SalesController extends Controller
                 'customer_location' => '',
                 'delivery_branch' => null
             ]);
+        }
+
+        if(!request()->has('from_update_all')){
+            return back()->with('success','Sales details has been updated!');
         }
 
         return back()->with('success','Sales details has been updated!');
