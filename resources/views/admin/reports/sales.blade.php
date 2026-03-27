@@ -240,7 +240,6 @@
                                 <th>Item Type</th>
                                 <th>Confirmed</th>
                                 <th>Delivery Branch</th>
-                                <th>Date Needed</th>
                                 <th>Encoded By</th>
                             </tr>
                             </thead>
@@ -312,7 +311,6 @@
                                     <td>{{$itemType}}</td>
                                     <td>@if($r->isConfirm==1) Yes @else No @endif</td>
                                     <td>{{ $r->delivery_branch }}</td>  
-                                    <td>{{date('H:i:s',strtotime($r->delivery_date))}}</td>
                                     @php 
                                         $user = \App\Models\User::whereId($r->created_by)->first();
                                     @endphp
