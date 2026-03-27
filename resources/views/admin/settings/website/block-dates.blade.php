@@ -127,6 +127,23 @@
                 </div>
             </div>
 
+            <div class="">
+                <label class="form-label fw-bold">Select Category</label>
+                <select 
+                    class=" select2 form-control" 
+                    id="combo-category"
+                    name="combo_categories[]"
+                    multiple
+                    disabled
+                >
+                    @foreach ($categories as $category)
+                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="text-muted">- OR -</div>
+
             <div class="mb-3">
                 <label class="form-label fw-bold">Select Products</label>
                 <select 
@@ -245,6 +262,7 @@
         const editBlockBtn    = document.getElementById('editBlock');
         const allowComboCheck = document.getElementById('allow-combo');
         const commonProductInput = document.getElementById('combo-product');
+        const commonCategoryInput = document.getElementById('combo-category');
 
         allDayCheckbox.checked = true;
         timeSlots.forEach(cb => {
@@ -278,6 +296,11 @@
         });
 
         $('#combo-product').select2({
+            placeholder: "Select product",
+            width: '100%'
+        });
+
+        $('#combo-category').select2({
             placeholder: "Select product",
             width: '100%'
         });
@@ -430,15 +453,32 @@
                         : formatTimeDisplay(props.start_time) + ' - ' + formatTimeDisplay(props.end_time);
 
                 // Allow Combo 
-                const comboEl = document.getElementById('modalBlockingOverride');
-                if (props.combo_products && props.combo_products.length) {
-                    comboEl.innerHTML = props.combo_products
-                        .map(p => `<span class="badge badge-success mr-1">${p.name}</span>`)
-                        .join('');
+                // combine props.combo_products and props.combo_categories and put them to modalBlockingOverride
+
+                const overrideEl = document.getElementById('modalBlockingOverride');
+                if (
+                    (props.combo_products && props.combo_products.length) ||
+                    (props.combo_categories && props.combo_categories.length)
+                ) {
+                    overrideEl.innerHTML = '';
+
+                    if (props.combo_products && props.combo_products.length) {
+                        const productBadges = props.combo_products
+                            .map(p => `<span class="badge badge-success mr-1">${p.name}</span>`)
+                            .join('');
+                        overrideEl.innerHTML += productBadges;
+                    }
+
+                    if (props.combo_categories && props.combo_categories.length) {
+                        const categoryBadges = props.combo_categories
+                            .map(c => `<span class="badge badge-light mr-1">${c.name}</span>`)
+                            .join('');
+                        overrideEl.innerHTML += categoryBadges;
+                    }
                 } else {
-                    comboEl.innerText = '—';
+                    overrideEl.innerText = '—';
                 }
-                
+
                 $('#blockModal').modal('show');
             }
         });
@@ -577,6 +617,9 @@
             const comboProductIds = Array.from(commonProductInput.selectedOptions)
                 .map(opt => opt.value);
 
+            const comboCategoryIds = Array.from(commonCategoryInput.selectedOptions)
+                .map(opt => opt.value);
+
             addBlockBtn.disabled = true
 
             const payload = {
@@ -588,6 +631,7 @@
                 is_all_day: isAllDay,
                 times,
                 combo_product_ids: comboProductIds.length ? comboProductIds : null,
+                combo_category_ids: comboCategoryIds.length ? comboCategoryIds : null,
                 location_ids: locationIds.length ? locationIds : null,
                 date_mode: mode
             };
@@ -670,6 +714,7 @@
             $('#product').val(null).trigger('change');
             $('#location').val(null).trigger('change');
             $('#combo-product').val([]).trigger('change');
+            $('#combo-category').val([]).trigger('change');
 
             document.querySelector('input[name="scope"][value="all"]').checked = true;
             document.querySelector('input[name="scope"][value="all"]')
@@ -680,6 +725,7 @@
             multipleWrapper.style.display = 'none';
 
             commonProductInput.disabled = false;
+            commonCategoryInput.disabled = false;
         }
 
         function formatDateLocal(date) {
@@ -968,9 +1014,12 @@
         allowComboCheck.addEventListener('change', function() {
             if (this.checked) {
                 commonProductInput.disabled = false;
+                commonCategoryInput.disabled = false;
             } else {
                 commonProductInput.disabled = true;
+                commonCategoryInput.disabled = true;
                 $('#combo-product').val([]).trigger('change');
+                $('#combo-category').val([]).trigger('change');
             }
             
         });
@@ -1000,6 +1049,7 @@
         $('#editGroupLocation').select2({ placeholder: 'Select location', width: '100%' });
         $('#editGroupTimes').select2({ placeholder: 'Select time', width: '100%' });
         $('#editGroupComboProduct').select2({ placeholder: 'Select product', width: '100%' });
+        $('#editGroupComboCategory').select2({ placeholder: 'Select category', width: '100%' });
 
         // DATE RANGE
         const editGroupRangePicker = new DateRangePicker(
@@ -1064,12 +1114,15 @@
 
         const editGroupAllowCombo = document.getElementById('editGroupAllowCombo');
         const editGroupComboProduct = document.getElementById('editGroupComboProduct');
+        const editGroupComboCategory = document.getElementById('editGroupComboCategory');
 
         editGroupAllowCombo.addEventListener('change', function () {
             editGroupComboProduct.disabled = !this.checked;
+            editGroupComboCategory.disabled = !this.checked;
 
             if (!this.checked) {
                 $('#editGroupComboProduct').val([]).trigger('change');
+                $('#editGroupComboCategory').val([]).trigger('change');
             }
         });
 
@@ -1167,11 +1220,16 @@
                 $('#editGroupAllowCombo').prop('checked', true);
                 $('#editGroupComboProduct')
                     .prop('disabled', false)
-                    .val(data.combo_products.map(p => p.id))
+                    .val(data?.combo_products?.map(p => p.id))
+                    .trigger('change');
+                $('#editGroupComboCategory')
+                    .prop('disabled', false)
+                    .val(data?.combo_categories?.map(c => c.id))
                     .trigger('change');
             } else {
                 $('#editGroupAllowCombo').prop('checked', false);
                 $('#editGroupComboProduct').prop('disabled', true).val([]).trigger('change');
+                $('#editGroupComboCategory').prop('disabled', true).val([]).trigger('change');
             }
 
             // TIME
@@ -1239,6 +1297,7 @@
                 is_all_day: isAllDay,
                 times: isAllDay ? [] : buildTimePayload($('#editGroupTimes').val()),
                 combo_product_ids: $('#editGroupComboProduct').val(),
+                combo_category_ids: $('#editGroupComboCategory').val(),
                 date_mode: document.querySelector('input[name="edit_group_date_mode"]:checked').value
             };
 

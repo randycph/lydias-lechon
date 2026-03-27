@@ -18,6 +18,7 @@ class BlockSlotController extends Controller
                 'products:id,name',
                 'categories:id,name',
                 'comboProducts:id,name',
+                'comboCategories:id,name',
                 'locations:id,name'
             ])
             ->orderBy('date')
@@ -29,7 +30,8 @@ class BlockSlotController extends Controller
             $productIds = $b->products->pluck('id')->sort()->implode(',');
             $categoryIds = $b->categories->pluck('id')->sort()->implode(',');
             $locationIds = $b->locations->pluck('id')->sort()->implode(',');
-            $comboIds = $b->comboProducts->pluck('id')->sort()->implode(',');
+            $comboProductIds = $b->comboProducts->pluck('id')->sort()->implode(',');
+            $comboCategoryIds = $b->comboCategories->pluck('id')->sort()->implode(',');
 
             return implode('|', [
                 $b->scope,
@@ -40,7 +42,8 @@ class BlockSlotController extends Controller
                 $productIds,
                 $categoryIds,
                 $locationIds,
-                $comboIds
+                $comboProductIds,
+                $comboCategoryIds
             ]);
         });
 
@@ -82,6 +85,7 @@ class BlockSlotController extends Controller
                         'products' => $block->products,
                         'categories' => $block->categories,
                         'combo_products' => $block->comboProducts,
+                        'combo_categories' => $block->comboCategories,
                         'locations' => $block->locations
                     ];
                 }
@@ -125,6 +129,9 @@ class BlockSlotController extends Controller
             'combo_product_ids' => 'nullable|array',
             'combo_product_ids.*' => 'integer|exists:products,id',
 
+            'combo_category_ids' => 'nullable|array',
+            'combo_category_ids.*' => 'integer|exists:product_categories,id',
+
             'date_mode' => 'required|in:range,multiple',
         ]);
 
@@ -139,6 +146,7 @@ class BlockSlotController extends Controller
             $categoryIds = $validated['category_ids'] ?? [];
             $locationIds = $validated['location_ids'] ?? [];
             $comboProductIds = $validated['combo_product_ids'] ?? [];
+            $comboCategoryIds = $validated['combo_category_ids'] ?? [];
 
             if ($scope === 'category') {
                 $productIds = [];
@@ -184,6 +192,10 @@ class BlockSlotController extends Controller
                     // Attach combo products
                     if (!empty($comboProductIds)) {
                         $blockedSlot->comboProducts()->sync($comboProductIds);
+                    }
+
+                    if (!empty($comboCategoryIds)) {
+                        $blockedSlot->comboCategories()->sync($comboCategoryIds);
                     }
 
                     // Attach locations
@@ -391,7 +403,8 @@ class BlockSlotController extends Controller
                 'products' => $b['products'],
                 'categories' => $b['categories'],
                 'locations' => $b['locations'],
-                'combo_products' => $b['combo_products']
+                'combo_products' => $b['combo_products'],
+                'combo_categories' => $b['combo_categories']
             ],
         ];
     }
@@ -424,6 +437,7 @@ class BlockSlotController extends Controller
                 'products:id',
                 'categories:id',
                 'comboProducts:id',
+                'comboCategories:id',
                 'locations:id,name'
             ])
             ->whereDate('date', '>=', $today)
@@ -480,17 +494,27 @@ class BlockSlotController extends Controller
 
                 $hasCombo = $block->comboProducts->isNotEmpty();
 
-                if ($hasCombo) {
+                $comboProductMatch = $block->comboProducts->isNotEmpty()
+                    && $block->comboProducts->pluck('id')->intersect($productIds)->isNotEmpty();
 
-                    $comboMatch = $block->comboProducts
-                        ->pluck('id')
-                        ->intersect($productIds)
-                        ->isNotEmpty();
+                $comboCategoryMatch = $block->comboCategories->isNotEmpty()
+                    && $block->comboCategories->pluck('id')->intersect($categoryIds)->isNotEmpty();
 
-                    if ($comboMatch) {
-                        return false;
-                    }
+                if ($comboProductMatch || $comboCategoryMatch) {
+                    return false;
                 }
+                
+                // if ($hasCombo) {
+
+                //     $comboMatch = $block->comboProducts
+                //         ->pluck('id')
+                //         ->intersect($productIds)
+                //         ->isNotEmpty();
+
+                //     if ($comboMatch) {
+                //         return false;
+                //     }
+                // }
                 
                 return $matchProduct && $matchCategory && $matchLocation;
             })
@@ -545,6 +569,7 @@ class BlockSlotController extends Controller
                 'product_ids' => 'nullable|array',
                 'location_ids' => 'nullable|array',
                 'combo_product_ids' => 'nullable|array',
+                'combo_category_ids' => 'nullable|array',
 
                 'dates' => 'required|array',
                 'dates.*' => 'date',
@@ -566,6 +591,7 @@ class BlockSlotController extends Controller
                 $block->categories()->detach();
                 $block->locations()->detach();
                 $block->comboProducts()->detach();
+                $block->comboCategories()->detach();
                 $block->delete();
             }
 
@@ -576,6 +602,7 @@ class BlockSlotController extends Controller
             $categoryIds = $validated['category_ids'] ?? [];
             $locationIds = $validated['location_ids'] ?? [];
             $comboIds    = $validated['combo_product_ids'] ?? [];
+            $comboCategoryIds = $validated['combo_category_ids'] ?? [];
 
             if ($scope === 'category') {
                 $productIds = [];
@@ -610,7 +637,7 @@ class BlockSlotController extends Controller
                         'date_mode'   => $validated['date_mode'],
                     ]);
 
-                    $this->syncRelations($block, $productIds, $categoryIds, $locationIds, $comboIds);
+                    $this->syncRelations($block, $productIds, $categoryIds, $locationIds, $comboIds, $comboCategoryIds);
                     continue;
                 }
 
@@ -628,7 +655,7 @@ class BlockSlotController extends Controller
                         'date_mode'   => $validated['date_mode'],
                     ]);
 
-                    $this->syncRelations($block, $productIds, $categoryIds, $locationIds, $comboIds);
+                    $this->syncRelations($block, $productIds, $categoryIds, $locationIds, $comboIds, $comboCategoryIds);
                 }
             }
         });
@@ -636,12 +663,13 @@ class BlockSlotController extends Controller
         return response()->json(['message' => 'Block updated']);
     }
 
-    private function syncRelations($block, $productIds, $categoryIds, $locationIds, $comboIds)
+    private function syncRelations($block, $productIds, $categoryIds, $locationIds, $comboIds, $comboCategoryIds)
     {
         $block->products()->sync($productIds);
         $block->categories()->sync($categoryIds);
         $block->locations()->sync($locationIds);
         $block->comboProducts()->sync($comboIds);
+        $block->comboCategories()->sync($comboCategoryIds);
     }
 
     private function attachRelations($blockedSlot, $validated)
@@ -681,7 +709,8 @@ class BlockSlotController extends Controller
             'products:id,name',
             'categories:id,name',
             'locations:id,name',
-            'comboProducts:id,name'
+            'comboProducts:id,name',
+            'comboCategories:id,name'
         ])
         ->where('group_id', $groupId)
         ->orderBy('date')
@@ -711,6 +740,7 @@ class BlockSlotController extends Controller
             'categories' => $first->categories,
             'locations' => $first->locations,
             'combo_products' => $first->comboProducts,
+            'combo_categories' => $first->comboCategories,
 
             'dates' => $dates,
             'time_slots' => $timeSlots,
