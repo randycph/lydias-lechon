@@ -161,7 +161,7 @@
                 </div>
 
                 <div class="form-group @if($user->assign_role->can_approve_payment == 1) d-block @else d-none @endif" id="payment_div">
-                    <label>Allowed to Approve (Payment Types)</label>
+                    <label>Allowed Payment Types</label>
                     <select name="payment_types[]" multiple="multiple" id="payment_types" class="form-control js-example-basic-multiple js-states select2 select-payment-types" style="width:100%">
                         @php
                             $alls = explode(",",$user->allowed_payments);
