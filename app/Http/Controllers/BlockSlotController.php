@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\EcommerceModel\Branch;
+use App\Helpers\ActivityLogger;
 use App\Models\BlockedSlot;
 use App\Models\Product;
+use App\Models\ProductCategory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use App\Helpers\ActivityLogger;
 
 class BlockSlotController extends Controller
 {
@@ -165,6 +166,21 @@ class BlockSlotController extends Controller
                 $locationIds = [];
             }
             
+            $newData = [
+                'block' => [
+                    'scope' => $validated['scope'],
+                    'block_type' => $validated['block_type'],
+                    'date_mode' => $validated['date_mode'],
+                    'is_all_day' => $validated['is_all_day'] ? 'All Day' : 'Time Slot',
+                    'dates' => $validated['dates'],
+                ],
+                'products' => Product::whereIn('id', $productIds)->pluck('name')->toArray(),
+                'categories' => ProductCategory::whereIn('id', $categoryIds)->pluck('name')->toArray(),
+                'locations' => Branch::whereIn('id', $locationIds)->pluck('name')->toArray(),
+                'combo_products' => Product::whereIn('id', $comboProductIds)->pluck('name')->toArray(),
+                'combo_categories' => ProductCategory::whereIn('id', $comboCategoryIds)->pluck('name')->toArray(),
+            ];
+
             foreach ($validated['dates'] as $date) {
 
                 if ($validated['is_all_day']) {
@@ -237,6 +253,16 @@ class BlockSlotController extends Controller
                     }
                 }
             }
+
+            ActivityLogger::log(
+                'create',
+                'Created block slot group',
+                'blocked_slots',
+                null,
+                $newData,
+                $groupId,
+                null
+            );
         });
 
 
@@ -256,6 +282,7 @@ class BlockSlotController extends Controller
             'category_ids' => 'nullable|array',
             'location_ids' => 'nullable|array',
             'combo_product_ids' => 'nullable|array',
+            'combo_category_ids' => 'nullable|array',
 
             'start_time' => 'nullable',
             'end_time' => 'nullable',
@@ -269,6 +296,8 @@ class BlockSlotController extends Controller
         $productIds  = $validated['product_ids'] ?? [];
         $categoryIds = $validated['category_ids'] ?? [];
         $locationIds = $validated['location_ids'] ?? [];
+        $comboProductIds = $validated['combo_product_ids'] ?? [];
+        $comboCategoryIds = $validated['combo_category_ids'] ?? [];
 
         if ($scope === 'category') {
             $productIds = [];
@@ -329,15 +358,69 @@ class BlockSlotController extends Controller
                     ->where('end_time', $request->end_time);
             }
 
-            $blocks = $query->get();
+            $blocks = $query->with([
+                'products:id,name',
+                'categories:id,name',
+                'locations:id,name',
+                'comboProducts:id,name',
+                'comboCategories:id,name'
+            ])->get();
+
+            $oldData = [
+                'block' => [
+                    'scope' => optional($blocks->first())->scope,
+                    'block_type' => optional($blocks->first())->block_type,
+                    'date_mode' => optional($blocks->first())->date_mode,
+                    'is_all_day' => optional($blocks->first())->is_all_day ? 'All Day' : 'Time Slot',
+                    'dates' => $blocks->pluck('date')->unique()->values()->toArray(),
+                ],
+                'products' => $blocks->flatMap(fn($b) => $b->products->pluck('name'))->unique()->values()->toArray(),
+                'categories' => $blocks->flatMap(fn($b) => $b->categories->pluck('name'))->unique()->values()->toArray(),
+                'locations' => $blocks->flatMap(fn($b) => $b->locations->pluck('name'))->unique()->values()->toArray(),
+                'combo_products' => $blocks->flatMap(fn($b) => $b->comboProducts->pluck('name'))->unique()->values()->toArray(),
+                'combo_categories' => $blocks->flatMap(fn($b) => $b->comboCategories->pluck('name'))->unique()->values()->toArray(),
+            ];
 
             foreach ($blocks as $block) {
                 $block->products()->detach();
                 $block->categories()->detach();
                 $block->locations()->detach();
                 $block->comboProducts()->detach();
+                $block->comboCategories()->detach();
                 $block->delete();
             }
+
+            $type = 'delete';
+
+            if ($request->filled('date') && !$request->filled('start_time')) {
+                $type = 'delete_date';
+            }
+
+            if ($request->filled('date') && $request->filled('start_time')) {
+                $type = 'delete_timeslot';
+            }
+
+            if (!$request->filled('date')) {
+                $type = 'delete_entire_group';
+            }
+
+            $description = match($type) {
+                'delete' => 'Deleted block slot',
+                'delete_date' => 'Deleted block (date)',
+                'delete_timeslot' => 'Deleted block (time slot)',
+                'delete_entire_group' => 'Deleted entire block group',
+                default => 'Deleted block'
+            };
+
+            ActivityLogger::log(
+                $type,
+                $description,
+                'blocked_slots',
+                $oldData,
+                null,
+                $groupId,
+                null
+            );
         });
 
         return response()->json([
@@ -353,16 +436,55 @@ class BlockSlotController extends Controller
 
         $monthStart = Carbon::createFromFormat('Y-m', $request['month'])->startOfMonth()->toDateString();
         $monthEnd = Carbon::createFromFormat('Y-m', $request['month'])->endOfMonth()->toDateString();
+        $year = Carbon::createFromFormat('Y-m', $request['month'])->year;
+        $month = Carbon::createFromFormat('Y-m', $request['month'])->month;
 
-        DB::transaction(function () use ($monthStart, $monthEnd) {
+        DB::transaction(function () use ($monthStart, $monthEnd, $year, $month) {
 
             $blocks = BlockedSlot::whereBetween('date', [$monthStart, $monthEnd])->get();
 
+            $dates = $blocks->pluck('date')->unique()->values()->toArray();
+
+            ActivityLogger::log(
+                'delete_month',
+                'Deleted all blocks for month',
+                'blocked_slots',
+                $dates,
+                null,
+                "$year-$month"
+            );
+            
             foreach ($blocks as $block) {
+                $productIds = $block->products()->pluck('products.id')->toArray();
+                $categoryIds = $block->categories()->pluck('product_categories.id')->toArray();
+                $locationIds = $block->locations()->pluck('branches.id')->toArray();
+                $comboProductIds = $block->comboProducts()->pluck('products.id')->toArray();
+                $comboCategoryIds = $block->comboCategories()->pluck('product_categories.id')->toArray();
+                
+                $validated = [
+                    'scope' => $block->scope,
+                    'block_type' => $block->block_type,
+                    'date_mode' => $block->date_mode ?? 'range'
+                ];
+
+                $this->recordLog(
+                    $validated,
+                    $block->date,
+                    $productIds,
+                    $categoryIds,
+                    $locationIds,
+                    $comboProductIds,
+                    $comboCategoryIds,
+                    "$year-$month",
+                    $block,
+                    'delete_month'
+                );
+
                 $block->products()->detach();
                 $block->categories()->detach();
                 $block->locations()->detach();
                 $block->comboProducts()->detach();
+                $block->comboCategories()->detach();
                 $block->delete();
             }
         });
@@ -585,8 +707,14 @@ class BlockSlotController extends Controller
             ]);
 
             // DELETE EXISTING GROUP
-            $blocks = BlockedSlot::where('group_id', $groupId)->get();
-
+            $blocks = BlockedSlot::with([
+                'products:id,name',
+                'categories:id,name',
+                'locations:id,name',
+                'comboProducts:id,name',
+                'comboCategories:id,name'
+            ])->where('group_id', $groupId)->get();
+            
             foreach ($blocks as $block) {
                 $block->products()->detach();
                 $block->categories()->detach();
@@ -620,6 +748,36 @@ class BlockSlotController extends Controller
                 $categoryIds = [];
                 $locationIds = [];
             }
+
+            $oldData = [
+                'block' => [
+                    'scope' => optional($blocks->first())->scope,
+                    'block_type' => optional($blocks->first())->block_type,
+                    'date_mode' => optional($blocks->first())->date_mode,
+                    'is_all_day' => optional($blocks->first())->is_all_day ? 'All Day' : 'Time Slot',
+                    'dates' => $blocks->pluck('date')->unique()->values()->toArray(),
+                ],
+                'products' => $blocks->flatMap(fn($b) => $b->products->pluck('name'))->unique()->values()->toArray(),
+                'categories' => $blocks->flatMap(fn($b) => $b->categories->pluck('name'))->unique()->values()->toArray(),
+                'locations' => $blocks->flatMap(fn($b) => $b->locations->pluck('name'))->unique()->values()->toArray(),
+                'combo_products' => $blocks->flatMap(fn($b) => $b->comboProducts->pluck('name'))->unique()->values()->toArray(),
+                'combo_categories' => $blocks->flatMap(fn($b) => $b->comboCategories->pluck('name'))->unique()->values()->toArray(),
+            ];
+
+            $newData = [
+                'block' => [
+                    'scope' => $validated['scope'],
+                    'block_type' => $validated['block_type'],
+                    'date_mode' => $validated['date_mode'],
+                    'is_all_day' => $validated['is_all_day'] ? 'All Day' : 'Time Slot',
+                    'dates' => $validated['dates'],
+                ],
+                'products' => Product::whereIn('id', $productIds)->pluck('name')->toArray(),
+                'categories' => ProductCategory::whereIn('id', $categoryIds)->pluck('name')->toArray(),
+                'locations' => Branch::whereIn('id', $locationIds)->pluck('name')->toArray(),
+                'combo_products' => Product::whereIn('id', $comboIds)->pluck('name')->toArray(),
+                'combo_categories' => ProductCategory::whereIn('id', $comboCategoryIds)->pluck('name')->toArray(),
+            ];
 
             // RECREATE BLOCKS
             foreach ($validated['dates'] as $date) {
@@ -659,6 +817,16 @@ class BlockSlotController extends Controller
                     $this->syncRelations($block, $productIds, $categoryIds, $locationIds, $comboIds, $comboCategoryIds);
                 }
             }
+
+            ActivityLogger::log(
+                'update',
+                'Updated block slot group',
+                'blocked_slots',
+                $oldData,
+                $newData,
+                $groupId,
+                null
+            );
         });
 
         return response()->json(['message' => 'Block updated']);
@@ -747,6 +915,84 @@ class BlockSlotController extends Controller
             'time_slots' => $timeSlots,
             'date_mode' => $first->date_mode
         ]);
+    }
+
+    public function recordLog($validated, $date, $productIds, $categoryIds, $locationIds, $comboProductIds, $comboCategoryIds, $groupId, $blockedSlot, $type = 'create', $oldBlocks = [])
+    {
+        $blocks = [
+            'scope' => $validated['scope'],
+            'block_type' => $validated['block_type'],
+            'date' => $date,
+            'is_all_day' =>  $blockedSlot->is_all_day ? 'All Day' : 'Time Slot',
+            'date_mode' => $validated['date_mode'],
+            'times' => $blockedSlot->is_all_day == false ? [
+                'start_time' => $blockedSlot?->start_time,
+                'end_time' => $blockedSlot?->end_time
+            ] : null
+        ];
+
+        $product = Product::select('id', 'name')->whereIn('id', $productIds)->get()->toArray();
+
+        $productNames = [];
+        foreach ($product as $key => $value) {
+            $productNames[] = $value['name'];
+        }
+
+        $category = ProductCategory::select('id', 'name')->whereIn('id', $categoryIds)->get()->toArray();
+
+        $categoryNames = [];
+        foreach ($category as $key => $value) {
+            $categoryNames[] = $value['name'];
+        }
+
+        $location = Branch::select('id', 'name')->whereIn('id', $locationIds)->get()->toArray();
+
+        $locationNames = [];
+        foreach ($location as $key => $value) {
+            $locationNames[] = $value['name'];
+        }
+
+        $comboProduct = Product::select('id', 'name')->whereIn('id', $comboProductIds)->get()->toArray();
+
+        $comboProductNames = [];
+        foreach ($comboProduct as $key => $value) {
+            $comboProductNames[] = $value['name'];
+        }
+
+        $comboCategory = ProductCategory::select('id', 'name')->whereIn('id', $comboCategoryIds)->get()->toArray();
+
+        $comboCategoryNames = [];
+        foreach ($comboCategory as $key => $value) {
+            $comboCategoryNames[] = $value['name'];
+        }
+
+        $description = match($type) {
+            'create' => 'Created block slot',
+            'update' => 'Updated block slot',
+            'delete' => 'Deleted block slot',
+            'delete_date' => 'Deleted block (date)',
+            'delete_timeslot' => 'Deleted block (time slot)',
+            'delete_entire_group' => 'Deleted entire block group',
+            'delete_month' => 'Deleted blocks for month',
+            default => 'Activity'
+        };
+
+        ActivityLogger::log(
+            $type,
+            $description,
+            'blocked_slots',
+            $oldBlocks,
+            [
+                'block' => $blocks,
+                'products' => $product ? $productNames : null,
+                'categories' => $category ? $categoryNames : null,
+                'locations' => $location ? $locationNames : null,
+                'combo_products' => $comboProductNames ? $comboProductNames : null,
+                'combo_categories' => $comboCategory ? $comboCategoryNames : null
+            ],
+            $groupId,
+            $blockedSlot
+        );
     }
     
 }

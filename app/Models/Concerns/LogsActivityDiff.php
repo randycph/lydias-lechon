@@ -62,7 +62,6 @@ trait LogsActivityDiff
         | UPDATE (FIELD DIFF)
         |--------------------------------------------------------------------------
         */
-
         static::updating(function (Model $model) {
             if ($model instanceof ActivityLog) {
                 return;

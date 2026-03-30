@@ -141,13 +141,61 @@
                                         @php
                                             $data = json_decode($r->old_value, true);
                                         @endphp
+
                                         @if(is_array($data))
                                             <ul style="padding-left: 15px;">
                                                 @foreach($data as $key => $value)
+
                                                     <li>
                                                         <strong>{{ Str::headline($key) }}:</strong>
-                                                        {{ is_array($value) ? json_encode($value) : $value }}
+
+                                                        @if(is_array($value))
+
+                                                            @if($key === 'block')
+                                                                <ul style="padding-left: 15px;">
+                                                                    @foreach($value as $k => $v)
+                                                                        <li>
+                                                                            <strong>{{ Str::headline($k) }}:</strong>
+
+                                                                            @if($k === 'date')
+                                                                                {{ \Carbon\Carbon::parse($v)->format('M d, Y') }}
+                                                                            @elseif($k === 'scope')
+                                                                                {{ ucfirst($v) }}
+                                                                            @elseif($k === 'block_type')
+                                                                                {{ ucfirst($v) }}
+                                                                            @elseif($k === 'date_mode')
+                                                                                {{ ucfirst($v) }}
+                                                                            @elseif($k === 'is_all_day')
+                                                                                {{ $v ? 'Yes' : 'No' }}
+                                                                            @else
+                                                                                @if(is_array($v))
+                                                                                    {{ collect($v)->implode(', ') }}
+                                                                                @else
+                                                                                    {{ $v }}
+                                                                                @endif
+                                                                            @endif
+
+                                                                        </li>
+                                                                    @endforeach
+                                                                </ul>
+
+                                                            @else
+                                                                @if(empty($value))
+                                                                    -
+                                                                @else
+                                                                    {{ collect($value)
+                                                                        ->flatten()
+                                                                        ->map(fn($v) => is_array($v) ? json_encode($v) : $v)
+                                                                        ->implode(', ')
+                                                                    }}
+                                                                @endif
+                                                            @endif
+
+                                                        @else
+                                                            {{ $value }}
+                                                        @endif
                                                     </li>
+
                                                 @endforeach
                                             </ul>
                                         @else
@@ -158,13 +206,61 @@
                                         @php
                                             $data = json_decode($r->new_value, true);
                                         @endphp
+
                                         @if(is_array($data))
                                             <ul style="padding-left: 15px;">
                                                 @foreach($data as $key => $value)
+
                                                     <li>
                                                         <strong>{{ Str::headline($key) }}:</strong>
-                                                        {{ is_array($value) ? json_encode($value) : $value }}
+
+                                                        @if(is_array($value))
+
+                                                            @if($key === 'block')
+                                                                <ul style="padding-left: 15px;">
+                                                                    @foreach($value as $k => $v)
+                                                                        <li>
+                                                                            <strong>{{ Str::headline($k) }}:</strong>
+
+                                                                            @if($k === 'date')
+                                                                                {{ \Carbon\Carbon::parse($v)->format('M d, Y') }}
+                                                                            @elseif($k === 'scope')
+                                                                                {{ ucfirst($v) }}
+                                                                            @elseif($k === 'block_type')
+                                                                                {{ ucfirst($v) }}
+                                                                            @elseif($k === 'date_mode')
+                                                                                {{ ucfirst($v) }}
+                                                                            @elseif($k === 'is_all_day')
+                                                                                {{ $v ? 'Yes' : 'No' }}
+                                                                            @else
+                                                                                @if(is_array($v))
+                                                                                    {{ collect($v)->implode(', ') }}
+                                                                                @else
+                                                                                    {{ $v }}
+                                                                                @endif
+                                                                            @endif
+
+                                                                        </li>
+                                                                    @endforeach
+                                                                </ul>
+
+                                                            @else
+                                                                @if(empty($value))
+                                                                    -
+                                                                @else
+                                                                    {{ collect($value)
+                                                                        ->flatten()
+                                                                        ->map(fn($v) => is_array($v) ? json_encode($v) : $v)
+                                                                        ->implode(', ')
+                                                                    }}
+                                                                @endif
+                                                            @endif
+
+                                                        @else
+                                                            {{ $value }}
+                                                        @endif
                                                     </li>
+
                                                 @endforeach
                                             </ul>
                                         @else
