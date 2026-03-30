@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use App\Helpers\ActivityLogger;
 
 class BlockSlotController extends Controller
 {
