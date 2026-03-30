@@ -1616,7 +1616,7 @@ class ReportsController extends Controller
             'social_media' => 'Social Media',
             'product_categories' => 'Product Categories',
             'subscribers' => 'Subscribers',
-            'block_dates' => 'Block Dates',
+            'blocked_slots' => 'Block Dates',
         ];
 
         return view('admin.reports.audit_trail_per_module',compact('rs', 'allowedTables'));
