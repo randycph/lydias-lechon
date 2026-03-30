@@ -5,6 +5,7 @@ namespace App\MailingListModel;
 use App\Models\ActivityLog;
 use App\Helpers\Webfocus\Setting;
 use App\Mail\MailingList\CampaignMail;
+use App\Models\Concerns\LogsActivityDiff;
 use App\Models\SentCampaign;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -13,6 +14,7 @@ use Illuminate\Support\Facades\Mail;
 class Subscriber extends Model
 {
     use SoftDeletes;
+    use LogsActivityDiff;
 
     protected $fillable = ['first_name', 'last_name', 'email', 'code', 'is_active'];
 

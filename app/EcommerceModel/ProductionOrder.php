@@ -6,9 +6,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Model;
 
 use App\EcommerceModel\SalesDetail;
+use App\Models\Concerns\LogsActivityDiff;
+
 class ProductionOrder extends Model
 {
     use SoftDeletes;
+    use LogsActivityDiff;
 
     protected $table = 'production_orders';
     protected $fillable = ['branch_id', 'joborder_id', 'delivery_date','schedule_type'];

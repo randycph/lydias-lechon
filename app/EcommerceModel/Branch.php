@@ -4,12 +4,14 @@ namespace App\EcommerceModel;
 
 use App\Models\ActivityLog;
 use App\Models\BranchNumbers;
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Branch extends Model
 {
     use SoftDeletes;
+    use LogsActivityDiff;
 
     protected $table = 'branches';
     protected $fillable = ['name', 'code', 'address', 'jo_select_branch', 'status', 'is_head_office', 'google_map_link', 'direction_link', 'contact_nos', 'contact_person','email_address','user_id', 'created_by','token','last_sync','hotline', 'branch_type','pickup_branch', 'delivery_branch', 'commissary'];

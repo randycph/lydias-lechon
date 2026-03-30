@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\EcommerceModel\Member;
+use App\Models\Concerns\LogsActivityDiff;
 use App\Notifications\NewUserResetPasswordNotification;
 use App\Notifications\UserResetPasswordNotification;
 use Illuminate\Notifications\Notifiable;
@@ -25,6 +26,9 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasFactory;
     use Notifiable;
     use SoftDeletes;
+    use LogsActivityDiff;
+
+    protected array $logExcept = ['updated_at', 'password', 'remember_token'];
 
     /** 
      * The attributes that are mass assignable.

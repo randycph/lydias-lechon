@@ -25,7 +25,6 @@
         @page {
           size: auto;
         }
-                
         #example {
             table-layout: fixed;
         }
@@ -35,17 +34,6 @@
             word-break: break-word;
         }
 
-        #example td:nth-child(5),
-        #example th:nth-child(5) {
-            max-width: 300px;
-        }
-
-        #example td:nth-child(7),
-        #example th:nth-child(7),
-        #example td:nth-child(8),
-        #example th:nth-child(8) {
-            max-width: 300px;
-        }
     </style>
 @endsection
 
@@ -62,7 +50,7 @@
     }
 @endphp
 @section('pagetitle')
-                User Audit Trail
+                Module Audit Trail
                 {{$date_display}}
 @endsection
 
@@ -71,46 +59,42 @@
 
         <div class="container-fluid">
             <div class="text-center mg-b-20"><img height="100px" src="{{ asset('images/lydias1965.png') }}" alt="">
-            <h4 class="mg-b-0 tx-spacing--1">Audit Trail (Sales)</h4></div>
+            <h4 class="mg-b-0 tx-spacing--1">Audit Trail (Module)</h4></div>
           
 
             <div class="row-sm">
                 <div class="col-md-12">
-                    <form action="{{route('admin.report.audit_trail_per_user')}}" method="get">
+                    <form action="{{route('admin.report.audit_trail_per_module')}}" method="get">
                       
                         @csrf
                         <div class="row row-sm">
                             <div class="col-md-3">
                                 <div class="form-group">
-                                    <label class="tx-13">Select User</label>
-                                    <select id="pb" name="pb" class="form-control select2-ajax" style="width:100%">
-                                        @if(request('pb'))
-                                            @php
-                                                $selectedUser = \App\Models\User::find(request('pb'));
-                                            @endphp
-                                            @if($selectedUser)
-                                                <option value="{{ $selectedUser->id }}" selected>{{ $selectedUser->name }}</option>
-                                            @endif
-                                        @endif
+                                    <label class="tx-13">Select Module</label>
+                                    <select id="module" name="module" class="form-control select2-ajax" style="width:100%">
+                                        <option value="">Select Module</option>
+                                        @foreach ($allowedTables as $k => $table)
+                                            <option value="{{ $k }}" @if(request('module') == $k) selected @endif>{{ $table }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="tx-13">Start Date (Log Date)</label>
-                                    <input type="date" required class="form-control input-sm" name="startdate"  autocomplete="off" value="@isset($_GET['startdate']){{ $_GET['startdate'] }}@endisset">
+                                    <input type="date" class="form-control input-sm" name="startdate"  autocomplete="off" value="@isset($_GET['startdate']){{ $_GET['startdate'] }}@endisset">
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label class="tx-13">End Date (Log Date)</label>
-                                    <input type="date" required class="form-control input-sm" name="enddate"  autocomplete="off" value="@isset($_GET['enddate']){{ $_GET['enddate'] }}@endisset">
+                                    <input type="date" class="form-control input-sm" name="enddate"  autocomplete="off" value="@isset($_GET['enddate']){{ $_GET['enddate'] }}@endisset">
                                 </div>
                             </div>
                             <div class="col-md-3 filter-action mg-r-5">
                             
                                 <button type="submit" class="btn btn-sm btn-primary mg-t-7 mg-r-5">Generate</button>
-                                <a href="{{route('admin.report.audit_trail_per_user')}}" class="btn btn-sm btn-info mg-t-7 mg-r-5">Reset</a>
+                                <a href="{{route('admin.report.audit_trail_per_module')}}" class="btn btn-sm btn-info mg-t-7 mg-r-5">Reset</a>
                             </div>
                         </div>
                         
@@ -188,7 +172,6 @@
                                         @endif
                                     </td>
                                     <td>{{$r->db_table}}</td>
-
                                 </tr>
                             @endforeach
                         
@@ -231,39 +214,29 @@
 
     $(document).ready(function() {
         $('.select2-ajax').select2({
-            placeholder: 'Select a user',
-            ajax: {
-                url: '{{ route("ajax.search-users") }}',
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    return {
-                        q: params.term // search term
-                    };
-                },
-                processResults: function (data) {
-                    return {
-                        results: data.results
-                    };
-                },
-                cache: true
-            },
-            minimumInputLength: 1
+            placeholder: 'Select a module',
         });
         
         $('#example').DataTable( {
             dom: 'Bfrtip',
             pageLength: 20,
-            autoWidth: false,
-            columnDefs: [
-                { width: "120px", targets: 1 }, // Date
-                { width: "120px", targets: 3 }, // Name
-                { width: "300px", targets: 4 }, // Description
-                { width: "300px", targets: 6 }, // Old Value
-                { width: "300px", targets: 7 }, // New Value
-                { type: 'time-uni', targets: [2] }
-            ],
             sorting: [[ 0, "desc" ]],
+            autoWidth: false,
+
+            columnDefs: [
+                { width: "140px", targets: 0 }, // Date
+                { width: "140px", targets: 1 }, // Created by
+                { width: "120px", targets: 2 }, // Activity Type
+                { width: "120px", targets: 3 }, // Activity
+                { width: "180px", targets: 4 }, // Email
+                { width: "100px", targets: 5 }, // Role
+                { width: "300px", targets: 6 }, // Description
+                { width: "200px", targets: 7 }, // Reference
+                { width: "220px", targets: 8 }, // Old Value
+                { width: "220px", targets: 9 }, // New Value
+                { width: "150px", targets: 10 }, // Module
+                { type: 'time-uni', targets: [0] }
+            ],
             buttons: [
                 {
                     extend: 'print',
@@ -305,10 +278,13 @@
                 },
                 'colvis'
             ],
-            columnDefs: [ {
-                targets: [],
-                visible: false
-            },{ type: 'time-uni', targets: [2] } ]
+            columnDefs: [ 
+                {
+                    // hide Reference column by default
+                    targets: [4,7], // Reference column index],
+                    visible: false
+                }
+            ]
         } );
     } );
 </script>

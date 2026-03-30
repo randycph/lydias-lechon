@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProductCategory extends Model
 {
     use SoftDeletes;
+    use LogsActivityDiff;
 
     public $table = 'product_categories';
     protected $fillable = [ 'parent_id', 'name', 'slug', 'description', 'status', 'created_by','image'];
