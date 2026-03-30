@@ -752,14 +752,14 @@
         <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}"
             data-value="{{ $isSales && $payments->count() ? $payments->map(fn($p)=>$p->payment_type.': '.number_format((float)$p->amount,2))->implode(', ') : '' }}">
             @if($isSales && !$isMerged && $payments->count())
-            <table>
+            <div>
                 @foreach($payments as $pp)
-                    <tr>
-                        <td class="bord">{{ e($pp->payment_type) }}</td>
-                        <td class="bord">{{ number_format((float)$pp->amount, 2) }}</td>
-                    </tr>
+                    <div>
+                        <div class="bord">{{ e($pp->payment_type) }}</div>
+                        <div class="bord">{{ number_format((float)$pp->amount, 2) }}</div>
+                    </div>
                 @endforeach
-            </table>
+            </div>
             @else &nbsp; @endif
         </td>
 
