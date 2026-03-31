@@ -437,7 +437,12 @@
                                     <tr>
                                         <td>TOTAL WHOLE LECHON ORDER:</td>
                                         <td align="center">
-                                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'whole-lechon']) }}">
+                                            <a href="{{ request()->url() . '?' . http_build_query(
+                                                array_merge(
+                                                    request()->except(['filter_size', 'filter_type']),
+                                                    ['filter' => 'whole-lechon']
+                                                )
+                                            ) }}">
                                                 {{ $total_lechon_order }}
                                             </a>
                                         </td>
@@ -446,7 +451,12 @@
                                     <tr>
                                         <td>TOTAL PANTAGA:</td>
                                         <td align="center">
-                                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'pantaga']) }}">
+                                            <a href="{{ request()->url() . '?' . http_build_query(
+                                                array_merge(
+                                                    request()->except(['filter_size', 'filter_type']),
+                                                    ['filter' => 'pantaga']
+                                                )
+                                            ) }}">
                                                 {{collect($jo)->where('jo_category','=','Pantaga')->sum('qty')}}
                                             </a>
                                         </td>
@@ -455,7 +465,12 @@
                                     <tr>
                                         <td>TOTAL BELLY PANTAGA:</td>
                                         <td align="center">
-                                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'belly-pantaga']) }}">
+                                            <a href="{{ request()->url() . '?' . http_build_query(
+                                                array_merge(
+                                                    request()->except(['filter_size', 'filter_type']),
+                                                    ['filter' => 'belly-pantaga']
+                                                )
+                                            ) }}">
                                                 {{collect($jo)->where('jo_category','=','Belly Pantaga')->sum('qty')}}
                                             </a>
                                         </td>
@@ -464,7 +479,12 @@
                                     <tr>
                                         <td>TOTAL DISPLAY:</td>
                                         <td align="center">
-                                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'display']) }}">
+                                            <a href="{{ request()->url() . '?' . http_build_query(
+                                                array_merge(
+                                                    request()->except(['filter_size', 'filter_type']),
+                                                    ['filter' => 'display']
+                                                )
+                                            ) }}">
                                                 {{collect($jo)->where('jo_category','=','Display')->sum('qty')}}
                                             </a>
                                         </td>
@@ -473,7 +493,12 @@
                                     <tr>
                                         <td>TOTAL ALPHA SIZE:</td>
                                         <td align="center">
-                                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'alpha-size']) }}">
+                                            <a href="{{ request()->url() . '?' . http_build_query(
+                                                array_merge(
+                                                    request()->except(['filter_size', 'filter_type']),
+                                                    ['filter' => 'alpha-size']
+                                                )
+                                            ) }}">
                                                 {{collect($jo)->where('jo_category','=','Alpha Size')->sum('qty')}}
                                             </a>
                                         </td>
@@ -482,8 +507,13 @@
                                     <tr>
                                         <td>OVERALL TOTAL LECHON:</td>
                                         <td align="center">
-                                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'overall-lechon']) }}">
-                                                {{$total_lechon_overall}}
+                                            <a href="{{ request()->url() . '?' . http_build_query(
+                                                array_merge(
+                                                    request()->except(['filter_size', 'filter_type']),
+                                                    ['filter' => 'overall-lechon']
+                                                )
+                                            ) }}">
+                                                {{ $total_lechon_overall }}
                                             </a>
                                         </td>
                                     </tr>
@@ -491,8 +521,13 @@
                                     <tr>
                                         <td>TOTAL MISC QTY:</td>
                                         <td align="center">
-                                            <a href="{{ request()->fullUrlWithQuery(['filter' => 'misc']) }}">
-                                                {{$total_misc}}
+                                            <a href="{{ request()->url() . '?' . http_build_query(
+                                                array_merge(
+                                                    request()->except(['filter_size', 'filter_type']),
+                                                    ['filter' => 'misc']
+                                                )
+                                            ) }}">
+                                                {{ $total_misc }}
                                             </a>
                                         </td>
                                     </tr>
@@ -518,10 +553,15 @@
                                         <tr>
                                             <td>{{ strtoupper($size) }}</td>
                                             <td align="center">
-                                                <a href="{{ request()->fullUrlWithQuery([
-                                                    'filter_size' => $baseSize,
-                                                    'filter_type' => $isPaella ? 'paella' : 'regular'
-                                                ]) }}">
+                                                <a href="{{ request()->url() . '?' . http_build_query(
+                                                    array_merge(
+                                                        request()->except(['filter']),
+                                                        [
+                                                            'filter_size' => $baseSize,
+                                                            'filter_type' => $isPaella ? 'paella' : 'regular'
+                                                        ]
+                                                    )
+                                                ) }}">
                                                     {{ $count }}
                                                 </a>
                                             </td>
