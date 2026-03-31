@@ -615,8 +615,18 @@
         }
 
         function removePaymentRow() {
+            const rows = $('#paymentsTable .payment-row:not(.d-none)');
             const $row = $(this).closest('tr');
+
+            if (rows.length <= 1) {
+                resetRow($row);
+
+                recalculatePayments();
+                return;
+            }
+
             $row.remove();
+
             reindexPayments();
             recalculatePayments();
         }
