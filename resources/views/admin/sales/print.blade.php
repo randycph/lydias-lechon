@@ -423,7 +423,7 @@
                                 <td class="tx-center">{{$payment->receipt_number}}</td>
                                 <td class="tx-center">{{ \Carbon\Carbon::parse($payment->payment_date)->format('F d, Y') }}</td>
                                 <td class="tx-center">@if($payment->status=='PENDING' && ($payment->payment_type=='IPAY' || $payment->payment_type=='Paymaya' )) Subject for Confirmation @else {{$payment->status}} @endif</td>
-                                <td class="tx-right">{{number_format($payment->amount, 2)}}</td>
+                                <td class="tx-right">₱{{number_format($salesDetails->sum('net_amount') + $sales->delivery_fee_amount - $sales->discount_amount, 2)}}</td>
                                
                             </tr>
                         @empty
@@ -435,7 +435,7 @@
                         @if($salesPayments->sum('amount') > 0)
                             <tr style="font-weight:bold;">
                                 <td colspan="4">&nbsp;</td>
-                                <td align="right">Total : {{number_format($salesPayments->sum('amount'), 2)}}</td> 
+                                <td align="right">Total : ₱{{number_format($salesDetails->sum('net_amount') + $sales->delivery_fee_amount - $sales->discount_amount, 2)}}</td> 
                             </tr>
                         @endif
                     </tbody>
