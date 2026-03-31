@@ -136,6 +136,7 @@
 
         <div x-data="categoryProductDropdown()">
 
+<<<<<<< Updated upstream
     <div class="mb-3">
         <label class="form-label">Category</label>
         <select x-model="selectedCategory" @change="fetchProducts()" class="form-control">
@@ -145,6 +146,115 @@
             </template>
         </select>
     </div>
+=======
+				<div class="form-group">
+					<div class="mb-3 reward-option" id="free-shipping-optn" style="display:@if($errors->any() && old('reward') == 'free-shipping-optn') block @else none @endif">
+						<label class="d-block">Location *</label>
+						<select class="form-control select2 select-location" name="location[]" multiple="multiple" style="min-height: 32px;">
+							<option value="all">All Area</option>
+							@foreach($locations as $location)
+								<option @if(is_array(old('location')) && in_array($location->city, old('location'))) selected @endif value="{{$location->city}}">{{ $location->city }}</option>
+							@endforeach
+						</select>
+						
+						<br><br>
+						<label class="d-block">Discount Type *</label>
+						<div class="row" style="padding-bottom: 10px;">
+							<div class="col-6">
+								<div class="custom-control custom-radio">
+									<input @if(old('discount_type') == 'partial') checked @endif checked type="radio" id="coupon-discount-type-partial" name="discount_type" class="custom-control-input" value="partial" onchange="sf_discount_type()">
+									<label class="custom-control-label" for="coupon-discount-type-partial">Partial</label>
+								</div>
+							</div>
+							<div class="col-6">
+								<div class="custom-control custom-radio">
+									<input @if(old('discount_type') == 'full') checked @endif type="radio" id="coupon-discount-type-full" name="discount_type" class="custom-control-input" value="full" onchange="sf_discount_type()">
+									<label class="custom-control-label" for="coupon-discount-type-full">Full</label>
+								</div>
+							</div>
+						</div>
+
+						<label id="discount_amount_label" style="display: @if(old('discount_type') == 'full') none @else block @endif;">Shipping Fee Discount Amount *</label>
+						<input style="display: @if(old('discount_type') == 'full') none @else block @endif;" type="number" name="shipping_fee_discount_amount" class="form-control @error('shipping_fee_discount_amount') is-invalid @enderror" id="discount_amount_input" value="{{ old('shipping_fee_discount_amount') }}">
+						
+					</div>
+
+					<div class="mb-3 reward-option" id="discount-amount-optn" style="display:@if($errors->any() && old('reward') == 'discount-amount-optn') block @else none @endif">
+						<label class="d-block">Discount Amount *</label>
+						<input name="discount_amount" type="number" class="form-control @error('discount_amount') is-invalid @enderror" value="{{ old('discount_amount') }}" placeholder="Php">
+						
+					</div>
+
+					<div class="mb-3 reward-option" id="discount-percentage-optn" style="display:@if($errors->any() && old('reward') == 'discount-percentage-optn') block @else none @endif">
+						<label class="d-block">Discount Percentage % *</label>
+						<input name="discount_percentage" type="number" class="form-control @error('discount_percentage') is-invalid @enderror" placeholder="%" value="{{ old('discount_percentage') }}">
+				
+					</div>
+
+					<div id="div_product_amount" style="display: @if(old('reward') == 'discount-amount-optn' || old('reward') == 'discount-percentage-optn') block @else none @endif;">
+                		<div class="row" style="padding-bottom: 10px;margin-top: 20px;">
+							<div class="col-6">
+								<div class="custom-control custom-radio">
+									<input @if(old('amount_discount') == 1) checked @endif checked type="radio" id="discount-total-amount" name="amount_discount" class="custom-control-input" value="1" onclick="product_discount_amount(1)">
+									<label class="custom-control-label" for="discount-total-amount">Total Amount</label>
+								</div>
+							</div>
+							<div class="col-6 d-none">
+								<div class="custom-control custom-radio">
+									<input @if(old('amount_discount') == 2) checked @endif type="radio" id="discount-product-price" name="amount_discount" class="custom-control-input" value="2" onclick="product_discount_amount(2)">
+									<label class="custom-control-label" for="discount-product-price">Product Price</label>
+								</div>
+							</div>
+						</div>
+
+						<div class="row" style="padding-bottom: 10px;margin-top: 20px;display: @if(old('amount_discount') == 2) flex @else none @endif;" id="discount_selection">
+							<div class="col-6">
+								<div class="custom-control custom-radio">
+									<input @if(old('product_discount') == 'current') checked @endif type="radio" id="same-product" name="product_discount" class="custom-control-input" value="current" onchange="productdiscount('current')">
+									<label class="custom-control-label" for="same-product">Same Product</label>
+								</div>
+							</div>
+							<!-- <div class="col-4">
+								<div class="custom-control custom-radio">
+									<input @if(old('product_discount') == 'highest') checked @endif type="radio" id="product-highest-price" name="product_discount" class="custom-control-input" value="highest" onchange="productdiscount('highest')">
+									<label class="custom-control-label" for="product-highest-price">Highest Price</label>
+								</div>
+							</div> -->
+							<div class="col-6">
+								<div class="custom-control custom-radio">
+									<input @if(old('product_discount') == 'specific') checked @endif type="radio" id="specific-product" name="product_discount" class="custom-control-input" value="specific" onchange="productdiscount('specific')">
+									<label class="custom-control-label" for="specific-product">Specific Product</label>
+								</div>
+							</div>
+						</div>
+
+						<div style="display: @if(old('product_discount') == 'specific') block @else none @endif;" id="discount_productid">
+							<select class="form-control select2" name="discount_productid">
+								<option label="Choose Product"></option>
+								@foreach($products as $product)
+									<option @if(old('discount_productid') == $product->id) selected @endif value="{{$product->id}}">{{ $product->name }}</option>
+								@endforeach
+							</select>
+						</div>
+                	</div>
+
+					<div class="mb-3 reward-option" id="free-product-optn" style="display:@if($errors->any() && old('reward') == 'free-product-optn') block @else none @endif">
+						<label class="d-block">Free Product *</label>
+						<select class="form-control select2" name="free_product_id" style="min-height: 32px;" multiple="multiple">
+							<option label="Choose one"></option>
+							@foreach($free_products as $product)
+								<option @if(old('free_product_id') == $product->id) selected @endif value="{{$product->id}}">{{ $product->name }}</option>
+							@endforeach
+						</select>
+						@error('free_product_id')
+							<span class="invalid-feedback" role="alert">
+								<strong>{{ $message }}</strong>
+							</span>
+						@enderror
+					</div>
+					<hr>
+				</div>
+>>>>>>> Stashed changes
 
 
     <div class="mb-3">

@@ -12,7 +12,7 @@ class GiftCertificate extends Model
     use SoftDeletes;
 
     protected $table = 'gift_certificate';
-    protected $fillable = ['code','amount','gc_type','status','user_id','sales_header_id','serial_number', 'claimed_at'];
+    protected $fillable = ['code','amount','gc_type','status','user_id','sales_header_id','serial_number', 'claimed_at','customer_id'];
 
     public function user()
     {

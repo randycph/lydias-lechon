@@ -12,7 +12,7 @@ use Auth;
 use Illuminate\Support\Facades\Validator;
 use App\EcommerceModel\SalesHeader;
 use Response;
-
+use App\Models\User;
 
 class GiftCertificateController extends Controller
 {
@@ -150,8 +150,10 @@ class GiftCertificateController extends Controller
     public function create()
     {
         $giftcertificate = GiftCertificate::all();
+        
+        $customers = User::where('role_id',6)->where('is_active',1)->get();
 
-        return view('admin.giftcertificate.create',compact('giftcertificate'));
+        return view('admin.giftcertificate.create',compact('giftcertificate','customers'));
     }
 
     public function store(Request $request)
@@ -160,10 +162,10 @@ class GiftCertificateController extends Controller
             'code' => $request->code,
             'amount' => $request->amount,
             'gc_type' => $request->gc_type,
-            'serial_number' => $request->serial_number,
             'status' => (isset($request->status) ? 'Used' : 'Unused'),
             'user_id' => Auth::id(),
-            'sales_header_id' => $request->sales_header_id
+            'sales_header_id' => $request->sales_header_id,
+            'customer_id' => is_array($request->customer) ? $request->customer[0] ?? null : $request->customer,
         ]);
 
         return back()->with('success','Successfully saved new gift certificate!');
@@ -268,4 +270,49 @@ class GiftCertificateController extends Controller
 
         return back()->with('success','Successfully restored gift certificate!');
     }
+    public function validateGiftCheque(Request $request)
+{
+    $request->validate([
+        'code' => 'required|string'
+    ]);
+
+    $code = trim($request->code);
+
+    $gc = GiftCheque::where('code', $code)
+        ->whereNull('deleted_at')
+        ->where('status', 'Unused')
+        ->whereNull('sales_header_id')
+        ->first();
+
+    if (!$gc) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gift cheque is invalid or already used.'
+        ], 422);
+    }
+
+    if (!empty($gc->user_id) && auth()->check() && (int) $gc->user_id !== (int) auth()->id()) {
+        return response()->json([
+            'success' => false,
+            'message' => 'This gift cheque is not assigned to your account.'
+        ], 422);
+    }
+
+    if (isset($gc->isApproved) && (string) $gc->isApproved !== '1') {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gift cheque is not yet approved.'
+        ], 422);
+    }
+
+    return response()->json([
+        'success' => true,
+        'gift_cheque' => [
+            'id' => $gc->id,
+            'code' => $gc->code,
+            'amount' => (float) $gc->amount,
+            'gc_type' => $gc->gc_type,
+        ]
+    ]);
+}
 }

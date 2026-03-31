@@ -1,6 +1,7 @@
 <?php
 
 use App\EcommerceModel\Branch;
+use App\Http\Controllers\BlockSlotController;
 use App\EcommerceModel\Cart;
 use App\EcommerceModel\DeliveryStatus;
 use App\EcommerceModel\GiftCertificate;
@@ -184,6 +185,10 @@ Route::post('/coupon_update/{id}', [CouponController::class, 'update_coupon'])->
 Route::post('/redeem-coupon/{id}', [CouponController::class, 'redeem']);
 Route::get('/user-coupons', [CouponController::class, 'getUserCoupons'])->name('user.coupons');
 Route::post('/cart/auto-free-delivery', [CouponController::class, 'autoFreeDelivery'])->name('cart.autoFreeDelivery');
+<<<<<<< Updated upstream
+=======
+Route::post('/coupon/validate', [CouponController::class, 'validateCoupon'])->name('coupon.validate');
+>>>>>>> Stashed changes
 //// MAILING LIST ////
 Route::post('/subscribe', 'MailingList\SubscriberFrontController@subscribe')->name('mailing-list.front.subscribe');
 Route::get('/unsubscribe/{subscriber}/{code}', 'MailingList\SubscriberFrontController@unsubscribe')->name('mailing-list.front.unsubscribe');
@@ -247,6 +252,7 @@ Route::post('cart-remove-product','EcommerceControllers\CartController@remove_pr
 
 Route::post('/add-manual-coupon','EcommerceControllers\CouponController@add_manual_coupon')->name('add-manual-coupon');
 Route::get('/add-auto-coupon','EcommerceControllers\CouponController@get_auto_coupons')->name('get-auto-coupons');
+Route::get('/coupon/check-auto-eligibility', [CouponController::class, 'checkAutoCouponEligibility'])->name('coupon.check-auto-eligibility');
 Route::get('checkout-as-guest', 'EcommerceControllers\CheckoutController@checkout_as_guest')->name('cart.front.checkout-as-guest');
 Route::post('/temp_save','EcommerceControllers\CartController@save_sales')->name('cart.temp_sales');
 Route::get('guest/view/{id}', 'FrontController@show_sales_summary_guest')->name('profile.show_sales_summary_guest');
@@ -541,7 +547,6 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::get('/admin/ajax/search-users', [ReportsController::class, 'searchUsers'])->name('ajax.search-users');
 
 
-
     //
 
     //Production Branch
@@ -559,6 +564,7 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::get('/admin/gift-certificate-upload', 'EcommerceControllers\GiftCertificateController@upload')->name('gift-certificate.upload');
     Route::post('/admin/gift-certificate-upload', 'EcommerceControllers\GiftCertificateController@upload_submit')->name('gift-certificate.upload_submit');
     Route::get('/admin/gift-certificate-export', 'EcommerceControllers\GiftCertificateController@export')->name('gift-certificate.export');
+    Route::post('/validate-gift-cheque', [GiftCertificateController::class, 'validateGiftCheque'])->name('cart.validate_gift_cheque');
     //
 
     //Sales Transaction
@@ -1003,6 +1009,14 @@ Route::get('driver', function() {
     return view('driver.index');
 })->name('driver.home');
 
+<<<<<<< Updated upstream
+=======
+Route::get('/blocks/events', [BlockSlotController::class, 'events'])->name('blocks.events');
+Route::post('/blocks', [BlockSlotController::class, 'store'])->name('blocks.store');
+Route::delete('/blocks/{id}', [BlockSlotController::class, 'destroy'])->name('blocks.destroy');
+Route::post('/checkout/blocks', [BlockSlotController::class, 'getCheckoutBlocks'])->name('checkout.blocks');
+
+>>>>>>> Stashed changes
 Route::get('paymaya-payment-check/{id}', function($id) {
     if (auth()->guest()) {
         return response()->json([
