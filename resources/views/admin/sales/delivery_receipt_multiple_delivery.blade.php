@@ -101,9 +101,11 @@
                 </div>
 
                 <div class="col-sm-12 col-lg-12 mg-t-10">
-                    <div class="mg-b-0 tx-15">Date Needed: {{\Carbon\Carbon::parse($deliveryAddress->delivery_date)->format('F d, Y')}}</div>
-                    <div class="mg-b-0 tx-15">Day: {{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('l') }}</div>
-                    <div class="mg-b-0 tx-15">Time: {{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('g:i A') }}</div>
+                    @if ($sales->delivery_status != 'Open Date')
+                        <div class="mg-b-0 tx-15">Date Needed: {{\Carbon\Carbon::parse($deliveryAddress->delivery_date)->format('F d, Y')}}</div>
+                        <div class="mg-b-0 tx-15">Day: {{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('l') }}</div>
+                        <div class="mg-b-0 tx-15">Time: {{ \Carbon\Carbon::parse($deliveryAddress->delivery_date . ' ' . $deliveryAddress->delivery_time)->format('g:i A') }}</div>
+                    @endif
                     <div class="mg-b-0 tx-15">Contact #: {{$deliveryAddress->contact_tel ?? $sales->customer_contact_number}}</div>
                     <div class="mg-b-0 tx-15" style="display:none;">Delivery Charge: ₱{{number_format($deliveryAddress->delivery_fee ?? 0)}}</div>
                     <div class="mg-b-0 tx-15" style="display:none;">Payment Method: {{$sales->payment_used ?? 'Paymaya'}}</div>
