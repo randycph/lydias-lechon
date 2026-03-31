@@ -158,7 +158,9 @@
                                 $saleDetail = $sales->items ? $sales->items->first() : null;
                                 $deliveryDate = $saleDetail ? \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y g:i A') : 'N/A';
                             @endphp
+                            @if ($sales->delivery_status <> 'Open Date')
                             <p class="mg-b-3">Date needed: {{$deliveryDate}}</p>
+                            @endif
                         @endif
 
                         <p class="mg-b-3">Contact Person: {{$sales->contact_person ?? $sales->customer_name}}</p>
@@ -215,10 +217,14 @@
                                 <td class="tx-nowrap">{!! highlightPaella($details?->product_name) !!}</td>
                                 <th class="tx-center">{{$details->no_of_pax}}</th>                                
                                 <td class="tx-nowrap">
-                                    @if(date('H:i A',strtotime($details->delivery_date)) == '12:00 PM')
-                                        {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
+                                    @if ($sales->delivery_status == 'Open Date')
+                                        -
                                     @else
-                                        {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
+                                        @if(date('H:i A',strtotime($details->delivery_date)) == '12:00 PM')
+                                            {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
+                                        @else
+                                            {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
+                                        @endif
                                     @endif
                                     
                                 </td>
