@@ -65,7 +65,9 @@
                                     Contact number: {{ $address->contact_tel }}<br>
                                     Delivery fee: ₱{{ number_format($address->delivery_fee, 2) }}<br>
                                     Location: {{ $address->location }}<br>
+                                    @if ($sales->delivery_status != 'Open Date')
                                     Delivery Date and time: {{ \Carbon\Carbon::parse(($address->delivery_date . ' ' . $address->delivery_time))->format('F d, Y g:i A') }}<br>
+                                    @endif
                                     Order/s:
                                         @if ($address->products)
                                             @php
@@ -99,7 +101,9 @@
                                 $saleDetail = $sales->items ? $sales->items->first() : null;
                                 $deliveryDate = $saleDetail ? \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y g:i A') : 'N/A';
                             @endphp
+                            @if ($sales->delivery_status != 'Open Date')
                             <p class="mg-b-0 tx-15">Date needed: {{$deliveryDate}}</p>
+                            @endif
                         @endif
 
                         <p class="mg-b-3">Instruction: {{$sales->instruction}}</p>
@@ -162,7 +166,13 @@
                             <tr>
                                 <td class="tx-nowrap">{!! highlightPaella($details?->product_name) !!}</td>
                                 <th class="tx-center">{{$details->no_of_pax}}</th>
-                                <td class="tx-nowrap">{{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y H:i A') }}</td>
+                                <td class="tx-nowrap">
+                                    @if ($sales->delivery_status != 'Open Date')
+                                        {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y H:i A') }}
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td class="tx-center">{{number_format($details->qty, 0)}}</td>
                                 <td class="tx-right">{{number_format(($details->paella_price),2)}}</td>
                                 <td class="tx-right">{{number_format($details->price, 2)}}</td>

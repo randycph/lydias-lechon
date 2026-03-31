@@ -164,7 +164,9 @@
                                 Contact number: {{ $address->contact_tel }}<br>
                                 Delivery fee: ₱{{ number_format($address->delivery_fee, 2) }}<br>
                                 Location: {{ $address->location }}<br>
+                                @if ($sales->delivery_status != 'Open Date')
                                 Delivery Date and time: {{ \Carbon\Carbon::parse(($address->delivery_date . ' ' . $address->delivery_time))->format('F d, Y g:i A') }}<br>
+                                @endif
                                 Order/s:
                                         @if ($address->products)
                                             @php
@@ -204,7 +206,11 @@
                                                             </td>
                                                             <th class="tx-center">{{ $product->product->no_of_pax }}</th>                                
                                                             <td class="tx-nowrap">
-                                                                {{ \Carbon\Carbon::parse(($address->delivery_date . ' ' . $address->delivery_time))->format('F d, Y g:i A') }}
+                                                                @if ($sales->delivery_status == 'Open Date')
+                                                                    -
+                                                                @else
+                                                                    {{ \Carbon\Carbon::parse(($address->delivery_date . ' ' . $address->delivery_time))->format('F d, Y g:i A') }}
+                                                                @endif
                                                             </td>
                                                             <td></td>
                                                             <td class="tx-center">{{ number_format((int) ($product->qty ?? 0), 0) }}</td>
@@ -275,13 +281,14 @@
                            Delivery/Pickup Address: {{$address_to_use}}
                         @endif
                     </p>   
-
-                    @if ($sales?->deliveryAddress && count($sales?->deliveryAddress) == 0)
-                        @php 
-                            $saleDetail = $sales->items ? $sales->items->first() : null;
-                            $deliveryDate = $saleDetail ? \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y g:i A') : 'N/A';
-                        @endphp
-                        <p class="mg-b-0 tx-15" style="display:none;">Date needed: {{$deliveryDate}}</p>
+                    @if ($sales->delivery_status != 'Open Date')
+                        @if ($sales?->deliveryAddress && count($sales?->deliveryAddress) == 0)
+                            @php 
+                                $saleDetail = $sales->items ? $sales->items->first() : null;
+                                $deliveryDate = $saleDetail ? \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y g:i A') : 'N/A';
+                            @endphp
+                            <p class="mg-b-0 tx-15" style="display:none;">Date needed: {{$deliveryDate}}</p>
+                        @endif
                     @endif
                     <p class="mg-b-0 tx-15">Contact Person: {{$sales->contact_person ?? $sales->customer_name}}</p>
                     @if ($sales->instruction)
@@ -307,7 +314,13 @@
                         @forelse($salesDetails as $details)
                             <tr>
                                 <td class="tx-nowrap">{!! highlightPaella($details?->product_name) !!}</td>                
-                                <td class="tx-nowrap tx-center">{{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y H:i A') }}</td>
+                                <td class="tx-nowrap tx-center">
+                                    @if ($sales->delivery_status == 'Open Date')
+                                        -
+                                    @else
+                                        {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y H:i A') }}
+                                    @endif
+                                </td>
                                 <td class="tx-center">{{number_format($details->qty, 0)}}</td>
                                 <td class="tx-center">{{number_format($details->price, 2)}}</td>
                                 <td class="tx-right">{{number_format($details->gross_amount, 2)}}</td>                               
