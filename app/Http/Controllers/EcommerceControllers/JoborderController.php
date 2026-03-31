@@ -297,6 +297,50 @@ class JoborderController extends Controller
             }
         }
 
+        $payments = collect($request->payments ?? []);
+
+        if ($payments->isEmpty()) {
+            return back()->withErrors(['payments' => 'Please add at least one payment method with a valid amount.'])->withInput();
+        }
+
+        $errors = [];
+        $hasValidPayment = false;
+
+        foreach ($payments as $index => $payment) {
+
+            $method = trim($payment['method'] ?? '');
+            $amount = isset($payment['amount']) ? floatval($payment['amount']) : 0;
+
+            $row = $index + 1;
+
+            if ($method === '' && $amount <= 0) {
+                continue;
+            }
+
+            if ($method === '' || $amount <= 0) {
+
+                if ($method === '') {
+                    $errors["payments.$index.method"] = "Row {$row}: Please select a payment method.";
+                }
+
+                if ($amount <= 0) {
+                    $errors["payments.$index.amount"] = "Row {$row}: Please enter a valid amount.";
+                }
+
+                continue;
+            }
+
+            $hasValidPayment = true;
+        }
+
+        if (!$hasValidPayment) {
+            $errors['payments'] = 'Please add at least one valid payment.';
+        }
+
+        if (!empty($errors)) {
+            return back()->withErrors($errors)->withInput();
+        }
+        
         $ran   = microtime();
         $today = getdate();
         $order_number = $today[0].substr($ran, 2,6);

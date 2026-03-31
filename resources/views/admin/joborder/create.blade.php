@@ -496,6 +496,16 @@
                             </tbody>
                         </table>
 
+                        @if ($errors->any())
+                            <div class="alert alert-danger">
+                                <ul class="mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
                         <button type="button" class="btn btn-sm btn-success" id="addPayment">
                             Add more
                         </button>
@@ -645,8 +655,18 @@
         }
 
         function removePaymentRow() {
+            const rows = $('#paymentsTable .payment-row:not(.d-none)');
             const $row = $(this).closest('tr');
+
+            if (rows.length <= 1) {
+                resetRow($row);
+
+                recalculatePayments();
+                return;
+            }
+
             $row.remove();
+
             reindexPayments();
             recalculatePayments();
         }
@@ -1749,10 +1769,32 @@
                 return;
             }
 
+            let hasError = false;
+
+            $('.payment-row:not(.d-none)').each(function () {
+                const method = $(this).find('.payment-method').val();
+                const amount = parseFloat($(this).find('.payment-amount').val()) || 0;
+
+                if (!method && amount <= 0) {
+                    hasError = true;
+                }
+
+                if ((method && amount <= 0) || (!method && amount > 0)) {
+                    hasError = true;
+                }
+            });
+
+            if (hasError) {
+                alert('Please complete all payment rows properly.');
+                $('#submitBtn').prop('disabled', false);
+                $('#submitBtn').text('Save Job Order');
+                e.preventDefault();
+            }
+
             if(parseFloat(get_payment_balance()) < 0){
                 alert('Your payment/s exceeded the total billing amount!');
-
-                resetButton();
+                $('#submitBtn').prop('disabled', false);
+                $('#submitBtn').text('Save Job Order');
                  e.preventDefault();
             }
 
