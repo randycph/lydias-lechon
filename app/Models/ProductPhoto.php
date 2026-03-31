@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
 class ProductPhoto extends Model
 {
+    use LogsActivityDiff;
+    
     public $table = 'product_photos';
     protected $fillable = [ 'product_id', 'name', 'description', 'status', 'is_primary', 'path', 'created_by' ];
     protected $appends = ['url'];

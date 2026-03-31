@@ -35,6 +35,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        if (app()->runningInConsole() || app()->environment('testing')) {
+            return;
+        }
+
         if(strpos(url()->current(), "storage") === FALSE && strpos(url()->current(), "theme") === FALSE){
             $insert_logs = \App\Models\ActivityLog::create([
                 'created_by' => auth()->check() ? auth()->id() : 'guest',

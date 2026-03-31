@@ -1,12 +1,17 @@
 @extends('admin.layouts.app')
 
 @section('pagetitle')
-    Website Settings
+Website Settings
 @endsection
 
 @section('pagecss')
 <script src="{{ asset('lib/ckeditor/ckeditor.js') }}"></script>
 <link type="text/css" rel="stylesheet" href="{{ asset('lib/select2/css/select2.min.css') }}" />
+<!-- VanillaJS Datepicker CSS -->
+
+<script src=" https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/js/datepicker-full.min.js "></script>
+<link href=" https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/css/datepicker.min.css " rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 <style>
     .select2-container--default .select2-selection--multiple .select2-selection__choice {
         position: relative;
@@ -20,6 +25,7 @@
         font-size: 13px;
         line-height: 1.45;
     }
+
     .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
         color: #fff;
         opacity: .5;
@@ -51,56 +57,81 @@
             <h4 class="mg-b-0 tx-spacing--1">Website Settings</h4>
         </div>
     </div>
+
     <div class="row row-sm">
         <div class="col-lg-12">
             <ul class="nav nav-tabs" id="myTab" role="tablist">
                 <li class="nav-item">
-                    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Website</a>
+                    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab"
+                        aria-controls="home" aria-selected="true">Website</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Contact</a>
+                    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab"
+                        aria-controls="profile" aria-selected="false">Contact</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#social" role="tab" aria-controls="social" aria-selected="false">Social Media</a>
+                    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#social" role="tab"
+                        aria-controls="social" aria-selected="false">Social Media</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="privacy-tab" data-toggle="tab" href="#privacy" role="tab" aria-controls="privacy" aria-selected="false">Data Privacy</a>
+                    <a class="nav-link" id="privacy-tab" data-toggle="tab" href="#privacy" role="tab"
+                        aria-controls="privacy" aria-selected="false">Data Privacy</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="ecommerce-tab" data-toggle="tab" href="#ecommerce" role="tab" aria-controls="ecommerce" aria-selected="false">Ecommerce</a>
+                    <a class="nav-link" id="ecommerce-tab" data-toggle="tab" href="#ecommerce" role="tab"
+                        aria-controls="ecommerce" aria-selected="false">Ecommerce</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="deliveryfee-tab" data-toggle="tab" href="#deliveryfee" role="tab" aria-controls="deliveryfee" aria-selected="false">Delivery Fee</a>
+                    <a class="nav-link" id="deliveryfee-tab" data-toggle="tab" href="#deliveryfee" role="tab"
+                        aria-controls="deliveryfee" aria-selected="false">Delivery Fee</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="kiosk-tab" data-toggle="tab" href="#kiosk" role="tab" aria-controls="kiosk" aria-selected="false">Kiosk</a>
+                    <a class="nav-link" id="kiosk-tab" data-toggle="tab" href="#kiosk" role="tab" aria-controls="kiosk"
+                        aria-selected="false">Kiosk</a>
                 </li>
-               
+                <li class="nav-item">
+                    <a class="nav-link" id="block-dates-tab" data-toggle="tab" href="#block-dates" role="tab" aria-controls="block-dates"
+                        aria-selected="false">Block Dates & Times</a>
+                </li>
+
             </ul>
             <div class="tab-content rounded bd bd-gray-300 bd-t-0 pd-20" id="myTabContent">
                 <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
                     <div class="col-md-6 mg-t-15">
-                        <form method="POST" action="{{ route('settings.update', $web->id) }}" enctype="multipart/form-data" id="selectForm2" class="parsley-style-1" data-parsley-validate novalidate>
-                        @method('PUT')
-                        @csrf
+                        <form method="POST" action="{{ route('settings.update', $web->id) }}"
+                            enctype="multipart/form-data" id="selectForm2" class="parsley-style-1" data-parsley-validate
+                            novalidate>
+                            @method('PUT')
+                            @csrf
                             <div class="form-group">
                                 <div id="company" class="parsley-input">
                                     <label>Company Name <span class="tx-danger">*</span></label>
-                                    <input type="text" name="company_name" data-toggle="tooltip" data-placement="right" data-title="The company name will appear at the footer of your website" class="form-control" value="{{ old('company_name',$web->company_name) }}" data-parsley-class-handler="#company" required @htmlValidationMessage({{__('standard.empty_all_field')}})>
+                                    <input type="text" name="company_name" data-toggle="tooltip" data-placement="right"
+                                        data-title="The company name will appear at the footer of your website"
+                                        class="form-control" value="{{ old('company_name',$web->company_name) }}"
+                                        data-parsley-class-handler="#company" required
+                                        @htmlValidationMessage({{__('standard.empty_all_field')}})>
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <div id="website" class="parsley-input">
                                     <label>Website Name <span class="tx-danger">*</span></label>
-                                    <input type="text" name="website_name" data-toggle="tooltip" data-placement="right" data-title="The website name will appear at the login page of your CMS" class="form-control" value="{{ old('website_name',$web->website_name) }}" data-parsley-class-handler="#website" required @htmlValidationMessage({{__('standard.empty_all_field')}})>
+                                    <input type="text" name="website_name" data-toggle="tooltip" data-placement="right"
+                                        data-title="The website name will appear at the login page of your CMS"
+                                        class="form-control" value="{{ old('website_name',$web->website_name) }}"
+                                        data-parsley-class-handler="#website" required
+                                        @htmlValidationMessage({{__('standard.empty_all_field')}})>
                                 </div>
                             </div>
 
                             <div class="form-group">
                                 <div id="copyright" class="parsley-input">
                                     <label>Copyright year <span class="tx-danger">*</span></label>
-                                    <input required type="text" name="copyright" class="form-control" data-parsley-class-handler="#copyright" value="{{ old('copyright',$web->copyright) }}" @htmlValidationMessage({{__('standard.empty_all_field')}})>
+                                    <input required type="text" name="copyright" class="form-control"
+                                        data-parsley-class-handler="#copyright"
+                                        value="{{ old('copyright',$web->copyright) }}"
+                                        @htmlValidationMessage({{__('standard.empty_all_field')}})>
                                 </div>
                             </div>
 
@@ -115,56 +146,67 @@
                                     Maximum file size: 1MB <br /> File extension: PNG, JPG, SVG
                                 </p>
                                 @if(empty($web->company_logo))
-                                    <div id="image_div" style="display:none;">
-                                        <img src="" height="100" width="300" id="img_temp" alt="Company Logo">  <br /><br />
-                                    </div>
+                                <div id="image_div" style="display:none;">
+                                    <img src="" height="100" width="300" id="img_temp" alt="Company Logo"> <br /><br />
+                                </div>
                                 @else
-                                    <div>
-                                        <img src="{{ asset('storage/logos/'.$web->company_logo) }}" id="img_temp" height="100" width="300" alt="Company Logo">  <br /><br />
-                                        <button type="button" class="btn btn-danger btn-xs btn-uppercase remove-logo" type="button" data-id=""><i data-feather="x"></i> Remove Logo</button>
-                                    </div>
+                                <div>
+                                    <img src="{{ asset('storage/logos/'.$web->company_logo) }}" id="img_temp"
+                                        height="100" width="300" alt="Company Logo"> <br /><br />
+                                    <button type="button" class="btn btn-danger btn-xs btn-uppercase remove-logo"
+                                        type="button" data-id=""><i data-feather="x"></i> Remove Logo</button>
+                                </div>
                                 @endif
                             </div>
 
                             <div class="form-group {{ $errors->has('web_favicon') ? 'has-error' : '' }}">
                                 <label class="d-block">Favicon</label>
                                 <div class="custom-file">
-                                    <input type="file" class="form-control" id="web_favicon" name="web_favicon" >
+                                    <input type="file" class="form-control" id="web_favicon" name="web_favicon">
                                     <span class="text-danger tx-12">{{ $errors->first('web_favicon') }}</span>
                                 </div>
                                 <p class="tx-10">
-                                    Required image dimension: 128px by 128px <br /> Maximum file size: 100KB <br/> File extension: ICO
+                                    Required image dimension: 128px by 128px <br /> Maximum file size: 100KB <br /> File
+                                    extension: ICO
                                 </p>
                                 @if(empty($web->website_favicon))
-                                    <div id="icon_div" style="display:none;">
-                                        <img src="" height="100" width="300" id="icon_temp" alt="Website Favicon">  <br /><br />
-                                    </div>
+                                <div id="icon_div" style="display:none;">
+                                    <img src="" height="100" width="300" id="icon_temp" alt="Website Favicon">
+                                    <br /><br />
+                                </div>
                                 @else
-                                    <div>
-                                        <img src="{{ asset('storage/icons/'.$web->website_favicon) }}" height="100" width="300" id="icon_temp" alt="Website Favicon">  <br /><br />
-                                        <button type="button" class="btn btn-danger btn-xs btn-uppercase remove-icon" type="button"><i data-feather="x"></i> Remove Icon</button>
-                                    </div>
+                                <div>
+                                    <img src="{{ asset('storage/icons/'.$web->website_favicon) }}" height="100"
+                                        width="300" id="icon_temp" alt="Website Favicon"> <br /><br />
+                                    <button type="button" class="btn btn-danger btn-xs btn-uppercase remove-icon"
+                                        type="button"><i data-feather="x"></i> Remove Icon</button>
+                                </div>
                                 @endif
                             </div>
 
                             <div class="form-group">
                                 <label class="d-block">Google Analytics Tracking Code</label>
-                                <textarea rows="3" name="g_analytics_code" class="form-control">{{ old('g_analytics_code',$web->google_analytics) }}</textarea>
+                                <textarea rows="3" name="g_analytics_code"
+                                    class="form-control">{{ old('g_analytics_code',$web->google_analytics) }}</textarea>
                             </div>
 
                             <div class="form-group">
                                 <label class="d-block">Google Map</label>
-                                <textarea rows="6" name="g_map" class="form-control">{{ old('g_map',$web->google_map) }}</textarea>
+                                <textarea rows="6" name="g_map"
+                                    class="form-control">{{ old('g_map',$web->google_map) }}</textarea>
                             </div>
 
                             <div class="form-group">
                                 <label class="d-block">Google reCaptcha Code <span class="tx-danger">*</span></label>
-                                <textarea required rows="3" name="g_recaptcha_sitekey" class="form-control" @htmlValidationMessage({{__('standard.empty_all_field')}})>{{ old('g_recaptcha_sitekey',$web->google_recaptcha_sitekey) }}</textarea>
+                                <textarea required rows="3" name="g_recaptcha_sitekey" class="form-control"
+                                    @htmlValidationMessage({{__('standard.empty_all_field')}})>{{ old('g_recaptcha_sitekey',$web->google_recaptcha_sitekey) }}</textarea>
                             </div>
 
                             <div class="col-lg-12 mg-t-30 ">
-                                <button class="btn btn-primary btn-sm btn-uppercase " type="submit ">Save Settings</button>
-                                <a href="{{ route('settings.edit', 1 ) }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Discard Changes</a>
+                                <button class="btn btn-primary btn-sm btn-uppercase " type="submit ">Save
+                                    Settings</button>
+                                <a href="{{ route('settings.edit', 1 ) }}"
+                                    class="btn btn-outline-secondary btn-sm btn-uppercase">Discard Changes</a>
                             </div>
                         </form>
                     </div>
@@ -172,38 +214,52 @@
                 <!-- Contact Tab -->
                 <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
                     <div class="col-md-6 mg-t-15">
-                        <p class="tx-13 mg-b-40"><i data-feather="zap" class="wd-12"></i><strong> Tip</strong> <br />{{__('standard.settings.website.tip_helper')}}</p>
-                        <form  method="POST" action="{{route('contacts.update',$web->id)}}" id="selectForm2" class="parsley-style-1" data-parsley-validate novalidate>
+                        <p class="tx-13 mg-b-40"><i data-feather="zap" class="wd-12"></i><strong> Tip</strong>
+                            <br />{{__('standard.settings.website.tip_helper')}}
+                        </p>
+                        <form method="POST" action="{{route('contacts.update',$web->id)}}" id="selectForm2"
+                            class="parsley-style-1" data-parsley-validate novalidate>
                             @csrf
                             <div class="form-group">
                                 <label>Company Address<span class="tx-danger">*</span></label>
-                                <textarea id="company_address" name="company_address" class="form-control" required @htmlValidationMessage({{__('standard.empty_all_field')}})>{{ $web->company_address }}</textarea>
+                                <textarea id="company_address" name="company_address" class="form-control" required
+                                    @htmlValidationMessage({{__('standard.empty_all_field')}})>{{ $web->company_address }}</textarea>
                             </div>
                             <div class="form-group">
                                 <div id="mob_no" class="parsley-input">
                                     <label>Mobile Number/s <span class="tx-danger">*</span></label>
-                                    <input type="text" id="mobile_no" name="mobile_no" class="form-control" value="{{ $web->mobile_no }}" data-parsley-class-handler="#mob_no" required @htmlValidationMessage({{__('standard.empty_all_field')}})>
+                                    <input type="text" id="mobile_no" name="mobile_no" class="form-control"
+                                        value="{{ $web->mobile_no }}" data-parsley-class-handler="#mob_no" required
+                                        @htmlValidationMessage({{__('standard.empty_all_field')}})>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label>Fax Number</label>
-                                <input type="text" id="fax_no" name="fax_no" class="form-control" value="{{ $web->fax_no }}">
+                                <input type="text" id="fax_no" name="fax_no" class="form-control"
+                                    value="{{ $web->fax_no }}">
                             </div>
                             <div class="form-group">
                                 <div id="tel_no" class="parsley-input">
                                     <label>Telephone Number/s <span class="tx-danger">*</span></label>
-                                    <input type="text" id="telephone_no" name="tel_no" class="form-control" value="{{ $web->tel_no }}" data-parsley-class-handler="#tel_no" placeholder="000 000-0000" required @htmlValidationMessage({{__('standard.empty_all_field')}})>
+                                    <input type="text" id="telephone_no" name="tel_no" class="form-control"
+                                        value="{{ $web->tel_no }}" data-parsley-class-handler="#tel_no"
+                                        placeholder="000 000-0000" required
+                                        @htmlValidationMessage({{__('standard.empty_all_field')}})>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <div id="email" class="parsley-input">
                                     <label>Email Address/es <span class="tx-danger">*</span></label>
-                                    <input type="email" name="email" class="form-control" value="{{ $web->email }}" data-parsley-class-handler="#email" required  pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
+                                    <input type="email" name="email" class="form-control" value="{{ $web->email }}"
+                                        data-parsley-class-handler="#email" required
+                                        pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
                                 </div>
                             </div>
                             <div class="col-lg-12 mg-t-30 ">
-                                <button class="btn btn-primary btn-sm btn-uppercase " type="submit ">Save Settings</button>
-                                <a href="{{ route('settings.edit', 1 ) }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Discard Changes</a>
+                                <button class="btn btn-primary btn-sm btn-uppercase " type="submit ">Save
+                                    Settings</button>
+                                <a href="{{ route('settings.edit', 1 ) }}"
+                                    class="btn btn-outline-secondary btn-sm btn-uppercase">Discard Changes</a>
                             </div>
                         </form>
                     </div>
@@ -215,29 +271,38 @@
                             <div class="form-group multiple-form-group">
                                 <label>Social Media Accounts</label>
                                 <form method="post" action="{{route('media.accounts.update')}}">
-                                @csrf
+                                    @csrf
                                     @forelse($medias as $media)
                                     <div class="form-group input-group input-icon">
                                         <input type="hidden" value="{{$media->id}}" name="mid[]">
-                                        <select name="social_media[]"  class="form-control">
+                                        <select name="social_media[]" class="form-control">
                                             <option value="">Choose One</option>
-                                            <option @if($media->name == 'facebook') selected @endif value="facebook">Facebook</option>
-                                            <option @if($media->name == 'twitter') selected @endif value="twitter">Twitter</option>
-                                            <option @if($media->name == 'instagram') selected @endif value="instagram">Instagram</option>
-                                            <option @if($media->name == 'youtube') selected @endif value="youtube">Youtube</option>
-                                            <option @if($media->name == 'google') selected @endif value="google">Google</option>
-                                            <option @if($media->name == 'dribble') selected @endif value="dribble">Dribble</option>
+                                            <option @if($media->name == 'facebook') selected @endif
+                                                value="facebook">Facebook</option>
+                                            <option @if($media->name == 'twitter') selected @endif
+                                                value="twitter">Twitter</option>
+                                            <option @if($media->name == 'instagram') selected @endif
+                                                value="instagram">Instagram</option>
+                                            <option @if($media->name == 'youtube') selected @endif
+                                                value="youtube">Youtube</option>
+                                            <option @if($media->name == 'google') selected @endif value="google">Google
+                                            </option>
+                                            <option @if($media->name == 'dribble') selected @endif
+                                                value="dribble">Dribble</option>
                                         </select>
                                         &nbsp;
-                                        <input type="text" class="form-control" name="url[]" value="{{ $media->media_account }}">
-                                        <span class="input-group-btn">&nbsp;<button type="button" data-mid="{{$media->id}}" class="btn btn-danger remove-media">x</button></span>
+                                        <input type="text" class="form-control" name="url[]"
+                                            value="{{ $media->media_account }}">
+                                        <span class="input-group-btn">&nbsp;<button type="button"
+                                                data-mid="{{$media->id}}"
+                                                class="btn btn-danger remove-media">x</button></span>
                                     </div>
                                     @empty
 
                                     @endforelse
                                     <div class="form-group input-group input-icon">
-                                    <input type="hidden" name="mid[]">
-                                        <select name="social_media[]"  class="form-control">
+                                        <input type="hidden" name="mid[]">
+                                        <select name="social_media[]" class="form-control">
                                             <option value="">Choose One</option>
                                             <option value="facebook">Facebook</option>
                                             <option value="twitter">Twitter</option>
@@ -248,36 +313,46 @@
                                         </select>
                                         &nbsp;
                                         <input type="text" class="form-control" name="url[]" placeholder="URL">
-                                        <span class="input-group-btn">&nbsp;<button type="button" class="btn btn-sm btn-primary btn-add"><i>+</i>
-                                        </button></span>
+                                        <span class="input-group-btn">&nbsp;<button type="button"
+                                                class="btn btn-sm btn-primary btn-add"><i>+</i>
+                                            </button></span>
                                     </div>
                                     <div class="col-lg-12 mg-t-30 ">
-                                        <button class="btn btn-primary btn-sm btn-uppercase " type="submit ">Save Settings</button>
-                                        <a href="{{ route('settings.edit', 1 ) }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Discard Changes</a>
+                                        <button class="btn btn-primary btn-sm btn-uppercase " type="submit ">Save
+                                            Settings</button>
+                                        <a href="{{ route('settings.edit', 1 ) }}"
+                                            class="btn btn-outline-secondary btn-sm btn-uppercase">Discard Changes</a>
                                     </div>
                                 </form>
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Data Privacy Tab -->
                 <div class="tab-pane fade" id="privacy" role="tabpanel" aria-labelledby="privacy-tab">
                     <div class="col-lg-12 mg-t-15">
-                        <form action="{{route('data.privacy.update',$web->id)}}" method="post" class="parsley-style-1" data-parsley-validate novalidate>
+                        <form action="{{route('data.privacy.update',$web->id)}}" method="post" class="parsley-style-1"
+                            data-parsley-validate novalidate>
                             @csrf
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <div id="title" class="parsley-input">
                                         <label>Page Title <span class="tx-danger">*</span></label>
-                                        <input type="text" name="privacy_title" class="form-control" data-parsley-class-handler="#title" value="{{ old('privacy_title',$web->data_privacy_title) }}" required @htmlValidationMessage({{__('standard.empty_all_field')}})>
+                                        <input type="text" name="privacy_title" class="form-control"
+                                            data-parsley-class-handler="#title"
+                                            value="{{ old('privacy_title',$web->data_privacy_title) }}" required
+                                            @htmlValidationMessage({{__('standard.empty_all_field')}})>
                                     </div>
                                 </div>
                                 <div class="form-group">
                                     <div id="pop_up" class="parsley-input">
                                         <label>Pop-up Content <span class="tx-danger">*</span></label>
-                                        <textarea rows="3" name="pop_up_content" class="form-control" data-parsley-class-handler="#pop_up" required @htmlValidationMessage({{__('standard.empty_all_field')}})>{{ old('pop_up_content',$web->data_privacy_popup_content) }}</textarea>
-                                        <small><i data-feather="alert-circle" width="13"></i> {{__('standard.settings.website.pop-up_helper')}}</small>
+                                        <textarea rows="3" name="pop_up_content" class="form-control"
+                                            data-parsley-class-handler="#pop_up" required
+                                            @htmlValidationMessage({{__('standard.empty_all_field')}})>{{ old('pop_up_content',$web->data_privacy_popup_content) }}</textarea>
+                                        <small><i data-feather="alert-circle" width="13"></i>
+                                            {{__('standard.settings.website.pop-up_helper')}}</small>
                                     </div>
                                 </div>
                             </div>
@@ -310,262 +385,324 @@
                                         });
                                     </script>
                                     @error('content')
-                                        <div class="alert alert-danger">{{ $message }}</div>
+                                    <div class="alert alert-danger">{{ $message }}</div>
                                     @enderror
-                                    <div class="alert alert-danger" id="contentRequired" style="display: none;">The content field is required</div>
+                                    <div class="alert alert-danger" id="contentRequired" style="display: none;">The
+                                        content field is required</div>
                                 </div>
                             </div>
                             <div class="col-lg-12 mg-t-30">
-                                <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Save Settings</button>
-                                <a href="{{ route('settings.edit', 1 ) }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Discard Changes</a>
+                                <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Save
+                                    Settings</button>
+                                <a href="{{ route('settings.edit', 1 ) }}"
+                                    class="btn btn-outline-secondary btn-sm btn-uppercase">Discard Changes</a>
                             </div>
                         </form>
                     </div>
                 </div>
 
+                <!-- Block Dates & Times -->
+                <div class="tab-pane fade" id="block-dates" role="tabpanel" aria-labelledby="block-dates-tab">
+                    @include('admin.settings.website.block-dates')
+                </div>
+
                 <!-- Ecommerce Setting -->
                 <div class="tab-pane fade" id="ecommerce" role="tabpanel" aria-labelledby="ecommerce-tab">
                     <div class="col-lg-12 mg-t-15">
-                        <form action="{{route('ecommerce.update',$web->id)}}" method="post" class="parsley-style-1" data-parsley-validate novalidate>
+                        <form action="{{route('ecommerce.update',$web->id)}}" method="post" class="parsley-style-1"
+                            data-parsley-validate novalidate>
                             @csrf
 
-                                <div class="col-md-7">
-                                    <div class="form-group">
-                                        <div id="title" class="parsley-input">
-                                            <label>Announcement</label>
-                                            <textarea name="announcement" id="" class="form-control" rows="5">{{ old('announcement',$web->announcement) }}</textarea>
-                                          
-                                        </div>
-                                    </div>   
-                                </div>     
-                          
-                                <div class="col-md-7">
-                                    <div class="form-group">
-                                        <div id="title" class="parsley-input">
-                                            <label>Minimum Order (Door to Door Delivery)</label>
-                                            <input type="number" step="0.01" min="0.00" name="minimum_order" class="form-control" data-parsley-class-handler="#title" value="{{ old('minimum_order',$web->minimum_order) }}" required @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                                        </div>
-                                    </div>                                
-                                </div>
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <div id="title" class="parsley-input">
+                                        <label>Announcement</label>
+                                        <textarea name="announcement" id="" class="form-control"
+                                            rows="5">{{ old('announcement',$web->announcement) }}</textarea>
 
-                                <div class="col-md-7">
-                                    <div class="form-group">
-                                        <div id="title" class="parsley-input">
-                                            <label>Minimum Order (Pickup to Store)</label>
-                                            <input type="number" step="0.01" min="0.00" name="minimum_order_pickup" class="form-control" data-parsley-class-handler="#title" value="{{ old('minimum_order_pickup',$web->minimum_order_pickup) }}" required @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                                        </div>
-                                    </div>                                
-                                </div>
-
-                                <div class="col-md-7">
-                                    <div class="form-group">
-                                        <div id="title" class="parsley-input">
-                                            <label>Minimum Order (Miscellaneous)</label>
-                                            <input type="number" step="0.01" min="0.00" name="minimum_order_misc" class="form-control" data-parsley-class-handler="#title" value="{{ old('minimum_order_misc',$web->minimum_order_misc) }}" required @htmlValidationMessage({{__('standard.empty_all_field')}})>
-                                        </div>
-                                    </div>                                
-                                </div>
-
-
-                                <div class="col-md-7">
-                                    <div class="form-group">
-                                        <div id="title" class="parsley-input">
-                                            <label>Minimum Preparation Hours for Baka</label>
-                                            <input type="number" min="0" name="minimum_processing_hours_baka" class="form-control" value="{{ old('minimum_processing_hours_baka',$web->minimum_processing_hours_baka) }}">
-                                        </div>
-                                    </div>   
-                                </div>  
-
-
-                                <div class="col-md-7">
-                                    <div class="form-group">
-                                        <div id="title" class="parsley-input">
-                                            <label>Minimum Lechon Processing Hours</label>
-                                            <input type="number" min="0" name="minimum_processing_hours" class="form-control" value="{{ old('minimum_processing_hours',$web->minimum_processing_hours) }}">
-                                        </div>
-                                    </div>   
-                                </div>                            
-                                
-                                <div class="col-md-7">
-                                    <div class="form-group">
-                                        <div id="title" class="parsley-input">
-                                            <label>Minimum Preparation Hours for Misc Items</label>
-                                            <input type="number" min="0" name="minimum_processing_hours_misc" class="form-control" value="{{ old('minimum_processing_hours_misc',$web->minimum_processing_hours_misc) }}">
-                                        </div>
-                                    </div>   
-                                </div>   
-                         
-                                <div class="col-md-7">
-                                    <div class="form-group">
-                                        <div id="title" class="parsley-input">
-                                            <input type="checkbox" name="disable_order" id="disable_order" @if($web->disable_order == 1) checked @endif>
-                                            <label for="disable_order">Disable Pickup</label>
-                                        </div>
                                     </div>
-                                    
-                                    <div class="form-group" id="disable_pickup_dates_div" @if($web->disable_order <> 1) style="display:none;" @endif>
+                                </div>
+                            </div>
+
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <div id="title" class="parsley-input">
+                                        <label>Minimum Order (Door to Door Delivery)</label>
+                                        <input type="number" step="0.01" min="0.00" name="minimum_order"
+                                            class="form-control" data-parsley-class-handler="#title"
+                                            value="{{ old('minimum_order',$web->minimum_order) }}" required
+                                            @htmlValidationMessage({{__('standard.empty_all_field')}})>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <div id="title" class="parsley-input">
+                                        <label>Minimum Order (Pickup to Store)</label>
+                                        <input type="number" step="0.01" min="0.00" name="minimum_order_pickup"
+                                            class="form-control" data-parsley-class-handler="#title"
+                                            value="{{ old('minimum_order_pickup',$web->minimum_order_pickup) }}"
+                                            required @htmlValidationMessage({{__('standard.empty_all_field')}})>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <div id="title" class="parsley-input">
+                                        <label>Minimum Order (Miscellaneous)</label>
+                                        <input type="number" step="0.01" min="0.00" name="minimum_order_misc"
+                                            class="form-control" data-parsley-class-handler="#title"
+                                            value="{{ old('minimum_order_misc',$web->minimum_order_misc) }}" required
+                                            @htmlValidationMessage({{__('standard.empty_all_field')}})>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <div id="title" class="parsley-input">
+                                        <label>Minimum Preparation Hours for Baka</label>
+                                        <input type="number" min="0" name="minimum_processing_hours_baka"
+                                            class="form-control"
+                                            value="{{ old('minimum_processing_hours_baka',$web->minimum_processing_hours_baka) }}">
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <div id="title" class="parsley-input">
+                                        <label>Minimum Lechon Processing Hours</label>
+                                        <input type="number" min="0" name="minimum_processing_hours"
+                                            class="form-control"
+                                            value="{{ old('minimum_processing_hours',$web->minimum_processing_hours) }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <div id="title" class="parsley-input">
+                                        <label>Minimum Preparation Hours for Misc Items</label>
+                                        <input type="number" min="0" name="minimum_processing_hours_misc"
+                                            class="form-control"
+                                            value="{{ old('minimum_processing_hours_misc',$web->minimum_processing_hours_misc) }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- <div class="col-md-7">
+                                <div class="form-group">
+                                    <div id="title" class="parsley-input">
+                                        <input type="checkbox" name="disable_order" id="disable_order"
+                                            @if($web->disable_order == 1) checked @endif>
+                                        <label for="disable_order">Disable Pickup</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group" id="disable_pickup_dates_div" @if($web->disable_order <> 1)
+                                        style="display:none;" @endif>
                                         <div id="title" class="parsley-input">
                                             <label for="disable_pickup_dates">Disable Pickup Dates</label>
 
-                                            <input type="text" id="single-date" placeholder="Select a date" class="mb-2 form-control" />
+                                            <input type="text" id="single-date" placeholder="Select a date"
+                                                class="mb-2 form-control" />
 
                                             <!-- Time Picker -->
-                                            <select id="multiple-times" multiple style="width: 100%;" class="mb-2 select2 form-control" placeholder="Select time"></select>
+                                            <select id="multiple-times" multiple style="width: 100%;"
+                                                class="mb-2 select2 form-control" placeholder="Select time"></select>
 
                                             <!-- Final Select2 -->
                                             <label for="disable_pickup_dates">Disable Pickup Dates</label>
-                                            <select name="disable_pickup_dates[]" multiple="multiple" id="disable_pickup_dates" class="form-control select2" style="width:100%"></select>
+                                            <select name="disable_pickup_dates[]" multiple="multiple"
+                                                id="disable_pickup_dates" class="form-control select2"
+                                                style="width:100%"></select>
                                         </div>
-                                    </div>   
-                                </div>      
-                                <div class="col-md-7">
-                                    <div class="form-group">
-                                        <div id="title" class="parsley-input">
-                                            <input type="checkbox" name="disable_delivery" id="disable_delivery" @if($web->disable_delivery == 1) checked @endif>
-                                            <label for="disable_delivery">Disable Delivery</label>
-                                        </div>
-                                    </div>   
-                                    <div class="form-group" id="disable_delivery_dates_div" @if($web->disable_delivery <> 1) style="display:none;" @endif>
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <div id="title" class="parsley-input">
+                                        <input type="checkbox" name="disable_delivery" id="disable_delivery"
+                                            @if($web->disable_delivery == 1) checked @endif>
+                                        <label for="disable_delivery">Disable Delivery</label>
+                                    </div>
+                                </div>
+                                <div class="form-group" id="disable_delivery_dates_div" @if($web->disable_delivery <> 1)
+                                        style="display:none;" @endif>
                                         <div id="title" class="parsley-input">
                                             <label for="disable_delivery_dates">Disable Delivery Dates</label> <br>
 
-                                            <input type="text" id="single-date-delivery" placeholder="Select a date" class="mb-2 form-control" />
+                                            <input type="text" id="single-date-delivery" placeholder="Select a date"
+                                                class="mb-2 form-control" />
 
                                             <!-- Time Picker -->
-                                            <select id="multiple-times-delivery" multiple style="width: 100%;" class="mb-2 select2 form-control" placeholder="Select time"></select>
+                                            <select id="multiple-times-delivery" multiple style="width: 100%;"
+                                                class="mb-2 select2 form-control" placeholder="Select time"></select>
 
                                             <!-- Final Select2 -->
-                                            <select name="disable_delivery_dates[]" multiple="multiple" id="disable_delivery_dates" class="form-control select2" style="width:100%">
+                                            <select name="disable_delivery_dates[]" multiple="multiple"
+                                                id="disable_delivery_dates" class="form-control select2"
+                                                style="width:100%">
                                             </select>
                                         </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <div id="title" class="parsley-input">
+                                        <input type="checkbox" name="disable_delivery_misc" id="disable_delivery_misc"
+                                            @if($web->disable_delivery_misc == 1) checked @endif>
+                                        <label for="disable_delivery_misc">Disable Delivery For Miscellaneous</label>
                                     </div>
-                                </div>      
-
-                                <div class="col-md-7">
-                                    <div class="form-group">
+                                </div>
+                                <div class="form-group" id="disable_delivery_misc_dates_div" @if($web->
+                                    disable_delivery_misc <> 1) style="display:none;" @endif>
                                         <div id="title" class="parsley-input">
-                                            <input type="checkbox" name="disable_delivery_misc" id="disable_delivery_misc" @if($web->disable_delivery_misc == 1) checked @endif>
-                                            <label for="disable_delivery_misc">Disable Delivery For Miscellaneous</label>
-                                        </div>
-                                    </div>   
-                                    <div class="form-group" id="disable_delivery_misc_dates_div" @if($web->disable_delivery_misc <> 1) style="display:none;" @endif>
-                                        <div id="title" class="parsley-input">
-                                            <label for="disable_delivery_misc_dates">Disable Delivery For Miscellaneous Dates</label> <br>
+                                            <label for="disable_delivery_misc_dates">Disable Delivery For Miscellaneous
+                                                Dates</label> <br>
 
-                                            <input type="text" id="single-date-delivery-misc" placeholder="Select a date" class="mb-2 form-control" />
+                                            <input type="text" id="single-date-delivery-misc"
+                                                placeholder="Select a date" class="mb-2 form-control" />
 
                                             <!-- Time Picker -->
-                                            <select id="multiple-times-delivery-misc" multiple style="width: 100%;" class="mb-2 select2 form-control" placeholder="Select time"></select>
+                                            <select id="multiple-times-delivery-misc" multiple style="width: 100%;"
+                                                class="mb-2 select2 form-control" placeholder="Select time"></select>
 
                                             <!-- Final Select2 -->
-                                            <select name="disable_delivery_misc_dates[]" multiple="multiple" id="disable_delivery_misc_dates" class="form-control select2" style="width:100%">
+                                            <select name="disable_delivery_misc_dates[]" multiple="multiple"
+                                                id="disable_delivery_misc_dates" class="form-control select2"
+                                                style="width:100%">
                                             </select>
                                         </div>
+                                </div>
+                            </div> --}}
+
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <div id="title" class="parsley-input">
+                                        <label>Popup Message Before Order <br> </label>
+                                        <textarea name="order_message" id="" class="form-control"
+                                            rows="5">{{ old('order_message',$web->order_message) }}</textarea>
+                                        <small>Note: this message is visible only if Pickup or Delivery is
+                                            disabled.</small>
                                     </div>
-                                </div>                          
-                           
-                           
-                                <div class="col-md-7">
-                                    <div class="form-group">
-                                        <div id="title" class="parsley-input">
-                                            <label>Popup Message Before Order <br> </label>
-                                            <textarea name="order_message" id="" class="form-control" rows="5">{{ old('order_message',$web->order_message) }}</textarea>
-                                            <small>Note: this message is visible only if Pickup or Delivery is disabled.</small>
-                                        </div>
-                                    </div>   
-                                </div> 
-                                
-                                <div class="col-md-7">
-                                    <div class="form-group">
-                                        <div class="form-row">
-                                            <div class="col">
-                                                <label>Forecast Cut-off Time</label>
-                                                <input type="time" name="cutoff" value="{{ $web->cutoff }}" class="form-control">
-                                            </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <div class="form-row">
+                                        <div class="col">
+                                            <label>Forecast Cut-off Time</label>
+                                            <input type="time" name="cutoff" value="{{ $web->cutoff }}"
+                                                class="form-control">
                                         </div>
                                     </div>
                                 </div>
-                           
+                            </div>
 
-                          
+
+
                             <div class="col-lg-12 mg-t-30">
-                                <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Save Settings</button>
-                                <a href="{{ route('settings.edit', 1 ) }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Discard Changes</a>
+                                <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Save
+                                    Settings</button>
+                                <a href="{{ route('settings.edit', 1 ) }}"
+                                    class="btn btn-outline-secondary btn-sm btn-uppercase">Discard Changes</a>
                             </div>
                         </form>
                     </div>
                 </div>
                 <div class="tab-pane fade" id="deliveryfee" role="tabpanel" aria-labelledby="deliveryfee-tab">
                     <div class="col-lg-12 mg-t-15">
-                        <form action="{{route('deliveryfee.update',$web->id)}}" method="post" class="parsley-style-1" data-parsley-validate novalidate>
+                        <form action="{{route('deliveryfee.update',$web->id)}}" method="post" class="parsley-style-1"
+                            data-parsley-validate novalidate>
                             @csrf
 
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <label>Applicable Products</label>
-                                        <select name="products[]" multiple="multiple" id="products" class="form-control js-example-basic-multiple js-states select2" style="width:100%">
-                                            @foreach(\App\Models\Product::where('for_sale_web','1')->orderBy('name')->get() as $p)
-                                                @php
-                                                    $rec_product = \App\Models\DeliveryFeePromo::where('type','product')->where('ref_id',$p->id)->first();
-                                                @endphp
-                                                <option value="{{$p->id}}" @if(!empty($rec_product)) selected="selected" @endif>{{$p->name}}</option>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label>Applicable Products</label>
+                                    <select name="products[]" multiple="multiple" id="products"
+                                        class="form-control js-example-basic-multiple js-states select2"
+                                        style="width:100%">
+                                        @foreach(\App\Models\Product::where('for_sale_web','1')->orderBy('name')->get()
+                                        as $p)
+                                        @php
+                                        $rec_product =
+                                        \App\Models\DeliveryFeePromo::where('type','product')->where('ref_id',$p->id)->first();
+                                        @endphp
+                                        <option value="{{$p->id}}" @if(!empty($rec_product)) selected="selected" @endif>
+                                            {{$p->name}}</option>
+                                        @endforeach
+                                    </select>
+                                    <small>Any purchased on these selected products will have free delivery fee.</small>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <div id="title" class="parsley-input">
+                                        <label>Selected Customers</label>
+
+                                        <select name="customers[]" multiple="multiple" id="customers"
+                                            class="form-control select2" style="width:100%">
+                                            @foreach($selectedCustomers ?? [] as $c)
+                                            <option value="{{ $c->id }}" selected>{{ $c->name }} ({{ $c->email }})
+                                            </option>
                                             @endforeach
                                         </select>
-                                        <small>Any purchased on these selected products will have free delivery fee.</small>
-                                    </div>   
-                                </div>     
-                          
-                                 <div class="col-md-12">
-                                    <div class="form-group">
-                                        <div id="title" class="parsley-input">
-                                            <label>Selected Customers</label>
 
-                                            <select name="customers[]" multiple="multiple" id="customers"
-                                                    class="form-control select2" style="width:100%">
-                                                @foreach($selectedCustomers ?? [] as $c)
-                                                    <option value="{{ $c->id }}" selected>{{ $c->name }} ({{ $c->email }})</option>
-                                                @endforeach
-                                            </select>
+                                        <small>All selected customers will have free delivery fee.</small>
+                                    </div>
+                                </div>
+                            </div>
 
-                                            <small>All selected customers will have free delivery fee.</small>
-                                        </div>
-                                    </div>   
-                                </div>  
-                          
                             <div class="col-lg-12 mg-t-30">
-                                <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Save Settings</button>
-                                <a href="{{ route('settings.edit', 1 ) }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Discard Changes</a>
+                                <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Save
+                                    Settings</button>
+                                <a href="{{ route('settings.edit', 1 ) }}"
+                                    class="btn btn-outline-secondary btn-sm btn-uppercase">Discard Changes</a>
                             </div>
                         </form>
                     </div>
                 </div>
-                
+
                 <!-- Kiosk Setting -->
                 <div class="tab-pane fade" id="kiosk" role="tabpanel" aria-labelledby="kiosk-tab">
                     <div class="col-lg-12 mg-t-15">
-                        <form action="{{route('kiosk.update',$web->id)}}" method="post" class="parsley-style-1" data-parsley-validate novalidate>
+                        <form action="{{route('kiosk.update',$web->id)}}" method="post" class="parsley-style-1"
+                            data-parsley-validate novalidate>
                             @csrf
                             <div class="col-md-12">
                                 <div class="form-group">
                                     @php
-                                        $cat_settings = explode('|',$web->kiosk_express_categories);
-                                        $arr_categories = [];
-                                        foreach($cat_settings as $cat){
-                                            array_push($arr_categories,$cat);
-                                        }
+                                    $cat_settings = explode('|',$web->kiosk_express_categories);
+                                    $arr_categories = [];
+                                    foreach($cat_settings as $cat){
+                                    array_push($arr_categories,$cat);
+                                    }
                                     @endphp
                                     <label>Express Categories</label>
-                                    <select name="categories[]" multiple="multiple" id="products" class="form-control select2" style="width:100%">
+                                    <select name="categories[]" multiple="multiple" id="products"
+                                        class="form-control select2" style="width:100%">
                                         @foreach($categories as $category)
-                                        <option @if(in_array($category->id, $arr_categories)) selected @endif value="{{$category->id}}">{{$category->name}}</option>
+                                        <option @if(in_array($category->id, $arr_categories)) selected @endif
+                                            value="{{$category->id}}">{{$category->name}}</option>
                                         @endforeach
                                     </select>
-                                </div>   
-                            </div>                             
-                           
+                                </div>
+                            </div>
+
                             <div class="col-lg-12 mg-t-30">
-                                <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Save Settings</button>
-                                <a href="{{ route('settings.edit', 1 ) }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Discard Changes</a>
+                                <button class="btn btn-primary btn-sm btn-uppercase" type="submit">Save
+                                    Settings</button>
+                                <a href="{{ route('settings.edit', 1 ) }}"
+                                    class="btn btn-outline-secondary btn-sm btn-uppercase">Discard Changes</a>
                             </div>
                         </form>
                     </div>
@@ -574,14 +711,403 @@
         </div>
     </div>
 </div>
+<div class="modal fade" role="dialog" id="blockModal" tabindex="-1">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">View Schedule</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <dl class="row mb-0">
+
+                    <dt class="col-4">Scope</dt>
+                    <dd class="col-8" id="modalScope"></dd>
+
+                    <dt class="col-4">Block Type</dt>
+                    <dd class="col-8" id="modalBlockType"></dd>
+
+                    <dt class="col-4 category-view-dt">Category</dt>
+                    <dd class="col-8 category-view-dd" id="modalCategory">—</dd>
+
+                    <dt class="col-4 product-view-dt">Product</dt>
+                    <dd class="col-8 product-view-dd" id="modalProduct">—</dd>
+
+                    <dt class="col-4 location-view-dt">Location</dt>
+                    <dd class="col-8 location-view-dd" id="modalLocation">—</dd>
+
+                    <dt class="col-4">Date</dt>
+                    <dd class="col-8" id="modalDate"></dd>
+
+                    <dt class="col-4">Time</dt>
+                    <dd class="col-8" id="modalTime"></dd>
+
+                    <dt class="col-4">Blocking Override</dt>
+                    <dd class="col-8" id="modalBlockingOverride"></dd>
+                </dl>
+
+            </div>
+
+            <div class="modal-footer justify-content-between">
+                <div>
+                    <button class="btn btn-danger" id="deleteBlock">Delete</button>
+                </div>
+                <div>
+                    <button class="btn btn-secondary" id="editGroup">Edit</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="editBlockModal" role="dialog" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Block</h5>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Scope -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Scope</label>
+
+          <div class="form-check">
+            <input type="radio" name="edit_scope" value="all" class="form-check-input" id="editScopeAll">
+            <label class="form-check-label" for="editScopeAll">All</label>
+          </div>
+
+          <div class="form-check">
+            <input type="radio" name="edit_scope" value="category" class="form-check-input" id="editScopeCategory">
+            <label class="form-check-label" for="editScopeCategory">Category</label>
+          </div>
+
+          <div class="form-check">
+            <input type="radio" name="edit_scope" value="product" class="form-check-input" id="editScopeProduct">
+            <label class="form-check-label" for="editScopeProduct">Product</label>
+          </div>
+
+          <div class="form-check">
+            <input type="radio" name="edit_scope" value="location" class="form-check-input" id="editScopeLocation">
+            <label class="form-check-label" for="editScopeLocation">Location</label>
+          </div>
+        </div>
+
+        <!-- Location -->
+        <div class="mb-3" id="editLocationWrapper">
+          <label class="form-label fw-bold">Locations</label>
+          <select id="editLocation" class="select2 form-control" name="editLocation_ids[]" disabled multiple>
+                @foreach ($locations as $location)
+                <option value="{{ $location->id }}">{{ $location->name }}</option>
+                @endforeach
+          </select>
+        </div>
+
+        <!-- Category -->
+        <div class="mb-3" id="editCategoryWrapper">
+          <label class="form-label fw-bold">Categories</label>
+          <select id="editCategory" class="select2 form-control" name="editCategory_ids[]" disabled multiple>
+                @foreach ($categories as $category)
+                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                @endforeach
+          </select>
+        </div>
+
+        <!-- Product -->
+        <div class="mb-3" id="editProductWrapper">
+          <label class="form-label fw-bold">Products</label>
+          <select id="editProduct" class="select2 form-control" name="editProduct_ids[]" disabled multiple>
+                @foreach ($products as $product)
+                <option value="{{ $product->id }}">{{ $product->name }}</option>
+                @endforeach
+          </select>
+        </div>
+
+        <!-- Date Mode -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Date Mode</label>
+
+          <div class="form-check">
+            <input type="radio" name="edit_date_mode" value="range" class="form-check-input" id="editRangeLabel">
+            <label class="form-check-label" for="editRangeLabel">Date Range</label>
+          </div>
+
+          <div class="form-check">
+            <input type="radio" name="edit_date_mode" value="multiple" class="form-check-input" id="editMultipleLabel">
+            <label class="form-check-label" for="editMultipleLabel">Multiple Dates</label>
+          </div>
+        </div>
+
+        <!-- Date Range -->
+        <div id="editRangeWrapper">
+          <div id="editDateRangeInputs" class="row g-2">
+            <div class="col">
+              <input type="text" class="form-control edit-start">
+            </div>
+            <div class="col">
+              <input type="text" class="form-control edit-end">
+            </div>
+          </div>
+        </div>
+
+        <!-- Multiple Dates -->
+        <div id="editMultipleWrapper" style="display:none;">
+          <div id="editMultipleDates"></div>
+          <button class="btn btn-sm btn-outline-primary mt-2" id="editAddDate">+ Add Date</button>
+        </div>
+
+        <!-- Time Slots -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Time Slots</label>
+          <select id="editTimes" class="form-control select2" disabled multiple>
+            @foreach (range(9, 19) as $hour)
+                <option value="{{ sprintf('%02d:00', $hour) }}">
+                    {{ sprintf('%02d:00 %s', ($hour > 12 ? $hour - 12 : $hour), ($hour >= 12 ? 'PM' : 'AM')) }}
+                </option>
+            @endforeach
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="editAllday">
+            <label class="form-check-label" for="editAllday">Block whole day</label>
+          </div>
+        </div>
+
+        <!-- Block Type -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Block Type</label>
+          <select id="editBlockType" class="form-control">
+            <option value="both">Delivery & Pickup</option>
+            <option value="delivery">Delivery Only</option>
+            <option value="pickup">Pickup Only</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="editAllowCombo">
+                <label for="editAllowCombo" class="form-check-label fw-bold">Allow Combo</label>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Select Products</label>
+            <select 
+                class="select2 form-control" 
+                id="editComboProduct"
+                name="edit_combo_products[]"
+                multiple
+                disabled
+            >
+                @foreach ($products as $product)
+                <option value="{{ $product->id }}">{{ $product->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="saveEditBlock">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="editGroupModal" role="dialog" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Block Group</h5>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Scope -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Scope</label>
+
+          <div class="form-check">
+            <input type="radio" name="group_scope" value="all" class="form-check-input" id="editGroupScopeAll">
+            <label class="form-check-label" for="editGroupScopeAll">All</label>
+          </div>
+
+          <div class="form-check">
+            <input type="radio" name="group_scope" value="category" class="form-check-input" id="editGroupScopeCategory">
+            <label class="form-check-label" for="editGroupScopeCategory">Category</label>
+          </div>
+
+          <div class="form-check">
+            <input type="radio" name="group_scope" value="product" class="form-check-input" id="editGroupScopeProduct">
+            <label class="form-check-label" for="editGroupScopeProduct">Product</label>
+          </div>
+
+          <div class="form-check">
+            <input type="radio" name="group_scope" value="location" class="form-check-input" id="editGroupScopeLocation">
+            <label class="form-check-label" for="editGroupScopeLocation">Location</label>
+          </div>
+        </div>
+
+        <!-- Location -->
+        <div class="mb-3" id="editGroupLocationWrapper">
+          <label class="form-label fw-bold">Locations</label>
+          <select id="editGroupLocation" class="select2 form-control" name="editGroupLocation_ids[]" disabled multiple>
+                @foreach ($locations as $location)
+                <option value="{{ $location->id }}">{{ $location->name }}</option>
+                @endforeach
+          </select>
+        </div>
+
+        <!-- Category -->
+        <div class="mb-3" id="editGroupCategoryWrapper">
+          <label class="form-label fw-bold">Categories</label>
+          <select id="editGroupCategory" class="select2 form-control" name="editGroupCategory_ids[]" disabled multiple>
+                @foreach ($categories as $category)
+                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                @endforeach
+          </select>
+        </div>
+
+        <!-- Product -->
+        <div class="mb-3" id="editGroupProductWrapper">
+          <label class="form-label fw-bold">Products</label>
+          <select id="editGroupProduct" class="select2 form-control" name="editGroupProduct_ids[]" disabled multiple>
+                @foreach ($products as $product)
+                <option value="{{ $product->id }}">{{ $product->name }}</option>
+                @endforeach
+          </select>
+        </div>
+
+        <!-- Date Mode -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Date Mode</label>
+
+          <div class="form-check">
+            <input type="radio" name="edit_group_date_mode" value="range" class="form-check-input" id="editGroupRangeLabel">
+            <label class="form-check-label" for="editGroupRangeLabel">Date Range</label>
+          </div>
+
+          <div class="form-check">
+            <input type="radio" name="edit_group_date_mode" value="multiple" class="form-check-input" id="editGroupMultipleLabel">
+            <label class="form-check-label" for="editGroupMultipleLabel">Multiple Dates</label>
+          </div>
+        </div>
+
+        <!-- Date Range -->
+        <div id="editGroupRangeWrapper">
+          <div id="editGroupDateRangeInputs" class="row g-2">
+            <div class="col">
+              <input type="text" class="form-control edit-group-start">
+            </div>
+            <div class="col">
+              <input type="text" class="form-control edit-group-end">
+            </div>
+          </div>
+        </div>
+
+        <!-- Multiple Dates -->
+        <div id="editGroupMultipleWrapper" style="display:none;">
+          <div id="editGroupMultipleDates"></div>
+          <button class="btn btn-sm btn-outline-primary mt-2" id="editGroupAddDate">+ Add Date</button>
+        </div>
+
+        <!-- Time Slots -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Time Slots</label>
+          <select id="editGroupTimes" class="form-control select2" disabled multiple>
+            @foreach (range(9, 19) as $hour)
+                <option value="{{ sprintf('%02d:00', $hour) }}">
+                    {{ sprintf('%02d:00 %s', ($hour > 12 ? $hour - 12 : $hour), ($hour >= 12 ? 'PM' : 'AM')) }}
+                </option>
+            @endforeach
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="editGroupAllday">
+            <label class="form-check-label" for="editGroupAllday">Block whole day</label>
+          </div>
+        </div>
+
+        <!-- Block Type -->
+        <div class="mb-3">
+          <label class="form-label fw-bold">Block Type</label>
+          <select id="editGroupBlockType" class="form-control">
+            <option value="both">Delivery & Pickup</option>
+            <option value="delivery">Delivery Only</option>
+            <option value="pickup">Pickup Only</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="editGroupAllowCombo">
+                <label for="editGroupAllowCombo" class="form-check-label fw-bold">Allow Combo (Override Blocking)</label>
+            </div>
+        </div>
+
+        <div class="">
+            <label class="form-label fw-bold">Select Category</label>
+            <select 
+                class="select2 form-control" 
+                id="editGroupComboCategory"
+                name="edit_group_combo_categories[]"
+                multiple
+                disabled
+            >
+                @foreach ($categories as $category)
+                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="text-muted">- OR -</div>
+
+        <div class="mb-3">
+            <label class="form-label fw-bold">Select Products</label>
+            <select 
+                class="select2 form-control" 
+                id="editGroupComboProduct"
+                name="edit_group_combo_products[]"
+                multiple
+                disabled
+            >
+                @foreach ($products as $product)
+                <option value="{{ $product->id }}">{{ $product->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-dark" id="saveEditGroup">Update Block</button>
+      </div>
+    </div>
+  </div>
+</div>
 @include('admin.settings.website.modal')
 @endsection
 
 @section('pagejs')
-    <script src="{{ asset('lib/cleave.js/cleave.min.js')}}"></script>
-    <script src="{{ asset('lib/cleave.js/addons/cleave-phone.us.js') }}"></script>
-    <script src="{{ asset('lib/parsleyjs/parsley.min.js') }}"></script>
-    <script src="{{ asset('lib/select2/js/select2.min.js') }}"></script>
+<script src="{{ asset('lib/cleave.js/cleave.min.js')}}"></script>
+<script src="{{ asset('lib/cleave.js/addons/cleave-phone.us.js') }}"></script>
+<script src="{{ asset('lib/parsleyjs/parsley.min.js') }}"></script>
+<script src="{{ asset('lib/select2/js/select2.min.js') }}"></script>
+
+<!-- FullCalendar JS (no jQuery needed) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.19/index.global.min.js">
+</script>
 @endsection
 
 @section('customjs')
@@ -771,8 +1297,8 @@
 </script>
 
 
-    <script>
-        $(function(){
+<script>
+    $(function(){
             'use strict'
 
             $('.select2').select2({
@@ -914,10 +1440,10 @@
             matcher: matchCustom,
             theme: "classic"
         });
-    </script>   
+</script>
 
-    <script>
-        (function ($) {
+<script>
+    (function ($) {
             $(function () {
 
                 var addFormGroup = function (event) {
@@ -966,10 +1492,10 @@
                 $('#row'+btn_id+'').remove();
             })
         });
-    </script>
+</script>
 
-    <script>
-         $(document).on('click', '.remove-logo', function() {
+<script>
+    $(document).on('click', '.remove-logo', function() {
             $('#prompt-remove-logo').modal('show');
         });
 
@@ -1019,5 +1545,7 @@
                 $('.remove-icon').hide();
             }
         }
-    </script>
+</script>
+
+
 @endsection

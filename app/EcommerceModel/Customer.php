@@ -2,6 +2,7 @@
 
 namespace App\EcommerceModel;
 
+use App\Models\Concerns\LogsActivityDiff;
 use App\Notifications\Ecommerce\CustomerResetPasswordNotification;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,7 @@ class Customer extends Model
 {
     use SoftDeletes;
     use Notifiable;
+    use LogsActivityDiff;
 
     protected $table = 'customers';
     protected $fillable = ['user_id', 'first_name', 'middle_name', 'last_name', 'ext_name', 'is_email_subscriber', 'organization', 'address_1', 'address_2', 'city', 'province', 'postal_code', 'country', 'contact_numbers', 'email', 'class', 'status', 'created_by'];

@@ -3,12 +3,14 @@
 namespace App\EcommerceModel;
 
 use App\Models\ActivityLog;
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class DeliveryRate extends Model
 {
     use SoftDeletes;
+    use LogsActivityDiff;
 
     protected $table = 'ecommerce_delivery_rate';
     protected $fillable = ['region', 'province', 'municipality', 'brgy', 'zip','sla','rate','remarks','user_id','excess_fee'];

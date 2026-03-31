@@ -11,14 +11,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use App\Models\Concerns\LogsActivityDiff;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class SalesHeader extends Model
 {
     use SoftDeletes, LogsActivityDiff;
+    use HasFactory;
     
     protected $primaryKey = 'id';
     public $incrementing = true;
     protected $keyType = 'int';
+    protected array $logExcept = ['updated_at', 'is_new_order'];
 
     protected $table = 'ecommerce_sales_headers';
     protected $fillable = [

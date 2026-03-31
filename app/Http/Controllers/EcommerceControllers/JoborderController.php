@@ -193,7 +193,15 @@ class JoborderController extends Controller
     public function create()
     {
         try {
-            $miscelaneous = Product::where('is_misc',1)->orderBy('name','asc')->get();
+            $specialId = 270;
+
+            $miscelaneous = Product::where(function ($q) use ($specialId) {
+                    $q->where('is_misc', 1)->where('status', 'PUBLISHED')
+                    ->orWhere('id', $specialId);
+                })
+                ->orderBy('name')
+                ->get();
+
             $products = Product::where('production_item',1)->where('status','PUBLISHED')->orderBy('name','asc')->get();
             $branches_store = Branch::where('status', 1)->where('jo_select_branch', 1)->orderBy('name','asc')->get();
             $pbs = ProductionBranch::orderBy('name','asc')->get();
@@ -332,7 +340,8 @@ class JoborderController extends Controller
                     'registration_source' => $request->branch_source,
                     'contact_mobile' => $request->mobile,
                     'password' => \Hash::make('password', array('rounds'=>12)),
-                    'is_active' => 1
+                    'is_active' => 1,
+                    'role_id' => 6
                 ]);
                 $id  = $customer->id;
             }
@@ -420,8 +429,17 @@ class JoborderController extends Controller
 
 
         if($salesHeader){
+
+            $lastOrder = SalesHeader::withTrashed()->whereNull('parent_sales_header_id')
+                ->whereRaw('order_number REGEXP "^[0-9]{7}$"')
+                ->max('order_number');
+
+            $nextOrder = $lastOrder ? intval($lastOrder) + 1 : 1;
+
+            $orderNumber = sprintf('%07d', $nextOrder);
+
             $salesHeader->update([
-                'order_number' => sprintf('%07d', $salesHeader->id)
+                'order_number' => $orderNumber
             ]);
             //dd($request);
             $data = $request->all();

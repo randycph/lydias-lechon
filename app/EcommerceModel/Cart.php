@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Cart extends Model
 {
-
     protected $table = 'ecommerce_shopping_cart';
     protected $fillable = ['user_id', 'product_id', 'price', 'qty','paella_price','coupon_code','coupon_amount','parent_id','is_misc', 'paella'];
 
