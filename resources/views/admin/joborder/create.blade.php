@@ -469,6 +469,16 @@
                             </tbody>
                         </table>
 
+                        @if ($errors->any())
+                            <div class="alert alert-danger">
+                                <ul class="mb-0">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
                         <button type="button" class="btn btn-sm btn-success" id="addPayment">
                             Add more
                         </button>
@@ -1715,23 +1725,54 @@
                 alert('Product list is empty! Add products to proceed.');
                 $('#selected_product').prop('style', 'border: 1px solid red;');
                 $('#selected_product').focus();
+                $('#submitBtn').prop('disabled', false);
+                $('#submitBtn').text('Save Job Order');
+
                 e.preventDefault();
                 return;
             }
 
+            let hasError = false;
+
+            $('.payment-row:not(.d-none)').each(function () {
+                const method = $(this).find('.payment-method').val();
+                const amount = parseFloat($(this).find('.payment-amount').val()) || 0;
+
+                if (!method && amount <= 0) {
+                    hasError = true;
+                }
+
+                if ((method && amount <= 0) || (!method && amount > 0)) {
+                    hasError = true;
+                }
+            });
+
+            if (hasError) {
+                alert('Please complete all payment rows properly.');
+                $('#submitBtn').prop('disabled', false);
+                $('#submitBtn').text('Save Job Order');
+                e.preventDefault();
+            }
+
             if(parseFloat(get_payment_balance()) < 0){
                 alert('Your payment/s exceeded the total billing amount!');
+                $('#submitBtn').prop('disabled', false);
+                $('#submitBtn').text('Save Job Order');
                  e.preventDefault();
             }
 
             if(parseFloat(get_payment_total())  < 1){
                 alert('Please add payment details');
-                 e.preventDefault();
+                $('#submitBtn').prop('disabled', false);
+                $('#submitBtn').text('Save Job Order');
+                e.preventDefault();
             }
 
             if($('#delivery_type').val() == 2){
                 if(!$("select[name=outlet_pickup]").val()){
                     alert('Please select Pickup Outlet');
+                    $('#submitBtn').prop('disabled', false);
+                    $('#submitBtn').text('Save Job Order');
                     e.preventDefault();
                 }
             }
@@ -1751,6 +1792,8 @@
             });
             if(no_attached > 0){
                 alert('Attachment is required for payment types: Bank Deposit, Check Payment , Gcash, Cash, Credit/Debit Card, Gift Certificate, or Online Bank Transfer');
+                $('#submitBtn').prop('disabled', false);
+                $('#submitBtn').text('Save Job Order');
                 e.preventDefault();
             }            
             
