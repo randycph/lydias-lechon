@@ -659,7 +659,7 @@ class ReportsController extends Controller
 
         $paellaCounts = collect($results)
             ->filter(function ($item) {
-                return isset($item->paella) && $item->paella == 1;
+                return (isset($item->paella) && $item->paella == 1) || str_contains(strtolower($item->dproduct_name ?? ''), 'paella');
             })
             ->groupBy(function ($item) {
                 return trim($item->size ?? '') !== ''
@@ -742,6 +742,7 @@ class ReportsController extends Controller
             if (request('filter_type') === 'paella') {
                 $results = $results->filter(function ($item) {
                     return str_contains(strtolower($item->dproduct_name ?? ''), 'paella')
+                        || str_contains(strtolower($item->product_name ?? ''), 'paella')
                         || str_contains(strtolower($item->catname ?? ''), 'paella');
                 });
             }
@@ -749,6 +750,7 @@ class ReportsController extends Controller
             if (request('filter_type') === 'regular') {
                 $results = $results->reject(function ($item) {
                     return str_contains(strtolower($item->dproduct_name ?? ''), 'paella')
+                        || str_contains(strtolower($item->product_name ?? ''), 'paella')
                         || str_contains(strtolower($item->catname ?? ''), 'paella');
                 });
             }
