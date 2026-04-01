@@ -659,11 +659,11 @@ class ReportsController extends Controller
 
         $paellaCounts = collect($results)
             ->filter(function ($item) {
-                return ($item?->paella && $item?->paella == 1);
+                return isset($item->paella) && $item->paella == 1;
             })
             ->groupBy(function ($item) {
-                return trim($item?->size ?? '') !== ''
-                    ? $item?->size
+                return trim($item->size ?? '') !== ''
+                    ? $item->size
                     : 'Size Undefined';
             })
             ->map->sum('qty');
