@@ -659,11 +659,11 @@ class ReportsController extends Controller
 
         $paellaCounts = collect($results)
             ->filter(function ($item) {
-                return ($item->paella && $item->paella == 1);
+                return ($item?->paella && $item?->paella == 1);
             })
             ->groupBy(function ($item) {
-                return trim($item->size ?? '') !== ''
-                    ? $item->size
+                return trim($item?->size ?? '') !== ''
+                    ? $item?->size
                     : 'Size Undefined';
             })
             ->map->sum('qty');
@@ -671,8 +671,8 @@ class ReportsController extends Controller
         // Count qty per size from results
         $sizeCountsFromResults = collect($results)
             ->groupBy(function ($item) {
-                return trim($item->size ?? '') !== ''
-                    ? $item->size
+                return trim($item?->size ?? '') !== ''
+                    ? $item?->size
                     : 'Size Undefined';
             })
             ->map->sum('qty');
