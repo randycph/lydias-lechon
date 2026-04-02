@@ -50,7 +50,7 @@
                     <div class="form-group">
                         <label class="d-block">Name *</label>
                         <input name="name" id="name" value="{{ old('name',$product->name) }}"  type="text" class="form-control @error('name') is-invalid @enderror" maxlength="250">
-                        <small id="product_slug"><a target="_blank" href="{{ route('lechon-menu') }}?product={{$product->slug}}">{{ route('lechon-menu') }}?product={{$product->slug}}</a></small>
+                        <small id="product_slug"><a target="_blank" href="{{ url('/menu') }}?product={{$product->slug}}">{{ url('/menu') }}?product={{$product->slug}}</a></small>
                         <div>
                             @error('name')
                                 <span class="invalid-feedback" role="alert">
