@@ -161,6 +161,7 @@
         window.disabledPickupDates = @json($disabledPickupDates);
         window.disabledDeliveryDates = @json($disabledDeliveryDates);
         window.disabledDeliveryMiscDates = @json($disabledDeliveryMiscDates);
+        window.availableCities = @json($cities);
         window.fullUrl = @json(config('app.url'));
         window.hasBaka = @json($hasbaka);
         window.hasMisc = @json($hasMisc);
@@ -1393,24 +1394,13 @@
                 },
 
                 get filteredCities() {
-
                     if (!this.province) return []
 
-                    let cities = []
-
-                    Object.values(this.phData).forEach(region => {
-
-                        const provinceObj = region.province_list[this.province]
-
-                        if (provinceObj) {
-                            cities = Object.keys(provinceObj.municipality_list)
-                        }
-
-                    })
-
-                    return cities.sort()
+                    return window.availableCities
+                        .filter(c => c.province === this.province)
+                        .map(c => c.city)
+                        .sort()
                 },
-
 
                 filteredBarangay() {
 
@@ -1436,26 +1426,15 @@
                     return barangays.sort()
                 },
 
-
                 multipleFilteredCities(index) {
-
                     const delivery = this.deliveries[index]
 
                     if (!delivery.province) return []
 
-                    let cities = []
-
-                    Object.values(this.phData).forEach(region => {
-
-                        const provinceObj = region.province_list[delivery.province]
-
-                        if (provinceObj) {
-                            cities = Object.keys(provinceObj.municipality_list)
-                        }
-
-                    })
-
-                    return cities.sort()
+                    return window.availableCities
+                        .filter(c => c.province === delivery.province)
+                        .map(c => c.city)
+                        .sort()
                 },
 
                 filteredMultipleBarangay(index) {
