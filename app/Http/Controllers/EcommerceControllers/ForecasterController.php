@@ -14,8 +14,10 @@ use App\EcommerceModel\SalesDetail;
 use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\JobOrder;
 use App\Helpers\Webfocus\Setting;
-use App\Models\Product;
 use Carbon\Carbon;
+use App\Mail\ManualOrderCancelledByAdminMail;
+use App\Models\Product;
+use Illuminate\Support\Facades\Mail;
 
 class ForecasterController extends Controller
 {
@@ -258,6 +260,11 @@ class ForecasterController extends Controller
             'instruction' => $sales_data->instruction.' TRANSACTION CANCELLED ('.$request->reason.')',
             'status' => 'CANCELLED'
         ]);
+
+        if ($sales_data?->user?->email) {
+            Mail::to($sales_data?->user?->email)->send(new ManualOrderCancelledByAdminMail($sales_data));
+        }
+
         $delete = SalesHeader::whereId($request->order_id)->delete();
         // $data = JobOrder::where('id',$request->order_id)->update([
         //     'status' => 'Cancelled',
