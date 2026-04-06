@@ -99,10 +99,10 @@
                             <div>
                                 <button
                                     type="submit"
-                                    :disabled="isSubmitting"
+                                    :disabled="incompleteProgress || isSubmitting"
                                     class="w-full bg-primary text-white font-bold py-3 rounded-lg transition flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
                                     :class="{
-                                        'opacity-50 cursor-not-allowed': isSubmitting
+                                        'opacity-50 cursor-not-allowed pointer-events-none': incompleteProgress || isSubmitting
                                     }"
                                 >
                                     <template x-if="!isSubmitting">
@@ -984,6 +984,8 @@
                 total_amount: 0,
                 discount_amount: 0,
                 deposit: '',
+
+                incompleteMessage: 'sdfsdfsdf',
 
                 async submitForm() {
 
@@ -2379,6 +2381,73 @@
                         // move to next day
                         date.setDate(date.getDate() + 1)
                     }
+                },
+
+                get incompleteProgress() {
+                    if (!this.contact.name || !this.contact.mobile || !this.contact.email) {
+                        return true
+                    }
+
+                    if (this.isGuest && !this.privacy) {
+                        return true
+                    }
+                        
+                    // ==========================
+                    // PICKUP
+                    // ==========================
+                    if (this.method === 'pickup') {
+
+                        if (!this.pickup_branch) return true
+                        if (!this.need_date) return true
+                        if (!this.need_time) return true
+
+                        return false
+                    }
+
+                    // ==========================
+                    // SINGLE DELIVERY
+                    // ==========================
+                    if (this.method === 'delivery' && !this.allowMultiple) {
+
+                        if (!this.delivery_address) return true
+                        if (!this.province) return true
+                        if (!this.city) return true
+                        if (!this.location) return true
+
+                        if (!this.need_date) return true
+                        if (!this.need_time) return true
+
+                        return false
+                    }
+
+                    // ==========================
+                    // MULTI DELIVERY
+                    // ==========================
+                    if (this.method === 'delivery' && this.allowMultiple) {
+
+                        // must assign all orders
+                        if (this.hasRemainingOrders()) return true
+
+                        for (let d of this.deliveries) {
+
+                            if (!d.orders || d.orders.length === 0) return true
+
+                            if (!d.address) return true
+                            if (!d.province) return true
+                            if (!d.city) return true
+                            if (!d.location) return true
+
+                            if (!d.name) return true
+                            if (!d.phone) return true
+
+                            if (!d.need_date) return true
+                            if (!d.need_time) return true
+                        }
+
+                        return false
+                    }
+
+                    return true
                 }
 
             }
