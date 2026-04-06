@@ -267,7 +267,8 @@
                         minDate: finalMinDate
                     })
 
-                    const parts = this.formatDateTimeParts(finalMinDate)
+                    const nextValidDate = this.getNextAvailableDate(finalMinDate)
+                    const parts = this.formatDateTimeParts(nextValidDate)
 
                     // Only force date if empty or invalid
                     if (!delivery.need_date || delivery.need_date < parts.date) {
@@ -351,7 +352,9 @@
                     }
 
                     const earliest = this.getEarliestAllowedDateTime()
-                    const parts = this.formatDateTimeParts(earliest)
+                    const nextValidDate = this.getNextAvailableDate(earliest)
+                    const parts = this.formatDateTimeParts(nextValidDate)
+
 
                     const picker = new Datepicker(el, {
                         autohide: true,
@@ -405,7 +408,8 @@
                     }
 
                     const earliest = this.getEarliestAllowedDateTime()
-                    const parts = this.formatDateTimeParts(earliest)
+                    const nextValidDate = this.getNextAvailableDate(earliest)
+                    const parts = this.formatDateTimeParts(nextValidDate)
 
                     const picker = new Datepicker(el, {
                         autohide: true,
@@ -546,7 +550,8 @@
                     })
 
                     const earliest = this.getEarliestForPickupAndSingle()
-                    const parts = this.formatDateTimeParts(earliest)
+                    const nextValidDate = this.getNextAvailableDate(earliest)
+                    const parts = this.formatDateTimeParts(nextValidDate)
 
                     if (this.need_date === parts.date) {
                         const requiredHour = minHour ?? parts.hour
@@ -586,7 +591,8 @@
                     })
 
                     const earliest = this.getEarliestForPickupAndSingle()
-                    const parts = this.formatDateTimeParts(earliest)
+                    const nextValidDate = this.getNextAvailableDate(earliest)
+                    const parts = this.formatDateTimeParts(nextValidDate)
 
                     if (this.need_date === parts.date) {
                         const requiredHour = minHour ?? parts.hour
@@ -2371,6 +2377,29 @@
                     }
 
                     return false
+                },
+
+                getNextAvailableDate(startDate) {
+                    let date = new Date(startDate)
+
+                    while (true) {
+                        const formatted = this.formatDate(date)
+
+                        const blockedForThisDate = this.blockedDetails.filter(b =>
+                            b.date === formatted &&
+                            this.blockAppliesToCart(b) &&
+                            this.blockAppliesToMethod(b)
+                        )
+
+                        const hasAllDayBlock = blockedForThisDate.some(b => b.is_all_day == 1)
+
+                        if (!hasAllDayBlock) {
+                            return date
+                        }
+
+                        // move to next day
+                        date.setDate(date.getDate() + 1)
+                    }
                 }
 
             }
