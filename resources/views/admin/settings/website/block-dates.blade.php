@@ -32,9 +32,9 @@
                 </div>
             </div>
 
-            <!-- Category -->
+            <!-- Location -->
             <div class="mb-3">
-                <label class="form-label">Select Location</label>
+                <label class="form-label">Select Location (Pickup only)</label>
                 <select 
                     class="select2 form-control" 
                     id="location"
@@ -44,6 +44,21 @@
                 >
                     @foreach ($locations as $location)
                     <option value="{{ $location->id }}">{{ $location->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Select City (Delivery only)</label>
+                <select 
+                    class="select2 form-control" 
+                    id="city"
+                    name="city_ids[]"
+                    multiple
+                    disabled
+                >
+                    @foreach ($cities as $city)
+                    <option value="{{ $city->id }}">{{ $city->province }} - {{ $city->city }}</option>
                     @endforeach
                 </select>
             </div>
@@ -253,7 +268,9 @@
         const scopeRadios    = document.querySelectorAll('input[name="scope"]');
         const categorySelect = document.querySelector('select[name="category_ids[]"]');
         const locationSelect = document.querySelector('select[name="location_ids[]"]');
+        const citySelect     = document.querySelector('select[name="city_ids[]"]');
         const productSelect  = document.querySelector('select[name="product_ids[]"]');
+        const blockTypeRadios  = document.querySelectorAll('input[name="block_type"]');
         const addBlockBtn    = document.getElementById('addBlock');
         const deleteBlockBtn = document.getElementById('deleteEntireBlock');
         const dateInput      = document.getElementById('blockDates');
@@ -263,6 +280,7 @@
         const allowComboCheck = document.getElementById('allow-combo');
         const commonProductInput = document.getElementById('combo-product');
         const commonCategoryInput = document.getElementById('combo-category');
+        const editGroupBlockTypeSelect = document.getElementById('editGroupBlockType');
 
         allDayCheckbox.checked = true;
         timeSlots.forEach(cb => {
@@ -286,6 +304,11 @@
         });
 
         $('#location').select2({
+            placeholder: "Select location",
+            width: '100%'
+        });
+
+        $('#city').select2({
             placeholder: "Select location",
             width: '100%'
         });
@@ -398,6 +421,15 @@
                     locationEl.innerText = '—';
                 }
 
+                const citiesEl = document.getElementById('modalCities');
+                if (props.cities && props.cities.length) {
+                    citiesEl.innerHTML = props.cities
+                        .map(c => `<span class="badge badge-info mr-1">${c.province} - ${c.city}</span>`)
+                        .join('');
+                } else {
+                    citiesEl.innerText = '—';
+                }
+
                 let type = '';
                 
                 if (props.block_type) {
@@ -492,6 +524,31 @@
         /* ---------------------------------------------------
         * 4. SCOPE LOGIC (ENABLE / DISABLE)
         * --------------------------------------------------- */
+        blockTypeRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                const value = radio.value;
+
+                if (value === 'both') {
+                    citySelect.disabled = false;
+                    locationSelect.disabled = false;
+                }
+
+                if (value === 'delivery') {
+                    citySelect.disabled = false;
+                    locationSelect.disabled = true;
+                    locationSelect.value = null;
+                    $('#location').val(null).trigger('change');
+                }
+
+                if (value === 'pickup') {
+                    locationSelect.disabled = false;
+                    citySelect.disabled = true;
+                    citySelect.value = null;
+                    $('#city').val(null).trigger('change');
+                }
+            });
+        });
+
         scopeRadios.forEach(radio => {
             radio.addEventListener('change', () => {
 
@@ -501,11 +558,13 @@
                 categorySelect.disabled = true;
                 productSelect.disabled  = true;
                 locationSelect.disabled = true;
+                citySelect.disabled    = true;
 
                 // clear all
                 $('#category').val(null).trigger('change');
                 $('#product').val(null).trigger('change');
                 $('#location').val(null).trigger('change');
+                $('#city').val(null).trigger('change');
 
                 if (value === 'all') {
                     // everything stays disabled
@@ -524,9 +583,35 @@
                     categorySelect.disabled = false;
                     productSelect.disabled  = false;
                     locationSelect.disabled = false;
+                    citySelect.disabled    = false;
                 }
             });
         });
+
+        const editGroupLocationSelect = document.getElementById('editGroupLocation');
+        const editGroupCitySelect = document.getElementById('editGroupCity');
+
+        editGroupBlockTypeSelect.addEventListener('change', () => {
+            const value = editGroupBlockTypeSelect.value;
+            if (value === 'both') {
+                editGroupLocationSelect.disabled = false;
+                editGroupCitySelect.disabled = false;
+            }
+            
+            if (value === 'pickup') {
+                editGroupLocationSelect.disabled = false;
+                editGroupCitySelect.disabled = true;
+                editGroupCitySelect.value = null;
+                $('#editGroupCity').val(null).trigger('change');
+            }
+
+            if (value === 'delivery') {
+                editGroupLocationSelect.disabled = true;
+                editGroupCitySelect.disabled = false;
+                editGroupLocationSelect.value = null;
+                $('#editGroupLocation').val(null).trigger('change');
+            }
+        })
 
         /* ---------------------------------------------------
         * 5. ALL DAY TOGGLE
@@ -614,6 +699,9 @@
             const locationIds = Array.from(locationSelect.selectedOptions)
                 .map(opt => opt.value);
 
+            const cityIds = Array.from(citySelect.selectedOptions)
+                .map(opt => opt.value);
+
             const comboProductIds = Array.from(commonProductInput.selectedOptions)
                 .map(opt => opt.value);
 
@@ -633,6 +721,7 @@
                 combo_product_ids: comboProductIds.length ? comboProductIds : null,
                 combo_category_ids: comboCategoryIds.length ? comboCategoryIds : null,
                 location_ids: locationIds.length ? locationIds : null,
+                city_ids: cityIds.length ? cityIds : null,
                 date_mode: mode
             };
 
@@ -704,15 +793,18 @@
             categoryIds = [];
             productIds = [];
             locationIds = [];
+            cityIds = [];
             comboProductIds = [];
 
             categorySelect.value = null;
             productSelect.value = null;
             locationSelect.value = null;
+            citySelect.value = null;
 
             $('#category').val(null).trigger('change');
             $('#product').val(null).trigger('change');
             $('#location').val(null).trigger('change');
+            $('#city').val(null).trigger('change');
             $('#combo-product').val([]).trigger('change');
             $('#combo-category').val([]).trigger('change');
 
@@ -770,6 +862,7 @@
         $('#editProduct').select2({ placeholder: 'Select product', width: '100%' });
         $('#editTimes').select2({ placeholder: 'Select time slot', width: '100%' });
         $('#editLocation').select2({ placeholder: 'Select location', width: '100%' });
+        $('#editCity').select2({ placeholder: 'Select city', width: '100%' });
 
         const editRangePicker = new DateRangePicker(
             document.getElementById('editDateRangeInputs'),
@@ -881,6 +974,7 @@
                 category_ids: $('#editCategory').val(),
                 product_ids: $('#editProduct').val(),
                 location_ids: $('#editLocation').val(),
+                city_ids: $('#editCity').val(),
                 dates: getEditDates(),
                 is_all_day: $('#editTimes').val().length === 0,
                 times: buildTimePayload($('#editTimes').val()),
@@ -1047,6 +1141,7 @@
         $('#editGroupCategory').select2({ placeholder: 'Select category', width: '100%' });
         $('#editGroupProduct').select2({ placeholder: 'Select product', width: '100%' });
         $('#editGroupLocation').select2({ placeholder: 'Select location', width: '100%' });
+        $('#editGroupCity').select2({ placeholder: 'Select city', width: '100%' });
         $('#editGroupTimes').select2({ placeholder: 'Select time', width: '100%' });
         $('#editGroupComboProduct').select2({ placeholder: 'Select product', width: '100%' });
         $('#editGroupComboCategory').select2({ placeholder: 'Select category', width: '100%' });
@@ -1079,6 +1174,7 @@
         const groupCategory = document.getElementById('editGroupCategory');
         const groupProduct  = document.getElementById('editGroupProduct');
         const groupLocation = document.getElementById('editGroupLocation');
+        const groupCity    = document.getElementById('editGroupCity');
 
         groupScopeRadios.forEach(radio => {
             radio.addEventListener('change', () => {
@@ -1087,10 +1183,12 @@
                 groupCategory.disabled = val !== 'category';
                 groupProduct.disabled  = val !== 'product';
                 groupLocation.disabled = val !== 'location';
+                groupCity.disabled    = val !== 'location';
 
                 $('#editGroupCategory').val([]).trigger('change');
                 $('#editGroupProduct').val([]).trigger('change');
                 $('#editGroupLocation').val([]).trigger('change');
+                $('#editGroupCity').val([]).trigger('change');
 
                 if (val === 'all') {
                     return;
@@ -1108,6 +1206,7 @@
                     groupCategory.disabled = false;
                     groupProduct.disabled  = false;
                     groupLocation.disabled = false;
+                    groupCity.disabled    = false;
                 }
             });
         });
@@ -1214,6 +1313,21 @@
             $('#editGroupCategory').val(data.categories.map(c => c.id)).trigger('change');
             $('#editGroupProduct').val(data.products.map(p => p.id)).trigger('change');
             $('#editGroupLocation').val(data.locations.map(l => l.id)).trigger('change');
+            $('#editGroupCity').val(data.cities.map(c => c.id)).trigger('change');
+
+            const editGroupLocationSelect1 = document.getElementById('editGroupLocation');
+            const editGroupCitySelect1 = document.getElementById('editGroupCity');
+
+            if (data.block_type == 'delivery') {
+                editGroupLocationSelect1.disabled = true;
+                $('#editGroupLocation').val(null).trigger('change');
+            } else if (data.block_type == 'pickup') {
+                editGroupCitySelect1.disabled = true;
+                $('#editGroupCity').val(null).trigger('change');
+            } else {
+                editGroupLocationSelect1.disabled = false;
+                editGroupCitySelect1.disabled = false;
+            }
 
             // COMBO
             if (data.combo_products.length) {
@@ -1293,6 +1407,7 @@
                 category_ids: $('#editGroupCategory').val(),
                 product_ids: $('#editGroupProduct').val(),
                 location_ids: $('#editGroupLocation').val(),
+                city_ids: $('#editGroupCity').val(),
                 dates: dates,
                 is_all_day: isAllDay,
                 times: isAllDay ? [] : buildTimePayload($('#editGroupTimes').val()),

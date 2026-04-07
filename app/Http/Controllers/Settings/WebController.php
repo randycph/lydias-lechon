@@ -6,6 +6,7 @@ use App\EcommerceModel\Branch;
 use App\Models\Permission;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Deliverablecities;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 
@@ -91,6 +92,18 @@ class WebController extends Controller
 
         $locations = Branch::with('numbers')->where('status', 1)->orderBy('name', 'asc')->where('pickup_branch', 1)->get();
 
+        $cities = Deliverablecities::query()
+            ->select('id', 'city', 'province')
+            ->where('is_active', 1)
+            ->whereNotNull('city')
+            ->where('city', '!=', '')
+            ->orderBy('city')
+            ->get()
+            ->unique(function ($item) {
+                return $item->province . '-' . $item->city;
+            })
+            ->values();
+
         return view('admin.settings.website.index', compact(
             'web', 
             'medias', 
@@ -98,7 +111,8 @@ class WebController extends Controller
             'categories', 
             'products', 
             'selectedCustomers',
-            'locations'
+            'locations',
+            'cities'
         ));
     }
 

@@ -741,6 +741,9 @@ Website Settings
                     <dt class="col-4 location-view-dt">Location</dt>
                     <dd class="col-8 location-view-dd" id="modalLocation">—</dd>
 
+                    <dt class="col-4 location-view-dt">Cities</dt>
+                    <dd class="col-8 location-view-dd" id="modalCities">—</dd>
+
                     <dt class="col-4">Date</dt>
                     <dd class="col-8" id="modalDate"></dd>
 
@@ -807,6 +810,14 @@ Website Settings
           <select id="editLocation" class="select2 form-control" name="editLocation_ids[]" disabled multiple>
                 @foreach ($locations as $location)
                 <option value="{{ $location->id }}">{{ $location->name }}</option>
+                @endforeach
+          </select>
+        </div>
+        <div class="mb-3" id="editCityWrapper">
+          <label class="form-label fw-bold">Cities</label>
+          <select id="editCity" class="select2 form-control" name="editCity_ids[]" disabled multiple>
+                @foreach ($cities as $city)
+                <option value="{{ $city->id }}">{{ $city->name }}</option>
                 @endforeach
           </select>
         </div>
@@ -960,10 +971,20 @@ Website Settings
 
         <!-- Location -->
         <div class="mb-3" id="editGroupLocationWrapper">
-          <label class="form-label fw-bold">Locations</label>
+          <label class="form-label fw-bold">Locations (Pickup Only)</label>
           <select id="editGroupLocation" class="select2 form-control" name="editGroupLocation_ids[]" disabled multiple>
                 @foreach ($locations as $location)
                 <option value="{{ $location->id }}">{{ $location->name }}</option>
+                @endforeach
+          </select>
+        </div>
+
+        <!-- City -->
+        <div class="mb-3" id="editGroupCityWrapper">
+          <label class="form-label fw-bold">Cities (Delivery Only)</label>
+          <select id="editGroupCity" class="select2 form-control" name="editGroupCity_ids[]" disabled multiple>
+                @foreach ($cities as $city)
+                <option value="{{ $city->id }}">{{ $city->province }} - {{ $city->city }}</option>
                 @endforeach
           </select>
         </div>
