@@ -713,8 +713,6 @@
                         ? this.deliveries.reduce((sum, d) => sum + (parseFloat(d.delivery_fee + d.lechon_baka_service) || 0), 0)
                         : (parseFloat(this.deliveryFee + this.lechonBakaService) || 0)
 
-                    console.log(itemsTotal, deliveryTotal)
-
                     this.total_amount = itemsTotal + deliveryTotal;
                     this.deposit = this.total_amount.toFixed(2);
 
