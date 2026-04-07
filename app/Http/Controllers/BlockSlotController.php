@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\EcommerceModel\Branch;
 use App\Helpers\ActivityLogger;
 use App\Models\BlockedSlot;
+use App\Models\Deliverablecities;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use Carbon\Carbon;
@@ -21,7 +22,8 @@ class BlockSlotController extends Controller
                 'categories:id,name',
                 'comboProducts:id,name',
                 'comboCategories:id,name',
-                'locations:id,name'
+                'locations:id,name',
+                'cities:id,province,city'
             ])
             ->orderBy('date')
             ->get();
@@ -32,6 +34,7 @@ class BlockSlotController extends Controller
             $productIds = $b->products->pluck('id')->sort()->implode(',');
             $categoryIds = $b->categories->pluck('id')->sort()->implode(',');
             $locationIds = $b->locations->pluck('id')->sort()->implode(',');
+            $cityIds = $b->cities->pluck('id')->sort()->implode(',');
             $comboProductIds = $b->comboProducts->pluck('id')->sort()->implode(',');
             $comboCategoryIds = $b->comboCategories->pluck('id')->sort()->implode(',');
 
@@ -44,6 +47,7 @@ class BlockSlotController extends Controller
                 $productIds,
                 $categoryIds,
                 $locationIds,
+                $cityIds,
                 $comboProductIds,
                 $comboCategoryIds
             ]);
@@ -88,7 +92,8 @@ class BlockSlotController extends Controller
                         'categories' => $block->categories,
                         'combo_products' => $block->comboProducts,
                         'combo_categories' => $block->comboCategories,
-                        'locations' => $block->locations
+                        'locations' => $block->locations,
+                        'cities' => $block->cities
                     ];
                 }
             }
@@ -115,6 +120,9 @@ class BlockSlotController extends Controller
 
             'location_ids' => 'nullable|array',
             'location_ids.*' => 'integer|exists:branches,id',
+
+            'city_ids' => 'nullable|array',
+            'city_ids.*' => 'integer|exists:deliverable_cities,id',
 
             'combo_product_ids' => 'nullable|array',
             'combo_product_ids.*' => 'integer|exists:products,id',
@@ -147,23 +155,27 @@ class BlockSlotController extends Controller
             $productIds  = $validated['product_ids'] ?? [];
             $categoryIds = $validated['category_ids'] ?? [];
             $locationIds = $validated['location_ids'] ?? [];
+            $cityIds = $validated['city_ids'] ?? [];
             $comboProductIds = $validated['combo_product_ids'] ?? [];
             $comboCategoryIds = $validated['combo_category_ids'] ?? [];
 
             if ($scope === 'category') {
                 $productIds = [];
                 $locationIds = [];
+                $cityIds = [];
             }
 
             if ($scope === 'product') {
                 $categoryIds = [];
                 $locationIds = [];
+                $cityIds = [];
             }
 
             if ($scope === 'all') {
                 $productIds = [];
                 $categoryIds = [];
                 $locationIds = [];
+                $cityIds = [];
             }
             
             $newData = [
@@ -177,6 +189,7 @@ class BlockSlotController extends Controller
                 'products' => Product::whereIn('id', $productIds)->pluck('name')->toArray(),
                 'categories' => ProductCategory::whereIn('id', $categoryIds)->pluck('name')->toArray(),
                 'locations' => Branch::whereIn('id', $locationIds)->pluck('name')->toArray(),
+                'cities' => Deliverablecities::whereIn('id', $cityIds)->pluck('city')->toArray(),
                 'combo_products' => Product::whereIn('id', $comboProductIds)->pluck('name')->toArray(),
                 'combo_categories' => ProductCategory::whereIn('id', $comboCategoryIds)->pluck('name')->toArray(),
             ];
@@ -220,6 +233,10 @@ class BlockSlotController extends Controller
                         $blockedSlot->locations()->sync($locationIds);
                     }
 
+                    if (!empty($cityIds)) {
+                        $blockedSlot->cities()->sync($cityIds);
+                    }
+
                     continue;
                 }
 
@@ -246,6 +263,10 @@ class BlockSlotController extends Controller
 
                     if (!empty($locationIds)) {
                         $blockedSlot->locations()->sync($locationIds);
+                    }
+
+                    if (!empty($cityIds)) {
+                        $blockedSlot->cities()->sync($cityIds);
                     }
 
                     if (!empty($comboProductIds)) {
@@ -281,6 +302,7 @@ class BlockSlotController extends Controller
             'product_ids' => 'nullable|array',
             'category_ids' => 'nullable|array',
             'location_ids' => 'nullable|array',
+            'city_ids' => 'nullable|array',
             'combo_product_ids' => 'nullable|array',
             'combo_category_ids' => 'nullable|array',
 
@@ -296,23 +318,27 @@ class BlockSlotController extends Controller
         $productIds  = $validated['product_ids'] ?? [];
         $categoryIds = $validated['category_ids'] ?? [];
         $locationIds = $validated['location_ids'] ?? [];
+        $cityIds = $validated['city_ids'] ?? [];
         $comboProductIds = $validated['combo_product_ids'] ?? [];
         $comboCategoryIds = $validated['combo_category_ids'] ?? [];
 
         if ($scope === 'category') {
             $productIds = [];
             $locationIds = [];
+            $cityIds = [];
         }
 
         if ($scope === 'product') {
             $categoryIds = [];
             $locationIds = [];
+            $cityIds = [];
         }
 
         if ($scope === 'all') {
             $productIds = [];
             $categoryIds = [];
             $locationIds = [];
+            $cityIds = [];
         }
 
         // UPDATE BLOCK
@@ -328,6 +354,7 @@ class BlockSlotController extends Controller
         $block->products()->sync($productIds);
         $block->categories()->sync($categoryIds);
         $block->locations()->sync($locationIds);
+        $block->cities()->sync($cityIds);
         $block->comboProducts()->sync($validated['combo_product_ids'] ?? []);
 
         return response()->json([
@@ -336,6 +363,7 @@ class BlockSlotController extends Controller
                 'products:id,name',
                 'categories:id,name',
                 'locations:id,name',
+                'cities:id,province,city',
                 'comboProducts:id,name'
             ])
         ]);
@@ -362,6 +390,7 @@ class BlockSlotController extends Controller
                 'products:id,name',
                 'categories:id,name',
                 'locations:id,name',
+                'cities:id,province,city',
                 'comboProducts:id,name',
                 'comboCategories:id,name'
             ])->get();
@@ -377,6 +406,7 @@ class BlockSlotController extends Controller
                 'products' => $blocks->flatMap(fn($b) => $b->products->pluck('name'))->unique()->values()->toArray(),
                 'categories' => $blocks->flatMap(fn($b) => $b->categories->pluck('name'))->unique()->values()->toArray(),
                 'locations' => $blocks->flatMap(fn($b) => $b->locations->pluck('name'))->unique()->values()->toArray(),
+                'cities' => $blocks->flatMap(fn($b) => $b->cities->pluck('city')->unique()->values()->toArray()),
                 'combo_products' => $blocks->flatMap(fn($b) => $b->comboProducts->pluck('name'))->unique()->values()->toArray(),
                 'combo_categories' => $blocks->flatMap(fn($b) => $b->comboCategories->pluck('name'))->unique()->values()->toArray(),
             ];
@@ -385,6 +415,7 @@ class BlockSlotController extends Controller
                 $block->products()->detach();
                 $block->categories()->detach();
                 $block->locations()->detach();
+                $block->cities()->detach();
                 $block->comboProducts()->detach();
                 $block->comboCategories()->detach();
                 $block->delete();
@@ -458,6 +489,7 @@ class BlockSlotController extends Controller
                 $productIds = $block->products()->pluck('products.id')->toArray();
                 $categoryIds = $block->categories()->pluck('product_categories.id')->toArray();
                 $locationIds = $block->locations()->pluck('branches.id')->toArray();
+                $cityIds = $block->cities()->pluck('deliverable_cities.id')->toArray();
                 $comboProductIds = $block->comboProducts()->pluck('products.id')->toArray();
                 $comboCategoryIds = $block->comboCategories()->pluck('product_categories.id')->toArray();
                 
@@ -473,6 +505,7 @@ class BlockSlotController extends Controller
                     $productIds,
                     $categoryIds,
                     $locationIds,
+                    $cityIds,
                     $comboProductIds,
                     $comboCategoryIds,
                     "$year-$month",
@@ -483,6 +516,7 @@ class BlockSlotController extends Controller
                 $block->products()->detach();
                 $block->categories()->detach();
                 $block->locations()->detach();
+                $block->cities()->detach();
                 $block->comboProducts()->detach();
                 $block->comboCategories()->detach();
                 $block->delete();
@@ -526,6 +560,7 @@ class BlockSlotController extends Controller
                 'products' => $b['products'],
                 'categories' => $b['categories'],
                 'locations' => $b['locations'],
+                'cities' => $b['cities'],
                 'combo_products' => $b['combo_products'],
                 'combo_categories' => $b['combo_categories']
             ],
@@ -561,7 +596,8 @@ class BlockSlotController extends Controller
                 'categories:id',
                 'comboProducts:id',
                 'comboCategories:id',
-                'locations:id,name'
+                'locations:id,name',
+                'cities:id,province,city'
             ])
             ->whereDate('date', '>=', $today)
             ->where(function ($query) use ($productIds, $categoryIds, $locationIds) {
@@ -593,6 +629,16 @@ class BlockSlotController extends Controller
                     });
                 });
 
+                // CITY scope
+                if (!empty($locationIds)) {
+                    $query->orWhere(function ($q) use ($locationIds) {
+                        $q->where('scope', 'city')
+                        ->whereHas('cities', function ($sub) use ($locationIds) {
+                            $sub->whereIn('deliverable_cities.id', $locationIds);
+                        });
+                    });
+                }
+
             })
             ->orderBy('date')
             ->get([
@@ -614,6 +660,9 @@ class BlockSlotController extends Controller
 
                 $matchLocation = $block->locations->isEmpty()
                     || $block->locations->pluck('id')->intersect($locationIds)->isNotEmpty();
+
+                $matchCity = $block->cities->isEmpty()
+                    || $block->cities->pluck('id')->intersect($locationIds)->isNotEmpty();
 
                 $hasCombo = $block->comboProducts->isNotEmpty();
 
@@ -691,6 +740,7 @@ class BlockSlotController extends Controller
                 'category_ids' => 'nullable|array',
                 'product_ids' => 'nullable|array',
                 'location_ids' => 'nullable|array',
+                'city_ids' => 'nullable|array',
                 'combo_product_ids' => 'nullable|array',
                 'combo_category_ids' => 'nullable|array',
 
@@ -711,6 +761,7 @@ class BlockSlotController extends Controller
                 'products:id,name',
                 'categories:id,name',
                 'locations:id,name',
+                'cities:id,province,city',
                 'comboProducts:id,name',
                 'comboCategories:id,name'
             ])->where('group_id', $groupId)->get();
@@ -719,6 +770,7 @@ class BlockSlotController extends Controller
                 $block->products()->detach();
                 $block->categories()->detach();
                 $block->locations()->detach();
+                $block->cities()->detach();
                 $block->comboProducts()->detach();
                 $block->comboCategories()->detach();
                 $block->delete();
@@ -730,23 +782,27 @@ class BlockSlotController extends Controller
             $productIds  = $validated['product_ids'] ?? [];
             $categoryIds = $validated['category_ids'] ?? [];
             $locationIds = $validated['location_ids'] ?? [];
+            $cityIds = $validated['city_ids'] ?? [];
             $comboIds    = $validated['combo_product_ids'] ?? [];
             $comboCategoryIds = $validated['combo_category_ids'] ?? [];
 
             if ($scope === 'category') {
                 $productIds = [];
                 $locationIds = [];
+                $cityIds = [];
             }
 
             if ($scope === 'product') {
                 $categoryIds = [];
                 $locationIds = [];
+                $cityIds = [];
             }
 
             if ($scope === 'all') {
                 $productIds = [];
                 $categoryIds = [];
                 $locationIds = [];
+                $cityIds = [];
             }
 
             $oldData = [
@@ -760,6 +816,7 @@ class BlockSlotController extends Controller
                 'products' => $blocks->flatMap(fn($b) => $b->products->pluck('name'))->unique()->values()->toArray(),
                 'categories' => $blocks->flatMap(fn($b) => $b->categories->pluck('name'))->unique()->values()->toArray(),
                 'locations' => $blocks->flatMap(fn($b) => $b->locations->pluck('name'))->unique()->values()->toArray(),
+                'cities' => $blocks->flatMap(fn($b) => $b->cities->pluck('city'))->unique()->values()->toArray(),
                 'combo_products' => $blocks->flatMap(fn($b) => $b->comboProducts->pluck('name'))->unique()->values()->toArray(),
                 'combo_categories' => $blocks->flatMap(fn($b) => $b->comboCategories->pluck('name'))->unique()->values()->toArray(),
             ];
@@ -775,6 +832,7 @@ class BlockSlotController extends Controller
                 'products' => Product::whereIn('id', $productIds)->pluck('name')->toArray(),
                 'categories' => ProductCategory::whereIn('id', $categoryIds)->pluck('name')->toArray(),
                 'locations' => Branch::whereIn('id', $locationIds)->pluck('name')->toArray(),
+                'cities' => Deliverablecities::whereIn('id', $cityIds)->pluck('city')->toArray(),
                 'combo_products' => Product::whereIn('id', $comboIds)->pluck('name')->toArray(),
                 'combo_categories' => ProductCategory::whereIn('id', $comboCategoryIds)->pluck('name')->toArray(),
             ];
@@ -796,7 +854,7 @@ class BlockSlotController extends Controller
                         'date_mode'   => $validated['date_mode'],
                     ]);
 
-                    $this->syncRelations($block, $productIds, $categoryIds, $locationIds, $comboIds, $comboCategoryIds);
+                    $this->syncRelations($block, $productIds, $categoryIds, $locationIds, $cityIds, $comboIds, $comboCategoryIds);
                     continue;
                 }
 
@@ -814,7 +872,7 @@ class BlockSlotController extends Controller
                         'date_mode'   => $validated['date_mode'],
                     ]);
 
-                    $this->syncRelations($block, $productIds, $categoryIds, $locationIds, $comboIds, $comboCategoryIds);
+                    $this->syncRelations($block, $productIds, $categoryIds, $locationIds, $cityIds, $comboIds, $comboCategoryIds);
                 }
             }
 
@@ -832,11 +890,12 @@ class BlockSlotController extends Controller
         return response()->json(['message' => 'Block updated']);
     }
 
-    private function syncRelations($block, $productIds, $categoryIds, $locationIds, $comboIds, $comboCategoryIds)
+    private function syncRelations($block, $productIds, $categoryIds, $locationIds, $cityIds, $comboIds, $comboCategoryIds)
     {
         $block->products()->sync($productIds);
         $block->categories()->sync($categoryIds);
         $block->locations()->sync($locationIds);
+        $block->cities()->sync($cityIds);
         $block->comboProducts()->sync($comboIds);
         $block->comboCategories()->sync($comboCategoryIds);
     }
@@ -855,6 +914,10 @@ class BlockSlotController extends Controller
             $blockedSlot->locations()->attach($validated['location_ids']);
         }
 
+        if (!empty($validated['city_ids'])) {
+            $blockedSlot->cities()->attach($validated['city_ids']);
+        }
+
         if (!empty($validated['combo_product_ids'])) {
             $blockedSlot->comboProducts()->attach($validated['combo_product_ids']);
         }
@@ -866,6 +929,7 @@ class BlockSlotController extends Controller
             'products:id,name',
             'categories:id,name',
             'locations:id,name',
+            'cities:id,city,province',
             'comboProducts:id,name'
         ])->findOrFail($id);
 
@@ -878,6 +942,7 @@ class BlockSlotController extends Controller
             'products:id,name',
             'categories:id,name',
             'locations:id,name',
+            'cities:id,city,province',
             'comboProducts:id,name',
             'comboCategories:id,name'
         ])
@@ -908,6 +973,7 @@ class BlockSlotController extends Controller
             'products' => $first->products,
             'categories' => $first->categories,
             'locations' => $first->locations,
+            'cities' => $first->cities,
             'combo_products' => $first->comboProducts,
             'combo_categories' => $first->comboCategories,
 
@@ -917,7 +983,7 @@ class BlockSlotController extends Controller
         ]);
     }
 
-    public function recordLog($validated, $date, $productIds, $categoryIds, $locationIds, $comboProductIds, $comboCategoryIds, $groupId, $blockedSlot, $type = 'create', $oldBlocks = [])
+    public function recordLog($validated, $date, $productIds, $categoryIds, $locationIds, $cityIds, $comboProductIds, $comboCategoryIds, $groupId, $blockedSlot, $type = 'create', $oldBlocks = [])
     {
         $blocks = [
             'scope' => $validated['scope'],
@@ -950,6 +1016,13 @@ class BlockSlotController extends Controller
         $locationNames = [];
         foreach ($location as $key => $value) {
             $locationNames[] = $value['name'];
+        }
+
+        $city = Deliverablecities::select('id', 'city', 'province')->whereIn('id', $cityIds)->get()->toArray();
+
+        $cityNames = [];
+        foreach ($city as $key => $value) {
+            $cityNames[] = $value['city'] . ' (' . $value['province'] . ')';
         }
 
         $comboProduct = Product::select('id', 'name')->whereIn('id', $comboProductIds)->get()->toArray();
@@ -987,6 +1060,7 @@ class BlockSlotController extends Controller
                 'products' => $product ? $productNames : null,
                 'categories' => $category ? $categoryNames : null,
                 'locations' => $location ? $locationNames : null,
+                'cities' => $city ? $cityNames : null,
                 'combo_products' => $comboProductNames ? $comboProductNames : null,
                 'combo_categories' => $comboCategory ? $comboCategoryNames : null
             ],
