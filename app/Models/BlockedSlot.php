@@ -67,4 +67,14 @@ class BlockedSlot extends Model
             'location_id'
         );
     }
+
+    public function cities()
+    {
+        return $this->belongsToMany(
+            Deliverablecities::class,
+            'blocked_slot_cities',
+            'blocked_slot_id',
+            'city_id'
+        );
+    }
 }
