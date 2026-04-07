@@ -1052,6 +1052,10 @@ class SalesController extends Controller
             return back()->with('error', 'Transaction is already abandoned');
         }
         
+        if ($salesHeader?->user?->email) {
+            Mail::to($salesHeader?->user?->email)->send(new ManualOrderCancelledByAdminMail($salesHeader));
+        }
+
         $salesHeader->status = 'CANCELLED';
         $salesHeader->save();
 
