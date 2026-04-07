@@ -885,8 +885,8 @@
                                                     placeholder="Select date">
                                             </div>
                                             <div x-show="noNeededDate"
-                                                class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded">
-                                                Please select a date.
+                                                class="text-red-700 bg-red-100 border-l-4 border-red-500 p-3 mt-3 rounded" x-text="noNeededDateMessage">
+                                                
                                             </div>
                                         </div>
                                         <div class="my-2 w-full lg:w-1/2">
@@ -1418,6 +1418,7 @@
             isPaymentLoading: false,
             noNeededTime: false,
             noNeededDate: false,
+            noNeededDateMessage: 'Please select a date.',
             coupon: null,
             coupons: [],
             couponCode: '',
@@ -1759,6 +1760,16 @@
                 
                 if ((!this.need_time && this.method === 'pickup') || (!this.need_time && this.method === 'delivery' && !this.allowMultiple)) {
                     this.noNeededTime = true;
+                    this.isSubmitting = false;
+                    return;
+                }
+
+                console.log('need_date', this.need_date)
+
+                if (this.blockedDates.includes(this.need_date)) {
+                    this.noNeededDateMessage = 'This date is not available. Select another Date';
+                    this.need_date = '';
+                    this.noNeededDate = true;
                     this.isSubmitting = false;
                     return;
                 }
@@ -3480,7 +3491,7 @@
 
             autoAdvanceDateIfNoHours(delivery, tries = 0) {
                 if (tries > 31) return; // Don't go more than a month ahead
-
+                
                 const available = this.getAvailableHours(delivery);
                 if (available.length === 0) {
                     // Add 1 day
@@ -3534,12 +3545,13 @@
                     // if its productTypes includes misc only then use this.disabledDeliveryMiscDates.includes(`${delivery.need_date} ${timeStr}`);
                     // but if productTypes includes other that misc then use this.disabledDeliveryDates.includes(`${delivery.need_date} ${timeStr}`);
                     // but if productTypes includes both misc and others then combine the disabledDeliveryMiscDates and disabledDeliveryDates.
-
+                    
                     if (productTypes.includes('misc') && !productTypes.includes('lechon') && !productTypes.includes('baka')) {
                         return this.disabledDeliveryMiscDates.includes(`${delivery.need_date} ${timeStr}`);
                     } else if ((productTypes.includes('lechon') || productTypes.includes('baka')) && !productTypes.includes('misc')) {
                         return this.disabledDeliveryDates.includes(`${delivery.need_date} ${timeStr}`);
                     }
+                    
 
                     // if (productTypes.includes('misc')) {
                     //     return this.disabledDeliveryMiscDates.includes(`${delivery.need_date} ${timeStr}`);
@@ -3579,13 +3591,15 @@
                 '2025-12-19',
                 '2025-12-24',
                 '2025-12-25',
-                '2025-12-31'
+                '2025-12-31',
+                '2026-04-02',
+                '2026-04-03'
             ],
 
             blockedDatesMisc: [
                 '2025-12-13','2025-12-14','2025-12-15','2025-12-16','2025-12-17','2025-12-18',
                 '2025-12-19','2025-12-20','2025-12-21','2025-12-22','2025-12-23','2025-12-24',
-                '2025-12-25','2025-12-26','2025-12-27','2025-12-28','2025-12-29','2025-12-30','2025-12-31'
+                '2025-12-25','2025-12-26','2025-12-27','2025-12-28','2025-12-29','2025-12-30','2025-12-31','2026-04-03','2026-04-02',
             ],
 
             initPicker() {
@@ -3597,6 +3611,7 @@
                     minDate: this.minDate(),
                     autohide: true,
                     format: 'yyyy-mm-dd',
+                    datesDisabled: this.blockedDates,
                     beforeShowDay: (date) => {
                         if (this.method !== 'delivery') return true;
 
@@ -3665,6 +3680,7 @@
                     minDate: this.minimumDate(),
                     autohide: true,
                     format: 'yyyy-mm-dd',
+                    datesDisabled: this.blockedDates,
                     beforeShowDay: (date) => {
                     const ymd = this.formatLocalYMD(date);
 
@@ -3784,6 +3800,9 @@
                 if (this.method === 'pickup') {
                     return this.disabledPickupDates.includes(fullStr);
                 } else {
+                    //temporarily added by jundrie
+                    return this.disabledDeliveryDates.includes(fullStr);
+                    
                     if (this.hasMisc && !this.haslechon && !this.hasbaka) {
                         return this.disabledDeliveryMiscDates.includes(fullStr);
                     } else if ((this.haslechon || this.hasbaka) && !this.hasMisc) {
