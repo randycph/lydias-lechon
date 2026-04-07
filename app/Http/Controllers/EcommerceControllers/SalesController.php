@@ -907,10 +907,6 @@ class SalesController extends Controller
             $sale->for_deletion = 1;
             $sale->status = 'CANCELLED';
             $sale->save();
-
-            if ($sale?->user?->email) {
-                Mail::to($sale?->user?->email)->send(new ManualOrderCancelledByAdminMail($sale));
-            }
         }
     
         return redirect()->back()->with('success', 'Selected sales have been deleted.');
@@ -926,10 +922,6 @@ class SalesController extends Controller
                 $sale->for_deletion = 1;
                 $sale->status = 'CANCELLED';
                 $sale->save();
-
-                if ($sale?->user?->email) {
-                    Mail::to($sale?->user?->email)->send(new ManualOrderCancelledByAdminMail($sale));
-                }
 
             } elseif ($record['type'] === 'job') {
                 JobOrder::find($record['id'])?->delete();
@@ -1040,10 +1032,6 @@ class SalesController extends Controller
         //     'new_value' => '',
         //     'reference' => $sale->id
         // ]);
-
-        if ($sale?->user?->email) {
-            Mail::to($sale?->user?->email)->send(new ManualOrderCancelledByAdminMail($sale));
-        }
 
         $sale->for_deletion = 1;
         $sale->status = 'CANCELLED';
