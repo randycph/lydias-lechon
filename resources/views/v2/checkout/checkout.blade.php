@@ -252,6 +252,17 @@
                     
                     await this.getBlockDatesForMulti(delivery.orders, index);
 
+                    this.$nextTick(() => {
+                        const el = this.deliveries[index]._el;
+
+                        if (!el._datepicker) {
+                            this.initMultiDeliveryDatepicker(el, index);
+                        } else {
+                            el._datepicker.destroy(); 
+                            this.initMultiDeliveryDatepicker(el, index);
+                        }
+                    });
+
                     if (!delivery.orders.length) {
                         delivery.need_date = ''
                         delivery.need_time = ''
@@ -467,7 +478,7 @@
                         placeholder: 'Select date',
                         beforeShowDay: (date) => {
 
-                            const delivery = this.deliveries[index]
+                            const delivery = this.deliveries[index]; 
 
                             if (!delivery || !delivery.orders.length) {
                                 return { enabled: false }
@@ -475,10 +486,9 @@
 
                             const formatted = this.formatDate(date)
 
-                            // BLOCK (per delivery)
                             const blockedForThisDate = (delivery.blockedDetails || []).filter(b =>
                                 b.date === formatted &&
-                                this.blockAppliesToDelivery(b, delivery) &&
+                                this.blockAppliesToCart(b) &&
                                 this.blockAppliesToMethod(b) &&
                                 this.isBlockedWithCombo(b)
                             )
@@ -486,9 +496,7 @@
                             const hasAllDayBlock = blockedForThisDate.some(b => b.is_all_day == 1)
 
                             if (hasAllDayBlock) {
-                                return {
-                                    enabled: false,
-                                }
+                                return { enabled: false }
                             }
 
                             // MIN DATE LOGIC
@@ -2235,18 +2243,17 @@
 
                     delivery.blockedDetails = Array.isArray(blocks) ? blocks : [];
 
-                    console.log('blocks for delivery', index, this.deliveries[index].blockedDetails)
-
                     this.$nextTick(() => {
-                        const el = this.$refs['deliveryDate' + index]
+                        this.$nextTick(() => {
 
-                        if (!el) {
-                            console.warn('Datepicker ref not ready for index', index)
-                            return
-                        }
+                            const el = this.deliveries[index]?._el;
 
-                        this.initMultiDeliveryDatepicker(el, index)
-                    })
+                            if (!el) return;
+
+                            this.initMultiDeliveryDatepicker(el, index);
+
+                        });
+                    });
                 },
 
                 async getBlockDates(isDelivery = false) {

@@ -230,8 +230,9 @@
                                 readonly
                                 placeholder="Select Date"
                                 :disabled="!delivery.orders.length"
-                                :x-ref="'deliveryDate' + index"
-                                x-init="initMultiDeliveryDatepicker($el, index)"
+                                x-init="
+                                    delivery._el = $el;
+                                "
                                 @change="validateDelivery(index, 'date')"
                                 class="bg-white border border-gray-300 text-sm rounded-lg block w-full p-2.5 ps-10"
                                 :class="{
