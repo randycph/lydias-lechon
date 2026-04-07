@@ -12,3 +12,5 @@ composer.lock
 package-lock.json
 public/hot
 index.php
+bootstrap/cache/packages.php
+bootstrap/cache/services.php
