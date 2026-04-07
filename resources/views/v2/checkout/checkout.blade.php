@@ -250,7 +250,7 @@
 
                     const delivery = this.deliveries[index]
                     
-                    await this.getBlockDatesForMulti(delivery.orders);
+                    await this.getBlockDatesForMulti(delivery.orders, index);
 
                     if (!delivery.orders.length) {
                         delivery.need_date = ''
@@ -476,13 +476,11 @@
                             const formatted = this.formatDate(date)
 
                             // BLOCK (per delivery)
-                            const blockedForThisDate = this.blockedDetails.filter(b =>
+                            const blockedForThisDate = (delivery.blockedDetails || []).filter(b =>
                                 b.date === formatted &&
                                 this.blockAppliesToDelivery(b, delivery) &&
-                                (
-                                    b.block_type === 'both' ||
-                                    b.block_type === 'delivery'
-                                )
+                                this.blockAppliesToMethod(b) &&
+                                this.isBlockedWithCombo(b)
                             )
 
                             const hasAllDayBlock = blockedForThisDate.some(b => b.is_all_day == 1)
@@ -736,6 +734,11 @@
                         this.availableDeliveryHours = []
                     }
 
+                    this.province = ''
+                    this.city = ''
+                    this.pickup_branch = ''
+                    this.blockedDetails = []
+
                     this.deliveryFee = 0;
                     this.lechonBakaService = this.hasBaka ? window.lechonBakaService : 0;
 
@@ -842,6 +845,14 @@
                     this.location = ''
                     this.getDeliveryFee?.()
                     this.validateSingleDeliveryField('city')
+
+                    this.getBlockDates(true).then(() => {
+                        this.$nextTick(() => {
+                            if (this.$refs.deliveryDate) {
+                                this.initSingleDeliveryDatepicker(this.$refs.deliveryDate)
+                            }
+                        })
+                    })
 
                     this.rebuildAddress()
 
@@ -1497,8 +1508,12 @@
                 async getDeliveryFeeForMultiple(index) {
                     const delivery = this.deliveries[index];
 
-                    const city = delivery.city;
-                    const province = delivery.province;
+                    const city = delivery?.city;
+                    const province = delivery?.province;
+
+                    if (city && province) {
+                        await this.getBlockDatesForMulti(delivery.orders, index);
+                    }
 
                     // include qty in products
                     const products = delivery?.orders?.map(o => ({ product_id: o.product_id, qty: o.qty }));
@@ -1551,6 +1566,12 @@
                         delivery.delivery_fee = 0;
                         delivery.isBaka = false;
                         delivery.lechon_baka_service = 0;
+                    }
+
+                    try {
+                        
+                    } catch (error) {
+                        
                     }
                 },
 
@@ -2182,14 +2203,23 @@
                     }
                 },
 
-                async getBlockDatesForMulti(orders) {
+                async getBlockDatesForMulti(orders, index) {
                     this.blockedDetails = [];
+
+                    let delivery = this.deliveries[index];
                     
                     const cartProductIds = orders.map(i => i.product_id);
 
-                    console.log('Fetching block dates for products:', cartProductIds);
+                    let citiesProvince = {};
 
-                    const response = await fetch('{{ route('checkout.blocks') }}', {
+                    if (delivery.city && delivery.province) {
+                        citiesProvince = {
+                            province: delivery.province,
+                            city: delivery.city
+                        }
+                    }
+
+                    const response = await fetch('{{ route('checkout.blocks') }}',  {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -2197,19 +2227,41 @@
                         },
                         body: JSON.stringify({
                             product_ids: cartProductIds,
+                            ...citiesProvince
                         })
                     });
 
                     const blocks = await response.json();
 
-                    this.blockedDetails = Array.isArray(blocks) ? blocks : [];
+                    delivery.blockedDetails = Array.isArray(blocks) ? blocks : [];
 
-                    // this.initMultiDeliveryDatepicker(el, index)
+                    console.log('blocks for delivery', index, this.deliveries[index].blockedDetails)
 
+                    this.$nextTick(() => {
+                        const el = this.$refs['deliveryDate' + index]
+
+                        if (!el) {
+                            console.warn('Datepicker ref not ready for index', index)
+                            return
+                        }
+
+                        this.initMultiDeliveryDatepicker(el, index)
+                    })
                 },
 
-                async getBlockDates() {
+                async getBlockDates(isDelivery = false) {
                     const cartProductIds = this.carts.map(i => i.product_id);
+
+                    let citiesProvince = {};
+
+                    if  (isDelivery) {
+                        if (!this.province || !this.city) return
+
+                        citiesProvince = {
+                            province: this.province,
+                            city: this.city
+                        }
+                    }
 
                     const response = await fetch('{{ route('checkout.blocks') }}', {
                         method: 'POST',
@@ -2219,7 +2271,8 @@
                         },
                         body: JSON.stringify({
                             product_ids: cartProductIds,
-                            location: this.method === 'pickup' ? this.pickup_branch : ''
+                            location: this.method === 'pickup' ? this.pickup_branch : '',
+                            ...citiesProvince
                         })
                     });
 
@@ -2248,11 +2301,41 @@
                     this.blockModal = false
                 },
 
+                blockAppliesToDelivery(block, delivery) {
+
+                    const cartProductIds = delivery.orders.map(i => i.product_id)
+                    const cartCategoryIds = delivery.orders.map(i => i.product.category_id)
+
+                    const matchProduct =
+                        !block.products?.length ||
+                        block.products.some(p => cartProductIds.includes(p.id))
+
+                    const matchCategory =
+                        !block.categories?.length ||
+                        block.categories.some(c => cartCategoryIds.includes(c.id))
+
+                    const matchLocation =
+                        !block.locations?.length ||
+                        block.locations.some(loc => loc.name === this.pickup_branch)
+
+                    const matchCity =
+                        !block.cities?.length ||
+                        block.cities.some(c =>
+                            c.province === delivery.province &&
+                            c.city === delivery.city
+                        )
+
+                    const matchGeo = matchLocation || matchCity
+
+                    return matchProduct && matchCategory && matchGeo
+                },
+                
                 isBlockedWithCombo(block) {
 
                     if (!block.combo_products?.length) return true
 
                     const cartProductIds = this.carts.map(i => i.product_id)
+                    const cartCategoryIds = this.carts.map(i => i.product.category_id)
 
                     const comboProductMatch =
                         block.combo_products?.some(p => cartProductIds.includes(p.id))
@@ -2268,40 +2351,32 @@
                     const cartProductIds = this.carts.map(i => i.product_id)
                     const cartCategoryIds = this.carts.map(i => i.product.category_id)
 
-                    if (block.scope === 'all') {
-                        return true
-                    }
+                    // PRODUCT
+                    const matchProduct =
+                        !block.products?.length ||
+                        block.products.some(p => cartProductIds.includes(p.id))
 
-                    if (block.scope === 'product') {
+                    // CATEGORY
+                    const matchCategory =
+                        !block.categories?.length ||
+                        block.categories.some(c => cartCategoryIds.includes(c.id))
 
-                        if (!block.products || !block.products.length) return false
+                    // LOCATION
+                    const matchLocation =
+                        !block.locations?.length ||
+                        block.locations.some(loc => loc.name === this.pickup_branch)
 
-                        const blockProductIds = block.products.map(p => p.id)
+                    // CITY
+                    const matchCity =
+                        !block.cities?.length ||
+                        block.cities.some(c =>
+                            c.province === this.province &&
+                            c.city === this.city
+                        )
 
-                        return cartProductIds.some(id => blockProductIds.includes(id))
-                    }
+                    const matchGeo = matchLocation || matchCity
 
-                    if (block.scope === 'category') {
-
-                        if (!block.categories || !block.categories.length) return false
-
-                        const blockCategoryIds = block.categories.map(c => c.id)
-
-                        return cartCategoryIds.some(id => blockCategoryIds.includes(id))
-                    }
-
-                    if (block.scope === 'location') {
-
-                        if (!block.locations || !block.locations.length) return false
-
-                        if (this.method === 'pickup') {
-                            return block.locations.some(loc => loc.name === this.pickup_branch)
-                        }
-
-                        return false;
-                    }
-
-                    return false
+                    return matchProduct && matchCategory && matchGeo
                 },
 
                 blockAppliesToMethod(block) {

@@ -574,10 +574,24 @@ class BlockSlotController extends Controller
             'product_ids.*' => 'integer|exists:products,id',
 
             'location' => 'nullable|string',
+
+            'city' => 'nullable|string',
+            'province' => 'nullable|string'
         ]);
+
+        $city = $validated['city'] ?? null;
+        $province = $validated['province'] ?? null;
+
+        if ($city && $province) {
+            $validated['city_ids'] = Deliverablecities::where('city', $city)
+                ->where('province', $province)
+                ->pluck('id')
+                ->toArray();
+        }
 
         $productIds = $validated['product_ids'];
         $location = $validated['location'] ?? null;
+        $cityIds = $validated['city_ids'] ?? [];
 
         // Get category IDs from cart products
         $categoryIds = Product::whereIn('id', $productIds)
@@ -600,7 +614,7 @@ class BlockSlotController extends Controller
                 'cities:id,province,city'
             ])
             ->whereDate('date', '>=', $today)
-            ->where(function ($query) use ($productIds, $categoryIds, $locationIds) {
+            ->where(function ($query) use ($productIds, $categoryIds, $locationIds, $cityIds) {
 
                 // ALL scope
                 $query->where('scope', 'all')
@@ -627,17 +641,15 @@ class BlockSlotController extends Controller
                     ->whereHas('locations', function ($sub) use ($locationIds) {
                         $sub->whereIn('branches.id', $locationIds);
                     });
-                });
+                })
 
                 // CITY scope
-                if (!empty($locationIds)) {
-                    $query->orWhere(function ($q) use ($locationIds) {
-                        $q->where('scope', 'city')
-                        ->whereHas('cities', function ($sub) use ($locationIds) {
-                            $sub->whereIn('deliverable_cities.id', $locationIds);
-                        });
+                ->orWhere(function ($q) use ($cityIds) {
+                    $q->where('scope', 'location')
+                    ->whereHas('cities', function ($sub) use ($cityIds) {
+                        $sub->whereIn('deliverable_cities.id', $cityIds);
                     });
-                }
+                });
 
             })
             ->orderBy('date')
@@ -650,7 +662,7 @@ class BlockSlotController extends Controller
                 'start_time',
                 'end_time',
             ])
-            ->filter(function ($block) use ($productIds, $categoryIds, $locationIds) {
+            ->filter(function ($block) use ($productIds, $categoryIds, $locationIds, $cityIds) {
 
                 $matchProduct = $block->products->isEmpty()
                     || $block->products->pluck('id')->intersect($productIds)->isNotEmpty();
@@ -662,7 +674,7 @@ class BlockSlotController extends Controller
                     || $block->locations->pluck('id')->intersect($locationIds)->isNotEmpty();
 
                 $matchCity = $block->cities->isEmpty()
-                    || $block->cities->pluck('id')->intersect($locationIds)->isNotEmpty();
+                    || $block->cities->pluck('id')->intersect($cityIds)->isNotEmpty();
 
                 $hasCombo = $block->comboProducts->isNotEmpty();
 
@@ -688,7 +700,9 @@ class BlockSlotController extends Controller
                 //     }
                 // }
                 
-                return $matchProduct && $matchCategory && $matchLocation;
+                $matchGeo = $matchLocation || $matchCity;
+
+                return $matchProduct && $matchCategory && $matchGeo;
             })
             ->values();;
 
