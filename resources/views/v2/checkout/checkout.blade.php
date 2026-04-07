@@ -1930,20 +1930,46 @@
                     return hours
                 },
 
-                getEarliestAllowedDateTime() {
+                calculateEarliestBusinessTime(processingHours) {
 
                     const now = new Date()
-                    const processingHours = this.getRequiredProcessingHours()
+                    let current = new Date(now)
 
-                    let earliest = new Date(now.getTime() + processingHours * 60 * 60 * 1000)
+                    // move to opening if outside hours
+                    if (current.getHours() >= this.closeHour) {
+                        current.setDate(current.getDate() + 1)
+                        current.setHours(this.openHour, 0, 0, 0)
+                    } else if (current.getHours() < this.openHour) {
+                        current.setHours(this.openHour, 0, 0, 0)
+                    }
 
-                    // round up to next hour
-                    earliest = this.roundUpToNextHour(earliest)
+                    let remainingHours = processingHours
 
-                    // then adjust to opening hours
-                    earliest = this.adjustToOpeningHours(earliest)
+                    while (remainingHours > 0) {
 
-                    return earliest
+                        const endOfDay = new Date(current)
+                        endOfDay.setHours(this.closeHour, 0, 0, 0)
+
+                        const availableToday =
+                            (endOfDay - current) / (1000 * 60 * 60)
+
+                        if (remainingHours <= availableToday) {
+                            current.setHours(current.getHours() + remainingHours)
+                            remainingHours = 0
+                        } else {
+                            remainingHours -= availableToday
+
+                            current.setDate(current.getDate() + 1)
+                            current.setHours(this.openHour, 0, 0, 0)
+                        }
+                    }
+
+                    return current
+                },
+
+                getEarliestAllowedDateTime() {
+                    const hours = this.getRequiredProcessingHours()
+                    return this.calculateEarliestBusinessTime(hours)
                 },
 
                 adjustToOpeningHours(dateObj) {
@@ -1996,12 +2022,38 @@
 
                     const processingHours = this.getProcessingHoursForDelivery(delivery)
 
-                    let earliest = new Date(now.getTime() + processingHours * 60 * 60 * 1000)
+                    let current = new Date(now)
 
-                    earliest = this.roundUpToNextHour(earliest)
-                    earliest = this.adjustToOpeningHours(earliest)
+                    // move to opening if outside hours
+                    if (current.getHours() >= this.closeHour) {
+                        current.setDate(current.getDate() + 1)
+                        current.setHours(this.openHour, 0, 0, 0)
+                    } else if (current.getHours() < this.openHour) {
+                        current.setHours(this.openHour, 0, 0, 0)
+                    }
 
-                    return earliest
+                    let remainingHours = processingHours
+
+                    while (remainingHours > 0) {
+
+                        const endOfDay = new Date(current)
+                        endOfDay.setHours(this.closeHour, 0, 0, 0)
+
+                        const availableToday =
+                            (endOfDay - current) / (1000 * 60 * 60)
+
+                        if (remainingHours <= availableToday) {
+                            current.setHours(current.getHours() + remainingHours)
+                            remainingHours = 0
+                        } else {
+                            remainingHours -= availableToday
+
+                            current.setDate(current.getDate() + 1)
+                            current.setHours(this.openHour, 0, 0, 0)
+                        }
+                    }
+
+                    return current
                 },
 
                 getProcessingHoursFromSelectedOrders() {
@@ -2054,17 +2106,8 @@
                 },
 
                 getEarliestForPickupAndSingle() {
-
-                    const now = new Date()
-
-                    const processingHours = this.getCartProcessingHours()
-
-                    let earliest = new Date(now.getTime() + processingHours * 60 * 60 * 1000)
-
-                    earliest = this.roundUpToNextHour(earliest)
-                    earliest = this.adjustToOpeningHours(earliest)
-
-                    return earliest
+                    const hours = this.getCartProcessingHours()
+                    return this.calculateEarliestBusinessTime(hours)
                 },
 
                 getProductName(productId) {
