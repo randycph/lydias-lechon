@@ -867,25 +867,14 @@
                             <div class="form-group">
                                 <label class="d-block">Mode of Payment *</label>
                                 <select required class="custom-select" name="pamenty_mode" id="mode_of_payment">
-                                    <option value="">Select</option>
-                                    <option value="Bank Deposit">Bank Deposit</option>
-                                    <option value="Cash">Cash</option>
-                                    <option value="Check Payment">Check Payment</option>
-                                    <option value="COD">COD</option>
-                                    <option value="Debit/Credit Card">Debit/Credit Card</option>
-                                    <option value="Discount (Promo)">Discount (Promo)</option>
-                                    <option value="Discount (VAT)">Discount (VAT)</option>
-                                    <option value="Discount (Senior Citizen)">Discount (Senior Citizen)</option>
-                                    <option value="Ex-deal">Ex-deal</option>
-                                    <option value="Gcash">Gcash</option>
-                                    <option value="Gift Certificate">Gift Certificate</option>   
-                                    <option value="M Lhuillier">M Lhuillier</option>
-                                    <option value="Ok Order">Ok Order</option>
-                                    <option value="Online Bank Transfer">Online Bank Transfer</option>
-                                    <option value="Open Date Order">Open Date Order</option>
-                                    <option value="Oth">Oth</option>
-                                    <option value="Paymaya">Paymaya</option>
-                                    <option value="Sign-Chit">Sign-Chit</option>      
+                                    <option value="">-Select -</option> 
+                                    @foreach (\App\EcommerceModel\SalesPayment::get_types() as $pm)
+                                        @php $allowed = explode(',', auth()->user()->allowed_payments); @endphp
+                                        @if (auth()->user()->user_role->name === 'Cashier' && !in_array($pm, $allowed))
+                                            @continue
+                                        @endif
+                                        <option value="{{ $pm }}">{{ $pm }}</option>
+                                    @endforeach    
                                 </select>
                                 <input type="hidden" id="sales_header_id" name="sales_header_id">
                             </div>
