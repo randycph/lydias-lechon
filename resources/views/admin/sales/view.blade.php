@@ -363,7 +363,7 @@
                                 </tr>
                             @endif
                             @php
-                                $total_balance = $sales->net_amount - $paidTotal;
+                                $total_balance = ($sales->items->sum('net_amount') + $sales->delivery_fee_amount) - $paidTotal;
                             @endphp
                             @if($total_balance > 0)
                                 <tr style="font-style:italic;">
