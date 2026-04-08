@@ -317,29 +317,21 @@ if (!function_exists('canAddPayment')) {
 
         $daysPassed = $sale->created_at->diffInDays(now());
 
-        $hasCheckPayment = $sale->payments()
-            ->where('payment_type', 'Check Payment')
-            ->exists();
+        $paymentTypes = collect($sale->payments)->pluck('payment_type');
 
-        $hasSignChit = $sale->payments()
-            ->where('payment_type', 'Sign-Chit')
-            ->exists();
+        $hasCheckPayment = $paymentTypes->contains('Check Payment');
+        $hasSignChit = $paymentTypes->contains('Sign-Chit');
 
-        // PRIORITY: Check Payment (3 days)
+        $force30 = auth()->user()->is_a_cashier() && request()->boolean('force_over_30');
+        $force3  = auth()->user()->is_a_cashier() && request()->boolean('force_over_3');
+
         if ($hasCheckPayment) {
-            if (request()->boolean('force_over_3')) {
-                return true;
-            }
-
+            if ($force3) return false;
             return $daysPassed < 3;
         }
 
-        // Sign-Chit (30 days)
         if ($hasSignChit) {
-            if (request()->boolean('force_over_30')) {
-                return true;
-            }
-
+            if ($force30) return false;
             return $daysPassed < 30;
         }
 
