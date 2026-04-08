@@ -270,47 +270,68 @@ class GiftCertificateController extends Controller
 
     public function validateGiftCheque(Request $request)
     {
-        $request->validate([
-            'code' => 'required|string'
-        ]);
+        try {
+            $validator = Validator::make($request->all(), [
+                'code' => 'required|string'
+            ]);
 
-        $code = trim($request->code);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first('code') ?: 'Code is required.',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
 
-        $gc = GiftCheque::where('code', $code)
-            ->whereNull('deleted_at')
-            ->where('status', 'Unused')
-            ->whereNull('sales_header_id')
-            ->first();
+            $code = trim((string) $request->input('code'));
 
-        if (!$gc) {
+            $gc = GiftCertificate::where('code', $code)
+                ->whereNull('deleted_at')
+                ->where('status', 'Unused')
+                ->whereNull('sales_header_id')
+                ->first();
+
+            if (!$gc) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gift cheque is invalid or already used.'
+                ], 422);
+            }
+
+            if (!empty($gc->user_id) && auth()->check() && (int) $gc->user_id !== (int) auth()->id()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This gift cheque is not assigned to your account.'
+                ], 422);
+            }
+
+            if (isset($gc->isApproved) && (string) $gc->isApproved !== '1') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gift cheque is not yet approved.'
+                ], 422);
+            }
+
             return response()->json([
-                'success' => false,
-                'message' => 'Gift cheque is invalid or already used.'
-            ], 422);
-        }
-
-        if (!empty($gc->user_id) && auth()->check() && (int) $gc->user_id !== (int) auth()->id()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'This gift cheque is not assigned to your account.'
-            ], 422);
-        }
-
-        if (isset($gc->isApproved) && (string) $gc->isApproved !== '1') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gift cheque is not yet approved.'
-            ], 422);
-        }
-
-        return response()->json([
-            'success' => true,
-            'gift_cheque' => [
-                'id' => $gc->id,
-                'code' => $gc->code,
+                'success' => true,
+                'message' => 'Gift cheque applied successfully.',
                 'amount' => (float) $gc->amount,
-                'gc_type' => $gc->gc_type,
-            ]
-        ]);
+                'gift_cheque' => [
+                    'id' => $gc->id,
+                    'code' => $gc->code,
+                    'amount' => (float) $gc->amount,
+                    'gc_type' => $gc->gc_type,
+                ]
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('validateGiftCheque failed', [
+                'message' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error while validating gift cheque.'
+            ], 500);
+        }
     }
 }
