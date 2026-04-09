@@ -31,6 +31,11 @@ class SalesHeader extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function subSales()
+    {
+        return $this->hasMany(SalesHeader::class, 'parent_sales_header_id');
+    }
+
     public function assign_to_production_branch($sale, $pb){
         //dd($sale);
         $items = $sale->items;
