@@ -1227,7 +1227,7 @@ class CartController extends Controller
                 'other_cost' => 0,
                 'other_cost_description' => '',
                 'created_by' => $user->id,
-                'delivery_date' => $request->need_date . ' ' . $request->need_time,
+                'delivery_date' => $request->need_date ? $request->need_date . ' ' . $request->need_time : null,
                 'has_baka' => $product->id == 178 ? 1 : 0,
                 'lechon_baka_service' => $product->id == 178 ? ($bakaQty * ($bakaProduct?->price ?? 0)) : 0,
             ]);
