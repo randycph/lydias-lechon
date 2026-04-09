@@ -296,24 +296,27 @@
                                     <td>{{ \Carbon\Carbon::parse($sale->created_at)->format('Y-m-d g:i A') }}</td>
                                     <td>
                                         @if($sale->delivery_status <> 'Open Date')
-                                            @php
-                                                $dates = [];
-
-                                                foreach ($sale->deliveryAddress as $address) {
-                                                    $rawDateTime = trim($address->delivery_date . ' ' . $address->delivery_time);
-
-                                                    if (
-                                                        empty($address->delivery_date) ||
-                                                        str_starts_with($address->delivery_date, '0000-00-00')
-                                                    ) {
-                                                        continue;
+                                            
+                                            
+                                            @if ($sale->deliveryAddress && count($sale->deliveryAddress) > 0)
+                                                @php
+                                                    $dateneeded = '';
+                                                    foreach ($sale->deliveryAddress as $address) {
+                                                        if ($dateneeded != '') {
+                                                            $dateneeded .= ', ';
+                                                        }
+                                                        $dateneeded .= \Carbon\Carbon::parse($address->delivery_date . ' ' . $address->delivery_time)->format('Y-m-d g:i A');
                                                     }
 
-                                                    $dates[] = \Carbon\Carbon::parse($rawDateTime)->format('Y-m-d g:i A');
-                                                }
-                                            @endphp
+                                                    if (!isValidDate($dateneeded)) {
+                                                        $dateneeded = '';
+                                                    }
 
-                                            {{ implode(', ', $dates) }}
+                                                @endphp
+                                                    {{ $dateneeded }}
+                                            @else
+                                                {{ $dateneeded }}
+                                            @endif
                                         @endif
                                     </td>
                                     <td>{{ $sale->delivery_type }}</td>

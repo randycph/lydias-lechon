@@ -360,3 +360,26 @@ if (!function_exists('safe_date')) {
         }
     }
 }
+if (!function_exists('isValidDate')) {
+    function isValidDate($date)
+    {
+        if (empty($date)) {
+            return false;
+        }
+
+        if (
+            $date === '0000-00-00' ||
+            $date === '0000-00-00 00:00:00' ||
+            str_starts_with($date, '0000-00-00')
+        ) {
+            return false;
+        }
+
+        try {
+            \Carbon\Carbon::parse($date);
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+}
