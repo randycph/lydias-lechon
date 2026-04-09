@@ -43,14 +43,16 @@ class CheckUnpaidTransactions extends Command
 
                 // Case 1: delivery already passed
                 $q->whereHas('items', function ($i) use ($now) {
-                    $i->where('delivery_date', '<', $now);
+                    $i->whereNotNull('delivery_date')
+                      ->where('delivery_date', '<', $now);
                 })
 
                 // Case 2: future delivery but order older than 5 days
                 ->orWhere(function ($q2) use ($now) {
                     $q2->whereDate('created_at', '<=', $now->copy()->subDays(5))
                     ->whereHas('items', function ($i) use ($now) {
-                            $i->where('delivery_date', '>=', $now);
+                            $i->whereNotNull('delivery_date')
+                              ->where('delivery_date', '>=', $now);
                     });
                 });
             })
