@@ -307,11 +307,6 @@
                                                         }
                                                         $dateneeded .= \Carbon\Carbon::parse($address->delivery_date . ' ' . $address->delivery_time)->format('Y-m-d g:i A');
                                                     }
-
-                                                    if (!isValidDate($dateneeded)) {
-                                                        $dateneeded = '';
-                                                    }
-
                                                 @endphp
                                                     {{ $dateneeded }}
                                             @else
