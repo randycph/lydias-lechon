@@ -34,6 +34,7 @@ class CheckUnpaidTransactions extends Command
         // Transactions unpaid for 5+ days — cancel them
         $cancel = SalesHeader::where('payment_status', '!=', 'PAID')
             ->where('status', '!=', 'CANCELLED')
+            ->where('has_sub', 0)
             ->whereDate('created_at', '>=', '2025-12-29')
 
             // CANCEL CONDITIONS
