@@ -296,22 +296,7 @@
                                     <td>{{ \Carbon\Carbon::parse($sale->created_at)->format('Y-m-d g:i A') }}</td>
                                     <td>
                                         @if($sale->delivery_status <> 'Open Date')
-                                            
-                                            
-                                            @if ($sale->deliveryAddress && count($sale->deliveryAddress) > 0)
-                                                @php
-                                                    $dateneeded = '';
-                                                    foreach ($sale->deliveryAddress as $address) {
-                                                        if ($dateneeded != '') {
-                                                            $dateneeded .= ', ';
-                                                        }
-                                                        $dateneeded .= \Carbon\Carbon::parse($address->delivery_date . ' ' . $address->delivery_time)->format('Y-m-d g:i A');
-                                                    }
-                                                @endphp
-                                                    {{ $dateneeded }}
-                                            @else
-                                                {{ $dateneeded }}
-                                            @endif
+                                            {{ $dateneeded }}
                                         @endif
                                     </td>
                                     <td>{{ $sale->delivery_type }}</td>
