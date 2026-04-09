@@ -12,6 +12,18 @@
         .row-selected {
             background-color: #92b7da !important;
         }
+        .bootstrap-select > .dropdown-toggle {
+            background-color: #ffffff !important;
+            border: 1px solid #ced4da;
+            color: #495057;
+        }
+
+        .bootstrap-select > .dropdown-toggle:focus,
+        .bootstrap-select > .dropdown-toggle:active {
+            background-color: #ffffff !important;
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25);
+        }
     </style>
 @endsection
 
@@ -41,10 +53,21 @@
                             <tr>
                                 
                                 <td style="width:10%">
-                                    <select name="order_source[]" id="order_source" class="form-control" multiple size="1">
-                                        <option value="" disabled>Source</option>
+                                    <select 
+                                        name="order_source[]" 
+                                        id="order_source" 
+                                        class="form-control selectpicker" 
+                                        multiple 
+                                        size="1" 
+                                        data-selected-text-format="count"
+                                        data-none-selected-text="0 selected source"
+                                        data-count-selected-text="{0} selected sources"  
+                                    >
                                         @foreach(\App\EcommerceModel\Branch::where('status', 1)->orderBy('name','asc')->get() as $b)
-                                            <option value="{{$b->name}}" {{ isset($_GET['order_source']) && in_array($b->name, $_GET['order_source']) ? 'selected' : '' }}>{{$b->name}}</option>
+                                            <option value="{{$b->name}}"
+                                                {{ isset($_GET['order_source']) && in_array($b->name, $_GET['order_source']) ? 'selected' : '' }}>
+                                                {{$b->name}}
+                                            </option>
                                         @endforeach
                                         <option value="Web">Web</option>
                                     </select>
@@ -52,7 +75,6 @@
                                 <td style="width:11%">
                                     <select class="form-control" name="order_status">
                                         <option value="">Order Status</option>
-                                        <option value="0" @if(isset($filter->order_status) && $filter->order_status == '0') selected="selected" @endif>Unconfirm</option>
                                         <option value="1" @if(isset($filter->order_status) && $filter->order_status == '1') selected="selected" @endif>Confirmed</option>
                                         <option value="2" @if(isset($filter->order_status) && $filter->order_status == '2') selected="selected" @endif>Open Date</option>
                                         <option value="Cancelled" @if(isset($filter->order_status) && $filter->order_status == 'Cancelled') selected="selected" @endif>Cancelled</option>
@@ -68,7 +90,7 @@
                                 
                                 <td style="width:20%"><input name="search" type="search" id="search" class="form-control"  placeholder="Order, Customer" value="{{ $filter->search }}">
                                 </td>                                
-                                <td align="left" style="width:10%">
+                                <td align="left" style="">
                                     <div class="bd-highlight">
                                         <div class="dropdown d-inline">
                                             <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -127,9 +149,9 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>
-                                    <input type="submit" class="btn-xs btn btn-success" value="Search">
-                                    <a href="{{ route('sales-transaction.index') }}" class="btn-xs btn btn-info">Reset</a>
+                                <td class="d-flex ml-2">
+                                    <input type="submit" class="btn-sm btn btn-success mr-2" value="Search">
+                                    <a href="{{ route('sales-transaction.index') }}" class="btn-sm btn btn-info">Reset</a>
                                 </td>
                             </tr>
                             <tr>
@@ -145,6 +167,23 @@
                                 </td>
                                 <td style="width:16%">
                                     <input @if(isset($filter->dn_end_date)) type="date" value="{{$filter->dn_end_date}}" @else type="text" onfocus="(this.type='date')" @endif class="form-control" name="dn_end_date" placeholder="End Date (Date Needed)">
+                                </td>
+                                <td style="width:16%">
+                                    <select 
+                                        name="delivery_address[]" 
+                                        id="delivery_address" 
+                                        class="form-control selectpicker" 
+                                        multiple 
+                                        size="1"
+                                        data-none-selected-text="0 selected delivery address"
+                                        data-selected-text-format="count"
+                                        data-count-selected-text="{0} selected delivery addresses"
+                                    >
+                                        <option value="" disabled>Delivery Address</option>
+                                        @foreach(\App\EcommerceModel\Branch::where('status', 1)->orderBy('name','asc')->get() as $b)
+                                            <option value="{{$b->name}}" {{ isset($_GET['delivery_address']) && in_array($b->name, $_GET['delivery_address']) ? 'selected' : '' }}>{{$b->name}}</option>
+                                        @endforeach
+                                    </select>
                                 </td>
                                 <td>
                                     <button id="bulk-delete-btn" type="button" class="btn btn-danger d-none" data-toggle="modal" data-target="#confirmDeleteModal">
@@ -188,6 +227,7 @@
                                 <th>Customer</th>
                                 <th>Ordered By</th>
                                 <th>Source</th>
+                                <th>Delivery Address</th>
                                 <th>Order Date</th>
                                 <th>Date Needed</th>
                                 <th>Delivery Type</th>
@@ -247,30 +287,36 @@
                                             <a title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale->id) }}">{{$sale->order_number }}</a><br>
                                         </div>
                                     </th>
-                                    <td class="{{ isUnreadTransaction($sale->id) ? 'font-weight-bold' : '' }}">{{ $sale->customer_name ?? $sale->contact_person }}</td>
+                                    <td class="{{ isUnreadTransaction($sale->id) ? 'font-weight-bold' : '' }}">
+                                        {{ $sale?->singleContact?->contact_person ?? $sale->customer_name ?? $sale->contact_person }}
+                                    </td>
                                     <td>{{ $sale->customer_name }}</td>
                                     <td>{{ $sale->order_source }}</td>
+                                    <td>{{ $sale->delivery_type == 'Store Pickup' ? $sale->outlet : $sale->delivery_branch }}</td>
                                     <td>{{ \Carbon\Carbon::parse($sale->created_at)->format('Y-m-d g:i A') }}</td>
                                     <td>
                                         @if($sale->delivery_status <> 'Open Date')
-                                            @php
-                                                $dates = [];
-
-                                                foreach ($sale->deliveryAddress as $address) {
-                                                    $rawDateTime = trim($address->delivery_date . ' ' . $address->delivery_time);
-
-                                                    if (
-                                                        empty($address->delivery_date) ||
-                                                        str_starts_with($address->delivery_date, '0000-00-00')
-                                                    ) {
-                                                        continue;
+                                            
+                                            
+                                            @if ($sale->deliveryAddress && count($sale->deliveryAddress) > 0)
+                                                @php
+                                                    $dateneeded = '';
+                                                    foreach ($sale->deliveryAddress as $address) {
+                                                        if ($dateneeded != '') {
+                                                            $dateneeded .= ', ';
+                                                        }
+                                                        $dateneeded .= \Carbon\Carbon::parse($address->delivery_date . ' ' . $address->delivery_time)->format('Y-m-d g:i A');
                                                     }
 
-                                                    $dates[] = \Carbon\Carbon::parse($rawDateTime)->format('Y-m-d g:i A');
-                                                }
-                                            @endphp
+                                                    if (!isValidDate($dateneeded)) {
+                                                        $dateneeded = '';
+                                                    }
 
-                                            {{ implode(', ', $dates) }}
+                                                @endphp
+                                                    {{ $dateneeded }}
+                                            @else
+                                                {{ $dateneeded }}
+                                            @endif
                                         @endif
                                     </td>
                                     <td>{{ $sale->delivery_type }}</td>
@@ -343,7 +389,15 @@
                                     <td width="10%">
                                         <!-- 10102 -->
                                          @php $forecasters = [3,13]; $forecasters = [13]; @endphp
-                                        @if(!in_array(auth()->user()->role_id, $forecasters) || auth()->user()->id == 10102)                                    
+                                        @if (
+                                            auth()->user()->has_access_to_route('sales-transaction.restore') || 
+                                            auth()->user()->has_access_to_route('sales-transaction.view') ||
+                                            auth()->user()->has_access_to_route('sales-transaction.update') ||
+                                            auth()->user()->has_access_to_route('sales-transaction.destroy') ||
+                                            auth()->user()->has_access_to_route('sales-transaction.quick_update') ||
+                                            auth()->user()->has_access_to_route('sales-transaction.view_payment') || 
+                                            auth()->user()->has_access_to_route('payment.add.store') 
+                                        )
                                             <nav class="nav table-options">
                                                 @if($sale->trashed())
                                                     @if (auth()->user()->has_access_to_route('sales-transaction.restore'))
@@ -359,22 +413,27 @@
                                                             <i data-feather="eye"></i>
                                                         </a>
                                                         <div class="dropdown-menu dropdown-menu-right">
-
                                                             <a class="dropdown-item" title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale->id) }}">View Sales Summary</a>
-                                                            @if ($sale->status !== 'CANCELLED')
+                                                            
+                                                                
+                                                                @if (
+                                                                    auth()->user()->has_access_to_route('sales-transaction.update') &&
+                                                                    !$sale->isConfirmedAndPastCutoffAndForecasted() && $sale->isDeliveryDateIsFuture()
+                                                                ) 
+                                                                <a class="dropdown-item" href="{{ route('sales.update_details',$sale->id) }}" title="Update Sales Details & Items">
+                                                                    Update Sales Details </a> 
+                                                                @endif
+   
                                                                 @if($sale->isConfirm != 1)
-                                                                    @if(auth()->user()->role_id == 2 || auth()->user()->role_id == 1)
+                                                                    @if(auth()->user()->has_access_to_route('sales.confirm.order'))
                                                                     <a class="dropdown-item"  href="javascript:void(0);" onclick="confirm_order({{$sale->id}},'{{ number_format((\App\EcommerceModel\SalesHeader::balance($sale->id)),2) }}');" title="Confirm Order" >Confirm Order</a>
                                                                     @endif
                                                                 @endif
-                                                                @if (!isDispatcher())
-                                                                <a class="dropdown-item"  href="{{ route('sales.update_details',$sale->id) }}" title="Update Sales Details & Items" >Update Sales Details</a>
+                                                                @if($dateneeded > date('Y-m-d H:i:s') && auth()->user()->has_access_to_route('sales-transaction.destroy'))
+                                                                <hr class="dropdown-divider">    
+                                                                <a class="dropdown-item text-danger" href="javascript:void(0)" onclick="delete_sales({{$sale->id}},'{{$sale->order_number}}')" title="Delete Transaction">Delete</a>
                                                                 @endif
-                                                                @if($dateneeded > date('Y-m-d H:i:s') && !isDispatcher())
-                                                                    <hr class="dropdown-divider">
-                                                                    <a class="dropdown-item text-danger" href="javascript:void(0)" onclick="delete_sales({{$sale->id}},'{{$sale->order_number}}')" title="Delete Transaction">Delete</a>
-                                                                @endif
-                                                            @endif
+                                                            
                                                         </div>
                                                     </div>
                                                     @if ($sale->status !== 'CANCELLED')
@@ -391,7 +450,15 @@
 
                                                                 <a class="dropdown-item" style="display: none;" target="_blank" href="{{ route('sales-transaction.view_payment',$sale->id) }}" title="Show payment" data-id="{{$sale->id}}">Sales Payment</a>
 
-                                                                <a class="dropdown-item" href="javascript:;" onclick="addPayment('{{$sale->id}}','{{\App\EcommerceModel\SalesPayment::get_remaining_unpaid($sale->gross_amount,$sale->id)}}');">Add Payment</a>
+                                                                @if(canAddPayment($sale) && auth()->user()->has_access_to_route('payment.add.store'))
+                                                                    <a class="dropdown-item" href="javascript:;"
+                                                                    onclick="addPayment(
+                                                                        '{{ $sale->id }}',
+                                                                        '{{ \App\EcommerceModel\SalesPayment::get_remaining_unpaid($sale->gross_amount, $sale->id) }}'
+                                                                    );">
+                                                                        Add Payment
+                                                                    </a>
+                                                                @endif
 
                                                                 @if($dateneeded > date('Y-m-d H:i:s'))
                                                                     @if(auth()->user()->role_id == 2 || auth()->user()->role_id == 1 || auth()->user()->role_id == 3)
@@ -399,8 +466,9 @@
                                                                     @endif
                                                                 @endif
 
+                                                                @if (auth()->user()->has_access_to_route('sales-transaction.view_payment'))
                                                                 <a class="dropdown-item" href="javascript:;" onclick="show_added_payments('{{$sale->id}}')">View Payments</a>
-
+                                                                @endif
 
                                                                 @if($sale->payment_type == 'xxxxxx')
                                                                 <a class="dropdown-item" href="{{route('staff-edit-payment',$sale->id)}}">Update Sales Payment</a>
@@ -449,7 +517,7 @@
 
                                                                 @endphp
 
-                                                                @if (!$isPast)
+                                                                @if ((!$isPast || $sale->delivery_status == 'Open Date') && $sale->delivery_status != 'Delivered/Picked Up')
                                                                     <a class="dropdown-item"
                                                                     href="javascript:void(0);"
                                                                     onclick="change_delivery_status({{ $sale->id }}, {{ $is_allowed_delivered }})"
@@ -494,8 +562,9 @@
                                                         <div class="dropdown-menu dropdown-menu-right">
 
                                                                 <a class="dropdown-item" title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale->id) }}">View Sales Summary</a>
-                                                                 <a class="dropdown-item" href="javascript:;" onclick="show_added_payments('{{$sale->id}}')">View Payments</a>
-
+                                                                @if (auth()->user()->has_access_to_route('sales-transaction.view_payment'))
+                                                                <a class="dropdown-item" href="javascript:;" onclick="show_added_payments('{{$sale->id}}')">View Payments</a>
+                                                                @endif
 
                                                            
                                                         </div>
@@ -897,25 +966,14 @@
                             <div class="form-group">
                                 <label class="d-block">Mode of Payment *</label>
                                 <select required class="custom-select" name="pamenty_mode" id="mode_of_payment">
-                                    <option value="">Select</option>
-                                    <option value="Bank Deposit">Bank Deposit</option>
-                                    <option value="Cash">Cash</option>
-                                    <option value="Check Payment">Check Payment</option>
-                                    <option value="COD">COD</option>
-                                    <option value="Debit/Credit Card">Debit/Credit Card</option>
-                                    <option value="Discount (Promo)">Discount (Promo)</option>
-                                    <option value="Discount (VAT)">Discount (VAT)</option>
-                                    <option value="Discount (Senior Citizen)">Discount (Senior Citizen)</option>
-                                    <option value="Ex-deal">Ex-deal</option>
-                                    <option value="Gcash">Gcash</option>
-                                    <option value="Gift Certificate">Gift Certificate</option>   
-                                    <option value="M Lhuillier">M Lhuillier</option>
-                                    <option value="Ok Order">Ok Order</option>
-                                    <option value="Online Bank Transfer">Online Bank Transfer</option>
-                                    <option value="Open Date Order">Open Date Order</option>
-                                    <option value="Oth">Oth</option>
-                                    <option value="Paymaya">Paymaya</option>
-                                    <option value="Sign-Chit">Sign-Chit</option>      
+                                    <option value="">-Select -</option> 
+                                    @foreach (\App\EcommerceModel\SalesPayment::get_types() as $pm)
+                                        @php $allowed = explode(',', auth()->user()->allowed_payments); @endphp
+                                        @if (auth()->user()->user_role->name === 'Cashier' && !in_array($pm, $allowed))
+                                            @continue
+                                        @endif
+                                        <option value="{{ $pm }}">{{ $pm }}</option>
+                                    @endforeach    
                                 </select>
                                 <input type="hidden" id="sales_header_id" name="sales_header_id">
                             </div>
@@ -1529,4 +1587,7 @@
 
 
     </script>
+
+
+
 @endsection
