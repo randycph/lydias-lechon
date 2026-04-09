@@ -129,6 +129,11 @@ class SalesHeader extends Model
             AND ecommerce_sales_payments.status = "PAID"
         ) >= net_amount');
     }
+    
+    public function subSales()
+    {
+        return $this->hasMany(SalesHeader::class, 'parent_sales_header_id');
+    }
 
     public function assign_to_production_branch($sale, $pb){
         //dd($sale);
