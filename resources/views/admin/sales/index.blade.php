@@ -296,19 +296,32 @@
                                     <td>{{ \Carbon\Carbon::parse($sale->created_at)->format('Y-m-d g:i A') }}</td>
                                     <td>
                                         @if($sale->delivery_status <> 'Open Date')
-                                            
-                                            
+
                                             @if ($sale->deliveryAddress && count($sale->deliveryAddress) > 0)
                                                 @php
                                                     $dateneeded = '';
+
                                                     foreach ($sale->deliveryAddress as $address) {
+                                                        $rawDateTime = trim($address->delivery_date . ' ' . $address->delivery_time);
+
+                                                        // Skip invalid zero dates
+                                                        if (
+                                                            $address->delivery_date == '0000-00-00' ||
+                                                            $address->delivery_date == '0000-00-00 00:00:00' ||
+                                                            $rawDateTime == '0000-00-00 00:00:00'
+                                                        ) {
+                                                            continue;
+                                                        }
+
                                                         if ($dateneeded != '') {
                                                             $dateneeded .= ', ';
                                                         }
-                                                        $dateneeded .= \Carbon\Carbon::parse($address->delivery_date . ' ' . $address->delivery_time)->format('Y-m-d g:i A');
+
+                                                        $dateneeded .= \Carbon\Carbon::parse($rawDateTime)->format('Y-m-d g:i A');
                                                     }
                                                 @endphp
-                                                    {{ $dateneeded }}
+
+                                                {{ $dateneeded }}
                                             @else
                                                 {{ $dateneeded }}
                                             @endif
