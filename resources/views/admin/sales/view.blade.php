@@ -83,27 +83,27 @@
 
                                                         @forelse($products as $product)
                                                             @php
-                                                                $product = \App\Models\Product::find($product->product_id);
-                                                                $lineTotal = ($product->price * ($product->qty ?? 1))
-                                                                        + (!empty($product->paella) ? ($product->paella_price ?? 0) * ($product->qty ?? 1) : 0);
+                                                                $prod = \App\Models\Product::find($product->product_id);
+                                                                $lineTotal = ($prod->price * ($product->qty ?? 1))
+                                                                        + (!empty($product->paella) ? ($prod->paella_price ?? 0) * ($product->qty ?? 1) : 0);
 
                                                                 $grandTotal += $lineTotal;
                                                             @endphp
                                                             <tr>
                                                                 <td class="tx-nowrap">
-                                                                    {!! highlightPaella($product?->product_name ?? '') !!}
+                                                                    {!! highlightPaella($product?->product_name ?? $product?->product?->name ?? '') !!}
                                                                 </td>
-                                                                <th class="tx-center">{{ $product->no_of_pax }}</th>                                
+                                                                <th class="tx-center">{{ $prod->no_of_pax }}</th>                                
                                                                 <td class="tx-nowrap">
                                                                     {{ \Carbon\Carbon::parse(($address->delivery_date . ' ' . $address->delivery_time))->format('F d, Y g:i A') }}
                                                                 </td>
                                                                 <td></td>
                                                                 <td class="tx-center">{{ number_format((int) ($product->qty ?? 0), 0) }}</td>
                                                                 <td class="tx-right">
-                                                                    ₱{{ number_format(!empty($product->paella) ? ($product->paella_price ?? 0) : 0, 2) }}
+                                                                    ₱{{ number_format(!empty($product->paella) ? ($product->product->paella_price ?? 0) : 0, 2) }}
                                                                 </td>
                                                                 <td class="tx-right">
-                                                                    ₱{{ number_format($product->price ?? 0, 2) }}
+                                                                    ₱{{ number_format($prod->price ?? 0, 2) }}
                                                                 </td>
                                                                 <td class="tx-right">
                                                                     ₱{{ number_format($lineTotal, 2) }}
@@ -137,8 +137,17 @@
                                     @endforeach
                                     </ul>
                                 @else
-                                    {{ $sales->customer_delivery_adress }}
+                                    @php
+                                        $region = $sales->region ? $sales->region : '';
+                                        $province = $sales->province ? ', ' . $sales->province : '';
+                                        $city = $sales->city ? ', ' . $sales->city : '';
+                                        $barangay = $sales->barangay ? ', ' . $sales->barangay : '';
+                                        $full_address = $sales->customer_delivery_adress ? $sales->customer_delivery_adress . $province . $city . $barangay : '';
+                                    @endphp
+                                    {{ $full_address }}
+                                    @if ($sales->delivery_branch)
                                     <br>Delivery Branch: {{ $sales->delivery_branch ?? '' }}
+                                    @endif
                                 @endif
                             @else
                                 @php
@@ -159,7 +168,9 @@
                                 $saleDetail = $sales->items ? $sales->items->first() : null;
                                 $deliveryDate = $saleDetail ? \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y g:i A') : 'N/A';
                             @endphp
+                            @if ($sales->delivery_status <> 'Open Date')
                             <p class="mg-b-3">Date needed: {{$deliveryDate}}</p>
+                            @endif
                         @endif
 
                         <p class="mg-b-3">Contact Person: {{$sales->contact_person ?? $sales->customer_name}}</p>
@@ -216,10 +227,14 @@
                                 <td class="tx-nowrap">{!! highlightPaella($details?->product_name) !!}</td>
                                 <th class="tx-center">{{$details->no_of_pax}}</th>                                
                                 <td class="tx-nowrap">
-                                    @if(date('H:i A',strtotime($details->delivery_date)) == '12:00 PM')
-                                        {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
+                                    @if ($sales->delivery_status == 'Open Date')
+                                        -
                                     @else
-                                        {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
+                                        @if(date('H:i A',strtotime($details->delivery_date)) == '12:00 PM')
+                                            {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
+                                        @else
+                                            {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
+                                        @endif
                                     @endif
                                     
                                 </td>
@@ -348,7 +363,7 @@
                                         {{$payment->status}}
                                     @endif
                                 </td>
-                                <td class="tx-right">{{number_format($payment->amount, 2)}}</td>
+                                <td class="tx-right">₱{{number_format($salesDetails->sum('net_amount') + $sales->delivery_fee_amount - $sales->discount_amount, 2)}}</td>
                                
                             </tr>
                             @empty
@@ -360,7 +375,7 @@
                             @if($paidTotal > 0)
                                 <tr style="font-weight:bold;">
                                     <td class="tx-left" colspan="4">Total</td>
-                                    <td class="tx-right">{{number_format($paidTotal, 2)}}</td> 
+                                    <td class="tx-right">₱{{number_format($salesDetails->sum('net_amount') + $sales->delivery_fee_amount - $sales->discount_amount, 2)}}</td> 
                                 </tr>
                             @endif
                             @php
