@@ -170,12 +170,7 @@ class SalesHeader extends Model
     {
         $sale = SalesHeader::withTrashed()->whereId($this->id)->first();
 
-        if (isset($sale->is_sub) && $sale->is_sub == 1) {
-            $parentSale = SalesHeader::withTrashed()->where('id', $sale->parent_sales_header_id)->first();
-            $payments = SalesPayment::where('sales_header_id', $parentSale->id)->get();
-        } else {
-            $payments = SalesPayment::where('sales_header_id', $sale->id)->get();
-        }
+        $payments = SalesPayment::where('sales_header_id', $sale->id)->get();
 
         $cntr=0;
         foreach($payments as $p){
