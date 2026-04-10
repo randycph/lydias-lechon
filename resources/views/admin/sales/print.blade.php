@@ -193,6 +193,7 @@
 
                                                     @forelse($products as $product)
                                                         @php
+                                                            $product = \App\Models\Product::find($product->product_id);
                                                             $lineTotal = ($product->product->price * ($product->qty ?? 1))
                                                                     + (!empty($product->paella) ? ($product->product->paella_price ?? 0) * ($product->qty ?? 1) : 0);
 
