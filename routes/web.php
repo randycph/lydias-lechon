@@ -15,6 +15,8 @@ use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\EcommerceControllers\CouponController;
 use App\Http\Controllers\BlockSlotController;
+use App\Http\Controllers\EcommerceControllers\CouponController;
+use App\Http\Controllers\EcommerceControllers\GiftCertificateController;
 use App\Http\Controllers\EcommerceControllers\ReportsController;
 use App\Http\Controllers\FacebookController;
 use App\Http\Controllers\FrontendController;
@@ -81,7 +83,6 @@ Route::get('/storesss', [FrontendController::class, 'our_stores'])->name('our-st
 Route::get('/lechon-pricelistss', [FrontendController::class, 'lechon_pricelist'])->name('lechon-pricelist');
 Route::get('/menuss', [FrontendController::class, 'lechon_menu'])->name('lechon-menu');
 Route::get('/checkout', [FrontendController::class, 'checkout'])->name('checkout');
-Route::get('/checkout2', [FrontendController::class, 'checkout2'])->name('checkout2');
 Route::get('/sales-summary/{id}', [FrontendController::class, 'confirmation'])->name('confirmation');
 Route::get('/login', [FrontendController::class, 'login'])->name('login');
 Route::post('/logout', [FrontendController::class, 'logout'])->name('logout');
@@ -302,6 +303,7 @@ Route::post('cart-remove-product','EcommerceControllers\CartController@remove_pr
 
 Route::post('/add-manual-coupon','EcommerceControllers\CouponController@add_manual_coupon')->name('add-manual-coupon');
 Route::get('/add-auto-coupon','EcommerceControllers\CouponController@get_auto_coupons')->name('get-auto-coupons');
+Route::get('/coupon/check-auto-eligibility', [CouponController::class, 'checkAutoCouponEligibility'])->name('coupon.check-auto-eligibility');
 Route::get('checkout-as-guest', 'EcommerceControllers\CheckoutController@checkout_as_guest')->name('cart.front.checkout-as-guest');
 Route::post('/temp_save','EcommerceControllers\CartController@save_sales')->name('cart.temp_sales');
 Route::get('guest/view/{id}', 'FrontController@show_sales_summary_guest')->name('profile.show_sales_summary_guest');
@@ -627,6 +629,7 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::get('/admin/gift-certificate-upload', 'EcommerceControllers\GiftCertificateController@upload')->name('gift-certificate.upload');
     Route::post('/admin/gift-certificate-upload', 'EcommerceControllers\GiftCertificateController@upload_submit')->name('gift-certificate.upload_submit');
     Route::get('/admin/gift-certificate-export', 'EcommerceControllers\GiftCertificateController@export')->name('gift-certificate.export');
+    Route::post('/validate-gift-cheque', [GiftCertificateController::class, 'validateGiftCheque'])->name('cart.validate_gift_cheque');
     //
 
     //Sales Transaction
@@ -756,6 +759,7 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::get('/admin/coupon-restore/{id}', 'EcommerceControllers\CouponController@restore')->name('coupon.restore');
     Route::post('/admin/coupon-multiple-change-status','EcommerceControllers\CouponController@multiple_change_status')->name('coupon.multiple.change.status');
     Route::post('/admin/coupon-multiple-delete','EcommerceControllers\CouponController@multiple_delete')->name('coupon.multiple.delete');
+    Route::post('/coupon/validate', [CouponController::class, 'validateCoupon'])->name('coupon.validate');
 
     Route::get('/report/coupon_list', 'EcommerceControllers\CouponController@coupon_list')->name('report.coupon.list');
     Route::get('/report/sales_list', 'EcommerceControllers\CouponController@sales_list')->name('report.sales.list');

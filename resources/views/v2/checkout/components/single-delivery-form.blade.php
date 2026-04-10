@@ -20,7 +20,7 @@
                 x-model="delivery_address"
                 @focus="startEditingAddress"
                 @input="onAddressInput"
-                @blur="validateSingleDeliveryField('delivery_address'); finishEditingAddress()"
+                @blur="validateSingleDeliveryField('address'); finishEditingAddress()"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5"
                 :class="{'border-red-500': singleDeliveryErrors.delivery_address}"
                 rows="3"
@@ -43,19 +43,17 @@
                 </label>
 
                 <select
-                    x-model="province"
-                    @change="onProvinceChange"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-                    :class="{'border-red-500': singleDeliveryErrors.province}"
-                >
-                    <option value="">Choose a province</option>
+                x-model="province"
+                @change="onProvinceChange()"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+                :class="{'border-red-500': singleDeliveryErrors.province}"
+            >
+                <option value="">Choose a province</option>
 
-                    @foreach ($provinces as $province)
-                        <option value="{{ $province }}">
-                            {{ $province }}
-                        </option>
-                    @endforeach
-                </select>
+                <template x-for="prov in provincesList" :key="prov">
+                    <option :value="prov" x-text="prov"></option>
+                </template>
+            </select>
 
                 <template x-if="singleDeliveryErrors.province">
                     <p class="text-red-500 text-xs mt-1"
@@ -70,18 +68,18 @@
                 </label>
 
                 <select
-                    x-model="city"
-                    @change="onCityChange"
-                    :disabled="!province"
-                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 disabled:bg-gray-100"
-                    :class="{'border-red-500': singleDeliveryErrors.city}"
-                >
-                    <option value="">Choose a city</option>
+                x-model="city"
+                @change="onCityChange()"
+                :disabled="!province"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 disabled:bg-gray-100"
+                :class="{'border-red-500': singleDeliveryErrors.city}"
+            >
+                <option value="">Choose a city</option>
 
-                    <template x-for="(c, i) in filteredCities" :key="i">
-                        <option :value="c" x-text="c"></option>
-                    </template>
-                </select>
+                <template x-for="cityName in filteredCities" :key="cityName">
+                    <option :value="cityName" x-text="cityName"></option>
+                </template>
+            </select>
 
                 <template x-if="singleDeliveryErrors.city">
                     <p class="text-red-500 text-xs mt-1"
@@ -98,20 +96,18 @@
             </label>
 
             <select
-                x-model="location"
-                @change="getDeliveryFee(); onBarangayChange()"
-                :disabled="!city"
-                :class="{'border-red-500': singleDeliveryErrors.location}"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 disabled:bg-gray-100"
-            >
-                <option value="">Choose a barangay</option>
+            x-model="location"
+            @change="onBarangayChange()"
+            :disabled="!city"
+            :class="{'border-red-500': singleDeliveryErrors.location}"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 disabled:bg-gray-100"
+        >
+            <option value="">Choose a barangay</option>
 
-                <template x-for="(b, i) in filteredBarangay()" :key="i">
-                    <option :value="b"
-                            x-text="b">
-                    </option>
-                </template>
-            </select>
+            <template x-for="brgy in filteredBarangay()" :key="brgy">
+                <option :value="brgy" x-text="brgy"></option>
+            </template>
+        </select>
 
             <template x-if="singleDeliveryErrors.location">
                 <p class="text-red-500 text-xs mt-1"
