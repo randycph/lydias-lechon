@@ -1275,18 +1275,23 @@
             function toggleDateTime() {
                 if ($('#open-date').is(':checked')) {
                     $('#date2').prop('required', false);
-                    $('.selectpicker').prop('required', false);
+                    $('select[name="update_dateneeded_time"]').prop('required', false);
+
                     $('.asterisk-date').text('');
                     $('.datetime').hide();
+
                 } else {
                     $('#date2').prop('required', true);
-                    $('.selectpicker').prop('required', true);
+                    $('select[name="update_dateneeded_time"]').prop('required', true);
+
                     $('.asterisk-date').text('*');
                     $('.datetime').show();
 
                     $('#date2').val('');
-                    $('.selectpicker').val('').selectpicker('refresh');
+                    $('select[name="update_dateneeded_time"]').val('').selectpicker('refresh');
                 }
+
+                $('.selectpicker').selectpicker('refresh');
             }
 
             // Run on load
