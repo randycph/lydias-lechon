@@ -129,9 +129,10 @@
                                                     <ul>
                                                         @foreach ($products as $product)
                                                             @php 
-                                                                $price = $product->product->price ?? 0;
+                                                                $prod = \App\Models\Product::find($product->product_id);
+                                                                $price = $prod->price ?? 0;
                                                                 if (!empty($product->paella)) {
-                                                                    $price += $product->product->paella_price ?? 0;
+                                                                    $price += $prod->paella_price ?? 0;
                                                                 }
                                                             @endphp
                                                             <li>
