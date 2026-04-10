@@ -253,7 +253,7 @@ class PaymayaController extends Controller
     public function pay(Request $request)
     {        
         try {
-            $sales = SalesHeader::where('order_number', $request->sales_header_id)->first();
+            $sales = SalesHeader::with('items')->where('id', $request->sales_header_id)->first();
 
             $request['sales_header_id'] = $sales->id;
 
