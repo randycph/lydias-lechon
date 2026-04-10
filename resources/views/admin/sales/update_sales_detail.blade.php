@@ -539,14 +539,6 @@
 
         // });
         $("#items_form").submit(function() {
-            if ($('#shipping_type').val() == 'd2d') {
-                if ($('#delivery_branch').val() == '') {
-                    alert('Please select Delivery Branch');
-                    return false;
-                } else {
-                    return true;
-                }
-            }
             const btn = document.getElementById('submitItemsBtn');
             btn.disabled = true;
             btn.innerText = 'Saving...';
