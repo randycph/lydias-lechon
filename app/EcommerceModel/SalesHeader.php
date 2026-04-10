@@ -170,12 +170,7 @@ class SalesHeader extends Model
     {
         $sale = SalesHeader::withTrashed()->whereId($this->id)->first();
 
-        if (isset($sale->is_sub) && $sale->is_sub == 1) {
-            $parentSale = SalesHeader::withTrashed()->where('id', $sale->parent_sales_header_id)->first();
-            $payments = SalesPayment::where('sales_header_id', $parentSale->id)->get();
-        } else {
-            $payments = SalesPayment::where('sales_header_id', $sale->id)->get();
-        }
+        $payments = SalesPayment::where('sales_header_id', $sale->id)->get();
 
         $cntr=0;
         foreach($payments as $p){
@@ -244,13 +239,18 @@ class SalesHeader extends Model
             $amount = $sale->net_amount;
         }
 
-        if ($sales->is_sub == 1) {
-            $payments = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)->where('status', 'PAID')->get();
-            $paid = (float) $payments->sum('amount');
-        } else {
-            $payments = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->get();
-            $paid = (float) $payments->sum('amount');
-        }
+        $amount = $sales->net_amount;
+
+        // if ($sales->is_sub == 1) {
+        //     $payments = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)->where('status', 'PAID')->get();
+        //     $paid = (float) $payments->sum('amount');
+        // } else {
+        //     $payments = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->get();
+        //     $paid = (float) $payments->sum('amount');
+        // }
+
+        $payments = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->get();
+        $paid = (float) $payments->sum('amount');
 
         $total = $amount - $paid;
 
@@ -348,11 +348,13 @@ class SalesHeader extends Model
 
         $sales = SalesHeader::withTrashed()->whereId($this->id)->first();
 
-        if ($sales->is_sub == 1) {
-            $paid = SalesPayment::where('sales_header_id',$sales->parent_sales_header_id)->where('status', 'PAID')->sum('amount');
-        } else {
-            $paid = SalesPayment::where('sales_header_id',$this->id)->where('status', 'PAID')->sum('amount');
-        }
+        // if ($sales->is_sub == 1) {
+        //     $paid = SalesPayment::where('sales_header_id',$sales->parent_sales_header_id)->where('status', 'PAID')->sum('amount');
+        // } else {
+        //     $paid = SalesPayment::where('sales_header_id',$this->id)->where('status', 'PAID')->sum('amount');
+        // }
+
+        $paid = SalesPayment::where('sales_header_id',$this->id)->where('status', 'PAID')->sum('amount');
         
         if ($paid > 0) {
             if ($this->delivery_status == 'Waiting for Payment' || $this->delivery_status == '' || is_null($this->delivery_status)) {
