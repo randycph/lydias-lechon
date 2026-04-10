@@ -295,6 +295,8 @@ class SalesHeader extends Model
         $sale = SalesHeader::withTrashed()->whereId($id)->first();
         $amount = $sale->items->sum('gross_amount') + $sale->delivery_fee_amount;
 
+        $amount = $sales->net_amount;
+
         // if ($sales->is_sub == 1) {
         //     $payments = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)->where('status', 'PAID')->get();
         //     $paid = (float) $payments->sum('amount');
@@ -402,11 +404,13 @@ class SalesHeader extends Model
 
         $sales = SalesHeader::withTrashed()->whereId($this->id)->first();
 
-        if ($sales->is_sub == 1) {
-            $paid = SalesPayment::where('sales_header_id',$sales->parent_sales_header_id)->where('status', 'PAID')->sum('amount');
-        } else {
-            $paid = SalesPayment::where('sales_header_id',$this->id)->where('status', 'PAID')->sum('amount');
-        }
+        // if ($sales->is_sub == 1) {
+        //     $paid = SalesPayment::where('sales_header_id',$sales->parent_sales_header_id)->where('status', 'PAID')->sum('amount');
+        // } else {
+        //     $paid = SalesPayment::where('sales_header_id',$this->id)->where('status', 'PAID')->sum('amount');
+        // }
+
+        $paid = SalesPayment::where('sales_header_id',$this->id)->where('status', 'PAID')->sum('amount');
         
         if ($paid > 0) {
             if ($this->delivery_status == 'Waiting for Payment' || $this->delivery_status == '' || is_null($this->delivery_status)) {
