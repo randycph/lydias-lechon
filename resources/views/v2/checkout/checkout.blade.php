@@ -176,6 +176,7 @@
         window.minimum_processing_hours_baka = @json($minimum_processing_hours_baka);
         window.initialCarts = @json($carts);
         window.lechonBakaService = @json($lechonBakaService);
+        window.APP_DEBUG = @json(config('app.debug'));
     </script>
 
     <script>
@@ -2429,17 +2430,23 @@
 
                 calculateEarliestTime(processingHours) {
 
-                    const now = new Date()
+                    const debugNow = this.getDebugNowFromUrl()
 
-                    // Step 1: add processing normally
+                    const now = debugNow
+                        ? new Date(debugNow)
+                        : new Date()
+
+                            console.log(now)
+
+                    // add processing normally
                     let earliest = new Date(
                         now.getTime() + processingHours * 60 * 60 * 1000
                     )
 
-                    // Step 2: round up to next hour
+                    // round up to next hour
                     earliest = this.roundUpToNextHour(earliest)
 
-                    // Step 3: adjust to business hours
+                    //adjust to business hours
                     earliest = this.adjustToOpeningHours(earliest)
 
                     return earliest
@@ -2533,6 +2540,11 @@
                     }
 
                     return true
+                },
+
+                getDebugNowFromUrl() {
+                    const params = new URLSearchParams(window.location.search)
+                    return params.get('debug_now')
                 }
 
             }
