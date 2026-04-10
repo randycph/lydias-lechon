@@ -1109,6 +1109,7 @@
                                         qty: o.qty,
                                         product: o.product,
                                         product_name: o.product_name,
+                                        price: o.price
                                     })),
                                     need_date: d.need_date,
                                     need_time: d.need_time,
