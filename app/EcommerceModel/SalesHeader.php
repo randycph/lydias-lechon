@@ -328,6 +328,8 @@ class SalesHeader extends Model
             $paid = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->sum('amount');
         }
 
+        $paid = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->sum('amount');
+
         logger('$paid: '.$paid);
 
         // $paid = SalesPayment::where('sales_header_id',$id)->whereStatus('PAID')->sum('amount');
