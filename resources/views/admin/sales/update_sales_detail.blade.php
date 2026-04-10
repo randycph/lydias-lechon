@@ -70,24 +70,6 @@
 
 
                                     @if (auth()->user()->has_access_to_route('sales.update_delivery_branch'))
-                                        <div class="form-group divd2d"
-                                            @if ($salesheader->delivery_type != 'Door to door delivery') style="display:none;" @endif>
-
-                                            @if (count($salesheader?->deliveryAddress) == 0)
-                                                <label class="d-block">Delivery Branch <span class="tx-danger">*</span></label>
-                                                <select class="selectpicker mg-b-5"
-                                                    data-style="btn btn-outline-light btn-md btn-block tx-left"
-                                                    title="Select branch to deliver" data-width="100%" name="delivery_branch"
-                                                    id="delivery_branch">
-                                                    <option value="">- Select Branch -</option>
-                                                    @foreach (\App\EcommerceModel\Branch::where('status', 1)->where('delivery_branch', 1)->orderBy('name')->get() as $b)
-                                                        <option @if ($salesheader->delivery_branch == $b->name) selected @endif
-                                                            value="{{ $b->name }}">{{ $b->name }}</option>
-                                                    @endforeach
-                                                </select>
-                                            @endif
-
-                                        </div>
 
                                         <div class="form-group">    
                                             <label class="d-block">Location <span class="tx-danger">*</span></label>
