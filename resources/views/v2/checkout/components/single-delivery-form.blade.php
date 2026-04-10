@@ -43,17 +43,19 @@
                 </label>
 
                 <select
-                x-model="province"
-                @change="onProvinceChange()"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-                :class="{'border-red-500': singleDeliveryErrors.province}"
-            >
-                <option value="">Choose a province</option>
+                    x-model="province"
+                    @change="onProvinceChange"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+                    :class="{'border-red-500': singleDeliveryErrors.province}"
+                >
+                    <option value="">Choose a province</option>
 
-                <template x-for="prov in provincesList" :key="prov">
-                    <option :value="prov" x-text="prov"></option>
-                </template>
-            </select>
+                    @foreach ($provinces as $province)
+                        <option value="{{ $province }}">
+                            {{ $province }}
+                        </option>
+                    @endforeach
+                </select>
 
                 <template x-if="singleDeliveryErrors.province">
                     <p class="text-red-500 text-xs mt-1"
