@@ -384,7 +384,7 @@
                                 this.isBlockedWithCombo(b)
                             )
 
-                            // If any full-day block exists → disable entire date
+                            // If any full-day block exists - disable entire date
                             const hasAllDayBlock = blockedForThisDate.some(b => b.is_all_day == 1)
 
                             if (hasAllDayBlock) {
@@ -1911,25 +1911,6 @@
                     return hours
                 },
 
-                getRequiredProcessingHours() {
-
-                    let hours = 0
-
-                    if (window.hasLechon) {
-                        hours = Math.max(hours, parseInt(window.minimum_processing_hours || 24))
-                    }
-
-                    if (window.hasMisc) {
-                        hours = Math.max(hours, parseInt(window.minimum_processing_hours_misc || 12))
-                    }
-
-                    if (window.hasBaka) {
-                        hours = Math.max(hours, parseInt(window.minimum_processing_hours_baka || 72))
-                    }
-
-                    return hours
-                },
-
                 calculateEarliestBusinessTime(processingHours) {
 
                     const now = new Date()
@@ -1968,8 +1949,17 @@
                 },
 
                 getEarliestAllowedDateTime() {
-                    const hours = this.getRequiredProcessingHours()
-                    return this.calculateEarliestBusinessTime(hours)
+                    return this.calculateEarliestTime(this.getRequiredProcessingHours())
+                },
+
+                getEarliestForPickupAndSingle() {
+                    return this.calculateEarliestTime(this.getCartProcessingHours())
+                },
+
+                getEarliestDateTimeForDelivery(delivery) {
+                    return this.calculateEarliestTime(
+                        this.getProcessingHoursForDelivery(delivery)
+                    )
                 },
 
                 adjustToOpeningHours(dateObj) {
@@ -1978,7 +1968,7 @@
 
                     const hour = adjusted.getHours()
 
-                    // If before opening → move to 9AM
+                    // If before opening - move to 9AM
                     if (hour < this.openHour) {
                         adjusted.setHours(this.openHour, 0, 0, 0)
                     }
@@ -2013,47 +2003,6 @@
                     })
 
                     return hours
-                },
-
-
-                getEarliestDateTimeForDelivery(delivery) {
-
-                    const now = new Date()
-
-                    const processingHours = this.getProcessingHoursForDelivery(delivery)
-
-                    let current = new Date(now)
-
-                    // move to opening if outside hours
-                    if (current.getHours() >= this.closeHour) {
-                        current.setDate(current.getDate() + 1)
-                        current.setHours(this.openHour, 0, 0, 0)
-                    } else if (current.getHours() < this.openHour) {
-                        current.setHours(this.openHour, 0, 0, 0)
-                    }
-
-                    let remainingHours = processingHours
-
-                    while (remainingHours > 0) {
-
-                        const endOfDay = new Date(current)
-                        endOfDay.setHours(this.closeHour, 0, 0, 0)
-
-                        const availableToday =
-                            (endOfDay - current) / (1000 * 60 * 60)
-
-                        if (remainingHours <= availableToday) {
-                            current.setHours(current.getHours() + remainingHours)
-                            remainingHours = 0
-                        } else {
-                            remainingHours -= availableToday
-
-                            current.setDate(current.getDate() + 1)
-                            current.setHours(this.openHour, 0, 0, 0)
-                        }
-                    }
-
-                    return current
                 },
 
                 getProcessingHoursFromSelectedOrders() {
@@ -2103,11 +2052,6 @@
                     })
 
                     return hours
-                },
-
-                getEarliestForPickupAndSingle() {
-                    const hours = this.getCartProcessingHours()
-                    return this.calculateEarliestBusinessTime(hours)
                 },
 
                 getProductName(productId) {
@@ -2481,6 +2425,24 @@
                     }
 
                     return false
+                },
+
+                calculateEarliestTime(processingHours) {
+
+                    const now = new Date()
+
+                    // Step 1: add processing normally
+                    let earliest = new Date(
+                        now.getTime() + processingHours * 60 * 60 * 1000
+                    )
+
+                    // Step 2: round up to next hour
+                    earliest = this.roundUpToNextHour(earliest)
+
+                    // Step 3: adjust to business hours
+                    earliest = this.adjustToOpeningHours(earliest)
+
+                    return earliest
                 },
 
                 getNextAvailableDate(startDate) {
