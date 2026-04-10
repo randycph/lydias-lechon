@@ -43,7 +43,7 @@ You have been assigned a new delivery. Please see the details below:
     $product = \App\Models\Product::find($product->product_id);
     $price = $product->price ?? 0;
     if (!empty($product->paella)) {
-        $price += $product->product->paella_price ?? 0;
+        $price += $product->paella_price ?? 0;
     }
 @endphp
 

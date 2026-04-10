@@ -229,7 +229,7 @@
                                                                             @php
                                                                                 $product = \App\Models\Product::find($product->product_id);
                                                                                 $base   = (float)($product->price ?? 0);
-                                                                                $addOn  = !empty($product->paella) ? (float)($product->product->paella_price ?? 0) : 0;
+                                                                                $addOn  = !empty($product->paella) ? (float)($product->paella_price ?? 0) : 0;
                                                                                 $price  = $base + $addOn;
                                                                             @endphp
                                                                             <li>

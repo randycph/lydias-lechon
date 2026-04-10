@@ -85,7 +85,7 @@
                                                             @php
                                                                 $product = \App\Models\Product::find($product->product_id);
                                                                 $lineTotal = ($product->price * ($product->qty ?? 1))
-                                                                        + (!empty($product->paella) ? ($product->product->paella_price ?? 0) * ($product->qty ?? 1) : 0);
+                                                                        + (!empty($product->paella) ? ($product->paella_price ?? 0) * ($product->qty ?? 1) : 0);
 
                                                                 $grandTotal += $lineTotal;
                                                             @endphp
@@ -93,14 +93,14 @@
                                                                 <td class="tx-nowrap">
                                                                     {!! highlightPaella($product?->product_name ?? $product?->product?->name ?? '') !!}
                                                                 </td>
-                                                                <th class="tx-center">{{ $product->product->no_of_pax }}</th>                                
+                                                                <th class="tx-center">{{ $product->no_of_pax }}</th>                                
                                                                 <td class="tx-nowrap">
                                                                     {{ \Carbon\Carbon::parse(($address->delivery_date . ' ' . $address->delivery_time))->format('F d, Y g:i A') }}
                                                                 </td>
                                                                 <td></td>
                                                                 <td class="tx-center">{{ number_format((int) ($product->qty ?? 0), 0) }}</td>
                                                                 <td class="tx-right">
-                                                                    ₱{{ number_format(!empty($product->paella) ? ($product->product->paella_price ?? 0) : 0, 2) }}
+                                                                    ₱{{ number_format(!empty($product->paella) ? ($product->paella_price ?? 0) : 0, 2) }}
                                                                 </td>
                                                                 <td class="tx-right">
                                                                     ₱{{ number_format($product->price ?? 0, 2) }}
