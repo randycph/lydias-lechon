@@ -15,7 +15,6 @@ use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\EcommerceControllers\CouponController;
 use App\Http\Controllers\BlockSlotController;
-use App\Http\Controllers\EcommerceControllers\CouponController;
 use App\Http\Controllers\EcommerceControllers\GiftCertificateController;
 use App\Http\Controllers\EcommerceControllers\ReportsController;
 use App\Http\Controllers\FacebookController;
