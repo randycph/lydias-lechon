@@ -84,7 +84,7 @@
                                                         @forelse($products as $product)
                                                             @php
                                                                 $product = \App\Models\Product::find($product->product_id);
-                                                                $lineTotal = ($product->product->price * ($product->qty ?? 1))
+                                                                $lineTotal = ($product->price * ($product->qty ?? 1))
                                                                         + (!empty($product->paella) ? ($product->product->paella_price ?? 0) * ($product->qty ?? 1) : 0);
 
                                                                 $grandTotal += $lineTotal;
@@ -103,7 +103,7 @@
                                                                     ₱{{ number_format(!empty($product->paella) ? ($product->product->paella_price ?? 0) : 0, 2) }}
                                                                 </td>
                                                                 <td class="tx-right">
-                                                                    ₱{{ number_format($product->product->price ?? 0, 2) }}
+                                                                    ₱{{ number_format($product->price ?? 0, 2) }}
                                                                 </td>
                                                                 <td class="tx-right">
                                                                     ₱{{ number_format($lineTotal, 2) }}
