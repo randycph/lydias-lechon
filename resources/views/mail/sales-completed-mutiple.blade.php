@@ -68,6 +68,7 @@ if (!$address) continue;
 @foreach ($products as $product)
 
 @php 
+    $product = \App\Models\Product::find($product->product_id);
     $price = $product->product->price ?? 0;
     if (!empty($product->paella)) {
         $price += $product->product->paella_price ?? 0;
