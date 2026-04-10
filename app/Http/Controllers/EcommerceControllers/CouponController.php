@@ -40,20 +40,13 @@ class CouponController extends Controller
     {
         $listing = new ListingHelper('desc', 10, 'updated_at');
 
-        $query  = DB::table('coupon_new');
+        $coupons = $listing->simple_search(Coupon::class, $this->searchFields);
 
-        $searchFields = ['code', 'status'];
+        // Simple search init data
+        $filter = $listing->get_filter($this->searchFields);
+        $searchType = 'simple_search';
 
-        $coupons = $listing->simple_search_query(
-            $query,    
-            $searchFields
-        );
-
-        $filter = $listing->get_filter($searchFields);
-
-        $searchType = 'simple_search_query';
-
-        return view('admin.coupon.index', compact('coupons', 'filter', 'searchType'));
+        return view('admin.coupon.index',compact('coupons', 'filter', 'searchType'));
     }
 
     /**
