@@ -130,7 +130,7 @@ class DeliveryService
 
                 foreach ($delivery->orders as $order) {
 
-                    $product = $order->product;
+                    $product = Product::find($order->product_id);
                     $gross_amount = ((float)$product->price + ($order->paella ? $product->paella_price : 0)) * $order->qty;
                     $tax_amount = $gross_amount - ($gross_amount/1.12);
                     $grand_gross += $gross_amount;

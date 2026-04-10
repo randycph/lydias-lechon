@@ -1887,6 +1887,7 @@
                                         qty: o.qty,
                                         product: o.product,
                                         product_name: o.product_name,
+                                        price: o.price
                                     })),
                                     need_date: d.need_date,
                                     need_time: d.need_time,
@@ -2400,6 +2401,7 @@
                                 parseFloat(order.paella_price || 0) > 0
                                     ? order.product.name + ' Boneless with Paella'
                                     : order.product.name,
+                            price: parseFloat(order.price || 0),
                         })
                     }
 
