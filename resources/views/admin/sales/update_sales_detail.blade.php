@@ -1297,6 +1297,9 @@
             // Run on load
             toggleDateTime();
 
+            $('#date2').datepicker('setDate', '{{$date_only}}');
+            $('select[name="update_dateneeded_time"]').val('{{$time_only}}').selectpicker('refresh');
+
             // Run on change
             $('#open-date').on('change', toggleDateTime);
         });
