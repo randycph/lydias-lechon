@@ -1669,6 +1669,7 @@
                                 parseFloat(order.paella_price || 0) > 0
                                     ? order.product.name + ' Boneless with Paella'
                                     : order.product.name,
+                            price: parseFloat(order.price || 0),
                         })
                     }
 
