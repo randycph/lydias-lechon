@@ -418,7 +418,7 @@ class SalesHeader extends Model
             }
         }
 
-        if ($paid >= $this->net_amount) {
+        if ($paid >= $this->items->sum('net_amount')) {
             SalesHeader::whereId($this->id)->update(['payment_status' => 'PAID']);
 
             return 'PAID';
