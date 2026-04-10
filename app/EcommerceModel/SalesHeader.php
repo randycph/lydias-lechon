@@ -239,7 +239,7 @@ class SalesHeader extends Model
             $amount = $sale->net_amount;
         }
 
-        $amount = $sales->net_amount;
+        $amount = $sales->items->sum('net_amount') + $sales->delivery_fee_amount ?? 0;
 
         // if ($sales->is_sub == 1) {
         //     $payments = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)->where('status', 'PAID')->get();
