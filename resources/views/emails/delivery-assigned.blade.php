@@ -40,10 +40,10 @@ You have been assigned a new delivery. Please see the details below:
 @foreach ($products as $product)
 
 @php 
-    $product = \App\Models\Product::find($product->product_id);
-    $price = $product->price ?? 0;
+    $prod = \App\Models\Product::find($product->product_id);
+    $price = $prod->price ?? 0;
     if (!empty($product->paella)) {
-        $price += $product->paella_price ?? 0;
+        $price += $prod->paella_price ?? 0;
     }
 @endphp
 
