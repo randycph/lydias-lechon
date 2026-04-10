@@ -240,7 +240,7 @@ class SalesHeader extends Model
 
     public function getPaymentadminstatusAttribute()
     {
-        $amount = floatval($this->net_amount);
+        $amount = floatval($this->items->sum('net_amount')) + floatval($this->delivery_fee_amount ?? 0);
         $sale = SalesHeader::withTrashed()->find($this->id);
 
         if (isset($sale->parent_sales_header_id) && $sale->parent_sales_header_id != null) {
@@ -250,6 +250,9 @@ class SalesHeader extends Model
             $payment = SalesPayment::where('sales_header_id', $sale->id)->where('status', 'PAID')->get();
             $paid = (float) $payment->sum('amount');
         }
+
+        $payment = SalesPayment::where('sales_header_id', $sale->id)->where('status', 'PAID')->get();
+        $paid = (float) $payment->sum('amount');
 
         if (isset($sale->parent_sales_header_id) && $sale->parent_sales_header_id != null) {
             $newSale = SalesHeader::where('id', $sale->parent_sales_header_id)->first();
