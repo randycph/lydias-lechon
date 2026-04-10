@@ -576,6 +576,7 @@
         });
 
         $(function() {
+            $('#shipping_type').trigger('change');
             $('.selectpicker').selectpicker();
         });
 
@@ -733,18 +734,23 @@
 
         $('#shipping_type').on('change', function() {
             var r = $(this).val();
+
             if (r == 'd2d') {
                 $('.divd2d').show();
                 $('.divsp').hide();
+
+                $('#update_dateneeded_sp').prop('required', false);
+                $('#update_dateneeded_d2d').prop('required', true);
+
             } else if (r == 'storepickup') {
                 $('.divd2d').hide();
                 $('.divsp').show();
+
+                $('#update_dateneeded_sp').prop('required', true);
+                $('#update_dateneeded_d2d').prop('required', false);
             }
-            $('.select2').select2({
-                placeholder: 'Choose one',
-                searchInputPlaceholder: 'Search options'
-            });
-            $('.selectpicker').selectpicker();
+
+            $('.selectpicker').selectpicker('refresh');
         });
 
         window.preloadedAddresses = @json($salesheader->deliveryAddress ?? []);
