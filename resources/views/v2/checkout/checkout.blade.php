@@ -183,6 +183,7 @@
         window.eligibleAutoCoupons = @json($eligibleAutoCoupons);
         window.allCoupons = @json($allCoupons);
         window.eligibleGiftCheques = @json($eligibleGiftCheques ?? []);
+        window.APP_DEBUG = @json(config('app.debug'));
     </script>
 
     <script>
@@ -912,7 +913,7 @@
                         this.openPrivacyModal()
                     }
                     if (!this.allowMultiple && this.hasBaka && this.lechonBakaService > 0) {
-                        console.log('1111')
+                        console.log('not multiple order and has baka');
                     }
                      this.$watch('province', () => {
                     this.removeInvalidLocationCoupons();
@@ -2643,8 +2644,6 @@
                     return hours
                 },
 
-                
-
                 calculateEarliestBusinessTime(processingHours) {
 
                     const now = new Date()
@@ -2683,8 +2682,17 @@
                 },
 
                 getEarliestAllowedDateTime() {
-                    const hours = this.getRequiredProcessingHours()
-                    return this.calculateEarliestBusinessTime(hours)
+                    return this.calculateEarliestTime(this.getRequiredProcessingHours())
+                },
+
+                getEarliestForPickupAndSingle() {
+                    return this.calculateEarliestTime(this.getCartProcessingHours())
+                },
+
+                getEarliestDateTimeForDelivery(delivery) {
+                    return this.calculateEarliestTime(
+                        this.getProcessingHoursForDelivery(delivery)
+                    )
                 },
 
                 adjustToOpeningHours(dateObj) {
@@ -2693,7 +2701,7 @@
 
                     const hour = adjusted.getHours()
 
-                    // If before opening → move to 9AM
+                    // If before opening - move to 9AM
                     if (hour < this.openHour) {
                         adjusted.setHours(this.openHour, 0, 0, 0)
                     }
@@ -2728,47 +2736,6 @@
                     })
 
                     return hours
-                },
-
-
-                getEarliestDateTimeForDelivery(delivery) {
-
-                    const now = new Date()
-
-                    const processingHours = this.getProcessingHoursForDelivery(delivery)
-
-                    let current = new Date(now)
-
-                    // move to opening if outside hours
-                    if (current.getHours() >= this.closeHour) {
-                        current.setDate(current.getDate() + 1)
-                        current.setHours(this.openHour, 0, 0, 0)
-                    } else if (current.getHours() < this.openHour) {
-                        current.setHours(this.openHour, 0, 0, 0)
-                    }
-
-                    let remainingHours = processingHours
-
-                    while (remainingHours > 0) {
-
-                        const endOfDay = new Date(current)
-                        endOfDay.setHours(this.closeHour, 0, 0, 0)
-
-                        const availableToday =
-                            (endOfDay - current) / (1000 * 60 * 60)
-
-                        if (remainingHours <= availableToday) {
-                            current.setHours(current.getHours() + remainingHours)
-                            remainingHours = 0
-                        } else {
-                            remainingHours -= availableToday
-
-                            current.setDate(current.getDate() + 1)
-                            current.setHours(this.openHour, 0, 0, 0)
-                        }
-                    }
-
-                    return current
                 },
 
                 getProcessingHoursFromSelectedOrders() {
@@ -2818,11 +2785,6 @@
                     })
 
                     return hours
-                },
-
-                getEarliestForPickupAndSingle() {
-                    const hours = this.getCartProcessingHours()
-                    return this.calculateEarliestBusinessTime(hours)
                 },
 
                 getProductName(productId) {
@@ -3150,13 +3112,12 @@
                 },
 
                 getBlockedTimeRangesForDate(date) {
-                return this.blockedDetails.filter(b =>
-                    b.date === date &&
-                    this.blockAppliesToCart(b) &&
-                    this.blockAppliesToMethod(b) &&
-                    this.isBlockedWithCombo(b) &&
-                    b.is_all_day == 0
-                )
+                    return this.blockedDetails.filter(b =>
+                        b.date === date &&
+                        this.blockAppliesToCart(b) &&
+                        this.blockAppliesToMethod(b) &&
+                        b.is_all_day == 0
+                    )
                 },
 
                 normalizeTime(timeStr) {
@@ -3164,27 +3125,85 @@
                     return timeStr.substring(0,5) // from "11:00:00" to "11:00"
                 },
 
-                
-                getNextAvailableDate(startDate, blocks = this.blockedDetails, applies = null) {
-                let date = new Date(startDate)
+                blockAppliesToDelivery(block, delivery) {
 
-                while (true) {
-                    const formatted = this.formatDate(date)
+                    if (!delivery || !delivery.orders?.length) return false
 
-                    const blockedForThisDate = (blocks || []).filter(b => {
-                        if (b.date !== formatted) return false
-                        if (b.is_all_day != 1) return false
+                    const deliveryProductIds = delivery.orders.map(o => o.product_id)
 
-                        return typeof applies === 'function' ? applies(b) : true
-                    })
+                    const deliveryCategoryIds = delivery.orders
+                        .map(o => o.product?.category_id)
+                        .filter(Boolean)
 
-                    if (!blockedForThisDate.length) {
-                        return date
+                    if (block.scope === 'all') {
+                        return true
                     }
 
-                    date.setDate(date.getDate() + 1)
-                }
-            },
+                    if (block.scope === 'product') {
+
+                        if (!block.products?.length) return false
+
+                        const blockProductIds = block.products.map(p => p.id)
+
+                        return deliveryProductIds.some(id => blockProductIds.includes(id))
+                    }
+
+                    if (block.scope === 'category') {
+
+                        if (!block.categories?.length) return false
+
+                        const blockCategoryIds = block.categories.map(c => c.id)
+
+                        return deliveryCategoryIds.some(id => blockCategoryIds.includes(id))
+                    }
+
+                    return false
+                },
+
+                calculateEarliestTime(processingHours) {
+
+                    const debugNow = this.getDebugNowFromUrl()
+
+                    const now = debugNow
+                        ? new Date(debugNow)
+                        : new Date()
+
+                    // add processing normally
+                    let earliest = new Date(
+                        now.getTime() + processingHours * 60 * 60 * 1000
+                    )
+
+                    // round up to next hour
+                    earliest = this.roundUpToNextHour(earliest)
+
+                    //adjust to business hours
+                    earliest = this.adjustToOpeningHours(earliest)
+
+                    return earliest
+                },
+
+                getNextAvailableDate(startDate) {
+                    let date = new Date(startDate)
+
+                    while (true) {
+                        const formatted = this.formatDate(date)
+
+                        const blockedForThisDate = this.blockedDetails.filter(b =>
+                            b.date === formatted &&
+                            this.blockAppliesToCart(b) &&
+                            this.blockAppliesToMethod(b)
+                        )
+
+                        const hasAllDayBlock = blockedForThisDate.some(b => b.is_all_day == 1)
+
+                        if (!hasAllDayBlock) {
+                            return date
+                        }
+
+                        // move to next day
+                        date.setDate(date.getDate() + 1)
+                    }
+                },
 
                 get incompleteProgress() {
                     if (!this.contact.name || !this.contact.mobile || !this.contact.email) {
@@ -3251,6 +3270,11 @@
                     }
 
                     return true
+                },
+
+                getDebugNowFromUrl() {
+                    const params = new URLSearchParams(window.location.search)
+                    return params.get('debug_now')
                 }
 
             }
