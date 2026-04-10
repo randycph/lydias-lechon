@@ -224,7 +224,7 @@
 
 
                     if (!this.allowMultiple && this.hasBaka && this.lechonBakaService > 0) {
-                        console.log('1111')
+                        console.log('not multiple order and has baka');
                     }
                 },
 
@@ -2435,8 +2435,6 @@
                     const now = debugNow
                         ? new Date(debugNow)
                         : new Date()
-
-                            console.log(now)
 
                     // add processing normally
                     let earliest = new Date(
