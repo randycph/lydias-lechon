@@ -128,8 +128,7 @@
                                                 @if(is_array($products) || is_object($products))
                                                     <ul>
                                                         @foreach ($products as $product)
-                                                            @php
-                                                                $product = \App\Models\Product::find($product->product_id);
+                                                            @php 
                                                                 $price = $product->product->price ?? 0;
                                                                 if (!empty($product->paella)) {
                                                                     $price += $product->product->paella_price ?? 0;
