@@ -449,6 +449,7 @@ class FrontendController extends Controller
 
         $sales = SalesHeader::where('user_id', Auth::id())
                             ->where('is_sub', 0)
+                            ->whereHas('items')
                             ->with([
                                 'couponUsed',
                                 'items.product.photos',
