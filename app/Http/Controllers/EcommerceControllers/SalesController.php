@@ -272,9 +272,15 @@ class SalesController extends Controller
             ]);
 
         } else {
-            SalesHeader::whereId($request->update_dateneeded_id)->update([
-                'delivery_status' => $sales->delivery_status // keep existing status if not open date
-            ]);
+            if ($sales->delivery_status == 'Open Date') {
+                SalesHeader::whereId($request->update_dateneeded_id)->update([
+                    'delivery_status' => ''
+                ]);
+            } else {
+                SalesHeader::whereId($request->update_dateneeded_id)->update([
+                    'delivery_status' => $sales->delivery_status // keep existing status if not open date
+                ]);
+            }
         }
 
         if ($request->has('update_dateneeded_date') && $request->has('update_dateneeded_time')) {
