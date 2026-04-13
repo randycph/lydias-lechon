@@ -363,7 +363,7 @@
                                         {{$payment->status}}
                                     @endif
                                 </td>
-                                <td class="tx-right">₱{{number_format($salesDetails->sum('net_amount') + $sales->delivery_fee_amount - $sales->discount_amount, 2)}}</td>
+                                <td class="tx-right">₱{{number_format($payment->amount, 2)}}</td>
                                
                             </tr>
                             @empty
@@ -375,7 +375,7 @@
                             @if($paidTotal > 0)
                                 <tr style="font-weight:bold;">
                                     <td class="tx-left" colspan="4">Total</td>
-                                    <td class="tx-right">₱{{number_format($salesDetails->sum('net_amount') + $sales->delivery_fee_amount - $sales->discount_amount, 2)}}</td> 
+                                    <td class="tx-right">₱{{number_format($salesPayments->sum('amount'), 2)}}</td> 
                                 </tr>
                             @endif
                             @php
