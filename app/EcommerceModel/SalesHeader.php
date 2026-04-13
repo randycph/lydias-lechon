@@ -566,6 +566,10 @@ class SalesHeader extends Model
 
         $deliveryDate = Carbon::parse($item->delivery_date);
 
+        if ($item->delivery_date == null || $item->delivery_date == '0000-00-00 00:00:00') {
+            return true;
+        }
+
         return $deliveryDate->isFuture();
     }
 
@@ -585,6 +589,10 @@ class SalesHeader extends Model
 
         $deliveryDate = Carbon::parse($item->delivery_date);
         $now = Carbon::now();
+
+        if ($item->delivery_date == null || $item->delivery_date == '0000-00-00 00:00:00') {
+            return true;
+        }
 
         return
             $deliveryDate->isTomorrow() &&
