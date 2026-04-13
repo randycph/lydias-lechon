@@ -400,7 +400,7 @@ class SalesController extends Controller
                     'gross_amount' => $sales->items->sum('gross_amount'),
                     'net_amount' => $amt,
                     'customer_address' => '',
-                    'delivery_branch' => $request->delivery_branch
+                    'delivery_branch' => $request->delivery_branch ?? $sales->delivery_branch
                 ]);
 
             }else{
@@ -413,7 +413,7 @@ class SalesController extends Controller
                     'gross_amount' => $amt,
                     'net_amount' => $amt,
                     'customer_address' => '',
-                    'delivery_branch' => $request->delivery_branch
+                    'delivery_branch' => $request->delivery_branch ?? $sales->delivery_branch
                 ]);
 
             }
