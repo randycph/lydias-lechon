@@ -1053,11 +1053,42 @@ class SalesController extends Controller
         }
         
         if ($salesHeader?->user?->email) {
-            Mail::to($salesHeader?->user?->email)->send(new ManualOrderCancelledByAdminMail($salesHeader));
+            Mail::to($salesHeader->user->email)
+                ->send(new ManualOrderCancelledByAdminMail($salesHeader));
         }
 
+        // Cancel current
         $salesHeader->status = 'CANCELLED';
         $salesHeader->save();
+
+        if ($salesHeader->is_sub && $salesHeader->parent_sales_header_id) {
+
+            $parent = SalesHeader::find($salesHeader->parent_sales_header_id);
+
+            if ($parent) {
+
+                // Get all children of parent
+                $children = SalesHeader::where('parent_sales_header_id', $parent->id)->get();
+
+                // Check if ALL are cancelled or abandoned
+                $allClosed = $children->every(function ($child) {
+                    return in_array($child->status, ['CANCELLED', 'ABANDONED']);
+                });
+
+                if ($allClosed) {
+
+                    // Decide parent status
+                    // If ALL cancelled - CANCELLED
+                    // Else - ABANDONED
+                    $allCancelled = $children->every(function ($child) {
+                        return $child->status === 'CANCELLED';
+                    });
+
+                    $parent->status = $allCancelled ? 'CANCELLED' : 'ABANDONED';
+                    $parent->save();
+                }
+            }
+        }
 
         return back()->with('success','Transaction has been cancelled');
     }
