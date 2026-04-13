@@ -159,7 +159,7 @@ class Sms
 		$item = $sale->items->first();
 		$date_needed = date('m/d/Y', strtotime($item->delivery_date));
 		try {
-			$message = "Happy Day, $order->customer_name!. Your order for order date ".date('m/d/Y', strtotime($order->created_at))."  Date Needed - ". $date_needed ." is now confirmed. Thank you for choosing Lydia's Lechon!";
+			$message = "Happy Day, $order->customer_name!. Your order  Order Date (".date('m/d/Y', strtotime($order->created_at)).")  Date Needed - ". $date_needed ." is now confirmed. Thank you for choosing Lydia's Lechon!";
 
 			$sms = new ItextmoSmsService();
 			$sms->send($receiver, $message);
