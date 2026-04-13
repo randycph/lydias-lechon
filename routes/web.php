@@ -846,7 +846,7 @@ Route::get('tests/sms', function() {
     try {
         $sms = new Sms();
         $salesHeader = SalesHeader::latest()->first();
-        $sms->send_sms('+639174128392', 'new_order', $salesHeader);
+        $sms->send_sms('+639949532961', 'confirm_order', $salesHeader);
     } catch (\Throwable $th) {
         throw $th;
     }
