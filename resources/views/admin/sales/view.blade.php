@@ -379,7 +379,7 @@
                             @if($paidTotal > 0)
                                 <tr style="font-weight:bold;">
                                     <td class="tx-left" colspan="4">Total</td>
-                                    <td class="tx-right">₱{{number_format($salesPayments->sum('amount'), 2)}}</td> 
+                                    <td class="tx-right">₱{{number_format($salesPayments->where('status','PAID')->where('is_discount',0)->sum('amount'), 2)}}</td> 
                                 </tr>
                             @endif
                             @php
