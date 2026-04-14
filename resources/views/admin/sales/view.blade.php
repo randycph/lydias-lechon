@@ -367,7 +367,7 @@
                                         {{$payment->status}}
                                     @endif
                                 </td>
-                                <td class="tx-right">{{ $payment->is_discount == 1 ? '-' : '' }}₱{{number_format($payment->amount, 2)}}</td>
+                                <td class="tx-right {{ $payment->is_discount == 1 ? 'text-danger' : '' }}">{{ $payment->is_discount == 1 ? '-' : '' }}₱{{number_format($payment->amount, 2)}}</td>
                                
                             </tr>
                             @empty
