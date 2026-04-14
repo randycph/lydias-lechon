@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Validator;
@@ -9,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 class Banner extends Model
 {
     use SoftDeletes;
+    use LogsActivityDiff;
 
     protected $table = 'banners';
     protected $fillable = ['album_id', 'title', 'description', 'alt','image_path', 'button_text', 'url', 'order', 'user_id'];

@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 
 class Option extends Model
 {
+    use LogsActivityDiff;
+
     protected $table = 'options';
     protected $fillable = ['type', 'name', 'value', 'field_type'];
 

@@ -194,7 +194,7 @@
                                     <label class="tx-13">Order Type</label>
                                     <select name="ordertype" id="order_type" class="form-control">
                                         <option value="">- Select Order Type -</option>
-                                        @foreach (['Whole', 'Reserved', 'Additional'] as $type)
+                                        @foreach (['Buhat', 'Additional', 'Reserve', 'Miscellaneous'] as $type)
                                             {{-- fix this --}}
                                             <option value="{{ $type }}" {{ request('ordertype') == $type ? 'selected' : '' }}>{{ $type }}</option>
                                         @endforeach

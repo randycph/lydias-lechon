@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 
 class ProductVariation extends Model
 {
+    use LogsActivityDiff;
+    
     public $table = 'products_variations';
     protected $fillable = [ 'product_id', 'color', 'size' ];
 

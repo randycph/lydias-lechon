@@ -306,9 +306,10 @@
                                     <label class="tx-13">Order Type</label>
                                     <select name="order_type" id="order_type" class="form-control">
                                         <option value="">- Select Item Type -</option>
-                                        <option value="Whole">Whole</option>
-                                        <option value="Reserved">Reserved</option>                                                                           
+                                        <option value="Buhat">Buhat</option>
                                         <option value="Additional">Additional</option>                                                                           
+                                        <option value="Reserve">Reserve</option>                                                                                    
+                                        <option value="Miscellaneous">Miscellaneous</option>                                                               
                                         @isset($_GET['order_type'])
                                             <option value="{{$_GET['order_type']}}" selected="selected">{{ $_GET['order_type'] }}</option>
                                         @endisset

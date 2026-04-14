@@ -379,7 +379,15 @@
                                     <td width="10%">
                                         <!-- 10102 -->
                                          @php $forecasters = [3,13]; $forecasters = [13]; @endphp
-                                        @if(!in_array(auth()->user()->role_id, $forecasters) || auth()->user()->id == 10102)                                    
+                                        @if (
+                                            auth()->user()->has_access_to_route('sales-transaction.restore') || 
+                                            auth()->user()->has_access_to_route('sales-transaction.view') ||
+                                            auth()->user()->has_access_to_route('sales-transaction.update') ||
+                                            auth()->user()->has_access_to_route('sales-transaction.destroy') ||
+                                            auth()->user()->has_access_to_route('sales-transaction.quick_update') ||
+                                            auth()->user()->has_access_to_route('sales-transaction.view_payment') || 
+                                            auth()->user()->has_access_to_route('payment.add.store') 
+                                        )
                                             <nav class="nav table-options">
                                                 @if($sale->trashed())
                                                     @if (auth()->user()->has_access_to_route('sales-transaction.restore'))
@@ -493,7 +501,7 @@
 
                                                                 @endphp
 
-                                                                @if (!$isPast)
+                                                                @if (!$isPast && $sale->delivery_status != 'Delivered/Picked Up')
                                                                     <a class="dropdown-item"
                                                                     href="javascript:void(0);"
                                                                     onclick="change_delivery_status({{ $sale->id }}, {{ $is_allowed_delivered }})"

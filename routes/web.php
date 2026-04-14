@@ -13,6 +13,7 @@ use App\Helpers\ListingHelper;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\BlockSlotController;
 use App\Http\Controllers\EcommerceControllers\ReportsController;
 use App\Http\Controllers\FacebookController;
 use App\Http\Controllers\FrontendController;
@@ -63,6 +64,7 @@ Route::get('/storesss', [FrontendController::class, 'our_stores'])->name('our-st
 Route::get('/lechon-pricelistss', [FrontendController::class, 'lechon_pricelist'])->name('lechon-pricelist');
 Route::get('/menuss', [FrontendController::class, 'lechon_menu'])->name('lechon-menu');
 Route::get('/checkout', [FrontendController::class, 'checkout'])->name('checkout');
+Route::get('/checkout2', [FrontendController::class, 'checkout2'])->name('checkout2');
 Route::get('/sales-summary/{id}', [FrontendController::class, 'confirmation'])->name('confirmation');
 Route::get('/login', [FrontendController::class, 'login'])->name('login');
 Route::post('/logout', [FrontendController::class, 'logout'])->name('logout');
@@ -546,6 +548,7 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
     Route::get('/admin/report/audit-trail-per-sales', 'EcommerceControllers\ReportsController@audit_trail_per_user')->name('admin.report.audit_trail_per_user');
     Route::get('/admin/report/audit-trail-per-user', 'EcommerceControllers\ReportsController@audit_trail_per_sales')->name('admin.report.audit_trail_per_sales');
     Route::get('/admin/report/audit-trail-per-external', 'EcommerceControllers\ReportsController@audit_trail_per_external')->name('admin.report.audit_trail_per_external');
+    Route::get('/admin/report/audit-trail-per-module', 'EcommerceControllers\ReportsController@audit_trail_per_module')->name('admin.report.audit_trail_per_module');
     Route::get('/admin/report/forecast_report_per_product_type', 'EcommerceControllers\ReportsController@forecast_report_per_product_type')->name('admin.report.forecast_report_per_product_type');
     
     Route::get('/admin/report/pickup_orders_per_branch', 'EcommerceControllers\ReportsController@pickup_orders_per_branch')->name('admin.report.pickup_orders_per_branch');
@@ -1017,6 +1020,16 @@ Route::get('driver', function() {
     return view('driver.index');
 })->name('driver.home');
 
+Route::get('/blocks/events', [BlockSlotController::class, 'events'])->name('blocks.events');
+
+Route::get('/blocks/{id}', [BlockSlotController::class, 'show']);
+Route::get('/blocks/group/{groupId}', [BlockSlotController::class, 'showGroup']);
+Route::post('/blocks', [BlockSlotController::class, 'store'])->name('blocks.store');
+Route::post('/blocks/delete-month', [BlockSlotController::class, 'destroyMonth'])->name('blocks.destroy-month');
+Route::post('/blocks/update-single', [BlockSlotController::class, 'updateSingle'])->name('blocks.update-single');
+Route::post('/blocks/{id}', [BlockSlotController::class, 'destroy'])->name('blocks.destroy');
+Route::post('/blocks/update/{id}', [BlockSlotController::class, 'updateGroup'])->name('blocks.update');
+Route::post('/checkout/blocks', [BlockSlotController::class, 'getCheckoutBlocks'])->name('checkout.blocks');
 Route::get('paymaya-payment-check/{id}', function($id) {
     if (auth()->guest()) {
         return response()->json([

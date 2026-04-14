@@ -3,6 +3,7 @@
 namespace App\EcommerceModel;
 
 use App\Models\ActivityLog;
+use App\Models\Concerns\LogsActivityDiff;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class JobOrder extends Model
 {
     use SoftDeletes;
+    use LogsActivityDiff;
 
     protected $table = 'job_orders';
     protected $fillable = ['user_id', 'jo_number', 'sales_number', 'sales_detail_id', 'order_source','product_id','product_name','product_size','product_weight', 'product_category','customer_name', 'customer_mobile_number','customer_tel_number', 'customer_address', 'customer_delivery_adress', 'delivery_tracking_number', 'delivery_fee_amount','delivery_method', 'date_needed', 'pickup_branch',

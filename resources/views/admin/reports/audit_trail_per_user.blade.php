@@ -25,6 +25,27 @@
         @page {
           size: auto;
         }
+                
+        #example {
+            table-layout: fixed;
+        }
+
+        #example td, #example th {
+            white-space: normal !important;
+            word-break: break-word;
+        }
+
+        #example td:nth-child(5),
+        #example th:nth-child(5) {
+            max-width: 300px;
+        }
+
+        #example td:nth-child(7),
+        #example th:nth-child(7),
+        #example td:nth-child(8),
+        #example th:nth-child(8) {
+            max-width: 300px;
+        }
     </style>
 @endsection
 
@@ -107,12 +128,16 @@
                             <thead>
                             <tr> 
                                 <th>Date</th>
-                                <th>Action</th> 
-                                <th>Name</th>  
+                                <th>Created by</th>
+                                <th>Activity Type</th> 
+                                <th>Activity</th>
+                                <th>Email</th>
+                                <th>Role</th>
                                 <th>Description</th> 
                                 <th>Reference</th>   
                                 <th>Old Value</th>
                                 <th>New Value</th> 
+                                <th>Module</th> 
                                                    
                             </tr>
                             </thead>
@@ -121,12 +146,49 @@
                             @foreach($rs as $r) 
                                 <tr style="text-align: left">
                                     <td>@if(date('Y-m-d',strtotime($r->activity_date)) <> '1970-01-01'){{date('m-d-Y g:i A',strtotime($r->activity_date))}} @endif</td>
+                                    <td>{{$r->user->name ?? 'Guest'}}</td>
                                     <td>{{$r->activity_type}}</td>
                                     <td>{{$r->dashboard_activity}}</td>
+                                    <td>{{$r->email}}</td>
+                                    <td>{{$r->role}}</td>
                                     <td>{{$r->activity_desc}}</td>
                                     <td>{{$r->reference}}</td>
-                                    <td>{{$r->old_value}}</td>
-                                    <td>{{$r->new_value}}</td>
+                                    <td>
+                                        @php
+                                            $data = json_decode($r->old_value, true);
+                                        @endphp
+                                        @if(is_array($data))
+                                            <ul style="padding-left: 15px;">
+                                                @foreach($data as $key => $value)
+                                                    <li>
+                                                        <strong>{{ Str::headline($key) }}:</strong>
+                                                        {{ is_array($value) ? json_encode($value) : $value }}
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            {{ $r->old_value == '(empty)' ? '' : $r->old_value }}
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @php
+                                            $data = json_decode($r->new_value, true);
+                                        @endphp
+                                        @if(is_array($data))
+                                            <ul style="padding-left: 15px;">
+                                                @foreach($data as $key => $value)
+                                                    <li>
+                                                        <strong>{{ Str::headline($key) }}:</strong>
+                                                        {{ is_array($value) ? json_encode($value) : $value }}
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            {{ $r->new_value == '(empty)' ? '' : $r->new_value }}
+                                        @endif
+                                    </td>
+                                    <td>{{$r->db_table}}</td>
+
                                 </tr>
                             @endforeach
                         
@@ -192,6 +254,15 @@
         $('#example').DataTable( {
             dom: 'Bfrtip',
             pageLength: 20,
+            autoWidth: false,
+            columnDefs: [
+                { width: "120px", targets: 1 }, // Date
+                { width: "120px", targets: 3 }, // Name
+                { width: "300px", targets: 4 }, // Description
+                { width: "300px", targets: 6 }, // Old Value
+                { width: "300px", targets: 7 }, // New Value
+                { type: 'time-uni', targets: [2] }
+            ],
             sorting: [[ 0, "desc" ]],
             buttons: [
                 {

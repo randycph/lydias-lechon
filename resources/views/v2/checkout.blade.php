@@ -6,7 +6,7 @@
 @section('alpine.plugins')
 <link rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/css/datepicker.min.css">
-    @endsection
+@endsection
 
 @section('content')
 
@@ -89,12 +89,12 @@
                     <div
                         class="flex items-center text-sm lg:text-base justify-between px-4 py-3 border-b border-[#DFDFDF]">
                         <div x-text="carts.length + ' items'"></div>
-                        <div class="font-bold" x-text="'₱' + carts.reduce((sum, item) => 
+                        <div class="font-bold" x-text="'₱' + carts?.reduce((sum, item) => 
                                 sum + 
                                 ((Number((item?.paella_price > 0 ? item?.product?.paella_price : 0)) || 0) * (Number(item.qty) || 1)) + 
                                 (item.is_free_product ? 0 : (Number(item.price) || 0) * (Number(item.qty) || 1))
                             , 0).toLocaleString(undefined, { minimumFractionDigits: 2 })" {{--
-                            x-text="'₱' + carts.reduce((sum, item) => sum + item.paella_price + (item.is_free_product ? 0 : item.price * item.qty), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })"
+                            x-text="'₱' + carts?.reduce((sum, item) => sum + item.paella_price + (item.is_free_product ? 0 : item.price * item.qty), 0).toLocaleString(undefined, { minimumFractionDigits: 2 })"
                             --}}></div>
                     </div>
 
@@ -204,19 +204,41 @@
                                     </div>
                                 </div>
                             </template>
+                            <template
+                                x-if="!allowMultiple && hasbaka && lechonBakaService > 0">
+                                <div>
+                                    <div class="flex justify-between lg:mt-2">
+                                        <span class="font-medium text-gray-800 italic">Lechon Baka Service</span>
+                                        <span class="font-medium"
+                                            x-text="lechonBakaService > 0 ? '₱' + lechonBakaService.toLocaleString(undefined, { minimumFractionDigits: 2 }) : 'Free'"></span>
+                                    </div>
+                                </div>
+                            </template>
                             <template x-if="deliveryFees.length > 0">
                                 <div class="flex flex-col gap-1 mt-2">
                                     <template x-for="(item, i) in deliveryFees" :key="i">
-                                        <div class="flex justify-between text-gray-500 text-sm">
-                                            <span x-text="'Delivery Fee (' + item.location + ')'"></span>
-                                            <div class="flex items-center gap-1">
-                                                <template x-if="item.discount && item.discount > 0">
-                                                    <span class="line-through text-red-700 italic"
-                                                        x-text="'₱' + item.fee.toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
-                                                </template>
-                                                <span
-                                                    x-text="'₱' + (item.fee - (item.discount || 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+                                        <div>
+                                            <div class="flex justify-between text-gray-500 text-sm">
+                                                <span x-text="'Delivery Fee (' + item.location + ')'"></span>
+                                                <div class="flex items-center gap-1">
+                                                    <template x-if="item.discount && item.discount > 0">
+                                                        <span class="line-through text-red-700 italic"
+                                                            x-text="'₱' + item.fee.toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+                                                    </template>
+                                                    <span
+                                                        x-text="'₱' + (item.fee - (item.discount || 0)).toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+                                                </div>
                                             </div>
+
+                                            <template x-if="item.isBaka && item.lechon_baka_service > 0 && allowMultiple && method == 'delivery'">
+                                                <ul class="pl-6 list-disc">
+                                                    <li class="flex justify-between text-gray-500 text-sm">
+                                                        <span class="italic ">Lechon Baka Service</span>
+                                                        <span
+                                                            x-text="'₱' + item.lechon_baka_service.toLocaleString(undefined, { minimumFractionDigits: 2 })"></span>
+                                                    </li>
+                                                </ul>
+                                            </template>
                                         </div>
                                     </template>
                                 </div>
@@ -357,12 +379,12 @@
 
                             <div x-show="method === 'delivery'" class="space-y-4">
 
-                                {{-- <div class="flex items-center me-4 my-4">
+                                <div class="flex items-center me-4 my-4">
                                     <input @change="onChangeMultipleAddress()" x-model="allowMultiple" checked
                                         id="multiple-address" type="checkbox" value=""
                                         class="w-5 h-5 text-primary bg-gray-100 border-gray-300 rounded-sm focus:ring-primary-dark focus:ring-2">
                                     <label for="multiple-address" class="ms-2 text-base font-medium text-gray-900">Allow multiple delivery address</label>
-                                </div> --}}
+                                </div>
 
                                 <template x-if="allowMultiple">
                                     <div class="space-y-6">
@@ -1249,6 +1271,7 @@
     window.minimum_order_misc = @json($minimum_order_misc);
     window.hasCochinillo = @json($hasCochinillo);
     window.minimum_processing_hours_baka = @json($minimum_processing_hours_baka);
+    window.lechonBakaService = @json($lechonBakaService);
 </script>
 
 <script>
@@ -1266,6 +1289,8 @@
             minimum_processing_hours_baka: window.minimum_processing_hours_baka || 0,
             minimum_processing_hours_lechon: window.minimum_processing_hours || 0,
             minimum_order_misc: window.minimum_order_misc || 0,
+            lechonBakaService: window.lechonBakaService || 0,
+            isBaka: false,
             minDate() {
                 const d = new Date(this.today);
 
@@ -1369,6 +1394,8 @@
                 }];
                 this.deliveryFees = [];
                 this.deliveryFee = 0;
+                this.isBaka = false;
+                this.lechonBakaService = 0;
 
             },
             formEl: null,
@@ -1610,7 +1637,7 @@
                 }
 
                 // Compute total
-                let total = orderAmount + deliveryFeeFinal - (couponDiscount + this.shippingDiscountAmount);
+                let total = orderAmount + deliveryFeeFinal - (couponDiscount + this.shippingDiscountAmount) + this.lechonBakaService;
 
                 total = total <= 0 ? 0 : total;
 
@@ -1671,6 +1698,9 @@
                 if (!this.allowMultiple) {
                     this.validateDateTime();
                 }
+
+                this.deliveryFee = 0;
+                this.lechonBakaService = window.lechonBakaService || 0;
 
                 this.recomputeCouponTotals()
             },
@@ -1841,13 +1871,15 @@
 
                 console.log('Total discount used:', discounted_amount);
 
-
+                console.log('this.hasBaka', this.hasbaka)
                 formData.append('discount_amount', couponsWithDiscountUsed.reduce((sum, c) => sum + (c.discount_used || 0), 0));
                 formData.append('coupon_data', JSON.stringify(this.coupons));
                 formData.append('order_amount', this.orderAmount);
                 formData.append('delivery_fee', this.deliveryFee);
                 formData.append('deposit', this.deposit);
                 formData.append('total_amount', this.totalAmount);
+                formData.append('isBaka', this.hasbaka ? 1 : 0);
+                formData.append('lechon_baka_service', this.lechonBakaService);
 
                 if (this.allowMultiple) {
                     formData.append('deliveries', JSON.stringify(this.deliveries));
@@ -1944,6 +1976,9 @@
                 const location = this.$refs?.location?.value;
                 const branch = this.$refs?.branch?.value;
 
+                this.isBaka = false;
+                // this.lechonBakaService = 0;
+
                 if (this.province && this.city) {
                     try {
                         let response = await fetch('{{route('cart.front.get_shipping_fee')}}', {
@@ -1967,6 +2002,9 @@
                         let data = await response.json();
 
                         this.deliveryFee = data.fee;
+
+                        this.isBaka = data.is_baka;
+                        this.lechonBakaService = data.lechon_baka_service;
 
                         this.location = location;
 
@@ -2119,7 +2157,8 @@
                 const delivery = this.deliveries[index];
                 const city = delivery.city;
                 const province = delivery.province;
-                const products = delivery?.orders?.map(o => o.product_id);
+                // include qty in products
+                const products = delivery?.orders?.map(o => ({ product_id: o.product_id, qty: o.qty }));
 
                 if (!delivery?.orders && !delivery?.orders?.length) {
                     delivery.city = '';
@@ -2153,14 +2192,22 @@
                     const fee = parseFloat(data.fee || 0);
 
                     delivery.delivery_fee = fee;
+                    delivery.isBaka = data.has_baka;
+                    delivery.lechon_baka_service = data.lechon_baka_service_total;
 
                     // Always store by index — 1 entry per row
-                    this.deliveryFees[index] = { location: city + ', ' + province, fee };
+                    this.deliveryFees[index] = { 
+                        location: city + ', ' + province, 
+                        fee, 
+                        isBaka: data.has_baka, 
+                        lechon_baka_service: 
+                        data.lechon_baka_service_total
+                    };
 
                     // this.deliveryFee += fee;
 
                     // Update total delivery fee
-                    this.deliveryFee = this.deliveries.reduce((sum, d) => sum + parseFloat(d.delivery_fee || 0), 0);
+                    this.deliveryFee = this.deliveries.reduce((sum, d) => sum + (parseFloat(d.delivery_fee || 0)) + (parseFloat(d.lechon_baka_service || 0)), 0);
 
                     // await this.loadAutoCoupons(true);
 
@@ -3000,6 +3047,9 @@
                     });
                 } else if (!isChecked && existingIndex !== -1) {
                     delivery.orders.splice(existingIndex, 1);
+                    this.deliveryFees.splice(this.deliveries.indexOf(delivery), 1);
+                    this.delivery.province = '';
+                    this.delivery.city = '';
                 }
 
                 this.refreshAllAvailableQty();
@@ -3201,6 +3251,8 @@
                 }
 
                 this.refreshAllAvailableQty();
+
+                this.getDeliveryFeeForMultipleDelivery(orderIndex);
             },
 
 

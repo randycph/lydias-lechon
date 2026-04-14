@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Leftovers extends Model
 {
 	use SoftDeletes;
+    use LogsActivityDiff;
+    
     protected $fillable = ['qty', 'product_id', 'remarks', 'user_id','uom', 'date', 'branch_id'];
 
     public function branch()

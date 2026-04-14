@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
@@ -9,6 +10,7 @@ use Illuminate\Support\Str;
 class Page extends Model
 {
     use SoftDeletes;
+    use LogsActivityDiff;
 
     protected $table = 'pages';
     protected $fillable = ['is_page', 'parent_page_id', 'album_id', 'slug', 'name', 'label', 'contents', 'status', 'page_type', 'image_url', 'meta_title', 'meta_keyword', 'meta_description', 'user_id', 'template','deleted_at'];

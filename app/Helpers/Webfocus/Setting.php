@@ -11,9 +11,13 @@ class Setting {
     public static function info() {
 
         $setting = DB::table('settings')->first();
-        $setting->menu = DB::table('menus')->where('is_active', 1)->first();
-        return $setting;
 
+        if ($setting) {
+            $setting->menu = DB::table('menus')->where('is_active', 1)->first();
+            return $setting;
+        }
+
+        return null;
 	}
 
 	public static function getFaviconLogo()

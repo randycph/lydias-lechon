@@ -227,8 +227,9 @@
                                                                     <ul class="list-disc pl-10">
                                                                         @foreach ($products as $product)
                                                                             @php
-                                                                                $base   = (float)($product->product->price ?? 0);
-                                                                                $addOn  = !empty($product->paella) ? (float)($product->product->paella_price ?? 0) : 0;
+                                                                                $prod = \App\Models\Product::find($product->product_id);
+                                                                                $base   = (float)($prod->price ?? 0);
+                                                                                $addOn  = !empty($product->paella) ? (float)($prod->paella_price ?? 0) : 0;
                                                                                 $price  = $base + $addOn;
                                                                             @endphp
                                                                             <li>
@@ -374,7 +375,7 @@
                                 </svg>
                                 <div class="font-bold text-lg">Your cart is empty</div>
                 
-                                <a href="{{ route('lechon-menu') }}" class="bg-primary custom-btn btn-primary-dark text-white text-center px-6 py-3 rounded-md mt-4 w-full">Continue Shopping</a>
+                                <a href="{{ url('/menu') }}" class="bg-primary custom-btn btn-primary-dark text-white text-center px-6 py-3 rounded-md mt-4 w-full">Continue Shopping</a>
                             </div>
                         </div>
                     @endif

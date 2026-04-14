@@ -248,7 +248,7 @@
                                 <option value="">- Select Branch -</option>
                                 @php 
                                     $name='delivery';
-                                    $brr = $branches_store->where('delivery_branch','1')
+                                    $brr = \App\EcommerceModel\Branch::where('status', 1)->where('delivery_branch','1')->orderBy('name','asc')->get();
                                 @endphp
                                 @foreach($brr as $b)
                                     <option value="{{$b->name}}" {{ old('delivery_branch') == $b->name ? 'selected' : '' }}>{{$b->name}}</option>
@@ -266,7 +266,8 @@
                                 <option value="">- Select Branch -</option>
                                 @php 
                                     $name='delivery';
-                                    $prr = $branches_store->where('pickup_branch','1')->filter(function ($item) use($name){
+                                    $prr = \App\EcommerceModel\Branch::where('status', 1)->where('pickup_branch','1')->orderBy('name','asc')->get();
+                                    $prr = $prr->filter(function ($item) use($name){
                                                  return false === stristr($item->name, $name);
                                             })
                                 @endphp

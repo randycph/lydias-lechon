@@ -105,6 +105,10 @@ class PaymayatestController extends Controller
                 'updated_at'      => $salesHeader->created_at,
             ]);
 
+            if ($salesHeader->delivery_status == 'Waiting for Payment' || $salesHeader->delivery_status == '' || is_null($salesHeader->delivery_status)) {
+                SalesHeader::whereId($salesHeader->id)->update(['delivery_status' => 'Processing Stock']);
+            }
+
             // =========================
             // CONFIRM SUB-SALES
             // =========================
@@ -117,6 +121,10 @@ class PaymayatestController extends Controller
                     'confirm_remarks' => 'Auto confirm via Maya checkout',
                     'updated_at'      => $sub->created_at,
                 ]);
+
+                if ($sub->delivery_status == 'Waiting for Payment' || $sub->delivery_status == '' || is_null($sub->delivery_status)) {
+                    SalesHeader::whereId($sub->id)->update(['delivery_status' => 'Processing Stock']);
+                }
 
                 $sub->assign_to_production_branch($sub, 1);
             }
@@ -196,6 +204,10 @@ class PaymayatestController extends Controller
                             $sale->confirmed_on = date('Y-m-d H:i:s');
                             $sale->confirm_remarks = 'Auto confirm via Paymaya checkout';
                             $sale->save();
+
+                            if ($sale->delivery_status == 'Waiting for Payment' || $sale->delivery_status == '' || is_null($sale->delivery_status)) {
+                                SalesHeader::whereId($sale->id)->update(['delivery_status' => 'Processing Stock']);
+                            }
                         }
                         return response('Ok', 200);   
                     }else{
@@ -237,31 +249,38 @@ class PaymayatestController extends Controller
     }
     
 
-    public function pay(Request $request){        
-        
-        $sales = SalesHeader::find($request->sales_header_id); 
+    public function pay(Request $request)
+    {        
+        try {
+            $sales = SalesHeader::with('items')->where('id', $request->sales_header_id)->first();
 
-        if ($sales && $sales->items && count($sales->items) == 0) {
-            return Redirect::back()->withErrors(['error' => 'No items found in the sales order.']);
+            $request['sales_header_id'] = $sales->id;
+
+            if ($sales && $sales->items && count($sales->items) == 0) {
+                return Redirect::back()->withErrors(['error' => 'No items found in the sales order.']);
+            }
+
+            $payment = SalesPayment::create([
+                'sales_header_id' => $sales->id,
+                'payment_type' => 'Paymaya',
+                'amount' => $request->amount,
+                'status'  => 'PENDING',
+                'payment_date'  => date('Y-m-d'),
+                'receipt_number'  => '',
+                'created_by' => $sales?->user_id
+            ]);
+
+            $checkoutId = $this->get_checkoutId($request, $payment);
+
+            $update_payment = $payment->update([
+                'receipt_number' => $checkoutId['checkoutId']
+            ]);
+            
+            return Redirect::to($checkoutId['redirectUrl']);
+        } catch (\Throwable $th) {
+            logger('PAYMAYA ERROR:', ['error' => $th->getMessage()]);
+            return Redirect::back()->withErrors(['error' => 'An error occurred while processing your payment. Please try again later.']);
         }
-
-        $payment = SalesPayment::create([
-            'sales_header_id' => $request->sales_header_id,
-            'payment_type' => 'Paymaya',
-            'amount' => $request->amount,
-            'status'  => 'PENDING',
-            'payment_date'  => date('Y-m-d'),
-            'receipt_number'  => '',
-            'created_by' => $sales->user_id
-        ]);
-
-        $checkoutId = $this->get_checkoutId($request, $payment);
-
-        $update_payment = $payment->update([
-            'receipt_number' => $checkoutId['checkoutId']
-        ]);
-        
-        return Redirect::to($checkoutId['redirectUrl']);
     }
 
     public function paydata($id,$amount,$checkoutId){

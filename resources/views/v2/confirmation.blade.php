@@ -20,7 +20,7 @@
             <div class="pt-20 pb-5 px-4 flex flex-col justify-start">
                 <h1 class="text-4xl lg:text-7xl font-cubao font-medium text-primary mt-10">order confirmation</h1>
                 <h3 class="font-medium text-base lg:text-xl mt-2">Thank you for ordering with us! Your delicious Lydia's Lechon meal is on its way. We’ll send you an update once it’s ready for pickup or delivery. Your order details has also been sent to your email. Enjoy!</h3>
-                <div class="font-medium text-base lg:text-xl mt-2 lg:mt-8">For any inquiries, you may call our <a href="{{ route('page', ['slug' => 'call-hotline']) }}" class="text-primary cursor-pointer underline">hotline</a> or <a href="{{ route('page', ['slug' => 'contact-us']) }}" class="text-primary cursor-pointer underline">contact us</a>.</div>
+                <div class="font-medium text-base lg:text-xl mt-2 lg:mt-8">For any inquiries, you may call our <a href="{{ route('page', ['slug' => 'stores']) }}" class="text-primary cursor-pointer underline">hotline</a> or <a href="{{ route('page', ['slug' => 'contact-us']) }}" class="text-primary cursor-pointer underline">contact us</a>.</div>
             </div>
 
             <div class="flex flex-col px-4  lg:flex-row gap-4 mt-5 w-full max-w-lg justify-start">
@@ -129,9 +129,10 @@
                                                     <ul>
                                                         @foreach ($products as $product)
                                                             @php 
-                                                                $price = $product->product->price ?? 0;
+                                                                $prod = \App\Models\Product::find($product->product_id);
+                                                                $price = $prod->price ?? 0;
                                                                 if (!empty($product->paella)) {
-                                                                    $price += $product->product->paella_price ?? 0;
+                                                                    $price += $prod->paella_price ?? 0;
                                                                 }
                                                             @endphp
                                                             <li>

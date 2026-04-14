@@ -3,12 +3,14 @@
 namespace App\MailingListModel;
 
 use App\Models\ActivityLog;
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Campaign extends Model
 {
     use SoftDeletes;
+    use LogsActivityDiff;
 
     protected $fillable = ['name', 'from_email', 'from_name', 'subject', 'content', 'last_sent', 'mailing_deliveries'];
 

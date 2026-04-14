@@ -4,10 +4,13 @@ namespace App\EcommerceModel;
 
 use Illuminate\Database\Eloquent\Model;
 use App\EcommerceModel\Coupon;
+use App\Models\Concerns\LogsActivityDiff;
 use App\Models\User;
 
 class CouponCart extends Model
 {
+    use LogsActivityDiff;
+    
 	protected $table = 'coupon_cart';
     protected $fillable = [ 'coupon_id','product_id','customer_id','total_usage', 'status', 'sales_header_id', 'coupon_code', 'discount_used' ];
     public $timestamps = true;

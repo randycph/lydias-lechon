@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Validator;
@@ -9,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 class Album extends Model
 {
     use SoftDeletes;
+    use LogsActivityDiff;
 
     protected $table = 'albums';
     protected $fillable = ['name', 'transition_in', 'transition_out', 'transition', 'type', 'banner_type', 'user_id', 'effect'];

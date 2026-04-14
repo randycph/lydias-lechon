@@ -235,7 +235,7 @@
                                     </svg>
                                     <div class="font-bold text-lg">Your cart is empty</div>
                     
-                                    <a href="{{ route('lechon-menu') }}" class="bg-primary custom-btn btn-primary-dark text-white text-center px-6 py-3 rounded-md mt-4 w-full">Continue Shopping</a>
+                                    <a href="{{ url('/menu') }}" class="bg-primary custom-btn btn-primary-dark text-white text-center px-6 py-3 rounded-md mt-4 w-full">Continue Shopping</a>
                                 </div>
                             </div>
                         </template>

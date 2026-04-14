@@ -133,6 +133,9 @@
                     @if (auth()->user()->has_access_to_route('admin.report.audit_trail_per_sales'))
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.audit_trail_per_sales')}}">Audit Trail (Sales)</a></li>
                     @endif
+                    @if (auth()->user()->has_access_to_route('admin.report.audit_trail_per_module'))
+                    <li><a style="color: white;" target="_blank" href="{{route('admin.report.audit_trail_per_module')}}">Audit Trail (Module)</a></li>
+                    @endif
                     @if (auth()->user()->has_access_to_route('admin.report.forecast_report_per_product_type'))
                     <li><a style="color: white;" target="_blank" href="{{route('admin.report.forecast_report_per_product_type')}}">Forecast Report per Product Type</a></li>
                     @endif
