@@ -37,7 +37,7 @@
                     </div>
                 @else
                     @if (strtolower($sales->PaymentStatus) != 'paid' && $sales->status != 'CANCELLED')
-                    <button {{ $isExpired ? 'disabled' : '' }} @click="openPaymentModal({{$sales->net_amount}}, '{{ $sales->id }}')" type="button"
+                    <button @click="openPaymentModal({{$sales->net_amount}}, '{{ $sales->id }}')" type="button"
                         class="border {{ $sales->status == 'CANCELLED' ? 'hidden' : '' }} border-primary text-primary px-6 py-4 w-full text-center rounded-md hover:bg-primary hover:text-white transition-colors duration-300">
                         Pay Now
                     </button>
