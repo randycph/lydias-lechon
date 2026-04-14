@@ -400,9 +400,18 @@
                                 <td class="tx-left">{{$payment->payment_type}}</td>
                                 <td class="tx-center">{{$payment->receipt_number}}</td>
                                 <td class="tx-center">{{ \Carbon\Carbon::parse($payment->payment_date)->format('F d, Y') }}</td>
-                                <td class="tx-center">@if($payment->status=='PENDING' && ($payment->payment_type=='IPAY' || $payment->payment_type=='Paymaya' )) Subject for Confirmation @else {{$payment->status}} @endif</td>
-                                <td class="tx-right">{{number_format($payment->amount, 2)}}</td>
-                               
+                                <td class="tx-center">
+                                    @if($payment->payment_type == 'Ok Order' || $payment->payment_type == 'COD')
+                                        @if($payment->status == 'PAID')
+                                            CONFIRMED
+                                        @else
+                                            UNPAID
+                                        @endif
+                                    @else
+                                        {{$payment->status}}
+                                    @endif
+                                </td>
+                                <td class="tx-right {{ $payment->is_discount == 1 ? 'text-danger' : '' }}">{{ $payment->is_discount == 1 ? '-' : '' }}₱{{number_format($payment->amount, 2)}}</td>
                             </tr>
                         @empty
                             <tr>
@@ -413,7 +422,7 @@
                         @if($salesPayments->sum('amount') > 0)
                             <tr style="font-weight:bold;">
                                 <td colspan="4">&nbsp;</td>
-                                <td align="right">Total : {{number_format($salesPayments->sum('amount'), 2)}}</td> 
+                                <td align="right">Total : ₱{{number_format($salesPayments->where('status','PAID')->where('is_discount',0)->sum('amount'), 2)}}</td> 
                             </tr>
                         @endif
                     </tbody>
