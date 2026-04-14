@@ -648,7 +648,7 @@
                             </div>
                 
                             <div class="text-gray-600 font-medium px-4 mt-4">
-                                Payment is no longer allowed because your delivery is scheduled for tomorrow.
+                                Payment is no longer allowed for orders with delivery scheduled for tomorrow or in the past.
                             </div>
                         </div>
                     </div>
