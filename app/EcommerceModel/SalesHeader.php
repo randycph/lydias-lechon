@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use App\Models\Concerns\LogsActivityDiff;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class SalesHeader extends Model
@@ -243,6 +244,7 @@ class SalesHeader extends Model
         }
 
         $amount = $sales->items->sum('net_amount') + $sales->delivery_fee_amount ?? 0;
+        $amount = (float) $amount - $sales->payments->where('status', 'PAID')->where('is_discount', 1)->sum('amount');
 
         // if ($sales->is_sub == 1) {
         //     $payments = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)->where('status', 'PAID')->get();
@@ -252,7 +254,7 @@ class SalesHeader extends Model
         //     $paid = (float) $payments->sum('amount');
         // }
 
-        $payments = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->get();
+        $payments = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->where('is_discount', 0)->get();
         $paid = (float) $payments->sum('amount');
 
         $total = $amount - $paid;
@@ -376,6 +378,45 @@ class SalesHeader extends Model
         }
     }
     
+    public function getIsExpiredAttribute()
+    {
+        if (!$this->created_at) {
+            return false;
+        }
+
+        $today = now();
+
+        // Debug 
+        $forceDay4     = request()->boolean('force_day_4');
+        $forceTomorrow = request()->boolean('force_tomorrow');
+        $forcePast     = request()->boolean('force_past');
+
+        //Days diff 
+        if ($forceDay4) {
+            $daysDiff = 4;
+        } else {
+            $daysDiff = $this->created_at->diffInDays($today);
+        }
+
+        $item = $this->items->first();
+
+        if ($item && $item->delivery_date) {
+            $deliveryDate = Carbon::parse($item->delivery_date);
+
+            $isTomorrow = $forceTomorrow
+                ? true
+                : $deliveryDate->isSameDay($today->copy()->addDay());
+
+            $isPast = $forcePast
+                ? true
+                : $deliveryDate->isPast();
+
+            return ($daysDiff >= 4 && $isTomorrow) || $isPast;
+        }
+
+        return false;
+    }
+
     public static function media_color($media) {
 
         switch($media){
