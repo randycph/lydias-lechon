@@ -354,7 +354,7 @@
                                         View
                                     </a>
                                     @if (strtolower($sale->payment_status) != 'paid')
-                                    <button @click="openPaymentModal({{$balance}}, '{{ $sale->order_number }}')" type="button"
+                                    <button @click="openPaymentModal({{$balance}}, '{{ $sale->id }}')" type="button"
                                         class="{{ $sale->status == 'CANCELLED' ? 'hidden' : '' }} text-white bg-primary custom-btn btn-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
                                         Pay Now
                                     </button>
