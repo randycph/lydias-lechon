@@ -376,14 +376,14 @@
                                 </tr>
                             @endforelse
                             
-                            @if($paidTotal > 0)
+                            @if($sales->payments->where('status','PAID')->sum('amount') > 0)
                                 <tr style="font-weight:bold;">
                                     <td class="tx-left" colspan="4">Total</td>
                                     <td class="tx-right">₱{{number_format($salesPayments->where('status','PAID')->where('is_discount',0)->sum('amount'), 2)}}</td> 
                                 </tr>
                             @endif
                             @php
-                                $total_balance = ($sales->items->sum('net_amount') + $sales->delivery_fee_amount) - ($paidTotal);
+                                $total_balance = ($sales->items->sum('net_amount') + $sales->delivery_fee_amount) - ($sales->payments->where('status', 'PAID')->where('is_discount', 1)->sum('amount'));
                             @endphp
                             @if($total_balance > 0 && $sales->payments->where('status','PAID')->sum('amount') > 0)
                                 <tr style="font-style:italic;">
