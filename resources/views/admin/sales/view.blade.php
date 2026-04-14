@@ -344,7 +344,7 @@
                             @forelse($salesPayments as $payment)   
                                 
                                 @php 
-                                    if($payment->status <> 'CANCELLED'){
+                                    if($payment->status == 'PAID'){
                                         $paidTotal+=$payment->amount; 
                                     }
                                 @endphp 
