@@ -736,14 +736,14 @@
             toggleDiscount('.discount-senior-th', d.senior);
 
             const totalDiscount = d.promo + d.vat + d.senior;
-            $('.total-discount-value').text('PHP ' + formatAmount(totalDiscount));
+            $('.total-discount-value').text('- PHP ' + formatAmount(totalDiscount));
         }
 
         function toggleDiscount(selector, value) {
             if (value > 0) {
                 $(selector).removeClass('d-none')
                     .find('.discount-value-th')
-                    .text(formatAmount(value));
+                    .text('- PHP ' + formatAmount(value));
             } else {
                 $(selector).addClass('d-none');
             }
