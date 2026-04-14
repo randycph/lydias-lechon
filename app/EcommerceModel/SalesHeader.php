@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use App\Models\Concerns\LogsActivityDiff;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class SalesHeader extends Model
@@ -377,6 +378,30 @@ class SalesHeader extends Model
         }
     }
     
+    public function getIsExpiredAttribute()
+    {
+        if (!$this->created_at) {
+            return false;
+        }
+
+        $createdAt = Carbon::parse($this->created_at);
+        $today = now();
+        $daysDiff = $createdAt->diffInDays($today);
+
+        $item = $this->items->first();
+
+        if ($item && $item->delivery_date) {
+            $deliveryDate = Carbon::parse($item->delivery_date);
+
+            $isTomorrow = $deliveryDate->isSameDay($today->copy()->addDay());
+            $isPast = $deliveryDate->isPast();
+
+            return ($daysDiff >= 4 && $isTomorrow) || $isPast;
+        }
+
+        return false;
+    }
+
     public static function media_color($media) {
 
         switch($media){

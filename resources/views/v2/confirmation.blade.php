@@ -7,7 +7,7 @@
 
     <div x-data="{ 
         expanded: false,
-        isExpired: '{{ $isExpired }}',
+        isExpired: '{{ $sales->isExpired }}',
         openPaymentModal(amount, sales_header_id) {
             if (this.isExpired) {
                 this.paymentDisabledModal = true
@@ -37,8 +37,8 @@
                     </div>
                 @else
                     @if (strtolower($sales->PaymentStatus) != 'paid' && $sales->status != 'CANCELLED')
-                    <button @click="openPaymentModal({{$sales->net_amount}}, '{{ $sales->id }}')" type="button"
-                        class="border {{ $sales->status == 'CANCELLED' ? 'hidden' : '' }} border-primary text-primary px-6 py-4 w-full text-center rounded-md hover:bg-primary hover:text-white transition-colors duration-300">
+                    <button {{ $sales->isExpired ? 'disabled' : '' }} @click="openPaymentModal({{$sales->net_amount}}, '{{ $sales->id }}')" type="button"
+                        class="border {{ $sales->status == 'CANCELLED' ? 'hidden' : '' }} border-primary text-primary px-6 py-4 w-full text-center rounded-md hover:bg-primary hover:text-white transition-colors duration-300 disabled:bg-gray-200 disabled:hover:text-primary">
                         Pay Now
                     </button>
                     @endif

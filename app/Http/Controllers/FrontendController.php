@@ -519,31 +519,6 @@ class FrontendController extends Controller
             abort(404);
         }
 
-        $item = $sales->items->first();
-
-        $createdAt = Carbon::parse($sales->created_at);
-        $today = Carbon::now();
-
-        $daysDiff = $createdAt->diffInDays($today);
-
-        $isExpired = false;
-
-        if ($item && $item->delivery_date) {
-            $deliveryDate = Carbon::parse($item->delivery_date);
-
-            $isTomorrow = $deliveryDate->isSameDay($today->copy()->addDay());
-
-            // more than 5 days
-            if ($daysDiff >= 5) {
-                $isExpired = true;
-            }
-
-            // 4th day AND delivery is tomorrow
-            if ($daysDiff >= 4 || $isTomorrow) {
-                $isExpired = true;
-            }
-        }
-
         $gc = GiftCertificate::where('sales_header_id',$id)->get();
         $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
         $salesDetails = SalesDetail::with('product.photos')->where('sales_header_id',$id)->get();
@@ -560,7 +535,7 @@ class FrontendController extends Controller
             }
         }
 
-        return view('v2.confirmation', compact('isExpired', 'page', 'sales', 'salesPayments', 'salesDetails', 'status', 'deliveries', 'gc', 'totalPayment', 'totalNet'));
+        return view('v2.confirmation', compact('page', 'sales', 'salesPayments', 'salesDetails', 'status', 'deliveries', 'gc', 'totalPayment', 'totalNet'));
     }
 
     public function login()
