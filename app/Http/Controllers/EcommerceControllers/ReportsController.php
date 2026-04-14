@@ -381,10 +381,11 @@ class ReportsController extends Controller
                 if(count((array)$obj2) > 0){              
                 
                     foreach($obj2 as $obj){
+                        $prod = \App\Models\Product::whereId($obj->product_id)->first();
                         DB::table('temp_mrs')->insert([
                             'product_id' => $obj->product_id,
                             'product_name' => $obj->product->name,
-                            'price' => $obj->product->price,
+                            'price' => $prod->price,
                             'address' => $tm->address,
                             'contact_person' => $tm->contact_person,
                             'contact_tel' => $tm->contact_tel,
