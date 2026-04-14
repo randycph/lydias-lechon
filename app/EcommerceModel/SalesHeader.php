@@ -243,6 +243,7 @@ class SalesHeader extends Model
         }
 
         $amount = $sales->items->sum('net_amount') + $sales->delivery_fee_amount ?? 0;
+        $amount = (float) $amount - $sales->discount_amount;
 
         // if ($sales->is_sub == 1) {
         //     $payments = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)->where('status', 'PAID')->get();

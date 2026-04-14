@@ -345,7 +345,11 @@
                                 
                                 @php 
                                     if($payment->status == 'PAID'){
-                                        $paidTotal+=$payment->amount; 
+                                        if ($payment->is_discount == 1) {
+                                            $paidTotal-=$payment->amount;
+                                        } else {
+                                            $paidTotal+=$payment->amount;
+                                        }
                                     }
                                 @endphp 
                             <tr>
@@ -363,7 +367,7 @@
                                         {{$payment->status}}
                                     @endif
                                 </td>
-                                <td class="tx-right">₱{{number_format($payment->amount, 2)}}</td>
+                                <td class="tx-right">{{ $payment->is_discount == 1 ? '-' : }}₱{{number_format($payment->amount, 2)}}</td>
                                
                             </tr>
                             @empty
@@ -379,7 +383,7 @@
                                 </tr>
                             @endif
                             @php
-                                $total_balance = ($sales->items->sum('net_amount') + $sales->delivery_fee_amount) - ($paidTotal + $sales->discount_amount);
+                                $total_balance = ($sales->items->sum('net_amount') + $sales->delivery_fee_amount) - ($paidTotal);
                             @endphp
                             @if($total_balance > 0 && $sales->payments->where('status','PAID')->sum('amount') > 0)
                                 <tr style="font-style:italic;">
