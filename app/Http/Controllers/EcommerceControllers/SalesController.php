@@ -452,8 +452,8 @@ class SalesController extends Controller
         $sales = SalesHeader::whereId($data->sales_header_id)->first();
 
         if ($discount > 0) {
-            $sales->discount_amount = floatval($sales->discount_amount) + floatval($discount);
-            $sales->net_amount = floatval($sales->net_amount) - floatval($discount);
+            $sales->discount_amount = floatval($sales->discount_amount + $discount);
+            $sales->net_amount = floatval($sales->net_amount) - floatval($sales->discount_amount + $discount);
             $sales->save();
         }
 
