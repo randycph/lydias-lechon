@@ -281,6 +281,10 @@ class PaymayaController extends Controller
         try {
             $sales = SalesHeader::with('items')->where('id', $request->sales_header_id)->first();
 
+            if ($sales->isExpired) {
+                return Redirect::back()->withErrors(['error' => 'Payment is no longer allowed for orders with delivery scheduled for tomorrow or in the past.']);
+            }
+
             $request['sales_header_id'] = $sales->id;
 
             if ($sales && $sales->items && count($sales->items) == 0) {

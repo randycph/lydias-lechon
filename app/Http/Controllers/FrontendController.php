@@ -653,7 +653,7 @@ class FrontendController extends Controller
         } else {
             $id = base64_decode($id);
         }
-
+        
         $sales = SalesHeader::where('id',$id)->with('deliveryAddress', 'items', 'couponUsed')->first();
 
         if (!$sales) {
