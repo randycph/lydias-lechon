@@ -439,17 +439,32 @@ class SalesHeader extends Model
             return false;
         }
 
-        $createdAt = Carbon::parse($this->created_at);
         $today = now();
-        $daysDiff = $createdAt->diffInDays($today);
+
+        // Debug 
+        $forceDay4     = request()->boolean('force_day_4');
+        $forceTomorrow = request()->boolean('force_tomorrow');
+        $forcePast     = request()->boolean('force_past');
+
+        //Days diff 
+        if ($forceDay4) {
+            $daysDiff = 4;
+        } else {
+            $daysDiff = $this->created_at->diffInDays($today);
+        }
 
         $item = $this->items->first();
 
         if ($item && $item->delivery_date) {
             $deliveryDate = Carbon::parse($item->delivery_date);
 
-            $isTomorrow = $deliveryDate->isSameDay($today->copy()->addDay());
-            $isPast = $deliveryDate->isPast();
+            $isTomorrow = $forceTomorrow
+                ? true
+                : $deliveryDate->isSameDay($today->copy()->addDay());
+
+            $isPast = $forcePast
+                ? true
+                : $deliveryDate->isPast();
 
             return ($daysDiff >= 4 && $isTomorrow) || $isPast;
         }
