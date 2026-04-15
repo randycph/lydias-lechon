@@ -175,7 +175,7 @@ User Management
                 @endphp
 
                 <div class="form-group {{ $showPayment || $paymentHasError ? 'd-block' : 'd-none' }}" id="payment_div">
-                    <label>Allowed to Approve (Payment Types)</label>
+                    <label>Allowed Payment Types</label>
                     <select name="payment_types[]" multiple
                             id="payment_types"
                             class="form-control select2 select-payment-types {{ $paymentHasError ? 'is-invalid' : '' }}"
