@@ -50,6 +50,7 @@ class SalesHeader extends Model
         'net_amount',
         'discount_amount',
         'payment_status',
+        'region',
         'province',
         'city',
         'barangay',
