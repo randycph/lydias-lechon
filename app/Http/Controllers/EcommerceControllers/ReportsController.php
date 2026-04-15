@@ -21,6 +21,7 @@ use App\Models\Permission;
 use App\Models\Product;
 use App\Models\ProductDeliveryAddress;
 use App\Models\User;
+use App\Models\ProductSize;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -214,7 +215,6 @@ class ReportsController extends Controller
 
     public function forecaster(Request $request)
     {
-       
         $wra="(";
         $wra_array=[];
         $products = Product::where('production_item',1)->where('is_misc',0)->get();
@@ -229,7 +229,8 @@ class ReportsController extends Controller
         // Sales
             $qry = "SELECT d.product_name, h.outlet, d.paella_price, h.contact_person, d.product_name as dproduct_name, h.has_sub, '' as jo_category, d.id as idd,
             d.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,d.price, h.customer_delivery_adress, h.parent_sales_header_id,
-            h.customer_name, d.delivery_date as delivery_date, h.instruction, po.delivery_date as deldate, h.delivery_type, jo.jo_number, pb.name as pbname, h.delivery_status as delstat,h.agent, h.customer_contact_number,'' as dr, h.delivery_fee_amount, d.price, '' as releasing, h.order_source, br.name as receiver, c.name as catname, u.name as username, jo.jo_order_type,h.order_type as hordertype, h.id as hid, '' as jo_category, 'sales' as trantype, DATE_FORMAT(d.delivery_date,'%H:%i:%s') as timeneeded, DATE_FORMAT(d.delivery_date, '%Y-%m-%d') as dateneeded, p.is_misc, p.production_item, h.isConfirm as isConfirm, h.gross_amount as gros, h.forecast_date as forecast_dt, h.delivery_branch as del_branch,p.id as prodid,h.created_at as created
+            h.customer_name, d.delivery_date as delivery_date, h.instruction, po.delivery_date as deldate, h.delivery_type, jo.jo_number, pb.name as pbname, h.delivery_status as delstat,h.agent, h.customer_contact_number,'' as dr, h.delivery_fee_amount, d.price, '' as releasing, h.order_source, br.name as receiver, c.name as catname, u.name as username, jo.jo_order_type,h.order_type as hordertype, h.id as hid, '' as jo_category, 'sales' as trantype, DATE_FORMAT(d.delivery_date,'%H:%i:%s') as timeneeded, DATE_FORMAT(d.delivery_date, '%Y-%m-%d') as dateneeded, p.is_misc, p.production_item, h.isConfirm as isConfirm, h.gross_amount as gros, h.forecast_date as forecast_dt, h.delivery_branch as del_branch,p.id as prodid,h.created_at as created,
+            p.size
             FROM `ecommerce_sales_details` d
             left join ecommerce_sales_headers h on h.id=d.sales_header_id
             left join products p on p.id=d.product_id
@@ -255,9 +256,9 @@ class ReportsController extends Controller
             if(isset($_GET['agent']) && $_GET['agent']<>''){
                 $qry.= " and h.agent='".$_GET['agent']."'";
             }
-            if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $qry.= " and h.customer_name='".$_GET['customer']."'";
-            }
+            // if(isset($_GET['customer']) && $_GET['customer']<>''){
+            //     $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
+            // }
             if(isset($_GET['product']) && $_GET['product']<>''){
                 $qry.= " and d.product_name='".$_GET['product']."'";
             }
@@ -268,11 +269,18 @@ class ReportsController extends Controller
                 $qry.= " and h.order_type='".$_GET['order_type']."'";
             }
             if(isset($_GET['order_source']) && $_GET['order_source']<>''){
-                $qry.= " and h.order_source='".$_GET['order_source']."'";
+                $order_sources = is_array($_GET['order_source']) ? $_GET['order_source'] : [$_GET['order_source']];
+                $order_sources = array_filter($order_sources, function($value) { return !is_null($value) && $value !== ''; });
+                $qry.= " and h.order_source in ('".implode("','",$order_sources)."')";
                 $no_jo = 1;
             }
             if(isset($_GET['production_branch']) && $_GET['production_branch']<>''){
                 $qry.= " and pb.id='".$_GET['production_branch']."'";
+            }
+            if (isset($_GET['size']) && $_GET['size']<>''){
+                $sizes = is_array($_GET['size']) ? $_GET['size'] : [$_GET['size']];
+                $sizes = array_filter($sizes, function($value) { return !is_null($value) && $value !== ''; });
+                $qry.= " and p.size in ('".implode("','",$sizes)."')";
             }
 
             // $qry.= " and pb.name='Tandang Sora'";
@@ -419,7 +427,8 @@ class ReportsController extends Controller
             c.name as catname, u.name as username, jo.jo_order_type,h.order_type as hordertype, h.id as hid, '' as jo_category, 'sales' as trantype, 
             m.delivery_time as timeneeded, m.delivery_date as dateneeded, 
             p.is_misc, p.production_item, h.isConfirm as isConfirm, h.gross_amount as gros, h.forecast_date as forecast_dt, 
-            h.delivery_branch as del_branch,p.id as prodid,h.created_at as created
+            h.delivery_branch as del_branch,p.id as prodid,h.created_at as created,
+            p.size
             FROM `temp_mrs` m
             left join `ecommerce_sales_details` d on d.product_id=m.product_id and d.sales_header_id=m.sales_header_id
             left join ecommerce_sales_headers h on h.id=d.sales_header_id
@@ -446,9 +455,9 @@ class ReportsController extends Controller
             if(isset($_GET['agent']) && $_GET['agent']<>''){
                 $mqry.= " and h.agent='".$_GET['agent']."'";
             }
-            if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $mqry.= " and h.customer_name='".$_GET['customer']."'";
-            }
+            // if(isset($_GET['customer']) && $_GET['customer']<>''){
+            //     $mqry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
+            // }
             if(isset($_GET['product']) && $_GET['product']<>''){
                 $mqry.= " and d.product_name='".$_GET['product']."'";
             }
@@ -459,11 +468,19 @@ class ReportsController extends Controller
                 $mqry.= " and h.order_type='".$_GET['order_type']."'";
             }
             if(isset($_GET['order_source']) && $_GET['order_source']<>''){
-                $mqry.= " and h.order_source='".$_GET['order_source']."'";
+                $order_sources = is_array($_GET['order_source']) ? $_GET['order_source'] : [$_GET['order_source']];
+                $order_sources = array_filter($order_sources, function($value) { return !is_null($value) && $value !== ''; });
+                $mqry.= " and h.order_source in ('".implode("','",$order_sources)."')";
                 
             }
             if(isset($_GET['production_branch']) && $_GET['production_branch']<>''){
                 $mqry.= " and pb.id='".$_GET['production_branch']."'";
+            }
+
+            if (isset($_GET['size']) && $_GET['size']<>''){
+                $sizes = is_array($_GET['size']) ? $_GET['size'] : [$_GET['size']];
+                $sizes = array_filter($sizes, function($value) { return !is_null($value) && $value !== ''; });
+                $mqry.= " and p.size in ('".implode("','",$sizes)."')";
             }
             
             // $mqry.= " and pb.name='Tandang Sora'";
@@ -535,7 +552,8 @@ class ReportsController extends Controller
             jo.qty as qty, '' as order_number, u.address_street, u.address_municipality, u.address_city, u.address_region, jo.price, jo.customer_address as customer_delivery_adress,
             jo.customer_name, jo.date_needed as delivery_date,jo.remarks as instruction, po.delivery_date as deldate,'' as delivery_type, jo.jo_number, pb.name as pbname, jo.created_at as created,
 
-            '' as delstat, '' as agent, '' as customer_contact_number,'' as dr, '0' as delivery_fee_amount,'0' as price, '' as releasing, 'Forecaster' as order_source, br.name as receiver, c.name as catname, u.name as username, jo.jo_order_type, '0' as hid, jo.jo_category as jo_category, 'jo' as trantype, DATE_FORMAT(jo.date_needed,'%H:%i:%s') as timeneeded, DATE_FORMAT(jo.date_needed, '%Y-%m-%d') as dateneeded, p.is_misc, p.production_item, '1' as isConfirm, 0 as gros, '' as forecast_dt, '' as del_branch,p.id as prodid
+            '' as delstat, '' as agent, '' as customer_contact_number,'' as dr, '0' as delivery_fee_amount,'0' as price, '' as releasing, 'Forecaster' as order_source, br.name as receiver, c.name as catname, u.name as username, jo.jo_order_type, '0' as hid, jo.jo_category as jo_category, 'jo' as trantype, DATE_FORMAT(jo.date_needed,'%H:%i:%s') as timeneeded, DATE_FORMAT(jo.date_needed, '%Y-%m-%d') as dateneeded, p.is_misc, p.production_item, '1' as isConfirm, 0 as gros, '' as forecast_dt, '' as del_branch,p.id as prodid,
+            p.size
             from job_orders jo 
             left join branches br on  br.id = jo.pickup_branch
             left join production_orders po on po.joborder_id = jo.id
@@ -565,6 +583,12 @@ class ReportsController extends Controller
             }
             if(isset($_GET['start_time']) && $_GET['start_time']<>''){
                 $jos.= " and time(jo.date_needed)='".$_GET['start_time']."'";
+            }
+            
+            if (isset($_GET['size']) && $_GET['size']<>''){
+                $sizes = is_array($_GET['size']) ? $_GET['size'] : [$_GET['size']];
+                $sizes = array_filter($sizes, function($value) { return !is_null($value) && $value !== ''; });
+                $jos.= " and p.size in ('".implode("','",$sizes)."')";
             }
 
             
@@ -614,9 +638,66 @@ class ReportsController extends Controller
             })
             ->values();
 
+        if (isset($_GET['customer']) && $_GET['customer'] != '') {
+            $search = strtolower($_GET['customer']);
+
+            $results = $results->filter(function ($item) use ($search) {
+                return str_contains(strtolower($item->customer_name), $search);
+            })->values();
+        }
+
         $ex_array = ['Pantaga','Display','Alpha Size','Belly Pantaga'];
 
         $original_results = $results;
+
+        // Get all published sizes
+        $sizes = ProductSize::select('product_sizes.*')
+            ->join('products', 'products.id', '=', 'product_sizes.product_id')
+            ->where('product_sizes.status', 'PUBLISHED')
+            ->orderBy('products.order')
+            ->orderBy('product_sizes.name')
+            ->get();
+
+        $paellaCounts = collect($results)
+            ->filter(function ($item) {
+                return (isset($item->paella) && $item->paella == 1) || str_contains(strtolower($item->dproduct_name ?? ''), 'paella');
+            })
+            ->groupBy(function ($item) {
+                return trim($item->size ?? '') !== ''
+                    ? $item->size
+                    : 'Size Undefined';
+            })
+            ->map->sum('qty');
+
+        // Count qty per size from results
+        $sizeCountsFromResults = collect($results)
+            ->groupBy(function ($item) {
+                return trim($item?->size ?? '') !== ''
+                    ? $item?->size
+                    : 'Size Undefined';
+            })
+            ->map->sum('qty');
+
+        // Map counts to sizes (default 0)
+        $sizeCounts = collect();
+
+        foreach ($sizes as $size) {
+
+            $sizeName = $size->name;
+
+            $total = $sizeCountsFromResults[$sizeName] ?? 0;
+            $paella = $paellaCounts[$sizeName] ?? 0;
+
+            $regular = $total - $paella;
+
+            // Regular (deduct paella)
+            $sizeCounts[$sizeName] = max($regular, 0);
+
+            // Add paella row if exists
+            if ($paella > 0) {
+                $sizeCounts[$sizeName . ' Boneless with Paella'] = $paella;
+            }
+        }
 
         if (isset($_GET['filter']) && $_GET['filter'] == 'whole-lechon') {
             $results = $results
@@ -654,13 +735,60 @@ class ReportsController extends Controller
                 ->where('jo_category', 'Pantaga')
                 ->values();
         }
+
+        if (request('filter_size')) {
+
+            $results = $results->where('size', request('filter_size'));
+
+            if (request('filter_type') === 'paella') {
+                $results = $results->filter(function ($item) {
+                    return str_contains(strtolower($item->dproduct_name ?? ''), 'paella')
+                        || str_contains(strtolower($item->product_name ?? ''), 'paella')
+                        || str_contains(strtolower($item->catname ?? ''), 'paella');
+                });
+            }
+
+            if (request('filter_type') === 'regular') {
+                $results = $results->reject(function ($item) {
+                    return str_contains(strtolower($item->dproduct_name ?? ''), 'paella')
+                        || str_contains(strtolower($item->product_name ?? ''), 'paella')
+                        || str_contains(strtolower($item->catname ?? ''), 'paella');
+                });
+            }
+
+            $results = $results->values();
+        }
+
+        $order_sources = session('order_sources', $_GET['order_sources'] ?? null);
+
+        if (empty($order_sources)) {
+            $order_sources = SalesHeader::select('order_source')->where('created_at', '>=', '2025-10-01')->distinct('order_source')->orderBy('order_source')->get();
+        }
+
+        session(['order_sources' => $order_sources]);
         
-        //logger($results);
-        if(isset($_GET['toexcel']))
-            return view('admin.reports.forecaster_excel',compact('rs','jo','results','wra_array','mrs'));
-        else
-            // return view('admin.reports.forecaster',compact('rs','jo','results','wra_array','mrs'));
-            return view('admin.reports.forecaster-test',compact('rs','jo','results','wra_array','mrs', 'original_results'));
+        if(isset($_GET['toexcel'])) {
+            return view('admin.reports.forecaster_excel', compact(
+                'rs',
+                'jo',
+                'results',
+                'wra_array',
+                'mrs'
+            ));
+        } else { 
+            return view('admin.reports.forecaster-test', compact(
+                'rs',
+                'jo',
+                'results',
+                'wra_array',
+                'mrs',
+                'original_results',
+                'sizeCounts',
+                'order_sources',
+                'sizes'
+            ));
+        }
+            
     }
 
     public function sales_payment(Request $request)
@@ -1632,19 +1760,21 @@ class ReportsController extends Controller
         //             ->orderBy('name')
         //             ->limit(20)
         //             ->get();
-
-            // include name, email, role, firstname, lastname, organization in the search
-            $users = User::when($search, fn($query) => $query->where(function($q) use ($search) {
-                            $q->where('name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%")
-                            ->orWhere('firstname', 'like', "%{$search}%")
-                            ->orWhere('lastname', 'like', "%{$search}%")
-                            ->orWhere('organization', 'like', "%{$search}%");
-                        })
-                     )
-                    ->orderBy('name')
-                    ->limit(20)
-                    ->get();
+        $users = User::where(function ($query) {
+                $query->where('role_id', 6)
+                    ->orWhere('user_type', 'customer');
+            })
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('firstname', 'like', "%{$search}%")
+                    ->orWhere('lastname', 'like', "%{$search}%")
+                    ->orWhere('organization', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('name')
+            ->limit(20)
+            ->get();
 
 
         return response()->json([
@@ -1655,22 +1785,58 @@ class ReportsController extends Controller
         ]);
     }
 
-    // public function searchCustomers(Request $request)
-    // {
-    //     $search = $request->input('q');
+    public function searchUsersForecaster(Request $request)
+    {
+        $search = $request->input('q');
 
-    //     $users = SalesHeader::where('customer_name', 'like', "%{$search}%")                    
-    //                 ->orderBy('name')
-    //                 ->limit(20)
-    //                 ->get();
+        // $users = User::where('role_id', '<>', env('CUSTOMER_ROLE_ID'))
+        //             ->when($search, fn($query) => $query->where('name', 'like', "%{$search}%"))
+        //             ->orderBy('name')
+        //             ->limit(20)
+        //             ->get();
+        $users = User::where(function ($query) {
+                $query->where('role_id', 6)
+                    ->orWhere('user_type', 'customer');
+            })
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('firstname', 'like', "%{$search}%")
+                    ->orWhere('lastname', 'like', "%{$search}%")
+                    ->orWhere('organization', 'like', "%{$search}%");
+                });
+            })
+            ->select('name')
+            ->distinct()
+            ->orderBy('name')
+            ->limit(20)
+            ->get();
 
-    //     return response()->json([
-    //         'results' => $users->map(fn($user) => [
-    //             'id' => $user->id,
-    //             'text' => $user->name
-    //         ])
-    //     ]);
-    // }
+
+        return response()->json([
+            'results' => $users->map(fn($user) => [
+                'id' => $user->name,
+                'text' => $user->name
+            ])
+        ]);
+    }
+
+    public function searchCustomers(Request $request)
+    {
+        $search = $request->input('q');
+
+        $users = SalesHeader::select('id', 'customer_name')->where('customer_name', 'like', "%{$search}%")                    
+                    ->orderBy('customer_name')
+                    ->limit(20)
+                    ->get();
+
+        return response()->json([
+            'results' => $users->map(fn($user) => [
+                'id' => $user->id,
+                'text' => $user->customer_name
+            ])
+        ]);
+    }
 
     public function audit_trail_per_sales(Request $request){
         $rs = '';

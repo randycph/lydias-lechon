@@ -251,7 +251,7 @@
                                 <a href="{{route('admin.report.forecaster')}}" class="btn btn-info mg-t-7 mg-r-5 btn-sm">Reset</a>
                             </div>
                         </div>
-                        <div class="row" id="adv" style="display:none;">
+                        <div class="row align-items-start" id="adv" style="display:none;">
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13">Time Needed</label>
@@ -303,7 +303,19 @@
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13">Customer</label>
-                                    <select name="customer" id="customer" class="form-control">
+                                    <select id="customer" name="customer" class="form-control select2-ajax" style="width:100%">
+                                        @isset($_GET['customer'])
+                                            @php
+                                                $customer = \App\Models\User::where('name', $_GET['customer'])->first();
+                                            @endphp
+
+                                            @if ($customer)
+                                                <option value="{{ $customer->name }}" selected="selected">{{ $customer->name }}</option>
+                                            @endif
+                                        @endisset
+                                    </select>
+
+                                    {{-- <select name="customer" id="customer" class="form-control">
                                         <option value="">- Select Customer -</option>
                                         @forelse(\App\EcommerceModel\SalesHeader::select('customer_name')->distinct('customer_name')->orderBy('customer_name')->get() as $cus)
 
@@ -313,7 +325,7 @@
                                         @isset($_GET['customer'])
                                             <option value="{{$_GET['customer']}}" selected="selected">{{ $_GET['customer'] }}</option>
                                         @endisset
-                                    </select>
+                                    </select> --}}
                                 </div>
                             </div>                            
                             <div class="col-md-2">
@@ -354,15 +366,22 @@
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13">Order Source</label>
-                                    <select name="order_source" id="order_source" class="form-control">
-                                        <option value="">- Select Source -</option>
-                                        @forelse(\App\EcommerceModel\SalesHeader::select('order_source')->where('created_at', '>=', '2025-10-01')->distinct('order_source')->orderBy('order_source')->get() as $cus)
-                                            <option value="{{$cus->order_source}}">{{$cus->order_source}}</option>
+                                    <select name="order_source[]" id="order_source" class="form-control order-sources-multiple" placeholder="Select Order Source" multiple>
+                                        @forelse($order_sources as $cus)
+                                            <option value="{{$cus->order_source}}" {{ (isset($_GET['order_source']) && in_array($cus->order_source, (array)$_GET['order_source'])) ? 'selected' : '' }}>{{$cus->order_source}}</option>
                                         @empty
                                         @endforelse
-                                        @isset($_GET['order_source'])
-                                            <option value="{{$_GET['order_source']}}" selected="selected">{{ $_GET['order_source'] }}</option>
-                                        @endisset
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label class="tx-13">Sizes</label>
+                                    <select name="size[]" id="size" class="form-control sizes-multiple" placeholder="Select Sizes" multiple>
+                                        @foreach($sizes as $cus)
+                                            <option value="{{$cus->name}}" {{ (isset($_GET['size']) && in_array($cus->name, (array)$_GET['size'])) ? 'selected' : '' }}>{{$cus->name}}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>
@@ -386,8 +405,7 @@
                             <div class="col-md-2">
                                 <div class="form-group">
                                     <label class="tx-13">Item Type</label>
-                                    <select name="item_type[]" id="item_type" class="form-control" multiple="multiple">
-                                        <option value="">- Select Item Type -</option>
+                                    <select name="item_type[]" id="item_type" class="form-control item-type-multiple" placeholder="Select Item Type" multiple>
                                         <option @if(isset($_GET['item_type']) && in_array("Miscellaneous",$_GET['item_type'])) selected="selected" @endif value="Miscellaneous">Miscellaneous</option>
                                         <option @if(isset($_GET['item_type']) && in_array("WRA",$_GET['item_type'])) selected="selected" @endif value="WRA">WRA</option>
                                         <option @if(isset($_GET['item_type']) && in_array("Belly Pantaga",$_GET['item_type'])) selected="selected" @endif value="Belly Pantaga">Belly Pantaga</option>
@@ -412,64 +430,149 @@
                         </tr>
                     </table>
 
-                    <table class="print-table" border="1" width="40%" style="font-size: 14px; font-weight:bold; ">
+                    <table class="print-table" width="100%" cellpadding="5" cellspacing="0" style="font-size: 14px; font-weight:bold;" >
                         <tr>
-                            <td>TOTAL WHOLE LECHON ORDER:</td>
-                            <td align="center">
-                                <a href="{{ request()->fullUrlWithQuery(['filter' => 'whole-lechon']) }}">
-                                    {{ $total_lechon_order }}
-                                </a>
+                            <!-- LEFT: Existing totals table -->
+                            <td width="60%" valign="top">
+                                <table class="print-table" border="1" width="100%" style="font-size:14px; font-weight:bold;">
+                                    <tr>
+                                        <td>TOTAL WHOLE LECHON ORDER:</td>
+                                        <td align="center">
+                                            <a href="{{ request()->url() . '?' . http_build_query(
+                                                array_merge(
+                                                    request()->except(['filter_size', 'filter_type']),
+                                                    ['filter' => 'whole-lechon']
+                                                )
+                                            ) }}">
+                                                {{ $total_lechon_order }}
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>TOTAL PANTAGA:</td>
+                                        <td align="center">
+                                            <a href="{{ request()->url() . '?' . http_build_query(
+                                                array_merge(
+                                                    request()->except(['filter_size', 'filter_type']),
+                                                    ['filter' => 'pantaga']
+                                                )
+                                            ) }}">
+                                                {{collect($jo)->where('jo_category','=','Pantaga')->sum('qty')}}
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>TOTAL BELLY PANTAGA:</td>
+                                        <td align="center">
+                                            <a href="{{ request()->url() . '?' . http_build_query(
+                                                array_merge(
+                                                    request()->except(['filter_size', 'filter_type']),
+                                                    ['filter' => 'belly-pantaga']
+                                                )
+                                            ) }}">
+                                                {{collect($jo)->where('jo_category','=','Belly Pantaga')->sum('qty')}}
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>TOTAL DISPLAY:</td>
+                                        <td align="center">
+                                            <a href="{{ request()->url() . '?' . http_build_query(
+                                                array_merge(
+                                                    request()->except(['filter_size', 'filter_type']),
+                                                    ['filter' => 'display']
+                                                )
+                                            ) }}">
+                                                {{collect($jo)->where('jo_category','=','Display')->sum('qty')}}
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>TOTAL ALPHA SIZE:</td>
+                                        <td align="center">
+                                            <a href="{{ request()->url() . '?' . http_build_query(
+                                                array_merge(
+                                                    request()->except(['filter_size', 'filter_type']),
+                                                    ['filter' => 'alpha-size']
+                                                )
+                                            ) }}">
+                                                {{collect($jo)->where('jo_category','=','Alpha Size')->sum('qty')}}
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>OVERALL TOTAL LECHON:</td>
+                                        <td align="center">
+                                            <a href="{{ request()->url() . '?' . http_build_query(
+                                                array_merge(
+                                                    request()->except(['filter_size', 'filter_type']),
+                                                    ['filter' => 'overall-lechon']
+                                                )
+                                            ) }}">
+                                                {{ $total_lechon_overall }}
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>TOTAL MISC QTY:</td>
+                                        <td align="center">
+                                            <a href="{{ request()->url() . '?' . http_build_query(
+                                                array_merge(
+                                                    request()->except(['filter_size', 'filter_type']),
+                                                    ['filter' => 'misc']
+                                                )
+                                            ) }}">
+                                                {{ $total_misc }}
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </table>
                             </td>
-                        </tr>
-                        <tr>
-                            <td>TOTAL PANTAGA:</td>
-                            <td align="center">
-                                <a href="{{ request()->fullUrlWithQuery(['filter' => 'pantaga']) }}">
-                                    {{collect($jo)->where('jo_category','=','Pantaga')->sum('qty')}}
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>TOTAL BELLY PANTAGA:</td>
-                            <td align="center">
-                                <a href="{{ request()->fullUrlWithQuery(['filter' => 'belly-pantaga']) }}">
-                                    {{collect($jo)->where('jo_category','=','Belly Pantaga')->sum('qty')}}
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>TOTAL DISPLAY:</td>
-                            <td align="center">
-                                <a href="{{ request()->fullUrlWithQuery(['filter' => 'display']) }}">
-                                    {{collect($jo)->where('jo_category','=','Display')->sum('qty')}}
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>TOTAL ALPHA SIZE:</td>
-                            <td align="center">
-                                <a href="{{ request()->fullUrlWithQuery(['filter' => 'alpha-size']) }}">
-                                    {{collect($jo)->where('jo_category','=','Alpha Size')->sum('qty')}}
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>OVERALL TOTAL LECHON: </td>
-                            <td align="center">
-                                <a href="{{ request()->fullUrlWithQuery(['filter' => 'overall-lechon']) }}">
-                                    {{$total_lechon_overall}}
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>TOTAL MISC QTY:</td>
-                            <td align="center">
-                                <a href="{{ request()->fullUrlWithQuery(['filter' => 'misc']) }}">
-                                    {{$total_misc}}
-                                </a>
+
+                            <!-- RIGHT: Size breakdown -->
+                            <td width="40%" valign="top">
+                                <table class="print-table" border="1" width="100%" style="font-size:14px; font-weight:bold;">
+                                    <tr>
+                                        <td colspan="2" align="center">Whole Lechon Breakdown</td>
+                                    </tr>
+
+                                    @foreach ($sizeCounts as $size => $count)
+
+                                        @php
+                                            $isPaella = str_contains($size, 'Boneless with Paella');
+                                            $baseSize = $isPaella
+                                                ? str_replace(' Boneless with Paella', '', $size)
+                                                : $size;
+                                        @endphp
+
+                                        <tr>
+                                            <td>{{ strtoupper($size) }}</td>
+                                            <td align="center">
+                                                <a href="{{ request()->url() . '?' . http_build_query(
+                                                    array_merge(
+                                                        request()->except(['filter']),
+                                                        [
+                                                            'filter_size' => $baseSize,
+                                                            'filter_type' => $isPaella ? 'paella' : 'regular'
+                                                        ]
+                                                    )
+                                                ) }}">
+                                                    {{ $count }}
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </table>
                             </td>
                         </tr>
                     </table>
+
                 </div>
             </div>
 
@@ -515,7 +618,8 @@
                                 <th>Delivery Branch</th>
                                 <th>Encoded Date</th>  
                                 <th>Encoded Time</th>   
-                                <th>Delivery Status</th>                     
+                                <th>Delivery Status</th>
+                                <th>Size</th>                     
                             </tr>
                             </thead>
                                 <tbody>
@@ -637,13 +741,14 @@
         $payments      = $isSales ? ($paymentsByHid->get($r->parent_sales_header_id > 0 ? $r->parent_sales_header_id : ($r->hid ?? 0), collect())) : collect();
         $custAddrSafe  = strip_tags($r->customer_delivery_adress ?? '');
         $contactMerged = $r->contact_person ?? $r->customer_name ?? '';
-        $deliveryDate  = $fmtDate($r->delivery_date);
+        $deliveryDate  = \Carbon\Carbon::parse($r->delivery_date)->format('Y-m-d');
         $deliveryTime  = $fmtTime($r->delivery_date);
         $noteChunked   = $chunkWords($r->instruction ?? '');
-        $delDate       = $fmtDate($r->deldate);
+        $delDate       = \Carbon\Carbon::parse($r->deldate)->format('Y-m-d');
         $delTime       = $fmtTime($r->deldate);
         $deliveryType  = (string)($r->delivery_type ?? '');
         $delstat       = (string)($r->delstat ?? '');
+        $size          = (string)($r->size ?? '');
         $agent         = (string)($r->agent ?? '');
         $orderNoText   = (string)($r->order_number ?? '');
         $customerName  = (string)($r->customer_name ?? '');
@@ -688,14 +793,14 @@
         <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}"
             data-value="{{ $isSales && $payments->count() ? $payments->map(fn($p)=>$p->payment_type.': '.number_format((float)$p->amount,2))->implode(', ') : '' }}">
             @if($isSales && !$isMerged && $payments->count())
-            <table>
+            <div>
                 @foreach($payments as $pp)
-                    <tr>
-                        <td class="bord">{{ e($pp->payment_type) }}</td>
-                        <td class="bord">{{ number_format((float)$pp->amount, 2) }}</td>
-                    </tr>
+                    <div>
+                        <div class="bord">{{ e($pp->payment_type) }}</div>
+                        <div class="bord">{{ number_format((float)$pp->amount, 2) }}</div>
+                    </div>
                 @endforeach
-            </table>
+            </div>
             @else &nbsp; @endif
         </td>
 
@@ -834,6 +939,11 @@
         {{-- Delivery Status (duplicate of status; merged for sales; JO per-row) --}}
         <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $delstat }}">
             {{ $isSales ? ($isMerged ? '' : e($delstat)) : e($r->delstat ?? '') }}
+        </td>
+
+        {{-- Size (duplicate of status; merged for sales; JO per-row) --}}
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $size }}">
+            {{ $isSales ? ($isMerged ? '' : e($size)) : e($r->size ?? '') }}
         </td>
     </tr>
 
@@ -1130,7 +1240,23 @@
                     }
                 }
             },
-            'colvis'
+            {
+                extend: 'colvis',
+                text: 'Column visibility',
+                buttons: [
+                    {
+                        extend: 'colvisGroup',
+                        text: 'Show all columns',
+                        show: ':hidden'
+                    },
+                    {
+                        extend: 'colvisGroup',
+                        text: 'Hide extra columns',
+                        hide: [2,4,5,7,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34]
+                    },
+                    'columnsToggle'
+                ]
+            }
         ],
         columnDefs: [
             // keep this list in sync with your actual header count
@@ -1143,6 +1269,21 @@
         $(document).ready(function() {
             $('.receiver-branch-multiple').select2({
                 placeholder: "Select a branch",
+                width: '300px',
+                dropdownAutoWidth: true
+            });
+            $('.sizes-multiple').select2({
+                placeholder: "Select a size",
+                width: '300px',
+                dropdownAutoWidth: true
+            });
+            $('.order-sources-multiple').select2({
+                placeholder: "Select an order source",
+                width: '300px',
+                dropdownAutoWidth: true
+            });
+            $('.item-type-multiple').select2({
+                placeholder: "Select an item type",
                 width: '300px',
                 dropdownAutoWidth: true
             });
@@ -1389,7 +1530,26 @@ function twoColTotals_forPrint() {
 //   };
 }
 
-
+    $('.select2-ajax').select2({
+        placeholder: 'Select a user',
+        ajax: {
+            url: '{{ route("ajax.search-users-forecaster") }}',
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                    q: params.term // search term
+                };
+            },
+            processResults: function (data) {
+                return {
+                    results: data.results
+                };
+            },
+            cache: true
+        },
+        minimumInputLength: 1
+    });
 
 
 </script>
