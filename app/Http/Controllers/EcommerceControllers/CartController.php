@@ -27,6 +27,7 @@ use App\Models\Page;
 use Illuminate\Support\Facades\Auth;
 use App\EcommerceModel\GiftCertificate;
 use App\Jobs\SendSmsJob;
+use App\Models\ActivityLog;
 use App\Models\ProductDeliveryAddress;
 use App\Models\Setting as ModelsSetting;
 use Redirect;

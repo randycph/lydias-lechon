@@ -92,7 +92,7 @@
                         <div class="mb-5">
                             <h2 class="font-bold text-lg mb-2">Products</h2>
                             <template x-for="(item, index) in results['Product'].slice(0, productLimit)" :key="item.id">
-                                <a :href="item.product_url" class="flex justify-between gap-x-6 py-3 hover:bg-gray-100 cursor-pointer rounded-md">
+                                <a :href="'/'+item.product_url" class="flex justify-between gap-x-6 py-3 hover:bg-gray-100 cursor-pointer rounded-md">
                                     <div class="flex min-w-0 gap-x-4">
                                         <img class="size-12 flex-none object-left object-cover rounded-full bg-gray-50" :src="item.photo_url || '{{ asset('images/no-image.jpg') }}'" alt="Product" onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}';">
                                         <div class="min-w-0 flex-auto">

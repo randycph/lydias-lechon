@@ -201,6 +201,14 @@ class CustomerFrontController extends Controller
                 'reference' => url()->current()
             ]);
 
+            $sessionId = $request->session()->getId();
+
+            ActivityLog::where('session_id', $sessionId)
+                ->whereNull('session_owner_id')
+                ->update([
+                    'session_owner_id' => Auth::id(),
+                    'created_by' => Auth::id(),
+                ]);
 
             $redirectTo = $request->input('redirect') ?? route('my-account');
             return redirect()->intended($redirectTo);

@@ -86,48 +86,9 @@ class SalesHeader extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function getNearestDeliveryDateAttribute()
+    public function subSales()
     {
-        $today = now()->startOfDay();
-
-        return $this->items
-            ->pluck('delivery_date')
-            ->map(fn ($date) => safe_date($date))
-            ->filter(fn ($date) => $date && $date->gte($today))
-            ->sort()
-            ->first();
-    }
-
-    public function scopeUnpaid($query)
-    {
-        return $query->whereRaw('(
-            SELECT COALESCE(SUM(amount), 0)
-            FROM ecommerce_sales_payments
-            WHERE ecommerce_sales_payments.sales_header_id = ecommerce_sales_headers.id
-            AND ecommerce_sales_payments.status = "PAID"
-        ) < net_amount');
-    }
-
-    public function scopePartial($query)
-    {
-        return $query
-            ->whereHas('payments', fn ($q) => $q->where('status', 'PAID'))
-            ->whereRaw('(
-                SELECT COALESCE(SUM(amount), 0)
-                FROM ecommerce_sales_payments
-                WHERE ecommerce_sales_payments.sales_header_id = ecommerce_sales_headers.id
-                AND ecommerce_sales_payments.status = "PAID"
-            ) < net_amount');
-    }
-
-    public function scopePaid($query)
-    {
-        return $query->whereRaw('(
-            SELECT COALESCE(SUM(amount), 0)
-            FROM ecommerce_sales_payments
-            WHERE ecommerce_sales_payments.sales_header_id = ecommerce_sales_headers.id
-            AND ecommerce_sales_payments.status = "PAID"
-        ) >= net_amount');
+        return $this->hasMany(SalesHeader::class, 'parent_sales_header_id');
     }
 
     public function assign_to_production_branch($sale, $pb){

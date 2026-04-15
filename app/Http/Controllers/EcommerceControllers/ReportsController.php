@@ -1839,23 +1839,24 @@ class ReportsController extends Controller
     }
 
     public function audit_trail_per_sales(Request $request){
-        $rs = '';
-        $qry = "SELECT l.* FROM `cms_activity_logs` l
-        left join ecommerce_sales_headers h on h.id=l.reference
-        where l.reference REGEXP '^-?[0-9]+$' ";
-        // conditions
-           
-            if(isset($_GET['pb']) && strlen($_GET['pb'])>=1){
-              
-                $qry.= " and order_number like '%".$_GET['pb']."%'";
-            }
-            else{
-                $qry.= " and h.id ='1'";
-            }
-            $qry.=" order by l.id desc";
-        // end conditions
-           //dd($qry);
-        $rs = DB::select($qry);
+        $pb = $request->input('pb') ?? null;
+
+        $rs = ActivityLog::with('user')->whereIn('db_table', [
+            'ecommerce_sales_headers',
+            'ecommerce_sales_details',
+            'ecommerce_sales_payments'
+        ])->whereIn('activity_type', [
+            'update',
+            'delete',
+            'create',
+            'force_delete',
+            'soft_delete',
+            'restore'
+        ])->whereNotNull('subject_id')
+        ->when($pb, function ($query) use ($pb) {
+            $query->where('subject_id', 'LIKE', "%{$pb}%");
+        })->orderBy('id', 'desc')
+        ->get();
    
         return view('admin.reports.audit_trail_per_sales',compact('rs'));
     }
