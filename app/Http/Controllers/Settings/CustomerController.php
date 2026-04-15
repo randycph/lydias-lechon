@@ -158,7 +158,11 @@ class CustomerController extends Controller
     public function update(Request $request, User $customer)
     {
         $request->validate([
-            'email' => 'nullable|email|max:191|unique:users,email,'.$customer->id,
+            'email' => [
+                'required',
+                'email:rfc,dns',
+                'max:191',
+            ],
             'contact_mobile' => 'required|max:15',
             'fname' => 'required_if:is_org,0|max:191',
             'lname' => 'required_if:is_org,0|max:191',

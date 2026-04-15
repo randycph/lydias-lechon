@@ -139,7 +139,6 @@ class CustomerFrontController extends Controller
 
     public function customer_login(Request $request)
     {
-    
         $userCredentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
@@ -153,9 +152,13 @@ class CustomerFrontController extends Controller
         $remember = $request->has('remember');
 
         $cart = session('cart', []);
-
         
         if (Auth::attempt($userCredentials, $remember)) {
+
+            if (Auth::user()->registration_type == 'guest') {
+                Auth::logout();
+                return back()->with('error', __('auth.login.inactive_account'));
+            }
 
             if ((Auth::user()->is_a_customer_user())) {
                 foreach ($cart as $order) {
