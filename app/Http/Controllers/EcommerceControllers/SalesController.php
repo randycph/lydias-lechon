@@ -495,7 +495,8 @@ class SalesController extends Controller
             'user_id' => Auth::id(),
             'approval_type' => 'Payment',
             'reference_id' => $data->sales_header_id,
-            'remarks' => $request->confirm_payment_remarks
+            'remarks' => $request->confirm_payment_remarks,
+            'payment_id' => $orig_payment->id
         ]);
 
 
@@ -1778,7 +1779,10 @@ class SalesController extends Controller
 
     public function payments()
     {
-        $payments = SalesPayment::where('sales_header_id','>',0)->orderBy('id','desc');
+        $payments = SalesPayment::with('approval.user')
+                                ->where('sales_header_id','>',0)
+                                ->orderBy('id','desc');
+
         if(isset($_GET['status']) && $_GET['status']){
             $payments = $payments->where('status',$_GET['status']);
         }
@@ -1797,6 +1801,12 @@ class SalesController extends Controller
 
         $page = new Page();
         $page->name = 'Payments';
+
+        $legacyApprovals = \App\Models\Approvals::whereNull('payment_id')
+            ->where('approval_type','Payment')
+            ->orderBy('created_at')
+            ->get()
+            ->groupBy('reference_id');
 
         return view('admin.sales.payments',compact('payments'));
 

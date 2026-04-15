@@ -2,6 +2,7 @@
 
 namespace App\EcommerceModel;
 
+use App\Models\Approvals;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Concerns\LogsActivityDiff;
@@ -32,7 +33,12 @@ class SalesPayment extends Model
         'is_discount'
     ];
 
-    
+    public function approval()
+    {
+        return $this->hasOne(Approvals::class, 'payment_id', 'id')
+                    ->where('approval_type', 'Payment');
+    }
+
     public static function check_if_has_added_payments($id)
     {
         $data = SalesPayment::where('sales_header_id',$id)->where('status','PAID')->exists();

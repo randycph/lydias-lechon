@@ -96,11 +96,15 @@ class ReportsController extends Controller
 
 
             if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-                $qry.= " and h.created_at >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and h.created_at <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
+                $start = Carbon::parse($request->startdate)->startOfDay();
+                $end = Carbon::parse($request->enddate)->endOfDay();
+                $qry.= " and h.created_at >='".$start."' and h.created_at <='".$end."'";
             }
             
             if(isset($_GET['startdateneeded']) && strlen($_GET['startdateneeded'])>=1){
-                $qry.= " and d.delivery_date >='".date('Y-m-d',strtotime($_GET['startdateneeded']))." 00:00:00.000' and d.delivery_date <='".date('Y-m-d',strtotime($_GET['enddateneeded']))." 23:59:59.999'";
+                $start = Carbon::parse($request->startdateneeded)->startOfDay();
+                $end = Carbon::parse($request->enddateneeded)->endOfDay();
+                $qry.= " and d.delivery_date >='".$start."' and d.delivery_date <='".$end."'";
             }
 
             if(isset($_GET['ordertype']) && strlen($_GET['ordertype'])>=1){
@@ -150,7 +154,9 @@ class ReportsController extends Controller
 
 
             if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-                $qry.= " and h.created_at >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and h.created_at <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
+                $start = Carbon::parse($request->startdate)->startOfDay();
+                $end = Carbon::parse($request->enddate)->endOfDay();
+                $qry.= " and h.created_at >='".$start."' and h.created_at <='".$end."'";
             }
             else{
                 $qry.= " and h.created_at >='2050-01-01 00:00:00.000'";
@@ -195,8 +201,8 @@ class ReportsController extends Controller
             $qry .= " AND h.order_source = '".$request->order_source."'";
         }
         if ($request->has('startdate') && $request->startdate != '') {
-            $start = date('Y-m-d', strtotime($request->startdate)) . " 00:00:00.000";
-            $end = date('Y-m-d', strtotime($request->enddate)) . " 23:59:59.999";
+            $start = Carbon::parse($request->startdate)->startOfDay();
+            $end = Carbon::parse($request->enddate)->endOfDay();
             $qry .= " AND h.created_at BETWEEN '$start' AND '$end'";
         }
 
@@ -310,7 +316,9 @@ class ReportsController extends Controller
 
 
             if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-                $qry.= " and d.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and d.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
+                $start = Carbon::parse($request->startdate)->startOfDay();
+                $end = Carbon::parse($request->enddate)->endOfDay();
+                $qry.= " and d.delivery_date >='".$start."' and d.delivery_date <='".$end."'";
             }
             else{
                 $qry.= " and d.delivery_date >='2051-01-01 00:00:00.000' and d.delivery_date <='2051-01-01 23:59:59.999'";
@@ -509,7 +517,9 @@ class ReportsController extends Controller
 
 
             if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-                $mqry.= " and m.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and m.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
+                $start = Carbon::parse($request->startdate)->startOfDay();
+                $end = Carbon::parse($request->enddate)->endOfDay();
+                $mqry.= " and m.delivery_date >='".$start."' and m.delivery_date <='".$end."'";
             }
             else{
                 $mqry.= " and m.delivery_date >='2051-01-01 00:00:00.000' and m.delivery_date <='2051-01-01 23:59:59.999'";
@@ -576,7 +586,9 @@ class ReportsController extends Controller
             // $jos.= " and pb.name='Tandang Sora'";
 
             if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-                $jos.= " and jo.date_needed >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and jo.date_needed <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
+                $start = Carbon::parse($request->startdate)->startOfDay();
+                $end = Carbon::parse($request->enddate)->endOfDay();
+                $jos.= " and jo.date_needed >='".$start."' and jo.date_needed <='".$end."'";
             }
             else{
                 $jos.= " and jo.date_needed >='2051-01-01 00:00:00.000' and jo.date_needed <='2051-01-01 23:59:59.999'";
@@ -807,8 +819,11 @@ class ReportsController extends Controller
         if(isset($_GET['payment_type']) && $_GET['payment_type']<>''){
             $qry.= " and p.payment_type='".$_GET['payment_type']."'";
         }
-        if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-            $qry.= " and p.payment_date >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and p.payment_date <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
+        if($request->startdate && $request->enddate){
+            $start = Carbon::parse($request->startdate)->format('Y-m-d');
+            $end = Carbon::parse($request->enddate)->format('Y-m-d');
+
+            $qry .= " AND p.payment_date >= '$start' AND p.payment_date <= '$end'";
         }
         else{
             $qry.= " and p.payment_date >='2050-01-01 00:00:00.000'";
@@ -941,7 +956,9 @@ class ReportsController extends Controller
             $qry.= " and c.id='".$_GET['category']."'";
         }
         if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-            $qry.= " and d.date>='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and d.date<='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
+            $start = Carbon::parse($_GET['startdate'])->startOfDay();
+            $end = Carbon::parse($_GET['enddate'])->endOfDay();
+            $qry.= " and d.date>='".$start."' and d.date<='".$end."'";
         }
         else{
             $qry.= " and d.date='".date('Y-m-d')."'";
@@ -1048,7 +1065,9 @@ class ReportsController extends Controller
 
 
             if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-                $qry.= " and d.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and d.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
+                $start = Carbon::parse($request->startdate)->startOfDay();
+                $end = Carbon::parse($request->enddate)->endOfDay();
+                $qry.= " and d.delivery_date >='".$start."' and d.delivery_date <='".$end."'";
             }
             else{
                 $qry.= " and d.delivery_date >='2050-01-01 00:00:00.000' and d.delivery_date <='2050-01-01 23:59:59.999'";
@@ -1123,7 +1142,9 @@ class ReportsController extends Controller
             }
 
             if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-                $qry.= " and d.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and d.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
+                $start = Carbon::parse($request->startdate)->startOfDay();
+                $end = Carbon::parse($request->enddate)->endOfDay();
+                $qry.= " and d.delivery_date >='".$start."' and d.delivery_date <='".$end."'";
 
 
                 // $qry.= " and d.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and d.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
@@ -1153,7 +1174,9 @@ class ReportsController extends Controller
                     where j.id>0  and h.deleted_at is null AND h.for_deletion = 0 AND h.has_sub = 0";
 
         if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-            $qry.= " and p.delivery_date>='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and p.delivery_date<='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
+            $start = Carbon::parse($_GET['startdate'])->startOfDay();
+            $end = Carbon::parse($_GET['enddate'])->endOfDay();
+            $qry.= " and p.delivery_date>='".$start."' and p.delivery_date<='".$end."'";
         }
         else{
             $qry.= " and p.delivery_date>='2051-01-01 00:00:00.000' and p.delivery_date<='2051-01-01 23:59:59.999'";
@@ -1213,11 +1236,11 @@ class ReportsController extends Controller
         }
 
         if ($request->filled('startdate') && $request->filled('enddate')) {
-            $start = date('Y-m-d 00:00:00', strtotime($request->startdate));
-            $end = date('Y-m-d 23:59:59', strtotime($request->enddate));
+            $start = Carbon::parse($request->startdate)->startOfDay();
+            $end = Carbon::parse($request->enddate)->endOfDay();
         } else {
-            $start = now()->startOfDay()->format('Y-m-d H:i:s');
-            $end = now()->endOfDay()->format('Y-m-d H:i:s');
+            $start = now()->startOfDay();
+            $end = now()->endOfDay();
         }
 
         $qry .= " AND h.created_at BETWEEN ? AND ?";
@@ -1257,7 +1280,9 @@ class ReportsController extends Controller
 
 
             if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-                $qry.= " and h.created_at >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and h.created_at <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
+                $start = Carbon::parse($request->startdate)->startOfDay();
+                $end = Carbon::parse($request->enddate)->endOfDay();
+                $qry.= " and h.created_at >= '".$start."' and h.created_at <= '".$end."'";
             }
             else{
                  $qry.= " and h.created_at >='2051-01-01 00:00:00.000'";
@@ -1286,7 +1311,9 @@ class ReportsController extends Controller
 
 
         if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-            $qry.= " and po.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and po.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
+            $start = Carbon::parse($request->startdate)->startOfDay();
+            $end = Carbon::parse($request->enddate)->endOfDay();
+            $qry.= " and po.delivery_date >= '".$start."' and po.delivery_date <= '".$end."'";
         }
 
         $rs = DB::select($qry);
@@ -1309,7 +1336,9 @@ class ReportsController extends Controller
         }
 
         if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-            $qry.= " and po.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and po.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
+            $start = Carbon::parse($request->startdate)->startOfDay();
+            $end = Carbon::parse($request->enddate)->endOfDay();
+            $qry.= " and po.delivery_date >= '".$start."' and po.delivery_date <= '".$end."'";
         }
 
         $rs = DB::select($qry);
@@ -1326,17 +1355,17 @@ class ReportsController extends Controller
         $qry = "select origin, count(id) total_order,sum(gross_amount) total_revenue from ecommerce_sales_headers where status = 'active' and payment_status = 'PAID' ";
 
         if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-            $startDate = date('Y-m-d',strtotime($_GET['startdate']));
-            $endDate = date('Y-m-d',strtotime($_GET['enddate']));
+            $startDate = Carbon::parse($request->startdate)->startOfDay()->toDateTimeString();
+            $endDate = Carbon::parse($request->enddate)->endOfDay()->toDateTimeString();
 
-            $qry.= " and created_at >='".$startDate." 00:00:00.000' and created_at <='".$endDate." 23:59:59.999'";
+            $qry.= " and created_at >= '".$startDate."' and created_at <= '".$endDate."'";
         } else {
             $firstDayOfMonth = new Carbon('first day of this month');
 
             $startDate = $firstDayOfMonth->format('Y-m-d');
-            $endDate   = Carbon::today()->format('Y-m-d');
+            $endDate   = Carbon::today()->endOfDay()->toDateTimeString();
 
-            $qry.= " and created_at >='".$startDate." 00:00:00.000' and created_at <='".$endDate." 23:59:59.999'";
+            $qry.= " and created_at >= '".$startDate."' and created_at <= '".$endDate."'";
         }
 
         $qry .= " group by origin";
@@ -1350,17 +1379,17 @@ class ReportsController extends Controller
         $qry = "select agent, count(id) as total_orders from ecommerce_sales_headers where agent is not null and status = 'active' and payment_status = 'PAID' ";
 
         if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-            $startDate = date('Y-m-d',strtotime($_GET['startdate']));
-            $endDate = date('Y-m-d',strtotime($_GET['enddate']));
+            $startDate = Carbon::parse($request->startdate)->startOfDay()->toDateTimeString();
+            $endDate = Carbon::parse($request->enddate)->endOfDay()->toDateTimeString();
 
-            $qry.= " and created_at >='".$startDate." 00:00:00.000' and created_at <='".$endDate." 23:59:59.999'";
+            $qry.= " and created_at >= '".$startDate."' and created_at <= '".$endDate."'";
         } else {
             $firstDayOfMonth = new Carbon('first day of this month');
 
             $startDate = $firstDayOfMonth->format('Y-m-d');
-            $endDate   = Carbon::today()->format('Y-m-d');
+            $endDate   = Carbon::today()->endOfDay()->toDateTimeString();
 
-            $qry.= " and created_at >='".$startDate." 00:00:00.000' and created_at <='".$endDate." 23:59:59.999'";
+            $qry.= " and created_at >= '".$startDate."' and created_at <= '".$endDate."'";
         }
 
         $qry .= " group by agent";
@@ -1375,17 +1404,17 @@ class ReportsController extends Controller
 
 
         if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-            $startDate = date('Y-m-d',strtotime($_GET['startdate']));
-            $endDate = date('Y-m-d',strtotime($_GET['enddate']));
+            $startDate = Carbon::parse($request->startdate)->startOfDay()->toDateTimeString();
+            $endDate = Carbon::parse($request->enddate)->endOfDay()->toDateTimeString();
 
-            $qry.= " and created_at >='".$startDate." 00:00:00.000' and created_at <='".$endDate." 23:59:59.999'";
+            $qry.= " and created_at >= '".$startDate."' and created_at <= '".$endDate."'";
         } else {
             $firstDayOfMonth = new Carbon('first day of this month');
 
-            $startDate = $firstDayOfMonth->format('Y-m-d');
-            $endDate   = Carbon::today()->format('Y-m-d');
+            $startDate = $firstDayOfMonth->startOfDay()->toDateTimeString();
+            $endDate   = Carbon::today()->endOfDay()->toDateTimeString();
 
-            $qry.= " and created_at >='".$startDate." 00:00:00.000' and created_at <='".$endDate." 23:59:59.999'";
+            $qry.= " and created_at >= '".$startDate."' and created_at <= '".$endDate."'";
         }
         $rs = DB::select($qry);
 
@@ -1397,17 +1426,17 @@ class ReportsController extends Controller
         $qry = "select sd.product_name, count(sh.id) total_orders, sum(sd.price*sd.qty) total_sales, sum(sd.qty) total_volume, p.weight from ecommerce_sales_details sd left join ecommerce_sales_headers sh on sh.id = sd.sales_header_id left join products as p on p.id = sd.product_id where sd.deleted_at is null and sh.status = 'active' and sh.payment_status = 'PAID' ";
 
         if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-            $startDate = date('Y-m-d',strtotime($_GET['startdate']));
-            $endDate = date('Y-m-d',strtotime($_GET['enddate']));
+            $startDate = Carbon::parse($request->startdate)->startOfDay()->toDateTimeString();
+            $endDate = Carbon::parse($request->enddate)->endOfDay()->toDateTimeString();
 
-            $qry.= " and sh.created_at >='".$startDate." 00:00:00.000' and sh.created_at <='".$endDate." 23:59:59.999'";
+            $qry.= " and sh.created_at >= '".$startDate."' and sh.created_at <= '".$endDate."'";
         } else {
             $firstDayOfMonth = new Carbon('first day of this month');
 
-            $startDate = $firstDayOfMonth->format('Y-m-d');
-            $endDate   = Carbon::today()->format('Y-m-d');
+            $startDate = $firstDayOfMonth->startOfDay()->toDateTimeString();
+            $endDate   = Carbon::today()->endOfDay()->toDateTimeString();
 
-            $qry.= " and sh. created_at >='".$startDate." 00:00:00.000' and sh.created_at <='".$endDate." 23:59:59.999'";
+            $qry.= " and sh. created_at >= '".$startDate."' and sh.created_at <= '".$endDate."'";
         }
 
         $qry .= " group by sd.product_id order by total_sales desc ";
@@ -1421,17 +1450,17 @@ class ReportsController extends Controller
         $qry = "select order_source, count(id) total_order,sum(gross_amount) total_revenue from ecommerce_sales_headers where status = 'active' and payment_status = 'PAID' AND has_sub = 0";
 
         if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-            $startDate = date('Y-m-d',strtotime($_GET['startdate']));
-            $endDate = date('Y-m-d',strtotime($_GET['enddate']));
+            $startDate = Carbon::parse($request->startdate)->startOfDay()->toDateTimeString();
+            $endDate = Carbon::parse($request->enddate)->endOfDay()->toDateTimeString();
 
-            $qry.= " and created_at >='".$startDate." 00:00:00.000' and created_at <='".$endDate." 23:59:59.999'";
+            $qry.= " and created_at >= '".$startDate."' and created_at <= '".$endDate."'";
         } else {
             $firstDayOfMonth = new Carbon('first day of this month');
 
-            $startDate = $firstDayOfMonth->format('Y-m-d');
-            $endDate   = Carbon::today()->format('Y-m-d');
+            $startDate = $firstDayOfMonth->startOfDay()->toDateTimeString();
+            $endDate   = Carbon::today()->endOfDay()->toDateTimeString();
 
-            $qry.= " and created_at >='".$startDate." 00:00:00.000' and created_at <='".$endDate." 23:59:59.999'";
+            $qry.= " and created_at >= '".$startDate."' and created_at <= '".$endDate."'";
         }
 
         $qry .= " group by order_source";
@@ -1445,17 +1474,17 @@ class ReportsController extends Controller
         $qry = "select sd.product_category, pcat.name, sum(sd.price*sd.qty) total_sales, count(sh.id) total_orders, sum(sd.qty) total_volume from ecommerce_sales_details sd left join ecommerce_sales_headers sh on sh.id = sd.sales_header_id left join product_categories as pcat on pcat.id = sd.product_category where sd.deleted_at is null and sh.status = 'active' and sh.payment_status = 'PAID' AND sh.has_sub = 0";
 
         if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-            $startDate = date('Y-m-d',strtotime($_GET['startdate']));
-            $endDate = date('Y-m-d',strtotime($_GET['enddate']));
+            $startDate = Carbon::parse($request->startdate)->startOfDay()->toDateTimeString();
+            $endDate = Carbon::parse($request->enddate)->endOfDay()->toDateTimeString();
 
-            $qry.= " and sh.created_at >='".$startDate." 00:00:00.000' and sh.created_at <='".$endDate." 23:59:59.999'";
+            $qry.= " and sh.created_at >= '".$startDate."' and sh.created_at <= '".$endDate."'";
         } else {
             $firstDayOfMonth = new Carbon('first day of this month');
 
-            $startDate = $firstDayOfMonth->format('Y-m-d');
-            $endDate   = Carbon::today()->format('Y-m-d');
+            $startDate = $firstDayOfMonth->startOfDay()->toDateTimeString();
+            $endDate   = Carbon::today()->endOfDay()->toDateTimeString();
 
-            $qry.= " and sh. created_at >='".$startDate." 00:00:00.000' and sh.created_at <='".$endDate." 23:59:59.999'";
+            $qry.= " and sh. created_at >= '".$startDate."' and sh.created_at <= '".$endDate."'";
         }
 
         $qry .= " group by sd.product_category";
@@ -1509,7 +1538,9 @@ class ReportsController extends Controller
 
 
         if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-            $qry.= " and po.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and po.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
+            $start = Carbon::parse($request->startdate)->startOfDay();
+            $end = Carbon::parse($request->enddate)->endOfDay();
+            $qry.= " and po.delivery_date >='".$start->toDateTimeString()."' and po.delivery_date <='".$end->toDateTimeString()."'";
         }
         else{
             $qry.= " and po.delivery_date >='2051-01-01 00:00:00.000' and po.delivery_date <='2051-01-01 23:59:59.999'";
@@ -1550,7 +1581,9 @@ class ReportsController extends Controller
             $jos.= " and pb.id='".$_GET['production_branch']."'";
         }
         if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-            $jos.= " and po.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and po.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
+            $start = Carbon::parse($request->startdate)->startOfDay();
+            $end = Carbon::parse($request->enddate)->endOfDay();
+            $jos.= " and po.delivery_date >='".$start->toDateTimeString()."' and po.delivery_date <='".$end->toDateTimeString()."'";
         }
         else{
             $jos.= " and po.delivery_date >='2051-01-01 00:00:00.000' and po.delivery_date <='2051-01-01 23:59:59.999'";
@@ -1617,10 +1650,12 @@ class ReportsController extends Controller
 
 
             if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-                $qry.= " and po.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))."' and po.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))."'";
+                $start = Carbon::parse($request->startdate)->startOfDay();
+                $end = Carbon::parse($request->enddate)->endOfDay();
+                $qry.= " and po.delivery_date >='".$start->toDateTimeString()."' and po.delivery_date <='".$end->toDateTimeString()."'";
             }
             else{
-                $qry.= " and po.delivery_date >='".date('Y-m-d 00:00:00')."' and po.delivery_date <='".date('Y-m-d 23:59:59')."'";
+                $qry.= " and po.delivery_date >='".Carbon::today()->startOfDay()->toDateTimeString()."' and po.delivery_date <='".Carbon::today()->endOfDay()->toDateTimeString()."'";
             }
         // end conditions
            //dd($qry);
@@ -1866,11 +1901,13 @@ class ReportsController extends Controller
         $qry = "SELECT * FROM `cms_activity_logs` where id>0 ";
         // conditions
             if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-                $qry .= " and activity_date >= '" . date('Y-m-d 00:00:00', strtotime($_GET['startdate'])) . "' and activity_date <= '" . date('Y-m-d 23:59:59', strtotime($_GET['enddate'])) . "'";
+                $start = Carbon::parse($_GET['startdate'])->startOfDay();
+                $end = Carbon::parse($_GET['enddate'])->endOfDay();
+                $qry .= " and activity_date >= '" . $start->toDateTimeString() . "' and activity_date <= '" . $end->toDateTimeString() . "'";
 
             }
             else{
-                $qry.= " and activity_date >='".date('Y-m-d 00:00:00')."' and activity_date <='".date('Y-m-d 23:59:59')."'";
+                $qry.= " and activity_date >='".Carbon::today()->startOfDay()->toDateTimeString()."' and activity_date <='".Carbon::today()->endOfDay()->toDateTimeString()."'";
             }
 
             if(isset($_GET['pb']) && strlen($_GET['pb'])>=1){
@@ -1893,18 +1930,22 @@ class ReportsController extends Controller
         $qry = "SELECT * FROM `gift_certificate` where id>0 ";
         // conditions
             if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
+                $start = Carbon::parse($_GET['startdate'])->startOfDay();
+                $end = Carbon::parse($_GET['enddate'])->endOfDay();
                 $qry .= " and 
                 (
-                (created_at >= '" . date('Y-m-d 00:00:00', strtotime($_GET['startdate'])) . "' and created_at <= '" . date('Y-m-d 23:59:59', strtotime($_GET['enddate'])). "')
+                (created_at >= '" . $start->toDateTimeString() . "' and created_at <= '" . $end->toDateTimeString() . "')
                 or
-                (updated_at >= '" . date('Y-m-d 00:00:00', strtotime($_GET['startdate'])) . "' and updated_at <= '" . date('Y-m-d 23:59:59', strtotime($_GET['enddate'])). "')
+                (updated_at >= '" . $start->toDateTimeString() . "' and updated_at <= '" . $end->toDateTimeString() . "')
                 )
                 
                  ";
 
             }
             else{
-                $qry.= " and created_at >='".date('Y-m-d 00:00:00')."' and created_at <='".date('Y-m-d 23:59:59')."'";
+                $start = Carbon::today()->startOfDay();
+                $end = Carbon::today()->endOfDay();
+                $qry.= " and created_at >='".$start->toDateTimeString()."' and created_at <='".$end->toDateTimeString()."'";
             }
 
             if(isset($_GET['status']) && strlen($_GET['status'])>=2){
@@ -1997,7 +2038,9 @@ class ReportsController extends Controller
 
 
         if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-            $qry.= " and d.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and d.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
+            $start = Carbon::parse($request->startdate)->startOfDay();
+            $end = Carbon::parse($request->enddate)->endOfDay();
+            $qry.= " and d.delivery_date >='".$start->toDateTimeString()."' and d.delivery_date <='".$end->toDateTimeString()."'";
         }
         else{
             $qry.= " and d.delivery_date >='2051-01-01 00:00:00.000' and d.delivery_date <='2051-01-01 23:59:59.999'";
@@ -2056,7 +2099,9 @@ class ReportsController extends Controller
             $jos.= " and pb.id='".$_GET['production_branch']."'";
         }
         if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-            $jos.= " and po.delivery_date >='".date('Y-m-d',strtotime($_GET['startdate']))." 00:00:00.000' and po.delivery_date <='".date('Y-m-d',strtotime($_GET['enddate']))." 23:59:59.999'";
+            $start = Carbon::parse($request->startdate)->startOfDay();
+            $end = Carbon::parse($request->enddate)->endOfDay();
+            $jos.= " and po.delivery_date >='".$start->toDateTimeString()."' and po.delivery_date <='".$end->toDateTimeString()."'";
         }
         else{
             $jos.= " and po.delivery_date >='2051-01-01 00:00:00.000' and po.delivery_date <='2051-01-01 23:59:59.999'";

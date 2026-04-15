@@ -135,6 +135,24 @@
                                     }
                                 @endphp
                                
+                                @php
+                                    $finalApproval = $p->approval;
+
+                                    if(!$finalApproval){
+
+                                        $index = \App\EcommerceModel\SalesPayment::where('sales_header_id', $p->sales_header_id)
+                                                    ->where('updated_at','<=',$p->updated_at)
+                                                    ->count() - 1;
+
+                                        $legacyList = \App\Models\Approvals::whereNull('payment_id')
+                                                        ->where('approval_type','Payment')
+                                                        ->where('reference_id',$p->sales_header_id)
+                                                        ->orderBy('created_at')
+                                                        ->get();
+
+                                        $finalApproval = $legacyList[$index] ?? null;
+                                    }
+                                @endphp
                                 <tr>
                                     
                                     <th> 
@@ -150,9 +168,13 @@
                                     <td>{{ date('Y-m-d',strtotime($p->payment_date)) }}</td>
                                     <td>{{ $p->status }}</td>
                                     <td>{{ number_format($p->amount,2) }}</td>
-                                    <td>@if(!empty($p->file_url))<a href="{{$p->file_url}}" target="_blank">View</a>@endif {!!$approval_code!!}</td>
-                                    <td>{{ $approved_by }}</td>
-                                    <td>{{ $approved_date }}</td>
+                                    @if ($p->approval?->approval_code)
+                                    <td>@if(!empty($p->file_url))<a href="{{$p->file_url}}" target="_blank">View</a>@endif {{ $p->approval?->approval_code }}</td>
+                                    @else
+                                    <td>@if(!empty($p->file_url))<a href="{{$p->file_url}}" target="_blank">View</a>@endif {{ $finalApproval?->approval_code }}</td>
+                                    @endif
+                                    <td>{{ $p->approval?->user?->name ?? $finalApproval?->user?->name }}</td>
+                                    <td>{{ $p->approval?->created_at ?? $finalApproval?->created_at ? date('Y-m-d h:i A', strtotime($finalApproval->created_at)) : '' }}</td>
                                     <td>
                                         @if($p->status == 'PENDING')
                                             @if(in_array(strtolower($p->payment_type),array_map('strtolower',$alls)) || auth()->user()->role_id == 1)
