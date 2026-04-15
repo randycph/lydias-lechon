@@ -36,6 +36,7 @@ use App\EcommerceModel\Branch;
 use App\EcommerceModel\JobOrder;
 use App\Mail\DeliveryAssignedMail;
 use App\Mail\DeliveryAssignedMultipleMail;
+use App\Mail\ManualOrderCancelledByAdminMail;
 use App\Models\ActivityLog;
 use App\Models\DeliveriesImage;
 use App\Models\ProductDeliveryAddress;
@@ -903,9 +904,15 @@ class SalesController extends Controller
     {
         $ids = explode(',', $request->input('ids'));
     
-        SalesHeader::whereIn('id', $ids)
+        $sales = SalesHeader::whereIn('id', $ids)
             ->where('isConfirm', '!=', 1)
-            ->delete();
+            ->get();
+
+        foreach ($sales as $sale) {
+            $sale->for_deletion = 1;
+            $sale->status = 'CANCELLED';
+            $sale->save();
+        }
     
         return redirect()->back()->with('success', 'Selected sales have been deleted.');
     }
@@ -916,7 +923,11 @@ class SalesController extends Controller
 
         foreach ($records as $record) {
             if ($record['type'] === 'sales') {
-                SalesHeader::find($record['id'])?->delete();
+                $sale = SalesHeader::find($record['id']);
+                $sale->for_deletion = 1;
+                $sale->status = 'CANCELLED';
+                $sale->save();
+
             } elseif ($record['type'] === 'job') {
                 JobOrder::find($record['id'])?->delete();
             }
@@ -1028,6 +1039,7 @@ class SalesController extends Controller
         // ]);
 
         $sale->for_deletion = 1;
+        $sale->status = 'CANCELLED';
         $sale->save();
 
         return back()->with('success','Successfully deleted transaction');
