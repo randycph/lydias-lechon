@@ -520,11 +520,11 @@ class FrontendController extends Controller
         }
 
         $gc = GiftCertificate::where('sales_header_id',$id)->get();
-        $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
+        $salesPayments = SalesPayment::where('sales_header_id',$id)->where('status', '!=', 'CANCELLED')->get();
         $salesDetails = SalesDetail::with('product.photos')->where('sales_header_id',$id)->get();
-        $totalPayment = SalesPayment::where('sales_header_id',$id)->sum('amount');
+        $totalPayment = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->where('is_discount', 0)->sum('amount');
         $deliveries = DeliveryStatus::where('order_id',$id)->get();
-        $totalNet = SalesHeader::where('id',$id)->sum('net_amount');
+        $totalNet = $sales->items->sum('net_amount') + $sales->delivery_fee_amount;
 
         if($totalNet <= $totalPayment) {
             $status = 'PAID';
