@@ -1267,7 +1267,20 @@ class SalesController extends Controller
 
             // dd($salesheader);
 
-        return view('admin.sales.update_sales_detail',compact('salesheader','dateneeded','date_only','time_only','locationed','products','branches_store', 'locations', 'provinces', 'cities'));
+        // return view('admin.sales.update_sales_detail',compact('salesheader','dateneeded','date_only','time_only','locationed','products','branches_store', 'locations', 'provinces', 'cities'));
+
+        return view('admin.sales.update-sales-details', [
+            'salesheader' => $salesheader,
+            'dateneeded' => $dateneeded,
+            'date_only' => $date_only,
+            'time_only' => $time_only,
+            'locationed' => $locationed,
+            'products' => $products,
+            'branches_store' => $branches_store,
+            'locations' => $locations,
+            'provinces' => $provinces,
+            'cities' => $cities
+        ]);
 
     }
 
