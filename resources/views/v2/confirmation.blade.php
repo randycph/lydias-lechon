@@ -461,10 +461,10 @@
                         @endforelse
                     </tbody>
                     <tfoot>
-                        @if($salesPayments->sum('amount') > 0)
+                        @if($sales->payments->where('status','PAID')->sum('amount') > 0)
                         <tr class="bg-white border-b border-gray-200">
                             <td colspan="4" class="px-6 py-4 font-bold text-right">Total</td>
-                            <td class="px-6 py-4 font-bold">₱{{ number_format($salesPayments->sum('amount'), 2) }}</td>
+                            <td class="px-6 py-4 font-bold">₱{{ number_format($salesPayments->where('status', '!=', 'CANCELLED')->where('is_discount',0)->sum('amount'), 2) }}</td>
                         </tr>
                         @endif
                     </tfoot>
