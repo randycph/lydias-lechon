@@ -239,17 +239,39 @@ class SalesController extends Controller
         //     SalesHeader::whereId($request->update_dateneeded_id)->update(['delivery_branch' => $request->delivery_branch]);
         // }
         
-        $update = SalesHeader::whereId($request->update_dateneeded_id)->update([
-            'delivery_status' => ''
-        ]);
-
-        if ($request->has('update_dateneeded_date') && $request->has('update_dateneeded_time')) {
-            $update_date_needed = SalesDetail::where('sales_header_id',$request->update_dateneeded_id)->update([
-                'delivery_date' => $request->update_dateneeded_date." ".$request->update_dateneeded_time
+        if ($request->has('open_date') && $request->open_date == 'on') {
+            SalesHeader::whereId($request->update_dateneeded_id)->update([
+                'delivery_status' => 'Open Date'
             ]);
+
+            SalesDetail::where('sales_header_id',$request->update_dateneeded_id)->update([
+                'delivery_date' => null
+            ]);
+
+        } else {
+            if ($sales->delivery_status == 'Open Date') {
+                SalesHeader::whereId($request->update_dateneeded_id)->update([
+                    'delivery_status' => ''
+                ]);
+            } else {
+                SalesHeader::whereId($request->update_dateneeded_id)->update([
+                    'delivery_status' => $sales->delivery_status // keep existing status if not open date
+                ]);
+            }
         }
 
-        if ($request->shipping_type == 'storepickup') {
+        if ($request->has('update_dateneeded_date') && $request->has('update_dateneeded_time')) {
+            SalesDetail::where('sales_header_id', $request->update_dateneeded_id)
+                ->get()
+                ->each(function ($detail) use ($request) {
+                    $detail->update([
+                        'delivery_date' =>
+                            $request->update_dateneeded_date . ' ' . $request->update_dateneeded_time
+                    ]);
+                });
+        }
+
+        if ($request->shipping_type == 'storepickup' && auth()->user()->has_access_to_route('sales.update_delivery_branch')) {
             $request->validate([
                 'update_dateneeded_sp' => 'required',
             ], [
@@ -1094,7 +1116,20 @@ class SalesController extends Controller
 
             // dd($salesheader);
 
-        return view('admin.sales.update_sales_detail',compact('salesheader','dateneeded','date_only','time_only','locationed','products','branches_store', 'locations', 'provinces', 'cities'));
+        // return view('admin.sales.update_sales_detail',compact('salesheader','dateneeded','date_only','time_only','locationed','products','branches_store', 'locations', 'provinces', 'cities'));
+
+        return view('admin.sales.update-sales-details', [
+            'salesheader' => $salesheader,
+            'dateneeded' => $dateneeded,
+            'date_only' => $date_only,
+            'time_only' => $time_only,
+            'locationed' => $locationed,
+            'products' => $products,
+            'branches_store' => $branches_store,
+            'locations' => $locations,
+            'provinces' => $provinces,
+            'cities' => $cities
+        ]);
 
     }
 

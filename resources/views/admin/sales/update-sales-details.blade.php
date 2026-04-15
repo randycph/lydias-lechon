@@ -39,10 +39,10 @@
         </div>
         <div class="row row-sm">
             <div class="col-lg-6">
+                <form method="post" action="{{ route('sales-transaction.update_all') }}" id="items_form">
                 @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102 || auth()->user()->has_access_to_route('sales-transaction.restore'))
-
                     @if ($dateneeded > date('Y-m-d H:i:s') || $salesheader->delivery_status == 'Open Date')
-                        <form method="post" action="{{ route('update_dateneeded') }}" id="updatefrm">
+                        
                             @csrf
                             <div class="order-details-place">
                                 <br>
@@ -79,9 +79,10 @@
                                 @endif
 
                                 <div class="form-group">    
-                                    <label class="d-block">Location <span class="tx-danger">*</span></label>
+                                    
 
                                     <div class="divd2d" @if ($salesheader->delivery_type != 'Door to door delivery') style="display:none;" @endif>
+                                        <label class="d-block">Location <span class="tx-danger">*</span></label>
                                         <select class="selectpicker mg-b-5"
                                             data-style="btn btn-outline-light btn-md btn-block tx-left"
                                             title="Choose New Location" data-width="100%" name="update_dateneeded_d2d"
@@ -104,6 +105,7 @@
                                     </div>
 
                                     <div class="divsp" @if ($salesheader->delivery_type != 'Store Pickup') style="display:none;" @endif >
+                                        <label class="d-block">Outlet <span class="tx-danger">*</span></label>
                                         <select class="selectpicker mg-b-5"
                                             data-style="btn btn-outline-light btn-md btn-block tx-left"
                                             title="Choose New Location" data-width="100%" name="update_dateneeded_sp"
@@ -172,11 +174,26 @@
 
                                     </div>
                                 </div>
-                                
+
+                                <div class="form-row ml-1">
+                                    <div class="d-flex justify-content-between mg-b-5 mb-3">
+                                        <div class="form-check form-check-inline">
+                                        <input 
+                                            class="form-check-input" 
+                                            type="checkbox" 
+                                            name="open_date" 
+                                            id="open-date"
+                                            @checked($salesheader->delivery_status === 'Open Date')
+                                        >
+                                            <label class="form-check-label" for="open-date">Is Open Date?</label>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="form-row datetime_field">
                                     <div class="col-md-8">
                                         <div class="form-group">
-                                            <label class="d-block">Date & Time Needed <i class="text-danger">*</i></label>
+                                            <label class="d-block">Date & Time Needed <i class="text-danger asterisk-date">*</i></label>
                                             <input type="text" name="update_dateneeded_date" class="form-control"
                                                 placeholder="Choose Date" id="date2" value="{{$date_only}}">
                                         </div>
@@ -215,17 +232,10 @@
                                     <textarea name="new_instruction" class="form-control"
                                         @if (auth()->user()->role_id <= 3 || auth()->user()->id == 10097 || auth()->user()->id == 10102) @else style="pointer-events: none;background-color:#E9ECEF" @endif>{{ $salesheader->instruction }}</textarea>
                                 </div>
-
-                                <div class="form-group">
-                                    <button class="btn btn-primary btn-sm btn-uppercase" type="submit" id="submitBtn">Save
-                                        Changes</button>
-                                </div>
                             </div>
-                        </form>
                     @endif
                 @endif
                 <br>
-                <form action="{{ route('sales-transaction.update_items') }}" method="post" id="items_form" autocomplete="off">
                     @csrf
                     <input type="hidden" name="ui_sales_id" value="{{ $salesheader->id }}">
                     <input type="hidden" name="ui_total_new" id="ui_total_new" value="0">
@@ -574,6 +584,38 @@
         let skipInitialBlock = false;
 
         $(document).ready(function() {
+
+            function toggleDateTime() {
+                if ($('#open-date').is(':checked')) {
+                    $('#date2').prop('required', false);
+                    $('select[name="update_dateneeded_time"]').prop('required', false);
+
+                    $('.asterisk-date').text('');
+                    $('.datetime_field').hide();
+
+                } else {
+                    $('#date2').prop('required', true);
+                    $('select[name="update_dateneeded_time"]').prop('required', true);
+
+                    $('.asterisk-date').text('*');
+                    $('.datetime_field').show();
+
+                    $('#date2').val('');
+                    $('select[name="update_dateneeded_time"]').val('').selectpicker('refresh');
+                }
+
+                $('.selectpicker').selectpicker('refresh');
+            }
+
+            // Run on load
+            toggleDateTime();
+
+            $('#date2').datepicker('setDate', '{{$date_only}}');
+            $('select[name="update_dateneeded_time"]').val('{{$time_only}}').selectpicker('refresh');
+
+            // Run on change
+            $('#open-date').on('change', toggleDateTime);
+
             $('#allowMultiple').on('change', function() {
                 const isChecked = this.checked;
                 $('#addMoreBtn').toggleClass('d-none', !isChecked);
