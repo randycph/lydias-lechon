@@ -51,6 +51,8 @@ class PopupMessageController extends Controller
             'button_text_url' => 'nullable',
             'close_button_text' => 'required',
             'url' => 'nullable',
+            'start_at' => 'nullable|date',
+            'expire_at' => 'nullable|date|after_or_equal:start_at',
             'image' => 'nullable|image|max:2048',
         ])->validate();
 
@@ -114,6 +116,8 @@ class PopupMessageController extends Controller
             'close_button_text' => 'required',
             'url' => 'nullable',
             'image' => 'nullable|image|max:2048',
+            'start_at' => 'nullable|date',
+            'expire_at' => 'nullable|date|after_or_equal:start_at',
         ])->validate();
 
         $data = $request->all([
@@ -124,6 +128,8 @@ class PopupMessageController extends Controller
             'button_text_url',
             'close_button_text',
             'url',
+            'start_at',
+            'expire_at',
         ]);
 
         if ($request->hasFile('image')) {
