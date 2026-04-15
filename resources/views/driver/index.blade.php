@@ -110,8 +110,11 @@
                         <div class="flex items-start gap-3">
                             <!-- badge -->
                             <div class="flex">
-                                <span style="word-break: break-word;" class=" mt-0.5 inline-flex items-center rounded-full w-16 px-2 py-0.5 text-xs font-medium" :class="badgeClass(d.delivery_status)"
-                                x-text="(d.delivery_status == 'Returned/Rejected' ? 'Returned' : (d.delivery_status == 'Delivered/Picked Up' ? 'Delivered' : 'In Transit'))"></span>
+                                <span 
+                                    class="mt-0.5 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap"
+                                    :class="badgeClass(d.delivery_status)"
+                                    x-text="(d.delivery_status == 'Returned/Rejected' ? 'Returned' : (d.delivery_status == 'Delivered/Picked Up' ? 'Delivered' : 'In Transit'))">
+                                </span>
                             </div>
 
                             <div class="flex-1">
