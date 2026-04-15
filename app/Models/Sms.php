@@ -54,7 +54,7 @@ class Sms
 		$orderNumber = $transaction->order_number;
 
 		try {
-			$message = "Happy Day, $name. Order #$orderNumber has been assigned to you. Please check the details in the system.";
+			$message = "Happy Day, $name! Order #$orderNumber has been assigned to you. Please check the details in the system.";
 
 			$sms = new ItextmoSmsService();
 			$sms->send($receiver, $message);
@@ -68,12 +68,12 @@ class Sms
 		try {
 			if ($order->delivery_status == 'Delivered/Picked Up') {
 				if ($order->delivery_type == 'Store Pickup') {
-					$message = "Happy Day, $order->customer_name. Your order is now ready for pickup. Thank you for choosing Lydia's Lechon!";
+					$message = "Happy Day, $order->customer_name! Your order is now ready for pickup. Thank you for choosing Lydia's Lechon!";
 				} else {
-					$message = "Happy Day, $order->customer_name.  Your order has been successfully delivered. Thank you for choosing Lydia's Lechon!";
+					$message = "Happy Day, $order->customer_name!  Your order has been successfully delivered. Thank you for choosing Lydia's Lechon!";
 				}
 			} else {
-				$message = "Happy Day, $order->customer_name. Your order is now out for delivery. Please keep your provided contact number active so we can reach you if needed. Thank you!";
+				$message = "Happy Day, $order->customer_name! Your order is now out for delivery. Please keep your provided contact number active so we can reach you if needed. Thank you!";
 			}
 
 			$sms = new ItextmoSmsService();
@@ -96,9 +96,9 @@ class Sms
 					$order = SalesHeader::whereId($payment->sales_header_id)->first();
 
 					if ($order->delivery_type == 'Store Pickup') {
-						$message = "Happy Day, $order->customer_name. Thank you for your payment of Php " . number_format($payment->amount, 2) . " for order #" . $order->order_number . ". You will be notified once your order is ready for pickup.";
+						$message = "Happy Day, $order->customer_name! Thank you for your payment of Php " . number_format($payment->amount, 2) . " for order #" . $order->order_number . ". You will be notified once your order is ready for pickup.";
 					} else {
-						$message = "Happy Day, $order->customer_name. Thank you for your payment of Php " . number_format($payment->amount, 2) . " for order #" . $order->order_number . ". You will be notified once your order is ready for delivery.";
+						$message = "Happy Day, $order->customer_name! Thank you for your payment of Php " . number_format($payment->amount, 2) . " for order #" . $order->order_number . ". You will be notified once your order is ready for delivery.";
 					}
 
 					$sms = new ItextmoSmsService();
@@ -115,7 +115,7 @@ class Sms
 		$name = $user->name;
 
 		try {
-			$message = "Happy Day, $name. Welcome to Lydia's Lechon! We're excited to have you on board.";
+			$message = "Happy Day, $name! Welcome to Lydia's Lechon! We're excited to have you on board.";
 
 			$sms = new ItextmoSmsService();
 			$sms->send($receiver, $message);
@@ -131,7 +131,7 @@ class Sms
 			$order = SalesHeader::whereId($payment->sales_header_id)->first();
 
 			if (!in_array($payment->payment_type, $confirmed_status_payments)) {
-				$message = "Happy Day, $order->customer_name. A Payment of ".number_format($payment->amount,2)." was paid for your ORDER: ".$order->order_number;
+				$message = "Happy Day, $order->customer_name! A Payment of ".number_format($payment->amount,2)." was paid for your ORDER: ".$order->order_number;
 
 				$sms = new ItextmoSmsService();
 				$sms->send($receiver, $message);
@@ -144,7 +144,7 @@ class Sms
 	public function new_order($receiver, $order){
 		
 		try {
-			$message = "Happy Day, $order->customer_name. Thank you for choosing Lydia's Lechon. Your order ".$order->order_number." for order date ".date('m/d/Y', strtotime($order->created_at))." is currently being processed. Kindly wait as we validate your payment and confirm your order.";
+			$message = "Happy Day, $order->customer_name! Thank you for choosing Lydia's Lechon. Your order ".$order->order_number." for order date ".date('m/d/Y', strtotime($order->created_at))." is currently being processed. Kindly wait as we validate your payment and confirm your order.";
 
 			$sms = new ItextmoSmsService();
 			$sms->send($receiver, $message);
@@ -159,7 +159,7 @@ class Sms
 		$item = $sale->items->first();
 		$date_needed = date('m/d/Y', strtotime($item->delivery_date));
 		try {
-			$message = "Happy Day, $order->customer_name. Your order  Order Date (".date('m/d/Y', strtotime($order->created_at)).")  Date Needed - ". $date_needed ." is now confirmed. Thank you for choosing Lydia's Lechon!";
+			$message = "Happy Day, $order->customer_name! Your Order Date (".date('m/d/Y', strtotime($order->created_at)).")  Date Needed - ". $date_needed ." is now confirmed. Thank you for choosing Lydia's Lechon!";
 
 			$sms = new ItextmoSmsService();
 			$sms->send($receiver, $message);
