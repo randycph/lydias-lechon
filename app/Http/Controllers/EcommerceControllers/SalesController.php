@@ -51,7 +51,7 @@ class SalesController extends Controller
 
     public function __construct()
     {
-        Permission::module_init($this, 'sales_transaction');
+        // Permission::module_init($this, 'sales_transaction');
     }
 
     public function edit_items(){
@@ -583,6 +583,10 @@ class SalesController extends Controller
 
     public function index()
     {
+        if (!auth()->user()->has_access_to_route('sales-transaction.index')) {
+            return response()->view('components.unauthorize-access');
+        }
+        
         if (auth()->user()->role_id == config('auth.driver_role_id')) {
             return redirect()->route('sales-transaction.driver_sales_transaction');
         } 
