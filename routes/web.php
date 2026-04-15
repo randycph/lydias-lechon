@@ -961,6 +961,13 @@ Route::get('/driver-deliveries', function(){
         ->where('delivery_type', '!=', 'Store Pickup')
         ->get()
         ->map(function ($sale) use ($driver) {
+
+            $region = $sale->region ? $sale->region : '';
+            $province = $sale->province ? ', ' . $sale->province : '';
+            $city = $sale->city ? ', ' . $sale->city : '';
+            $barangay = $sale->barangay ? ', ' . $sale->barangay : '';
+            $full_address = $sale->customer_delivery_adress ? $sale->customer_delivery_adress . $province . $city . $barangay : '';
+
             return [
                 'type' => 'sales',
                 'id' => $sale->id,
@@ -981,7 +988,7 @@ Route::get('/driver-deliveries', function(){
                 'order_source' => $sale->order_source,
                 'isConfirm' => $sale->isConfirm,
                 'gross_amount' => $sale->gross_amount,
-                'delivery_address' => $sale->customer_delivery_address ?? $sale->customer_address,
+                'delivery_address' => $full_address,
                 'contact_person' => $sale->contact_person,
                 'contact_number' => $sale->customer_contact_number ?? $sale->user->contact_mobile,
                 'sales' => $sale->items->first() ?? null,
