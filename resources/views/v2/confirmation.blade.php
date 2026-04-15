@@ -450,8 +450,8 @@
                             <td class="px-6 py-4">
                                 @if($payment->status=='PENDING' && ($payment->payment_type=='IPAY' || $payment->payment_type=='Paymaya' )) Subject for Confirmation @else {{$payment->status}} @endif
                             </td>
-                            <td class="px-6 py-4">
-                                ₱{{ number_format($payment->amount, 2) }}
+                            <td class="px-6 py-4 {{ $payment->is_discount == 1 ? 'text-red-600' : '' }}">
+                                {{ $payment->is_discount == 1 ? '-' : '' }}₱{{ number_format($payment->amount, 2) }}
                             </td>
                         </tr>
                         @empty
