@@ -61,7 +61,14 @@ class SalesController extends Controller
     }
 
     public function update_items(Request $request){
-        $head = SalesHeader::findOrFail($request->ui_sales_id);
+        $head = SalesHeader::whereId($request->ui_sales_id)->first();
+        
+        if (
+            auth()->user()->has_access_to_route('sales-transaction.update') &&
+            $head->isConfirmedAndPastCutoffAndForecasted()) {
+                return redirect()->route('sales-transaction.index')->with('error', 'Confirmed orders past cutoff and forecasted cannot be updated.');
+        }
+        
         $date_needed = '';
         foreach($head->items as $item){
             if(!empty($item->delivery_date)){
@@ -242,6 +249,13 @@ class SalesController extends Controller
     public function update_dateneeded(Request $request){
         $sales = SalesHeader::findOrFail($request->update_dateneeded_id);
     
+        if (
+            auth()->user()->has_access_to_route('sales-transaction.update') &&
+            $sales->isConfirmedAndPastCutoffAndForecasted()) {
+                return redirect()->route('sales-transaction.index')->with('error', 'Confirmed orders past cutoff and forecasted cannot be updated.');
+        }
+
+
         // if(isset($request->delivery_branch)){
         //     SalesHeader::whereId($request->update_dateneeded_id)->update(['delivery_branch' => $request->delivery_branch]);
         // }
@@ -1161,14 +1175,13 @@ class SalesController extends Controller
         $salesdetail = SalesDetail::where('sales_header_id',$id)->first();
         $salesheader = SalesHeader::with('deliveryAddress')->find($id);
 
-        $specialId = 270;
+        if (
+            auth()->user()->has_access_to_route('sales-transaction.update') &&
+            $salesheader->isConfirmedAndPastCutoffAndForecasted()) {
+                return redirect()->route('sales-transaction.index')->with('error', 'Confirmed orders past cutoff and forecasted cannot be updated.');
+        }
 
-        $products = Product::where(function ($q) use ($specialId) {
-                $q->where('status', 'PUBLISHED')
-                ->orWhere('id', $specialId);
-            })
-            ->orderBy('name')
-            ->get();
+        $products = Product::orderBy('name')->get();
 
         $dateneeded = '';
         $date_only = '';

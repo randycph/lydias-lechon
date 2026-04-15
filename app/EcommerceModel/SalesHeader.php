@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Concerns\LogsActivityDiff;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\EcommerceModel\ProductionOrder;
+use App\Helpers\Webfocus\Setting;
 
 class SalesHeader extends Model
 {
@@ -625,11 +627,88 @@ class SalesHeader extends Model
         return $this->hasMany(self::class, 'parent_sales_header_id', 'id');
     }
 
-    public function hasPartialPayment()
+    public function isFullyPaid()
     {
-        $payments = $this->payments()->where('status', 'PAID')->get();
-        $paidAmount = $payments->sum('amount');
+        return $this->payment_status === 'PAID';
+    }
 
-        return $paidAmount > 0 || $this->isConfirm == 1; 
+    public function isPartiallyPaid()
+    {
+        $payments = $this->payments()->where('status', 'PAID')->sum('amount');
+
+        return $payments > 0 && $payments < $this->net_amount;
+    }
+
+    public function isUnpaid()
+    {
+        $payments = $this->payments()->where('status', 'PAID')->sum('amount');
+
+        return $payments == 0;
+    }
+
+    public function isOverpaid()
+    {
+        $payments = $this->payments()->where('status', 'PAID')->sum('amount');
+
+        return $payments > $this->net_amount;
+    }
+
+    public function isForecasted()
+    {
+        $joborder = JobOrder::where('sales_number', $this->order_number)->where('status', 'Active')->first();
+
+        if (!$joborder) {
+            return false;
+        }
+
+        $productionOrder = ProductionOrder::where('joborder_id', $joborder->id)->whereNotNull('branch_id')->first();
+
+        if (!$productionOrder) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public function isDeliveryDateIsFuture()
+    {
+        $item = $this->items->first();
+        if (!$item) {
+            return false;
+        }
+
+        $deliveryDate = Carbon::parse($item->delivery_date);
+
+        if ($item->delivery_date == null || $item->delivery_date == '0000-00-00 00:00:00') {
+            return true;
+        }
+
+        return $deliveryDate->isFuture();
+    }
+
+    public function isConfirmedAndPastCutoffAndForecasted()
+    {
+        return $this->isConfirm == 1 && $this->pastForecastedTime() && $this->isForecasted();
+    }
+
+    public function pastForecastedTime()
+    {
+        $cutoff = Setting::info()->cutoff;
+
+        $item = $this->items->first();
+        if (!$item) {
+            return false;
+        }
+
+        $deliveryDate = Carbon::parse($item->delivery_date);
+        $now = Carbon::now();
+
+        if ($item->delivery_date == null || $item->delivery_date == '0000-00-00 00:00:00') {
+            return true;
+        }
+
+        return
+            $deliveryDate->isTomorrow() &&
+            $now->format('H:i') > $cutoff;
     }
 }
