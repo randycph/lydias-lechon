@@ -296,11 +296,24 @@
                                         </div>
                                     @endif
                                     
+                                    <div class="d-flex justify-content-between mg-b-5 mb-3">
+                                        <div class="form-check form-check-inline">
+                                        <input 
+                                            class="form-check-input" 
+                                            type="checkbox" 
+                                            name="open_date" 
+                                            id="open-date"
+                                            @checked($salesheader->delivery_status === 'Open Date')
+                                        >
+                                            <label class="form-check-label" for="open-date">Is Open Date?</label>
+                                        </div>
+                                    </div>
+
                                     @if ($salesheader->deliveryAddress->count() == 0)
-                                        <div class="form-row datetime_field">
+                                        <div class="form-row datetime_field datetime">
                                             <div class="col-md-8">
                                                 <div class="form-group">
-                                                    <label class="d-block">Date & Time Needed <i class="text-danger">*</i></label>
+                                                    <label class="d-block">Date & Time Needed <i class="text-danger asterisk-date">*</i></label>
                                                     <input type="text" name="update_dateneeded_date" class="form-control"
                                                         placeholder="Choose Date" id="date2" value="{{$date_only}}">
                                                 </div>
@@ -541,16 +554,6 @@
             $('.selectpicker').selectpicker();
         });
 
-        var dateToday = new Date();
-
-        $(function() {
-            'use strict'
-
-            $('#date1,#date2').datepicker({
-                minDate: dateToday,
-                dateFormat: 'yy-mm-dd',
-            });
-        });
         /** page level plugins **/
 
         function ui_add_product(x) {
@@ -1259,5 +1262,47 @@
                 $barangay.prop('disabled', brgys.length === 0);
             });
         });
+
+        $(function() {
+
+            var dateToday = new Date(); 
+            
+            $('#date1, #date2').datepicker({ 
+                minDate: dateToday, 
+                dateFormat: 'yy-mm-dd', 
+            });
+
+            function toggleDateTime() {
+                if ($('#open-date').is(':checked')) {
+                    $('#date2').prop('required', false);
+                    $('select[name="update_dateneeded_time"]').prop('required', false);
+
+                    $('.asterisk-date').text('');
+                    $('.datetime').hide();
+
+                } else {
+                    $('#date2').prop('required', true);
+                    $('select[name="update_dateneeded_time"]').prop('required', true);
+
+                    $('.asterisk-date').text('*');
+                    $('.datetime').show();
+
+                    $('#date2').val('');
+                    $('select[name="update_dateneeded_time"]').val('').selectpicker('refresh');
+                }
+
+                $('.selectpicker').selectpicker('refresh');
+            }
+
+            // Run on load
+            toggleDateTime();
+
+            $('#date2').datepicker('setDate', '{{$date_only}}');
+            $('select[name="update_dateneeded_time"]').val('{{$time_only}}').selectpicker('refresh');
+
+            // Run on change
+            $('#open-date').on('change', toggleDateTime);
+        });
+        
     </script>
 @endsection
