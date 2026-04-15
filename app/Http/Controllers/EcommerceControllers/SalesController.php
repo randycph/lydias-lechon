@@ -136,7 +136,23 @@ class SalesController extends Controller
             }
         }
         $this->update_header_details($head);
+
+        if(!request()->has('from_update_all')){
+            return back()->with('success','Sales details has been updated!');
+        }
+
         return back()->with('success','Successfully updated sales record');
+    }
+
+    public function update_all(Request $request)
+    {
+        // dd($request->all());
+        $request->merge(['from_update_all' => true]);
+
+        $this->update_dateneeded($request);
+        $this->update_items($request);
+
+        return back()->with('success', 'Sales details and items successfully updated!');
     }
 
     public function update_header_details($sales){
@@ -226,9 +242,30 @@ class SalesController extends Controller
     public function update_dateneeded(Request $request){
         $sales = SalesHeader::findOrFail($request->update_dateneeded_id);
     
-        SalesHeader::whereId($request->update_dateneeded_id)->update([
-            'delivery_status' => ''
-        ]);
+        // if(isset($request->delivery_branch)){
+        //     SalesHeader::whereId($request->update_dateneeded_id)->update(['delivery_branch' => $request->delivery_branch]);
+        // }
+        
+        if ($request->has('open_date') && $request->open_date == 'on') {
+            SalesHeader::whereId($request->update_dateneeded_id)->update([
+                'delivery_status' => 'Open Date'
+            ]);
+
+            SalesDetail::where('sales_header_id',$request->update_dateneeded_id)->update([
+                'delivery_date' => null
+            ]);
+
+        } else {
+            if ($sales->delivery_status == 'Open Date') {
+                SalesHeader::whereId($request->update_dateneeded_id)->update([
+                    'delivery_status' => ''
+                ]);
+            } else {
+                SalesHeader::whereId($request->update_dateneeded_id)->update([
+                    'delivery_status' => $sales->delivery_status // keep existing status if not open date
+                ]);
+            }
+        }
 
         if ($request->has('update_dateneeded_date') && $request->has('update_dateneeded_time')) {
             SalesDetail::where('sales_header_id', $request->update_dateneeded_id)
@@ -241,7 +278,7 @@ class SalesController extends Controller
                 });
         }
 
-        if ($request->shipping_type == 'storepickup') {
+        if ($request->shipping_type == 'storepickup' && auth()->user()->has_access_to_route('sales.update_delivery_branch')) {
             $request->validate([
                 'update_dateneeded_sp' => 'required',
             ], [
@@ -343,7 +380,7 @@ class SalesController extends Controller
                     'customer_delivery_adress' => $request->new_delivery_address,
                     'instruction' => $request->new_instruction,
                     'delivery_fee_amount' => $delivery_amount,
-                    'gross_amount' => $amt,
+                    'gross_amount' => $sales->items->sum('gross_amount'),
                     'net_amount' => $amt,
                     'customer_address' => '',
                     'delivery_branch' => $request->delivery_branch ?? $sales->delivery_branch
@@ -378,6 +415,10 @@ class SalesController extends Controller
                 'customer_location' => '',
                 'delivery_branch' => null
             ]);
+        }
+
+        if(!request()->has('from_update_all')){
+            return back()->with('success','Sales details has been updated!');
         }
 
         return back()->with('success','Sales details has been updated!');
@@ -1188,7 +1229,20 @@ class SalesController extends Controller
 
             // dd($salesheader);
 
-        return view('admin.sales.update_sales_detail',compact('salesheader','dateneeded','date_only','time_only','locationed','products','branches_store', 'locations', 'provinces', 'cities'));
+        // return view('admin.sales.update_sales_detail',compact('salesheader','dateneeded','date_only','time_only','locationed','products','branches_store', 'locations', 'provinces', 'cities'));
+
+        return view('admin.sales.update-sales-details', [
+            'salesheader' => $salesheader,
+            'dateneeded' => $dateneeded,
+            'date_only' => $date_only,
+            'time_only' => $time_only,
+            'locationed' => $locationed,
+            'products' => $products,
+            'branches_store' => $branches_store,
+            'locations' => $locations,
+            'provinces' => $provinces,
+            'cities' => $cities
+        ]);
 
     }
 
