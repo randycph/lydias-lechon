@@ -7,6 +7,7 @@ use App\EcommerceModel\SalesHeader;
 use App\Models\Role;
 use App\Models\UserBranch;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 if(!function_exists('isImageBroken')) {
     function isImageBroken($imageUrl) {
@@ -314,5 +315,27 @@ if (!function_exists('canAddPayment')) {
         }
 
         return true;
+    }
+}
+
+if (!function_exists('safe_date')) {
+    function safe_date($value): ?Carbon
+    {
+        if (empty($value) || $value === '0000-00-00 00:00:00') {
+            return null;
+        }
+
+        try {
+            $date = Carbon::parse($value);
+
+            // Reject Unix epoch fallback
+            if ($date->year === 1970) {
+                return null;
+            }
+
+            return $date;
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }
