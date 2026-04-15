@@ -400,8 +400,8 @@
                     </tbody>
                     <tfoot>
                         <tr class="bg-white ">
-                            <td colspan="{{ $colspan }}" class="px-6 py-4 font-bold text-right">Sub total</td>
-                            <td class="px-6 py-4 font-bold">₱{{ number_format($sales->gross_amount, 2) }}</td>
+                            <td colspan="{{ $colspan }}" class="px-6 py-4 font-bold text-right">Subtotal</td>
+                            <td class="px-6 py-4 font-bold">₱{{ number_format($total, 2) }}</td>
                         </tr>
                         @if($sales->delivery_fee_amount > 0)
                         <tr class="bg-white ">
