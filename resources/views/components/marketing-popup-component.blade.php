@@ -74,7 +74,7 @@
                         {{ $popupMessage->title }}
                     </div>
         
-                    <div class="font-medium px-6 text-left mt-5">{!! nl2br($popupMessage->message) !!}</div>
+                    <div class="font-medium px-6 text-left mt-5">{!! $popupMessage->message !!}</div>
         
                     <div class="w-full px-6 mt-5">
                         <a href="{{ $popupMessage->button_text_url }}" class="bg-primary flex justify-center w-full text-center custom-btn btn-primary-dark text-white rounded-md px-6 py-4 mt-3 font-medium uppercase">{{ $popupMessage->button_text }}</a>
