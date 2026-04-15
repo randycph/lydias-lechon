@@ -354,13 +354,13 @@
                                         View
                                     </a>
                                     @if (strtolower($sale->payment_status) != 'paid')
-                                        <div class="relative group w-full sm:w-auto">
+                                        <div class="relative group w-full sm:w-auto overflow-visible">
 
                                             <button 
                                                 {{ $sale->isExpired ? 'disabled' : '' }} 
-                                                @click="openPaymentModal({{$balance}}, '{{ $sale->id }}', '{{$sale->isExpired}}')" 
+                                                @click="openPaymentModal({{$balance}}, '{{ $sale->id }}', {{ $sale->isExpired ? 'true' : 'false' }})" 
                                                 type="button"
-                                                class="{{ $sale->status == 'CANCELLED' ? 'hidden' : '' }}  {{ $sale->isExpired ? '' : 'custom-btn' }} 
+                                                class="{{ $sale->status == 'CANCELLED' ? 'hidden' : '' }} {{ $sale->isExpired ? '' : 'custom-btn' }} 
                                                     text-white bg-primary  btn-primary-dark font-medium rounded-md 
                                                     w-full sm:w-auto px-5 py-3.5 text-center 
                                                     disabled:bg-gray-200 disabled:cursor-not-allowed">
@@ -369,9 +369,16 @@
                                             </button>
 
                                             @if($sale->isExpired)
-                                                <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2
-                                                            opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                                                            bg-gray-800 text-white text-xs px-3 py-1 rounded whitespace-nowrap">
+                                                <div class="
+                                                    absolute bottom-full mb-2 z-50 pointer-events-none
+                                                    opacity-0 group-hover:opacity-100 transition-opacity duration-200
+
+                                                    left-1/2 -translate-x-1/2 w-[90vw] max-w-xs px-3 text-center whitespace-normal
+
+                                                    sm:left-auto sm:translate-x-0 sm:right-0 sm:w-auto sm:max-w-none sm:whitespace-nowrap
+
+                                                    bg-gray-800 text-white text-xs py-2 rounded
+                                                ">
                                                     Payment is no longer allowed for orders with delivery scheduled for tomorrow or in the past.
                                                 </div>
                                             @endif
