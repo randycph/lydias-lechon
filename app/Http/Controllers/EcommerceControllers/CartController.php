@@ -2048,6 +2048,12 @@ class CartController extends Controller
                                     ]);
                                 }
                             }
+
+                            SalesHeader::where('id', $subSalesHeader->id)->update([
+                                'gross_amount' => $grand_gross + ($delivery?->lechon_baka_service ?? 0),
+                                'tax_amount' => $grand_tax,
+                                'net_amount' => $grand_gross + $delivery->delivery_fee + ($delivery?->lechon_baka_service ?? 0) - $discount,
+                            ]);
                         }
                     }
                 }

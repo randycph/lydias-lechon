@@ -279,13 +279,16 @@ class SalesHeader extends Model
     public static function balance($id){
         $sales = SalesHeader::withTrashed()->whereId($id)->first();
 
-        if ($sales->is_sub == 1) {
-            $sale = SalesHeader::withTrashed()->where('id', $sales->parent_sales_header_id)->first();
-            $amount = $sale->net_amount;
-        } else {
-            $sale = SalesHeader::withTrashed()->whereId($id)->first();
-            $amount = $sale->net_amount;
-        }
+        // if ($sales->is_sub == 1) {
+        //     $sale = SalesHeader::withTrashed()->where('id', $sales->parent_sales_header_id)->first();
+        //     $amount = $sale->net_amount;
+        // } else {
+        //     $sale = SalesHeader::withTrashed()->whereId($id)->first();
+        //     $amount = $sale->net_amount;
+        // }
+
+        $sale = SalesHeader::withTrashed()->whereId($id)->first();
+        $amount = $sale->items->sum('gross_amount') + $sale->delivery_fee_amount;
 
         $amount = $sales->items->sum('net_amount') + $sales->delivery_fee_amount ?? 0;
         $amount = (float) $amount - $sales->payments->where('status', 'PAID')->where('is_discount', 1)->sum('amount');
@@ -600,6 +603,11 @@ class SalesHeader extends Model
     public function deliveryAddress()
     {
         return $this->hasMany(ProductDeliveryAddress::class, 'sales_header_id')->orderBy('id', 'asc');
+    }
+
+    public function singleContact()
+    {
+        return $this->hasOne(ProductDeliveryAddress::class, 'sales_header_id')->orderBy('id', 'asc');
     }
 
     public function deliveryStatuses()
