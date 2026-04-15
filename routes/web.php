@@ -131,16 +131,29 @@ Route::post('/admin/login', function(Request $request) {
                 'forecaster'
             ];
 
-            if (auth()->user()->user_role->name == 'Cashier' && !in_array($request->branch, $exludeBranch)) {
-                if ($request->has('branch')) {
-                    session(['login_branch' => $request->branch]);
-                } else {
+            if (auth()->user()->user_role->name != 'Admin' && !in_array($request->branch, $exludeBranch)) {
+                
+                if ($user->user_role->name == 'Forecaster') {
+                    return redirect()->intended('admin/forecaster');
+                }
+
+                $branch = null;
+
+                $firstbranch = $user->branches->first();
+
+                if ($firstbranch) {
+                    $branch = $firstbranch->branch->name;
+                }
+                
+                $branch = Branch::where('name', $branch)->first();
+
+                if (!$branch) {
                     session()->forget('login_branch');
                 }
-            }
 
-            if ($request->has('branch') && $request->branch == 'forecaster') {
-                return redirect()->intended('admin/forecaster');
+                if ($branch) {
+                    session(['login_branch' => $branch->name]);
+                }
             }
 
             return redirect()->intended('admin/dashboard');

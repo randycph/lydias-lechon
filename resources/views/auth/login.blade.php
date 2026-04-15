@@ -39,7 +39,7 @@
                     </div>
                 </div>
 
-                <div class="form-group {{ $errors->has('branch') ? 'has-error' : '' }}">
+                {{-- <div class="form-group {{ $errors->has('branch') ? 'has-error' : '' }}">
                     <label for="password"><i class="tx-danger">*</i> Branch</label>
 
                     <select name="branch" required="required" id="branch" class="form-control">
@@ -51,7 +51,7 @@
 
                     </select>
                     <span class="text-danger">{{ $errors->first('branch') }}</span>
-                </div>
+                </div> --}}
 
                 
 

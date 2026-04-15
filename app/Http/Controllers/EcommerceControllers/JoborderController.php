@@ -206,7 +206,16 @@ class JoborderController extends Controller
             $branches_store = Branch::where('status', 1)->where('jo_select_branch', 1)->orderBy('name','asc')->get();
             $pbs = ProductionBranch::orderBy('name','asc')->get();
             $branches  = Deliverablecities::distinct()->where('is_active', 1)->orderBy('name')->get(['name']);
-
+            
+            $userBranches = Auth::user()
+                ->branches()
+                ->whereHas('branch', function ($q) {
+                    $q->where('status', 1)
+                    ->where('jo_select_branch', 1);
+                })
+                ->with('branch')
+                ->get()
+                ->sortBy(fn($b) => $b->branch->name);
 
             $provinces = Deliverablecities::query()
                 ->select('province', 'region')
@@ -225,7 +234,7 @@ class JoborderController extends Controller
 
             $customersData = User::customer_lookup();
 
-            return view('admin.joborder.create',compact('products','miscelaneous','branches','branches_store','pbs','provinces','cities', 'customersData'));
+            return view('admin.joborder.create',compact('products','miscelaneous','branches','branches_store','pbs','provinces','cities', 'customersData', 'userBranches'));
         } catch (\Throwable $th) {
             throw $th;
             return back()->with('error', 'An error occurred while loading the create job order form. Please try again later.');

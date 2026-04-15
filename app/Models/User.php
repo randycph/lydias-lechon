@@ -64,7 +64,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function branches()
     {
-        return $this->hasMany('App\EcommerceModel\UserBranch');
+        return $this->hasMany('App\Models\UserBranch');
     }
 
 
