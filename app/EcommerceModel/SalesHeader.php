@@ -672,4 +672,17 @@ class SalesHeader extends Model
             $deliveryDate->isTomorrow() &&
             $now->format('H:i') > $cutoff;
     }
+    public function scopePaidOnlyForForecasterRole($query)
+    {
+        return $query->when(
+            auth()->check() && auth()->user()->role_id == 3,
+            function ($q) {
+                $q->where('isConfirm', 1)
+                ->where('has_sub', 0)
+                ->whereHas('payments', fn ($pq) => $pq->where('status', 'PAID'))
+                ->with('payments');
+            }
+        );
+    }
+
 }

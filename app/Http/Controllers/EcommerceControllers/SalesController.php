@@ -722,6 +722,7 @@ class SalesController extends Controller
                 $model = SalesHeader::with(['items' => function ($q) {
                         $q->orderBy('delivery_date', 'asc');
                     }])
+                    ->paidOnlyForForecasterRole()
                     ->where('has_sub', 0)
                     ->when($showDeleted === true,
                         fn ($q) => $q->where('for_deletion', 1),
@@ -731,7 +732,7 @@ class SalesController extends Controller
                         fn ($q) => $q->where('is_new_order', 1)
                     )
                     ->when($isDispatcher == true,
-                        fn ($q) => $q->where('payment_status', '==', 'PAID')->orWhere('isConfirm', 1)
+                        fn ($q) => $q->where('isConfirm', 1)
                     )
                     // apply production / branch filters without plucking IDs
                     ->where(function ($q) use ($hasProdBranch, $eligible, $hasBranches, $locations) {
@@ -756,12 +757,13 @@ class SalesController extends Controller
                     ->where('d.delivery_date', '>=', $today->startOfDay()->toDateTimeString())
                     ->select('d.sales_header_id');
 
-                $model = SalesHeader::with(['items' => function($q) {
-                        $q->orderBy('delivery_date', 'asc');
-                    }])
+                $model = SalesHeader::with([
+                        'items' => function ($q) {
+                            $q->orderBy('delivery_date', 'asc');
+                        }
+                    ])
+                    ->paidOnlyForForecasterRole()
                     ->whereIn('id', $eligible) 
-                    ->where('has_sub', 0)
-                    ->where('payment_status', '!=', 'PENDING')
                     ->when($showDeleted === true,
                         fn ($q) => $q->where('for_deletion', 1),
                         fn ($q) => $q->where('for_deletion', 0)
@@ -782,9 +784,10 @@ class SalesController extends Controller
                         $q->where('delivery_date', '>=', $today->startOfDay()->toDateTimeString())
                           ->orderBy('delivery_date', 'desc');
                     })
+                    ->paidOnlyForForecasterRole()
                     ->where('has_sub', 0)
                     ->when($isDispatcher == true,
-                        fn ($q) => $q->where('payment_status', '==', 'PAID')->orWhere('isConfirm', 1)
+                        fn ($q) => $q->where('isConfirm', 1)
                     )
                     ->when($showDeleted === true,
                         fn ($q) => $q->where('for_deletion', 1),
@@ -879,7 +882,7 @@ class SalesController extends Controller
             'end_date'
         ];
 
-        if ($isDispatcher) {
+        if ($isDispatcher || (auth()->user()->role_id == 3)) {
             $listing = new ListingHelper('desc',20,'date_needed', $customConditions);
         } else {
             $listing = new ListingHelper('desc',20,'order_number', $customConditions);
