@@ -52,9 +52,11 @@
                         </button>
 
                         @if($sales->isExpired)
-                            <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 
-                                        hidden group-hover:block 
-                                        bg-gray-800 text-white text-xs px-3 py-1 rounded whitespace-nowrap">
+                            <div class="absolute bottom-full mb-2 z-50 pointer-events-none
+                                        opacity-0 group-hover:opacity-100 transition-opacity duration-200
+                                        left-1/2 -translate-x-1/2 w-[90vw] max-w-xs px-3 text-center whitespace-normal
+                                        bg-gray-800 text-white text-xs py-2 rounded
+                                ">
                                 Payment is no longer allowed for orders with delivery scheduled for tomorrow or in the past.
                             </div>
                         @endif
