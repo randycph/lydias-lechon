@@ -26,7 +26,7 @@ class CustomerController extends Controller
 {
     use SendsPasswordResetEmails;
 
-    private $searchFields = ['name'];
+    private $searchFields = ['name', 'email'];
 
     public function __construct()
     {
@@ -256,4 +256,23 @@ class CustomerController extends Controller
         return view('admin.customers.profile',compact('user','logs','param'));
     }
 
+    public function bulkDeactivate(Request $request)
+    {
+        $ids = explode('|', $request->users);
+        $ids = array_filter($ids);
+
+        $status = $request->status;
+
+        dd($ids, $status);
+        
+        User::whereIn('id', $ids)->get()
+            ->each(function ($user) use ($status) {
+                $user->update([
+                    'is_active' => $status,
+                    'user_id'   => Auth::id(),
+                ]);
+            });
+
+        return back()->with('success', __('standard.customers.status_success', ['status' => $status == 1 ? 'activated' : 'deactivated']));
+    }
 }
