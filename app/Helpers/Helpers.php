@@ -287,20 +287,32 @@ if (!function_exists('unreadForecastersTransactions')) {
 }
 
 if (!function_exists('canAddPayment')) {
-
-    function canAddPayment(SalesHeader $sale, int $days = 30): bool
+    function canAddPayment(SalesHeader $sale): bool
     {
-        // OVERRIDE via URL
-        if (request()->boolean('force_over_30')) {
-            $isOverDays = true;
-        } else {
-            $isOverDays = $sale->created_at->diffInDays(now()) >= $days;
+        if (auth()->user()->is_an_admin()) {
+            return true;
         }
 
-        $hasSignChit = $sale->payments()
-            ->where('payment_type', 'Sign-Chit')
-            ->exists();
+        $daysPassed = $sale->created_at->diffInDays(now());
 
-        return !($hasSignChit && $isOverDays);
+        $paymentTypes = collect($sale->payments)->pluck('payment_type');
+
+        $hasCheckPayment = $paymentTypes->contains('Check Payment');
+        $hasSignChit = $paymentTypes->contains('Sign-Chit');
+
+        $force30 = auth()->user()->is_a_cashier() && request()->boolean('force_over_30');
+        $force3  = auth()->user()->is_a_cashier() && request()->boolean('force_over_3');
+
+        if ($hasCheckPayment) {
+            if ($force3) return false;
+            return $daysPassed < 3;
+        }
+
+        if ($hasSignChit) {
+            if ($force30) return false;
+            return $daysPassed < 30;
+        }
+
+        return true;
     }
 }
