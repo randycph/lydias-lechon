@@ -53,7 +53,7 @@
                     </div>
                     <div class="flex items-center text-sm justify-between px-4 py-3 border-b border-gray-200">
                         <div>Payment Status</div>
-                        <div class="font-bold {{ strtolower($sales->PaymentStatus) == 'paid' ? 'text-primary' : 'text-yellow-500' }}">{{ $sales->PaymentStatus }}  {{ $sales->status == 'CANCELLED' ? '- CANCELLED' : '' }}</div>
+                        <div class="font-bold {{ strtolower($sales->PaymentStatus) == 'paid' ? 'text-primary' : 'text-yellow-500' }}">{{ $sales->PaymentStatus }}  {{ $sales->status == 'CANCELLED' ? '- CANCELLED' : ($sales->status == 'ABANDONED' ? '- ABANDONED' : '') }}</div>
                     </div>
                     @if ($sales->delivery_type == 'Door to door delivery')
                     <div class="flex items-center text-sm  justify-between px-4 py-3 border-b border-gray-200">

@@ -575,4 +575,12 @@ class SalesHeader extends Model
     {
         return $this->hasMany(self::class, 'parent_sales_header_id', 'id');
     }
+
+    public function hasPartialPayment()
+    {
+        $payments = $this->payments()->where('status', 'PAID')->get();
+        $paidAmount = $payments->sum('amount');
+
+        return $paidAmount > 0 || $this->isConfirm == 1; 
+    }
 }

@@ -611,7 +611,7 @@ class SalesController extends Controller
                 [
                     'field' => 'status',
                     'operator' => '=',
-                    'value' => 'active',
+                    'value' => request()->has('order_status') && request()->order_status == 'Abandoned' ? '' : 'active',
                     'apply_to_deleted_data' => true
                 ],
             ];
@@ -892,6 +892,9 @@ class SalesController extends Controller
             elseif ($_GET['order_status'] == 'Cancelled') {
                 $model = $model->where('status','=','Cancelled');        
             }
+            elseif ($_GET['order_status'] == 'Abandoned') {
+                $model = $model->where('status','=','Abandoned');        
+            }
             else{
                 $model = $model->where('isConfirm','=',$_GET['order_status']);        
             }
@@ -949,22 +952,75 @@ class SalesController extends Controller
     {
         $sale = SalesHeader::findOrFail($request->id_delete);
 
-        ActivityLog::create([
-            'created_by' => auth()->id(),
-            'activity_type' => 'delete',
-            'dashboard_activity' => 'delete Sales Transaction',
-            'activity_desc' => 'deleted Sales Transaction with Order Number: '.$sale->order_number,
-            'activity_date' => date("Y-m-d H:i:s"),
-            'db_table' => 'ecommerce_sales_headers',
-            'old_value' => '',
-            'new_value' => '',
-            'reference' => $sale->id
-        ]);
+        // ActivityLog::create([
+        //     'created_by' => auth()->id(),
+        //     'activity_type' => 'delete',
+        //     'dashboard_activity' => 'delete Sales Transaction',
+        //     'activity_desc' => 'deleted Sales Transaction with Order Number: '.$sale->order_number,
+        //     'activity_date' => date("Y-m-d H:i:s"),
+        //     'db_table' => 'ecommerce_sales_headers',
+        //     'old_value' => '',
+        //     'new_value' => '',
+        //     'reference' => $sale->id
+        // ]);
 
         $sale->for_deletion = 1;
         $sale->save();
 
         return back()->with('success','Successfully deleted transaction');
+    }
+
+    public function cancel(Request $request, SalesHeader $salesHeader)
+    {
+        $salesHeader = SalesHeader::findOrFail($request->id_cancel);
+
+        if ($salesHeader->status == 'CANCELLED') {
+            return back()->with('error', 'Transaction is already cancelled');
+        }
+
+        if ($salesHeader->status == 'ABANDONED') {
+            return back()->with('error', 'Transaction is already abandoned');
+        }
+        
+        if ($salesHeader?->user?->email) {
+            Mail::to($salesHeader->user->email)
+                ->send(new ManualOrderCancelledByAdminMail($salesHeader));
+        }
+
+        // Cancel current
+        $salesHeader->status = 'CANCELLED';
+        $salesHeader->save();
+
+        if ($salesHeader->is_sub && $salesHeader->parent_sales_header_id) {
+
+            $parent = SalesHeader::find($salesHeader->parent_sales_header_id);
+
+            if ($parent) {
+
+                // Get all children of parent
+                $children = SalesHeader::where('parent_sales_header_id', $parent->id)->get();
+
+                // Check if ALL are cancelled or abandoned
+                $allClosed = $children->every(function ($child) {
+                    return in_array($child->status, ['CANCELLED', 'ABANDONED']);
+                });
+
+                if ($allClosed) {
+
+                    // Decide parent status
+                    // If ALL cancelled - CANCELLED
+                    // Else - ABANDONED
+                    $allCancelled = $children->every(function ($child) {
+                        return $child->status === 'CANCELLED';
+                    });
+
+                    $parent->status = $allCancelled ? 'CANCELLED' : 'ABANDONED';
+                    $parent->save();
+                }
+            }
+        }
+
+        return back()->with('success','Transaction has been cancelled');
     }
 
     public function restore($sales)

@@ -290,7 +290,11 @@ class ListingHelper
 
             $models->where($condition['field'], $condition['operator'], $condition['value']);
             if ($condition['field'] === 'status' && (isset($_GET['order_status']) && strtoupper($_GET['order_status']) === 'CANCELLED')) {
-                $models->orWhere('status', 'CANCELLED');
+                $models->orWhere('status', 'CANCELLED')->where('has_sub', 0);
+            }
+
+            if ($condition['field'] === 'status' && (isset($_GET['order_status']) && strtoupper($_GET['order_status']) === 'ABANDONED')) {
+                $models->orWhere('status', 'ABANDONED')->where('has_sub', 0);
             }
         }
 
