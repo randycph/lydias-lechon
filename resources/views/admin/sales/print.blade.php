@@ -422,7 +422,7 @@
                         @if($salesPayments->sum('amount') > 0)
                             <tr style="font-weight:bold;">
                                 <td colspan="4">&nbsp;</td>
-                                <td align="right">Total : ₱{{number_format($salesPayments->where('status','PAID')->where('is_discount',0)->sum('amount'), 2)}}</td> 
+                                <td align="right">Total : ₱{{number_format($salesPayments->where('status', '!=', 'CANCELLED')->where('is_discount',0)->sum('amount'), 2)}}</td> 
                             </tr>
                         @endif
                     </tbody>
