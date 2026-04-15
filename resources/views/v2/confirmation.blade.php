@@ -32,15 +32,34 @@
             <div class="flex flex-col px-4  lg:flex-row gap-4 mt-5 w-full max-w-lg justify-start">
                 <a href="/menu" class="primary-btn bg-primary border-primary border text-white px-6 py-4 w-full rounded-md text-center">Go Shopping</a>
                 @if (auth()->check())
-                    <div class="border border-primary text-primary px-6 py-4 w-full text-center rounded-md">
+                    <div class="border cursor-pointer border-primary text-primary px-6 py-4 w-full text-center rounded-md hover:bg-primary hover:text-white transition-colors duration-300 ">
                         <a href="{{ route('order-history') }}" class="text-center">View Order History</a>
                     </div>
                 @else
                     @if (strtolower($sales->PaymentStatus) != 'paid' && $sales->status != 'CANCELLED')
-                    <button {{ $sales->isExpired ? 'disabled' : '' }} @click="openPaymentModal({{$sales->net_amount}}, '{{ $sales->id }}')" type="button"
-                        class="border {{ $sales->status == 'CANCELLED' ? 'hidden' : '' }} border-primary text-primary px-6 py-4 w-full text-center rounded-md hover:bg-primary hover:text-white transition-colors duration-300 disabled:bg-gray-200 disabled:hover:text-primary disabled:hover-none">
-                        Pay Now
-                    </button>
+                    <div class="relative group w-full">
+
+                        <button 
+                            {{ $sales->isExpired ? 'disabled' : '' }}
+                            @click="openPaymentModal({{$sales->net_amount}}, '{{ $sales->id }}')" 
+                            type="button"
+                            class="border {{ $sales->status == 'CANCELLED' ? 'hidden' : '' }} 
+                                border-primary text-primary px-6 py-4 w-full text-center rounded-md 
+                                hover:bg-primary hover:text-white transition-colors duration-300 
+                                disabled:bg-gray-200 disabled:cursor-not-allowed disabled:hover:text-primary">
+
+                            Pay Now
+                        </button>
+
+                        @if($sales->isExpired)
+                            <div class="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 
+                                        hidden group-hover:block 
+                                        bg-gray-800 text-white text-xs px-3 py-1 rounded whitespace-nowrap">
+                                Payment is no longer allowed for orders with delivery scheduled for tomorrow or in the past.
+                            </div>
+                        @endif
+
+                    </div>
                     @endif
                 @endif
 
