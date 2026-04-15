@@ -354,10 +354,36 @@
                                         View
                                     </a>
                                     @if (strtolower($sale->payment_status) != 'paid')
-                                    <button @click="openPaymentModal({{$balance}}, '{{ $sale->order_number }}')" type="button"
-                                        class="{{ ($sale->status == 'CANCELLED' || $sale->status == 'ABANDONED') ? 'hidden' : '' }} text-white bg-primary custom-btn btn-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
-                                        Pay Now
-                                    </button>
+                                        <div class="relative group w-full sm:w-auto overflow-visible">
+
+                                            <button 
+                                                {{ $sale->isExpired ? 'disabled' : '' }} 
+                                                @click="openPaymentModal({{$balance}}, '{{ $sale->id }}', {{ $sale->isExpired ? 'true' : 'false' }})" 
+                                                type="button"
+                                                class="{{ $sale->status == 'CANCELLED' ? 'hidden' : '' }} {{ $sale->isExpired ? '' : 'custom-btn' }} 
+                                                    text-white bg-primary  btn-primary-dark font-medium rounded-md 
+                                                    w-full sm:w-auto px-5 py-3.5 text-center 
+                                                    disabled:bg-gray-200 disabled:cursor-not-allowed">
+
+                                                Pay Now
+                                            </button>
+
+                                            @if($sale->isExpired)
+                                                <div class="
+                                                    absolute bottom-full mb-2 z-50 pointer-events-none
+                                                    opacity-0 group-hover:opacity-100 transition-opacity duration-200
+
+                                                    left-1/2 -translate-x-1/2 w-[90vw] max-w-xs px-3 text-center whitespace-normal
+
+                                                    sm:left-auto sm:translate-x-0 sm:right-0 sm:w-auto sm:max-w-none sm:whitespace-nowrap
+
+                                                    bg-gray-800 text-white text-xs py-2 rounded
+                                                ">
+                                                    Payment is no longer allowed for orders with delivery scheduled for tomorrow or in the past.
+                                                </div>
+                                            @endif
+
+                                        </div>
                                     @endif
                                 </div>
                             
@@ -751,6 +777,43 @@
     </div>
 </div>
 
+<div x-show="paymentDisabledModal"
+    x-transition
+    class="relative z-50"
+    aria-labelledby="modal-title"
+    role="dialog"
+    aria-modal="true"
+    style="display: none;">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
+
+    <!-- Modal content -->
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+            <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg pb-5">
+                <!-- Modal body -->
+                <div class="">
+
+                    <div class="flex justify-between items-center px-3 pt-3">
+                        <div class="flex gap-2 items-center">
+                            <div class="text-2xl font-bold">Payment disabled</div>
+                        </div>
+                        <button @click="paymentDisabledModal = false" class="self-end text-2xl text-gray-800">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+        
+                    <div class="text-gray-600 font-medium px-4 mt-4">
+                        Payment is no longer allowed for orders with delivery scheduled for tomorrow or in the past.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div x-show="editOrderModal"
     x-transition
     class="relative z-50"
@@ -854,7 +917,11 @@
             closeBankDepositProof() {
                 this.bankDepositProof = false;
             },
-            openPaymentModal(amount, sales_header_id) {
+            openPaymentModal(amount, sales_header_id, isExpired = false) {
+                if (isExpired) {
+                    this.paymentDisabledModal = true
+                    return;
+                }
                 this.depositModal = true;
                 this.amount = amount;
                 this.sales_header_id = sales_header_id;

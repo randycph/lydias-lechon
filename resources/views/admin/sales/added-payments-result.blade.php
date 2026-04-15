@@ -19,7 +19,7 @@
             <td>{{$payment->payment_date}}</td>
             <td>{{$payment->payment_type}}</td>
             <td><a href="{{$payment->file_url}}" target="_blank">@if(!empty($payment->file_url)) View @endif</a></td>
-            <td class="text-right">{{number_format($payment->amount,2)}}</td>
+            <td class="text-right {{ $payment->is_discount == 1 ? 'text-danger' : ''}}">{{ $payment->is_discount == 1 ? '-' : ''}}₱{{number_format($payment->amount,2)}}</td>
             <td align="center">{{$payment->status}} {!!$approval_code!!}</td>
             <td>@if($payment->status<>'PAID')
                     @if(in_array(strtolower($payment->payment_type),array_map('strtolower',$alls)) || auth()->user()->role_id == 1 || (auth()->user()->has_access_to_route('approve_payment') || auth()->user()->has_access_to_route('disapprove_payment')))
@@ -47,5 +47,5 @@
 @endforeach
 <tr style="font-weight:bold;">
     <td colspan="4">Total</td>
-    <td>{{number_format($payments->sum('amount'),2)}}</td>
+    <td>{{number_format($payments->where('is_discount', 0)->sum('amount'),2)}}</td>
 </tr>

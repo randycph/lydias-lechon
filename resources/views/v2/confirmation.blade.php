@@ -7,12 +7,18 @@
 
     <div x-data="{ 
         expanded: false,
+        isExpired: '{{ $sales->isExpired }}',
         openPaymentModal(amount, sales_header_id) {
+            if (this.isExpired) {
+                this.paymentDisabledModal = true
+                return;
+            }
             this.depositModal = true;
             this.amount = amount;
             this.sales_header_id = sales_header_id;
         },
         depositModal: false,
+        paymentDisabledModal: false,
         amount: 0,
         sales_header_id: null,
     }" class="bg-cream">
@@ -26,15 +32,36 @@
             <div class="flex flex-col px-4  lg:flex-row gap-4 mt-5 w-full max-w-lg justify-start">
                 <a href="{{ url('/menu') }}" class="primary-btn bg-primary border-primary border text-white px-6 py-4 w-full rounded-md text-center">Go Shopping</a>
                 @if (auth()->check())
-                    <div class="border border-primary text-primary px-6 py-4 w-full text-center rounded-md">
+                    <div class="border cursor-pointer border-primary text-primary px-6 py-4 w-full text-center rounded-md hover:bg-primary hover:text-white transition-colors duration-300 ">
                         <a href="{{ route('order-history') }}" class="text-center">View Order History</a>
                     </div>
                 @else
                     @if (strtolower($sales->PaymentStatus) != 'paid' && $sales->status != 'CANCELLED')
-                    <button @click="openPaymentModal({{$sales->net_amount}}, '{{ $sales->order_number }}')" type="button"
-                        class="border {{ $sales->status == 'CANCELLED' ? 'hidden' : '' }} border-primary text-primary px-6 py-4 w-full text-center rounded-md hover:bg-primary hover:text-white transition-colors duration-300">
-                        Pay Now
-                    </button>
+                    <div class="relative group w-full">
+
+                        <button 
+                            {{ $sales->isExpired ? 'disabled' : '' }}
+                            @click="openPaymentModal({{$sales->net_amount}}, '{{ $sales->id }}')" 
+                            type="button"
+                            class="border {{ $sales->status == 'CANCELLED' ? 'hidden' : '' }} 
+                                border-primary text-primary px-6 py-4 w-full text-center rounded-md 
+                                hover:bg-primary hover:text-white transition-colors duration-300 
+                                disabled:bg-gray-200 disabled:cursor-not-allowed disabled:hover:text-primary">
+
+                            Pay Now
+                        </button>
+
+                        @if($sales->isExpired)
+                            <div class="absolute bottom-full mb-2 z-50 pointer-events-none
+                                        opacity-0 group-hover:opacity-100 transition-opacity duration-200
+                                        left-1/2 -translate-x-1/2 w-[90vw] max-w-xs px-3 text-center whitespace-normal
+                                        bg-gray-800 text-white text-xs py-2 rounded
+                                ">
+                                Payment is no longer allowed for orders with delivery scheduled for tomorrow or in the past.
+                            </div>
+                        @endif
+
+                    </div>
                     @endif
                 @endif
 
@@ -444,8 +471,8 @@
                             <td class="px-6 py-4">
                                 @if($payment->status=='PENDING' && ($payment->payment_type=='IPAY' || $payment->payment_type=='Paymaya' )) Subject for Confirmation @else {{$payment->status}} @endif
                             </td>
-                            <td class="px-6 py-4">
-                                ₱{{ number_format($payment->amount, 2) }}
+                            <td class="px-6 py-4 {{ $payment->is_discount == 1 ? 'text-red-600' : '' }}">
+                                {{ $payment->is_discount == 1 ? '-' : '' }}₱{{ number_format($payment->amount, 2) }}
                             </td>
                         </tr>
                         @empty
@@ -455,10 +482,10 @@
                         @endforelse
                     </tbody>
                     <tfoot>
-                        @if($salesPayments->sum('amount') > 0)
+                        @if($sales->payments->where('status','PAID')->sum('amount') > 0)
                         <tr class="bg-white border-b border-gray-200">
                             <td colspan="4" class="px-6 py-4 font-bold text-right">Total</td>
-                            <td class="px-6 py-4 font-bold">₱{{ number_format($salesPayments->sum('amount'), 2) }}</td>
+                            <td class="px-6 py-4 font-bold">₱{{ number_format($salesPayments->where('status', '!=', 'CANCELLED')->where('is_discount',0)->sum('amount'), 2) }}</td>
                         </tr>
                         @endif
                     </tfoot>
@@ -606,6 +633,43 @@
                                         </div>
                                     </form>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="paymentDisabledModal"
+            x-transition
+            class="relative z-50"
+            aria-labelledby="modal-title"
+            role="dialog"
+            aria-modal="true"
+            style="display: none;">
+            <!-- Backdrop -->
+            <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
+
+            <!-- Modal content -->
+            <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+                <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
+                    <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg pb-5">
+                        <!-- Modal body -->
+                        <div class="">
+
+                            <div class="flex justify-between items-center px-3 pt-3">
+                                <div class="flex gap-2 items-center">
+                                    <div class="text-2xl font-bold">Payment disabled</div>
+                                </div>
+                                <button @click="paymentDisabledModal = false" class="self-end text-2xl text-gray-800">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+                
+                            <div class="text-gray-600 font-medium px-4 mt-4">
+                                Payment is no longer allowed for orders with delivery scheduled for tomorrow or in the past.
                             </div>
                         </div>
                     </div>
