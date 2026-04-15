@@ -21,6 +21,17 @@ class MyAccountController extends Controller
     public function cancel_order(Request $request) {
         $salesHeader = SalesHeader::whereId($request->sales_id)->first();
 
+        if ($salesHeader->has_sub == 1) {
+            $subSalesHeaders = SalesHeader::where('parent_sales_header_id', $salesHeader->id)->get();
+
+            if ($subSalesHeaders) {
+                foreach ($subSalesHeaders as $subSalesHeader) {
+                    $subSalesHeader->status = 'CANCELLED';
+                    $subSalesHeader->save();
+                }
+            }
+        }
+
         if (!$salesHeader) {
             return back()->with('error_cancelled', "Your order cannot be cancelled at this time");
         }
