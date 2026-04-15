@@ -642,7 +642,8 @@
             // aaSorting: [[ 8, "asc" ]],
             // bPaginate: false,
             aaSorting: [],
-            bSort: false,
+            bSort: true,
+            searching: true,
             asStripeClasses: [],
             buttons: [
                 {
