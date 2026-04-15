@@ -60,18 +60,40 @@
                                 <td id="grand_total">0</td>
                                 <td style="display: none;"><input type="text" name="gross" id="summary_input_gross" value="0"></td>
                             </tr>
-                            @if(auth()->user()->role_id == 4)
-                            <tr>
+                            {{-- @if(auth()->user()->role_id == 4) --}}
+                            {{-- <tr>
                                 <th scope="row"><strong>Deposit :</strong></th>
                                 <td id="summary_deposit">0</td>
                                 <td style="display: none;"><input type="text" id="summary_input_deposit" value="0"></td>
-                            </tr>
-                            <tr>
-                                <th scope="row"><strong>Discount :</strong></th>
-                                <td id="summary_discount">0</td>
-                                <td style="display: none;"><input type="text" id="summary_input_discount" value="0"></td>
-                            </tr>
-                            @endif
+                            </tr> --}}
+                            <div class="deposit-th">
+                                <div class="text-muted">
+                                    <strong>Discount</strong>
+                                </div>
+                                <ul>
+                                    <li class="discount-promo-th d-none">
+                                        <div class="text-muted d-flex justify-content-between">
+                                            <span class="discount-type-th">Discount (Promo)</span> <span class="discount-value-th"></span>
+                                        </div>
+                                    </li>
+                                    <li class="discount-vat-th d-none">
+                                        <div class="text-muted d-flex justify-content-between">
+                                            <span class="discount-type-th">Discount (VAT)</span> <span class="discount-value-th"></span>
+                                        </div>
+                                    </li>
+                                    <li class="discount-senior-th d-none">
+                                        <div class="text-muted d-flex justify-content-between">
+                                            <span class="discount-type-th">Discount (Senior Citizen)</span> <span class="discount-value-th"></span>
+                                        </div>
+                                    </li>
+                                </ul>
+                                <div class="d-flex justify-content-between">
+                                    <strong class="text-muted ">Total Discount</strong>
+                                    <span class="total-discount-value"></span>
+                                </div>
+                                {{-- <td style="display: none;"><input type="text" id="summary_input_discount" value="0"></td> --}}
+                            </div>
+                            {{-- @endif --}}
                         </tbody>
                     </table>
                     @if(auth()->user()->role_id == 4)

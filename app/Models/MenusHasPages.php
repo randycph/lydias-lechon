@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Validator;
@@ -10,6 +11,7 @@ use Illuminate\Validation\Rule;
 class MenusHasPages extends Model
 {
     use SoftDeletes;
+    use LogsActivityDiff;
 
     protected $table = 'menus_has_pages';
     protected $fillable = ['menu_id', 'parent_id', 'page_id', 'page_order', 'uri', 'label', 'target', 'type'];

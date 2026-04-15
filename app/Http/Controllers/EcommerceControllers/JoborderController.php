@@ -193,7 +193,15 @@ class JoborderController extends Controller
     public function create()
     {
         try {
-            $miscelaneous = Product::where('is_misc',1)->orderBy('name','asc')->get();
+            $specialId = 270;
+
+            $miscelaneous = Product::where(function ($q) use ($specialId) {
+                    $q->where('is_misc', 1)->where('status', 'PUBLISHED')
+                    ->orWhere('id', $specialId);
+                })
+                ->orderBy('name')
+                ->get();
+
             $products = Product::where('production_item',1)->where('status','PUBLISHED')->orderBy('name','asc')->get();
             $branches_store = Branch::where('status', 1)->where('jo_select_branch', 1)->orderBy('name','asc')->get();
             $pbs = ProductionBranch::orderBy('name','asc')->get();
@@ -273,6 +281,50 @@ class JoborderController extends Controller
             }
         }
 
+        $payments = collect($request->payments ?? []);
+
+        if ($payments->isEmpty()) {
+            return back()->withErrors(['payments' => 'Please add at least one payment method with a valid amount.'])->withInput();
+        }
+
+        $errors = [];
+        $hasValidPayment = false;
+
+        foreach ($payments as $index => $payment) {
+
+            $method = trim($payment['method'] ?? '');
+            $amount = isset($payment['amount']) ? floatval($payment['amount']) : 0;
+
+            $row = $index + 1;
+
+            if ($method === '' && $amount <= 0) {
+                continue;
+            }
+
+            if ($method === '' || $amount <= 0) {
+
+                if ($method === '') {
+                    $errors["payments.$index.method"] = "Row {$row}: Please select a payment method.";
+                }
+
+                if ($amount <= 0) {
+                    $errors["payments.$index.amount"] = "Row {$row}: Please enter a valid amount.";
+                }
+
+                continue;
+            }
+
+            $hasValidPayment = true;
+        }
+
+        if (!$hasValidPayment) {
+            $errors['payments'] = 'Please add at least one valid payment.';
+        }
+
+        if (!empty($errors)) {
+            return back()->withErrors($errors)->withInput();
+        }
+        
         $ran   = microtime();
         $today = getdate();
         $order_number = $today[0].substr($ran, 2,6);
@@ -332,7 +384,8 @@ class JoborderController extends Controller
                     'registration_source' => $request->branch_source,
                     'contact_mobile' => $request->mobile,
                     'password' => \Hash::make('password', array('rounds'=>12)),
-                    'is_active' => 1
+                    'is_active' => 1,
+                    'role_id' => 6
                 ]);
                 $id  = $customer->id;
             }
@@ -420,8 +473,17 @@ class JoborderController extends Controller
 
 
         if($salesHeader){
+
+            $lastOrder = SalesHeader::withTrashed()->whereNull('parent_sales_header_id')
+                ->whereRaw('order_number REGEXP "^[0-9]{7}$"')
+                ->max('order_number');
+
+            $nextOrder = $lastOrder ? intval($lastOrder) + 1 : 1;
+
+            $orderNumber = sprintf('%07d', $nextOrder);
+
             $salesHeader->update([
-                'order_number' => sprintf('%07d', $salesHeader->id)
+                'order_number' => $orderNumber
             ]);
             //dd($request);
             $data = $request->all();
@@ -489,34 +551,43 @@ class JoborderController extends Controller
                 }
             }
 
-                for($ix=1; $ix<=10; $ix++){
+            $payments = collect($request->payments ?? [])
+                ->filter(function ($payment) {
+                    return !empty($payment['method'])
+                        && isset($payment['amount'])
+                        && floatval($payment['amount']) > 0;
+                });
 
-                    if($request->input('payment_amount'.$ix) > 0){
+            foreach ($payments as $payment) {
 
-                        $image_url = '';
-                        if($request->hasFile('payment_file'.$ix))
-                        {
-                            $newFile = $this->upload_file_to_storage('payments', $request->file('payment_file'.$ix));
-                            $image_url = $newFile['url'];
-                        }
+                $image_url = null;
 
-                        //$is_cod = ($request->input('payment_method'.$ix) == 'COD') ? 'PENDING':'PAID';
-                        $is_cod = 'PENDING';
-                        $add_special_payment = SalesPayment::create([
-                            'sales_header_id' => $salesHeader->id,
-                            'payment_type' => $request->input('payment_method'.$ix),
-                            'amount' => $request->input('payment_amount'.$ix),
-                            'status' => $is_cod,
-                            'payment_date' => date('Y-m-d'),
-                            'receipt_number' => $request->input('payment_remarks'.$ix),
-                            'created_by' => $salesHeader->user_id,
-                            'file_url' => $image_url,
-                            'order_number' => $salesHeader->order_number
-                        ]);
-                    }
+                // Handle per-row file upload
+                if (isset($payment['file']) && $payment['file'] instanceof \Illuminate\Http\UploadedFile) {
+                    $newFile = $this->upload_file_to_storage('payments', $payment['file']);
+                    $image_url = $newFile['url'] ?? null;
                 }
-               // logger($add_special_payment);
 
+                // COD
+                // $is_cod = ($payment['method'] === 'COD') ? 'PENDING' : 'PAID';
+
+                $is_cod = 'PENDING';
+
+                $isDiscount = str_starts_with($payment['method'], 'Discount');
+
+                SalesPayment::create([
+                    'sales_header_id' => $salesHeader->id,
+                    'payment_type'    => $payment['method'],
+                    'amount'          => (float) $payment['amount'],
+                    'status'          => $is_cod,
+                    'payment_date'    => now()->toDateString(),
+                    'receipt_number'  => $payment['remarks'] ?? null,
+                    'created_by'      => $salesHeader->user_id,
+                    'file_url'        => $image_url,
+                    'order_number'    => $salesHeader->order_number,
+                    'is_discount'    => $isDiscount ? 1 : 0,
+                ]);
+            }
 
             //if(strlen($request->couponcode)>=1){
             if($request->totalcoupon > 0){

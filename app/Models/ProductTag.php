@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 
 class ProductTag extends Model
 {    
+    use LogsActivityDiff;
+    
     public $table = 'product_tags';
     protected $fillable = [ 'product_id', 'tag', 'created_by' ];
 

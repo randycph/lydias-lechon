@@ -14,6 +14,16 @@ class UpdatePermissionTable extends Migration
     public function up()
     {
         Schema::table('permission', function (Blueprint $table) {
+            if (!Schema::hasColumn('permission', 'routes')) {
+                $table->string('routes')->nullable()->after('name');
+            }
+
+            if (!Schema::hasColumn('permission', 'methods')) {
+                $table->string('methods')->nullable()->after('routes');
+            }
+        });
+
+        Schema::table('permission', function (Blueprint $table) {
             $table->text('routes')->nullable()->after('description')->change();
             $table->text('methods')->nullable()->after('routes')->change();
         });

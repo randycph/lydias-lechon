@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers\Settings;
 
+use App\EcommerceModel\Branch;
 use App\Models\Permission;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\Deliverablecities;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 
 use App\Models\Setting;
 use App\Models\MediaAccounts;
 use App\Models\DeliveryFeePromo;
+use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\User;
 
@@ -74,7 +77,8 @@ class WebController extends Controller
         $web = Setting::find($id);
         $medias = MediaAccounts::get();
         $deliveryfees = DeliveryFeePromo::get();
-        $categories = ProductCategory::where('status','PUBLISHED')->get();
+        $categories = ProductCategory::where('status','PUBLISHED')->orderBy('name')->get();
+        $products = Product::where('status','PUBLISHED')->orderBy('name')->get();
 
         $selectedIds = DeliveryFeePromo::where('type', 'customer')->pluck('ref_id');
 
@@ -86,7 +90,30 @@ class WebController extends Controller
                 return $u;
             });
 
-        return view('admin.settings.website.index',compact('web','medias','deliveryfees','categories','selectedCustomers'));
+        $locations = Branch::with('numbers')->where('status', 1)->orderBy('name', 'asc')->where('pickup_branch', 1)->get();
+
+        $cities = Deliverablecities::query()
+            ->select('id', 'city', 'province')
+            ->where('is_active', 1)
+            ->whereNotNull('city')
+            ->where('city', '!=', '')
+            ->orderBy('city')
+            ->get()
+            ->unique(function ($item) {
+                return $item->province . '-' . $item->city;
+            })
+            ->values();
+
+        return view('admin.settings.website.index', compact(
+            'web', 
+            'medias', 
+            'deliveryfees', 
+            'categories', 
+            'products', 
+            'selectedCustomers',
+            'locations',
+            'cities'
+        ));
     }
 
     /**

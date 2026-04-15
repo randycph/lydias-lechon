@@ -3,12 +3,14 @@
 namespace App\EcommerceModel;
 
 use App\Models\ActivityLog;
+use App\Models\Concerns\LogsActivityDiff;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProductionBranch extends Model
 {
     use SoftDeletes;
+    use LogsActivityDiff;
 
     protected $table = 'production_branches';
     protected $fillable = ['name', 'address_region', 'address_province', 'address_city', 'address_street', 'address_zip', 'contact_tel', 'contact_mobile', 'contact_person', 'created_by'];

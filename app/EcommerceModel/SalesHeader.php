@@ -11,14 +11,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use App\Models\Concerns\LogsActivityDiff;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class SalesHeader extends Model
 {
     use SoftDeletes, LogsActivityDiff;
+    use HasFactory;
     
     protected $primaryKey = 'id';
     public $incrementing = true;
     protected $keyType = 'int';
+    protected array $logExcept = ['updated_at', 'is_new_order'];
 
     protected $table = 'ecommerce_sales_headers';
     protected $fillable = [
@@ -167,12 +170,7 @@ class SalesHeader extends Model
     {
         $sale = SalesHeader::withTrashed()->whereId($this->id)->first();
 
-        if (isset($sale->is_sub) && $sale->is_sub == 1) {
-            $parentSale = SalesHeader::withTrashed()->where('id', $sale->parent_sales_header_id)->first();
-            $payments = SalesPayment::where('sales_header_id', $parentSale->id)->get();
-        } else {
-            $payments = SalesPayment::where('sales_header_id', $sale->id)->get();
-        }
+        $payments = SalesPayment::where('sales_header_id', $sale->id)->get();
 
         $cntr=0;
         foreach($payments as $p){
@@ -189,7 +187,7 @@ class SalesHeader extends Model
 
     public function getPaymentadminstatusAttribute()
     {
-        $amount = floatval($this->net_amount);
+        $amount = floatval($this->items->sum('net_amount')) + floatval($this->delivery_fee_amount ?? 0);
         $sale = SalesHeader::withTrashed()->find($this->id);
 
         if (isset($sale->parent_sales_header_id) && $sale->parent_sales_header_id != null) {
@@ -199,6 +197,9 @@ class SalesHeader extends Model
             $payment = SalesPayment::where('sales_header_id', $sale->id)->where('status', 'PAID')->get();
             $paid = (float) $payment->sum('amount');
         }
+
+        $payment = SalesPayment::where('sales_header_id', $sale->id)->where('status', 'PAID')->get();
+        $paid = (float) $payment->sum('amount');
 
         if (isset($sale->parent_sales_header_id) && $sale->parent_sales_header_id != null) {
             $newSale = SalesHeader::where('id', $sale->parent_sales_header_id)->first();
@@ -241,13 +242,18 @@ class SalesHeader extends Model
             $amount = $sale->net_amount;
         }
 
-        if ($sales->is_sub == 1) {
-            $payments = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)->where('status', 'PAID')->get();
-            $paid = (float) $payments->sum('amount');
-        } else {
-            $payments = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->get();
-            $paid = (float) $payments->sum('amount');
-        }
+        $amount = $sales->items->sum('net_amount') + $sales->delivery_fee_amount ?? 0;
+
+        // if ($sales->is_sub == 1) {
+        //     $payments = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)->where('status', 'PAID')->get();
+        //     $paid = (float) $payments->sum('amount');
+        // } else {
+        //     $payments = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->get();
+        //     $paid = (float) $payments->sum('amount');
+        // }
+
+        $payments = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->get();
+        $paid = (float) $payments->sum('amount');
 
         $total = $amount - $paid;
 
@@ -265,6 +271,8 @@ class SalesHeader extends Model
         } else {
             $paid = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->sum('amount');
         }
+
+        $paid = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->sum('amount');
 
         logger('$paid: '.$paid);
 
@@ -345,11 +353,13 @@ class SalesHeader extends Model
 
         $sales = SalesHeader::withTrashed()->whereId($this->id)->first();
 
-        if ($sales->is_sub == 1) {
-            $paid = SalesPayment::where('sales_header_id',$sales->parent_sales_header_id)->where('status', 'PAID')->sum('amount');
-        } else {
-            $paid = SalesPayment::where('sales_header_id',$this->id)->where('status', 'PAID')->sum('amount');
-        }
+        // if ($sales->is_sub == 1) {
+        //     $paid = SalesPayment::where('sales_header_id',$sales->parent_sales_header_id)->where('status', 'PAID')->sum('amount');
+        // } else {
+        //     $paid = SalesPayment::where('sales_header_id',$this->id)->where('status', 'PAID')->sum('amount');
+        // }
+
+        $paid = SalesPayment::where('sales_header_id',$this->id)->where('status', 'PAID')->sum('amount');
         
         if ($paid > 0) {
             if ($this->delivery_status == 'Waiting for Payment' || $this->delivery_status == '' || is_null($this->delivery_status)) {
@@ -357,7 +367,7 @@ class SalesHeader extends Model
             }
         }
 
-        if ($paid >= $this->net_amount) {
+        if ($paid >= $this->items->sum('net_amount')) {
             SalesHeader::whereId($this->id)->update(['payment_status' => 'PAID']);
 
             return 'PAID';

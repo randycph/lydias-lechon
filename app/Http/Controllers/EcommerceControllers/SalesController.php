@@ -61,7 +61,7 @@ class SalesController extends Controller
     }
 
     public function update_items(Request $request){
-        $head = SalesHeader::whereId($request->ui_sales_id)->first();
+        $head = SalesHeader::findOrFail($request->ui_sales_id);
         $date_needed = '';
         foreach($head->items as $item){
             if(!empty($item->delivery_date)){
@@ -76,18 +76,23 @@ class SalesController extends Controller
                     $paella_qty = $request->input('uiu_qty'.$item->id);
                     $gross = ($request->input('uiu_qty'.$item->id) * $item->price) + ($request->input('uiu_qty'.$item->id) * $request->input('uiu_paella'.$item->id));
                 }
-                $update = SalesDetail::whereId($item->id)->update([
-                    'paella_price' => $paella_price,
-                    'paella_qty' => $paella_qty,
-                    'qty' => $request->input('uiu_qty'.$item->id),
-                    'gross_amount' => $gross,
-                    'net_amount' => $gross
-                ]);
-            }
-            else{
-
-                $delete = SalesDetail::whereId($item->id)->forceDelete();
-
+                SalesDetail::where('id', $item->id)
+                    ->get()
+                    ->each(function ($e) use ($paella_price, $paella_qty, $request, $item, $gross) {
+                        $e->update([
+                            'paella_price' => $paella_price,
+                            'paella_qty' => $paella_qty,
+                            'qty' => $request->input('uiu_qty'.$item->id),
+                            'gross_amount' => $gross,
+                            'net_amount' => $gross
+                        ]);
+                    });
+            } else {
+                SalesDetail::where('id', $item->id)
+                    ->get()
+                    ->each(function ($e) {
+                        $e->forceDelete();
+                    });
             }
             
         }
@@ -172,18 +177,20 @@ class SalesController extends Controller
                 $delivery_amount = $sales->delivery_fee_amount;
             }
         }
-        $update_header = SalesHeader::whereId($sales->id)->update([
-            'delivery_fee_amount' => $delivery_amount,
-            'gross_amount' => ($gross + $delivery_amount), 
-            'net_amount' => ($gross + $delivery_amount) - $sales->discount_amount,
-            'payment_status' => 'UNPAID'
-        ]);
+        SalesHeader::where('id', $sales->id)
+            ->get()
+            ->each(function ($header) use ($delivery_amount, $gross, $sales) {
+                $header->update([
+                    'delivery_fee_amount' => $delivery_amount,
+                    'gross_amount' => ($gross + $delivery_amount), 
+                    'net_amount' => ($gross + $delivery_amount) - $sales->discount_amount,
+                    'payment_status' => 'UNPAID'
+                ]);
+        });
         
     }
 
     public function prepare_dateneeded(Request $request){
-        //({{$sale->id}},'{{ $dateneeded }}','{{$sale->delivery_type}}','{{$locationed}}','{{$sale->instruction}}','{{$sale->customer_delivery_adress}}');
-
         $salesdetail = SalesDetail::where('sales_header_id',$request->id)->first();
         $salesheader = SalesHeader::find($request->id);
 
@@ -217,20 +224,21 @@ class SalesController extends Controller
     }
 
     public function update_dateneeded(Request $request){
-        $sales = SalesHeader::whereId($request->update_dateneeded_id)->first();
+        $sales = SalesHeader::findOrFail($request->update_dateneeded_id);
     
-        // if(isset($request->delivery_branch)){
-        //     SalesHeader::whereId($request->update_dateneeded_id)->update(['delivery_branch' => $request->delivery_branch]);
-        // }
-        
-        $update = SalesHeader::whereId($request->update_dateneeded_id)->update([
+        SalesHeader::whereId($request->update_dateneeded_id)->update([
             'delivery_status' => ''
         ]);
 
         if ($request->has('update_dateneeded_date') && $request->has('update_dateneeded_time')) {
-            $update_date_needed = SalesDetail::where('sales_header_id',$request->update_dateneeded_id)->update([
-                'delivery_date' => $request->update_dateneeded_date." ".$request->update_dateneeded_time
-            ]);
+            SalesDetail::where('sales_header_id', $request->update_dateneeded_id)
+                ->get()
+                ->each(function ($detail) use ($request) {
+                    $detail->update([
+                        'delivery_date' =>
+                            $request->update_dateneeded_date . ' ' . $request->update_dateneeded_time
+                    ]);
+                });
         }
 
         if ($request->shipping_type == 'storepickup') {
@@ -243,7 +251,10 @@ class SalesController extends Controller
 
         // Insert new addresses
         if ($request->filled('address')) {
-            ProductDeliveryAddress::where('sales_header_id', $request->update_dateneeded_id)->delete();
+            ProductDeliveryAddress::where('sales_header_id', $request->update_dateneeded_id)
+                ->get()
+                ->each
+                ->delete();
 
             foreach ($request->address as $index => $addr) {
 
@@ -251,9 +262,15 @@ class SalesController extends Controller
 
                 $products = Product::whereIn('id', $request->product_ids[$index])->get();
 
-                SalesDetail::where('sales_header_id',$request->update_dateneeded_id)->update([
-                    'delivery_date' => $request->dateneeded_date[$index]." ".$request->dateneeded_time[$index]
-                ]);
+                SalesDetail::where('sales_header_id',$request->update_dateneeded_id)
+                        ->get()
+                        ->each(function ($detail) use ($request, $index) {
+                            $detail->update([
+                                'delivery_date' =>
+                                    $request->dateneeded_date[$index] . ' ' . $request->dateneeded_time[$index]
+                            ]);
+                        });
+
 
                 foreach ($products as $product) {
                     $prods[] = [
@@ -322,19 +339,19 @@ class SalesController extends Controller
 
             if($sales->customer_location == $request->update_dateneeded_d2d){
 
-                $update_date_needed = SalesHeader::whereId($request->update_dateneeded_id)->update([               
+                $sales->update([               
                     'customer_delivery_adress' => $request->new_delivery_address,
                     'instruction' => $request->new_instruction,
                     'delivery_fee_amount' => $delivery_amount,
                     'gross_amount' => $amt,
                     'net_amount' => $amt,
                     'customer_address' => '',
-                    'delivery_branch' => $request->delivery_branch
+                    'delivery_branch' => $request->delivery_branch ?? $sales->delivery_branch
                 ]);
 
             }else{
 
-                $update_date_needed = SalesHeader::whereId($request->update_dateneeded_id)->update([
+                $sales->update([
                     'customer_location' => $request->update_dateneeded_d2d,
                     'customer_delivery_adress' => $request->new_delivery_address,
                     'instruction' => $request->new_instruction,
@@ -342,15 +359,14 @@ class SalesController extends Controller
                     'gross_amount' => $amt,
                     'net_amount' => $amt,
                     'customer_address' => '',
-                    'delivery_branch' => $request->delivery_branch
+                    'delivery_branch' => $request->delivery_branch ?? $sales->delivery_branch
                 ]);
 
             }
         }
         if($request->shipping_type == 'storepickup'){
-            $sales->update(['delivery_type' => 'Store Pickup']);
             $gross = $sales->items->sum('gross_amount');
-            $update_date_needed = SalesHeader::whereId($request->update_dateneeded_id)->update([
+            $sales->update([
                 'customer_delivery_adress' => $request->update_dateneeded_sp,
                 'instruction' => $request->new_instruction,
                 'outlet' => $request->update_dateneeded_sp,
@@ -371,38 +387,50 @@ class SalesController extends Controller
 
         $orig_payment = SalesPayment::whereId($request->confirm_payment_id)->first();
         $image_url = $orig_payment->file_url;
-        if($request->hasFile('confirm_payment_file'))
-        {
+        if($request->hasFile('confirm_payment_file')) {
             $newFile = $this->upload_file_to_storage('payments', $request->file('confirm_payment_file'));
             $image_url = $newFile['url'];
         }
 
-        $s = SalesPayment::whereId($request->confirm_payment_id)->update(
-            [
-                'status' => 'PAID',
-                'file_url' => $image_url,
-                'receipt_number' => $request->confirm_payment_ref ?? $orig_payment->receipt_number
-            ]
-        );
+        SalesPayment::where('id', $request->confirm_payment_id)
+            ->get()
+            ->each(function ($payment) use ($image_url, $request, $orig_payment) {
+                $payment->update([
+                    'status' => 'PAID',
+                    'file_url' => $image_url,
+                    'receipt_number' => $request->confirm_payment_ref ?? $orig_payment->receipt_number
+                ]);
+            });
         $data = SalesPayment::whereId($request->confirm_payment_id)->first();
         if($data->payment_type == 'Gift Cert'){
 
             $update_gift_cert = GiftCertificate::where('code',$data->receipt_number)->where('isApproved','<>','1')
-                                ->update([
-                                    'isApproved' => '1',
-                                    'approved_by' => Auth::user()->name,
-                                    'approved_on' => date('Y-m-d')
-                                ]);
+                                ->get()
+                                ->each(function ($gc) {
+                                    $gc->update([
+                                        'isApproved' => '1',
+                                        'approved_by' => Auth::user()->name,
+                                        'approved_on' => date('Y-m-d')
+                                    ]);
+                                });
             if($update_gift_cert){
+                $coupon_amount = 0;
                 $discounts = SalesPayment::where('sales_header_id',$data->sales_header_id)->whereStatus('PAID')->sum('amount');
                 $grand_gross = $data->gross_amount - $discounts;
-                $update_sales_header = SalesHeader::whereId($data->sales_header_id)->update([
-                    'net_amount' => $grand_gross,
-                    'discount_amount' => $coupon_amount
-                ]);
+                $coupon_amount = $discounts;
+                SalesHeader::whereId($data->sales_header_id)
+                    ->get()->each(function ($sh) use ($grand_gross, $coupon_amount) {
+                        $sh->update([
+                            'net_amount' => $grand_gross,
+                            'discount_amount' => $coupon_amount
+                        ]);
+                    });
             }
         }
 
+        if ($data->is_discount == 1) {
+            $discount = $data->amount;
+        }
 
         $ran = microtime();
         $today = getdate();
@@ -422,6 +450,12 @@ class SalesController extends Controller
 
 
         $sales = SalesHeader::whereId($data->sales_header_id)->first();
+
+        if ($discount > 0) {
+            $sales->discount_amount = floatval($sales->discount_amount + $discount);
+            $sales->net_amount = floatval($sales->net_amount) - floatval($sales->discount_amount + $discount);
+            $sales->save();
+        }
 
         $sms = new Sms();
         $sms->send_sms($sales->customer_contact_number, 'payment_update', $data);
@@ -965,14 +999,17 @@ class SalesController extends Controller
             return redirect()->route('sales-transaction.index')->with('error', 'Sales record not found.');
         }
 
-        if ($sales->is_sub == 1) {
-            $subSales = SalesHeader::where('id', $sales->parent_sales_header_id)->first();
-            $salesPayments = $subSales->payments ?? collect();
-            $totalPayment = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)->sum('amount');
-        } else {
-            $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
-            $totalPayment = SalesPayment::where('sales_header_id',$id)->sum('amount');
-        }
+        // if ($sales->is_sub == 1) {
+        //     $subSales = SalesHeader::where('id', $sales->parent_sales_header_id)->first();
+        //     $salesPayments = $subSales->payments ?? collect();
+        //     $totalPayment = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)->sum('amount');
+        // } else {
+        //     $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
+        //     $totalPayment = SalesPayment::where('sales_header_id',$id)->sum('amount');
+        // }
+
+        $salesPayments = SalesPayment::where('sales_header_id',$id)->where('status', '!=', 'CANCELLED')->get();
+        $totalPayment = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->sum('amount');
 
         if (!$sales) {
             return redirect()->route('sales-transaction.index')->with('error', 'Sales record not found.');
@@ -983,7 +1020,7 @@ class SalesController extends Controller
         $salesDetails = SalesDetail::where('sales_header_id',$id)->get();
         $deliveries = DeliveryStatus::where('order_id',$id)->get();
         $deliveries = DeliveryStatus::where('order_id',$id)->get();
-        $totalNet = SalesHeader::where('id',$id)->sum('net_amount');
+        $totalNet = ($sales->items->sum('net_amount') + $sales->delivery_fee_amount) - $sales->discount_amount;
 
         if($totalNet <= $totalPayment){
             $status = 'PAID';
@@ -1011,7 +1048,14 @@ class SalesController extends Controller
         $salesdetail = SalesDetail::where('sales_header_id',$id)->first();
         $salesheader = SalesHeader::with('deliveryAddress')->find($id);
 
-        $products = Product::orderBy('name')->get();
+        $specialId = 270;
+
+        $products = Product::where(function ($q) use ($specialId) {
+                $q->where('status', 'PUBLISHED')
+                ->orWhere('id', $specialId);
+            })
+            ->orderBy('name')
+            ->get();
 
         $dateneeded = '';
         $date_only = '';
@@ -1042,17 +1086,17 @@ class SalesController extends Controller
             return !is_null($value->name) && $value->name !== '';
         })->values();
       
-        ActivityLog::create([
-            'created_by' => auth()->id(),
-            'activity_type' => 'update',
-            'dashboard_activity' => 'update Sales Details',
-            'activity_desc' => 'updated Sales Details with Order Number: '.$salesheader?->order_number,
-            'activity_date' => date("Y-m-d H:i:s"),
-            'db_table' => 'ecommerce_sales_details',
-            'old_value' => '',
-            'new_value' => '',
-            'reference' => $salesdetail?->id
-        ]);
+        // ActivityLog::create([
+        //     'created_by' => auth()->id(),
+        //     'activity_type' => 'update',
+        //     'dashboard_activity' => 'update Sales Details',
+        //     'activity_desc' => 'updated Sales Details with Order Number: '.$salesheader?->order_number,
+        //     'activity_date' => date("Y-m-d H:i:s"),
+        //     'db_table' => 'ecommerce_sales_details',
+        //     'old_value' => '',
+        //     'new_value' => '',
+        //     'reference' => $salesdetail?->id
+        // ]);
 
         $provinces = Deliverablecities::query()
             ->select('province')

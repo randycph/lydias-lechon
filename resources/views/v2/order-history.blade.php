@@ -227,8 +227,9 @@
                                                                     <ul class="list-disc pl-10">
                                                                         @foreach ($products as $product)
                                                                             @php
-                                                                                $base   = (float)($product->product->price ?? 0);
-                                                                                $addOn  = !empty($product->paella) ? (float)($product->product->paella_price ?? 0) : 0;
+                                                                                $prod = \App\Models\Product::find($product->product_id);
+                                                                                $base   = (float)($prod->price ?? 0);
+                                                                                $addOn  = !empty($product->paella) ? (float)($prod->paella_price ?? 0) : 0;
                                                                                 $price  = $base + $addOn;
                                                                             @endphp
                                                                             <li>

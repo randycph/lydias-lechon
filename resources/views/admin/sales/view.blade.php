@@ -83,16 +83,17 @@
 
                                                         @forelse($products as $product)
                                                             @php
-                                                                $lineTotal = ($product->product->price * ($product->qty ?? 1))
-                                                                        + (!empty($product->paella) ? ($product->product->paella_price ?? 0) * ($product->qty ?? 1) : 0);
+                                                                $prod = \App\Models\Product::find($product->product_id);
+                                                                $lineTotal = ($prod->price * ($product->qty ?? 1))
+                                                                        + (!empty($product->paella) ? ($prod->paella_price ?? 0) * ($product->qty ?? 1) : 0);
 
                                                                 $grandTotal += $lineTotal;
                                                             @endphp
                                                             <tr>
                                                                 <td class="tx-nowrap">
-                                                                    {!! highlightPaella($product?->product_name ?? '') !!}
+                                                                    {!! highlightPaella($product?->product_name ?? $product?->product?->name ?? '') !!}
                                                                 </td>
-                                                                <th class="tx-center">{{ $product->product->no_of_pax }}</th>                                
+                                                                <th class="tx-center">{{ $prod->no_of_pax }}</th>                                
                                                                 <td class="tx-nowrap">
                                                                     {{ \Carbon\Carbon::parse(($address->delivery_date . ' ' . $address->delivery_time))->format('F d, Y g:i A') }}
                                                                 </td>
@@ -102,7 +103,7 @@
                                                                     ₱{{ number_format(!empty($product->paella) ? ($product->product->paella_price ?? 0) : 0, 2) }}
                                                                 </td>
                                                                 <td class="tx-right">
-                                                                    ₱{{ number_format($product->product->price ?? 0, 2) }}
+                                                                    ₱{{ number_format($prod->price ?? 0, 2) }}
                                                                 </td>
                                                                 <td class="tx-right">
                                                                     ₱{{ number_format($lineTotal, 2) }}
@@ -136,8 +137,17 @@
                                     @endforeach
                                     </ul>
                                 @else
-                                    {{ $sales->customer_delivery_adress }}
+                                    @php
+                                        $region = $sales->region ? $sales->region : '';
+                                        $province = $sales->province ? ', ' . $sales->province : '';
+                                        $city = $sales->city ? ', ' . $sales->city : '';
+                                        $barangay = $sales->barangay ? ', ' . $sales->barangay : '';
+                                        $full_address = $sales->customer_delivery_adress ? $sales->customer_delivery_adress . $province . $city . $barangay : '';
+                                    @endphp
+                                    {{ $full_address }}
+                                    @if ($sales->delivery_branch)
                                     <br>Delivery Branch: {{ $sales->delivery_branch ?? '' }}
+                                    @endif
                                 @endif
                             @else
                                 @php
@@ -158,7 +168,9 @@
                                 $saleDetail = $sales->items ? $sales->items->first() : null;
                                 $deliveryDate = $saleDetail ? \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y g:i A') : 'N/A';
                             @endphp
+                            @if ($sales->delivery_status <> 'Open Date')
                             <p class="mg-b-3">Date needed: {{$deliveryDate}}</p>
+                            @endif
                         @endif
 
                         <p class="mg-b-3">Contact Person: {{$sales->contact_person ?? $sales->customer_name}}</p>
@@ -215,10 +227,14 @@
                                 <td class="tx-nowrap">{!! highlightPaella($details?->product_name) !!}</td>
                                 <th class="tx-center">{{$details->no_of_pax}}</th>                                
                                 <td class="tx-nowrap">
-                                    @if(date('H:i A',strtotime($details->delivery_date)) == '12:00 PM')
-                                        {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
+                                    @if ($sales->delivery_status == 'Open Date')
+                                        -
                                     @else
-                                        {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
+                                        @if(date('H:i A',strtotime($details->delivery_date)) == '12:00 PM')
+                                            {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
+                                        @else
+                                            {{ \Carbon\Carbon::parse($details->delivery_date)->format('F d, Y g:i A') }}
+                                        @endif
                                     @endif
                                     
                                 </td>
@@ -328,7 +344,7 @@
                             @forelse($salesPayments as $payment)   
                                 
                                 @php 
-                                    if($payment->status <> 'CANCELLED'){
+                                    if($payment->status == 'PAID'){
                                         $paidTotal+=$payment->amount; 
                                     }
                                 @endphp 
@@ -347,7 +363,7 @@
                                         {{$payment->status}}
                                     @endif
                                 </td>
-                                <td class="tx-right">{{number_format($payment->amount, 2)}}</td>
+                                <td class="tx-right">₱{{number_format($payment->amount, 2)}}</td>
                                
                             </tr>
                             @empty
@@ -359,13 +375,13 @@
                             @if($paidTotal > 0)
                                 <tr style="font-weight:bold;">
                                     <td class="tx-left" colspan="4">Total</td>
-                                    <td class="tx-right">{{number_format($paidTotal, 2)}}</td> 
+                                    <td class="tx-right">₱{{number_format($salesPayments->sum('amount'), 2)}}</td> 
                                 </tr>
                             @endif
                             @php
-                                $total_balance = $sales->net_amount - $paidTotal;
+                                $total_balance = ($sales->items->sum('net_amount') + $sales->delivery_fee_amount) - ($paidTotal + $sales->discount_amount);
                             @endphp
-                            @if($total_balance > 0)
+                            @if($total_balance > 0 && $sales->payments->where('status','PAID')->sum('amount') > 0)
                                 <tr style="font-style:italic;">
                                     <td class="tx-left" colspan="4"><br>Balance</td>
                                     <td class="tx-right"><br>{{number_format($total_balance, 2)}}</td> 

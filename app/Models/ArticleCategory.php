@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\Article;
+use App\Models\Concerns\LogsActivityDiff;
 
 class ArticleCategory extends Model
 {
     use SoftDeletes;
+    use LogsActivityDiff;
 
     protected $table = 'article_categories';
     protected $fillable = ['name', 'slug', 'user_id', 'image'];

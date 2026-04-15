@@ -6,7 +6,7 @@ use App\EcommerceModel\SalesHeader;
 use Illuminate\Database\Eloquent\Model;
 
 class ProductDeliveryAddress extends Model
-{
+{    
     protected $table = 'product_delivery_addresses';
 
     protected $fillable = [
@@ -33,6 +33,8 @@ class ProductDeliveryAddress extends Model
         'region',
         'city',
         'barangay',
+        'has_baka', 
+        'lechon_baka_service',
     ];
 
     public function user()
