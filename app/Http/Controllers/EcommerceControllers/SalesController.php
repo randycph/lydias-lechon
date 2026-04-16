@@ -62,7 +62,7 @@ class SalesController extends Controller
     }
 
     public function update_items(Request $request){
-        $head = SalesHeader::whereId($request->ui_sales_id)->first();
+        $head = SalesHeader::findOrFail($request->ui_sales_id);
         
         if (
             auth()->user()->has_access_to_route('sales-transaction.update') &&
@@ -102,7 +102,6 @@ class SalesController extends Controller
                         $e->forceDelete();
                     });
             }
-            
         }
 
         for($x = 1; $x <= $request->ui_total_new; $x++){
@@ -116,10 +115,12 @@ class SalesController extends Controller
                     $gross = ($request->input('uia_qty'.$x) * $request->input('uia_price'.$x)) + ($request->input('uia_qty'.$x) * $request->input('uia_paella'.$x));
                 }
                 $p = Product::whereId($request->input('uia_product'.$x))->first();
+                $product_name = $p->name;
+                $product_name = str_replace(" Boneless with Paella", "", $product_name);
                 $update = SalesDetail::create([
                     'sales_header_id' => $head->id,
                     'product_id' => $request->input('uia_product'.$x),
-                    'product_name' => $p->name,
+                    'product_name' => $paella_qty > 0 ? $product_name . " Boneless with Paella" : $product_name,
                     'product_category' => $p->category_id,
                     'price' => $request->input('uia_price'.$x),
                     'cost' => 0,
@@ -356,6 +357,7 @@ class SalesController extends Controller
             }
         }
 
+
         if($request->shipping_type == 'd2d'){
             $sales->update(['delivery_type' => 'Door to door delivery']);
             $rate_type= 'misc';
@@ -483,6 +485,8 @@ class SalesController extends Controller
                     });
             }
         }
+        
+        $discount = 0;
 
         if ($data->is_discount == 1) {
             $discount = $data->amount;
@@ -603,19 +607,15 @@ class SalesController extends Controller
         ]);
 
         $sh = new SalesHeader();
-
         if ($sales->order_source == 'Web') {
             $sh->assign_to_production_branch($sales, 1);
         } else {
             $sh->assign_to_production_branch($sales, $sales->temp_prod_branch);
         }
-
+            
         if ($sales->delivery_status == 'Waiting for Payment' || $sales->delivery_status == '' || is_null($sales->delivery_status)) {
             SalesHeader::whereId($sales->id)->update(['delivery_status' => 'Processing Stock']);
         }
-    
-        //$mobile = SalesHeader::whereId($order_id)->first();
-            
         $sms = new Sms();
         $sms->send_sms($sales->customer_contact_number, 'confirm_order', $sales);
         
@@ -701,7 +701,7 @@ class SalesController extends Controller
         $isDispatcher = auth()->user()->role_id == 5;
 
         if(auth()->user()->role_id == 1 || $hasProdBranch || auth()->user()->role_id == 3 || $hasBranches || auth()->user()->role_id == 5){
-
+            
             if ($hasProdBranch || $hasBranches) {
                 $productionBranches = $hasProdBranch
                     ? explode(',', auth()->user()->production_branch_id)
@@ -752,7 +752,6 @@ class SalesController extends Controller
                         }
                     });
             } elseif (auth()->user()->role_id == 3) {
-
                 $eligible = DB::table('ecommerce_sales_details as d')
                     ->join('job_orders as jo', 'jo.sales_detail_id', '=', 'd.id')
                     ->join('production_orders as po', 'po.joborder_id', '=', 'jo.id')
@@ -873,6 +872,8 @@ class SalesController extends Controller
             'net_amount',
             'gross_amount',
             'deleted_at',
+            'lechon_baka_service',
+            'has_baka',
             DB::raw('(SELECT ecommerce_sales_details.delivery_date From ecommerce_sales_details WHERE ecommerce_sales_headers.id=ecommerce_sales_details.sales_header_id GROUP BY ecommerce_sales_details.sales_header_id) as date_needed')
         ];
 
@@ -1191,6 +1192,14 @@ class SalesController extends Controller
         $salesdetail = SalesDetail::where('sales_header_id',$id)->first();
         $salesheader = SalesHeader::with('deliveryAddress')->find($id);
 
+        $specialId = 270;
+
+        $products = Product::where(function ($q) use ($specialId) {
+                $q->where('status', 'PUBLISHED')
+                ->orWhere('id', $specialId);
+            })
+            ->orderBy('name')
+            ->get();
         if (
             auth()->user()->has_access_to_route('sales-transaction.update') &&
             $salesheader->isConfirmedAndPastCutoffAndForecasted()) {
@@ -1361,7 +1370,11 @@ class SalesController extends Controller
                     $deliveryAddress->save();
                 }
             } else {
-                SalesHeader::whereId($request->del_id)->update([
+                $sale = SalesHeader::whereId($request->del_id)->first();
+                $sale->delivery_status = $request->delivery_status;
+                $sale->save();
+
+                JobOrder::where('sales_number', $sale->order_number)->update([
                     'delivery_status' => $request->delivery_status
                 ]);
             }
@@ -1996,7 +2009,6 @@ class SalesController extends Controller
 
         // Return paginated to view
         $sales = $paginated;
-        }
 
         // dd($model);
 
@@ -2015,6 +2027,9 @@ class SalesController extends Controller
 
         return view('admin.sales.driver_index',compact('sales','filter','searchType'));
 
+        } else {
+            return redirect()->route('login');
+        }
     }
 
     public function pending_deletion()
@@ -2106,8 +2121,7 @@ class SalesController extends Controller
                     })
                     ->when($isDispatcher == true,
                         fn ($q) => $q->where('payment_status', '==', 'PAID')->orWhere('isConfirm', 1)
-                    )
-                    ->orderBy('order_number', 'desc');
+                    );
 
             } elseif (auth()->user()->role_id == 3) {
 
