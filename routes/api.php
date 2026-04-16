@@ -21,3 +21,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::post('/deploy/beta', [DeployController::class, 'beta']);
+Route::post('/deploy/deployment', [DeployController::class, 'deployment']);
