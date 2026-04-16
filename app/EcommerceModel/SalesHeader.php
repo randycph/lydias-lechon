@@ -11,10 +11,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use App\Models\Concerns\LogsActivityDiff;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\EcommerceModel\ProductionOrder;
 use App\Helpers\Webfocus\Setting;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class SalesHeader extends Model
 {
@@ -50,6 +50,7 @@ class SalesHeader extends Model
         'net_amount',
         'discount_amount',
         'payment_status',
+        'region',
         'province',
         'city',
         'barangay',
@@ -86,6 +87,50 @@ class SalesHeader extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function getNearestDeliveryDateAttribute()
+    {
+        $today = now()->startOfDay();
+
+        return $this->items
+            ->pluck('delivery_date')
+            ->map(fn ($date) => safe_date($date))
+            ->filter(fn ($date) => $date && $date->gte($today))
+            ->sort()
+            ->first();
+    }
+
+    public function scopeUnpaid($query)
+    {
+        return $query->whereRaw('(
+            SELECT COALESCE(SUM(amount), 0)
+            FROM ecommerce_sales_payments
+            WHERE ecommerce_sales_payments.sales_header_id = ecommerce_sales_headers.id
+            AND ecommerce_sales_payments.status = "PAID"
+        ) < net_amount');
+    }
+
+    public function scopePartial($query)
+    {
+        return $query
+            ->whereHas('payments', fn ($q) => $q->where('status', 'PAID'))
+            ->whereRaw('(
+                SELECT COALESCE(SUM(amount), 0)
+                FROM ecommerce_sales_payments
+                WHERE ecommerce_sales_payments.sales_header_id = ecommerce_sales_headers.id
+                AND ecommerce_sales_payments.status = "PAID"
+            ) < net_amount');
+    }
+
+    public function scopePaid($query)
+    {
+        return $query->whereRaw('(
+            SELECT COALESCE(SUM(amount), 0)
+            FROM ecommerce_sales_payments
+            WHERE ecommerce_sales_payments.sales_header_id = ecommerce_sales_headers.id
+            AND ecommerce_sales_payments.status = "PAID"
+        ) >= net_amount');
+    }
+    
     public function subSales()
     {
         return $this->hasMany(SalesHeader::class, 'parent_sales_header_id');
@@ -94,6 +139,7 @@ class SalesHeader extends Model
     public function assign_to_production_branch($sale, $pb){
         //dd($sale);
         $items = $sale->items;
+        $status = !empty($sale?->delivery_status) ? $sale->delivery_status : 'On Processed';
         foreach($items as $salesdetail){
 
             $current_total_order = JobOrder::whereDate('date_needed',date('Y-m-d',strtotime($salesdetail->delivery_date)))->count();
@@ -129,7 +175,7 @@ class SalesHeader extends Model
                 'delivery_tracking_number' => '',
                 'delivery_method' => $sale->delivery_type,
                 'pickup_branch' => $sale->outlet,
-                'delivery_status' => 'On Processed',
+                'delivery_status' => $status,
                 'status' => 'Active',
                 'jo_category' => 'Order',
                 'jo_order_type' => $sale->order_type ?? ' '
@@ -685,4 +731,11 @@ class SalesHeader extends Model
         );
     }
 
+    public function hasPartialPayment()
+    {
+        $payments = $this->payments()->where('status', 'PAID')->get();
+        $paidAmount = $payments->sum('amount');
+
+        return $paidAmount > 0 || $this->isConfirm == 1; 
+    }
 }
