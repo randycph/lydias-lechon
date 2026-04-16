@@ -382,7 +382,9 @@ class SalesHeader extends Model
             }
         }
 
-        if ($paid >= $this->items->sum('net_amount') + $this->delivery_fee_amount) {
+        $amount = ($this->items->sum('net_amount') + $this->delivery_fee_amount) - $this->payments->where('status', 'PAID')->where('is_discount', 1)->sum('amount');
+
+        if ($paid >= $amount) {
             SalesHeader::whereId($this->id)->update(['payment_status' => 'PAID']);
 
             return 'PAID';
