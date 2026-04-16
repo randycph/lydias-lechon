@@ -355,7 +355,7 @@
                             <tr>
                                 <td class="tx-left">{{$payment->payment_type}}</td>
                                 <td class="tx-center">{{$payment->receipt_number}}</td>
-                                <td class="tx-center">{{ \Carbon\Carbon::parse($payment->payment_date)->format('F d, Y') }}</td>
+                                <td class="tx-center">{{ isValidDate($payment->payment_date) ? \Carbon\Carbon::parse($payment->payment_date)->format('F d, Y') : '' }}</td>
                                 <td class="tx-center">
                                     @if($payment->payment_type == 'Ok Order' || $payment->payment_type == 'COD')
                                         @if($payment->status == 'PAID')

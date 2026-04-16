@@ -963,7 +963,8 @@
                             </div>
                             <div class="form-group">
                                 <label class="d-block">Payment Date *</label>
-                                <input required type="text" name="payment_dt" class="form-control" id="payment_dt" placeholder="Choose date" value="{{ old('date') }}">
+                                <input required 
+                                        type="date" name="payment_dt" class="form-control" id="payment_dt" placeholder="Choose date" value="{{ old('date') }}">
                                 <x-error-message inputName="payment_dt" />
                             </div>
                             <div class="form-group">
