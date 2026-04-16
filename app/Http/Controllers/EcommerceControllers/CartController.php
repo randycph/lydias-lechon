@@ -1031,6 +1031,8 @@ class CartController extends Controller
             $forecast_date = date('Y-m-d');
         }
 
+        $region = Deliverablecities::where('province', $request->province)->first();
+
         if (session()->has('edit_sales_header_id') && !empty(session()->get('edit_sales_header_id'))) {
 
             $salesHeader = SalesHeader::find(session()->get('edit_sales_header_id'));
@@ -1057,7 +1059,7 @@ class CartController extends Controller
                 'customer_address' => $customer_delivery_address,
                 'customer_delivery_adress' => $customer_delivery_address,
                 'city' => $request->city ?? '',
-                'region' => $request->region ?? '',
+                'region' => $region?->region ?? '',
                 'province' => $request->province ?? '',
                 'barangay' => $request->location ?? '',
                 'delivery_type' => $delivery_type,
@@ -1106,7 +1108,7 @@ class CartController extends Controller
                 'email' => $request->email ?? $user->email,
                 'customer_delivery_adress' => $customer_delivery_address,
                 'city' => $request->city ?? '',
-                'region' => $request->region ?? '',
+                'region' => $region?->region ?? '',
                 'province' => $request->province ?? '',
                 'barangay' => $request->location ?? '',
                 'delivery_tracking_number' => '',

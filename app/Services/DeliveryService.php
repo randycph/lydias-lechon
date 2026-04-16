@@ -7,6 +7,7 @@ use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\SalesDetail;
 use App\Helpers\Webfocus\Setting;
 use App\Jobs\SendSmsJob;
+use App\Models\Deliverablecities;
 use App\Models\Product;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cookie;
@@ -39,6 +40,8 @@ class DeliveryService
         } else {
             $forecast_date = date('Y-m-d');
         }
+
+        $region = Deliverablecities::where('province', $request->province)->first();
 
         foreach ($deliveries as $k => $delivery) {
 
@@ -78,7 +81,7 @@ class DeliveryService
                 'is_sub' => 1,
                 'has_baka' => $delivery?->isBaka ? 1 : 0,
                 'lechon_baka_service' => $delivery?->lechon_baka_service ?? 0,
-                'region' => $delivery->region ?? '',
+                'region' => $region?->region ?? '',
                 'city' => $delivery->city ?? '',
                 'province' => $delivery->province ?? '',
                 'barangay' => $delivery->location ?? '',
