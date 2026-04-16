@@ -314,7 +314,7 @@ class ReportsController extends Controller
         $no_jo = 0;
 
         // Sales
-            $qry = "SELECT h.outlet, d.product_name, d.paella_price, h.contact_person, d.product_name as dproduct_name, h.has_sub, '' as jo_category, d.id as idd, pda.branch as pdabranch,
+            $qry = "SELECT h.payment_status, h.outlet, d.product_name, d.paella_price, h.contact_person, d.product_name as dproduct_name, h.has_sub, '' as jo_category, d.id as idd, pda.branch as pdabranch,
             d.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,d.price, h.customer_delivery_adress, h.parent_sales_header_id,
             h.customer_name, d.delivery_date as delivery_date, h.instruction, po.delivery_date as deldate, h.delivery_type, jo.jo_number, pb.name as pbname, h.delivery_status as delstat,h.agent, h.customer_contact_number,'' as dr, h.delivery_fee_amount, d.price, '' as releasing, h.order_source, br.name as receiver, c.name as catname, u.name as username, jo.jo_order_type,h.order_type as hordertype, h.id as hid, '' as jo_category, 'sales' as trantype, DATE_FORMAT(d.delivery_date,'%H:%i:%s') as timeneeded, DATE_FORMAT(d.delivery_date, '%Y-%m-%d') as dateneeded, p.is_misc, p.production_item, h.isConfirm as isConfirm, h.gross_amount as gros, h.forecast_date as forecast_dt, h.delivery_branch as del_branch,p.id as prodid,h.created_at as created,
             p.size, jo.product_size
@@ -505,7 +505,7 @@ class ReportsController extends Controller
             //dd(DB::select("select * from temp_mrs"));
             //    IF(m.delivery_status, "YES", "NO") as delstat,
 
-            $mqry = "SELECT distinct h.outlet, m.product_name, m.paella_price, m.paella, m.contact_person, h.has_sub, m.id as idd, pda.branch as pdabranch,
+            $mqry = "SELECT distinct h.payment_status, h.outlet, m.product_name, m.paella_price, m.paella, m.contact_person, h.has_sub, m.id as idd, pda.branch as pdabranch,
             m.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,m.price, m.address as customer_delivery_adress, h.parent_sales_header_id,
             h.customer_name, m.branch as mbranch, 
             cast(concat(m.delivery_date, ' ', m.delivery_time) as datetime)  as delivery_date,
@@ -641,7 +641,7 @@ class ReportsController extends Controller
         
         // JO
             $jos = "
-                SELECT jo.jo_category as product_name, '' as paella_price,'' as hordertype, jo.jo_category as dproduct_name, jo.id as idd, jo.product_size,
+                SELECT '' as payment_status, jo.jo_category as product_name, '' as paella_price,'' as hordertype, jo.jo_category as dproduct_name, jo.id as idd, jo.product_size,
             jo.qty as qty, '' as order_number, u.address_street, u.address_municipality, u.address_city, u.address_region, jo.price, jo.customer_address as customer_delivery_adress,
             jo.customer_name, jo.date_needed as delivery_date,jo.remarks as instruction, po.delivery_date as deldate,'' as delivery_type, jo.jo_number, pb.name as pbname, jo.created_at as created,
 
@@ -741,7 +741,9 @@ class ReportsController extends Controller
             })->values();
         }
 
-        $results = $results->where('isConfirm', 1);
+        $results = $results->filter(function ($item) {
+            return $item->isConfirm == 1 || $item->payment_status === 'PAID';
+        })->values();
 
         $ex_array = ['Pantaga','Display','Alpha Size','Belly Pantaga'];
 
@@ -798,19 +800,16 @@ class ReportsController extends Controller
 
         if (isset($_GET['filter']) && $_GET['filter'] == 'whole-lechon') {
             $results = $results
-                ->where('isConfirm', 1)
                 ->where('is_misc', 0)
                 ->where('production_item', 1)
                 ->whereNotIn('jo_category', $ex_array)
                 ->values();
         } elseif (isset($_GET['filter']) && $_GET['filter'] == 'misc') {
             $results = $results
-                ->where('isConfirm', 1)
                 ->where('is_misc', 1)
                 ->values();
         } elseif (isset($_GET['filter']) && $_GET['filter'] == 'overall-lechon') {
             $results = $results
-                ->where('isConfirm', 1)
                 ->where('is_misc', 0)
                 ->values();
         }

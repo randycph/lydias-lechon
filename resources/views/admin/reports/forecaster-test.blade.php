@@ -40,7 +40,7 @@
         if($j->is_misc == 0 && $j->production_item == 1){
 
                                          
-            if($j->isConfirm == 1){
+            if($j->isConfirm == 1 || $j?->payment_status == 'PAID'){
 
                 if(!in_array($j->jo_category,$ex_array) ){
                     $total_lechon_order += $j->qty;
