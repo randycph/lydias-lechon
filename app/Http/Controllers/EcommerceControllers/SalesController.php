@@ -1545,17 +1545,19 @@ class SalesController extends Controller
             $image_url = $newFile['url'];
         }
         $sales = SalesHeader::whereId($request->sales_header_id)->first();
+        $isDiscount = str_starts_with($request->pamenty_mode, 'Discount');
         $payment = SalesPayment::create([
-            'sales_header_id' => $request->sales_header_id,
-            'payment_type' => $request->pamenty_mode,
-            'amount' => $request->amount,
-            'status' => 'PENDING',
-            'payment_date' => $request->payment_dt,
-            'receipt_number' => $request->ref_no,
-            'file_url' => $image_url,
-            'remark' => $request->payment_remark,
-            'order_number' => $sales->order_number,
-            'created_by' => Auth::id()
+            'sales_header_id'       => $request->sales_header_id,
+            'payment_type'          => $request->pamenty_mode,
+            'amount'                => $request->amount,
+            'status'                => 'PENDING',
+            'payment_date'          => $request->payment_dt,
+            'receipt_number'        => $request->ref_no,
+            'file_url'              => $image_url,
+            'remark'                => $request->payment_remark,
+            'order_number'          => $sales->order_number,
+            'created_by'            => Auth::id(),
+            'is_discount'           => $isDiscount ? 1 : 0,
         ]);
         
 
