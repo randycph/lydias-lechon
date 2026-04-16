@@ -72,7 +72,7 @@ class ReportsController extends Controller
                 $qry.= " and h.agent='".$_GET['agent']."'";
             }
             if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $qry.= " and h.customer_name='".$_GET['customer']."'";
+                $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
             }
             if(isset($_GET['product']) && $_GET['product']<>''){
                 $qry.= " and d.product_name='".$_GET['product']."'";
@@ -140,7 +140,7 @@ class ReportsController extends Controller
                 $qry.= " and h.agent='".$_GET['agent']."'";
             }
             if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $qry.= " and h.customer_name='".$_GET['customer']."'";
+                $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
             }
             if(isset($_GET['product']) && $_GET['product']<>''){
                 $qry.= " and d.product_name='".$_GET['product']."'";
@@ -314,10 +314,10 @@ class ReportsController extends Controller
         $no_jo = 0;
 
         // Sales
-            $qry = "SELECT d.product_name, h.outlet, d.paella_price, h.contact_person, d.product_name as dproduct_name, h.has_sub, '' as jo_category, d.id as idd,
+            $qry = "SELECT h.outlet, d.product_name, d.paella_price, h.contact_person, d.product_name as dproduct_name, h.has_sub, '' as jo_category, d.id as idd, pda.branch as pdabranch,
             d.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,d.price, h.customer_delivery_adress, h.parent_sales_header_id,
             h.customer_name, d.delivery_date as delivery_date, h.instruction, po.delivery_date as deldate, h.delivery_type, jo.jo_number, pb.name as pbname, h.delivery_status as delstat,h.agent, h.customer_contact_number,'' as dr, h.delivery_fee_amount, d.price, '' as releasing, h.order_source, br.name as receiver, c.name as catname, u.name as username, jo.jo_order_type,h.order_type as hordertype, h.id as hid, '' as jo_category, 'sales' as trantype, DATE_FORMAT(d.delivery_date,'%H:%i:%s') as timeneeded, DATE_FORMAT(d.delivery_date, '%Y-%m-%d') as dateneeded, p.is_misc, p.production_item, h.isConfirm as isConfirm, h.gross_amount as gros, h.forecast_date as forecast_dt, h.delivery_branch as del_branch,p.id as prodid,h.created_at as created,
-            p.size
+            p.size, jo.product_size
             FROM `ecommerce_sales_details` d
             left join ecommerce_sales_headers h on h.id=d.sales_header_id
             left join products p on p.id=d.product_id
@@ -327,6 +327,7 @@ class ReportsController extends Controller
             left join production_orders po on po.joborder_id = jo.id
             left join production_branches pb on pb.id = po.branch_id
             left join users u on u.id = d.created_by
+            left join product_delivery_addresses pda on pda.sales_header_id = h.id
             WHERE 
                         h.id > 0 
                     AND h.delivery_status <> 'Open Date' 
@@ -389,7 +390,7 @@ class ReportsController extends Controller
 
                 $qry.= " and ((h.delivery_type='Store Pickup' and h.customer_delivery_adress in ".$br_opts.") or 
 
-                (jo.pickup_branch in ".$id_opts." OR h.delivery_branch in ".$br_opts.")
+                (jo.pickup_branch in ".$id_opts." OR h.delivery_branch in ".$br_opts.") or (pda.branch in ".$br_opts.")
 
                 )";
             }
@@ -504,7 +505,7 @@ class ReportsController extends Controller
             //dd(DB::select("select * from temp_mrs"));
             //    IF(m.delivery_status, "YES", "NO") as delstat,
 
-            $mqry = "SELECT distinct m.product_name, h.outlet, m.paella_price, m.paella, m.contact_person, h.has_sub, m.id as idd,
+            $mqry = "SELECT distinct h.outlet, m.product_name, m.paella_price, m.paella, m.contact_person, h.has_sub, m.id as idd, pda.branch as pdabranch,
             m.qty, h.order_number, u.address_street, u.address_municipality, u.address_city, u.address_region,m.price, m.address as customer_delivery_adress, h.parent_sales_header_id,
             h.customer_name, m.branch as mbranch, 
             cast(concat(m.delivery_date, ' ', m.delivery_time) as datetime)  as delivery_date,
@@ -513,7 +514,7 @@ class ReportsController extends Controller
             IFNULL(NULLIF(m.delivery_status, ''), 'Processing Stock') as delstat,
             h.agent, d.product_name as dproduct_name,
             m.contact_tel as customer_contact_number,'' as dr, m.delivery_fee as delivery_fee_amount, d.price, '' as releasing, h.order_source, br.name as receiver, 
-            c.name as catname, u.name as username, jo.jo_order_type,h.order_type as hordertype, h.id as hid, '' as jo_category, 'sales' as trantype, 
+            c.name as catname, u.name as username, jo.jo_order_type,h.order_type as hordertype, jo.product_size, h.id as hid, '' as jo_category, 'sales' as trantype, 
             m.delivery_time as timeneeded, m.delivery_date as dateneeded, 
             p.is_misc, p.production_item, h.isConfirm as isConfirm, h.gross_amount as gros, h.forecast_date as forecast_dt, 
             h.delivery_branch as del_branch,p.id as prodid,h.created_at as created,
@@ -528,6 +529,7 @@ class ReportsController extends Controller
             left join production_orders po on po.joborder_id = jo.id
             left join production_branches pb on pb.id = po.branch_id
             left join users u on u.id = d.created_by
+            left join product_delivery_addresses pda on pda.sales_header_id = h.id
             WHERE 
                     h.id>0 
                 AND h.delivery_status <> 'Open Date' 
@@ -591,7 +593,7 @@ class ReportsController extends Controller
 
                 $mqry.= " and ((h.delivery_type='Store Pickup' and h.customer_delivery_adress in ".$br_opts.") or 
 
-                (jo.pickup_branch in ".$id_opts." OR h.delivery_branch in ".$br_opts.")
+                (jo.pickup_branch in ".$id_opts." OR h.delivery_branch in ".$br_opts.") or pda.branch in ".$br_opts."
 
                 )";
             }
@@ -639,7 +641,7 @@ class ReportsController extends Controller
         
         // JO
             $jos = "
-                SELECT jo.jo_category as product_name, '' as paella_price,'' as hordertype, jo.jo_category as dproduct_name, jo.id as idd,
+                SELECT jo.jo_category as product_name, '' as paella_price,'' as hordertype, jo.jo_category as dproduct_name, jo.id as idd, jo.product_size,
             jo.qty as qty, '' as order_number, u.address_street, u.address_municipality, u.address_city, u.address_region, jo.price, jo.customer_address as customer_delivery_adress,
             jo.customer_name, jo.date_needed as delivery_date,jo.remarks as instruction, po.delivery_date as deldate,'' as delivery_type, jo.jo_number, pb.name as pbname, jo.created_at as created,
 
@@ -738,6 +740,8 @@ class ReportsController extends Controller
                 return str_contains(strtolower($item->customer_name), $search);
             })->values();
         }
+
+        $results = $results->where('isConfirm', 1);
 
         $ex_array = ['Pantaga','Display','Alpha Size','Belly Pantaga'];
 
@@ -895,7 +899,7 @@ class ReportsController extends Controller
             $qry.= " and p.status='".$_GET['status']."'";
         }
         if(isset($_GET['customer']) && $_GET['customer']<>''){
-            $qry.= " and h.customer_name='".$_GET['customer']."'";
+            $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
         }
         if(isset($_GET['payment_type']) && $_GET['payment_type']<>''){
             $qry.= " and p.payment_type='".$_GET['payment_type']."'";
@@ -1125,7 +1129,7 @@ class ReportsController extends Controller
                 $qry.= " and h.agent='".$_GET['agent']."'";
             }
             if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $qry.= " and h.customer_name='".$_GET['customer']."'";
+                $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
             }
             if(isset($_GET['product']) && $_GET['product']<>''){
                 $qry.= " and d.product_name='".$_GET['product']."'";
@@ -1197,7 +1201,7 @@ class ReportsController extends Controller
                 $qry.= " and h.agent='".$_GET['agent']."'";
             }
             if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $qry.= " and h.customer_name='".$_GET['customer']."'";
+                $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
             }
             if(isset($_GET['product']) && $_GET['product']<>''){
                 $qry.= " and d.product_name='".$_GET['product']."'";
@@ -1209,13 +1213,27 @@ class ReportsController extends Controller
                 $qry.= " and h.order_source='".$_GET['order_source']."'";
             }
 
-            if(isset($_GET['branch']) && $_GET['branch']<>''){
-                //$qry.= " and (h.order_source='".$_GET['branch']."' OR h.outlet='".$_GET['branch']."')";
-                $qry.= " and h.order_source='".$_GET['branch']."'";
-            }
+            if (isset($_GET['branch']) && $_GET['branch'] !== '') {
 
-            if(isset($_GET['delbra']) && $_GET['delbra']<>''){
-                $qry.= " and h.delivery_branch='".$_GET['delbra']."'";
+                if ($_GET['branch'] === 'Tandang Sora Head Office') {
+
+                    $qry .= " AND (
+                        (h.order_source = 'Web' AND h.delivery_type = 'Store Pickup')
+                        OR h.order_source = 'Tandang Sora Head Office'
+                    )";
+
+                } elseif ($_GET['branch'] === 'Tandang Sora Delivery') {
+
+                    $qry .= " AND (
+                        (h.order_source = 'Web' AND h.delivery_type = 'Door to door delivery')
+                        OR h.order_source = 'Tandang Sora Delivery'
+                    )";
+
+                } else {
+
+                    // Normal case
+                    $qry .= " AND h.order_source = '" . $_GET['branch'] . "'";
+                }
             }
 
             if(isset($_GET['order_number']) && $_GET['order_number']<>''){
@@ -1598,7 +1616,7 @@ class ReportsController extends Controller
             $qry.= " and h.agent='".$_GET['agent']."'";
         }
         if(isset($_GET['customer']) && $_GET['customer']<>''){
-            $qry.= " and h.customer_name='".$_GET['customer']."'";
+            $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
         }
         if(isset($_GET['product']) && $_GET['product']<>''){
             $qry.= " and d.product_name='".$_GET['product']."'";
@@ -1717,7 +1735,7 @@ class ReportsController extends Controller
                 $qry.= " and po.branch_id=".$_GET['pb']."";
             }
             if(isset($_GET['customer']) && $_GET['customer']<>''){
-                $qry.= " and h.customer_name='".$_GET['customer']."'";
+                $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
             }
             if(isset($_GET['product']) && $_GET['product']<>''){
                 $qry.= " and d.product_name='".$_GET['product']."'";
@@ -1747,28 +1765,6 @@ class ReportsController extends Controller
     }
 
     public function audit_trail_per_user(Request $request){
-        // $rs = '';
-        // $qry = "SELECT * FROM `cms_activity_logs` where id>0 ";
-        // // conditions
-        //     if(isset($_GET['startdate']) && strlen($_GET['startdate'])>=1){
-        //         $qry .= " and activity_date >= '" . date('Y-m-d 00:00:00', strtotime($_GET['startdate'])) . "' and activity_date <= '" . date('Y-m-d 23:59:59', strtotime($_GET['enddate'])) . "'";
-        //     }
-        //     else{
-        //         $qry.= " and activity_date >='".date('Y-m-d 00:00:00')."' and activity_date <='".date('Y-m-d 23:59:59')."'";
-        //     }
-
-        //     if(isset($_GET['pb']) && strlen($_GET['pb'])>=1){
-        //         $ex = $_GET['pb'];
-        //         $qry.= " and (created_by ='".$ex."')";
-        //     }
-        //     else{
-        //         $qry.= " and created_by ='1111111111111111111111111111111111111'";
-        //     }
-        //     $qry.=" order by id desc";
-        // // end conditions
-        //    //dd($qry);
-        // $rs = DB::select($qry);
-
         $start = $request->input('startdate') ?? Carbon::now()->format('Y-m-d');
         $end = $request->input('enddate') ?? Carbon::now()->format('Y-m-d');
         $pb = $request->input('pb') ?? null; 
@@ -1804,10 +1800,9 @@ class ReportsController extends Controller
                     ->orderBy('activity_date', 'desc')
                     ->get();
 
-                    // dd($rs);
+        // $users = User::where('role_id','<>',env('CUSTOMER_ROLE_ID'))->orderBy('name')->get();
+        return view('admin.reports.audit_trail_per_user',compact('rs'));
 
-        $users = User::where('role_id','<>',env('CUSTOMER_ROLE_ID'))->orderBy('name')->get();
-        return view('admin.reports.audit_trail_per_user',compact('rs','users'));
     }
 
     public function audit_trail_per_module(Request $request){
@@ -1896,7 +1891,7 @@ class ReportsController extends Controller
         return response()->json([
             'results' => $users->map(fn($user) => [
                 'id' => $user->id,
-                'text' => $user->name." (".$user->email.")"
+                'text' => $user->name . ($user->email ? " (".$user->email.")" : "")
             ])
         ]);
     }
@@ -1910,29 +1905,16 @@ class ReportsController extends Controller
         //             ->orderBy('name')
         //             ->limit(20)
         //             ->get();
-        $users = User::where(function ($query) {
-                $query->where('role_id', 6)
-                    ->orWhere('user_type', 'customer');
-            })
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('firstname', 'like', "%{$search}%")
-                    ->orWhere('lastname', 'like', "%{$search}%")
-                    ->orWhere('organization', 'like', "%{$search}%");
-                });
-            })
-            ->select('name')
-            ->distinct()
-            ->orderBy('name')
-            ->limit(20)
-            ->get();
-
+        $users = SalesHeader::select('customer_name')->where('customer_name', 'like', "%{$search}%")                    
+                    ->orderBy('customer_name')
+                    ->limit(20)
+                    ->distinct()
+                    ->get();
 
         return response()->json([
             'results' => $users->map(fn($user) => [
-                'id' => $user->name,
-                'text' => $user->name
+                'id' => $user->customer_name,
+                'text' => $user->customer_name
             ])
         ]);
     }
@@ -2074,7 +2056,7 @@ class ReportsController extends Controller
             $qry.= " and h.agent='".$_GET['agent']."'";
         }
         if(isset($_GET['customer']) && $_GET['customer']<>''){
-            $qry.= " and h.customer_name='".$_GET['customer']."'";
+            $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
         }
         if(isset($_GET['product']) && $_GET['product']<>''){
             $qry.= " and d.product_name='".$_GET['product']."'";
