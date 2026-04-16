@@ -47,6 +47,40 @@ class DeliveryService
 
             if (empty($delivery->orders)) continue;
 
+            $grand_gross = 0;
+            $grand_tax   = 0;
+
+            // compute totals
+            foreach ($delivery->orders as $order) {
+
+                $product = Product::find($order->product_id);
+
+                $gross_amount = ((float)$product->price + ($order->paella ? $product->paella_price : 0)) * $order->qty;
+                $tax_amount   = $gross_amount - ($gross_amount / 1.12);
+
+                $grand_gross += $gross_amount;
+                $grand_tax   += $tax_amount;
+
+                // baka logic
+                if ($product->id == 178 && $bakaProduct) {
+                    $baka = Product::whereId(270)->first();
+
+                    $baka_gross = $baka->price * $order->qty;
+                    $baka_tax   = $baka_gross - ($baka_gross / 1.12);
+
+                    $grand_gross += $baka_gross;
+                    $grand_tax   += $baka_tax;
+                }
+            }
+
+            // compute sales values
+            $grossAmount = $grand_gross;
+            $netAmount   = $grossAmount + (float)$delivery->delivery_fee;
+
+            if ($discount > 0) {
+                $netAmount -= $discount;
+            }
+
             $sub = SalesHeader::create([
                 'user_id' => $user->id,
                 'parent_sales_header_id' => $salesHeader->id,
@@ -63,7 +97,9 @@ class DeliveryService
                 'delivery_branch' => 'Tandang Sora Delivery',
                 'gross_amount' => $request->order_amount + ( $bakaProduct->price * $qty ),
                 'tax_amount' => 0,
-                'net_amount' => $netAmount + (float) $delivery->delivery_fee,
+                'gross_amount' => $grossAmount,
+                // 'tax_amount'   => $grand_tax,
+                'net_amount'   => $netAmount,
                 'discount_amount' => $discount,
                 'payment_status' => $request->order_amount <= 0 ? 'PAID' : 'PENDING',
                 'delivery_status' => '',
