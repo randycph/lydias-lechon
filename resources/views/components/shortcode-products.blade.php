@@ -51,10 +51,10 @@
             get productName() {
                 const withPaella = this.withPaella ? ' Boneless with Paella' : '';
                 if (this.product?.name) {
-                    return this.product.name + withPaella;
+                    return this.product?.name + withPaella;
                 }
 
-                return this.product.name;
+                return this.product?.name;
             },
 
             get productPrice() {
