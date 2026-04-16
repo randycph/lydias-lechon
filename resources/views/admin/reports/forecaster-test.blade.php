@@ -752,7 +752,7 @@ table.dataTable thead .sorting::before, table.dataTable thead .sorting::after {
         $delTime       = $fmtTime($r->deldate);
         $deliveryType  = (string)($r->delivery_type ?? '');
         $delstat       = (string)($r->delstat ?? '');
-        $size          = (string)($r->size ?? '');
+        $size          = (string)($r->size ?? $r->product_size ?? '');
         $agent         = (string)($r->agent ?? '');
         $orderNoText   = (string)($r->order_number ?? '');
         $customerName  = (string)($r->customer_name ?? '');
@@ -947,7 +947,7 @@ table.dataTable thead .sorting::before, table.dataTable thead .sorting::after {
 
         {{-- Size (duplicate of status; merged for sales; JO per-row) --}}
         <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $size }}">
-            {{ $isSales ? ($isMerged ? '' : e($size)) : e($r->size ?? '') }}
+            {{ $isSales ? ($isMerged ? '' : e($size)) : e($size ?? '') }}
         </td>
     </tr>
 
