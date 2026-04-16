@@ -474,7 +474,14 @@ class FrontendController extends Controller
 
         $lechonBakaService = floatval(Product::whereId(270)->first()->price * ($bakaQty ?? 1));
 
+        $sale = null;
+
+        if (session()->has('edit_sales_header_id') && !empty(session()->get('edit_sales_header_id'))) {
+            $sale = SalesHeader::with(['items', 'items.product'])->find(session()->get('edit_sales_header_id'));
+        }
+
         return view('v2.checkout.checkout', compact(
+            'sale',
             'triples', 
             'provinces', 
             'cities', 

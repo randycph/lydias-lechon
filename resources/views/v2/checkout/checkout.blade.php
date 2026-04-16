@@ -177,6 +177,7 @@
         window.initialCarts = @json($carts);
         window.lechonBakaService = @json($lechonBakaService);
         window.APP_DEBUG = @json(config('app.debug'));
+        window.sale = @json($sale ?? null);
     </script>
 
     <script>
@@ -191,6 +192,7 @@
                 allowMultiple: false,
                 deliveryFee: 0,
                 deliveryFees: [],
+                sale: window.sale,
 
                 pickup_branch: '',
                 pickup_date: '',
@@ -221,7 +223,39 @@
                         this.openPrivacyModal()
                     }
 
+                    this.$nextTick(() => {
+                        if (this.sale && this.sale.delivery_type == "Door to door delivery") {
+                            this.province = this.sale && this.sale.delivery_type == "Door to door delivery" ? this.sale.province : ''
+                            this.onProvinceChange()
+                            this.city = this.sale && this.sale.delivery_type == "Door to door delivery" ? this.sale.city : ''
+                            this.onCityChange()
+                            this.location = this.sale && this.sale.delivery_type == "Door to door delivery" ? this.sale.barangay : ''
+                            this.onBarangayChange()
+                            this.instruction = this.sale && this.sale.delivery_type == "Door to door delivery" ? this.sale.instruction : ''
 
+                            let delivery_date = '{{ $sale && $sale?->delivery_type == "Door to door delivery" ? $sale?->items()->first()->delivery_date : '' }}'
+
+                            if (delivery_date) {
+                                this.need_date = this.formatDate(new Date(delivery_date))
+                                let time = delivery_date.split(' ')[1]
+                                time = time.slice(0, -3)
+                                this.need_time = this.formatHourValue(time)
+                            }
+                        } else if (this.sale && this.sale.delivery_type == "Store Pickup") {
+                            this.pickup_branch = this.sale?.outlet ?? ''
+                            this.pickup_note = this.sale?.instruction ?? ''
+
+                            let delivery_date = '{{ $sale && $sale?->delivery_type == "Store Pickup" ? $sale?->items()->first()->delivery_date : '' }}'
+
+                            if (delivery_date) {
+                                this.need_date = this.formatDate(new Date(delivery_date))
+                                let time = delivery_date.split(' ')[1]
+                                time = time.slice(0, -3)
+                                this.need_time = this.formatHourValue(time)
+                            }
+
+                        }
+                    })
 
                     if (!this.allowMultiple && this.hasBaka && this.lechonBakaService > 0) {
                         console.log('not multiple order and has baka');
@@ -399,8 +433,12 @@
 
                     el._datepicker = picker
 
-                    this.need_date = parts.date
-                    picker.setDate(parts.date)
+                    if (this.sale && this.sale.delivery_type == "Door to door delivery") {
+                        
+                    } else {
+                        this.need_date = parts.date
+                        picker.setDate(parts.date)
+                    }
 
                     this.$nextTick(() => {
                         this.populateDeliveryTimes(parts.hour)
@@ -569,9 +607,21 @@
                     this.availablePickupHours = hours
 
                     this.$nextTick(() => {
-                        this.need_time = hours.length
-                            ? this.formatHourValue(hours[0])
-                            : ''
+                        if (this.sale && this.sale.delivery_type == "Store Pickup" && this.method == 'pickup') {
+                            let delivery_date = '{{ $sale && $sale?->delivery_type == "Store Pickup" ? $sale?->items()->first()->delivery_date : '' }}'
+
+                            if (delivery_date) {
+                                let time = delivery_date.split(' ')[1]
+                                time = time.slice(0, -3)
+                                setTimeout(() => {
+                                    this.need_time = time
+                                }, 300)
+                            }
+                        } else {
+                            this.need_time = hours.length
+                                ? this.formatHourValue(hours[0])
+                                : ''
+                        }
                     })
                 },
 
@@ -610,9 +660,22 @@
                     this.availableDeliveryHours = hours
 
                     this.$nextTick(() => {
-                        this.need_time = hours.length
-                            ? this.formatHourValue(hours[0])
-                            : ''
+
+                        if (this.sale && this.sale.delivery_type == "Door to door delivery" && this.method == 'delivery') {
+                            let delivery_date = '{{ $sale && $sale?->delivery_type == "Door to door delivery" ? $sale?->items()->first()->delivery_date : '' }}'
+
+                            if (delivery_date) {
+                                let time = delivery_date.split(' ')[1]
+                                time = time.slice(0, -3)
+                                setTimeout(() => {
+                                    this.need_time = time
+                                }, 300)
+                            }
+                        } else {
+                            this.need_time = hours.length
+                                ? this.formatHourValue(hours[0])
+                                : ''
+                        }
                     })
                 },
 
@@ -731,6 +794,7 @@
                         this.deliveryFee = 0
                         this.deliveryFees = []
                         this.need_time = ''
+                        this.pickup_note = ''
                     }
 
                     if (type === 'delivery') {
@@ -1617,6 +1681,9 @@
                             this.need_time = ''
                             this.availableDeliveryHours = []
                         }
+
+                        this.province = ''
+                        this.delivery_address = ''
 
                         this.isBaka = window.hasBaka;
                         this.lechonBakaService = this.isBaka ? window.lechonBakaService : 0;
