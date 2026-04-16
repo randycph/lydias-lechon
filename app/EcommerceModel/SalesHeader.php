@@ -372,52 +372,9 @@ class SalesHeader extends Model
 
     public function getPaymentStatusAttribute($value)
     {
-        // $sale = SalesHeader::find($this->id);
-
-        // if (isset($sale->parent_sales_header_id) && $sale->parent_sales_header_id != null) {
-        //     $paid = SalesPayment::where('sales_header_id', $sale->parent_sales_header_id)
-        //         ->where('status', 'PAID') 
-        //         ->sum('amount') ?? 0;
-        // } else {
-        //     $paid = SalesPayment::where('sales_header_id', $this->id)
-        //         ->where('status', 'PAID') 
-        //         ->sum('amount') ?? 0;
-        // }
-
-        // // Use the raw/current saved status to avoid recursion
-        // $current = $value ?? $this->getRawOriginal('payment_status');
-
-        // if ($paid >= $this->gross_amount && $current !== 'PAID') {
-        //     static::whereKey($this->id)->update([
-        //         'payment_status' => 'PAID',
-        //         'updated_at'     => $this->created_at,
-        //     ]);
-
-        //     if (
-        //         ($this->delivery_status === 'Waiting for Payment' || $this->delivery_status === '') &&
-        //         $this->delivery_status !== 'Processing Stock'
-        //     ) {
-        //         static::whereKey($this->id)->update([
-        //             'delivery_status' => 'Processing Stock',
-        //             'updated_at'      => $this->created_at,
-        //         ]);
-        //     }
-
-        //     return 'PAID';
-        // }
-
-        // // Normalize legacy 'Completed' to PAID
-        // return in_array($current, ['PAID', 'Completed'], true) ? 'PAID' : 'UNPAID';
-
         $sales = SalesHeader::withTrashed()->whereId($this->id)->first();
 
-        // if ($sales->is_sub == 1) {
-        //     $paid = SalesPayment::where('sales_header_id',$sales->parent_sales_header_id)->where('status', 'PAID')->sum('amount');
-        // } else {
-        //     $paid = SalesPayment::where('sales_header_id',$this->id)->where('status', 'PAID')->sum('amount');
-        // }
-
-        $paid = SalesPayment::where('sales_header_id',$this->id)->where('status', 'PAID')->sum('amount');
+        $paid = SalesPayment::where('sales_header_id',$this->id)->where('status', 'PAID')->where('is_discount', 0)->sum('amount');
         
         if ($paid > 0) {
             if ($this->delivery_status == 'Waiting for Payment' || $this->delivery_status == '' || is_null($this->delivery_status)) {
@@ -425,7 +382,7 @@ class SalesHeader extends Model
             }
         }
 
-        if ($paid >= $this->items->sum('net_amount')) {
+        if ($paid >= $this->items->sum('net_amount') + $this->delivery_fee_amount) {
             SalesHeader::whereId($this->id)->update(['payment_status' => 'PAID']);
 
             return 'PAID';
