@@ -1235,6 +1235,13 @@
             $('#prompt-add-payment').modal('show');
             $('#sales_header_id').val(id);
 
+            $('#mode_of_payment').val('').trigger('change');
+            $('#ref_no').val('');
+            $('#payment_dt').val('');
+            $('#payment_amount').val('');
+            $('#payment_remark').val('');
+            $('#payment_attachment').val('').trigger('change');
+
             $("#payment_amount").attr({
                 "max" : balance
             });
