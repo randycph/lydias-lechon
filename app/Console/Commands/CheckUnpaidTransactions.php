@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\EcommerceModel\SalesHeader;
+use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 
@@ -103,6 +104,23 @@ class CheckUnpaidTransactions extends Command
             if ($order->user && $order->user->email) {
                 Mail::to($order->user->email)->send(new \App\Mail\OrderCancelledMail($order));
             }
+
+            ActivityLog::create([
+                'created_by'        => 1,
+                'email'             => 'wsiprod.demo@gmail.com',
+                'role'              => 'Super Admin',
+                'dashboard_activity' => "abandoned order",
+                'activity_desc'      => "updated the ecommerce_sales_headers status of {$order->id} from {$order->status} to 'ABANDONED",
+                'activity_date'      => now()->format('Y-m-d H:i:s'),
+                'db_table'           => 'ecommerce_sales_headers',
+                'old_value'          => $order->status,
+                'new_value'          => 'ABANDONED',
+                'reference'          => $order->id,
+                'subject_type'       => 'App\EcommerceModel\SalesHeader',
+                'subject_id'         => $order->id,
+                'ip_address'         => '',
+                'session_id'         => null,
+            ]);
         }
 
         $this->info('Unpaid transaction reminders sent and expired orders cancelled.');
