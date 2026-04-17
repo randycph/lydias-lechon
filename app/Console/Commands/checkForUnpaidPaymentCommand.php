@@ -29,12 +29,12 @@ class checkForUnpaidPaymentCommand extends Command
      */
     public function handle()
     {
-        // check if receipt_number is not null or empty and created_at starts at nov 1, 2025
+        // check if receipt_number is not null or empty and created_at starts at 2026-04-17
         $payments = SalesPayment::where('payment_type', 'Paymaya')
             ->where('status', 'PENDING')
             ->where('receipt_number', '!=', null)
             ->where('receipt_number', '!=', '')
-            ->whereDate('created_at', '>=', '2025-11-01')
+            ->whereDate('created_at', '>=', '2026-04-17')
             ->get();
 
         foreach ($payments as $salesPayment) {

@@ -14,7 +14,7 @@ class DeleteOldGuestUsers extends Command
 
     public function handle()
     {
-        $startDate = Carbon::create(2026, 3, 3);
+        $startDate = Carbon::create(2026, 4, 4);
         $today = Carbon::now();
 
         if ($today->lt($startDate)) {
@@ -22,7 +22,7 @@ class DeleteOldGuestUsers extends Command
             return;
         }
 
-        $cutoff = Carbon::now()->subDays(6);
+        $cutoff = Carbon::now()->subDays(40);
 
         $guests = User::where('registration_type', 'guest')
             ->where('created_at', '>=', $startDate)
