@@ -14,7 +14,11 @@
         @foreach ($categories as $category)
             <div class="product pb-12 px-4">
                 <a href="{{ url('/menu') }}?s={{ $category->slug }}" class="cursor-pointer relative bg-orange-500 rounded-md w-full h-[300px] p-2 flex justify-center clip-bottom items-center">
+                    @if ($category['image'])
                     <img onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'" src="{{ asset('images/category/'.$category['image']) }}" alt="Shop {{ $category->name }}" class="scale-110 md:scale-125 top-0 left-0 px-10 overflow-hidden hover:scale-150 transition-all duration-300 ease-in-out">
+                    @else
+                    <img onerror="this.onerror=null;this.src='{{ asset('images/no-image.jpg') }}'" src="{{ asset('images/no-image.jpg') }}" alt="Shop {{ $category->name }}" class="scale-110 md:scale-125 top-0 left-0 px-10 overflow-hidden hover:scale-150 transition-all duration-300 ease-in-out">
+                    @endif
                 </a>
                 <div class="flex justify-between mt-4">
                     <div class="font-bold">{{ $category->name }}</div>
