@@ -18,7 +18,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('users:delete-old-guests')->dailyAt('02:00');
 
         $schedule->command('sitemap:generate')->dailyAt('03:00');
-        $schedule->command('update:deliverable-cities-schedules')->everyFiveMinutes();
+        // $schedule->command('update:deliverable-cities-schedules')->everyFiveMinutes();
     }
 
     /**
