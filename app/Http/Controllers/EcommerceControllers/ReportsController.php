@@ -302,7 +302,6 @@ class ReportsController extends Controller
 
     public function forecaster(Request $request)
     {
-        return 'debugging';
         $wra="(";
         $wra_array=[];
         $products = Product::where('production_item',1)->where('is_misc',0)->get();
