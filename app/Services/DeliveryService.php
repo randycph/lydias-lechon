@@ -95,7 +95,7 @@ class DeliveryService
                 'delivery_fee_amount' => $delivery->delivery_fee,
                 'order_source' => 'Web',
                 'delivery_branch' => 'Tandang Sora Delivery',
-                'gross_amount' => $request->order_amount + ( $bakaProduct->price * $qty ),
+                'gross_amount' => $request->order_amount + ( $bakaProduct?->price * $qty ),
                 'tax_amount' => 0,
                 'gross_amount' => $grossAmount,
                 // 'tax_amount'   => $grand_tax,
@@ -171,7 +171,7 @@ class DeliveryService
                 foreach ($delivery->orders as $order) {
 
                     $product = Product::find($order->product_id);
-                    $gross_amount = ((float)$product->price + ($order->paella ? $product->paella_price : 0)) * $order->qty;
+                    $gross_amount = ((float)$product?->price + ($order->paella ? $product->paella_price : 0)) * $order->qty;
                     $tax_amount = $gross_amount - ($gross_amount/1.12);
                     $grand_gross += $gross_amount;
                     $grand_tax += $tax_amount;
@@ -181,7 +181,7 @@ class DeliveryService
                         'product_id' => $product->id,
                         'product_name' => $product->name . ($order->paella ? ' Boneless with Paella' : ''),
                         'product_category' => $product->category_id,
-                        'price' => $product->price,
+                        'price' => $product?->price,
                         'cost' => 0,
                         'tax_amount' => $tax_amount,
                         'promo_id' => 0,
@@ -206,7 +206,7 @@ class DeliveryService
                     // Baka service
                     if ($product->id == 178 && $bakaProduct) {
                         $product = Product::whereId(270)->first();
-                        $gross_amount = ((float)$product->price) * $order->qty;
+                        $gross_amount = ((float)$product?->price) * $order->qty;
                         $tax_amount = $gross_amount - ($gross_amount/1.12);
                         $grand_gross += $gross_amount;
                         $grand_tax += $tax_amount;
@@ -216,7 +216,7 @@ class DeliveryService
                             'product_id' => 270,
                             'product_name' => $product->name,
                             'product_category' => $product->category_id,
-                            'price' => $product->price,
+                            'price' => $product?->price,
                             'cost' => 0,
                             'tax_amount' => $tax_amount,
                             'promo_id' => 0,
