@@ -206,7 +206,25 @@ class DashboardController extends Controller
                     })
                     ->whereNotIn('status', ['ABANDONED', 'CANCELLED'])
                     ->get()
-                    ->filter(fn ($sale) => $sale->balance($sale->id) > 0);
+                    ->filter(function ($sale) {
+                            $itemTotal = $sale->items->sum('net_amount');
+                            $deliveryFee = (float) $sale->delivery_fee_amount;
+
+                            $discount = $sale->payments
+                                ->where('status', 'PAID')
+                                ->where('is_discount', 1)
+                                ->sum('amount');
+
+                            $paid = $sale->payments
+                                ->where('status', 'PAID')
+                                ->where('is_discount', 0)
+                                ->sum('amount');
+
+                            $balance = ($itemTotal + $deliveryFee - $discount) - $paid;
+
+                            return $balance > 0;
+                        })
+                    ->values();
         
         return view('admin.dashboard.index', compact(
             'logs',
