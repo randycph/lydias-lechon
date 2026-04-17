@@ -640,6 +640,7 @@ class SalesController extends Controller
 
     public function index()
     {
+        return 'test';
         if (!auth()->user()->has_access_to_route('sales-transaction.index')) {
             return response()->view('components.unauthorize-access');
         }
