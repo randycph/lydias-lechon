@@ -39,9 +39,9 @@ class AppServiceProvider extends ServiceProvider
             return;
         }
 
-        if (config('app.env') !== 'local') {
-            URL::forceScheme('https');
-        }
+        // if (config('app.env') !== 'local') {
+        //     URL::forceScheme('https');
+        // }
 
         if(strpos(url()->current(), "storage") === FALSE && strpos(url()->current(), "theme") === FALSE){
             $insert_logs = \App\Models\ActivityLog::create([
