@@ -22,7 +22,7 @@ class DeleteOldGuestUsers extends Command
             return;
         }
 
-        $cutoff = Carbon::now()->subDays(6);
+        $cutoff = Carbon::now()->subDays(40);
 
         $guests = User::where('registration_type', 'guest')
             ->where('created_at', '>=', $startDate)
