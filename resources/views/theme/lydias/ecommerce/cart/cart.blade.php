@@ -378,15 +378,6 @@
 @section('jsscript')
 
     <script>
-        // $('#checkoutAsGuest').on('click', function () {
-        //     if ($(this).is(':checked')) {
-        //         $('#customer_type').val(1);
-        //         //$('#checkout').attr('href', "{{ route('cart.front.checkout-as-guest') }}");
-        //     } else {
-        //         $('#customer_type').val(0);
-        //         //$('#checkout').attr('href', "{{ route('cart.front.checkout') }}");
-        //     }
-        // });
 
         function deapply_coupon(code){
             $('#coupon_delete').val(code);
