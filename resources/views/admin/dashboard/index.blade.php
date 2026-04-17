@@ -173,7 +173,7 @@
                                                     </td>
 
                                                     <td>
-                                                        {{ $sale->user->name ?? '—' }}
+                                                        {{ $sale->user->name ?? $sale->customer_name ?? '—' }}
                                                     </td>
 
                                                     <td>
