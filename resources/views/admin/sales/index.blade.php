@@ -351,20 +351,14 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @if ($sale->Paymentadminstatus == 'UNPAID' && isForecaster())
+                                        @if(\App\EcommerceModel\SalesPayment::check_if_has_added_payments($sale->id) == 1)
+                                            <a href="javascript:;" onclick="show_added_payments('{{$sale->id}}');">{{ number_format($sale->net_amount <= 0 ? 0 : ($sale->items->sum('net_amount') + $sale->delivery_fee_amount) - $sale->payments->where('is_discount', 1)->where('status', 'PAID')->sum('amount'), 2) }}</a>
                                         @else
-                                            @if(\App\EcommerceModel\SalesPayment::check_if_has_added_payments($sale->id) == 1)
-                                                <a href="javascript:;" onclick="show_added_payments('{{$sale->id}}');">{{ number_format($sale->net_amount <= 0 ? 0 : ($sale->items->sum('net_amount') + $sale->delivery_fee_amount) - $sale->payments->where('is_discount', 1)->where('status', 'PAID')->sum('amount'), 2) }}</a>
-                                            @else
-                                                {{ number_format(($sale->items->sum('net_amount') + ($sale->delivery_fee_amount ?? 0)) - $sale->payments->where('is_discount', 1)->where('status', 'PAID')->sum('amount'), 2) }}
-                                            @endif
+                                            {{ number_format(($sale->items->sum('net_amount') + ($sale->delivery_fee_amount ?? 0)) - $sale->payments->where('is_discount', 1)->where('status', 'PAID')->sum('amount'), 2) }}
                                         @endif
                                     </td>
                                      <td>
-                                        @if ($sale->Paymentadminstatus == 'UNPAID' && isForecaster())
-                                        @else
-                                            {{ number_format((\App\EcommerceModel\SalesHeader::balance($sale->id)),2) }}
-                                        @endif
+                                        {{ number_format((\App\EcommerceModel\SalesHeader::balance($sale->id)),2) }}
                                     </td>
                                     <td width="10%">
                                         <!-- 10102 -->
