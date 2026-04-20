@@ -654,6 +654,10 @@ class SalesHeader extends Model
 
     public function isConfirmedAndPastCutoffAndForecasted()
     {
+        if (auth()->user()->is_an_admin()) {
+            return false;
+        }
+
         return $this->isConfirm == 1 && $this->pastForecastedTime() && $this->isForecasted();
     }
 
