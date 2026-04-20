@@ -11,6 +11,7 @@ trait LogsActivityDiff
 {
     public static function bootLogsActivityDiff(): void
     {
+        return;
         if (app()->runningUnitTests()) return;
 
         /*

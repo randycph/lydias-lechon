@@ -65,6 +65,7 @@ class SalesController extends Controller
         $head = SalesHeader::findOrFail($request->ui_sales_id);
         
         if (
+            (!auth()->user()->is_an_admin() && !auth()->user()->is_supervisor()) &&
             auth()->user()->has_access_to_route('sales-transaction.update') &&
             $head->isConfirmedAndPastCutoffAndForecasted()) {
                 return redirect()->route('sales-transaction.index')->with('error', 'Confirmed orders past cutoff and forecasted cannot be updated.');
@@ -252,6 +253,7 @@ class SalesController extends Controller
         $sales = SalesHeader::findOrFail($request->update_dateneeded_id);
     
         if (
+            (!auth()->user()->is_an_admin() && !auth()->user()->is_supervisor()) &&
             auth()->user()->has_access_to_route('sales-transaction.update') &&
             $sales->isConfirmedAndPastCutoffAndForecasted()) {
                 return redirect()->route('sales-transaction.index')->with('error', 'Confirmed orders past cutoff and forecasted cannot be updated.');
@@ -724,7 +726,7 @@ class SalesController extends Controller
                 $model = SalesHeader::with(['items' => function ($q) {
                         $q->orderBy('delivery_date', 'asc');
                     }])
-                    ->paidOnlyForForecasterRole()
+                    // ->paidOnlyForForecasterRole()
                     ->where('has_sub', 0)
                     ->when($showDeleted === true,
                         fn ($q) => $q->where('for_deletion', 1),
@@ -763,7 +765,6 @@ class SalesController extends Controller
                             $q->orderBy('delivery_date', 'asc');
                         }
                     ])
-                    ->paidOnlyForForecasterRole()
                     ->whereIn('id', $eligible) 
                     ->when($showDeleted === true,
                         fn ($q) => $q->where('for_deletion', 1),
@@ -785,7 +786,7 @@ class SalesController extends Controller
                         $q->where('delivery_date', '>=', $today->startOfDay()->toDateTimeString())
                           ->orderBy('delivery_date', 'desc');
                     })
-                    ->paidOnlyForForecasterRole()
+                    // ->paidOnlyForForecasterRole()
                     ->where('has_sub', 0)
                     ->when($isDispatcher == true,
                         fn ($q) => $q->where('isConfirm', 1)
@@ -1201,6 +1202,7 @@ class SalesController extends Controller
             ->orderBy('name')
             ->get();
         if (
+            (!auth()->user()->is_an_admin() && !auth()->user()->is_supervisor()) &&
             auth()->user()->has_access_to_route('sales-transaction.update') &&
             $salesheader->isConfirmedAndPastCutoffAndForecasted()) {
                 return redirect()->route('sales-transaction.index')->with('error', 'Confirmed orders past cutoff and forecasted cannot be updated.');

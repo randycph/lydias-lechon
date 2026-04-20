@@ -333,6 +333,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role_id == 1;
     }
 
+    public function is_supervisor()
+    {
+        return $this->role_id == 16;
+    }
+
     public function is_a_cashier()
     {
         return $this->role_id == 12;
