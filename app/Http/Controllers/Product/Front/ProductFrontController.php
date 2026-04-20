@@ -74,6 +74,10 @@ class ProductFrontController extends Controller
     public function list(Request $request) {
         $productCategory = ProductCategory::where('id', $request->criteria)->first();
 
+        if (empty($productCategory)) {
+            abort(404);
+        }
+
         $slug = $productCategory->slug;
 
         return redirect('/menu/?s='.$slug);
