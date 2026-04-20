@@ -886,7 +886,7 @@ class SalesController extends Controller
             'end_date'
         ];
 
-        if ($isDispatcher || (auth()->user()->role_id == 3)) {
+        if ($isDispatcher) {
             $listing = new ListingHelper('desc',20,'date_needed', $customConditions);
         } else {
             $listing = new ListingHelper('desc',20,'order_number', $customConditions);
