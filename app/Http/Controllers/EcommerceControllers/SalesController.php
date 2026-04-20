@@ -65,7 +65,7 @@ class SalesController extends Controller
         $head = SalesHeader::findOrFail($request->ui_sales_id);
         
         if (
-            !auth()->user()->is_an_admin() &&
+            (!auth()->user()->is_an_admin() && !auth()->user()->is_supervisor()) &&
             auth()->user()->has_access_to_route('sales-transaction.update') &&
             $head->isConfirmedAndPastCutoffAndForecasted()) {
                 return redirect()->route('sales-transaction.index')->with('error', 'Confirmed orders past cutoff and forecasted cannot be updated.');
@@ -253,7 +253,7 @@ class SalesController extends Controller
         $sales = SalesHeader::findOrFail($request->update_dateneeded_id);
     
         if (
-            !auth()->user()->is_an_admin() &&
+            (!auth()->user()->is_an_admin() && !auth()->user()->is_supervisor()) &&
             auth()->user()->has_access_to_route('sales-transaction.update') &&
             $sales->isConfirmedAndPastCutoffAndForecasted()) {
                 return redirect()->route('sales-transaction.index')->with('error', 'Confirmed orders past cutoff and forecasted cannot be updated.');
@@ -1203,6 +1203,7 @@ class SalesController extends Controller
             ->orderBy('name')
             ->get();
         if (
+            (!auth()->user()->is_an_admin() && !auth()->user()->is_supervisor()) &&
             auth()->user()->has_access_to_route('sales-transaction.update') &&
             $salesheader->isConfirmedAndPastCutoffAndForecasted()) {
                 return redirect()->route('sales-transaction.index')->with('error', 'Confirmed orders past cutoff and forecasted cannot be updated.');

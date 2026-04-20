@@ -398,7 +398,7 @@
                                                                 
                                                                 @if (
                                                                     (auth()->user()->has_access_to_route('sales-transaction.update') &&
-                                                                    !$sale->isConfirmedAndPastCutoffAndForecasted() && $sale->isDeliveryDateIsFuture()) || auth()->user()->is_an_admin()
+                                                                    !$sale->isConfirmedAndPastCutoffAndForecasted() && $sale->isDeliveryDateIsFuture()) || (auth()->user()->is_an_admin() || auth()->user()->is_supervisor())
                                                                 ) 
                                                                 <a class="dropdown-item" href="{{ route('sales.update_details',$sale->id) }}" title="Update Sales Details & Items">
                                                                     Update Sales Details </a> 
