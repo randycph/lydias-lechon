@@ -74,7 +74,7 @@ class DashboardController extends Controller
                 $model = SalesHeader::with(['items' => function ($q) {
                         $q->orderBy('delivery_date', 'asc');
                     }])
-                    ->paidOnlyForForecasterRole()
+                    // ->paidOnlyForForecasterRole()
                     ->where('has_sub', 0)
                     ->when($isDispatcher == true,
                         fn ($q) => $q->where('isConfirm', 1)
@@ -106,7 +106,7 @@ class DashboardController extends Controller
                             $q->orderBy('delivery_date', 'asc');
                         }
                     ])
-                    ->paidOnlyForForecasterRole()
+                    // ->paidOnlyForForecasterRole()
                     ->whereIn('id', $eligible) 
                     ->when($hasBranches && count($locations) > 0,
                         fn ($q) => $q->where(function ($q2) use ($locations) {
@@ -121,7 +121,7 @@ class DashboardController extends Controller
                             $q->where('delivery_date', '>=', $today->startOfDay()->toDateTimeString())
                             ->orderBy('delivery_date', 'desc');
                         })
-                        ->paidOnlyForForecasterRole()
+                        // ->paidOnlyForForecasterRole()
                         ->where('has_sub', 0)
                         ->when($isDispatcher == true,
                             fn ($q) => $q->where('isConfirm', 1)
