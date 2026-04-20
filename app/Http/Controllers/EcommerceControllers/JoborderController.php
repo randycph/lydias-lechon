@@ -50,7 +50,9 @@ class JoborderController extends Controller
 
         $x = explode(" - ", $request->dateneeded);
 
-        $tym24 = date("H:i", strtotime($x[1]));
+        $tym24 = isset($x[1])
+            ? date("H:i", strtotime($x[1]))
+            : null;
 
         //check if time is between the operation time
         $current_time = $x[1];
