@@ -69,6 +69,8 @@ class CheckoutController extends Controller
 
     public function checkout_as_guest()
     {
+        return redirect()->route('checkout');
+        
         $products = session('cart', []); // Cart::where('user_id',Auth::id())->get();
         $branches = Branch::where('status', 1)->where('pickup_branch', 1)->get();
         $locations = Deliverablecities::distinct()->where('is_active', 1)->orderBy('name')->get(['name']);

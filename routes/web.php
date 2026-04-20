@@ -65,7 +65,6 @@ Route::get('/storesss', [FrontendController::class, 'our_stores'])->name('our-st
 Route::get('/lechon-pricelistss', [FrontendController::class, 'lechon_pricelist'])->name('lechon-pricelist');
 Route::get('/menuss', [FrontendController::class, 'lechon_menu'])->name('lechon-menu');
 Route::get('/checkout', [FrontendController::class, 'checkout'])->name('checkout');
-Route::get('/checkout2', [FrontendController::class, 'checkout2'])->name('checkout2');
 Route::get('/sales-summary/{id}', [FrontendController::class, 'confirmation'])->name('confirmation');
 Route::get('/login', [FrontendController::class, 'login'])->name('login');
 Route::post('/logout', [FrontendController::class, 'logout'])->name('logout');
