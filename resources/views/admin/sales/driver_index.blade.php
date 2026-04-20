@@ -230,7 +230,7 @@
 
                                     <td style="display:none;">{{ rtrim($payment_types,",") }}</td>
                                     <td>
-                                        {{ number_format(($sale->items->sum('net_amount') + ($sale->delivery_fee_amount ?? 0)) - $sale->payments->where('is_discount', 1)->where('status', 'PAID')->sum('amount'), 2) }}
+                                        {{ number_format(($sale?->items?->sum('net_amount') + ($sale->delivery_fee_amount ?? 0)) - $sale->payments->where('is_discount', 1)->where('status', 'PAID')->sum('amount'), 2) }}
                                     </td>
                                      <td>{{ $sale['type'] == 'job' ? 'Job Order' : 'Sales' }}</td>
                                     <td width="10%">
