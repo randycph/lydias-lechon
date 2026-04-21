@@ -723,10 +723,11 @@ class SalesController extends Controller
                     ->where('d.delivery_date', '>=', $today->startOfDay()->toDateTimeString())
                     ->select('d.sales_header_id');
 
-                $model = SalesHeader::with(['items' => function ($q) {
-                        $q->orderBy('delivery_date', 'asc');
-                    }])
+                $model = SalesHeader::with('items')
                     // ->paidOnlyForForecasterRole()
+                    ->whereHas('items', function ($q) {
+                        $q->orderBy('delivery_date', 'asc');
+                    })
                     ->where('has_sub', 0)
                     ->when($showDeleted === true,
                         fn ($q) => $q->where('for_deletion', 1),
@@ -736,7 +737,9 @@ class SalesController extends Controller
                         fn ($q) => $q->where('is_new_order', 1)
                     )
                     ->when($isDispatcher == true,
-                        fn ($q) => $q->where('isConfirm', 1)
+                        fn ($q) => $q->where('isConfirm', 1)->whereHas('items', function($q) use ($today) {
+                            $q->where('delivery_date', '<=', $today->endOfDay());
+                        })
                     )
                     // apply production / branch filters without plucking IDs
                     ->where(function ($q) use ($hasProdBranch, $eligible, $hasBranches, $locations) {
@@ -828,6 +831,11 @@ class SalesController extends Controller
                                 ->when($isDispatcher == true,
                                     fn ($q) => $q->where('payment_status', '==', 'PAID')->orWhere('isConfirm', 1)
                                 )
+                                ->when($isDispatcher == true,
+                                    fn ($q) => $q->whereHas('items', function($q) use ($today) {
+                                        $q->where('delivery_date', '<=', $today->endOfDay());
+                                    })
+                                )
                                 ->where(function ($query) use($locations) {
                                     $query->whereIn('outlet', $locations)
                                         ->orWhereIn('order_source', $locations)
@@ -841,6 +849,11 @@ class SalesController extends Controller
                                 )
                                 ->when($isDispatcher == true,
                                     fn ($q) => $q->where('payment_status', '==', 'PAID')->orWhere('isConfirm', 1)
+                                )
+                                ->when($isDispatcher == true,
+                                    fn ($q) => $q->whereHas('items', function($q) use ($today) {
+                                        $q->where('delivery_date', '<=', $today->endOfDay());
+                                    })
                                 )
                                 ->when($showUnread === true,
                                     fn ($q) => $q->where('is_new_order', 1)

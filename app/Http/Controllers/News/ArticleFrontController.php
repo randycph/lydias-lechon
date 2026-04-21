@@ -46,53 +46,42 @@ class ArticleFrontController extends Controller
     {
         $pageLimit = 6;
 
-        /* Search Function */
-        if(isset($_GET['type']) && isset($_GET['criteria'])){
+        $articles = Article::query()->whereStatus('Published');
 
-            if($_GET['type'] == 'searchbox'){
+        if (isset($_GET['type']) && isset($_GET['criteria'])) {
 
-                $articles = Article::where(function($query){
-                                    $query->where('name','like','%'.$_GET['criteria'].'%')
-                                    ->orWhere('contents','like','%'.$_GET['criteria'].'%');
-                                })->whereStatus('Published');
-
-
+            if ($_GET['type'] == 'searchbox') {
+                $articles->where(function($query){
+                    $query->where('name','like','%'.$_GET['criteria'].'%')
+                        ->orWhere('contents','like','%'.$_GET['criteria'].'%');
+                });
             }
-            elseif($_GET['type'] == 'year'){
 
-                $articles = Article::whereYear('date','=',$_GET['criteria'])->whereStatus('Published');
-
+            elseif ($_GET['type'] == 'year') {
+                $articles->whereYear('date', $_GET['criteria']);
             }
-            elseif($_GET['type'] == 'month'){
 
+            elseif ($_GET['type'] == 'month') {
                 $criterias = explode("-", $_GET['criteria']);
-                $articles = Article::whereYear('date','=',$criterias[0])->whereMonth('date','=',$criterias[1])->whereStatus('Published');
+                $articles->whereYear('date', $criterias[0])
+                        ->whereMonth('date', $criterias[1] ?? null);
+            }
 
+            elseif ($_GET['type'] == 'category') {
+                if ($_GET['criteria'] == 0) {
+                    $articles->where(function($query){
+                        $query->whereNull('category_id')
+                            ->orWhere('category_id', 0);
+                    });
+                } else {
+                    $articles->where('category_id', $_GET['criteria']);
+                }
             }
-            elseif($_GET['type'] == 'category'){
-                if($_GET['criteria'] == 0)
-                    $articles = Article::where(function($query){
-                                    $query->whereNull('category_id')->orWhere('category_id','=',0);
-                                })
-                                ->whereStatus('Published');
-                else
-                    $articles = Article::where('category_id','=',$_GET['criteria'])->whereStatus('Published');
-            }
-            else{
-                $articles = Article::whereStatus('Published')->get();
-            }
-            $articles = $articles->orderBy('updated_at','desc')
-                                ->orderBy('id','desc')
-                                ->paginate($pageLimit);
-        }
-        else{
-            $articles = Article::whereStatus('Published')
-                                ->orderBy('updated_at','desc')
-                                ->orderBy('id','desc')
-                                ->paginate($pageLimit);
         }
 
-
+        $articles = $articles->orderBy('updated_at','desc')
+                            ->orderBy('id','desc')
+                            ->paginate($pageLimit);
 
         /* End Search function */
 
