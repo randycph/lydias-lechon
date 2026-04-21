@@ -56,7 +56,7 @@ class CouponController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {        
+    {
         Validator::make($request->all(), [
             'name' => 'required|max:150|unique:coupons,name',
             'description' => 'required|max:150',
@@ -69,9 +69,83 @@ class CouponController extends Controller
             'discount_amount' => $request->reward == 'discount-amount-optn' ? 'required' : '',
             'discount_percentage' => $request->reward == 'discount-percentage-optn' ? 'required' : '',
             'free_product_id' => $request->reward == 'free-product-optn' ? 'required' : '',
-        ])->validate();
-    }
 
+        ])->validate();
+
+        $data = $request->all();
+
+        $loc = '';
+        if($request->reward == 'free-shipping-optn'){
+          
+            $locations = $data['location'];
+            $loc_discount_type = $request->discount_type;
+            $loc_discount_amount = $request->shipping_fee_discount_amount;
+
+            foreach($locations as $l){
+                $loc .= $l.'|';
+            }  
+        } else {
+            $loc = NULL;
+            $loc_discount_type = NULL;
+            $loc_discount_amount = 0;
+        }
+
+        $customernames = '';
+        if(isset($request->customer)){
+            $customers = $data['customer'];
+            foreach($customers as $c){
+                $customernames .= $c.'|';
+            }
+        }
+
+        $amount_discount = 1;
+        if($request->reward == 'discount-amount-optn' || $request->reward == 'discount-percentage-optn'){
+            $amount_discount = $request->amount_discount;
+        }
+
+        $discount_productid = NULL;
+        if($request->product_discount == 'current'){
+            $discount_productid = NULL;
+        }
+
+        if($request->product_discount == 'specific'){
+            $discount_productid = $request->discount_productid;
+        }
+
+        $coupon = Coupon::create([
+            'coupon_code' => $request->coupon_activation == 'manual' ? $request->code : $request->name,
+            'name' => $request->name,
+            'description' => $request->description,
+            'terms_and_conditions' => $request->terms_and_conditions,
+            'activation_type' => $request->coupon_activation,
+            'customer_scope' => $request->coupon_scope,
+            'scope_customer_id' => $request->coupon_scope == 'specific' ? $customernames : NULL,
+            'location' => $loc,
+            'location_discount_type' => $loc_discount_type,
+            'location_discount_amount' => $loc_discount_amount,
+            'amount' => $request->reward == 'discount-amount-optn' ? $request->discount_amount : NULL,
+            'percentage' => $request->reward == 'discount-percentage-optn' ? $request->discount_percentage : NULL,
+            'free_product_id' => $request->free_product_id,
+            'status' => ($request->has('status') ? 'ACTIVE' : 'INACTIVE'),
+            'amount_discount_type' => $amount_discount,
+            'product_discount' => $request->amount_discount == 2 ? $request->product_discount : NULL,
+            'discount_product_id' => $discount_productid,
+            'reward' => $request->reward,
+            // 'availability' => ($request->has('availability')) ? 1 : 0,
+            'user_id' => Auth::id(),
+        ]);
+
+        if($coupon){
+
+            $this->update_coupon_time_settings($coupon->id,$request);            
+            $this->update_coupon_purchase_settings($coupon->id,$request);
+            // $this->update_coupon_activity_settings($coupon->id,$request);
+            $this->update_coupon_rule_settings($coupon->id,$request);
+        }
+        
+
+        return redirect(route('coupons.index'))->with('success','Coupon has been added.');
+    }
     /**
      * Show the form for creating a new resource.
      *
