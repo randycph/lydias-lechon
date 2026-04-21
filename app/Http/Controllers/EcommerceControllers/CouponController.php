@@ -25,7 +25,6 @@ use Illuminate\Support\Facades\DB;
 class CouponController extends Controller
 {
     private $searchFields = ['name'];
-    
     public function __construct()
     {
         Permission::module_init($this, 'coupon');
@@ -49,103 +48,106 @@ class CouponController extends Controller
         return view('admin.coupon.index',compact('coupons', 'filter', 'searchType'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
-    {
-        Validator::make($request->all(), [
-            'name' => 'required|max:150|unique:coupons,name',
-            'description' => 'required|max:150',
-            'terms_and_conditions' => 'required',
-            'customer' => $request->coupon_scope == 'specific' ? 'required' : '',
-            'reward' => 'required',
-            'code' => $request->coupon_activation == 'manual' ? 'required|unique:coupons,coupon_code' : '',
-            'location' => $request->reward == 'free-shipping-optn' ? 'required' : '',
-            'shipping_fee_discount_amount' => ($request->reward == 'free-shipping-optn' && $request->discount_type == 'partial') ? 'required' : '',
-            'discount_amount' => $request->reward == 'discount-amount-optn' ? 'required' : '',
-            'discount_percentage' => $request->reward == 'discount-percentage-optn' ? 'required' : '',
-            'free_product_id' => $request->reward == 'free-product-optn' ? 'required' : '',
+{
+    Validator::make($request->all(), [
+        'name' => 'required|max:150|unique:coupons,name',
+        'description' => 'required|max:150',
+        'terms_and_conditions' => 'required',
+        'customer' => $request->coupon_scope == 'specific' ? 'required' : 'nullable',
+        'reward' => 'required',
+        'code' => $request->coupon_activation == 'manual' ? 'required|unique:coupons,coupon_code' : 'nullable',
+        'location' => $request->reward == 'free-shipping-optn' ? 'required' : 'nullable',
+        'shipping_fee_discount_amount' => ($request->reward == 'free-shipping-optn' && $request->discount_type == 'partial') ? 'required' : 'nullable',
+        'discount_amount' => $request->reward == 'discount-amount-optn' ? 'required' : 'nullable',
+        'discount_percentage' => $request->reward == 'discount-percentage-optn' ? 'required' : 'nullable',
+        'free_product_id' => $request->reward == 'free-product-optn' ? 'required' : 'nullable',
+    ])->validate();
 
-        ])->validate();
+    $data = $request->all();
 
-        $data = $request->all();
+    // defaults
+    $loc = null;
+    $loc_discount_type = null;
+    $loc_discount_amount = 0;
+    $customernames = null;
+    $amount_discount = 1;
+    $discount_productid = null;
 
-        $loc = '';
-        if($request->reward == 'free-shipping-optn'){
-          
-            $locations = $data['location'];
-            $loc_discount_type = $request->discount_type;
-            $loc_discount_amount = $request->shipping_fee_discount_amount;
-
-            foreach($locations as $l){
-                $loc .= $l.'|';
-            }  
-        } else {
-            $loc = NULL;
-            $loc_discount_type = NULL;
-            $loc_discount_amount = 0;
-        }
-
-        $customernames = '';
-        if(isset($request->customer)){
-            $customers = $data['customer'];
-            foreach($customers as $c){
-                $customernames .= $c.'|';
-            }
-        }
-
-        $amount_discount = 1;
-        if($request->reward == 'discount-amount-optn' || $request->reward == 'discount-percentage-optn'){
-            $amount_discount = $request->amount_discount;
-        }
-
-        $discount_productid = NULL;
-        if($request->product_discount == 'current'){
-            $discount_productid = NULL;
-        }
-
-        if($request->product_discount == 'specific'){
-            $discount_productid = $request->discount_productid;
-        }
-
-        $coupon = Coupon::create([
-            'coupon_code' => $request->coupon_activation == 'manual' ? $request->code : $request->name,
-            'name' => $request->name,
-            'description' => $request->description,
-            'terms_and_conditions' => $request->terms_and_conditions,
-            'activation_type' => $request->coupon_activation,
-            'customer_scope' => $request->coupon_scope,
-            'scope_customer_id' => $request->coupon_scope == 'specific' ? $customernames : NULL,
-            'location' => $loc,
-            'location_discount_type' => $loc_discount_type,
-            'location_discount_amount' => $loc_discount_amount,
-            'amount' => $request->reward == 'discount-amount-optn' ? $request->discount_amount : NULL,
-            'percentage' => $request->reward == 'discount-percentage-optn' ? $request->discount_percentage : NULL,
-            'free_product_id' => $request->free_product_id,
-            'status' => ($request->has('status') ? 'ACTIVE' : 'INACTIVE'),
-            'amount_discount_type' => $amount_discount,
-            'product_discount' => $request->amount_discount == 2 ? $request->product_discount : NULL,
-            'discount_product_id' => $discount_productid,
-            'reward' => $request->reward,
-            // 'availability' => ($request->has('availability')) ? 1 : 0,
-            'user_id' => Auth::id(),
-        ]);
-
-        if($coupon){
-
-            $this->update_coupon_time_settings($coupon->id,$request);            
-            $this->update_coupon_purchase_settings($coupon->id,$request);
-            // $this->update_coupon_activity_settings($coupon->id,$request);
-            $this->update_coupon_rule_settings($coupon->id,$request);
-        }
-        
-
-        return redirect(route('coupons.index'))->with('success','Coupon has been added.');
+    // location handling
+    if ($request->reward == 'free-shipping-optn') {
+        $locations = $data['location'] ?? [];
+        $loc = !empty($locations) ? implode('|', $locations) . '|' : 'ALL|';
+        $loc_discount_type = $request->discount_type ?? 'full';
+        $loc_discount_amount = $request->shipping_fee_discount_amount ?? 0;
     }
+
+    // customer handling
+    if ($request->coupon_scope == 'specific' && isset($data['customer']) && is_array($data['customer'])) {
+        $customernames = !empty($data['customer']) ? implode('|', $data['customer']) . '|' : null;
+    }
+
+    // amount discount type
+    if (in_array($request->reward, ['discount-amount-optn', 'discount-percentage-optn'])) {
+        $amount_discount = $request->amount_discount ?? 1;
+    }
+
+    // product discount target
+    if ($request->product_discount == 'specific') {
+        $discount_productid = $request->discount_productid ?? 0;
+    }
+
+    $coupon = Coupon::create([
+        'coupon_code' => $request->coupon_activation == 'manual'
+            ? ($request->code ?? 'DEFAULTCODE')
+            : ($request->name ?? 'DEFAULTNAME'),
+
+        'name' => $request->name ?? 'No Name',
+        'description' => $request->description ?? '',
+        'terms_and_conditions' => $request->terms_and_conditions ?? '',
+        'activation_type' => $request->coupon_activation ?? 'auto',
+        'customer_scope' => $request->coupon_scope ?? 'all',
+        'scope_customer_id' => $request->coupon_scope == 'specific'
+            ? ($customernames ?? '')
+            : null,
+
+        'location' => $loc ?? null,
+        'location_discount_type' => $loc_discount_type ?? null,
+        'location_discount_amount' => $loc_discount_amount ?? 0,
+
+        'amount' => $request->reward == 'discount-amount-optn'
+            ? ($request->discount_amount ?? 0)
+            : null,
+
+        'percentage' => $request->reward == 'discount-percentage-optn'
+            ? ($request->discount_percentage ?? 0)
+            : null,
+
+        'free_product_id' => $request->reward == 'free-product-optn'
+            ? ($request->free_product_id ?? 0)
+            : null,
+
+        'status' => $request->has('status') ? 'ACTIVE' : 'INACTIVE',
+        'amount_discount_type' => $amount_discount ?? 1,
+        'product_discount' => $request->amount_discount == 2
+            ? ($request->product_discount ?? 'current')
+            : null,
+        'discount_product_id' => $discount_productid ?? null,
+        'reward' => $request->reward ?? '',
+        'user_id' => Auth::id(),
+    ]);
+
+    if ($coupon) {
+        $this->update_coupon_time_settings($coupon->id, $request);
+        $this->update_coupon_purchase_settings($coupon->id, $request);
+        $this->update_coupon_rule_settings($coupon->id, $request);
+    }
+
+    return redirect(route('coupons.index'))->with('success', 'Coupon has been added.');
+}
+
+
+
     /**
      * Show the form for creating a new resource.
      *
@@ -170,93 +172,92 @@ class CouponController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function autoFreeDelivery(Request $request)
-    {
-        $subtotal = (float) $request->subtotal;
+public function autoFreeDelivery(Request $request)
+{
+ $subtotal = (float) $request->subtotal;
 
-        $coupon = DB::table('coupon_new')
-            ->where('discount_type', 'free delivery')
-            ->where('is_auto_apply', 'Yes')
-            ->where('status', 'active')
-            ->where('min_spend', '<=', $subtotal)
-            ->orderByDesc('min_spend')
-            ->first();
+$coupon = DB::table('coupon_new')
+    ->where('discount_type', 'free delivery')
+    ->where('is_auto_apply', 'Yes')
+    ->where('status', 'active')
+    ->where('min_spend', '<=', $subtotal)
+    ->orderByDesc('min_spend')
+    ->first();
 
-        if ($coupon) {
-            session([
-                'coupon' => [
-                    'id' => $coupon->id,
-                    'code' => $coupon->code,
-                    'discount_type' => $coupon->discount_type
-                ]
-            ]);
+if ($coupon) {
+    session([
+        'coupon' => [
+            'id' => $coupon->id,
+            'code' => $coupon->code,
+            'discount_type' => $coupon->discount_type
+        ]
+    ]);
 
-            return response()->json([
-                'applied' => true,
-                'coupon' => $coupon 
-            ]);
-        }
+    return response()->json([
+        'applied' => true,
+        'coupon' => $coupon 
+    ]);
+}
 
-        if (
-            session()->has('coupon') &&
-            session('coupon.discount_type') === 'free delivery'
-        ) {
-            session()->forget('coupon');
-        }
+if (
+    session()->has('coupon') &&
+    session('coupon.discount_type') === 'free delivery'
+) {
+    session()->forget('coupon');
+}
 
-        return response()->json(['applied' => false]);
-    }
-        
+return response()->json(['applied' => false]);
+}
     public function insert_coupons(Request $request)
-    { 
-        $request->validate([
-            'coupon_name'    => 'required|unique:coupon_new,coupon_name',
-            'coupon_desc'    => 'required',
-            'coupon_code'    => 'required',
-            'discount_type'  => 'required|in:percentage,fixed,free delivery',
-            'auto_apply'     => 'required|in:Yes,No',
-            'discount_value' => 'required|numeric|min:0',
-            'min_spend'      => 'required|numeric|min:0',
-            'usage_limit'    => 'nullable|integer|min:1',
+{ 
+    $request->validate([
+    'coupon_name'    => 'required|unique:coupon_new,coupon_name',
+    'coupon_desc'    => 'required',
+    'coupon_code'    => 'required',
+    'discount_type'  => 'required|in:percentage,fixed,free delivery',
+    'auto_apply'     => 'required|in:Yes,No',
+    'discount_value' => 'required|numeric|min:0',
+    'min_spend'      => 'required|numeric|min:0',
+    'usage_limit'    => 'nullable|integer|min:1',
 
-            'region_name'    => 'nullable|string',
-            'province_name'  => 'nullable|string',
-            'city_name'      => 'nullable|string',
-            'barangay_name'  => 'nullable|string',
+    'region_name'    => 'nullable|string',
+    'province_name'  => 'nullable|string',
+    'city_name'      => 'nullable|string',
+    'barangay_name'  => 'nullable|string',
 
-            'start_date'     => 'required|date',
-            'start_time'     => 'required',
-            'end_date'       => 'required|date|after_or_equal:start_date',
-            'end_time'       => 'required',
-            'status' => 'required|in:active,inactive',
-        ]);
+    'start_date'     => 'required|date',
+    'start_time'     => 'required',
+    'end_date'       => 'required|date|after_or_equal:start_date',
+    'end_time'       => 'required',
+    'status' => 'required|in:active,inactive',
+]);
 
-        DB::table('coupon_new')->insert([
-            'coupon_name'     => $request->coupon_name,
-            'coupon_desc'     => $request->coupon_desc,
-            'code'            => $request->coupon_code,
-            'discount_type'   => $request->discount_type,
-            'discount_value'  => $request->discount_value,
-            'min_spend'       => $request->min_spend,
-            'usage_limit'     => $request->usage_limit,
-            'is_auto_apply'     => $request->auto_apply,
-            'product_id'     => $request->product_id,
-            'region_code'      => $request->region_code,  
-            'province_code'   => $request->province_code,
-            'city_code'   =>$request->city_code,
-            'barangay_code'=>$request->barangay_code,
-            'start_date'      => $request->start_date,
-            'start_time'      => $request->start_time,
-            'end_date'        => $request->end_date,
-            'end_time'        => $request->end_time,
-            'status'          => $request->status,
+    DB::table('coupon_new')->insert([
+        'coupon_name'     => $request->coupon_name,
+        'coupon_desc'     => $request->coupon_desc,
+        'code'            => $request->coupon_code,
+        'discount_type'   => $request->discount_type,
+        'discount_value'  => $request->discount_value,
+        'min_spend'       => $request->min_spend,
+        'usage_limit'     => $request->usage_limit,
+        'is_auto_apply'     => $request->auto_apply,
+        'product_id'     => $request->product_id,
+        'region_code'      => $request->region_code,  
+        'province_code'   => $request->province_code,
+        'city_code'   =>$request->city_code,
+        'barangay_code'=>$request->barangay_code,
+        'start_date'      => $request->start_date,
+        'start_time'      => $request->start_time,
+        'end_date'        => $request->end_date,
+        'end_time'        => $request->end_time,
+        'status'          => $request->status,
 
-            'created_at'      => now(),
-            'updated_at'      => now(),
-        ]);
+        'created_at'      => now(),
+        'updated_at'      => now(),
+    ]);
 
-        return redirect()->back()->with('success', 'Coupon created successfully!');
-    }
+    return redirect()->back()->with('success', 'Coupon created successfully!');
+}
 
     /**
      * Display the specified resource.
@@ -297,90 +298,90 @@ class CouponController extends Controller
     {
         $coupon = DB::table('coupon_new')->where('id', $id)->first();
 
-        return view('admin.coupon.edit', compact('coupon'));
+       return view('admin.coupon.edit', compact('coupon'));
     }
-    
     public function update_coupon(Request $request, $id)
-    {
+{
 
-        $validator = Validator::make($request->all(), [
-            'coupon_name'      => 'required|string|max:255',
-            'coupon_desc'      => 'nullable|string',
-            'discount_type'    => 'required|in:percentage,fixed,free delivery',
-            'discount_value'   => 'nullable|numeric|min:0',
-            'min_spend'      => 'required|numeric|min:0',
-            'max_discount'     => 'nullable|numeric|min:0',
-            'usage_limit'      => 'nullable|integer|min:1',
-            'usage_per_user'   => 'nullable|integer|min:1',
-            'auto_apply'    => 'required|in:Yes,No',
-            'product_id'       => 'nullable|integer',
-            'region_code'      => 'nullable|string',
-            'province_code'    => 'nullable|string',
-            'city_code'        => 'nullable|string',
-            'barangay_code'    => 'nullable|string',
-            'start_date'       => 'nullable|date',
-            'start_time'       => 'nullable',
-            'end_date'         => 'nullable|date|after_or_equal:start_date',
-            'end_time'         => 'nullable',
-            'status' => 'required|in:active,inactive',
+    $validator = Validator::make($request->all(), [
+        'coupon_name'      => 'required|string|max:255',
+        'coupon_desc'      => 'nullable|string',
+        'discount_type'    => 'required|in:percentage,fixed,free delivery',
+        'discount_value'   => 'nullable|numeric|min:0',
+        'min_spend'      => 'required|numeric|min:0',
+        'max_discount'     => 'nullable|numeric|min:0',
+        'usage_limit'      => 'nullable|integer|min:1',
+        'usage_per_user'   => 'nullable|integer|min:1',
+        'auto_apply'    => 'required|in:Yes,No',
+        'product_id'       => 'nullable|integer',
+        'region_code'      => 'nullable|string',
+        'province_code'    => 'nullable|string',
+        'city_code'        => 'nullable|string',
+        'barangay_code'    => 'nullable|string',
+        'start_date'       => 'nullable|date',
+        'start_time'       => 'nullable',
+        'end_date'         => 'nullable|date|after_or_equal:start_date',
+        'end_time'         => 'nullable',
+        'status' => 'required|in:active,inactive',
+    ]);
+
+    if ($validator->fails()) {
+        return redirect()->back()
+                         ->withErrors($validator)
+                         ->withInput();
+    }
+
+    $data = [
+            'coupon_name'     => $request->coupon_name,
+            'coupon_desc'     => $request->coupon_desc,
+            'code'            => $request->coupon_code,
+            'discount_type'   => $request->discount_type,
+            'discount_value'  => $request->discount_value,
+            'min_spend'       => $request->min_spend,
+            'max_discount'    => $request->max_discount,
+            'usage_limit'     => $request->usage_limit,
+            'usage_per_user'  => $request->usage_per_user,
+            'is_auto_apply'   => $request->is_auto_apply,
+            'product_id'      => $request->product_id,
+            'region_code'     => $request->region_code,
+            'province_code'   => $request->province_code,
+            'city_code'       => $request->city_code,
+            'barangay_code'   => $request->barangay_code,
+            'start_date'      => $request->start_date,
+            'start_time'      => $request->start_time,
+            'end_date'        => $request->end_date,
+            'end_time'        => $request->end_time,
+            'status'          => $request->status,
+            'updated_at'      => now(),
+        ];
+
+ 
+    DB::table('coupon_new')->where('id', $id)->update($data);
+
+    return redirect()->route('coupons.index')->with('success', 'Coupon updated successfully.');
+}
+
+public function delete_coupon(Request $request, $id){
+
+$hasRedemptions = DB::table('coupon_redemptions')
+        ->where('coupon_id', $id)
+        ->exists();
+
+    if ($hasRedemptions) {
+        return back()->withErrors([
+            'error' => 'Coupon cannot be deleted because it has already been used.'
         ]);
-
-        if ($validator->fails()) {
-            return redirect()->back()
-                            ->withErrors($validator)
-                            ->withInput();
-        }
-
-        $data = [
-                'coupon_name'     => $request->coupon_name,
-                'coupon_desc'     => $request->coupon_desc,
-                'code'            => $request->coupon_code,
-                'discount_type'   => $request->discount_type,
-                'discount_value'  => $request->discount_value,
-                'min_spend'       => $request->min_spend,
-                'max_discount'    => $request->max_discount,
-                'usage_limit'     => $request->usage_limit,
-                'usage_per_user'  => $request->usage_per_user,
-                'is_auto_apply'   => $request->is_auto_apply,
-                'product_id'      => $request->product_id,
-                'region_code'     => $request->region_code,
-                'province_code'   => $request->province_code,
-                'city_code'       => $request->city_code,
-                'barangay_code'   => $request->barangay_code,
-                'start_date'      => $request->start_date,
-                'start_time'      => $request->start_time,
-                'end_date'        => $request->end_date,
-                'end_time'        => $request->end_time,
-                'status'          => $request->status,
-                'updated_at'      => now(),
-            ];
-
-    
-        DB::table('coupon_new')->where('id', $id)->update($data);
-
-        return redirect()->route('coupons.index')->with('success', 'Coupon updated successfully.');
     }
 
-    public function delete_coupon(Request $request, $id){
+       DB::table('coupon_new')
+        ->where('id', $id)
+        ->delete();
 
-        $hasRedemptions = DB::table('coupon_redemptions')
-            ->where('coupon_id', $id)
-            ->exists();
+    return redirect()
+        ->route('coupons.index')
+        ->with('success', 'Coupon deleted successfully.');
 
-        if ($hasRedemptions) {
-            return back()->withErrors([
-                'error' => 'Coupon cannot be deleted because it has already been used.'
-            ]);
-        }
-
-        DB::table('coupon_new')
-            ->where('id', $id)
-            ->delete();
-
-        return redirect()
-            ->route('coupons.index')
-            ->with('success', 'Coupon deleted successfully.');
-    }
+}
 
 
     /**
@@ -543,8 +544,9 @@ class CouponController extends Controller
                     foreach($prodcat as $cat){
                         $productcategories .= $cat.'|';
                     }
-                }
+                } 
             }
+            
         }
 
         if($request->has('purchase_total_amount')){
@@ -758,19 +760,19 @@ class CouponController extends Controller
             ->first();
 
         if (Auth::check()) {
-            $alreadyUsed = DB::table('coupon_sales')
-                ->where('coupon_id', $coupon->id)
-                ->where('customer_id', Auth::id())
-                ->exists();
+        $alreadyUsed = DB::table('coupon_sales')
+            ->where('coupon_id', $coupon->id)
+            ->where('customer_id', Auth::id())
+            ->exists();
 
-            if ($alreadyUsed) {
-                return response()->json([
-                    'success' => false,
-                    'status' => 'already_used',
-                    'message' => 'You have already used this coupon.'
-                ]);
-            }
+        if ($alreadyUsed) {
+            return response()->json([
+                'success' => false,
+                'status' => 'already_used',
+                'message' => 'You have already used this coupon.'
+            ]);
         }
+    }
 
         if (!$coupon) {
             return response()->json([
@@ -972,235 +974,51 @@ class CouponController extends Controller
     }
 
     public function get_auto_coupons(Request $request)
-    {
-        $now = Carbon::now();
-        $uid = Auth::id();
+{
+    $now = Carbon::now();
+    $uid = Auth::id();
 
-        $eligibleCoupons = Coupon::where('activation_type', 'auto')
-            ->where('status', 'ACTIVE')
-            ->whereRaw("CONCAT(start_date, ' ', start_time) <= ?", [$now])
-            ->whereRaw("CONCAT(end_date, ' ', end_time) >= ?", [$now])
-            ->where(function ($q) use ($uid) {
-                $q->whereNull('customer_scope')
-                    ->orWhere('customer_scope', 'all')
-                    ->orWhere(function ($x) use ($uid) {
-                        if ($uid) {
-                            $x->where('customer_scope', 'specific')
-                            ->whereRaw(
-                                "FIND_IN_SET(?, REPLACE(REPLACE(scope_customer_id, ' ', ''), '|', ','))",
-                                [$uid]
-                            );
-                        }
-                    });
-            })
-            ->get();
-
-        $result = [];
-
-        $cartItems = Auth::check()
-            ? Cart::where('user_id', Auth::id())->get()
-            : collect(session('cart', []));
-
-        $cartQty = $cartItems->sum('qty');
-        $cartTotal = $cartItems->sum(fn($item) => ($item['price'] ?? 0) * ($item['qty'] ?? 0));
-        $cartProductIds = $cartItems->pluck('product_id')->map(fn($id) => (string) $id)->toArray();
-
-        $cartHasExcludedCategory = Product::whereIn('id', $cartProductIds)
-            ->where('category_id', 1)
-            ->exists();
-
-        if ($cartHasExcludedCategory) {
-            return response()->json([
-                'success' => true,
-                'coupons' => []
-            ]);
-        }
-
-        foreach ($eligibleCoupons as $coupon) {
-            if (Auth::check()) {
-                $alreadyUsed = DB::table('coupon_sales')
-                    ->where('coupon_id', $coupon->id)
-                    ->where('customer_id', Auth::id())
-                    ->exists();
-
-                if ($alreadyUsed) {
-                    continue;
-                }
-            }
-
-            $totalUsed = CouponCart::where('coupon_id', $coupon->id)
-                ->where('status', 1)
-                ->sum('total_usage');
-
-            $customerUsed = 0;
-            if (Auth::check()) {
-                $customerUsed = CouponCart::where('coupon_id', $coupon->id)
-                    ->where('status', 1)
-                    ->where('customer_id', Auth::id())
-                    ->sum('total_usage');
-            }
-
-            if ($coupon->usage_limit !== null && $totalUsed >= $coupon->usage_limit) continue;
-            if ($coupon->customer_limit !== null && $customerUsed >= $coupon->customer_limit) continue;
-
-            if ($coupon->purchase_combination) {
-                if ($coupon->purchase_qty && $coupon->purchase_qty > 0) {
-                    if (($coupon->purchase_qty_type === 'min' || empty($coupon->purchase_qty_type)) && $cartQty < $coupon->purchase_qty) continue;
-                    if ($coupon->purchase_qty_type === 'max' && $cartQty > $coupon->purchase_qty) continue;
-                    if ($coupon->purchase_qty_type === 'exact' && $cartQty != $coupon->purchase_qty) continue;
-                }
-
-                if ($coupon->purchase_amount && $coupon->purchase_amount > 0) {
-                    if (($coupon->purchase_amount_type === 'min' || empty($coupon->purchase_amount_type)) && $cartTotal < $coupon->purchase_amount) continue;
-                    if ($coupon->purchase_amount_type === 'max' && $cartTotal > $coupon->purchase_amount) continue;
-                    if ($coupon->purchase_amount_type === 'exact' && $cartTotal != $coupon->purchase_amount) continue;
-                }
-
-                if ($coupon->purchase_product_id) {
-                    $requiredIds = array_filter(explode('|', $coupon->purchase_product_id));
-                    $hasRequiredProduct = false;
-
-                    foreach ($requiredIds as $requiredId) {
-                        if (in_array((string) $requiredId, $cartProductIds)) {
-                            $hasRequiredProduct = true;
-                            break;
-                        }
+    $eligibleCoupons = Coupon::where('activation_type', 'auto')
+        ->where('status', 'ACTIVE')
+        ->whereRaw("CONCAT(start_date, ' ', start_time) <= ?", [$now])
+        ->whereRaw("CONCAT(end_date, ' ', end_time) >= ?", [$now])
+        ->where(function ($q) use ($uid) {
+            $q->whereNull('customer_scope')
+                ->orWhere('customer_scope', 'all')
+                ->orWhere(function ($x) use ($uid) {
+                    if ($uid) {
+                        $x->where('customer_scope', 'specific')
+                          ->whereRaw(
+                              "FIND_IN_SET(?, REPLACE(REPLACE(scope_customer_id, ' ', ''), '|', ','))",
+                              [$uid]
+                          );
                     }
-
-                    if (!$hasRequiredProduct) continue;
-                }
-            }
-
-            $free_products = null;
-            if ($coupon->free_product_id) {
-                $freeProductIds = array_filter(explode('|', $coupon->free_product_id), fn($val) => !is_null($val) && $val !== '');
-                $free_products = Product::with('photos')->whereIn('id', $freeProductIds)->get();
-            }
-
-            $result[] = [
-                'id' => $coupon->id,
-                'code' => $coupon->coupon_code,
-                'name' => $coupon->name,
-                'description' => $coupon->description,
-                'terms' => $coupon->terms_and_conditions,
-                'type' => $coupon->amount_discount_type == 1 ? 'amount' : 'product',
-                'discount_type' => $coupon->reward == 'free-shipping-optn'
-                    ? ($coupon->location_discount_type == 'partial' ? 'amount' : 'percent')
-                    : ($coupon->percentage > 0 ? 'percent' : 'amount'),
-                'discount' => $coupon->percentage > 0 ? $coupon->percentage : $coupon->amount,
-                'applies_to' => $coupon->free_product_id ? 'free_product' : ($coupon->purchase_product_id ? 'product' : 'cart'),
-                'purchase_product_id' => $coupon->purchase_product_id,
-                'free_products' => $free_products ?? [],
-                'combination_allowed' => $coupon->combination == 1,
-                'total_usage_limit' => $coupon->usage_limit,
-                'total_usage_used' => $totalUsed,
-                'customer_limit' => $coupon->customer_limit,
-                'customer_usage_used' => $customerUsed,
-                'status' => 'valid',
-                'location' => $coupon->location,
-                'reward' => $coupon->reward,
-                'free_shipping' => $coupon->reward == 'free-shipping-optn',
-                'free_shipping_discount_amount' => $coupon->reward == 'free-shipping-optn'
-                    ? ($coupon->location_discount_type == 'partial' ? $coupon->location_discount_amount : 100)
-                    : 0,
-            ];
-        }
-
-        return response()->json([
-            'success' => true,
-            'coupons' => $result
-        ]);
-    }
-
-    public function getCategories() {
-        $categories = DB::table('product_categories')
-                        ->select('id', 'name')
-                        ->orderBy('name')
-                        ->get();
-
-        return response()->json($categories);
-    }
-
-    public function getProducts(Request $request) {
-        $query = DB::table('products')
-                    ->where('category_id', $request->category_id)
-                    ->orderBy('name')
-                    ->select('id', 'name')
-                    ->get();
-
-        return response()->json($query);
-    }
-
-
-    public function redeem($id)
-    {
-        $userId = Auth::id();
-
-
-        $coupon = DB::table('coupon_new')
-            ->where('id', $id)
-            ->where('status', 1)
-            ->first();
-
-        if (!$coupon) {
-            return response()->json(['error' => 'Coupon not found or inactive.'], 404);
-        }
-
-        $exists = DB::table('coupon_redemptions')
-            ->where('user_id', $userId)
-            ->where('coupon_id', $id)
-            ->exists();
-
-        if ($exists) {
-            return response()->json(['error' => 'You already redeemed this coupon.'], 409);
-        }
-
-
-        DB::table('coupon_redemptions')->insert([
-            'user_id' => $userId,
-            'coupon_id' => $id,
-            'redeemed_at' => now()
-        ]);
-
-        return response()->json(['success' => 'Coupon redeemed successfully.']);
-    }
-
-    public function getUserCoupons()
-    {
-        $userId = auth()->id();
-
-        $coupons = DB::table('coupon_new')
-        ->where('start_date', '<=', now())
-        ->where('end_date', '>=', now())
-        ->whereIn('id', function($q) use ($userId) {
-            $q->select('coupon_id')
-            ->from('coupon_redemptions')
-            ->where('user_id', $userId);
+                });
         })
         ->get();
 
-        return response()->json(['coupons' => $coupons]);
-    }
-    public function validateCoupon(Request $request)
-    {
-        $request->validate([
-            'coupon_code' => 'required|string',
-            'order_amount' => 'required|numeric',
+    $result = [];
+
+    $cartItems = Auth::check()
+        ? Cart::where('user_id', Auth::id())->get()
+        : collect(session('cart', []));
+
+    $cartQty = $cartItems->sum('qty');
+    $cartTotal = $cartItems->sum(fn($item) => ($item['price'] ?? 0) * ($item['qty'] ?? 0));
+    $cartProductIds = $cartItems->pluck('product_id')->map(fn($id) => (string) $id)->toArray();
+
+    $cartHasExcludedCategory = Product::whereIn('id', $cartProductIds)
+        ->where('category_id', 1)
+        ->exists();
+
+    if ($cartHasExcludedCategory) {
+        return response()->json([
+            'success' => true,
+            'coupons' => []
         ]);
+    }
 
-        $coupon = Coupon::where('coupon_code', $request->coupon_code)
-            ->where('status', 'ACTIVE')
-            ->whereRaw("CONCAT(start_date, ' ', start_time) <= ?", [now()])
-            ->whereRaw("CONCAT(end_date, ' ', end_time) >= ?", [now()])
-            ->first();
-
-        if (!$coupon) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid coupon code'
-            ]);
-        }
-
+    foreach ($eligibleCoupons as $coupon) {
         if (Auth::check()) {
             $alreadyUsed = DB::table('coupon_sales')
                 ->where('coupon_id', $coupon->id)
@@ -1208,27 +1026,211 @@ class CouponController extends Controller
                 ->exists();
 
             if ($alreadyUsed) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'You have already used this coupon.'
-                ]);
+                continue;
             }
         }
 
-        if ($request->order_amount < $coupon->purchase_amount) {
-            return response()->json([
-                'success' => false,
-                'message' => "Minimum order amount of ₱{$coupon->purchase_amount} required"
-            ]);
+        $totalUsed = CouponCart::where('coupon_id', $coupon->id)
+            ->where('status', 1)
+            ->sum('total_usage');
+
+        $customerUsed = 0;
+        if (Auth::check()) {
+            $customerUsed = CouponCart::where('coupon_id', $coupon->id)
+                ->where('status', 1)
+                ->where('customer_id', Auth::id())
+                ->sum('total_usage');
         }
 
-        if ($coupon->free_products) {
-            $coupon->load('freeProducts');
+        if ($coupon->usage_limit !== null && $totalUsed >= $coupon->usage_limit) continue;
+        if ($coupon->customer_limit !== null && $customerUsed >= $coupon->customer_limit) continue;
+
+        if ($coupon->purchase_combination) {
+            if ($coupon->purchase_qty && $coupon->purchase_qty > 0) {
+                if (($coupon->purchase_qty_type === 'min' || empty($coupon->purchase_qty_type)) && $cartQty < $coupon->purchase_qty) continue;
+                if ($coupon->purchase_qty_type === 'max' && $cartQty > $coupon->purchase_qty) continue;
+                if ($coupon->purchase_qty_type === 'exact' && $cartQty != $coupon->purchase_qty) continue;
+            }
+
+            if ($coupon->purchase_amount && $coupon->purchase_amount > 0) {
+                if (($coupon->purchase_amount_type === 'min' || empty($coupon->purchase_amount_type)) && $cartTotal < $coupon->purchase_amount) continue;
+                if ($coupon->purchase_amount_type === 'max' && $cartTotal > $coupon->purchase_amount) continue;
+                if ($coupon->purchase_amount_type === 'exact' && $cartTotal != $coupon->purchase_amount) continue;
+            }
+
+            if ($coupon->purchase_product_id) {
+                $requiredIds = array_filter(explode('|', $coupon->purchase_product_id));
+                $hasRequiredProduct = false;
+
+                foreach ($requiredIds as $requiredId) {
+                    if (in_array((string) $requiredId, $cartProductIds)) {
+                        $hasRequiredProduct = true;
+                        break;
+                    }
+                }
+
+                if (!$hasRequiredProduct) continue;
+            }
         }
 
+        $free_products = null;
+        if ($coupon->free_product_id) {
+            $freeProductIds = array_filter(explode('|', $coupon->free_product_id), fn($val) => !is_null($val) && $val !== '');
+            $free_products = Product::with('photos')->whereIn('id', $freeProductIds)->get();
+        }
+
+        $result[] = [
+            'id' => $coupon->id,
+            'code' => $coupon->coupon_code,
+            'name' => $coupon->name,
+            'description' => $coupon->description,
+            'terms' => $coupon->terms_and_conditions,
+            'type' => $coupon->amount_discount_type == 1 ? 'amount' : 'product',
+            'discount_type' => $coupon->reward == 'free-shipping-optn'
+                ? ($coupon->location_discount_type == 'partial' ? 'amount' : 'percent')
+                : ($coupon->percentage > 0 ? 'percent' : 'amount'),
+            'discount' => $coupon->percentage > 0 ? $coupon->percentage : $coupon->amount,
+            'applies_to' => $coupon->free_product_id ? 'free_product' : ($coupon->purchase_product_id ? 'product' : 'cart'),
+            'purchase_product_id' => $coupon->purchase_product_id,
+            'free_products' => $free_products ?? [],
+            'combination_allowed' => $coupon->combination == 1,
+            'total_usage_limit' => $coupon->usage_limit,
+            'total_usage_used' => $totalUsed,
+            'customer_limit' => $coupon->customer_limit,
+            'customer_usage_used' => $customerUsed,
+            'status' => 'valid',
+            'location' => $coupon->location,
+            'reward' => $coupon->reward,
+            'free_shipping' => $coupon->reward == 'free-shipping-optn',
+            'free_shipping_discount_amount' => $coupon->reward == 'free-shipping-optn'
+                ? ($coupon->location_discount_type == 'partial' ? $coupon->location_discount_amount : 100)
+                : 0,
+        ];
+    }
+
+    return response()->json([
+        'success' => true,
+        'coupons' => $result
+    ]);
+}
+
+public function getCategories() {
+    $categories = DB::table('product_categories')
+                    ->select('id', 'name')
+                    ->orderBy('name')
+                    ->get();
+
+    return response()->json($categories);
+}
+
+public function getProducts(Request $request) {
+    $query = DB::table('products')
+                ->where('category_id', $request->category_id)
+                ->orderBy('name')
+                ->select('id', 'name')
+                ->get();
+
+    return response()->json($query);
+}
+
+
+    public function redeem($id)
+{
+    $userId = Auth::id();
+
+
+    $coupon = DB::table('coupon_new')
+        ->where('id', $id)
+        ->where('status', 1)
+        ->first();
+
+    if (!$coupon) {
+        return response()->json(['error' => 'Coupon not found or inactive.'], 404);
+    }
+
+    $exists = DB::table('coupon_redemptions')
+        ->where('user_id', $userId)
+        ->where('coupon_id', $id)
+        ->exists();
+
+    if ($exists) {
+        return response()->json(['error' => 'You already redeemed this coupon.'], 409);
+    }
+
+
+    DB::table('coupon_redemptions')->insert([
+        'user_id' => $userId,
+        'coupon_id' => $id,
+        'redeemed_at' => now()
+    ]);
+
+    return response()->json(['success' => 'Coupon redeemed successfully.']);
+}
+public function getUserCoupons()
+{
+    $userId = auth()->id();
+
+    $coupons = DB::table('coupon_new')
+    ->where('start_date', '<=', now())
+    ->where('end_date', '>=', now())
+    ->whereIn('id', function($q) use ($userId) {
+        $q->select('coupon_id')
+          ->from('coupon_redemptions')
+          ->where('user_id', $userId);
+    })
+    ->get();
+
+    return response()->json(['coupons' => $coupons]);
+}
+public function validateCoupon(Request $request)
+{
+    $request->validate([
+        'coupon_code' => 'required|string',
+        'order_amount' => 'required|numeric',
+    ]);
+
+    $coupon = Coupon::where('coupon_code', $request->coupon_code)
+        ->where('status', 'ACTIVE')
+        ->whereRaw("CONCAT(start_date, ' ', start_time) <= ?", [now()])
+        ->whereRaw("CONCAT(end_date, ' ', end_time) >= ?", [now()])
+        ->first();
+
+    if (!$coupon) {
         return response()->json([
-            'success' => true,
-            'coupon' => $coupon
+            'success' => false,
+            'message' => 'Invalid coupon code'
         ]);
     }
+
+    if (Auth::check()) {
+        $alreadyUsed = DB::table('coupon_sales')
+            ->where('coupon_id', $coupon->id)
+            ->where('customer_id', Auth::id())
+            ->exists();
+
+        if ($alreadyUsed) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You have already used this coupon.'
+            ]);
+        }
+    }
+
+    if ($request->order_amount < $coupon->purchase_amount) {
+        return response()->json([
+            'success' => false,
+            'message' => "Minimum order amount of ₱{$coupon->purchase_amount} required"
+        ]);
+    }
+
+    if ($coupon->free_products) {
+        $coupon->load('freeProducts');
+    }
+
+    return response()->json([
+        'success' => true,
+        'coupon' => $coupon
+    ]);
+}
+
 }
