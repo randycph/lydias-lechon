@@ -480,9 +480,12 @@ class FrontendController extends Controller
 
             
 
-        $formattedEligibleCoupons = $eligibleCoupons
-            ->map(fn ($coupon) => $formatCoupon($coupon, $uid))
-            ->values();
+        $formattedEligibleCoupons = collect(
+            $eligibleCoupons
+                ->map(fn ($coupon) => $formatCoupon($coupon, $uid))
+                ->values()
+                ->all()
+        );
 
         $eligibleCoupons = $formattedEligibleCoupons;
 
@@ -613,7 +616,7 @@ class FrontendController extends Controller
             $sale = SalesHeader::with(['items', 'items.product'])->find(session()->get('edit_sales_header_id'));
         }
         $allCoupons = $formattedEligibleCoupons
-            ->merge($eligibleAutoCoupons->values())
+            ->merge($eligibleAutoCoupons)
             ->values();
 
         return view('v2.checkout.checkout', compact(
