@@ -699,6 +699,7 @@ Route::group(['middleware' => ['authenticated', 'cmsUserOnly']], function () {
 
     // Coupon
     Route::resource('/admin/coupons','EcommerceControllers\CouponController');
+    Route::post('/insert_coupon', [CouponController::class, 'insert_coupons'])->name('coupon.insert');
     Route::get('/admin/coupon/{id}/{status}', 'EcommerceControllers\CouponController@update_status')->name('coupon.change-status');
     Route::post('/admin/coupon-single-delete', 'EcommerceControllers\CouponController@single_delete')->name('coupon.single.delete');
     Route::get('/admin/coupon-restore/{id}', 'EcommerceControllers\CouponController@restore')->name('coupon.restore');
