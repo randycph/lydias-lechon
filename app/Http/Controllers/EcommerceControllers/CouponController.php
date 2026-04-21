@@ -104,7 +104,6 @@ class CouponController extends Controller
     $isDiscountAmount = $request->reward === 'discount-amount-optn';
     $isDiscountPercentage = $request->reward === 'discount-percentage-optn';
     $isFreeProduct = $request->reward === 'free-product-optn';
-    $isSpecificProductDiscount = $request->product_discount === 'specific';
 
     $scopeCustomerId = null;
     if ($isSpecificCustomer) {
@@ -112,24 +111,37 @@ class CouponController extends Controller
         $scopeCustomerId = !empty($customers) ? implode('|', $customers) . '|' : null;
     }
 
-    $location = null;
+    /*
+     |------------------------------------------------------------
+     | IMPORTANT:
+     | These defaults match your CURRENT DB schema:
+     | location = NOT NULL default 'all'
+     | location_discount_amount = NOT NULL default 0.00
+     |------------------------------------------------------------
+     */
+    $location = 'all';
     $locationDiscountType = null;
-    $locationDiscountAmount = null;
+    $locationDiscountAmount = 0;
 
     if ($isFreeShipping) {
         $locations = $request->input('location', []);
-        $location = !empty($locations) ? implode('|', $locations) . '|' : null;
+        $location = !empty($locations) ? implode('|', $locations) . '|' : 'all';
         $locationDiscountType = $request->input('discount_type');
-        $locationDiscountAmount = $request->filled('shipping_fee_discount_amount')
-            ? $request->input('shipping_fee_discount_amount')
-            : null;
+
+        $locationDiscountAmount = $request->input('discount_type') === 'partial'
+            ? (float) $request->input('shipping_fee_discount_amount', 0)
+            : 0;
     }
 
     $amountDiscountType = in_array($request->reward, ['discount-amount-optn', 'discount-percentage-optn'])
         ? ($request->input('amount_discount') ?? 1)
+        : 1;
+
+    $productDiscount = $amountDiscountType == 2
+        ? $request->input('product_discount')
         : null;
 
-    $discountProductId = $isSpecificProductDiscount
+    $discountProductId = ($amountDiscountType == 2 && $request->input('product_discount') === 'specific')
         ? $request->input('discount_productid')
         : null;
 
@@ -140,43 +152,35 @@ class CouponController extends Controller
         $isDiscountAmount,
         $isDiscountPercentage,
         $isFreeProduct,
-        $amountDiscountType,
-        $discountProductId,
         $scopeCustomerId,
         $location,
         $locationDiscountType,
         $locationDiscountAmount,
-        &$coupon
+        $amountDiscountType,
+        $productDiscount,
+        $discountProductId
     ) {
         $coupon = Coupon::create([
-            'coupon_code' => $isManual
-                ? $request->input('code')
-                : $request->input('name'),
-
+            'coupon_code' => $isManual ? $request->input('code') : $request->input('name'),
             'name' => $request->input('name'),
             'description' => $request->input('description'),
             'terms_and_conditions' => $request->input('terms_and_conditions'),
             'activation_type' => $request->input('coupon_activation'),
             'customer_scope' => $request->input('coupon_scope'),
-
             'scope_customer_id' => $isSpecificCustomer ? $scopeCustomerId : null,
 
             'location' => $location,
             'location_discount_type' => $locationDiscountType,
             'location_discount_amount' => $locationDiscountAmount,
 
-            'amount' => $isDiscountAmount ? $request->input('discount_amount') : null,
+            'amount' => $isDiscountAmount ? $request->input('discount_amount') : 0,
             'percentage' => $isDiscountPercentage ? $request->input('discount_percentage') : null,
             'free_product_id' => $isFreeProduct ? $request->input('free_product_id') : null,
 
             'status' => $request->has('status') ? 'ACTIVE' : 'INACTIVE',
-
             'amount_discount_type' => $amountDiscountType,
-            'product_discount' => $amountDiscountType == 2
-                ? $request->input('product_discount')
-                : null,
+            'product_discount' => $productDiscount,
             'discount_product_id' => $discountProductId,
-
             'reward' => $request->input('reward'),
             'user_id' => Auth::id(),
         ]);
