@@ -290,51 +290,46 @@ class ListingHelper
 
             $models->where($condition['field'], $condition['operator'], $condition['value']);
             if ($condition['field'] === 'status' && (isset($_GET['order_status']) && strtoupper($_GET['order_status']) === 'CANCELLED')) {
-                $models->orWhere('status', 'CANCELLED')->where('has_sub', 0);
-            }
-
-            if ($condition['field'] === 'status' && (isset($_GET['order_status']) && strtoupper($_GET['order_status']) === 'ABANDONED')) {
-                $models->orWhere('status', 'ABANDONED')->where('has_sub', 0);
+                $models->orWhere('status', 'CANCELLED');
             }
         }
 
-        $searchTerms = $this->get_search_terms();
+        $models->where(function($models) use ($search, $searchFields, $customQuery, $customQueryFields) {
+            foreach ($searchFields as $fieldName) {
+                if (in_array($fieldName, $customQueryFields) <= -1) {
+                    $models->orWhere($fieldName, 'like', '%' . $search . '%');
+                }
+            }
 
-        $models->where(function ($query) use ($searchTerms, $searchFields, $customQuery, $customQueryFields) {
-
-            foreach ($searchTerms as $term) {
-
-                $query->orWhere(function ($q) use ($term, $searchFields, $customQuery, $customQueryFields) {
-
-                    foreach ($searchFields as $fieldName) {
-                        if (!in_array($fieldName, $customQueryFields)) {
-                            $q->orWhere($fieldName, 'like', '%' . $term . '%');
-                        }
-                    }
-
-                    foreach ($customQuery as $raw) {
-                        $q->orWhereRaw($raw, ['%' . $term . '%']);
-                    }
-                });
+            foreach ($customQuery as $query) {
+                $models->orWhereRaw($query, ['%' . $search . '%']);
             }
         });
 
         return $models->paginate($perPage);
     }
+    public function simple_search_query($query, array $fields)
+{
 
-    private function get_search_terms(): array
-    {
-        $search = $this->get_search_string();
+    if (request()->filled('search') && !empty($fields)) {
+        $search = request('search');
 
-        if (!$search) {
-            return [];
-        }
-
-        return collect(explode(',', $search))
-            ->map(fn ($v) => trim($v))
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
+        $query->where(function ($q) use ($fields, $search) {
+            foreach ($fields as $field) {
+                $q->orWhere($field, 'LIKE', "%{$search}%");
+            }
+        });
     }
+
+
+    $sortBy = request()->input('orderBy', $this->sortBy ?? 'updated_at');
+    $order = request()->input('sort', $this->order ?? 'desc');
+
+    $query->orderBy($sortBy, $order);
+
+
+    $limit = request()->input('perPage', $this->limit ?? 15);
+
+    return $query->paginate($limit);
+}
 }

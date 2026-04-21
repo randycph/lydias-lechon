@@ -3,7 +3,6 @@
 namespace App\EcommerceModel;
 
 use App\Models\ActivityLog;
-use App\Models\Concerns\LogsActivityDiff;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,10 +10,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class GiftCertificate extends Model
 {
     use SoftDeletes;
-    use LogsActivityDiff;
 
     protected $table = 'gift_certificate';
-    protected $fillable = ['code','amount','gc_type','status','user_id','sales_header_id','serial_number', 'claimed_at'];
+    protected $fillable = ['code','amount','gc_type','status','user_id','sales_header_id','serial_number', 'claimed_at','customer_id'];
 
     public function user()
     {
