@@ -211,10 +211,8 @@
                                                             @endphp
 
                                                             <li>
-                                                                @if ($sale?->delivery_status <> 'Open Date')
-                                                                Date: {{ \Carbon\Carbon::parse($address->delivery_date)->format('F d, Y') }}<br>
-                                                                Time: {{ \Carbon\Carbon::parse($address->delivery_time)->format('h:i A') }}<br>
-                                                                @endif
+                                                                Date: {{ $sale?->delivery_status <> 'Open Date' ? \Carbon\Carbon::parse($address->delivery_date)->format('F d, Y') : 'Open Date' }}<br>
+                                                                Time: {{ $sale?->delivery_status <> 'Open Date' ? \Carbon\Carbon::parse($address->delivery_time)->format('h:i A') : '--:-- --' }}<br>
                                                                 Name: {{ $address->contact_person ?? $sale->customer_name }}<br>
                                                                 Contact #: {{ $address->contact_tel ?? $sale->customer_contact_number }}<br>
                                                                 QTY/Size: {{ $totalQty }}<br>
@@ -257,10 +255,8 @@
                                                             $saleDetail = $sale->items ? $sale->items->first() : null;
                                                             $deliveryDate = $saleDetail ? date('F d, Y h:i A', strtotime($saleDetail?->delivery_date)) : 'N/A';
                                                         @endphp
-                                                            @if ($sale?->delivery_status <> 'Open Date')
-                                                            Date: {{ \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y') }}<br>
-                                                            Time: {{ \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('h:i A') }}<br>
-                                                            @endif
+                                                            Date: {{ $sale?->delivery_status <> 'Open Date' ? \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y') : 'Open Date' }}<br>
+                                                            Time: {{ $sale?->delivery_status <> 'Open Date' ? \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('h:i A') : '--:-- --' }}<br>
                                                             Name: {{ $saleDetail?->contact_person ?? $sale->customer_name }}<br>
                                                             Contact #: {{ $saleDetail?->contact_tel ?? $sale->customer_contact_number }}<br>
                                                             QTY/Size: {{ count($sale->items) }} <br>
@@ -273,10 +269,8 @@
                                                         $saleDetail = $sale->items ? $sale->items->first() : null;
                                                         $deliveryDate = $saleDetail ? date('F d, Y h:i A', strtotime($saleDetail?->delivery_date)) : 'N/A';
                                                     @endphp
-                                                    @if ($sale?->delivery_status <> 'Open Date')
-                                                    Date: {{ \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y') }}<br>
-                                                    Time: {{ \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('h:i A') }}<br>
-                                                    @endif
+                                                    Date: {{ $sale?->delivery_status <> 'Open Date' ? \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y') : 'Open Date' }}<br>
+                                                    Time: {{ $sale?->delivery_status <> 'Open Date' ? \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('h:i A') : '--:-- --' }}<br>
                                                     Name: {{ $saleDetail?->contact_person ?? $sale->customer_name }}<br>
                                                     Contact #: {{ $saleDetail?->contact_tel ?? $sale->customer_contact_number }}<br>
                                                     QTY/Size: {{ count($sale->items) }} <br>
