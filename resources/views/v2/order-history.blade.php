@@ -128,44 +128,48 @@
                                         </div>
                                         @endif
 
-                                        @if ($sale->couponUsed && count($sale->couponUsed) > 0 && $sale->discount_amount > 0)
-                                        <ul class="italic">
-                                            @foreach ($sale->couponUsed as $coupon)
-                                                <li class="pl-4 flex items-center text-sm justify-between">
-                                                    <div>{{ $coupon->coupon_code }}</div>
-                                                    <div class="text-right text-red-500 italic">
-                                                    @if ($coupon?->coupon?->free_product_id)
-                                                        <span class="text-green-500">Free Products </span>
-                                                        @php $products = explode('|', $coupon->coupon->free_product_id); @endphp
-                                                        <ul class="mt-2">
-                                                            @foreach ($products as $productId)
-                                                                @php $product = \App\Models\Product::find($productId); @endphp
-                                                                @if ($product)
-                                                                    <li class="text-green-500">
-                                                                        {{ $product->name }}
-                                                                    </li>
-                                                                @endif
-                                                            @endforeach
-                                                        </ul>
-                                                    @else
-                                                        <div>-₱{{ number_format($coupon->discount_used ?? 0, 2) }}</div>
-                                                    @endif
+                                        @if ($sale->couponUsed && count($sale->couponUsed) > 0 || $sale->discount_amount > 0)
+                                            @if ($sale->couponUsed && count($sale->couponUsed) > 0)
+                                            <ul class="italic">
+                                                @foreach ($sale->couponUsed as $coupon)
+                                                    <li class="pl-4 flex items-center text-sm justify-between">
+                                                        <div>{{ $coupon->coupon_code }}</div>
+                                                        <div class="text-right text-red-500 italic">
+                                                        @if ($coupon?->coupon?->free_product_id)
+                                                            <span class="text-green-500">Free Products </span>
+                                                            @php $products = explode('|', $coupon->coupon->free_product_id); @endphp
+                                                            <ul class="mt-2">
+                                                                @foreach ($products as $productId)
+                                                                    @php $product = \App\Models\Product::find($productId); @endphp
+                                                                    @if ($product)
+                                                                        <li class="text-green-500">
+                                                                            {{ $product->name }}
+                                                                        </li>
+                                                                    @endif
+                                                                @endforeach
+                                                            </ul>
+                                                        @else
+                                                            <div>-₱{{ number_format($coupon->discount_used ?? 0, 2) }}</div>
+                                                        @endif
 
-                                                </li>
-                                            @endforeach
-                                        </ul>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                            @else
+                                                <div>-₱{{ number_format($sale->discount_amount ?? 0, 2) }}</div>
+                                            @endif
                                         @endif
 
                                         @if ($sale->net_amount && $sale->net_amount > 0)
                                         <div class="flex items-center justify-between w-full">
                                             <div class="text-sm text-black font-bold">Total</div>
-                                            <div class="text-sm font-bold">₱{{ number_format($total <= 0 ? 0 : $total, 2) }}</div>
+                                            <div class="text-sm font-bold">₱₱{{number_format($sale->items->sum('net_amount') + $sale->delivery_fee_amount - ($sale->discount_amount ?? 0), 2)}}</div>
                                         </div>
                                         @endif
-                                        @if ($sale->payments && count($sale->payments) > 0)
+                                        @if ($sale->payments && count($sale->payments->where('status','PAID')->where('is_discount',0)->sum('amount') > 0))
                                         <div class="flex items-center justify-between w-full">
                                             <div class="text-sm text-black font-bold">Amount Paid</div>
-                                            <div class="text-sm text-red-600 font-bold italic">- ₱{{ number_format($amountPaid <= 0 ? 0 : $amountPaid, 2) }}</div>
+                                            <div class="text-sm text-red-600 font-bold italic">- ₱{{ number_format($sale->payments->where('status','PAID')->where('is_discount',0)->sum('amount'), 2) }}</div>
                                         </div>
                                         @endif
 
