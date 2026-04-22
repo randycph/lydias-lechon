@@ -90,7 +90,7 @@
 					@enderror
 				</div>
 				<div class="form-group">
-					<label class="d-block">Distribution Type</label>
+					<label class="d-block">Distribution Type *</label>
 					<div class="row" style="padding-bottom: 10px;">
 						<div class="col-6">
 							<div class="custom-control custom-radio">
@@ -108,7 +108,7 @@
 						</div>
 					</div>
 					<div class="mb-3" id="coupon-code" style="display: @if(old('coupon_activation', $coupon->activation_type) == 'manual' || $coupon->activation_type == 'manual') block @else none @endif;">
-						<label class="d-block">Coupon Code</label>
+						<label class="d-block">Coupon Code *</label>
 						<input type="text" name="code" class="form-control @error('code') is-invalid @enderror" value="{{ old('code',$coupon->coupon_code) }}">
 						@error('code')
 							<span class="invalid-feedback" role="alert">
@@ -122,14 +122,14 @@
 					<div class="row" style="padding-bottom: 10px;">
 						<div class="col-6">
 							<div class="custom-control custom-radio">
-								<input type="radio" id="coupon-scope-all" name="coupon_scope" class="custom-control-input" value="all" onclick="ShowHideDiv()" @if($coupon->customer_scope == 'all') checked @endif>
+								<input type="radio" id="coupon-scope-all" name="coupon_scope" class="custom-control-input" value="all" onclick="ShowHideDiv()" @if(old('coupon_scope', $coupon->customer_scope) == 'all') checked @endif>
 								<label class="custom-control-label" for="coupon-scope-all">All</label>
 							</div>
 							<small style="font-style: italic;">Coupon will be applicable to all customers who completed an activity.</small>
 						</div>
 						<div class="col-6">
 							<div class="custom-control custom-radio">
-								<input type="radio" id="coupon-scope-specific" name="coupon_scope" class="custom-control-input" value="specific" onclick="ShowHideDiv()" @if($coupon->customer_scope == 'specific') checked @endif>
+								<input type="radio" id="coupon-scope-specific" name="coupon_scope" class="custom-control-input" value="specific" onclick="ShowHideDiv()" @if(old('coupon_scope', $coupon->customer_scope) == 'specific') checked @endif>
 								<label class="custom-control-label" for="coupon-scope-specific">Specific</label>
 							</div>
 							<small style="font-style: italic;">Only the specific customer will be able to use and claim the coupon reward.</small>
@@ -137,11 +137,11 @@
 					</div>
 				</div>
 				<div class="form-group">
-					<div class="mb-3 reward-option" id="customer-optn" style="display:@if($coupon->customer_scope == 'specific') block @else none @endif">
+					<div class="mb-3" id="customer-optn" style="display: @if(old('coupon_scope', $coupon->customer_scope) == 'specific') block @else none @endif;">
 						<label class="d-block">Customer Name *</label>
-						<select class="select2" name="customer[]" multiple="multiple">
+						<select class="form-control select2" name="customer[]" multiple="multiple">
 							@foreach($customers as $customer)
-								<option @if(in_array($customer->id, $selectedCustomers)) selected @endif value="{{$customer->id}}">{{ $customer->name }}</option>
+								<option @if(in_array($customer->id, old('customer', $selectedCustomers ?? []))) selected @endif value="{{$customer->id}}">{{ $customer->name }}</option>
 							@endforeach
 						</select>
 						@error('customer')
@@ -152,13 +152,13 @@
 					</div>
 				</div>
 				<div class="form-group">
-					<label class="d-block">Reward</label>
+					<label class="d-block">Reward *</label>
 					<select class="custom-select @error('reward') is-invalid @enderror" id="reward-optn" name="reward">
-						<option label="Choose Reward"></option>
-						<option @if(isset($coupon->reward) && $coupon->reward == 'free-shipping-optn') selected @endif value="free-shipping-optn">Free Shipping</option>
+						<option value="" class="text-secondary">Select Reward</option>
+						<option @if(old('reward', $coupon->reward) == 'free-shipping-optn') selected @endif value="free-shipping-optn">Free Shipping</option>
 						<option @if(isset($coupon->reward) && $coupon->reward == 'discount-amount-optn')selected @endif value="discount-amount-optn">Discount Amount</option>
-						<option @if(isset($coupon->reward) && $coupon->reward == 'discount-percentage-optn') selected @endif value="discount-percentage-optn">Discount Percentage</option>
-						<option @if(isset($coupon->reward) && $coupon->reward == 'free-product-optn') selected @endif value="free-product-optn">Free Product/Gift</option>
+						<option @if(old('reward', $coupon->reward) == 'discount-percentage-optn') selected @endif value="discount-percentage-optn">Discount Percentage</option>
+						<option @if(old('reward', $coupon->reward) == 'free-product-optn') selected @endif value="free-product-optn">Free Product/Gift</option>
 					</select>
 					@error('reward')
 						<span class="invalid-feedback" role="alert">
@@ -169,19 +169,18 @@
 
 				@php
 					$arr_loc = [];
-					$locs = explode('|',$coupon->location);
+					$locs = old('location', !empty($coupon->location) ? explode('|', $coupon->location) : []);
 					foreach($locs as $l){
 						array_push($arr_loc,$l);
 					}
 				@endphp
 				<div class="form-group">
 					<div class="mb-3 reward-option" id="free-shipping-optn" 
-						style="display:@if(isset($coupon->location) || $coupon->reward == 'free-shipping-optn' || $errors->has('location')) block @else none @endif">						<label class="d-block">Location</label>
+						style="display:@if(old('reward', $coupon->reward) == 'free-shipping-optn') block @else none @endif"><label class="d-block">Location *</label>
 						<select class="form-control select2 select-location" name="location[]" multiple="multiple" style="min-height: 32px;">
-							<option label="Select Area"></option>
-							<option value="all" @if(in_array('all',$arr_loc)) selected @endif>All Area</option>
+							<option value="all">All Area</option>
 							@foreach($locations as $location)
-								<option @if(in_array($location->name,$arr_loc)) selected @endif value="{{$location->name}}">{{ $location->name }}</option>
+								<option @if(in_array($location->city, $arr_loc)) selected @endif value="{{$location->city}}">{{ $location->city }}</option>
 							@endforeach
 						</select>
 						@error('location')
@@ -191,24 +190,24 @@
 						@enderror
 
 						<br><br>
-						<label class="d-block">Discount Type</label>
+						<label class="d-block">Discount Type *</label>
 						<div class="row">
 							<div class="col-6">
 								<div class="custom-control custom-radio">
-									<input type="radio" id="coupon-discount-type-partial" name="discount_type" class="custom-control-input" value="partial" onchange="sf_discount_type()" @if($coupon->location_discount_type == 'partial') checked @endif>
+									<input type="radio" id="coupon-discount-type-partial" name="discount_type" class="custom-control-input" value="partial" onchange="sf_discount_type()" @if(old('discount_type', $coupon->location_discount_type) == 'partial') checked @endif>
 									<label class="custom-control-label" for="coupon-discount-type-partial">Partial</label>
 								</div>
 							</div>
 							<div class="col-6">
 								<div class="custom-control custom-radio">
-									<input type="radio" id="coupon-discount-type-full" name="discount_type" class="custom-control-input" value="full" onchange="sf_discount_type()" @if($coupon->location_discount_type == 'full') checked @endif>
+									<input type="radio" id="coupon-discount-type-full" name="discount_type" class="custom-control-input" value="full" onchange="sf_discount_type()" @if(old('discount_type', $coupon->location_discount_type) == 'full') checked @endif>
 									<label class="custom-control-label" for="coupon-discount-type-full">Full</label>
 								</div>
 							</div>
 						</div>
 
-						<label class="mg-t-10" id="discount_amount_label" style="display: @if($coupon->location_discount_type == 'full') none @else block @endif;">Shipping Fee Discount Amount</label>
-						<input type="number" name="shipping_fee_discount_amount" class="form-control @error('shipping_fee_discount_amount') is-invalid @enderror" id="discount_amount_input" value="{{ number_format($coupon->location_discount_amount, 0) }}" style="display: @if($coupon->location_discount_type == 'full') none @else block @endif;">
+						<label class="mg-t-10" id="discount_amount_label" style="display: @if(old('discount_type', $coupon->location_discount_type) == 'full') none @else block @endif;">Shipping Fee Discount Amount *</label>
+						<input type="number" name="shipping_fee_discount_amount" class="form-control @error('shipping_fee_discount_amount') is-invalid @enderror" id="discount_amount_input" value="{{ old('shipping_fee_discount_amount', number_format($coupon->location_discount_amount, 0, '.', '')) }}" style="display: @if(old('discount_type', $coupon->location_discount_type) == 'full') none @else block @endif;">
 						@error('shipping_fee_discount_amount')
 							<span class="invalid-feedback" role="alert">
 								<strong>{{ $message }}</strong>
@@ -216,9 +215,9 @@
 						@enderror
 					</div>
 
-					<div class="mb-3 reward-option" id="discount-amount-optn" style="display:@if(isset($coupon->amount)) block @else none @endif">
-						<label class="d-block">Discount Amount</label>
-						<input name="discount_amount" type="number" class="form-control @error('discount_amount') is-invalid @enderror" value="{{ $coupon->amount }}" placeholder="Php">
+					<div class="mb-3 reward-option" id="discount-amount-optn" style="display:@if(old('reward', $coupon->reward) == 'discount-amount-optn') block @else none @endif">
+						<label class="d-block">Discount Amount *</label>
+						<input name="discount_amount" type="number" class="form-control @error('discount_amount') is-invalid @enderror" value="{{ old('discount_amount', $coupon->amount) }}" placeholder="Php">
 						@error('discount_amount')
 							<span class="invalid-feedback" role="alert">
 								<strong>{{ $message }}</strong>
@@ -226,9 +225,9 @@
 						@enderror
 					</div>
 
-					<div class="mb-3 reward-option" id="discount-percentage-optn" style="display:@if(isset($coupon->percentage)) block @else none @endif">
-						<label class="d-block">Discount Percentage</label>
-						<input name="discount_percentage" type="number" class="form-control @error('discount_percentage') is-invalid @enderror" value="{{ $coupon->percentage }}" placeholder="%">
+					<div class="mb-3 reward-option" id="discount-percentage-optn" style="display:@if(old('reward', $coupon->reward) == 'discount-percentage-optn') block @else none @endif">
+						<label class="d-block">Discount Percentage % *</label>
+						<input name="discount_percentage" type="number" class="form-control @error('discount_percentage') is-invalid @enderror" value="{{ old('discount_percentage', $coupon->percentage) }}" placeholder="%">
 						@error('discount_percentage')
 							<span class="invalid-feedback" role="alert">
 								<strong>{{ $message }}</strong>
@@ -236,26 +235,26 @@
 						@enderror
 					</div>
 
-					<div id="div_product_amount" style="display: @if(isset($coupon->amount) || isset($coupon->percentage)) block @else none @endif;">
+					<div id="div_product_amount" style="display: @if(old('reward', $coupon->reward) == 'discount-amount-optn' || old('reward', $coupon->reward) == 'discount-percentage-optn') block @else none @endif;">
                 		<div class="row" style="padding-bottom: 10px;margin-top: 20px;">
 							<div class="col-6">
 								<div class="custom-control custom-radio">
-									<input type="radio" id="discount-total-amount" name="amount_discount" class="custom-control-input" value="1" onclick="product_discount_amount(1)" @if($coupon->amount_discount_type == 1) checked @endif>
+									<input type="radio" id="discount-total-amount" name="amount_discount" class="custom-control-input" value="1" onclick="product_discount_amount(1)" @if(old('amount_discount', $coupon->amount_discount_type) == 1) checked @endif>
 									<label class="custom-control-label" for="discount-total-amount">Total Amount</label>
 								</div>
 							</div>
 							<div class="col-6 d-none">
 								<div class="custom-control custom-radio">
-									<input type="radio" id="discount-product-price" name="amount_discount" class="custom-control-input" value="2" onclick="product_discount_amount(2)" @if($coupon->amount_discount_type == 2) checked @endif>
+									<input type="radio" id="discount-product-price" name="amount_discount" class="custom-control-input" value="2" onclick="product_discount_amount(2)" @if(old('amount_discount', $coupon->amount_discount_type) == 2) checked @endif>
 									<label class="custom-control-label" for="discount-product-price">Product Price</label>
 								</div>
 							</div>
 						</div>
 
-						<div class="row" style="padding-bottom: 10px;margin-top: 20px;display: @if($coupon->amount_discount_type == 2) flex @else none @endif;" id="discount_selection">
+						<div class="row" style="padding-bottom: 10px;margin-top: 20px;display: @if(old('amount_discount', $coupon->amount_discount_type) == 2) flex @else none @endif;" id="discount_selection">
 							<div class="col-6">
 								<div class="custom-control custom-radio">
-									<input type="radio" id="same-product" name="product_discount" class="custom-control-input" value="current" onchange="productdiscount('current')" @if($coupon->product_discount == 'current') checked @endif>
+									<input type="radio" id="same-product" name="product_discount" class="custom-control-input" value="current" onchange="productdiscount('current')" @if(old('product_discount', $coupon->product_discount) == 'current') checked @endif>
 									<label class="custom-control-label" for="same-product">Same Product</label>
 								</div>
 							</div>
@@ -267,17 +266,17 @@
 							</div> -->
 							<div class="col-6">
 								<div class="custom-control custom-radio">
-									<input type="radio" id="specific-product" name="product_discount" class="custom-control-input" value="specific" onchange="productdiscount('specific')" @if($coupon->product_discount == 'specific') checked @endif>
+									<input type="radio" id="specific-product" name="product_discount" class="custom-control-input" value="specific" onchange="productdiscount('specific')" @if(old('product_discount', $coupon->product_discount) == 'specific') checked @endif>
 									<label class="custom-control-label" for="specific-product">Specific Product</label>
 								</div>
 							</div>
 						</div>
 
-						<div style="display: @if($coupon->product_discount == 'specific') block @else none @endif;" id="discount_productid">
+						<div style="display: @if(old('product_discount', $coupon->product_discount) == 'specific') block @else none @endif;" id="discount_productid">
 							<select class="form-control select2" name="discount_productid">
 								<option label="Choose Product"></option>
 								@foreach($products as $product)
-									<option @if($coupon->discount_product_id == $product->id) selected @endif value="{{$product->id}}">{{ $product->name }}</option>
+									<option @if(old('discount_productid', $coupon->discount_product_id) == $product->id) selected @endif value="{{$product->id}}">{{ $product->name }}</option>
 								@endforeach
 							</select>
 						</div>
@@ -287,19 +286,19 @@
 					@php
 						$free_product_ids = [];
 
-						$coupon_free_products = explode('|',$coupon->free_product_id);
+						$coupon_free_products = old('free_product_id', !empty($coupon->free_product_id) ? explode('|', $coupon->free_product_id) : []);
 
 						foreach($coupon_free_products as $cprod){
 							array_push($free_product_ids, $cprod);
 						}
 					@endphp
 
-					<div class="mb-3 reward-option" id="free-product-optn" style="display:@if(isset($coupon->free_product_id) || $coupon->reward == 'free-product-optn') block @else none @endif">
-						<label class="d-block">Free Product</label>
+					<div class="mb-3 reward-option" id="free-product-optn" style="display:@if(old('reward', $coupon->reward) == 'free-product-optn') block @else none @endif">
+						<label class="d-block">Free Product *</label>
 						<select class="form-control select2" name="free_product_id[]" style="min-height: 32px;" multiple="multiple">
 							<option label="Choose one"></option>
 							@foreach($free_products as $product)
-								<option @if(in_array($product->id, $free_product_ids)) selected @endif value="{{$product->id}}">{{ $product->name }}</option>
+								<option @if(in_array($product->id, old('free_product_id', $free_product_ids ?? []))) selected @endif value="{{$product->id}}">{{ $product->name }}</option>
 							@endforeach
 						</select>
 						@error('free_product_id')
@@ -351,11 +350,11 @@
 						<div class="row mt-3">
 							<div class="col-6">
 								<label class="d-block">Start Time</label>
-								<input name="starttime" type="time" class="form-control" autocomplete="off" value="{{ $coupon->start_time }}">
+								<input name="starttime" type="time" class="form-control" autocomplete="off" value="{{ old('starttime', $coupon->start_time) }}">
 							</div>
 							<div class="col-6">
 								<label class="d-block">End Time</label>
-								<input name="endtime" type="time" class="form-control" autocomplete="off" value="{{ $coupon->end_time }}">
+								<input name="endtime" type="time" class="form-control" autocomplete="off" value="{{ old('endtime', $coupon->end_time) }}">
 							</div>
 						</div>
 					</div>
@@ -558,7 +557,7 @@
 			</div>
 
 			<div class="col-lg-12 mg-t-30">
-				<button class="btn btn-primary btn-sm btn-uppercase" type="button" id="btnSubmit">Update</button>
+				<button class="btn btn-primary btn-sm btn-uppercase" type="button" id="btnSubmit">Save</button>
 				<a href="{{ route('coupons.index') }}" class="btn btn-outline-secondary btn-sm btn-uppercase">Cancel</a>
 			</div>
 		</div>
@@ -886,29 +885,27 @@
 	function ShowHideDiv() {
 		var couponDateTime = document.getElementById("coupon-date-time");
 		var couponDateTimeForm = document.getElementById("coupon-date-time-form");
-		couponDateTimeForm.style.display = couponDateTime.checked ? "block" : "none";
+		if (couponDateTime && couponDateTimeForm) {
+			couponDateTimeForm.style.display = couponDateTime.checked ? "block" : "none";
+		}
 
 		var couponCustom = document.getElementById("coupon-custom");
-		if (couponCustom) {
-			var couponCustomForm = document.getElementById("coupon-custom-form");
+		var couponCustomForm = document.getElementById("coupon-custom-form");
+		if (couponCustom && couponCustomForm) {
 			couponCustomForm.style.display = couponCustom.checked ? "block" : "none";
 		}
 
 		var scopeSpecific = document.getElementById("coupon-scope-specific");
 		var customerOption = document.getElementById("customer-optn");
-		customerOption.style.display = scopeSpecific.checked ? "block" : "none";
+		if (scopeSpecific && customerOption) {
+			customerOption.style.display = scopeSpecific.checked ? "block" : "none";
+		}
 
-		var scopeAll= document.getElementById("coupon-scope-all");
-		var customerOptionAll = document.getElementById("customer-optn");
-		customerOptionAll.style.display = scopeAll.checked ? "none" : "block";
-
-		var activateManual= document.getElementById("coupon-activate-manual");
-		var couponCodeManual = document.getElementById("coupon-code");
-		couponCodeManual.style.display = activateManual.checked ? "none" : "block";
-
-		var autoManual= document.getElementById("coupon-activate-auto");
-		var couponCodeAuto = document.getElementById("coupon-code");
-		couponCodeAuto.style.display = autoManual.checked ? "none" : "block";
+		var activateManual = document.getElementById("coupon-activate-manual");
+		var couponCode = document.getElementById("coupon-code");
+		if (activateManual && couponCode) {
+			couponCode.style.display = activateManual.checked ? "block" : "none";
+		}
 	};
 
 // Points Earned start --------------------->

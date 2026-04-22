@@ -329,7 +329,7 @@ class CouponController extends Controller
         $categories =  ProductCategory::has('published_products')->where('status','PUBLISHED')->get();
       
         $customers = User::where('role_id',6)->where('is_active',1)->get();
-        $locations = Deliverablecities::distinct()->where('is_active', 1)->orderBy('name')->get(['name']);
+        $locations = Deliverablecities::distinct()->where('is_active', 1)->orderBy('city')->get(['city']);
         $free_products = Product::get();
 
         $selectedCustomers = explode('|', $coupon->scope_customer_id ?? '');
