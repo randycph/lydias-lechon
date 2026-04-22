@@ -175,11 +175,15 @@
                                         </div>
                                         @endif
 
-                                        @if (strtolower($sale->payment_status) != 'paid')
+                                        @php
+                                            $total_balance = ($sale->items->sum('net_amount') + $sale->delivery_fee_amount) - ($sale->payments->where('status', 'PAID')->sum('amount'));
+                                        @endphp
+
+                                        @if($total_balance > 0 && $sale->payments->where('status','PAID')->sum('amount') > 0)
                                         <div class="flex items-center justify-between w-full">
                                             <div class="text-sm text-black font-bold">Amount to pay</div>
                                             <div class="text-sm text-black font-bold">
-                                                ₱{{ number_format($balance <= 0 ? 0 : $balance, 2) }}
+                                                ₱{{ number_format($total_balance <= 0 ? 0 : $total_balance, 2) }}
                                             </div>
                                         </div>
                                         @endif
