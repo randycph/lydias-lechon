@@ -22,13 +22,13 @@
                 @input="onAddressInput"
                 @blur="validateSingleDeliveryField('address'); finishEditingAddress()"
                 class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md block w-full p-2.5"
-                :class="{'border-red-500': singleDeliveryErrors.delivery_address}"
+                :class="{'border-red-500': singleDeliveryErrors.address}"
                 rows="3"
             ></textarea>
 
-            <template x-if="singleDeliveryErrors.delivery_address">
+            <template x-if="singleDeliveryErrors.address">
                 <p class="text-red-500 text-xs mt-1"
-                   x-text="singleDeliveryErrors.delivery_address"></p>
+                   x-text="singleDeliveryErrors.address"></p>
             </template>
         </div>
 
@@ -36,24 +36,26 @@
         {{-- PROVINCE + CITY --}}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-            {{-- PROVINCE --}}
             <div>
-                <label class="block font-bold mb-2">
+                <label class="block font-bold mb-2 text-sm">
                     Province <span class="text-red-600">*</span>
                 </label>
 
                 <select
-                x-model="province"
-                @change="onProvinceChange()"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-                :class="{'border-red-500': singleDeliveryErrors.province}"
-            >
-                <option value="">Choose a province</option>
+                    x-model="province"
+                    @change="onProvinceChange()"
+                    @input="singleDeliveryErrors.province = ''"
+                    class="bg-white border border-gray-300 text-sm rounded-lg block w-full p-2.5"
+                    :class="{'border-red-500': singleDeliveryErrors.province}"
+                >
+                    <option value="">Choose province</option>
 
-                <template x-for="prov in provincesList" :key="prov">
-                    <option :value="prov" x-text="prov"></option>
-                </template>
-            </select>
+                    @foreach ($provinces as $province)
+                        <option value="{{ $province }}">
+                            {{ $province }}
+                        </option>
+                    @endforeach
+                </select>
 
                 <template x-if="singleDeliveryErrors.province">
                     <p class="text-red-500 text-xs mt-1"
@@ -61,57 +63,58 @@
                 </template>
             </div>
 
-            {{-- CITY --}}
             <div>
-                <label class="block font-bold mb-2">
-                    City / Municipality <span class="text-red-600">*</span>
+                <label class="block font-bold mb-2 text-sm">
+                    City <span class="text-red-600">*</span>
                 </label>
 
                 <select
-                x-model="city"
-                @change="onCityChange()"
-                :disabled="!province"
-                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 disabled:bg-gray-100"
-                :class="{'border-red-500': singleDeliveryErrors.city}"
-            >
-                <option value="">Choose a city</option>
+                    x-model="city"
+                    @change="onCityChange()"
+                    @input="singleDeliveryErrors.city = ''"
+                    :disabled="!province"
+                    class="bg-white border border-gray-300 text-sm rounded-lg block w-full p-2.5"
+                    :class="{'border-red-500': singleDeliveryErrors.city}"
+                >
+                    <option value="">Choose city</option>
 
-                <template x-for="cityName in filteredCities" :key="cityName">
-                    <option :value="cityName" x-text="cityName"></option>
-                </template>
-            </select>
+                    <template x-for="c in filteredCities" :key="`${province}-${c}`">
+                        <option :value="c" x-text="c"></option>
+                    </template>
+                </select>
 
                 <template x-if="singleDeliveryErrors.city">
                     <p class="text-red-500 text-xs mt-1"
                        x-text="singleDeliveryErrors.city"></p>
                 </template>
             </div>
+
         </div>
 
 
         {{-- BARANGAY --}}
         <div>
-            <label class="block font-bold mb-2">
+            <label class="block font-bold mb-2 text-sm">
                 Barangay
             </label>
 
             <select
-            x-model="location"
-            @change="onBarangayChange()"
-            :disabled="!city"
-            :class="{'border-red-500': singleDeliveryErrors.location}"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 disabled:bg-gray-100"
-        >
-            <option value="">Choose a barangay</option>
+                x-model="location"
+                @change="onBarangayChange()"
+                :disabled="!city"
+                class="bg-white border border-gray-300 text-sm rounded-lg block w-full p-2.5"
+                :class="{'border-red-500': singleDeliveryErrors.location}"
+            >
+                <option value="">Choose barangay</option>
 
-            <template x-for="brgy in filteredBarangay()" :key="brgy">
-                <option :value="brgy" x-text="brgy"></option>
-            </template>
-        </select>
+                <template x-for="b in filteredBarangay()" :key="`${city}-${b}`">
+                    <option :value="b" x-text="b"></option>
+                </template>
+            </select>
 
             <template x-if="singleDeliveryErrors.location">
                 <p class="text-red-500 text-xs mt-1"
-                    x-text="singleDeliveryErrors.location"></p>
+                   x-text="singleDeliveryErrors.location"></p>
             </template>
         </div>
 
@@ -144,13 +147,13 @@
                         x-init="initSingleDeliveryDatepicker($el)"
                         @change="validateSingleDeliveryField('date')"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 ps-10"
-                        :class="{'border-red-500': singleDeliveryErrors.need_date}"
+                        :class="{'border-red-500': singleDeliveryErrors.date}"
                     >
                 </div>
 
-                <template x-if="singleDeliveryErrors.need_date">
+                <template x-if="singleDeliveryErrors.date">
                     <p class="text-red-500 text-xs mt-1"
-                       x-text="singleDeliveryErrors.need_date"></p>
+                       x-text="singleDeliveryErrors.date"></p>
                 </template>
             </div>
 
@@ -163,12 +166,14 @@
                 <div class="relative">
                     <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-gray-500">
-                        <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clip-rule="evenodd" />
+                            <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clip-rule="evenodd" />
                         </svg>
                     </div>
-                    <select 
-                        x-model="need_time" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full ps-10 p-2.5"
-                        :class="{'border-red-500': singleDeliveryErrors.need_time}"
+                    <select
+                        x-model="need_time"
+                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full ps-10 p-2.5"
+                        :class="{'border-red-500': singleDeliveryErrors.time}"
+                        @change="validateSingleDeliveryField('time')"
                     >
                         <option value="">Select Hour</option>
 
@@ -180,15 +185,14 @@
                     </select>
                 </div>
 
-                <template x-if="singleDeliveryErrors.need_time">
+                <template x-if="singleDeliveryErrors.time">
                     <p class="text-red-500 text-xs mt-1"
-                       x-text="singleDeliveryErrors.need_time"></p>
+                       x-text="singleDeliveryErrors.time"></p>
                 </template>
             </div>
         </div>
 
-        <div
-            class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
+        <div class="text-yellow-700 bg-yellow-100 border-l-4 border-yellow-500 p-3 mt-3 rounded">
             <div>We've pre-selected the earliest available time for your order. You may adjust the date and time to your preference. For bookings earlier that our pre-selected schedule, please contact our <a href="/contact-us" target="_blank" class="underline">Hotline</a> directly.</div>
         </div>
 
