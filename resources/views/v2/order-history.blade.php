@@ -154,7 +154,7 @@
                                                     @endforeach
                                                 </ul>
                                                 @else
-                                                    <div>-₱{{ number_format($sale->discount_amount ?? 0, 2) }}</div>
+                                                    <div class="text-red-600">-₱{{ number_format($sale->discount_amount ?? 0, 2) }}</div>
                                                 @endif
                                             @endif
 
