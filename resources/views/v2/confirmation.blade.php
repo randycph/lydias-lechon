@@ -99,8 +99,8 @@
                     <div class="flex items-center text-sm justify-between px-4 py-3 border-b border-gray-200">
                         <div>Delivery Date</div>
                         <div class="text-right">
-                            <div>{{ \Carbon\Carbon::parse($sales->items()->first()->delivery_date)->format('F d, Y') }}</div>
-                            <div>{{ \Carbon\Carbon::parse($sales->items()->first()->delivery_date)->format('g:i A') }}</div>
+                            <div>{{ $sales?->delivery_status <> 'Open Date' ? \Carbon\Carbon::parse($sales->items()->first()->delivery_date)->format('F d, Y') : 'Open Date' }}</div>
+                            <div>{{ $sales?->delivery_status <> 'Open Date' ? \Carbon\Carbon::parse($sales->items()->first()->delivery_date)->format('g:i A') : '--:-- --' }}</div>
                         </div>
                     </div>
                     @endif
@@ -304,40 +304,18 @@
                         </div>
                     </div>
                     @endif
-                    @if ($sales->couponUsed && count($sales->couponUsed) > 0 && $sales->discount_amount > 0)
-                    <div class="text-sm px-4 pt-3">
-                        Discount
+                    @if ($sales->discount_amount && $sales->discount_amount > 0)
+                    <div class="flex items-center text-sm justify-between px-4 py-3 border-b border-gray-200">
+                        <div>Discount</div>
+                        <div class="text-right">
+                            <div class="text-red-600">-₱{{ number_format($sales->discount_amount, 2) }}</div>
+                        </div>
                     </div>
-                    <ul class="italic">
-                        @foreach ($sales->couponUsed as $coupon)
-                            <li class="pl-10 flex items-center text-sm justify-between pr-4 py-3 border-b border-gray-200">
-                                <div>{{ $coupon->coupon_code }}</div>
-                                <div class="text-right text-red-500 italic">
-                                    @if ($coupon->coupon->free_product_id)
-                                        <span class="text-green-500">Free Products </span>
-                                        @php $products = explode('|', $coupon->coupon->free_product_id); @endphp
-                                        <ul class="mt-2">
-                                            @foreach ($products as $productId)
-                                                @php $product = \App\Models\Product::find($productId); @endphp
-                                                @if ($product)
-                                                    <li class="text-green-500">
-                                                        {{ $product->name }}
-                                                    </li>
-                                                @endif
-                                            @endforeach
-                                        </ul>
-                                    @else
-                                        <div>-₱{{ number_format($coupon->discount_used ?? 0, 2) }}</div>
-                                    @endif
-                                </div>
-                            </li>
-                        @endforeach
-                    </ul>
                     @endif
                     <div class="flex items-center text-sm justify-between px-4 py-4 border-b border-gray-200">
                         <div>Total</div>
                         <div class="text-right font-bold">
-                            <div>₱{{ number_format($sales->net_amount <= 0 ? 0 : $sales->net_amount, 2) }}</div>
+                            <div>₱{{number_format($sales->items->sum('net_amount') + $sales->delivery_fee_amount - ($sales->discount_amount ?? 0), 2)}}</div>
                         </div>
                     </div>
                 </div>
