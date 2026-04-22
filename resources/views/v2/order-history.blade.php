@@ -166,7 +166,7 @@
                                             <div class="text-sm font-bold">₱₱{{number_format($sale->items->sum('net_amount') + $sale->delivery_fee_amount - ($sale->discount_amount ?? 0), 2)}}</div>
                                         </div>
                                         @endif
-                                        @if ($sale->payments && count($sale->payments->where('status','PAID')->where('is_discount',0)->sum('amount') > 0))
+                                        @if ($sale->payments && $sale->payments->where('status','PAID')->where('is_discount',0)->sum('amount') > 0)
                                         <div class="flex items-center justify-between w-full">
                                             <div class="text-sm text-black font-bold">Amount Paid</div>
                                             <div class="text-sm text-red-600 font-bold italic">- ₱{{ number_format($sale->payments->where('status','PAID')->where('is_discount',0)->sum('amount'), 2) }}</div>
