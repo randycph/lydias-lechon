@@ -386,61 +386,76 @@
 
 
 
+				@php
+					$purchaseSettingChecked = in_array('purchase', old('coupon_setting', []))
+						|| !empty($coupon->purchase_product_id)
+						|| !empty($coupon->purchase_product_cat_id)
+						|| !empty($coupon->purchase_product_brand)
+						|| !empty($coupon->purchase_amount)
+						|| (!empty($coupon->purchase_qty) && $coupon->purchase_qty > 0);
+
+					$purchaseProductChecked = old('purchase_product')
+						|| !empty($coupon->purchase_product_id)
+						|| !empty($coupon->purchase_product_cat_id)
+						|| !empty($coupon->purchase_product_brand);
+
+					$purchaseAmountChecked = old('purchase_total_amount') || !empty($coupon->purchase_amount);
+					$purchaseQtyChecked = old('purchase_total_qty') || (!empty($coupon->purchase_qty) && $coupon->purchase_qty > 0);
+
+					$arr_products = old('product_name', array_values(array_filter(explode('|', (string) ($coupon->purchase_product_id ?? '')))));
+					$arr_categories = old('product_category', array_values(array_filter(explode('|', (string) ($coupon->purchase_product_cat_id ?? '')))));
+				@endphp
+
 				<div class="form-group">
 					<div class="custom-control custom-checkbox">
-						<input type="checkbox" class="custom-control-input" id="coupon-purchase" onclick="myFunction()" name="coupon_setting[]" value="purchase" @if(isset($coupon->purchase_product_id) || isset($coupon->purchase_product_cat_id) || isset($coupon->purchase_product_brand) || isset($coupon->purchase_amount) || (isset($coupon->purchase_qty) && $coupon->purchase_qty > 0)) checked @endif>
+						<input type="checkbox" class="custom-control-input" id="coupon-purchase" onclick="myFunction()" name="coupon_setting[]" value="purchase" @if($purchaseSettingChecked) checked @endif>
 						<label class="custom-control-label" for="coupon-purchase">Purchase 
 							&nbsp;&nbsp;<span style="font-style: italic;">Coupon is received after the purchase conditions have been met.</span>
 						</label>
 					</div>
 				</div>
 
-				<div class="form-row border  rounded p-3 mb-4" id="coupon-purchase-option" style="display:@if(isset($coupon->purchase_product_id) || isset($coupon->purchase_product_cat_id) || isset($coupon->purchase_product_brand) || isset($coupon->purchase_amount) || (isset($coupon->purchase_qty) && $coupon->purchase_qty > 0)) flex @else none @endif;">
+				<div class="form-row border  rounded p-3 mb-4" id="coupon-purchase-option" style="display:@if($purchaseSettingChecked) flex @else none @endif;">
 					<div class="col-md-3">
 						<div class="custom-control custom-checkbox">
-							<input type="checkbox" id="coupon-product" name="purchase_product" class="custom-control-input" onclick="purchase_products()"  @if(isset($coupon->purchase_product_id) || isset($coupon->purchase_product_cat_id) || isset($coupon->purchase_product_brand)) checked @endif >
+							<input type="checkbox" id="coupon-product" name="purchase_product" class="custom-control-input" onclick="purchase_products()" @if($purchaseProductChecked) checked @endif>
 							<label class="custom-control-label" for="coupon-product">Product</label>
 						</div>
 					</div>
 					<div class="col-md-3">
 						<div class="custom-control custom-checkbox">
-							<input type="checkbox" id="coupon-amount" name="purchase_total_amount" class="custom-control-input" onclick="total_amount_purchase()" @if(isset($coupon->purchase_amount)) checked @endif>
+							<input type="checkbox" id="coupon-amount" name="purchase_total_amount" class="custom-control-input" onclick="total_amount_purchase()" @if($purchaseAmountChecked) checked @endif>
 							<label class="custom-control-label" for="coupon-amount">Total Amount</label>
 						</div>
 					</div>
 					<div class="col-md-3">
 						<div class="custom-control custom-checkbox">
-							<input type="checkbox" id="coupon-quantity" name="purchase_total_qty" class="custom-control-input" onclick="total_amount_purchase()" @if(isset($coupon->purchase_qty) && $coupon->purchase_qty > 0) checked @endif>
+							<input type="checkbox" id="coupon-quantity" name="purchase_total_qty" class="custom-control-input" onclick="total_amount_purchase()" @if($purchaseQtyChecked) checked @endif>
 							<label class="custom-control-label" for="coupon-quantity">Total Quantity</label>
 						</div>
 					</div>
 
-					<div class="col-12 mt-3" id="coupon-product-form" style="display:@if(isset($coupon->purchase_product_id) || isset($coupon->purchase_product_cat_id) || isset($coupon->purchase_product_brand)) block @else none @endif;">
+					@php
+						$arr_products = array_map('strval', old(
+							'product_name',
+							$selectedProductIds ?? array_values(array_filter(explode('|', (string) ($coupon->purchase_product_id ?? ''))))
+						));
+
+						$arr_categories = array_map('strval', old(
+							'product_category',
+							$selectedCategoryIds ?? array_values(array_filter(explode('|', (string) ($coupon->purchase_product_cat_id ?? ''))))
+						));
+					@endphp
+					<div class="col-12 mt-3" id="coupon-product-form" style="display:@if($purchaseProductChecked) block @else none @endif;">
 						<small class="text-danger" style="display: none;" id="spanProductOpt"></small>
 						<div class="form-group">
 							<label class="d-block">Product Name</label>
-							@php
-								$arr_products = [];
-								$arr_categories = [];
-
-								$coupon_products = explode('|',$coupon->purchase_product_id);
-								$coupon_categories = explode('|',$coupon->purchase_product_cat_id);
-								
-
-								foreach($coupon_products as $cprod){
-									array_push($arr_products,$cprod);
-								}
-
-								foreach($coupon_categories as $ccat){
-									array_push($arr_categories,$ccat);
-								}
-
-							
-							@endphp
 							<select class="form-control select2" multiple="multiple" name="product_name[]" id="product_opt">
 								<option label="Choose one"></option>
 								@foreach($products as $product)
-									<option @if(in_array($product->id,$arr_products)) selected @endif value="{{$product->id}}">{{ $product->name }}</option>
+									<option @if(in_array((string) $product->id, $arr_products, true)) selected @endif value="{{ $product->id }}">
+										{{ $product->name }}
+									</option>
 								@endforeach
 							</select>
 						</div>
@@ -448,45 +463,44 @@
 						<div class="form-group">
 							<label class="d-block">Category</label>
 							<select class="form-control select2" multiple="multiple" name="product_category[]" id="category_opt">
-								<option label="Choose one"></option>
-								@foreach($categories as $category)
-									<option @if(in_array($category->id,$arr_categories)) selected @endif value="{{$category->id}}">{{ $category->name }}</option>
-								@endforeach
-							</select>
+							<option label="Choose one"></option>
+							@foreach($categories as $category)
+								<option @if(in_array((string) $category->id, $arr_categories, true)) selected @endif value="{{ $category->id }}">
+									{{ $category->name }}
+								</option>
+							@endforeach
+						</select>
 						</div>
-
-						
 					</div>
 
-					<div class="col-12 mt-3" id="coupon-amount-form" style="display:@if(isset($coupon->purchase_amount) || isset($coupon->purchase_qty)) block @else none @endif">
+					<div class="col-12 mt-3" id="coupon-amount-form" style="display:@if($purchaseAmountChecked || $purchaseQtyChecked) block @else none @endif">
 						<div class="row">
-							<div class="col-12" id="total-amount-div" style="display:@if(isset($coupon->purchase_amount)) block @else none @endif;">
+							<div class="col-12" id="total-amount-div" style="display:@if($purchaseAmountChecked) block @else none @endif;">
 								<label class="d-block">Total Minimum Amount *</label>
 							</div>
-							<div class="col-md-6" id="total-amount-input" style="display:@if(isset($coupon->purchase_amount)) block @else none @endif;">
-								<input name="purchase_amount" id="purchase_amount" type="number" min="1" class="form-control" value="{{ $coupon->purchase_amount }}">
+							<div class="col-md-6" id="total-amount-input" style="display:@if($purchaseAmountChecked) block @else none @endif;">
+								<input name="purchase_amount" id="purchase_amount" type="number" min="1" class="form-control" value="{{ old('purchase_amount', $coupon->purchase_amount) }}">
 								<small id="spanPurchaseAmount" style="display: none;" class="text-danger"></small>
 							</div>
-							<div class="col-md-6 d-none" id="total-amount-select" style="display:@if(isset($coupon->purchase_amount)) block @else none @endif;">
+							<div class="col-md-6 d-none" id="total-amount-select" style="display:@if($purchaseAmountChecked) block @else none @endif;">
 								<select class="custom-select" name="amount_opt" id="amount_opt">
 									<option value="">Choose One</option>
-									<option @if($coupon->purchase_amount_type == 'min') selected @endif value="min">Minimum</option>
-									<option @if($coupon->purchase_amount_type == 'max') selected @endif value="max">Maximum</option>
+									<option @if(old('amount_opt', $coupon->purchase_amount_type) == 'min') selected @endif value="min">Minimum</option>
+									<option @if(old('amount_opt', $coupon->purchase_amount_type) == 'max') selected @endif value="max">Maximum</option>
 								</select>
 								<small id="spanAmountOpt" style="display: none;" class="text-danger"></small>
 							</div>
 
-							<!-- Quantity -->
-							<div class="col-12" id="total-quantity-div" style="padding-top: 10px;display:@if(isset($coupon->purchase_qty) && $coupon->purchase_qty > 0) block @else none @endif;">
+							<div class="col-12" id="total-quantity-div" style="padding-top: 10px;display:@if($purchaseQtyChecked) block @else none @endif;">
 								<label class="d-block">Total Quantity *</label>
 							</div>
-							<div class="col-md-6" id="total-quantity-input" style="display:@if(isset($coupon->purchase_qty)  && $coupon->purchase_qty > 0) block @else none @endif;">
-								<input name="purchase_qty" id="purchase_qty" type="tel" min="1" class="form-control" value="{{ $coupon->purchase_qty }}">
+							<div class="col-md-6" id="total-quantity-input" style="display:@if($purchaseQtyChecked) block @else none @endif;">
+								<input name="purchase_qty" id="purchase_qty" type="tel" min="1" class="form-control" value="{{ old('purchase_qty', $coupon->purchase_qty) }}">
 								<small id="spanPurchaseQty" style="display: none;" class="text-danger"></small>
 							</div>
-							<div class="col-md-6" id="total-quantity-select" style="display:@if(isset($coupon->purchase_qty)  && $coupon->purchase_qty > 0) block @else none @endif;">
+							<div class="col-md-6" id="total-quantity-select" style="display:@if($purchaseQtyChecked) block @else none @endif;">
 								<select class="custom-select" name="qty_opt" id="qty_opt">
-									<option value="min">Minimum</option>
+									<option value="min" @if(old('qty_opt', $coupon->purchase_qty_type) == 'min') selected @endif>Minimum</option>
 								</select>
 								<small id="spanQtyOpt" style="display: none;" class="text-danger"></small>
 							</div>
@@ -678,19 +692,12 @@
 		} else {
 			$('#coupon-product-form').css('display','none');
 		}
-		
 	}
 
-	$('#product_opt').change(function(){
-		var value = $(this).val();
-
-		if(value != ''){
-			$('#category_opt').attr("disabled", true);
-			$('#brand_opt').attr("disabled", true);
-		} else {
-			$('#category_opt').removeAttr("disabled");
-			$('#brand_opt').removeAttr("disabled");
-		}
+	$('#product_opt, #category_opt, #brand_opt').on('change', function(){
+		$('#spanProductOpt').hide();
+		$('#product_opt').next('.select2-container, .select2').css('border', '');
+		$('#category_opt').next('.select2-container, .select2').css('border', '');
 	});
 
 	
@@ -750,12 +757,13 @@
 				   			var selectedOption = $('input[name="coupon_purchase[]"]:checked').val();
 
 				   			if($('#coupon-product').is(':checked')){
-				   				var product = $('#product_opt').val();
-				   				var category = $('#category_opt').val();
-				   				var brand = $('#brand_opt').val();
+				   				var product = $('#product_opt').val() || [];
+				   				var category = $('#category_opt').val() || [];
+				   				var brand = $('#brand_opt').length ? ($('#brand_opt').val() || []) : [];
 
 				   				if(product.length === 0 && category.length === 0 && brand.length === 0){
-				   					$('.select2-container').css('border','1px solid red');
+				   					$('#product_opt').next('.select2-container, .select2').css('border','1px solid red');
+				   					$('#category_opt').next('.select2-container, .select2').css('border','1px solid red');
 				   					$('.select2-container').css('border-radius','0.25rem');
 				   					$('#spanProductOpt').css('display','block');
 				   					$('#spanProductOpt').html('Please select at least one(1) option.');
@@ -763,6 +771,9 @@
 	            					return false;
 				   				}
 
+				   				$('#product_opt').next('.select2-container, .select2').css('border','');
+				   				$('#category_opt').next('.select2-container, .select2').css('border','');
+				   				$('#spanProductOpt').hide();
 				   				rs = true;
 				   			}
 
