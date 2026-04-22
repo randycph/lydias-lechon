@@ -32,17 +32,25 @@ Click here to view and manage this order
 ### Order Items
 
 | Code | Product | No of Pax | Qty | Price | Total |
-|------|---------|-----------|-----|--------|--------|
+|------|---------|-----------|-----|-------|-------|
 @foreach($h->items as $details)
 | {{ $details->product->code }} | {!! highlightPaella($details?->product_name) !!} | {{ $details->no_of_pax }} | {{ number_format($details->qty, 0) }} | {{ number_format($details->paella_price + $details->price, 2) }} | {{ number_format($details->gross_amount, 2) }} |
 @endforeach
+
+@if($h->gross_amount > 0)
+| | | | | **Subtotal** | **{{ number_format($h->gross_amount, 2) }}** |
+@endif
 
 @if($h->delivery_fee_amount > 0 && $h->delivery_type == 'Door to door delivery')
 | | | | | **Delivery Fee** | {{ number_format($h->delivery_fee_amount, 2) }} |
 @endif
 
-@if($h->gross_amount > 0)
-| | | | | **Total** | **{{ number_format($h->gross_amount, 2) }}** |
+@if(($h->discount_amount ?? 0) > 0)
+| | | | | **Discount** | **-{{ number_format($h->discount_amount, 2) }}** |
+@endif
+
+@if($h->net_amount > 0)
+| | | | | **Total** | **{{ number_format($h->net_amount, 2) }}** |
 @endif
 
 ---
@@ -50,7 +58,7 @@ Click here to view and manage this order
 ### Delivery Addresses
 
 | Contact Person | Contact Number | Delivery Date | Address |
-|----------------|----------------|----------------|----------|
+|----------------|----------------|---------------|---------|
 @foreach($h->deliveryAddress as $address)
 | {{ $address->contact_person }} | {{ $address->contact_tel }} | {{ $address->delivery_date }} | {{ $address->address }} |
 @endforeach
@@ -60,17 +68,25 @@ Click here to view and manage this order
 ### Order Items
 
 | Code | Product | No of Pax | Date Needed | Qty | Price | Total |
-|------|---------|-----------|-------------|-----|--------|--------|{!! highlightPaella($details?->product_name) !!}
+|------|---------|-----------|-------------|-----|-------|-------|
 @foreach($h->items as $details)
 | {{ $details?->product->code }} | {!! highlightPaella($details?->product_name) !!} | {{ $details->no_of_pax }} | {{ date('F d, Y H:i A', strtotime($details->delivery_date)) }} | {{ number_format($details->qty, 0) }} | {{ number_format($details->paella_price + $details->price, 2) }} | {{ number_format($details->gross_amount, 2) }} |
 @endforeach
 
-@if($h->delivery_fee_amount > 0 && $h->delivery_type == 'Door to door delivery')
-| | | | | **Delivery Fee** | {{ number_format($h->delivery_fee_amount, 2) }} |
+@if($h->gross_amount > 0)
+| | | | | | **Subtotal** | **{{ number_format($h->gross_amount, 2) }}** |
 @endif
 
-@if($h->gross_amount > 0)
-| | | | | **Total** | **{{ number_format($h->gross_amount, 2) }}** |
+@if($h->delivery_fee_amount > 0 && $h->delivery_type == 'Door to door delivery')
+| | | | | | **Delivery Fee** | {{ number_format($h->delivery_fee_amount, 2) }} |
+@endif
+
+@if(($h->discount_amount ?? 0) > 0)
+| | | | | | **Discount** | **-{{ number_format($h->discount_amount, 2) }}** |
+@endif
+
+@if($h->net_amount > 0)
+| | | | | | **Total** | **{{ number_format($h->net_amount, 2) }}** |
 @endif
 
 @endif

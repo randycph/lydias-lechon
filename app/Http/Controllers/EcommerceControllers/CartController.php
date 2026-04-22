@@ -1443,7 +1443,7 @@ class CartController extends Controller
                 'other_cost' => 0,
                 'other_cost_description' => '',
                 'created_by' => $user->id,
-                'delivery_date' => $request->need_date ? $request->need_date . ' ' . $request->need_time : null,
+                'delivery_date' => $request->need_date . ' ' . $request->need_time,
                 'has_baka' => $product->id == 178 ? 1 : 0,
                 'lechon_baka_service' => $product->id == 178 ? ($bakaQty * ($bakaProduct?->price ?? 0)) : 0,
             ]);
@@ -1463,6 +1463,16 @@ class CartController extends Controller
         // =============================
         // 14. NOTIFICATIONS
         // =============================
+
+        $appliedCoupons = CouponCart::where('sales_header_id', $salesHeader->id)
+        ->select('coupon_code', 'discount_used')
+        ->get();
+
+        $salesHeader->setAttribute('applied_coupons', $appliedCoupons);
+        $salesHeader->setAttribute('email_discount_amount', (float) $salesHeader->discount_amount);
+        $salesHeader->setAttribute('email_gross_amount', (float) $salesHeader->gross_amount);
+        $salesHeader->setAttribute('email_delivery_fee_amount', (float) $salesHeader->delivery_fee_amount);
+        $salesHeader->setAttribute('email_net_amount', (float) $salesHeader->net_amount);
 
         $sendNotification->process($notificationService, $salesHeader, $user, $request);
 
