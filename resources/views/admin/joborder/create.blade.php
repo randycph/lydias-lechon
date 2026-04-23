@@ -712,6 +712,16 @@
             });
 
             updateDiscountUI(discountTotals);
+            paymentTotal -= discountTotals.promo + discountTotals.vat + discountTotals.senior;
+            
+            let gross = $('#summary_input_gross').val() - discountTotals.promo - discountTotals.vat - discountTotals.senior;
+
+            console.log(gross, paymentTotal)
+
+            if (paymentTotal > gross) {
+                alert('You are exceeding the gross amount. Please check your payments. Continue anyway.');
+            }
+            
             $('#payment_total').text('Total: ' + formatAmount(paymentTotal));
 
             calculate_grand_total();
@@ -855,6 +865,8 @@
             // NET (after discount) – UI only
             const netTotal = grossTotal - totalDiscount;
 
+            $('#subtotal').html('PHP ' + FormatAmount(grossTotal, 2));
+
             // ackend value (DO NOT deduct discount here)
             $('#summary_input_gross').val(grossTotal.toFixed(2));
 
@@ -924,6 +936,9 @@
             var amt = 0;
             for(i=1;i<=10;i++){
                 if($('#payment_amount'+i).val() === '') {
+                    $('#payment_amount'+i).val(0);
+                }
+                if ($('#payment_method'+i).val() === 'Discount (Promo)' || $('#payment_method'+i).val() === 'Discount (VAT)' || $('#payment_method'+i).val() === 'Discount (Senior Citizen)') {
                     $('#payment_amount'+i).val(0);
                 }
                 amt+=parseFloat($('#payment_amount'+i).val());
@@ -1706,6 +1721,7 @@
                     type: "post",
                     url: "{{route('cart.joborder.get_shipping_fee')}}",                
                     success: function(returnData) {
+                        console.log(returnData['fee'])
                             $('#set_delivery_charge').val(parseFloat(returnData['fee']).toFixed(2));
                             $('#input_delivery_charge').val(parseFloat(returnData['fee']).toFixed(2));
                             $('#set_delivery_charge').prop('readonly',true);
