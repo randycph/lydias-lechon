@@ -189,36 +189,25 @@
         </div>
     </div>
 
-    <div class="flex items-center border border-gray-200 rounded-md overflow-hidden mb-3">
-        <input
-            @input="couponCode = $event.target.value.toUpperCase()"
-            x-model="couponCode"
-            type="text"
-            placeholder="Enter coupon code"
-            class="w-full p-3 outline-none border-none text-gray-700"
-        >
-        <button
-            @click="applyCouponCode()"
-            type="button"
-            class="bg-primary hover:bg-primary-dark text-white px-6 py-3 text-sm"
-        >
-            Apply
-        </button>
-    </div>
-
     <template x-if="coupons.length > 0">
         <div class="mt-2 space-y-2">
             <template x-for="(item, i) in coupons" :key="i">
                 <div class="flex justify-between">
-                    <div class="font-medium text-red-700 italic flex items-center flex-wrap">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
-                            fill="currentColor" class="size-4 text-green-600 mr-1">
-                            <path fill-rule="evenodd"
-                                d="M4.5 2A2.5 2.5 0 0 0 2 4.5v2.879a2.5 2.5 0 0 0 .732 1.767l4.5 4.5a2.5 2.5 0 0 0 3.536 0l2.878-2.878a2.5 2.5 0 0 0 0-3.536l-4.5-4.5A2.5 2.5 0 0 0 7.38 2H4.5ZM5 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        Coupon (<span x-text="formatCouponName(item)"></span>)
-                        <span class="text-xs ml-1 underline cursor-pointer" @click="removeCoupon(i)">Remove</span>
+                    <div class="flex flex-col">
+                        <template x-if="item.description">
+                            <div class="text-xs text-gray-500 mb-1" x-text="item.description"></div>
+                        </template>
+
+                        <div class="font-medium text-red-700 italic flex items-center flex-wrap">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
+                                fill="currentColor" class="size-4 text-green-600 mr-1">
+                                <path fill-rule="evenodd"
+                                    d="M4.5 2A2.5 2.5 0 0 0 2 4.5v2.879a2.5 2.5 0 0 0 .732 1.767l4.5 4.5a2.5 2.5 0 0 0 3.536 0l2.878-2.878a2.5 2.5 0 0 0 0-3.536l-4.5-4.5A2.5 2.5 0 0 0 7.38 2H4.5ZM5 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            Coupon (<span x-text="item.name || item.coupon_name || item.code || item.coupon_code || 'Coupon'"></span>)
+                            <span class="text-xs ml-1 underline cursor-pointer" @click="removeCoupon(i)">Remove</span>
+                        </div>
                     </div>
 
                     <span class="font-medium italic text-red-700">
@@ -240,8 +229,8 @@
         </div>
     </template>
     <div class="mt-4 border rounded-2xl p-4">
-<div class="mt-5 rounded-2xl border border-orange-200 bg-gradient-to-br from-white to-orange-50 p-4 shadow-sm">
-    <div class="flex items-start justify-between gap-3">
+<div class="mt-4 border rounded-2xl p-4" x-data="{ gcOpen: false }">
+    <div class="flex items-center justify-between cursor-pointer" @click="gcOpen = !gcOpen">
         <div>
             <h3 class="text-xl font-bold text-gray-900">Gift Certificate</h3>
             <p class="mt-1 text-sm text-gray-500">
@@ -249,67 +238,78 @@
             </p>
         </div>
 
-        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-100 text-orange-600 shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79V7a2 2 0 0 0-2-2h-3.17a3 3 0 0 0-5.66 0H7a2 2 0 0 0-2 2v5.79m16 0A2 2 0 0 1 19 15H5a2 2 0 0 1-2-2.21m18 0V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4.21" />
+        <div class="flex items-center gap-3">
+            <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-100 text-orange-600 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79V7a2 2 0 0 0-2-2h-3.17a3 3 0 0 0-5.66 0H7a2 2 0 0 0-2 2v5.79m16 0A2 2 0 0 1 19 15H5a2 2 0 0 1-2-2.21m18 0V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4.21" />
+                </svg>
+            </div>
+
+            <svg xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 text-gray-500 transition-transform duration-200"
+                :class="{ 'rotate-180': gcOpen }"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
         </div>
     </div>
 
-    <div class="mt-4 flex flex-col gap-3 sm:flex-row">
-        <div class="flex-1">
-            <input
-                type="text"
-                x-model="giftChequeCode"
-                placeholder="Enter gift certificate code"
-                class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-gray-900 shadow-sm outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+    <div x-show="gcOpen || appliedGiftCheque" x-collapse class="mt-4">
+        <div class="mt-4 flex flex-col gap-3 sm:flex-row">
+            <div class="flex-1">
+                <input
+                    type="text"
+                    x-model="giftChequeCode"
+                    placeholder="Enter gift certificate code"
+                    class="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-gray-900 shadow-sm outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+                >
+            </div>
+
+            <button
+                type="button"
+                @click="applyGiftCheque(); gcOpen = true"
+                class="inline-flex items-center justify-center rounded-xl bg-orange-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-200"
             >
+                Apply GC
+            </button>
         </div>
 
-        <button
-            type="button"
-            @click="applyGiftCheque()"
-            class="inline-flex items-center justify-center rounded-xl bg-orange-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-200"
-        >
-            Apply GC
-        </button>
-    </div>
+        <template x-if="giftChequeMessage">
+            <div
+                class="mt-3 rounded-xl px-3 py-2 text-sm font-medium"
+                :class="giftChequeMessageType === 'success'
+                    ? 'border border-green-200 bg-green-50 text-green-700'
+                    : 'border border-red-200 bg-red-50 text-red-700'"
+                x-text="giftChequeMessage">
+            </div>
+        </template>
 
-    <template x-if="giftChequeMessage">
-        <div
-            class="mt-3 rounded-xl px-3 py-2 text-sm font-medium"
-            :class="giftChequeMessageType === 'success'
-                ? 'border border-green-200 bg-green-50 text-green-700'
-                : 'border border-red-200 bg-red-50 text-red-700'"
-            x-text="giftChequeMessage">
-        </div>
-    </template>
+        <template x-if="appliedGiftCheque">
+            <div class="mt-4 rounded-2xl border border-green-200 bg-white p-4 shadow-sm">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700">
+                                Applied
+                            </span>
+                            <span class="text-lg font-bold text-gray-900" x-text="appliedGiftCheque.code"></span>
+                        </div>
 
-    <template x-if="appliedGiftCheque">
-        <div class="mt-4 rounded-2xl border border-green-200 bg-white p-4 shadow-sm">
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="inline-flex rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700">
-                            Applied
-                        </span>
-                        <span class="text-lg font-bold text-gray-900" x-text="appliedGiftCheque.code"></span>
+                        <div class="mt-2 text-sm text-gray-500">Gift Certificate Value</div>
+                        <div class="text-2xl font-extrabold text-green-600" x-text="formatMoney(giftChequeDiscountAmount || 0)"></div>
                     </div>
 
-                    <div class="mt-2 text-sm text-gray-500">Gift Certificate Value</div>
-                    <div class="text-2xl font-extrabold text-green-600" x-text="formatMoney(giftChequeDiscountAmount || 0)"></div>
+                    <button
+                        type="button"
+                        @click="removeGiftCheque(); gcOpen = false"
+                        class="inline-flex items-center justify-center rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100"
+                    >
+                        Remove
+                    </button>
                 </div>
-
-                <button
-                    type="button"
-                    @click="removeGiftCheque()"
-                    class="inline-flex items-center justify-center rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100"
-                >
-                    Remove
-                </button>
             </div>
-        </div>
-    </template>
+        </template>
+    </div>
 </div>
 </div>
 </div>

@@ -381,26 +381,32 @@
 					</div>
 				</div>
 
-
-
-
-
-
 				@php
-					$purchaseSettingChecked = in_array('purchase', old('coupon_setting', []))
-						|| !empty($coupon->purchase_product_id)
-						|| !empty($coupon->purchase_product_cat_id)
-						|| !empty($coupon->purchase_product_brand)
-						|| !empty($coupon->purchase_amount)
-						|| (!empty($coupon->purchase_qty) && $coupon->purchase_qty > 0);
+					$hasPurchaseProducts =
+						!empty($coupon->purchase_product_id) ||
+						!empty($coupon->purchase_product_cat_id) ||
+						!empty($coupon->purchase_product_brand);
 
-					$purchaseProductChecked = old('purchase_product')
-						|| !empty($coupon->purchase_product_id)
-						|| !empty($coupon->purchase_product_cat_id)
-						|| !empty($coupon->purchase_product_brand);
+					$hasPurchaseAmount = (float) ($coupon->purchase_amount ?? 0) > 0;
+					$hasPurchaseQty = (int) ($coupon->purchase_qty ?? 0) > 0;
 
-					$purchaseAmountChecked = old('purchase_total_amount') || !empty($coupon->purchase_amount);
-					$purchaseQtyChecked = old('purchase_total_qty') || (!empty($coupon->purchase_qty) && $coupon->purchase_qty > 0);
+					$purchaseSettingChecked =
+						in_array('purchase', old('coupon_setting', [])) ||
+						$hasPurchaseProducts ||
+						$hasPurchaseAmount ||
+						$hasPurchaseQty;
+
+					$purchaseProductChecked =
+						old('purchase_product') ||
+						$hasPurchaseProducts;
+
+					$purchaseAmountChecked =
+						old('purchase_total_amount') ||
+						$hasPurchaseAmount;
+
+					$purchaseQtyChecked =
+						old('purchase_total_qty') ||
+						$hasPurchaseQty;
 
 					$arr_products = old('product_name', array_values(array_filter(explode('|', (string) ($coupon->purchase_product_id ?? '')))));
 					$arr_categories = old('product_category', array_values(array_filter(explode('|', (string) ($coupon->purchase_product_cat_id ?? '')))));

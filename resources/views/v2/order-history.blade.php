@@ -86,13 +86,18 @@
                                 @endif
 
                                 @php
-                                    $amountPaid = ($sale->payments && count($sale->payments) > 0) ? $sale->payments->sum('amount') : 0;
-                                    $amountPaid = $amountPaid < 0 ? 0 : $amountPaid;
-                                    $cartTotal = $total;
-                                    $total += $fee;
-                                    $discount = $sale->discount_amount ? $sale->discount_amount : 0;
-                                    $balance = ($total - $amountPaid) - $discount;
-                                    $balance = $balance < 0 ? 0 : $balance;
+                                    $amountPaid = ($sale->payments && count($sale->payments) > 0)
+                                        ? (float) $sale->payments->sum('amount')
+                                        : 0;
+
+                                    $amountPaid = max($amountPaid, 0);
+
+                                    $cartTotal = (float) $total;
+                                    $discount = (float) ($sale->discount_amount ?? 0);
+                                    $fee = (float) ($sale->delivery_type == 'Door to door delivery' ? $sale->delivery_fee_amount : 0);
+
+                                    $grandTotal = max(($cartTotal + $fee) - $discount, 0);
+                                    $balance = max($grandTotal - $amountPaid, 0);
                                 @endphp
             
                                 <div class="flex items-center justify-between w-full mt-4">
@@ -187,6 +192,7 @@
                                             </div>
                                         </div>
                                         @endif
+                                        
 
                                         <div class="mt-5">
                                             <div class="text-sm text-slate-500 font-bold mb-3">Order Details</div>
@@ -237,9 +243,8 @@
                                                                     <ul class="list-disc pl-10">
                                                                         @foreach ($products as $product)
                                                                             @php
-                                                                                $prod = \App\Models\Product::find($product->product_id);
-                                                                                $base   = (float)($prod->price ?? 0);
-                                                                                $addOn  = !empty($product->paella) ? (float)($prod->paella_price ?? 0) : 0;
+                                                                                $base   = (float)($product->product->price ?? 0);
+                                                                                $addOn  = !empty($product->paella) ? (float)($product->product->paella_price ?? 0) : 0;
                                                                                 $price  = $base + $addOn;
                                                                             @endphp
                                                                             <li>
@@ -787,43 +792,6 @@
     </div>
 </div>
 
-<div x-show="paymentDisabledModal"
-    x-transition
-    class="relative z-50"
-    aria-labelledby="modal-title"
-    role="dialog"
-    aria-modal="true"
-    style="display: none;">
-    <!-- Backdrop -->
-    <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
-
-    <!-- Modal content -->
-    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
-            <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg pb-5">
-                <!-- Modal body -->
-                <div class="">
-
-                    <div class="flex justify-between items-center px-3 pt-3">
-                        <div class="flex gap-2 items-center">
-                            <div class="text-2xl font-bold">Payment disabled</div>
-                        </div>
-                        <button @click="paymentDisabledModal = false" class="self-end text-2xl text-gray-800">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-        
-                    <div class="text-gray-600 font-medium px-4 mt-4">
-                        Payment is no longer allowed for orders with delivery scheduled for tomorrow or in the past.
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div x-show="editOrderModal"
     x-transition
     class="relative z-50"
@@ -927,11 +895,7 @@
             closeBankDepositProof() {
                 this.bankDepositProof = false;
             },
-            openPaymentModal(amount, sales_header_id, isExpired = false) {
-                if (isExpired) {
-                    this.paymentDisabledModal = true
-                    return;
-                }
+            openPaymentModal(amount, sales_header_id) {
                 this.depositModal = true;
                 this.amount = amount;
                 this.sales_header_id = sales_header_id;
