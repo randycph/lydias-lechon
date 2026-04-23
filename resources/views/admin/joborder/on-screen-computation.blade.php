@@ -32,11 +32,6 @@
                     <table class="table table-borderless table-xs mg-b-0 bd-b">
                         <tbody id="tbod">
                             <tr>
-                                <th scope="row"><strong>Sub Total :</strong> </th>
-                                <td id="subtotal">0</td>
-                                <td style="display: none;"><input type="text" id="input_subtotal" value="0"></td>
-                            </tr>
-                            <tr>
                                 <th scope="row"><strong>Quantity :</strong></th>
                                 <td id="totalQty">0</td>
                             </tr>
@@ -45,10 +40,15 @@
                                 <td id="summary_delivery_charge">0</td>
                                 <td style="display: none;"><input type="text" id="input_delivery_charge" value="0"></td>
                             </tr>
-                            <tr>
+                            <tr class="d-none">
                                 <th scope="row"><strong>Total Misc :</strong></th>
                                 <td id="summary_total_misc">0</td>
                                 <td style="display: none;"><input type="text" id="input_total_misc" value="0"></td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><strong>Sub Total :</strong> </th>
+                                <td id="subtotal">0</td>
+                                <td style="display: none;"><input type="text" id="input_subtotal" value="0"></td>
                             </tr>
                             
                         </tbody>
@@ -89,7 +89,7 @@
                                 </ul>
                                 <div class="d-flex justify-content-between">
                                     <strong class="text-muted ">Total Discount</strong>
-                                    <span class="total-discount-value"></span>
+                                    <span class="total-discount-value">0</span>
                                 </div>
                                 {{-- <td style="display: none;"><input type="text" id="summary_input_discount" value="0"></td> --}}
                             </div>
