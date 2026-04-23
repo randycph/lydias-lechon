@@ -997,28 +997,29 @@ class CartController extends Controller
 
                         if (!$alreadyFree) {
                             $freeItem = [
-                                'id' => 'free_' . $freeProduct['id'],
-                                'product_id' => $freeProduct['id'],
+                            'id' => 'free_' . $freeProduct['id'],
+                            'product_id' => $freeProduct['id'],
+                            'name' => $freeProduct['name'],
+                            'price' => 0,
+                            'qty' => 1,
+                            'is_free_product' => true,
+                            'coupon_code' => $coupon['code'] ?? null,
+                            'paella_price' => 0,
+                            'product' => new \Illuminate\Support\Fluent([
+                                'id' => $freeProduct['id'],
                                 'name' => $freeProduct['name'],
+                                'slug' => $freeProduct['slug'] ?? '',
+                                'category_id' => $freeProduct['category_id'] ?? null,
+                                'uom' => $freeProduct['uom'] ?? '',
+                                'size' => $freeProduct['size'] ?? '',
+                                'no_of_pax' => $freeProduct['no_of_pax'] ?? '',
                                 'price' => 0,
-                                'qty' => 1,
-                                'is_free_product' => true,
-                                'coupon_code' => $coupon['code'] ?? null,
-                                'paella_price' => 0,
-                                'product' => [
-                                    'id' => $freeProduct['id'],
-                                    'name' => $freeProduct['name'],
-                                    'slug' => $freeProduct['slug'] ?? '',
-                                    'category_id' => $freeProduct['category_id'] ?? null,
-                                    'uom' => $freeProduct['uom'] ?? '',
-                                    'size' => $freeProduct['size'] ?? '',
-                                    'no_of_pax' => $freeProduct['no_of_pax'] ?? '',
-                                    'paella_price' => $freeProduct['paella_price'] ?? 0,
-                                    'photos' => $freeProduct['photos'] ?? [],
-                                ],
-                            ];
+                                'paella_price' => $freeProduct['paella_price'] ?? 0,
+                                'photos' => $freeProduct['photos'] ?? [],
+                            ]),
+                        ];
 
-                            $carts->push(new Fluent($freeItem));
+                        $carts->push(new Fluent($freeItem));
                         }
                     }
                 }
@@ -1387,69 +1388,54 @@ class CartController extends Controller
 
         $saved_items = '';
         foreach ($carts as $cart) {
+                $product = $cart->product ?? null;
 
-            $product = $cart->product;
-
-            if (!$product) {
-                continue;
-            }
-
-            $gross = ((float)$product->price + ($cart->paella_price > 0 ? $product->paella_price : 0)) * $cart->qty;
-
-            $tax = $gross - ($gross / 1.12);
-
-            if(!empty($cart->coupon_code)){
-                
-                $ccode = explode("|", $cart->coupon_code);
-                foreach($ccode as $cd){
-                    $code = explode(":",$cd);
-
-                    $coupon = $this->use_coupon($code[0], $salesHeader->id);
-
-                    if(!empty($coupon)){
-
-                        SalesPayment::create([
-                            'sales_header_id' => $salesHeader->id,
-                            'payment_type' => 'Gift Cert',
-                            'amount' => $code[1],
-                            'status' => $salesHeader->payment_status == 'PAID' ? 'PAID' : 'PENDING',
-                            'payment_date' => date('Y-m-d'),
-                            'receipt_number' => $code[0],
-                            'created_by' => Auth::id()
-                        ]);
-                    }
+                if (is_array($product)) {
+                    $product = new \Illuminate\Support\Fluent($product);
                 }
+
+                if (!$product) {
+                    continue;
+                }
+
+                $productPrice = (float) ($product->price ?? 0);
+                $paellaPrice = ((float) ($cart->paella_price ?? 0) > 0)
+                    ? (float) ($product->paella_price ?? 0)
+                    : 0;
+                $qty = (int) ($cart->qty ?? 1);
+
+                $gross = ($productPrice + $paellaPrice) * $qty;
+                $tax = $gross - ($gross / 1.12);
+
+                SalesDetail::create([
+                    'sales_header_id' => $salesHeader->id,
+                    'product_id' => $product->id ?? $cart->product_id ?? 0,
+                    'product_name' => ($product->name ?? 'Product') . (((float) ($cart->paella_price ?? 0) > 0) ? ' Boneless with Paella' : ''),
+                    'product_category' => $product->category_id ?? 0,
+                    'price' => $productPrice,
+                    'cost' => 0,
+                    'tax_amount' => $tax,
+                    'promo_id' => 0,
+                    'promo_description' => '',
+                    'discount_amount' => $discount,
+                    'gross_amount' => $gross,
+                    'net_amount' => $gross,
+                    'qty' => $qty,
+                    'paella_qty' => $qty,
+                    'uom' => $product->uom ?? '',
+                    'size' => $product->size ?? '',
+                    'no_of_pax' => $product->no_of_pax ?? '',
+                    'paella_price' => $paellaPrice,
+                    'other_cost' => 0,
+                    'other_cost_description' => '',
+                    'created_by' => $user->id,
+                    'delivery_date' => $request->need_date . ' ' . $request->need_time,
+                    'has_baka' => ($product->id ?? 0) == 178 ? 1 : 0,
+                    'lechon_baka_service' => ($product->id ?? 0) == 178 ? ($bakaQty * ($bakaProduct?->price ?? 0)) : 0,
+                ]);
+
+                $saved_items .= $qty . " x " . ($product->name ?? 'Product') . ", ";
             }
-
-            SalesDetail::create([
-                'sales_header_id' => $salesHeader->id,
-                'product_id' => $product->id,
-                'product_name' => $product->name . ($cart->paella_price > 0 ? ' Boneless with Paella' : ''),
-                'product_category' => $product->category_id ?? 0,
-                'price' => $product->price,
-                'cost' => 0,
-                'tax_amount' => $tax,
-                'promo_id' => 0,
-                'promo_description' => '',
-                'discount_amount' => $discount,
-                'gross_amount' => $gross,
-                'net_amount' => $gross,
-                'qty' => $cart->qty,
-                'paella_qty' => $cart->qty,
-                'uom' => $product->uom ?? '',
-                'size' => $product->size ?? '',
-                'no_of_pax' => $product->no_of_pax ?? '',
-                'paella_price' => $cart->paella_price > 0 ? $product->paella_price : 0,
-                'other_cost' => 0,
-                'other_cost_description' => '',
-                'created_by' => $user->id,
-                'delivery_date' => $request->need_date . ' ' . $request->need_time,
-                'has_baka' => $product->id == 178 ? 1 : 0,
-                'lechon_baka_service' => $product->id == 178 ? ($bakaQty * ($bakaProduct?->price ?? 0)) : 0,
-            ]);
-
-            $saved_items .= $cart->qty." x ".$product->name.", ";
-        }
 
         // =============================
         // 13. CLEAR CART
