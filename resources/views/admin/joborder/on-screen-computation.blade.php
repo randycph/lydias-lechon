@@ -32,7 +32,7 @@
                     <table class="table table-borderless table-xs mg-b-0 bd-b">
                         <tbody id="tbod">
                             <tr>
-                                <th scope="row"><strong>Quantity :</strong></th>
+                                <th scope="row"><strong>Total Quantity :</strong></th>
                                 <td id="totalQty">0</td>
                             </tr>
                             <tr>
