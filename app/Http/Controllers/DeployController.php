@@ -72,9 +72,16 @@ class DeployController extends Controller
         }
 
         // 3. Run deploy script (external, NOT inline) for security reasons
-        $output = shell_exec(
-            'cd /home/lydiaslech0n/beta.lydias-lechon.com && git pull origin deployment-april 2>&1'
-        );
+        $path = '/home/lydiaslech0n/beta.lydias-lechon.com';
+
+        // Pull latest code
+        $pullOutput = shell_exec("cd {$path} && git pull origin deployment-april 2>&1");
+
+        // Run migrations (force is required in production)
+        $migrateOutput = shell_exec("cd {$path} && php artisan migrate --force 2>&1");
+
+        // Combine logs
+        $output = "=== GIT PULL ===\n{$pullOutput}\n\n=== MIGRATE ===\n{$migrateOutput}\n";
 
         file_put_contents(
             base_path('storage/logs/deploy_beta.log'),
