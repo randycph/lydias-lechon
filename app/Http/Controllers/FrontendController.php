@@ -765,6 +765,27 @@ class FrontendController extends Controller
         return view('v2.my-coupons', compact('page', 'eligibleCoupons'));
     }
 
+    public function my_used_coupons(Request $request)
+{
+    $page = 'my-used-coupons';
+
+    $request->session()->forget('redirect_after_login');
+
+    if (!Auth::check()) {
+        return redirect()->route('login', ['redirect' => $request->fullUrl()]);
+    }
+
+    $uid = Auth::id();
+
+    $usedCoupons = CouponCart::with('coupon')
+        ->where('customer_id', $uid)
+        ->whereNotNull('sales_header_id')
+        ->latest()
+        ->get();
+
+    return view('v2.my-used-coupons', compact('page', 'usedCoupons'));
+}
+
     public function my_cart(Request $request)
     {
         $page = 'my-cart';

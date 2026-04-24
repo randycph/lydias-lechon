@@ -179,8 +179,12 @@ class GiftCertificateController extends Controller
     public function edit($id)
     {
         $giftcertificate = GiftCertificate::findOrFail($id);
-        //$giftcertificate = GiftCertificate::all();
-        return view('admin.giftcertificate.edit', compact('giftcertificate'));
+
+        $customers = User::where('role_id', 6)
+            ->where('is_active', 1)
+            ->get();
+
+        return view('admin.giftcertificate.edit', compact('giftcertificate', 'customers'));
     }
 
 
@@ -191,8 +195,6 @@ class GiftCertificateController extends Controller
             'code' => $request->code,
             'amount' => $request->amount,
             'gc_type' => $request->gc_type,
-            'serial_number' => $request->serial_number,
-            'sales_header_id' => $request->sales_header_id,
             'status' => (isset($request->status) ? 'Used' : 'Unused'),
             'user_id' => Auth::id(),
             'sales_header_id' => $request->sales_header_id
