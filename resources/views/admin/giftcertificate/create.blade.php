@@ -59,7 +59,7 @@
                             </div>
                              <div class="form-group">
                             <label class="d-block">Customer Name *</label>
-                            <select class="form-control select2" name="customer[]" multiple>
+                            <select class="form-control select2" name="customer[]">
                                 @foreach($customers as $customer)
                                     <option value="{{ $customer->id }}"
                                         @if(is_array(old('customer')) && in_array($customer->id, old('customer'))) selected @endif>

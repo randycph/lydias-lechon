@@ -78,6 +78,7 @@ Route::post('/lydia-reset-password', [ResetPasswordController::class, 'reset'])-
 Route::get('/signup', [FrontendController::class, 'signup'])->name('signup');
 Route::get('/my-account', [FrontendController::class, 'my_account'])->name('my-account');
 Route::get('/coupons', [FrontendController::class, 'my_coupons'])->name('my-coupons');
+Route::get('/used_coupons', [FrontendController::class, 'my_used_coupons'])->name('my-used-coupons');
 Route::get('/my-cart', [FrontendController::class, 'my_cart'])->name('my-cart');
 Route::get('/order-history', [FrontendController::class, 'order_history'])->name('order-history');
 Route::get('/change-password', [FrontendController::class, 'change_password'])->name('change-password');
