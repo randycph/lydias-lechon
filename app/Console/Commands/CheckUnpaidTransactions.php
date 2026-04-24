@@ -20,7 +20,7 @@ class CheckUnpaidTransactions extends Command
         $statuses = ['ABANDONED', 'CANCELLED'];
 
         // Transactions unpaid for 2+ days (but less than 5)
-        $remind = SalesHeader::where('payment_status', '!=', 'PAID')
+        $remind = SalesHeader::with('payments')->where('payment_status', '!=', 'PAID')
             ->whereNotIn('status', $statuses)
             ->whereDate('created_at', '<=', $now->copy()->subDays(2))
             ->whereDate('created_at', '>', $now->copy()->subDays(5))
