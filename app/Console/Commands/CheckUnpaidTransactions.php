@@ -31,6 +31,10 @@ class CheckUnpaidTransactions extends Command
             if (!$order->user || !$order->user->email) {
                 continue; // Skip if no user or email
             }
+            if ($order?->payments?->where('status', 'PAID')->sum('amount') > 0 || $order->isConfirm == 1) {
+                continue; // Skip if any payment is marked as PAID or if the order is confirmed
+            }
+
             Mail::to($order->user->email)->send(new \App\Mail\UnpaidReminderMail($order));
         }
 
