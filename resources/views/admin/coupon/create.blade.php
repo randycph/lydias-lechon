@@ -5,6 +5,19 @@
 	{{-- <link href="{{ asset('lib/clockpicker/bootstrap-clockpicker.min.css') }}" rel="stylesheet"> --}}
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 	<style>
+		/* Highlight already selected options inside Select2 dropdown */
+		.select2-container--default .select2-results__option[aria-selected="true"],
+		.select2-container--default .select2-results__option--selected {
+			background-color: #0168fa !important;
+			color: #fff !important;
+			font-weight: 600;
+		}
+
+		/* Keep hover readable */
+		.select2-container--default .select2-results__option--highlighted[aria-selected] {
+			background-color: #0056d6 !important;
+			color: #fff !important;
+		}
 		.select2 {width:100% !important;}
 
 		.select2-container--default .select2-selection--multiple .select2-selection__choice{
@@ -790,9 +803,13 @@
 		minDate: dateToday,
 	});
 
-	$('.select2').select2({
-		placeholder: 'Choose Options'
-	});
+	$('.select2').each(function () {
+    $(this).select2({
+        placeholder: 'Choose Options',
+        width: '100%',
+        closeOnSelect: !$(this).prop('multiple')
+    });
+});
 
 
 	function myFunction() {
@@ -915,27 +932,32 @@
 // Points Earned end --------------------->
 
 $(function() {
-	$('.selectpicker').selectpicker();
-	
-	let isHandlingSelect = false;
+    $('.selectpicker').selectpicker();
 
-	$('.select-location').on('change', function () {
+    $('.select2').each(function () {
+        $(this).select2({
+            placeholder: 'Choose Options',
+            width: '100%',
+            closeOnSelect: !$(this).prop('multiple') ? true : false
+        });
+    });
+
+    let isHandlingSelect = false;
+
+	$('.select-location').on('select2:select', function (e) {
 		if (isHandlingSelect) return;
 
 		isHandlingSelect = true;
 
 		const $select = $(this);
-		const selected = $select.val();
+		const selectedId = e.params.data.id;
+		let selected = $select.val() || [];
 
-		if (selected && selected.includes('all')) {
-			// Only keep "all" selected
+		if (selectedId === 'all') {
 			$select.val(['all']).trigger('change.select2');
 		} else {
-			// Remove "all" if other options are selected
-			if (selected) {
-				const filtered = selected.filter(val => val !== 'all');
-				$select.val(filtered).trigger('change.select2');
-			}
+			selected = selected.filter(value => value !== 'all');
+			$select.val(selected).trigger('change.select2');
 		}
 
 		isHandlingSelect = false;

@@ -57,6 +57,18 @@
             <form id="checkoutForm" method="POST" action="{{ route('cart.temp_sales') }}" @submit.prevent="submitForm"
                 class="pb-20 px-4">
                 @csrf
+
+                 <input 
+                    type="hidden" 
+                    name="selected_auto_coupon_id" 
+                    :value="selectedAutoCoupon ? selectedAutoCoupon.id : ''"
+                >
+
+                <input 
+                    type="hidden" 
+                    name="selected_coupon_id" 
+                    :value="selectedCoupon ? selectedCoupon.id : ''"
+                >
                 <div class="pt-20 pb-5 px-4">
                     <h1 class="text-4xl lg:text-7xl font-cubao font-medium text-primary text-center mt-10">Checkout</h1>
                     @if ($carts && count($carts) > 0)
@@ -138,12 +150,144 @@
 
                         {{-- RIGHT --}}
                         <div class="w-full lg:w-2/5 order-1 lg:order-2">
+                           
                             @include('v2.checkout.components.order-summary')
                         </div>
                     </div>
                 @endif
             </form>
+                {{-- AUTO COUPON POPUP --}}
+                <div
+                    x-cloak
+                    x-show="showAutoCouponChooser"
+                    x-transition.opacity
+                    class="fixed inset-0 z-50"
+                >
+                    {{-- BACKDROP --}}
+                    <div class="fixed inset-0 bg-black/50"></div>
 
+                    {{-- MODAL CONTAINER --}}
+                    <div class="fixed inset-0 flex items-center justify-center p-4">
+                        <div
+                            x-show="showAutoCouponChooser"
+                            x-transition
+                            class="w-full max-w-xl"
+                        >
+                            <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden">
+
+                                {{-- CLOSE BUTTON --}}
+                                <button
+                                    type="button"
+                                    @click="showAutoCouponChooser = false"
+                                    class="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+                                >
+                                    ✕
+                                </button>
+
+                                {{-- HEADER --}}
+                                <div class="px-6 pt-6 pb-4 border-b">
+                                    <h2 class="text-xl font-semibold">
+                                        Choose Your Auto Coupon
+                                    </h2>
+
+                                    <p class="text-sm text-gray-500 mt-1">
+                                        You have multiple available auto coupons. Please choose one to apply.
+                                    </p>
+                                </div>
+
+                                {{-- BODY --}}
+                                <div class="px-6 py-6 space-y-4 max-h-[500px] overflow-y-auto">
+
+                                    <template x-for="coupon in autoCouponChoices" :key="coupon.id">
+                                        <label
+                                            class="block border rounded-2xl p-5 cursor-pointer transition"
+                                            :class="{
+                                                'border-green-600 bg-green-50': String(selectedAutoCouponId) === String(coupon.id),
+                                                'border-gray-200 bg-white': String(selectedAutoCouponId) !== String(coupon.id)
+                                            }"
+                                        >
+                                            <div class="flex items-start gap-4">
+                                                <input
+                                                    type="radio"
+                                                    name="auto_coupon_choice"
+                                                    :value="coupon.id"
+                                                    x-model="selectedAutoCouponId"
+                                                    class="mt-1"
+                                                >
+
+                                                <div class="flex-1 min-w-0">
+                                                    <div
+                                                        class="text-lg font-semibold text-gray-900"
+                                                        x-text="coupon.name || coupon.code"
+                                                    ></div>
+                                                    <template x-if="coupon.auto_applied">
+                                                    <div class="inline-block mt-2 text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded">
+                                                        Auto Coupon
+                                                    </div>
+                                                </template>
+                                                    <div
+                                                        class="mt-1 text-sm text-gray-600"
+                                                        x-text="coupon.description || 'No description available'"
+                                                    ></div>
+
+                                                    <div class="mt-3 text-sm text-orange-600 font-medium">
+                                                        <template x-if="coupon.reward === 'free-shipping-optn'">
+                                                            <span>Free Shipping Coupon</span>
+                                                        </template>
+
+                                                        <template x-if="coupon.reward === 'discount-amount-optn'">
+                                                            <span x-text="'₱' + Number(coupon.discount || 0).toFixed(2) + ' OFF'"></span>
+                                                        </template>
+
+                                                        <template x-if="coupon.reward === 'discount-percentage-optn'">
+                                                            <span x-text="Number(coupon.discount || 0) + '% OFF'"></span>
+                                                        </template>
+
+                                                        <template x-if="coupon.reward === 'free-product-optn'">
+                                                            <span>Free Product Coupon</span>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </template>
+
+                                    <template x-if="couponMessage">
+                                        <div
+                                            class="text-sm"
+                                            :class="{
+                                                'text-green-600': couponMessageType === 'success',
+                                                'text-red-600': couponMessageType === 'error'
+                                            }"
+                                            x-text="couponMessage"
+                                        ></div>
+                                    </template>
+
+                                </div>
+
+                                {{-- FOOTER --}}
+                                <div class="px-6 py-4 border-t flex justify-end gap-3">
+                                    <button
+                                        type="button"
+                                        @click="showAutoCouponChooser = false"
+                                        class="px-4 py-2 text-sm border rounded-md"
+                                    >
+                                        Skip
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        @click="applySelectedAutoCoupon()"
+                                        class="px-6 py-2 text-sm bg-primary text-white rounded-md"
+                                    >
+                                        Apply Selected Coupon
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
             @include('v2.checkout.modals.coupon-modal')
             @include('v2.checkout.modals.privacy-modal')
             @include('v2.checkout.modals.payment-modal')
@@ -159,7 +303,7 @@
 
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/js/datepicker.min.js"></script>
-
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
     <script>
         window.disabledPickupDates = @json($disabledPickupDates);
         window.disabledDeliveryDates = @json($disabledDeliveryDates);
@@ -218,6 +362,10 @@
                 allCoupons: window.allCoupons || [],
                 selectedCoupon: null,
                 autoAppliedCoupons: [],
+                selectedAutoCoupon: null,
+                showAutoCouponChooser: false,
+                autoCouponChoices: [],
+                selectedAutoCouponId: '',
                 totalDiscountAmount: 0,
                 shippingDiscountAmount: 0,
                 shippingDiscountLists: [],
@@ -248,6 +396,37 @@
 
                     return 'Coupon';
                 },
+
+                get selectableCoupons() {
+                const regularCoupons = (this.eligibleCoupons || [])
+                    .map(c => this.normalizeCoupon(c));
+
+                const nonSelectedAutoCoupons = (this.autoCouponChoices || [])
+                    .map(c => this.normalizeCoupon(c))
+                    .filter(c => {
+                        return !this.selectedAutoCoupon ||
+                            String(c.id) !== String(this.selectedAutoCoupon.id);
+                    });
+
+                const merged = [
+                    ...regularCoupons,
+                    ...nonSelectedAutoCoupons
+                ];
+
+                const unique = [];
+
+                merged.forEach(coupon => {
+                    const exists = unique.some(item =>
+                        String(item.code || '').trim().toUpperCase() === String(coupon.code || '').trim().toUpperCase()
+                    );
+
+                    if (!exists) {
+                        unique.push(coupon);
+                    }
+                });
+
+                return unique;
+            },
 
                 couponWorthLabel(coupon) {
                     if (!coupon) return '';
@@ -596,39 +775,62 @@
                 applyAutoCoupons() {
                 const autos = (this.autoCouponsSource || [])
                     .map(c => this.normalizeCoupon(c))
-                    .filter(c => this.shouldAutoApplyCoupon(c))
-
-                this.coupons = this.coupons.filter(c => !c.auto_applied)
-                this.autoAppliedCoupons = []
+                    .filter(c => this.shouldAutoApplyCoupon(c));
 
                 const autoCodes = (this.autoCouponsSource || [])
-                    .map(c => this.normalizeCoupon(c).code)
+                    .map(c => this.normalizeCoupon(c).code);
 
+                // Remove old auto coupons first
+                this.coupons = this.coupons.filter(c => !c.auto_applied);
+                this.autoAppliedCoupons = [];
+
+                // Remove old free products from auto coupons
                 this.carts = this.carts.filter(item =>
                     !(item.is_free_product && autoCodes.includes(item.coupon_code))
-                )
+                );
 
                 this.orders = this.orders.filter(item =>
                     !(item.is_free_product && autoCodes.includes(item.coupon_code))
-                )
+                );
 
-                autos.forEach(autoCoupon => {
-                    if (this.coupons.some(c =>
-                        String(c.code || '').trim().toUpperCase() === String(autoCoupon.code || '').trim().toUpperCase()
-                    )) return
+                this.selectedAutoCoupon = null;
+                this.autoCouponChoices = autos;
 
-                    if (!autoCoupon.combination_allowed && this.coupons.length > 0) return
-                    if (autoCoupon.combination_allowed && this.coupons.some(c => !c.combination_allowed)) return
+                // No eligible auto coupon
+                if (autos.length === 0) {
+                    this.selectedAutoCouponId = '';
+                    this.showAutoCouponChooser = false;
+                    this.order_amount = this.cartSubtotal();
+                    this.recomputeCouponTotals();
+                    return;
+                }
 
-                    autoCoupon.auto_applied = true
+                // Only one auto coupon: apply directly
+                if (autos.length === 1) {
+                    this.showAutoCouponChooser = false;
+                    this.selectedAutoCouponId = autos[0].id;
+                    this.applyChosenAutoCoupon(autos[0]);
+                    return;
+                }
 
-                    this.coupons.push(autoCoupon)
-                    this.autoAppliedCoupons.push(autoCoupon)
-                    this.addFreeProductsFromCoupon(autoCoupon)
-                })
+                // 2 or more auto coupons: user must choose
+                this.showAutoCouponChooser = true;
 
-                this.order_amount = this.cartSubtotal()
-                this.recomputeCouponTotals()
+                // If user already selected one before, keep it if still valid
+                if (this.selectedAutoCouponId) {
+                    const chosen = autos.find(c =>
+                        String(c.id) === String(this.selectedAutoCouponId)
+                    );
+
+                    if (chosen) {
+                        this.applyChosenAutoCoupon(chosen);
+                        this.showAutoCouponChooser = false;
+                        return;
+                    }
+                }
+
+                this.order_amount = this.cartSubtotal();
+                this.recomputeCouponTotals();
             },
 
                 confirmCouponSelection() {
@@ -774,6 +976,72 @@
                 this.recomputeCouponTotals();
             },
 
+            applyChosenAutoCoupon(autoCoupon) {
+                if (!autoCoupon) return;
+
+                const alreadyApplied = this.coupons.some(c =>
+                    String(c.code || '').trim().toUpperCase() === String(autoCoupon.code || '').trim().toUpperCase()
+                );
+
+                if (alreadyApplied) return;
+
+                if (!autoCoupon.combination_allowed && this.coupons.length > 0) {
+                    this.couponMessage = 'This coupon cannot be combined with other coupons.';
+                    this.couponMessageType = 'error';
+                    return;
+                }
+
+                if (autoCoupon.combination_allowed && this.coupons.some(c => !c.combination_allowed)) {
+                    this.couponMessage = 'A coupon that does not allow combination has already been applied.';
+                    this.couponMessageType = 'error';
+                    return;
+                }
+
+                autoCoupon.auto_applied = true;
+
+                this.selectedAutoCoupon = autoCoupon;
+                this.selectedAutoCouponId = autoCoupon.id;
+
+                this.coupons.push(autoCoupon);
+                this.autoAppliedCoupons.push(autoCoupon);
+                this.addFreeProductsFromCoupon(autoCoupon);
+
+                this.order_amount = this.cartSubtotal();
+                this.recomputeCouponTotals();
+            },
+
+           applySelectedAutoCoupon() {
+            if (!this.selectedAutoCouponId) {
+                this.couponMessage = 'Please select an auto coupon first.';
+                this.couponMessageType = 'error';
+                return;
+            }
+
+            const chosen = this.autoCouponChoices.find(c =>
+                String(c.id) === String(this.selectedAutoCouponId)
+            );
+
+            if (!chosen) {
+                this.couponMessage = 'Selected coupon is no longer available.';
+                this.couponMessageType = 'error';
+                return;
+            }
+
+            const beforeCount = this.coupons.length;
+
+            this.applyChosenAutoCoupon(chosen);
+
+            const wasApplied = this.coupons.length > beforeCount;
+
+            if (!wasApplied) {
+                return;
+            }
+
+            this.showAutoCouponChooser = false;
+            this.couponMessage = 'Coupon applied successfully.';
+            this.couponMessageType = 'success';
+        },
+
                 applyGiftCheque() {
                 this.giftChequeMessage = '';
                 this.giftChequeMessageType = '';
@@ -894,12 +1162,11 @@
                     await this.changeMethod(cookie ? cookie.split('=')[1] : 'pickup')
 
                     await this.getBlockDates();
-                    
                     await this.loadPhilippineData();
 
-                this.order_amount = this.cartSubtotal()
-                this.applyAutoCoupons()
-                this.recomputeCouponTotals()
+                    this.order_amount = this.cartSubtotal()
+                    this.applyAutoCoupons()
+                    this.recomputeCouponTotals()
 
                     this.$nextTick(() => {
                         if (this.method === 'pickup' && this.$refs.pickupDate) {
@@ -917,13 +1184,13 @@
 
                     this.$nextTick(() => {
                         if (this.sale && this.sale.delivery_type == "Door to door delivery") {
-                            this.province = this.sale && this.sale.delivery_type == "Door to door delivery" ? this.sale.province : ''
+                            this.province = this.sale?.province ?? ''
                             this.onProvinceChange()
-                            this.city = this.sale && this.sale.delivery_type == "Door to door delivery" ? this.sale.city : ''
+                            this.city = this.sale?.city ?? ''
                             this.onCityChange()
-                            this.location = this.sale && this.sale.delivery_type == "Door to door delivery" ? this.sale.barangay : ''
+                            this.location = this.sale?.barangay ?? ''
                             this.onBarangayChange()
-                            this.instruction = this.sale && this.sale.delivery_type == "Door to door delivery" ? this.sale.instruction : ''
+                            this.instruction = this.sale?.instruction ?? ''
 
                             let delivery_date = '{{ $sale && $sale?->delivery_type == "Door to door delivery" ? $sale?->items()->first()->delivery_date : '' }}'
 
@@ -945,32 +1212,19 @@
                                 time = time.slice(0, -3)
                                 this.need_time = this.formatHourValue(time)
                             }
-
                         }
                     })
 
-                    if (!this.allowMultiple && this.hasBaka && this.lechonBakaService > 0) {
-                        console.log('not multiple order and has baka');
+                    const refreshCouponState = () => {
+                        this.removeInvalidLocationCoupons()
+                        this.applyAutoCoupons()
+                        this.recomputeCouponTotals()
                     }
-                     this.$watch('province', () => {
-                    this.removeInvalidLocationCoupons();
-                    this.recomputeCouponTotals();
-                });
 
-                this.$watch('city', () => {
-                    this.removeInvalidLocationCoupons();
-                    this.recomputeCouponTotals();
-                });
-
-                this.$watch('location', () => {
-                    this.removeInvalidLocationCoupons();
-                    this.recomputeCouponTotals();
-                });
-
-                this.$watch(() => JSON.stringify(this.deliveries || []), () => {
-                    this.removeInvalidLocationCoupons();
-                    this.recomputeCouponTotals();
-                });
+                    this.$watch('province', refreshCouponState)
+                    this.$watch('city', refreshCouponState)
+                    this.$watch('location', refreshCouponState)
+                    this.$watch(() => JSON.stringify(this.deliveries || []), refreshCouponState)
                 },
 
                 formatDate(date) {
@@ -1152,12 +1406,12 @@
 
                 el._datepicker = picker
 
-                    if (this.sale && this.sale.delivery_type == "Door to door delivery") {
-                        
-                    } else {
-                        this.need_date = parts.date
-                        picker.setDate(parts.date)
-                    }
+                if (this.sale && this.sale.delivery_type == "Door to door delivery") {
+                    // Keep existing sale date when editing.
+                } else {
+                    this.need_date = parts.date
+                    picker.setDate(parts.date)
+                }
 
                 this.$nextTick(() => {
                     this.populateDeliveryTimes(parts.hour)
@@ -1394,7 +1648,6 @@
                     this.availableDeliveryHours = hours
 
                     this.$nextTick(() => {
-
                         if (this.sale && this.sale.delivery_type == "Door to door delivery" && this.method == 'delivery') {
                             let delivery_date = '{{ $sale && $sale?->delivery_type == "Door to door delivery" ? $sale?->items()->first()->delivery_date : '' }}'
 
@@ -1552,6 +1805,7 @@
                         this.deliveryFees = []
                         this.need_time = ''
                         this.pickup_note = ''
+                        this.availableDeliveryHours = []
                     }
 
                     if (type === 'delivery') {
@@ -1861,6 +2115,7 @@
                     try {
 
                         const couponPayload = this.coupons.map(coupon => ({
+                        id: coupon.id,
                         code: coupon.code,
                         name: coupon.name,
                         reward: coupon.reward,
@@ -1875,18 +2130,22 @@
                             email: this.contact.email,
                             agent: this.contact.agent,
                             shipping_type: this.method,
-                        coupons: JSON.stringify(couponPayload),
-                        coupon_data: JSON.stringify(couponPayload),
+
+                            selected_auto_coupon_id: this.selectedAutoCoupon ? this.selectedAutoCoupon.id : null,
+                            selected_coupon_id: this.selectedCoupon ? this.selectedCoupon.id : null,
+
+                            coupons: JSON.stringify(couponPayload),
+                            coupon_data: JSON.stringify(couponPayload),
                             discount_amount: this.discount_amount || 0,
-                        order_amount: this.cartSubtotal(),
+                            order_amount: this.cartSubtotal(),
                             delivery_fee: this.deliveryFee || 0,
                             deposit: this.deposit,
                             total_amount: this.total_amount,
                             isBaka: this.hasBaka ? 1 : 0,
                             lechon_baka_service: this.lechonBakaService,
-                        gift_cheque: this.appliedGiftCheque ? JSON.stringify(this.appliedGiftCheque) : null,
-                        gift_cheque_amount: Number(this.giftChequeDiscountAmount || 0),
-                    };
+                            gift_cheque: this.appliedGiftCheque ? JSON.stringify(this.appliedGiftCheque) : null,
+                            gift_cheque_amount: Number(this.giftChequeDiscountAmount || 0),
+                        };
 
                         /* ==========================
                         PICKUP
@@ -2413,9 +2672,6 @@
                             this.availableDeliveryHours = []
                         }
 
-                        this.province = ''
-                        this.delivery_address = ''
-
                         this.isBaka = window.hasBaka;
                         this.lechonBakaService = this.isBaka ? window.lechonBakaService : 0;
                     } else {
@@ -2715,6 +2971,8 @@
                     return hours
                 },
 
+                
+
                 calculateEarliestBusinessTime(processingHours) {
 
                     const now = new Date()
@@ -2753,17 +3011,8 @@
                 },
 
                 getEarliestAllowedDateTime() {
-                    return this.calculateEarliestTime(this.getRequiredProcessingHours())
-                },
-
-                getEarliestForPickupAndSingle() {
-                    return this.calculateEarliestTime(this.getCartProcessingHours())
-                },
-
-                getEarliestDateTimeForDelivery(delivery) {
-                    return this.calculateEarliestTime(
-                        this.getProcessingHoursForDelivery(delivery)
-                    )
+                    const hours = this.getRequiredProcessingHours()
+                    return this.calculateEarliestBusinessTime(hours)
                 },
 
                 adjustToOpeningHours(dateObj) {
@@ -2772,7 +3021,7 @@
 
                     const hour = adjusted.getHours()
 
-                    // If before opening - move to 9AM
+                    // If before opening → move to 9AM
                     if (hour < this.openHour) {
                         adjusted.setHours(this.openHour, 0, 0, 0)
                     }
@@ -2807,6 +3056,47 @@
                     })
 
                     return hours
+                },
+
+
+                getEarliestDateTimeForDelivery(delivery) {
+
+                    const now = new Date()
+
+                    const processingHours = this.getProcessingHoursForDelivery(delivery)
+
+                    let current = new Date(now)
+
+                    // move to opening if outside hours
+                    if (current.getHours() >= this.closeHour) {
+                        current.setDate(current.getDate() + 1)
+                        current.setHours(this.openHour, 0, 0, 0)
+                    } else if (current.getHours() < this.openHour) {
+                        current.setHours(this.openHour, 0, 0, 0)
+                    }
+
+                    let remainingHours = processingHours
+
+                    while (remainingHours > 0) {
+
+                        const endOfDay = new Date(current)
+                        endOfDay.setHours(this.closeHour, 0, 0, 0)
+
+                        const availableToday =
+                            (endOfDay - current) / (1000 * 60 * 60)
+
+                        if (remainingHours <= availableToday) {
+                            current.setHours(current.getHours() + remainingHours)
+                            remainingHours = 0
+                        } else {
+                            remainingHours -= availableToday
+
+                            current.setDate(current.getDate() + 1)
+                            current.setHours(this.openHour, 0, 0, 0)
+                        }
+                    }
+
+                    return current
                 },
 
                 getProcessingHoursFromSelectedOrders() {
@@ -2856,6 +3146,11 @@
                     })
 
                     return hours
+                },
+
+                getEarliestForPickupAndSingle() {
+                    const hours = this.getCartProcessingHours()
+                    return this.calculateEarliestBusinessTime(hours)
                 },
 
                 getProductName(productId) {
@@ -3183,12 +3478,13 @@
                 },
 
                 getBlockedTimeRangesForDate(date) {
-                    return this.blockedDetails.filter(b =>
-                        b.date === date &&
-                        this.blockAppliesToCart(b) &&
-                        this.blockAppliesToMethod(b) &&
-                        b.is_all_day == 0
-                    )
+                return this.blockedDetails.filter(b =>
+                    b.date === date &&
+                    this.blockAppliesToCart(b) &&
+                    this.blockAppliesToMethod(b) &&
+                    this.isBlockedWithCombo(b) &&
+                    b.is_all_day == 0
+                )
                 },
 
                 normalizeTime(timeStr) {
@@ -3196,85 +3492,27 @@
                     return timeStr.substring(0,5) // from "11:00:00" to "11:00"
                 },
 
-                blockAppliesToDelivery(block, delivery) {
+                
+                getNextAvailableDate(startDate, blocks = this.blockedDetails, applies = null) {
+                let date = new Date(startDate)
 
-                    if (!delivery || !delivery.orders?.length) return false
+                while (true) {
+                    const formatted = this.formatDate(date)
 
-                    const deliveryProductIds = delivery.orders.map(o => o.product_id)
+                    const blockedForThisDate = (blocks || []).filter(b => {
+                        if (b.date !== formatted) return false
+                        if (b.is_all_day != 1) return false
 
-                    const deliveryCategoryIds = delivery.orders
-                        .map(o => o.product?.category_id)
-                        .filter(Boolean)
+                        return typeof applies === 'function' ? applies(b) : true
+                    })
 
-                    if (block.scope === 'all') {
-                        return true
+                    if (!blockedForThisDate.length) {
+                        return date
                     }
 
-                    if (block.scope === 'product') {
-
-                        if (!block.products?.length) return false
-
-                        const blockProductIds = block.products.map(p => p.id)
-
-                        return deliveryProductIds.some(id => blockProductIds.includes(id))
-                    }
-
-                    if (block.scope === 'category') {
-
-                        if (!block.categories?.length) return false
-
-                        const blockCategoryIds = block.categories.map(c => c.id)
-
-                        return deliveryCategoryIds.some(id => blockCategoryIds.includes(id))
-                    }
-
-                    return false
-                },
-
-                calculateEarliestTime(processingHours) {
-
-                    const debugNow = this.getDebugNowFromUrl()
-
-                    const now = debugNow
-                        ? new Date(debugNow)
-                        : new Date()
-
-                    // add processing normally
-                    let earliest = new Date(
-                        now.getTime() + processingHours * 60 * 60 * 1000
-                    )
-
-                    // round up to next hour
-                    earliest = this.roundUpToNextHour(earliest)
-
-                    //adjust to business hours
-                    earliest = this.adjustToOpeningHours(earliest)
-
-                    return earliest
-                },
-
-                getNextAvailableDate(startDate) {
-                    let date = new Date(startDate)
-
-                    while (true) {
-                        const formatted = this.formatDate(date)
-
-                        const blockedForThisDate = this.blockedDetails.filter(b =>
-                            b.date === formatted &&
-                            this.blockAppliesToCart(b) &&
-                            this.blockAppliesToMethod(b)
-                        )
-
-                        const hasAllDayBlock = blockedForThisDate.some(b => b.is_all_day == 1)
-
-                        if (!hasAllDayBlock) {
-                            return date
-                        }
-
-                        // move to next day
-                        date.setDate(date.getDate() + 1)
-                    }
-                },
+                    date.setDate(date.getDate() + 1)
+                }
+            },
 
                 get incompleteProgress() {
                     if (!this.contact.name || !this.contact.mobile || !this.contact.email) {
@@ -3341,11 +3579,6 @@
                     }
 
                     return true
-                },
-
-                getDebugNowFromUrl() {
-                    const params = new URLSearchParams(window.location.search)
-                    return params.get('debug_now')
                 }
 
             }
