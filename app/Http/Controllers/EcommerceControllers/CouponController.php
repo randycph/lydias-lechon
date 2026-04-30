@@ -75,9 +75,10 @@ class CouponController extends Controller
             ? 'required|unique:coupons,coupon_code'
             : 'nullable',
 
-        'location' => $request->reward === 'free-shipping-optn'
+        'location' => in_array($request->reward, ['free-shipping-optn', 'free-product-optn'])
             ? 'required|array|min:1'
             : 'nullable|array',
+
         'location.*' => 'nullable|string',
 
         'shipping_fee_discount_amount' => (
@@ -94,8 +95,10 @@ class CouponController extends Controller
             : 'nullable',
 
         'free_product_id' => $request->reward === 'free-product-optn'
-            ? 'required'
-            : 'nullable',
+            ? 'required|array|min:1'
+            : 'nullable|array',
+
+        'free_product_id.*' => 'nullable|exists:products,id',
     ])->validate();
 
     $isManual = $request->coupon_activation === 'manual';
@@ -123,15 +126,18 @@ class CouponController extends Controller
     $locationDiscountType = null;
     $locationDiscountAmount = 0;
 
-    if ($isFreeShipping) {
-        $locations = $request->input('location', []);
-        $location = !empty($locations) ? implode('|', $locations) . '|' : 'all';
-        $locationDiscountType = $request->input('discount_type');
+    if ($isFreeShipping || $isFreeProduct) {
+    $locations = $request->input('location', []);
+    $location = !empty($locations) ? implode('|', $locations) . '|' : 'all';
+        }
 
-        $locationDiscountAmount = $request->input('discount_type') === 'partial'
-            ? (float) $request->input('shipping_fee_discount_amount', 0)
-            : 0;
-    }
+        if ($isFreeShipping) {
+            $locationDiscountType = $request->input('discount_type');
+
+            $locationDiscountAmount = $request->input('discount_type') === 'partial'
+                ? (float) $request->input('shipping_fee_discount_amount', 0)
+                : 0;
+        }
 
     $amountDiscountType = in_array($request->reward, ['discount-amount-optn', 'discount-percentage-optn'])
         ? ($request->input('amount_discount') ?? 1)
@@ -175,7 +181,9 @@ class CouponController extends Controller
 
             'amount' => $isDiscountAmount ? $request->input('discount_amount') : 0,
             'percentage' => $isDiscountPercentage ? $request->input('discount_percentage') : null,
-            'free_product_id' => $isFreeProduct ? $request->input('free_product_id') : null,
+            'free_product_id' => $isFreeProduct
+            ? implode('|', $request->input('free_product_id', [])) . '|'
+            : null,
 
             'status' => $request->has('status') ? 'ACTIVE' : 'INACTIVE',
             'amount_discount_type' => $amountDiscountType,
@@ -472,100 +480,179 @@ class CouponController extends Controller
      */
     public function update(Request $request, Coupon $coupon)
     {
-        Validator::make($request->all(), [
-            'name' => 'required|max:150|unique:coupons,name,' . $coupon->id,
-            'description' => 'required',
-            'terms_and_conditions' => 'required',
+    Validator::make($request->all(), [
+        'name' => 'required|max:150|unique:coupons,name,' . $coupon->id,
+        'description' => 'required',
+        'terms_and_conditions' => 'required',
 
-            'customer' => $request->coupon_scope == 'specific'
-                ? 'required|array|min:1'
-                : 'nullable',
+        'coupon_scope' => 'required',
+        'coupon_activation' => 'required',
+        'reward' => 'required',
 
-            'code' => $request->coupon_activation == 'manual'
-                ? 'required|max:150|unique:coupons,coupon_code,' . $coupon->id
-                : 'nullable',
+        'customer' => $request->coupon_scope == 'specific'
+            ? 'required|array|min:1'
+            : 'nullable|array',
 
-            'reward' => 'required',
+        'customer.*' => 'nullable',
 
-            'location' => $request->reward == 'free-shipping-optn'
-                ? 'required|array|min:1'
-                : 'nullable',
+        'code' => $request->coupon_activation == 'manual'
+            ? 'required|max:150|unique:coupons,coupon_code,' . $coupon->id
+            : 'nullable',
 
-            'shipping_fee_discount_amount' => ($request->reward == 'free-shipping-optn' && $request->discount_type == 'partial')
-                ? 'required|numeric|min:1'
-                : 'nullable',
+        // Location is now required for Free Shipping AND Free Product
+        'location' => in_array($request->reward, ['free-shipping-optn', 'free-product-optn'])
+            ? 'required|array|min:1'
+            : 'nullable|array',
 
-            'discount_amount' => $request->reward == 'discount-amount-optn'
-                ? 'required|numeric|min:1'
-                : 'nullable',
+        'location.*' => 'nullable|string',
 
-            'discount_percentage' => $request->reward == 'discount-percentage-optn'
-                ? 'required|numeric|min:1'
-                : 'nullable',
+        'discount_type' => $request->reward == 'free-shipping-optn'
+            ? 'required|in:partial,full'
+            : 'nullable',
 
-            'free_product_id' => $request->reward == 'free-product-optn'
-                ? 'required|array|min:1'
-                : 'nullable',
-        ])->validate();
+        'shipping_fee_discount_amount' => (
+            $request->reward == 'free-shipping-optn' &&
+            $request->discount_type == 'partial'
+        )
+            ? 'required|numeric|min:1'
+            : 'nullable',
 
-        $loc = null;
-        $loc_discount_type = null;
-        $loc_discount_amount = 0;
+        'discount_amount' => $request->reward == 'discount-amount-optn'
+            ? 'required|numeric|min:1'
+            : 'nullable',
 
-        if ($request->reward == 'free-shipping-optn') {
-            $loc = implode('|', $request->location ?? []);
-            $loc_discount_type = $request->discount_type;
-            $loc_discount_amount = $request->discount_type == 'full'
-                ? 0
-                : ($request->shipping_fee_discount_amount ?? 0);
-        }
+        'discount_percentage' => $request->reward == 'discount-percentage-optn'
+            ? 'required|numeric|min:1|max:100'
+            : 'nullable',
 
-        $customernames = $request->coupon_scope == 'specific'
-            ? implode('|', $request->customer ?? [])
-            : null;
+        'free_product_id' => $request->reward == 'free-product-optn'
+            ? 'required|array|min:1'
+            : 'nullable|array',
 
-        $productids = $request->reward == 'free-product-optn'
-            ? implode('|', $request->free_product_id ?? [])
-            : null;
+        'free_product_id.*' => 'nullable|exists:products,id',
+    ])->validate();
 
-        $amount_discount = 1;
-        if (in_array($request->reward, ['discount-amount-optn', 'discount-percentage-optn'])) {
-            $amount_discount = $request->amount_discount ?? 1;
-        }
+    $isFreeShipping = $request->reward == 'free-shipping-optn';
+    $isFreeProduct = $request->reward == 'free-product-optn';
+    $isDiscountAmount = $request->reward == 'discount-amount-optn';
+    $isDiscountPercentage = $request->reward == 'discount-percentage-optn';
 
-        $discount_productid = null;
-        if (($request->amount_discount ?? 1) == 2 && $request->product_discount == 'specific') {
-            $discount_productid = $request->discount_productid;
-        }
+    /*
+     |------------------------------------------------------------
+     | Helper for saving multiple selected values.
+     | Example: [1, 2, 3] becomes 1|2|3|
+     |------------------------------------------------------------
+     */
+    $savePipeValues = function ($values) {
+        $values = array_values(array_filter($values ?? [], function ($value) {
+            return $value !== null && $value !== '';
+        }));
 
-        $coupon->update([
-            'coupon_code' => $request->coupon_activation == 'manual' ? $request->code : $request->name,
-            'name' => $request->name,
-            'description' => $request->description,
-            'terms_and_conditions' => $request->terms_and_conditions,
-            'activation_type' => $request->coupon_activation,
-            'customer_scope' => $request->coupon_scope,
-            'scope_customer_id' => $customernames,
-            'location' => $loc,
-            'location_discount_type' => $loc_discount_type,
-            'location_discount_amount' => $loc_discount_amount,
-            'reward' => $request->reward,
-            'amount' => $request->reward == 'discount-amount-optn' ? $request->discount_amount : null,
-            'percentage' => $request->reward == 'discount-percentage-optn' ? $request->discount_percentage : null,
-            'free_product_id' => $productids,
-            'status' => $request->has('status') ? 'ACTIVE' : 'INACTIVE',
-            'amount_discount_type' => $amount_discount,
-            'product_discount' => $amount_discount == 2 ? $request->product_discount : null,
-            'discount_product_id' => $discount_productid,
-            'user_id' => Auth::id(),
-        ]);
+        return !empty($values) ? implode('|', $values) . '|' : null;
+    };
 
-        $this->update_coupon_time_settings($coupon->id, $request);
-        $this->update_coupon_purchase_settings($coupon->id, $request);
-        $this->update_coupon_rule_settings($coupon->id, $request);
+    /*
+     |------------------------------------------------------------
+     | Location
+     | Free Shipping and Free Product both use location.
+     | Default is "all" so your NOT NULL location column will not fail.
+     |------------------------------------------------------------
+     */
+    $loc = 'all';
+    $loc_discount_type = null;
+    $loc_discount_amount = 0;
 
-        return back()->with('success', 'Coupon details has been updated.');
+    if ($isFreeShipping || $isFreeProduct) {
+        $loc = $savePipeValues($request->location) ?? 'all';
     }
+
+    if ($isFreeShipping) {
+        $loc_discount_type = $request->discount_type;
+        $loc_discount_amount = $request->discount_type == 'full'
+            ? 0
+            : ($request->shipping_fee_discount_amount ?? 0);
+    }
+
+    /*
+     |------------------------------------------------------------
+     | Customer scope
+     |------------------------------------------------------------
+     */
+    $customernames = $request->coupon_scope == 'specific'
+        ? $savePipeValues($request->customer)
+        : null;
+
+    /*
+     |------------------------------------------------------------
+     | Free product IDs
+     |------------------------------------------------------------
+     */
+    $productids = $isFreeProduct
+        ? $savePipeValues($request->free_product_id)
+        : null;
+
+    /*
+     |------------------------------------------------------------
+     | Discount amount / percentage product settings
+     |------------------------------------------------------------
+     */
+    $amount_discount = 1;
+
+    if ($isDiscountAmount || $isDiscountPercentage) {
+        $amount_discount = $request->amount_discount ?? 1;
+    }
+
+    $discount_productid = null;
+
+    if ($amount_discount == 2 && $request->product_discount == 'specific') {
+        $discount_productid = $request->discount_productid;
+    }
+
+    $coupon->update([
+        'coupon_code' => $request->coupon_activation == 'manual'
+            ? $request->code
+            : $request->name,
+
+        'name' => $request->name,
+        'description' => $request->description,
+        'terms_and_conditions' => $request->terms_and_conditions,
+        'activation_type' => $request->coupon_activation,
+        'customer_scope' => $request->coupon_scope,
+        'scope_customer_id' => $customernames,
+
+        'location' => $loc,
+        'location_discount_type' => $loc_discount_type,
+        'location_discount_amount' => $loc_discount_amount,
+
+        'reward' => $request->reward,
+
+        'amount' => $isDiscountAmount
+            ? $request->discount_amount
+            : 0,
+
+        'percentage' => $isDiscountPercentage
+            ? $request->discount_percentage
+            : null,
+
+        'free_product_id' => $productids,
+
+        'status' => $request->has('status') ? 'ACTIVE' : 'INACTIVE',
+        'amount_discount_type' => $amount_discount,
+
+        'product_discount' => $amount_discount == 2
+            ? $request->product_discount
+            : null,
+
+        'discount_product_id' => $discount_productid,
+        'user_id' => Auth::id(),
+    ]);
+
+    $this->update_coupon_time_settings($coupon->id, $request);
+    $this->update_coupon_purchase_settings($coupon->id, $request);
+    $this->update_coupon_rule_settings($coupon->id, $request);
+
+    return back()->with('success', 'Coupon details has been updated.');
+}
 
     public function update_coupon_time_settings($couponID,$request)
     {

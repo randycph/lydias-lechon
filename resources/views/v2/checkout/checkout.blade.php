@@ -605,6 +605,10 @@
                     );
                 },
 
+                couponHasLocationLimit(coupon) {
+                    return this.getCouponLocations(coupon).length > 0;
+                },
+
                 normalizeText(value) {
                     return String(value ?? '')
                         .replace(/[\[\]"']/g, '')
@@ -711,14 +715,18 @@
             },
 
                 shouldAutoApplyCoupon(coupon) {
-                    const isAuto =
-                        coupon.auto_applied === true ||
-                        String(coupon.activation_type || '').toLowerCase() === 'auto';
+                const isAuto =
+                    coupon.auto_applied === true ||
+                    String(coupon.activation_type || '').toLowerCase() === 'auto';
 
-                    if (!isAuto) return false;
+                if (!isAuto) return false;
 
-                    if (!this.isFreeShippingCoupon(coupon)) return true;
+                const hasLocationLimit = this.couponHasLocationLimit(coupon);
 
+                // Same rule as free shipping:
+                // if coupon has address/location restriction,
+                // it only applies when delivery address matches.
+                if (hasLocationLimit) {
                     if (this.method !== 'delivery') return false;
 
                     const targets = this.getSelectedCouponTargets();
@@ -727,7 +735,10 @@
                     return targets.some(t =>
                         this.couponMatchesLocation(coupon, t.city, t.location)
                     );
-                },
+                }
+
+                return true;
+            },
 
                 getCouponDiscount(coupon) {
                     const subtotal = this.cartSubtotal();
@@ -838,27 +849,27 @@
 
                 const normalized = this.normalizeCoupon(this.selectedCoupon);
 
-                if (this.isFreeShippingCoupon(normalized)) {
-                    const targets = this.getSelectedCouponTargets();
+                if (this.couponHasLocationLimit(normalized)) {
+                const targets = this.getSelectedCouponTargets();
 
-                    if (!targets.length) {
-                        this.couponMessage = 'Please select a delivery location first.';
-                        this.couponMessageType = 'error';
-                        this.closeCouponModal();
-                        return;
-                    }
-
-                    const isValidForAnyTarget = targets.some(t =>
-                        this.couponMatchesLocation(normalized, t.city, t.location)
-                    );
-
-                    if (!isValidForAnyTarget) {
-                        this.couponMessage = 'This free shipping coupon is not valid for the selected location.';
-                        this.couponMessageType = 'error';
-                        this.closeCouponModal();
-                        return;
-                    }
+                if (!targets.length) {
+                    this.couponMessage = 'Please select a delivery location first.';
+                    this.couponMessageType = 'error';
+                    this.closeCouponModal();
+                    return;
                 }
+
+                const isValidForAnyTarget = targets.some(t =>
+                    this.couponMatchesLocation(normalized, t.city, t.location)
+                );
+
+                if (!isValidForAnyTarget) {
+                    this.couponMessage = 'This coupon is not valid for the selected address.';
+                    this.couponMessageType = 'error';
+                    this.closeCouponModal();
+                    return;
+                }
+            }
 
                 if (this.coupons.find(c => c.code === normalized.code)) {
                     this.couponMessage = 'Coupon already applied.';
@@ -910,25 +921,25 @@
 
                 const normalized = this.normalizeCoupon(found);
 
-                if (this.isFreeShippingCoupon(normalized)) {
-                    const targets = this.getSelectedCouponTargets();
+                if (this.couponHasLocationLimit(normalized)) {
+                const targets = this.getSelectedCouponTargets();
 
-                    if (!targets.length) {
-                        this.couponMessage = 'Please select a delivery location first.';
-                        this.couponMessageType = 'error';
-                        return;
-                    }
-
-                    const isValidForAnyTarget = targets.some(t =>
-                        this.couponMatchesLocation(normalized, t.city, t.location)
-                    );
-
-                    if (!isValidForAnyTarget) {
-                        this.couponMessage = 'This free shipping coupon is not valid for the selected location.';
-                        this.couponMessageType = 'error';
-                        return;
-                    }
+                if (!targets.length) {
+                    this.couponMessage = 'Please select a delivery location first.';
+                    this.couponMessageType = 'error';
+                    return;
                 }
+
+                const isValidForAnyTarget = targets.some(t =>
+                    this.couponMatchesLocation(normalized, t.city, t.location)
+                );
+
+                if (!isValidForAnyTarget) {
+                    this.couponMessage = 'This coupon is not valid for the selected address.';
+                    this.couponMessageType = 'error';
+                    return;
+                }
+            }
 
                 const alreadyApplied = this.coupons.find(c =>
                     String(c.code || '').trim().toUpperCase() === code

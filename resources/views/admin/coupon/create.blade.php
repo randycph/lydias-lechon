@@ -5,6 +5,51 @@
 	{{-- <link href="{{ asset('lib/clockpicker/bootstrap-clockpicker.min.css') }}" rel="stylesheet"> --}}
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 	<style>
+
+		/* Make Select2 typing/search area more obvious */
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    height: 40px;
+    border: 2px solid #0168fa !important;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    outline: none;
+    background-color: #f8fbff;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field:focus {
+    border-color: #0056d6 !important;
+    box-shadow: 0 0 0 3px rgba(1, 104, 250, 0.18);
+    background-color: #fff;
+}
+
+/* Make multiple select typing field visible */
+.select2-container--default .select2-selection--multiple {
+    min-height: 42px;
+    padding: 4px 6px;
+    border: 1px solid #c7ced8;
+    border-radius: 6px;
+}
+
+.select2-container--default.select2-container--focus .select2-selection--multiple,
+.select2-container--default.select2-container--open .select2-selection--multiple {
+    border-color: #0168fa !important;
+    box-shadow: 0 0 0 3px rgba(1, 104, 250, 0.15);
+}
+
+.select2-container--default .select2-selection--multiple .select2-search__field {
+    min-width: 180px !important;
+    font-size: 14px;
+    font-weight: 600;
+    color: #111;
+}
+
+.select2-container--default .select2-selection--multiple .select2-search__field::placeholder {
+    color: #0168fa;
+    font-weight: 600;
+    opacity: 1;
+}
 		/* Highlight already selected options inside Select2 dropdown */
 		.select2-container--default .select2-results__option[aria-selected="true"],
 		.select2-container--default .select2-results__option--selected {
@@ -251,18 +296,53 @@
                 	</div>
 
 					<div class="mb-3 reward-option" id="free-product-optn" style="display:@if($errors->any() && old('reward') == 'free-product-optn') block @else none @endif">
-						<label class="d-block">Free Product *</label>
-						<select class="form-control select2" name="free_product_id" style="min-height: 32px;" multiple="multiple">
-							<option label="Choose one"></option>
-							@foreach($free_products as $product)
-								<option @if(old('free_product_id') == $product->id) selected @endif value="{{$product->id}}">{{ $product->name }}</option>
-							@endforeach
-						</select>
-						@error('free_product_id')
-							<span class="invalid-feedback" role="alert">
+
+
+						@error('location')
+							<span class="text-danger d-block mt-1">
 								<strong>{{ $message }}</strong>
 							</span>
 						@enderror
+
+						<br><br>
+
+						<label class="d-block">Free Product *</label>
+						<select class="form-control select2" name="free_product_id[]" style="min-height: 32px;" multiple="multiple">
+							<option label="Choose one"></option>
+							@foreach($free_products as $product)
+								<option 
+									@if(is_array(old('free_product_id')) && in_array($product->id, old('free_product_id'))) selected @endif 
+									value="{{ $product->id }}"
+								>
+									{{ $product->name }}
+								</option>
+							@endforeach
+						</select>
+
+						@error('free_product_id')
+							<span class="invalid-feedback d-block" role="alert">
+								<strong>{{ $message }}</strong>
+							</span>
+						@enderror
+
+						@error('free_product_id.*')
+							<span class="invalid-feedback d-block" role="alert">
+								<strong>{{ $message }}</strong>
+							</span>
+						@enderror
+
+						<label class="d-block">Location *</label>
+						<select class="form-control select2 select-location" name="location[]" multiple="multiple" style="min-height: 32px;">
+							<option value="all">All Area</option>
+							@foreach($locations as $location)
+								<option 
+									@if(is_array(old('location')) && in_array($location->city, old('location'))) selected @endif 
+									value="{{ $location->city }}"
+								>
+									{{ $location->city }}
+								</option>
+							@endforeach
+						</select>
 					</div>
 					<hr>
 				</div>
@@ -803,13 +883,7 @@
 		minDate: dateToday,
 	});
 
-	$('.select2').each(function () {
-    $(this).select2({
-        placeholder: 'Choose Options',
-        width: '100%',
-        closeOnSelect: !$(this).prop('multiple')
-    });
-});
+
 
 
 	function myFunction() {
@@ -935,33 +1009,48 @@ $(function() {
     $('.selectpicker').selectpicker();
 
     $('.select2').each(function () {
+        const isMultiple = $(this).prop('multiple');
+
         $(this).select2({
-            placeholder: 'Choose Options',
+            placeholder: 'Type to search...',
             width: '100%',
-            closeOnSelect: !$(this).prop('multiple') ? true : false
+            closeOnSelect: !isMultiple,
+            minimumResultsForSearch: 0
         });
+    });
+
+    // Add clearer placeholder when dropdown opens
+    $(document).on('select2:open', function () {
+        setTimeout(function () {
+            let searchField = document.querySelector('.select2-container--open .select2-search__field');
+
+            if (searchField) {
+                searchField.setAttribute('placeholder', 'Type here to search...');
+                searchField.focus();
+            }
+        }, 0);
     });
 
     let isHandlingSelect = false;
 
-	$('.select-location').on('select2:select', function (e) {
-		if (isHandlingSelect) return;
+    $('.select-location').on('select2:select', function (e) {
+        if (isHandlingSelect) return;
 
-		isHandlingSelect = true;
+        isHandlingSelect = true;
 
-		const $select = $(this);
-		const selectedId = e.params.data.id;
-		let selected = $select.val() || [];
+        const $select = $(this);
+        const selectedId = e.params.data.id;
+        let selected = $select.val() || [];
 
-		if (selectedId === 'all') {
-			$select.val(['all']).trigger('change.select2');
-		} else {
-			selected = selected.filter(value => value !== 'all');
-			$select.val(selected).trigger('change.select2');
-		}
+        if (selectedId === 'all') {
+            $select.val(['all']).trigger('change.select2');
+        } else {
+            selected = selected.filter(value => value !== 'all');
+            $select.val(selected).trigger('change.select2');
+        }
 
-		isHandlingSelect = false;
-	});
+        isHandlingSelect = false;
+    });
 });
 </script>
 @endsection

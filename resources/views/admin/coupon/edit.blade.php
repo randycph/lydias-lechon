@@ -5,6 +5,50 @@
 	{{-- <link href="{{ asset('lib/clockpicker/jquery-clockpicker.min.css') }}" rel="stylesheet"> --}}
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 	<style>
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    height: 40px;
+    border: 2px solid #0168fa !important;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    outline: none;
+    background-color: #f8fbff;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field:focus {
+    border-color: #0056d6 !important;
+    box-shadow: 0 0 0 3px rgba(1, 104, 250, 0.18);
+    background-color: #fff;
+}
+
+/* Make multiple select typing field visible */
+.select2-container--default .select2-selection--multiple {
+    min-height: 42px;
+    padding: 4px 6px;
+    border: 1px solid #c7ced8;
+    border-radius: 6px;
+}
+
+.select2-container--default.select2-container--focus .select2-selection--multiple,
+.select2-container--default.select2-container--open .select2-selection--multiple {
+    border-color: #0168fa !important;
+    box-shadow: 0 0 0 3px rgba(1, 104, 250, 0.15);
+}
+
+.select2-container--default .select2-selection--multiple .select2-search__field {
+    min-width: 180px !important;
+    font-size: 14px;
+    font-weight: 600;
+    color: #111;
+}
+
+.select2-container--default .select2-selection--multiple .select2-search__field::placeholder {
+    color: #0168fa;
+    font-weight: 600;
+    opacity: 1;
+}
+
 			/* Highlight already selected options inside Select2 dropdown */
 		.select2-container--default .select2-results__option[aria-selected="true"],
 		.select2-container--default .select2-results__option--selected {
@@ -181,11 +225,14 @@
 				</div>
 
 				@php
-					$arr_loc = [];
-					$locs = old('location', !empty($coupon->location) ? explode('|', $coupon->location) : []);
-					foreach($locs as $l){
-						array_push($arr_loc,$l);
-					}
+					$arr_loc = old(
+						'location',
+						!empty($coupon->location)
+							? array_values(array_filter(explode('|', $coupon->location)))
+							: []
+					);
+
+					$arr_loc = array_map('strval', $arr_loc);
 				@endphp
 				<div class="form-group">
 					<div class="mb-3 reward-option" id="free-shipping-optn" 
@@ -307,19 +354,61 @@
 					@endphp
 
 					<div class="mb-3 reward-option" id="free-product-optn" style="display:@if(old('reward', $coupon->reward) == 'free-product-optn') block @else none @endif">
-						<label class="d-block">Free Product *</label>
-						<select class="form-control select2" name="free_product_id[]" style="min-height: 32px;" multiple="multiple">
-							<option label="Choose one"></option>
-							@foreach($free_products as $product)
-								<option @if(in_array($product->id, old('free_product_id', $free_product_ids ?? []))) selected @endif value="{{$product->id}}">{{ $product->name }}</option>
-							@endforeach
-						</select>
-						@error('free_product_id')
-							<span class="invalid-feedback" role="alert">
-								<strong>{{ $message }}</strong>
-							</span>
-						@enderror
-					</div>
+
+					<label class="d-block">Location *</label>
+					<select class="form-control select2 select-location" name="location[]" multiple="multiple" style="min-height: 32px;">
+						<option value="all" @if(in_array('all', $arr_loc)) selected @endif>All Area</option>
+
+						@foreach($locations as $location)
+							<option 
+								@if(in_array($location->city, $arr_loc)) selected @endif 
+								value="{{ $location->city }}"
+							>
+								{{ $location->city }}
+							</option>
+						@endforeach
+					</select>
+
+					@error('location')
+						<span class="invalid-feedback d-block" role="alert">
+							<strong>{{ $message }}</strong>
+						</span>
+					@enderror
+
+					@error('location.*')
+						<span class="invalid-feedback d-block" role="alert">
+							<strong>{{ $message }}</strong>
+						</span>
+					@enderror
+
+					<br><br>
+
+					<label class="d-block">Free Product *</label>
+					<select class="form-control select2" name="free_product_id[]" style="min-height: 32px;" multiple="multiple">
+						<option label="Choose one"></option>
+
+						@foreach($free_products as $product)
+							<option 
+								@if(in_array((string) $product->id, array_map('strval', old('free_product_id', $free_product_ids ?? [])), true)) selected @endif 
+								value="{{ $product->id }}"
+							>
+								{{ $product->name }}
+							</option>
+						@endforeach
+					</select>
+
+					@error('free_product_id')
+						<span class="invalid-feedback d-block" role="alert">
+							<strong>{{ $message }}</strong>
+						</span>
+					@enderror
+
+					@error('free_product_id.*')
+						<span class="invalid-feedback d-block" role="alert">
+							<strong>{{ $message }}</strong>
+						</span>
+					@enderror
+				</div>
 					<hr>
 				</div>
 
@@ -654,16 +743,35 @@
 		}
 	}
 
-	$('#reward-optn').change(function(){
-		$('.reward-option').hide();
-		$('#' + $(this).val()).show();
+	function refreshRewardOptions() {
+    const reward = $('#reward-optn').val();
 
-		if($(this).val() == 'discount-amount-optn' || $(this).val() == 'discount-percentage-optn'){
-			$('#div_product_amount').show();
-		} else {
-			$('#div_product_amount').hide();
-		}
-	});
+    $('.reward-option').hide();
+
+    $('.reward-option').find('input, select, textarea').prop('disabled', true);
+
+    if (reward) {
+        const $activeReward = $('#' + reward);
+
+        $activeReward.show();
+        $activeReward.find('input, select, textarea').prop('disabled', false);
+    }
+
+    if (reward === 'discount-amount-optn' || reward === 'discount-percentage-optn') {
+        $('#div_product_amount').show();
+        $('#div_product_amount').find('input, select, textarea').prop('disabled', false);
+    } else {
+        $('#div_product_amount').hide();
+        $('#div_product_amount').find('input, select, textarea').prop('disabled', true);
+    }
+}
+
+$('#reward-optn').change(function () {
+    refreshRewardOptions();
+});
+
+// Run once on page load
+refreshRewardOptions();
 
 	function sf_discount_type(){
 		var option = $('input[name="discount_type"]:checked').val();
@@ -1022,25 +1130,47 @@ $(function() {
     $('.selectpicker').selectpicker();
 
     $('.select2').each(function () {
+        const isMultiple = $(this).prop('multiple');
+
         $(this).select2({
-            placeholder: 'Choose Options',
+            placeholder: 'Type to search...',
             width: '100%',
-            closeOnSelect: !$(this).prop('multiple') ? true : false
+            closeOnSelect: !isMultiple,
+            minimumResultsForSearch: 0
         });
     });
 
+    // Add clearer placeholder when dropdown opens
+    $(document).on('select2:open', function () {
+        setTimeout(function () {
+            let searchField = document.querySelector('.select2-container--open .select2-search__field');
+
+            if (searchField) {
+                searchField.setAttribute('placeholder', 'Type here to search...');
+                searchField.focus();
+            }
+        }, 0);
+    });
+
+    let isHandlingSelect = false;
+
     $('.select-location').on('select2:select', function (e) {
+        if (isHandlingSelect) return;
+
+        isHandlingSelect = true;
+
         const $select = $(this);
         const selectedId = e.params.data.id;
-
         let selected = $select.val() || [];
 
         if (selectedId === 'all') {
             $select.val(['all']).trigger('change.select2');
-            return;
+        } else {
+            selected = selected.filter(value => value !== 'all');
+            $select.val(selected).trigger('change.select2');
         }
-        selected = selected.filter(value => value !== 'all');
-        $select.val(selected).trigger('change.select2');
+
+        isHandlingSelect = false;
     });
 });
 </script>
