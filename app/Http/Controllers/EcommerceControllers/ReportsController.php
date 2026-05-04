@@ -50,7 +50,7 @@ class ReportsController extends Controller
         $wra = rtrim($wra,",");
         $wra.=")";
 
-        $qry = "SELECT pb.name as prod_branch,jo.jo_number as jnum,h.*,d.*,h.created_at as hcreated,h.id as hid,p.category_id,c.name as catname,d.id as did,p.id as prodid,p.is_misc, h.delivery_branch, time(d.delivery_date) as del_branch
+        $qry = "SELECT pb.name as prod_branch,h.delivery_status,jo.jo_number as jnum,h.*,d.*,h.created_at as hcreated,h.id as hid,p.category_id,c.name as catname,d.id as did,p.id as prodid,p.is_misc, h.delivery_branch, time(d.delivery_date) as del_branch
             FROM `ecommerce_sales_details` d
             left join ecommerce_sales_headers h on h.id=d.sales_header_id
             left join products p on p.id=d.product_id
