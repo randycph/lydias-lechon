@@ -301,7 +301,7 @@
                                     <th>{{$r->jnum}}</th>
                                     <th>{{$r->prod_branch}}</th>
                                     <td>{{$r->delivery_status == 'Open Date' ? '' : date('Y-m-d',strtotime($r->delivery_date))}}</td>
-                                    <td>{{$r->delivery_status == 'Open Date' ? '' : date('H:i',strtotime($r->delivery_date))}}</td> // change to military time
+                                    <td>{{$r->delivery_status == 'Open Date' ? '' : date('H:i',strtotime($r->delivery_date))}}</td>
                                     <td>{{number_format($r->price,2)}}</td>
                                     <td>{{number_format($r->qty,2)}}</td>
                                     <td>{{number_format((($r->price + $r->paella_price) * $r->qty),2)}}</td>
