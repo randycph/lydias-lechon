@@ -19,50 +19,349 @@
             <div class="w-full lg:w-3/4">
                 <div class="rounded-lg border bg-white border-[#DFDFDF] shadow-md">
                     <div class="px-6 py-4 border-b border-[#DFDFDF]">
-                        <h2 class="font-semibold text-tertiary text-left uppercase">Coupons I Used</h2>
+                        <h2 class="font-semibold text-tertiary text-left uppercase">
+                            Coupons
+                        </h2>
                     </div>
 
                     <div class="flex items-start font-bold flex-col gap-2 px-5 py-5 border-b border-[#DFDFDF]">
 
                         <style>
-                            :root {
-                                --page-bg: #fff;
-                            }
-
                             [x-cloak] {
-                                display: none;
+                                display: none !important;
                             }
 
-                            .vertical-rl {
-                                writing-mode: vertical-rl;
+                            .coupon-grid {
+                                display: grid;
+                                grid-template-columns: repeat(2, minmax(0, 1fr));
+                                gap: 14px;
+                                width: 100%;
+                            }
+
+                            @media (max-width: 768px) {
+                                .coupon-grid {
+                                    grid-template-columns: 1fr;
+                                }
+                            }
+
+                            .coupon-card {
+                                position: relative;
+                                background: #ffffff;
+                                border: 1px solid #e5e7eb;
+                                border-radius: 14px;
+                                overflow: hidden;
+                                box-shadow: 0 5px 14px rgba(0, 0, 0, 0.08);
+                                transition: all .2s ease;
+                            }
+
+                            .coupon-card:hover {
+                                transform: translateY(-3px);
+                                box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+                            }
+
+                            .coupon-card::before,
+                            .coupon-card::after {
+                                content: "";
+                                position: absolute;
+                                top: 50%;
+                                width: 20px;
+                                height: 20px;
+                                background: #fff7ed;
+                                border: 1px solid #e5e7eb;
+                                border-radius: 999px;
+                                transform: translateY(-50%);
+                                z-index: 5;
+                            }
+
+                            .coupon-card::before {
+                                left: -11px;
+                            }
+
+                            .coupon-card::after {
+                                right: -11px;
+                            }
+
+                            .coupon-pattern {
+                                position: absolute;
+                                inset: 0;
+                                background-image: radial-gradient(circle, rgba(0,0,0,.07) 1px, transparent 1px);
+                                background-size: 14px 14px;
+                                opacity: .35;
+                                pointer-events: none;
+                            }
+
+                            .coupon-inner {
+                                position: relative;
+                                display: flex;
+                                min-height: 135px;
+                                z-index: 2;
+                            }
+
+                            .coupon-left {
+                                width: 35%;
+                                background: linear-gradient(135deg, #f97316 0%, #dc2626 100%);
+                                color: #ffffff;
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                justify-content: center;
+                                text-align: center;
+                                padding: 12px 8px;
+                            }
+
+                            .coupon-left-label {
+                                font-size: 9px;
+                                letter-spacing: .22em;
+                                text-transform: uppercase;
+                                font-weight: 800;
+                                opacity: .9;
+                            }
+
+                            .coupon-discount {
+                                margin-top: 8px;
+                                font-size: 22px;
+                                line-height: 1;
+                                font-weight: 950;
+                                word-break: break-word;
+                            }
+
+                            .coupon-reward {
+                                margin-top: 8px;
+                                font-size: 9px;
+                                line-height: 1.2;
+                                text-transform: uppercase;
+                                font-weight: 800;
+                                opacity: .95;
+                            }
+
+                            .coupon-right {
+                                position: relative;
+                                width: 65%;
+                                background: #ffffff;
+                                padding: 12px 14px;
+                            }
+
+                            .coupon-right::before {
+                                content: "";
+                                position: absolute;
+                                left: 0;
+                                top: 0;
+                                height: 100%;
+                                border-left: 2px dashed #cbd5e1;
+                            }
+
+                            .coupon-title {
+                                padding-right: 72px;
+                                font-size: 14px;
+                                line-height: 1.2;
+                                font-weight: 950;
+                                color: #111827;
+                            }
+
+                            .coupon-desc {
+                                margin-top: 4px;
+                                padding-right: 56px;
+                                font-size: 11px;
+                                line-height: 1.35;
+                                font-weight: 500;
+                                color: #6b7280;
+                            }
+
+                            .coupon-stamp {
+                                position: absolute;
+                                right: 12px;
+                                top: 10px;
+                                z-index: 3;
+                                display: inline-block;
+                                border: 2px solid #dc2626;
+                                color: #dc2626;
+                                background: rgba(255,255,255,.92);
+                                border-radius: 4px;
+                                padding: 2px 7px;
+                                font-size: 10px;
+                                line-height: 1;
+                                font-weight: 950;
+                                letter-spacing: .2em;
+                                transform: rotate(-14deg);
+                            }
+
+                            .coupon-code-label,
+                            .coupon-small-label {
+                                font-size: 8px;
+                                letter-spacing: .18em;
+                                text-transform: uppercase;
+                                font-weight: 900;
+                                color: #9ca3af;
+                            }
+
+                            .coupon-code-box {
+                                display: inline-flex;
+                                margin-top: 4px;
+                                max-width: 100%;
+                                border: 1px dashed #9ca3af;
+                                background: #f9fafb;
+                                border-radius: 5px;
+                                padding: 2px 8px;
+                            }
+
+                            .coupon-code-text {
+                                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+                                font-size: 11px;
+                                font-weight: 900;
+                                color: #111827;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                                white-space: nowrap;
+                            }
+
+                            .coupon-bottom {
+                                margin-top: 8px;
+                                display: flex;
+                                align-items: end;
+                                justify-content: space-between;
+                                gap: 8px;
+                            }
+
+                            .coupon-date {
+                                font-size: 11px;
+                                font-weight: 950;
+                                color: #111827;
+                            }
+
+                            .coupon-view {
+                                display: inline-flex;
+                                align-items: center;
+                                justify-content: center;
+                                border-radius: 999px;
+                                background: #111827;
+                                color: #ffffff;
+                                padding: 6px 13px;
+                                font-size: 10px;
+                                font-weight: 900;
+                                box-shadow: 0 4px 10px rgba(0,0,0,.12);
+                                white-space: nowrap;
+                            }
+
+                            .coupon-modal-wrap {
+                                width: 100%;
+                                max-width: 360px;
+                            }
+
+                            .coupon-modal-top {
+                                position: relative;
+                                background: linear-gradient(135deg, #f97316 0%, #dc2626 100%);
+                                color: #ffffff;
+                                text-align: center;
+                                padding: 32px 24px 28px;
+                                overflow: hidden;
+                            }
+
+                            .coupon-modal-stamp {
+                                position: absolute;
+                                left: 50%;
+                                top: 50%;
+                                transform: translate(-50%, -50%) rotate(-16deg);
+                                border: 3px solid rgba(220, 38, 38, .9);
+                                color: #dc2626;
+                                background: rgba(255,255,255,.78);
+                                border-radius: 8px;
+                                padding: 6px 20px;
+                                font-size: 26px;
+                                font-weight: 950;
+                                letter-spacing: .22em;
+                                z-index: 1;
+                            }
+
+                            .coupon-modal-content {
+                                position: relative;
+                                z-index: 2;
+                            }
+
+                            .coupon-modal-label {
+                                font-size: 10px;
+                                letter-spacing: .28em;
+                                text-transform: uppercase;
+                                font-weight: 900;
+                                opacity: .95;
+                            }
+
+                            .coupon-modal-discount {
+                                margin-top: 12px;
+                                font-size: 38px;
+                                line-height: 1;
+                                font-weight: 950;
+                            }
+
+                            .coupon-modal-reward {
+                                margin-top: 8px;
+                                font-size: 12px;
+                                font-weight: 800;
+                            }
+
+                            .coupon-modal-body {
+                                position: relative;
+                                background: #ffffff;
+                                padding: 22px 24px;
+                            }
+
+                            .coupon-modal-body::before {
+                                content: "";
+                                position: absolute;
+                                left: 0;
+                                right: 0;
+                                top: 0;
+                                border-top: 2px dashed #cbd5e1;
+                            }
+
+                            .modal-row {
+                                display: flex;
+                                justify-content: space-between;
+                                gap: 12px;
+                                padding-bottom: 8px;
+                                margin-bottom: 8px;
+                                border-bottom: 1px solid #f3f4f6;
+                                font-size: 12px;
+                            }
+
+                            .modal-row span:first-child {
+                                color: #6b7280;
+                                font-weight: 700;
+                            }
+
+                            .modal-row span:last-child {
+                                color: #111827;
+                                font-weight: 950;
+                                text-align: right;
                             }
                         </style>
 
-                        <div x-data="{
-                                open:false,
-                                active:{},
-                                openModal(c){
+                        <div
+                            x-data="{
+                                open: false,
+                                active: {},
+                                openModal(c) {
                                     this.active = c;
                                     this.open = true;
                                     document.body.classList.add('overflow-hidden');
                                 },
-                                close(){
+                                close() {
                                     this.open = false;
                                     document.body.classList.remove('overflow-hidden');
                                 }
                             }"
                             @keydown.escape.window="close()"
-                            class="max-w-7xl w-full">
+                            class="max-w-7xl w-full"
+                        >
 
-                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-2 w-full">
+                            <div class="coupon-grid">
 
                                 @forelse ($usedCoupons as $used)
                                     @php
                                         $c = $used->coupon;
 
                                         $couponName = $c->name ?? $used->coupon_code ?? 'Coupon';
-                                        $couponCode = $c->coupon_code ?? $used->coupon_code ?? '-';
                                         $couponDescription = $c->description ?? 'This coupon was already used.';
+                                        $couponDescriptionText = strip_tags($couponDescription);
 
                                         $usedDate = $used->created_at
                                             ? \Carbon\Carbon::parse($used->created_at)->format('d M Y')
@@ -76,14 +375,16 @@
                                             ? (\Illuminate\Support\Str::contains($c->location, 'all') ? 'All Stores' : explode('|', $c->location))
                                             : 'N/A';
 
+                                        $locationText = is_array($locations) ? implode(', ', $locations) : $locations;
+
                                         $purchase_amount = $c->purchase_amount ?? 0;
                                         $percentage = $c->percentage ?? 0;
                                         $amount = $c->amount ?? 0;
 
                                         $reward = match (trim((string)($c->reward ?? ''))) {
                                             'free-shipping-optn' => 'Free Shipping',
-                                            'discount-amount-optn' => 'Discount Amount',
-                                            'discount-percentage-optn' => 'Discount Percent',
+                                            'discount-amount-optn' => 'Amount Discount',
+                                            'discount-percentage-optn' => 'Percentage Discount',
                                             'free-product-optn' => 'Free Product',
                                             '' => 'Used Coupon',
                                             default => $c->reward,
@@ -94,22 +395,23 @@
                                         } elseif ($c && $c->reward == 'discount-amount-optn') {
                                             $discountAmount = '₱' . number_format($amount, 0);
                                         } elseif ($c && $c->reward == 'discount-percentage-optn') {
-                                            $discountAmount = number_format($percentage, 0) . '% off';
+                                            $discountAmount = number_format($percentage, 0) . '% OFF';
                                         } elseif ($c && $c->reward == 'free-shipping-optn') {
-                                            $discountAmount = 'Free Shipping';
+                                            $discountAmount = 'FREE SHIP';
+                                        } elseif ($c && $c->reward == 'free-product-optn') {
+                                            $discountAmount = 'FREE ITEM';
                                         } else {
-                                            $discountAmount = 'Used';
+                                            $discountAmount = 'USED';
                                         }
                                     @endphp
-
-                                    <button type="button"
+                                    <button
+                                        type="button"
                                         @click="openModal({
                                             title: @js($couponName),
-                                            desc: @js($couponDescription),
-                                            code: @js($couponCode),
+                                            desc: @js($couponDescriptionText),
                                             usedDate: @js($usedDate),
                                             expires: @js($expires),
-                                            locations: @js($locations),
+                                            locations: @js($locationText),
                                             reward: @js($reward),
                                             purchase_amount: @js($purchase_amount),
                                             discountAmount: @js($discountAmount),
@@ -118,66 +420,50 @@
                                             orderId: @js($used->sales_header_id ?? '-'),
                                             discountUsed: @js('₱' . number_format($used->discount_used ?? 0, 2))
                                         })"
-                                        class="relative w-full text-left">
+                                        class="w-full text-left"
+                                    >
+                                        <div class="coupon-card">
+                                            <div class="coupon-pattern"></div>
 
-                                        <div class="relative overflow-visible rounded-2xl border border-gray-200 bg-white shadow-sm opacity-90">
+                                            <div class="coupon-inner">
+                                                <div class="coupon-left">
+                                                    <div class="coupon-left-label">Used Coupon</div>
 
-                                            <!-- USED STAMP -->
-                                            <div class="absolute top-4 right-14 z-20 rotate-[-18deg] pointer-events-none">
-                                                <span class="inline-block border-[4px] border-red-700 text-red-700 font-black text-sm sm:text-base tracking-[0.35em] px-4 py-1 rounded-lg bg-white/80 shadow-md uppercase">
-                                                    USED
-                                                </span>
-                                            </div>
+                                                    <div class="coupon-discount">
+                                                        {{ $discountAmount }}
+                                                    </div>
 
-                                            <div class="absolute inset-y-0 left-0 w-12 rounded-l-2xl overflow-hidden">
-                                                <div class="h-full w-full bg-gradient-to-b from-gray-500 to-gray-700"></div>
-
-                                                <div class="absolute inset-y-0 left-0 flex w-12 items-center justify-center">
-                                                    <span class="vertical-rl rotate-180 text-white/90 tracking-widest text-[11px] font-bold uppercase text-center ml-2">
-                                                        Used
-                                                    </span>
-                                                </div>
-                                            </div>
-
-                                            <div class="pointer-events-none absolute top-1/2 -left-3 -translate-y-1/2 h-6 w-6 rounded-full border border-white"
-                                                style="background:var(--page-bg);"></div>
-
-                                            <div class="pl-16 pr-28 py-4">
-                                                <div class="flex items-start gap-3">
-                                                    <div class="min-w-0 flex-1">
-                                                        <p class="text-sm leading-5 text-gray-800 flex flex-col gap-1">
-                                                            <span class="font-semibold">{{ $couponName }}</span>
-
-                                                            {!! $couponDescription
-                                                                ? \Illuminate\Support\Str::of($couponDescription)->replace('%', '<span class="font-extrabold">%</span>')
-                                                                : 'Used coupon' !!}
-                                                        </p>
-
-                                                        <div class="mt-1">
-                                                            <p class="text-[11px] uppercase tracking-wide text-gray-400">
-                                                                Discount Used
-                                                            </p>
-                                                            <p class="text-sm font-semibold text-gray-900">
-                                                                {{ $discountAmount }}
-                                                            </p>
-                                                        </div>
-
-                                                        <div class="mt-1">
-                                                            <p class="text-[11px] uppercase tracking-wide text-gray-400">
-                                                                Used Date
-                                                            </p>
-                                                            <p class="text-sm font-semibold text-gray-900">
-                                                                {{ $usedDate }}
-                                                            </p>
-                                                        </div>
+                                                    <div class="coupon-reward">
+                                                        {{ $reward }}
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                            <div class="absolute right-4 top-1/2 -translate-y-1/2">
-                                                <span class="inline-flex items-center rounded-full bg-gray-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-gray-600">
-                                                    View
-                                                </span>
+                                                <div class="coupon-right">
+                                                    <div class="coupon-stamp">USED</div>
+
+                                                    <h3 class="coupon-title">
+                                                        {{ $couponName }}
+                                                    </h3>
+
+                                                    <p class="coupon-desc">
+                                                        {{ \Illuminate\Support\Str::limit($couponDescriptionText, 50) }}
+                                                    </p>
+
+                                                   
+
+                                                    <div class="coupon-bottom">
+                                                        <div>
+                                                            <div class="coupon-small-label">Used</div>
+                                                            <div class="coupon-date">
+                                                                {{ $usedDate }}
+                                                            </div>
+                                                        </div>
+
+                                                        <span class="coupon-view">
+                                                            View
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </button>
@@ -189,78 +475,102 @@
                             </div>
 
                             <div x-cloak x-show="open" class="fixed inset-0 z-50">
-                                <div class="fixed inset-0 bg-black/50" @click="close()"></div>
+                                <div
+                                    x-show="open"
+                                    x-transition.opacity
+                                    class="fixed inset-0 bg-black/60"
+                                    @click="close()"
+                                ></div>
 
                                 <div class="fixed inset-0 flex items-center justify-center p-4">
-                                    <div x-show="open" x-transition class="w-full max-w-sm">
-                                        <div class="relative rounded-2xl bg-white shadow-2xl overflow-hidden">
+                                    <div
+                                        x-show="open"
+                                        x-transition
+                                        class="coupon-modal-wrap"
+                                    >
+                                        <div class="coupon-card bg-white">
 
-                                            <button @click="close()"
-                                                class="absolute right-3 top-3 z-30 rounded-full bg-black/10 p-1 text-white hover:bg-black/20"
-                                                aria-label="Close">
-                                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fill-rule="evenodd"
+                                            <button
+                                                @click="close()"
+                                                class="absolute right-3 top-3 z-30 rounded-full bg-black/10 p-2 text-white hover:bg-black/20"
+                                                aria-label="Close"
+                                            >
+                                                <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path
+                                                        fill-rule="evenodd"
                                                         d="M4.293 4.293 10 10l5.707-5.707 1.414 1.414L11.414 11.414l5.707 5.707-1.414 1.414L10 12.828l-5.707 5.707-1.414-1.414 5.707-5.707-5.707-5.707 1.414-1.414z"
-                                                        clip-rule="evenodd" />
+                                                        clip-rule="evenodd"
+                                                    />
                                                 </svg>
                                             </button>
 
-                                            <div class="relative px-8 pt-12 pb-20 text-white overflow-hidden"
-                                                style="background: radial-gradient(120% 90% at 20% -10%, rgba(255,255,255,.15) 0%, rgba(255,255,255,0) 60%), linear-gradient(180deg,#6b7280 0%, #374151 100%);">
+                                            <div class="coupon-modal-top">
+                                                <div class="coupon-pattern"></div>
 
-                                                <!-- BIG MODAL USED STAMP -->
-                                                <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                                                    <span class="rotate-[-20deg] border-[6px] border-red-200 text-red-200/90 font-black text-4xl sm:text-5xl tracking-[0.35em] px-6 py-2 rounded-xl uppercase">
-                                                        USED
-                                                    </span>
+                                                <div class="coupon-modal-stamp">
+                                                    USED
                                                 </div>
 
-                                                <div class="relative z-20 text-center">
-                                                    <p class="text-xl/5 opacity-90 py-5" x-text="active.reward"></p>
-
-                                                    <h2 class="mt-2 text-5xl font-extrabold font-cubao"
-                                                        x-text="active.discountAmount"></h2>
-
-                                                    <p class="mt-3 opacity-90"
-                                                        x-text="active.desc || 'This coupon was already used.'">
-                                                    </p>
-
-                                                    <template x-if="active.locations != ''">
-                                                        <div class="mt-3 text-sm">
-                                                            Applicable locations:
-                                                            <span x-text="active.locations"></span>
-                                                        </div>
-                                                    </template>
-                                                </div>
-
-                                                <div class="relative z-20 flex justify-center mt-10">
-                                                    <div class="relative inline-block text-center">
-                                                        <span class="inline-flex items-center rounded-md border border-gray-200 bg-gray-50 px-3 py-2 font-mono text-sm text-gray-800 shadow-sm"
-                                                            x-text="active.code">
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                <div class="relative z-20 mt-5 text-center text-sm opacity-90 w-full space-y-1">
-                                                    <div class="font-light">
-                                                        Used on <span x-text="active.usedDate"></span>
+                                                <div class="coupon-modal-content">
+                                                    <div class="coupon-modal-label">
+                                                        Used Coupon
                                                     </div>
 
-                                                    <div class="font-light">
-                                                        Order # <span x-text="active.orderId"></span>
-                                                    </div>
+                                                    <div
+                                                        class="coupon-modal-discount"
+                                                        x-text="active.discountAmount"
+                                                    ></div>
 
-                                                    <div class="font-light">
-                                                        Valid until <span x-text="active.expires"></span>
-                                                    </div>
+                                                    <div
+                                                        class="coupon-modal-reward"
+                                                        x-text="active.reward"
+                                                    ></div>
                                                 </div>
                                             </div>
 
-                                            <div class="pointer-events-none absolute top-1/2 -left-3 -translate-y-1/2 h-6 w-6 rounded-full border border-white/60"
-                                                style="background:var(--page-bg);"></div>
+                                            <div class="coupon-modal-body">
+                                                <h3
+                                                    class="text-lg font-black text-gray-900 text-center"
+                                                    x-text="active.title"
+                                                ></h3>
 
-                                            <div class="pointer-events-none absolute top-1/2 -right-3 -translate-y-1/2 h-6 w-6 rounded-full border border-white/60"
-                                                style="background:var(--page-bg);"></div>
+                                                <p
+                                                    class="mt-2 text-xs text-gray-500 text-center leading-5"
+                                                    x-text="active.desc || 'This coupon was already used.'"
+                                                ></p>
+
+                                                
+
+                                                <div class="mt-5">
+                                                    <div class="modal-row">
+                                                        <span>Used on</span>
+                                                        <span x-text="active.usedDate"></span>
+                                                    </div>
+
+                                                    <div class="modal-row">
+                                                        <span>Order #</span>
+                                                        <span x-text="active.orderId"></span>
+                                                    </div>
+
+                                                    <div class="modal-row">
+                                                        <span>Valid until</span>
+                                                        <span x-text="active.expires"></span>
+                                                    </div>
+
+                                                    <div class="modal-row">
+                                                        <span>Location</span>
+                                                        <span x-text="active.locations"></span>
+                                                    </div>
+                                                </div>
+
+                                                <button
+                                                    type="button"
+                                                    @click="close()"
+                                                    class="mt-4 w-full rounded-full bg-gray-900 px-5 py-2.5 text-xs font-bold text-white shadow hover:bg-gray-700"
+                                                >
+                                                    Close
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -276,4 +586,5 @@
 </div>
 
 <x-footer-component />
+
 @endsection

@@ -63,16 +63,7 @@
                     </div>
 
                     {{-- MESSAGE --}}
-                    <template x-if="couponMessage">
-                        <div
-                            class="text-sm"
-                            :class="{
-                                'text-green-600': couponMessageType === 'success',
-                                'text-red-600': couponMessageType === 'error'
-                            }"
-                            x-text="couponMessage"
-                        ></div>
-                    </template>
+                    
 
                     {{-- COUPON LIST --}}
                     <div class="space-y-4">

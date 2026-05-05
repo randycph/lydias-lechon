@@ -92,69 +92,68 @@
                             Shopping</a>
                     </div>
                 @else
-                    <div class="flex flex-col lg:flex-row gap-4 mt-10">
-                        {{-- LEFT --}}
-                        <div class="w-full lg:w-3/5 space-y-4 order-2 lg:order-1">
-                            @include('v2.checkout.components.delivery-method')
+    <div class="flex flex-col lg:flex-row gap-4 mt-10">
 
-                            <template x-if="method === 'pickup'">
-                                @include('v2.checkout.components.pickup-form')
-                            </template>
+        {{-- LEFT --}}
+        <div class="w-full lg:w-3/5 space-y-4 order-2 lg:order-1">
+            @include('v2.checkout.components.delivery-method')
 
-                            <template x-if="method === 'delivery' && !allowMultiple">
-                                @include('v2.checkout.components.single-delivery-form')
-                            </template>
+            <template x-if="method === 'pickup'">
+                @include('v2.checkout.components.pickup-form')
+            </template>
 
-                            <template x-if="method === 'delivery' && allowMultiple">
-                                @include('v2.checkout.components.multi-delivery-form')
-                            </template>
+            <template x-if="method === 'delivery' && !allowMultiple">
+                @include('v2.checkout.components.single-delivery-form')
+            </template>
 
-                            @include('v2.checkout.components.contact-info')
-                            {{-- @include('v2.checkout.components.place-order') --}}
-                            <div>
-                                <button
-                                    type="submit"
-                                    :disabled="incompleteProgress || isSubmitting"
-                                    class="w-full bg-primary text-white font-bold py-3 rounded-lg transition flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                                    :class="{
-                                        'opacity-50 cursor-not-allowed pointer-events-none': incompleteProgress || isSubmitting
-                                    }"
-                                >
-                                    <template x-if="!isSubmitting">
-                                        <span>Place Order</span>
-                                    </template>
+            <template x-if="method === 'delivery' && allowMultiple">
+                @include('v2.checkout.components.multi-delivery-form')
+            </template>
 
-                                    <template x-if="isSubmitting">
-                                        <span class="flex items-center gap-2">
-                                            <svg class="animate-spin h-4 w-4 text-white"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 24 24">
-                                                <circle class="opacity-25"
-                                                        cx="12"
-                                                        cy="12"
-                                                        r="10"
-                                                        stroke="currentColor"
-                                                        stroke-width="4"></circle>
-                                                <path class="opacity-75"
-                                                    fill="currentColor"
-                                                    d="M4 12a8 8 0 018-8v8z"></path>
-                                            </svg>
-                                            Processing...
-                                        </span>
-                                    </template>
-                                </button>
+            @include('v2.checkout.components.contact-info')
+            {{-- @include('v2.checkout.components.place-order') --}}
 
-                            </div>
-                        </div>
+            <button
+                type="submit"
+                :disabled="incompleteProgress || isSubmitting"
+                class="w-full bg-primary text-white font-bold py-3 rounded-lg transition flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                :class="{
+                    'opacity-50 cursor-not-allowed pointer-events-none': incompleteProgress || isSubmitting
+                }"
+            >
+                <template x-if="!isSubmitting">
+                    <span>Place Order</span>
+                </template>
 
-                        {{-- RIGHT --}}
-                        <div class="w-full lg:w-2/5 order-1 lg:order-2">
-                           
-                            @include('v2.checkout.components.order-summary')
-                        </div>
-                    </div>
-                @endif
+                <template x-if="isSubmitting">
+                    <span class="flex items-center gap-2">
+                        <svg class="animate-spin h-4 w-4 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24">
+                            <circle class="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    stroke-width="4"></circle>
+                            <path class="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8v8z"></path>
+                        </svg>
+                        Processing...
+                    </span>
+                </template>
+            </button>
+        </div>
+
+        {{-- RIGHT --}}
+        <div class="w-full lg:w-2/5 order-1 lg:order-2">
+            @include('v2.checkout.components.order-summary')
+        </div>
+
+    </div>
+@endif
             </form>
                 {{-- AUTO COUPON POPUP --}}
                 <div
@@ -191,7 +190,7 @@
                                     </h2>
 
                                     <p class="text-sm text-gray-500 mt-1">
-                                        You have multiple available auto coupons. Please choose one to apply.
+                                        Please choose one auto coupon to apply. Coupons that do not match your current address will still be shown but cannot be selected.
                                     </p>
                                 </div>
 
@@ -199,69 +198,74 @@
                                 <div class="px-6 py-6 space-y-4 max-h-[500px] overflow-y-auto">
 
                                     <template x-for="coupon in autoCouponChoices" :key="coupon.id">
-                                        <label
-                                            class="block border rounded-2xl p-5 cursor-pointer transition"
-                                            :class="{
-                                                'border-green-600 bg-green-50': String(selectedAutoCouponId) === String(coupon.id),
-                                                'border-gray-200 bg-white': String(selectedAutoCouponId) !== String(coupon.id)
-                                            }"
-                                        >
-                                            <div class="flex items-start gap-4">
-                                                <input
-                                                    type="radio"
-                                                    name="auto_coupon_choice"
-                                                    :value="coupon.id"
-                                                    x-model="selectedAutoCouponId"
-                                                    class="mt-1"
-                                                >
+                    <label
+                        class="block border rounded-2xl p-5 transition"
+                        :class="{
+                            'border-green-600 bg-green-50 cursor-pointer': coupon.auto_available && String(selectedAutoCouponId) === String(coupon.id),
+                            'border-gray-200 bg-white cursor-pointer hover:border-orange-300': coupon.auto_available && String(selectedAutoCouponId) !== String(coupon.id),
+                            'border-gray-200 bg-gray-100 opacity-70 cursor-not-allowed': !coupon.auto_available
+                        }"
+                    >
+                        <div class="flex items-start gap-4">
+                            <input
+                                type="radio"
+                                name="auto_coupon_choice"
+                                :value="coupon.id"
+                                x-model="selectedAutoCouponId"
+                                :disabled="!coupon.auto_available"
+                                class="mt-1"
+                            >
 
-                                                <div class="flex-1 min-w-0">
-                                                    <div
-                                                        class="text-lg font-semibold text-gray-900"
-                                                        x-text="coupon.name || coupon.code"
-                                                    ></div>
-                                                    <template x-if="coupon.auto_applied">
-                                                    <div class="inline-block mt-2 text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded">
-                                                        Auto Coupon
-                                                    </div>
-                                                </template>
-                                                    <div
-                                                        class="mt-1 text-sm text-gray-600"
-                                                        x-text="coupon.description || 'No description available'"
-                                                    ></div>
+                            <div class="flex-1 min-w-0">
+                                <div
+                                    class="text-lg font-semibold text-gray-900"
+                                    x-text="coupon.name || coupon.code"
+                                ></div>
 
-                                                    <div class="mt-3 text-sm text-orange-600 font-medium">
-                                                        <template x-if="coupon.reward === 'free-shipping-optn'">
-                                                            <span>Free Shipping Coupon</span>
-                                                        </template>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <span class="inline-block text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded">
+                                        Auto Coupon
+                                    </span>
 
-                                                        <template x-if="coupon.reward === 'discount-amount-optn'">
-                                                            <span x-text="'₱' + Number(coupon.discount || 0).toFixed(2) + ' OFF'"></span>
-                                                        </template>
-
-                                                        <template x-if="coupon.reward === 'discount-percentage-optn'">
-                                                            <span x-text="Number(coupon.discount || 0) + '% OFF'"></span>
-                                                        </template>
-
-                                                        <template x-if="coupon.reward === 'free-product-optn'">
-                                                            <span>Free Product Coupon</span>
-                                                        </template>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </label>
+                                    <template x-if="coupon.auto_available">
+                                        <span class="inline-block text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
+                                            Available
+                                        </span>
                                     </template>
 
-                                    <template x-if="couponMessage">
-                                        <div
-                                            class="text-sm"
-                                            :class="{
-                                                'text-green-600': couponMessageType === 'success',
-                                                'text-red-600': couponMessageType === 'error'
-                                            }"
-                                            x-text="couponMessage"
-                                        ></div>
+                                    
+                                </div>
+
+                                <div
+                                    class="mt-2 text-sm text-gray-600"
+                                    x-text="coupon.description || 'No description available'"
+                                ></div>
+
+                                
+
+                                <div class="mt-3 text-sm text-orange-600 font-medium">
+                                    <template x-if="coupon.reward === 'free-shipping-optn'">
+                                        <span>Free Shipping Coupon</span>
                                     </template>
+
+                                    <template x-if="coupon.reward === 'discount-amount-optn'">
+                                        <span x-text="'₱' + Number(coupon.discount || 0).toFixed(2) + ' OFF'"></span>
+                                    </template>
+
+                                    <template x-if="coupon.reward === 'discount-percentage-optn'">
+                                        <span x-text="Number(coupon.discount || 0) + '% OFF'"></span>
+                                    </template>
+
+                                    <template x-if="coupon.reward === 'free-product-optn'">
+                                        <span>Free Product Coupon</span>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </label>
+                </template>
+
+                                
 
                                 </div>
 
@@ -288,7 +292,108 @@
                         </div>
                     </div>
                 </div>
+              
             @include('v2.checkout.modals.coupon-modal')
+    {{-- COUPON ERROR / SUCCESS POPUP --}}
+<div
+    x-data="{
+        open: false,
+        type: 'error',
+        title: '',
+        message: '',
+
+        show(e) {
+            this.type = e.detail.type || 'error';
+            this.title = this.type === 'success' ? 'Coupon Applied' : 'Coupon Error';
+            this.message = e.detail.message || '';
+            this.open = true;
+        },
+
+        close() {
+            this.open = false;
+        }
+    }"
+    @coupon-popup.window="show($event)"
+    x-cloak
+    x-show="open"
+    x-transition.opacity
+    class="fixed inset-0 flex items-center justify-center p-4"
+    style="z-index: 999999;"
+>
+    <div
+        class="absolute inset-0 bg-black/40"
+        @click="close()"
+    ></div>
+
+    <div
+        x-show="open"
+        x-transition
+        class="relative w-full max-w-sm rounded-2xl bg-white shadow-2xl overflow-hidden"
+        style="z-index: 1000000;"
+    >
+        <div
+            class="px-6 py-5"
+            :class="{
+                'bg-red-50': type === 'error',
+                'bg-green-50': type === 'success'
+            }"
+        >
+            <div class="flex items-start gap-4">
+                <div
+                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg font-black"
+                    :class="{
+                        'bg-red-100 text-red-600': type === 'error',
+                        'bg-green-100 text-green-600': type === 'success'
+                    }"
+                >
+                    <span x-text="type === 'success' ? '✓' : '!'"></span>
+                </div>
+
+                <div class="flex-1">
+                    <h3
+                        class="text-lg font-black"
+                        :class="{
+                            'text-red-700': type === 'error',
+                            'text-green-700': type === 'success'
+                        }"
+                        x-text="title"
+                    ></h3>
+
+                    <p
+                        class="mt-1 text-sm leading-5"
+                        :class="{
+                            'text-red-600': type === 'error',
+                            'text-green-600': type === 'success'
+                        }"
+                        x-text="message"
+                    ></p>
+                </div>
+
+                <button
+                    type="button"
+                    @click="close()"
+                    class="text-gray-400 hover:text-gray-700"
+                >
+                    ✕
+                </button>
+            </div>
+        </div>
+
+        <div class="px-6 py-4 bg-white flex justify-end">
+            <button
+                type="button"
+                @click="close()"
+                class="rounded-lg px-5 py-2 text-sm font-bold text-white"
+                :class="{
+                    'bg-red-600 hover:bg-red-700': type === 'error',
+                    'bg-green-600 hover:bg-green-700': type === 'success'
+                }"
+            >
+                Okay
+            </button>
+        </div>
+    </div>
+</div>
             @include('v2.checkout.modals.privacy-modal')
             @include('v2.checkout.modals.payment-modal')
             @include('v2.checkout.modals.block-modal')
@@ -344,6 +449,11 @@
                 deliveryFee: 0,
                 deliveryFees: [],
                 sale: window.sale,
+
+                couponPopupOpen: false,
+                couponPopupTitle: '',
+                couponPopupMessage: '',
+                couponPopupType: 'error',
 
                 pickup_branch: '',
                 pickup_date: '',
@@ -581,6 +691,28 @@
                     this.couponModal = false;
                 },
 
+            showCouponPopup(message, type = 'error') {
+            this.couponMessage = message;
+            this.couponMessageType = type;
+
+            window.dispatchEvent(new CustomEvent('coupon-popup', {
+                detail: {
+                    message: message,
+                    type: type
+                }
+            }));
+        },
+
+            showCouponError(message) {
+                this.showCouponPopup(message, 'error');
+            },
+
+            showCouponSuccess(message) {
+                this.showCouponPopup(message, 'success');
+            },
+
+             
+
                 selectCoupon(coupon) {
                     this.selectedCoupon = this.normalizeCoupon(coupon);
                     this.couponCode = this.selectedCoupon.code ?? '';
@@ -707,14 +839,13 @@
                         !removedCodes.includes(c.code)
                     );
 
-                    this.couponMessage = 'Invalid coupon removed because the selected location changed.';
-                    this.couponMessageType = 'error';
+                    this.showCouponError('Invalid coupon removed because the selected location changed.');
                     this.order_amount = this.cartSubtotal();
                     this.recomputeCouponTotals();
                 }
             },
 
-                shouldAutoApplyCoupon(coupon) {
+            shouldAutoApplyCoupon(coupon) {
                 const isAuto =
                     coupon.auto_applied === true ||
                     String(coupon.activation_type || '').toLowerCase() === 'auto';
@@ -739,6 +870,40 @@
 
                 return true;
             },
+
+            getAutoCouponUnavailableReason(coupon) {
+    const isAuto =
+        coupon.auto_applied === true ||
+        String(coupon.activation_type || '').toLowerCase() === 'auto';
+
+    if (!isAuto) {
+        return 'This is not an auto coupon.';
+    }
+
+    const hasLocationLimit = this.couponHasLocationLimit(coupon);
+
+    if (hasLocationLimit) {
+        if (this.method !== 'delivery') {
+            return 'Available for delivery addresses only.';
+        }
+
+        const targets = this.getSelectedCouponTargets();
+
+        if (!targets.length) {
+            return 'Select a delivery location first.';
+        }
+
+        const matched = targets.some(t =>
+            this.couponMatchesLocation(coupon, t.city, t.location)
+        );
+
+        if (!matched) {
+            return 'Not valid for the selected address.';
+        }
+    }
+
+    return 'Not available for the current order.';
+},
 
                 getCouponDiscount(coupon) {
                     const subtotal = this.cartSubtotal();
@@ -783,150 +948,166 @@
                     return `- ${this.formatMoney(amount)}`;
                 },
 
-                applyAutoCoupons() {
-                const autos = (this.autoCouponsSource || [])
-                    .map(c => this.normalizeCoupon(c))
-                    .filter(c => this.shouldAutoApplyCoupon(c));
+           applyAutoCoupons() {
+    const allAutos = (this.autoCouponsSource || [])
+        .map(c => this.normalizeCoupon(c))
+        .filter(c =>
+            c.auto_applied === true ||
+            String(c.activation_type || '').toLowerCase() === 'auto'
+        );
 
-                const autoCodes = (this.autoCouponsSource || [])
-                    .map(c => this.normalizeCoupon(c).code);
+    const autoCodes = allAutos.map(c => c.code);
 
-                // Remove old auto coupons first
-                this.coupons = this.coupons.filter(c => !c.auto_applied);
-                this.autoAppliedCoupons = [];
+    // Remove old auto coupons first
+    this.coupons = this.coupons.filter(c => !c.auto_applied);
+    this.autoAppliedCoupons = [];
 
-                // Remove old free products from auto coupons
-                this.carts = this.carts.filter(item =>
-                    !(item.is_free_product && autoCodes.includes(item.coupon_code))
-                );
+    // Remove old free products from auto coupons
+    this.carts = this.carts.filter(item =>
+        !(item.is_free_product && autoCodes.includes(item.coupon_code))
+    );
 
-                this.orders = this.orders.filter(item =>
-                    !(item.is_free_product && autoCodes.includes(item.coupon_code))
-                );
+    this.orders = this.orders.filter(item =>
+        !(item.is_free_product && autoCodes.includes(item.coupon_code))
+    );
 
-                this.selectedAutoCoupon = null;
-                this.autoCouponChoices = autos;
+    this.selectedAutoCoupon = null;
 
-                // No eligible auto coupon
-                if (autos.length === 0) {
-                    this.selectedAutoCouponId = '';
-                    this.showAutoCouponChooser = false;
-                    this.order_amount = this.cartSubtotal();
-                    this.recomputeCouponTotals();
+    // Build popup choices from ALL auto coupons
+    // Available ones can be selected.
+    // Not available ones will still display, but disabled.
+    this.autoCouponChoices = allAutos.map(coupon => {
+        const available = this.shouldAutoApplyCoupon(coupon);
+
+        return {
+            ...coupon,
+            auto_available: available,
+            unavailable_reason: available
+                ? ''
+                : this.getAutoCouponUnavailableReason(coupon)
+        };
+    });
+
+    const availableAutos = this.autoCouponChoices.filter(c => c.auto_available);
+
+    // No auto coupons at all
+    if (this.autoCouponChoices.length === 0) {
+        this.selectedAutoCouponId = '';
+        this.showAutoCouponChooser = false;
+        this.order_amount = this.cartSubtotal();
+        this.recomputeCouponTotals();
+        return;
+    }
+
+    // No available auto coupon for current condition
+    // Still show the popup so customer can see why coupons are not available.
+    if (availableAutos.length === 0) {
+        this.selectedAutoCouponId = '';
+        this.showAutoCouponChooser = true;
+        this.order_amount = this.cartSubtotal();
+        this.recomputeCouponTotals();
+        return;
+    }
+
+    // If user already selected one before, keep it only if still available
+    if (this.selectedAutoCouponId) {
+        const chosen = availableAutos.find(c =>
+            String(c.id) === String(this.selectedAutoCouponId)
+        );
+
+        if (chosen) {
+            this.applyChosenAutoCoupon(chosen);
+            this.showAutoCouponChooser = false;
+            return;
+        }
+    }
+
+    // IMPORTANT:
+    // Show chooser even if only one coupon is available.
+    // This allows the customer to see the other auto coupons too.
+    this.showAutoCouponChooser = true;
+
+    this.order_amount = this.cartSubtotal();
+    this.recomputeCouponTotals();
+},
+
+            confirmCouponSelection() {
+                if (!this.selectedCoupon) {
+                    this.showCouponError('Please select a coupon first.');
                     return;
                 }
-
-                // Only one auto coupon: apply directly
-                if (autos.length === 1) {
-                    this.showAutoCouponChooser = false;
-                    this.selectedAutoCouponId = autos[0].id;
-                    this.applyChosenAutoCoupon(autos[0]);
-                    return;
-                }
-
-                // 2 or more auto coupons: user must choose
-                this.showAutoCouponChooser = true;
-
-                // If user already selected one before, keep it if still valid
-                if (this.selectedAutoCouponId) {
-                    const chosen = autos.find(c =>
-                        String(c.id) === String(this.selectedAutoCouponId)
-                    );
-
-                    if (chosen) {
-                        this.applyChosenAutoCoupon(chosen);
-                        this.showAutoCouponChooser = false;
-                        return;
-                    }
-                }
-
-                this.order_amount = this.cartSubtotal();
-                this.recomputeCouponTotals();
-            },
-
-                confirmCouponSelection() {
-                if (!this.selectedCoupon) return;
 
                 const normalized = this.normalizeCoupon(this.selectedCoupon);
 
                 if (this.couponHasLocationLimit(normalized)) {
-                const targets = this.getSelectedCouponTargets();
+                    const targets = this.getSelectedCouponTargets();
 
-                if (!targets.length) {
-                    this.couponMessage = 'Please select a delivery location first.';
-                    this.couponMessageType = 'error';
-                    this.closeCouponModal();
-                    return;
+                    if (!targets.length) {
+    this.showCouponError('Please select a delivery location first.');
+    return;
+}
+
+                    const isValidForAnyTarget = targets.some(t =>
+                        this.couponMatchesLocation(normalized, t.city, t.location)
+                    );
+
+                    if (!isValidForAnyTarget) {
+                        this.showCouponError('This coupon is not valid for the selected delivery address.');
+                        return;
+                    }
                 }
-
-                const isValidForAnyTarget = targets.some(t =>
-                    this.couponMatchesLocation(normalized, t.city, t.location)
-                );
-
-                if (!isValidForAnyTarget) {
-                    this.couponMessage = 'This coupon is not valid for the selected address.';
-                    this.couponMessageType = 'error';
-                    this.closeCouponModal();
-                    return;
-                }
-            }
 
                 if (this.coupons.find(c => c.code === normalized.code)) {
-                    this.couponMessage = 'Coupon already applied.';
-                    this.couponMessageType = 'error';
-                    this.closeCouponModal();
+                    this.showCouponError('Coupon already applied.');
                     return;
                 }
 
                 if (!normalized.combination_allowed && this.coupons.length > 0) {
-                    this.couponMessage = 'This coupon cannot be combined with other coupons.';
-                    this.couponMessageType = 'error';
+                    this.showCouponError('This coupon cannot be combined with other coupons.');
                     return;
                 }
 
                 if (normalized.combination_allowed && this.coupons.some(c => !c.combination_allowed)) {
-                    this.couponMessage = 'A coupon that does not allow combination has already been applied.';
-                    this.couponMessageType = 'error';
+                    this.showCouponError('A coupon that does not allow combination has already been applied.');
                     return;
                 }
 
-                this.coupons.push(normalized)
-                this.addFreeProductsFromCoupon(normalized)
-                this.order_amount = this.cartSubtotal()
-                this.recomputeCouponTotals()
-                this.closeCouponModal()
+                this.coupons.push(normalized);
+                this.addFreeProductsFromCoupon(normalized);
+                this.order_amount = this.cartSubtotal();
+                this.recomputeCouponTotals();
+
+                this.showCouponSuccess('Coupon applied successfully.');
+                this.closeCouponModal();
             },
 
-                applyCouponCode() {
-                this.couponMessage = '';
-                this.couponMessageType = '';
+           applyCouponCode() {
+            this.couponMessage = '';
+            this.couponMessageType = '';
 
-                const code = String(this.couponCode || '').trim().toUpperCase();
+            const code = String(this.couponCode || '').trim().toUpperCase();
 
-                if (!code) {
-                    this.couponMessage = 'Please enter a coupon code.';
-                    this.couponMessageType = 'error';
-                    return;
-                }
+            if (!code) {
+                this.showCouponError('Please enter a coupon code.');
+                return;
+            }
 
-                const found = (this.availableCoupons || []).find(c =>
-                    String(c.code ?? c.coupon_code ?? '').trim().toUpperCase() === code
-                );
+            const found = (this.availableCoupons || []).find(c =>
+                String(c.code ?? c.coupon_code ?? '').trim().toUpperCase() === code
+            );
 
-                if (!found) {
-                    this.couponMessage = 'Invalid coupon code.';
-                    this.couponMessageType = 'error';
-                    return;
-                }
+            if (!found) {
+                this.showCouponError('Invalid coupon code.');
+                return;
+            }
 
-                const normalized = this.normalizeCoupon(found);
+            const normalized = this.normalizeCoupon(found);
 
-                if (this.couponHasLocationLimit(normalized)) {
+            if (this.couponHasLocationLimit(normalized)) {
                 const targets = this.getSelectedCouponTargets();
 
                 if (!targets.length) {
-                    this.couponMessage = 'Please select a delivery location first.';
-                    this.couponMessageType = 'error';
+                    this.showCouponError('Please select a delivery location first.');
                     return;
                 }
 
@@ -935,46 +1116,42 @@
                 );
 
                 if (!isValidForAnyTarget) {
-                    this.couponMessage = 'This coupon is not valid for the selected address.';
-                    this.couponMessageType = 'error';
+                    this.showCouponError('This coupon is not valid for the selected address.');
                     return;
                 }
             }
 
-                const alreadyApplied = this.coupons.find(c =>
-                    String(c.code || '').trim().toUpperCase() === code
-                );
+            const alreadyApplied = this.coupons.find(c =>
+                String(c.code || '').trim().toUpperCase() === code
+            );
 
-                if (alreadyApplied) {
-                    if (alreadyApplied.auto_applied) {
-                        this.couponMessage = 'This coupon is already auto-applied.';
-                    } else {
-                        this.couponMessage = 'Coupon already applied.';
-                    }
-                    this.couponMessageType = 'error';
-                    return;
+            if (alreadyApplied) {
+                if (alreadyApplied.auto_applied) {
+                    this.showCouponError('This coupon is already auto-applied.');
+                } else {
+                    this.showCouponError('Coupon already applied.');
                 }
+                return;
+            }
 
-                if (!normalized.combination_allowed && this.coupons.length > 0) {
-                    this.couponMessage = 'This coupon cannot be combined with other coupons.';
-                    this.couponMessageType = 'error';
-                    return;
-                }
+            if (!normalized.combination_allowed && this.coupons.length > 0) {
+                this.showCouponError('This coupon cannot be combined with other coupons.');
+                return;
+            }
 
-                if (normalized.combination_allowed && this.coupons.some(c => !c.combination_allowed)) {
-                    this.couponMessage = 'A coupon that does not allow combination has already been applied.';
-                    this.couponMessageType = 'error';
-                    return;
-                }
+            if (normalized.combination_allowed && this.coupons.some(c => !c.combination_allowed)) {
+                this.showCouponError('A coupon that does not allow combination has already been applied.');
+                return;
+            }
 
-                this.coupons.push(normalized)
-                this.addFreeProductsFromCoupon(normalized)
-                this.couponMessage = 'Coupon applied successfully.';
-                this.couponMessageType = 'success';
-                this.couponCode = '';
-                this.order_amount = this.cartSubtotal()
-                this.recomputeCouponTotals()
-            },
+            this.coupons.push(normalized);
+            this.addFreeProductsFromCoupon(normalized);
+            this.couponCode = '';
+            this.order_amount = this.cartSubtotal();
+            this.recomputeCouponTotals();
+
+            this.showCouponSuccess('Coupon applied successfully.');
+        },
 
                 removeCoupon(index) {
                 const removed = this.coupons[index];
@@ -997,14 +1174,12 @@
                 if (alreadyApplied) return;
 
                 if (!autoCoupon.combination_allowed && this.coupons.length > 0) {
-                    this.couponMessage = 'This coupon cannot be combined with other coupons.';
-                    this.couponMessageType = 'error';
+                    this.showCouponError('This coupon cannot be combined with other coupons.');
                     return;
                 }
 
                 if (autoCoupon.combination_allowed && this.coupons.some(c => !c.combination_allowed)) {
-                    this.couponMessage = 'A coupon that does not allow combination has already been applied.';
-                    this.couponMessageType = 'error';
+                    this.showCouponError('A coupon that does not allow combination has already been applied.');
                     return;
                 }
 
@@ -1021,37 +1196,39 @@
                 this.recomputeCouponTotals();
             },
 
-           applySelectedAutoCoupon() {
-            if (!this.selectedAutoCouponId) {
-                this.couponMessage = 'Please select an auto coupon first.';
-                this.couponMessageType = 'error';
-                return;
-            }
+applySelectedAutoCoupon() {
+    if (!this.selectedAutoCouponId) {
+        this.showCouponError('Please select an auto coupon first.');
+        return;
+    }
 
-            const chosen = this.autoCouponChoices.find(c =>
-                String(c.id) === String(this.selectedAutoCouponId)
-            );
+    const chosen = this.autoCouponChoices.find(c =>
+        String(c.id) === String(this.selectedAutoCouponId)
+    );
 
-            if (!chosen) {
-                this.couponMessage = 'Selected coupon is no longer available.';
-                this.couponMessageType = 'error';
-                return;
-            }
+    if (!chosen) {
+        this.showCouponError('Selected coupon is no longer available.');
+        return;
+    }
 
-            const beforeCount = this.coupons.length;
+    if (!chosen.auto_available) {
+        this.showCouponError(chosen.unavailable_reason || 'This coupon is not available for the current order.');
+        return;
+    }
 
-            this.applyChosenAutoCoupon(chosen);
+    const beforeCount = this.coupons.length;
 
-            const wasApplied = this.coupons.length > beforeCount;
+    this.applyChosenAutoCoupon(chosen);
 
-            if (!wasApplied) {
-                return;
-            }
+    const wasApplied = this.coupons.length > beforeCount;
 
-            this.showAutoCouponChooser = false;
-            this.couponMessage = 'Coupon applied successfully.';
-            this.couponMessageType = 'success';
-        },
+    if (!wasApplied) {
+        return;
+    }
+
+    this.showAutoCouponChooser = false;
+    this.showCouponSuccess('Coupon applied successfully.');
+},
 
                 applyGiftCheque() {
                 this.giftChequeMessage = '';

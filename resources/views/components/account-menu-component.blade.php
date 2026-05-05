@@ -32,17 +32,10 @@
         </a>
         @endif
         
-        @if (Auth::check() && Auth()->user()->role_id == 6)
-        <a href="{{ route('my-coupons') }}" class="group relative items-center flex pl-6 hover:text-tertiary cursor-pointer {{ route('my-coupons') == request()->url() ? 'text-tertiary' : '' }}">
-            <div class="absolute left-0 top-0 h-10 w-1 bg-orange-500 group-hover:opacity-100 transition duration-200 {{ route('my-coupons') == request()->url() ? 'opacity-100' : 'opacity-0' }}"></div>
-            <div class="py-2">Coupons</div>
-        </a>
-        @endif
          @if (Auth::check() && Auth()->user()->role_id == 6)
-        <a href="{{ route('my-used-coupons') }}"
-        class="block px-4 py-3 font-semibold border-b
-        {{ request()->routeIs('my-used-coupons') ? 'bg-primary text-white' : 'text-gray-700 hover:bg-gray-100' }}">
-            Coupons I Used
+        <a href="{{ route('my-used-coupons') }}" class="group relative items-center flex pl-6 hover:text-tertiary cursor-pointer {{ route('my-used-coupons') == request()->url() ? 'text-tertiary' : '' }}">
+            <div class="absolute left-0 top-0 h-10 w-1 bg-orange-500 group-hover:opacity-100 transition duration-200 {{ route('my-used-coupons') == request()->url() ? 'opacity-100' : 'opacity-0' }}"></div>
+            <div class="py-2">Coupons</div>
         </a>
         @endif
     </div>
