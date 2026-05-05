@@ -78,6 +78,17 @@
                                     </div>
                                 @endif
 
+                                @if ($salesheader->order_type && $salesheader->order_type != '' && auth()->user()->id == 2)
+                                <div class="form-group">
+                                    <label class="d-block">Order Type</label>
+                                    <select class="form-control mg-b-5" data-style="btn btn-outline-light btn-md btn-block tx-left" title="Select order type" data-width="100%" name="order_type">
+                                        <option value="Buhat" {{ $salesheader->order_type == 'Buhat' ? 'selected' : '' }}>Buhat</option>
+                                        <option value="Additional" {{ $salesheader->order_type == 'Additional' ? 'selected' : '' }}>Additional</option>
+                                        <option value="Reserve" {{ $salesheader->order_type == 'Reserve' ? 'selected' : '' }}>Reserve</option>
+                                    </select>
+                                </div>
+                                @endif
+
                                 <div class="form-group">    
                                     
 

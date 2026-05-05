@@ -296,6 +296,20 @@ class SalesController extends Controller
                 });
         }
 
+        if ($request->has('order_type') && auth()->user()->id == 2) {
+            SalesHeader::whereId($request->update_dateneeded_id)->update([
+                'order_type' => $request->order_type
+            ]);
+
+            $joborder = JobOrder::where('sales_number', $sales->order_number)->first();
+
+            if ($joborder && $joborder->jo_order_type != $request->order_type) {
+                $joborder->update([
+                    'jo_order_type' => $request->order_type
+                ]);
+            }
+        }
+
         if ($request->shipping_type == 'storepickup' && auth()->user()->has_access_to_route('sales.update_delivery_branch')) {
             $request->validate([
                 'update_dateneeded_sp' => 'required',
