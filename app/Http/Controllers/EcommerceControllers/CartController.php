@@ -27,7 +27,6 @@ use App\Models\Page;
 use Illuminate\Support\Facades\Auth;
 use App\EcommerceModel\GiftCertificate;
 use App\Jobs\SendSmsJob;
-use App\Models\ActivityLog;
 use App\Models\ProductDeliveryAddress;
 use App\Models\Setting as ModelsSetting;
 use Redirect;
@@ -1138,8 +1137,6 @@ class CartController extends Controller
             $forecast_date = date('Y-m-d');
         }
 
-        $region = Deliverablecities::where('province', $request->province)->first();
-
         if (session()->has('edit_sales_header_id') && !empty(session()->get('edit_sales_header_id'))) {
 
             $salesHeader = SalesHeader::find(session()->get('edit_sales_header_id'));
@@ -1175,7 +1172,6 @@ class CartController extends Controller
                 'customer_address' => $customer_delivery_address,
                 'customer_delivery_adress' => $customer_delivery_address,
                 'city' => $request->city ?? '',
-                'region' => $region?->region ?? '',
                 'province' => $request->province ?? '',
                 'barangay' => $request->location ?? '',
                 'delivery_type' => $delivery_type,
@@ -1224,7 +1220,6 @@ class CartController extends Controller
                 'email' => $request->email ?? $user->email,
                 'customer_delivery_adress' => $customer_delivery_address,
                 'city' => $request->city ?? '',
-                'region' => $region?->region ?? '',
                 'province' => $request->province ?? '',
                 'barangay' => $request->location ?? '',
                 'delivery_tracking_number' => '',
@@ -1284,20 +1279,34 @@ class CartController extends Controller
                     ->first();
 
                 if ($couponCode) {
-                    CouponCart::updateOrCreate(
-                        [
-                            'sales_header_id' => $salesHeader->id,
-                            'coupon_code' => $couponCode->coupon_code,
-                        ],
-                        [
-                            'coupon_id' => $couponCode->id,
-                            'customer_id' => $user->id,
-                            'total_usage' => 1,
-                            'status' => 0,
-                            'discount_used' => (float) ($coupon['discount_used'] ?? 0),
-                        ]
-                    );
-                }
+                        CouponCart::updateOrCreate(
+                            [
+                                'sales_header_id' => $salesHeader->id,
+                                'coupon_code'     => $couponCode->coupon_code,
+                            ],
+                            [
+                                'coupon_id'     => $couponCode->id,
+                                'customer_id'   => $user->id,
+                                'total_usage'   => 1,
+                                'status'        => 1,
+                                'discount_used' => (float) ($coupon['discount_used'] ?? 0),
+                            ]
+                        );
+
+                        CouponSale::updateOrCreate(
+                            [
+                                'sales_header_id' => $salesHeader->id,
+                                'coupon_id'       => $couponCode->id,
+                                'coupon_code'     => $couponCode->coupon_code,
+                                'product_id'      => null,
+                            ],
+                            [
+                                'customer_id'   => $user->id,
+                                'order_status'  => $salesHeader->status ?? 'active',
+                                'discount_used' => (float) ($coupon['discount_used'] ?? 0),
+                            ]
+                        );
+                    }
             }
         }
 
@@ -1312,7 +1321,7 @@ class CartController extends Controller
                     'customer_id'   => $user->id,
                     'product_id'    => null,
                     'total_usage'   => 1,
-                    'status'        => 0,
+                    'status'        => 1,
                     'discount_used' => (float) $giftChequeAmount,
                 ]
             );

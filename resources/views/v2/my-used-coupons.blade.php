@@ -157,15 +157,44 @@
                                 font-weight: 950;
                                 color: #111827;
                             }
+                            .coupon-right {
+                            position: relative;
+                            width: 65%;
+                            background: #ffffff;
+                            padding: 16px 14px 12px;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: space-between;
+                            min-width: 0;
+                        }
 
-                            .coupon-desc {
-                                margin-top: 4px;
-                                padding-right: 56px;
-                                font-size: 11px;
-                                line-height: 1.35;
-                                font-weight: 500;
-                                color: #6b7280;
-                            }
+                        .coupon-right::before {
+                            content: "";
+                            position: absolute;
+                            left: 0;
+                            top: 0;
+                            height: 100%;
+                            border-left: 2px dashed #cbd5e1;
+                        }
+
+                        .coupon-title {
+                            padding-right: 72px;
+                            font-size: 15px;
+                            line-height: 1.3;
+                            font-weight: 950;
+                            color: #111827;
+                            word-break: break-word;
+                        }
+
+                        .coupon-bottom {
+                            margin-top: auto;
+                            display: flex;
+                            align-items: end;
+                            justify-content: space-between;
+                            gap: 8px;
+                        }
+
+                           
 
                             .coupon-stamp {
                                 position: absolute;
@@ -229,18 +258,20 @@
                             }
 
                             .coupon-view {
-                                display: inline-flex;
-                                align-items: center;
-                                justify-content: center;
-                                border-radius: 999px;
-                                background: #111827;
-                                color: #ffffff;
-                                padding: 6px 13px;
-                                font-size: 10px;
-                                font-weight: 900;
-                                box-shadow: 0 4px 10px rgba(0,0,0,.12);
-                                white-space: nowrap;
-                            }
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            border-radius: 999px;
+                            background: #111827;
+                            color: #ffffff;
+                            padding: 6px 13px;
+                            font-size: 10px;
+                            font-weight: 900;
+                            box-shadow: 0 4px 10px rgba(0,0,0,.12);
+                            white-space: nowrap;
+                            border: 0;
+                            cursor: pointer;
+                        }
 
                             .coupon-modal-wrap {
                                 width: 100%;
@@ -257,20 +288,75 @@
                             }
 
                             .coupon-modal-stamp {
-                                position: absolute;
-                                left: 50%;
-                                top: 50%;
-                                transform: translate(-50%, -50%) rotate(-16deg);
-                                border: 3px solid rgba(220, 38, 38, .9);
-                                color: #dc2626;
-                                background: rgba(255,255,255,.78);
-                                border-radius: 8px;
-                                padding: 6px 20px;
-                                font-size: 26px;
-                                font-weight: 950;
-                                letter-spacing: .22em;
-                                z-index: 1;
-                            }
+                            position: absolute;
+                            left: 16px;
+                            top: 16px;
+                            transform: rotate(-14deg);
+                            border: 2px solid rgba(220, 38, 38, .95);
+                            color: #dc2626;
+                            background: rgba(255,255,255,.92);
+                            border-radius: 6px;
+                            padding: 4px 12px;
+                            font-size: 13px;
+                            font-weight: 950;
+                            letter-spacing: .2em;
+                            z-index: 5;
+                        }
+
+                        .coupon-modal-top {
+                        position: relative;
+                        background: linear-gradient(135deg, #f97316 0%, #dc2626 100%);
+                        color: #ffffff;
+                        text-align: center;
+                        padding: 46px 24px 28px;
+                        overflow: hidden;
+                    }
+
+                    .modal-description-box {
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+}
+
+.modal-description-label {
+    font-size: 9px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    font-weight: 900;
+    color: #9ca3af;
+    margin-bottom: 6px;
+}
+
+.modal-description-text {
+    font-size: 12px;
+    line-height: 1.5;
+    font-weight: 700;
+    color: #374151;
+}
+
+.coupon-close-btn {
+    margin-top: 16px;
+    width: 100%;
+    border-radius: 999px;
+    background: #111827;
+    color: #ffffff;
+    padding: 10px 20px;
+    font-size: 12px;
+    font-weight: 900;
+    border: 0;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
+}
+
+                    .coupon-modal-discount {
+                        margin-top: 12px;
+                        font-size: 34px;
+                        line-height: 1.05;
+                        font-weight: 950;
+                        word-break: break-word;
+                    }
 
                             .coupon-modal-content {
                                 position: relative;
@@ -404,24 +490,7 @@
                                             $discountAmount = 'USED';
                                         }
                                     @endphp
-                                    <button
-                                        type="button"
-                                        @click="openModal({
-                                            title: @js($couponName),
-                                            desc: @js($couponDescriptionText),
-                                            usedDate: @js($usedDate),
-                                            expires: @js($expires),
-                                            locations: @js($locationText),
-                                            reward: @js($reward),
-                                            purchase_amount: @js($purchase_amount),
-                                            discountAmount: @js($discountAmount),
-                                            percentage: @js($percentage),
-                                            amount: @js($amount),
-                                            orderId: @js($used->sales_header_id ?? '-'),
-                                            discountUsed: @js('₱' . number_format($used->discount_used ?? 0, 2))
-                                        })"
-                                        class="w-full text-left"
-                                    >
+                                    <div class="w-full text-left">
                                         <div class="coupon-card">
                                             <div class="coupon-pattern"></div>
 
@@ -445,12 +514,6 @@
                                                         {{ $couponName }}
                                                     </h3>
 
-                                                    <p class="coupon-desc">
-                                                        {{ \Illuminate\Support\Str::limit($couponDescriptionText, 50) }}
-                                                    </p>
-
-                                                   
-
                                                     <div class="coupon-bottom">
                                                         <div>
                                                             <div class="coupon-small-label">Used</div>
@@ -459,14 +522,31 @@
                                                             </div>
                                                         </div>
 
-                                                        <span class="coupon-view">
+                                                        <button
+                                                            type="button"
+                                                            class="coupon-view"
+                                                            @click="openModal({
+                                                                title: @js($couponName),
+                                                                desc: @js($couponDescriptionText),
+                                                                usedDate: @js($usedDate),
+                                                                expires: @js($expires),
+                                                                locations: @js($locationText),
+                                                                reward: @js($reward),
+                                                                purchase_amount: @js($purchase_amount),
+                                                                discountAmount: @js($discountAmount),
+                                                                percentage: @js($percentage),
+                                                                amount: @js($amount),
+                                                                orderId: @js($used->sales_header_id ?? '-'),
+                                                                discountUsed: @js('₱' . number_format($used->discount_used ?? 0, 2))
+                                                            })"
+                                                        >
                                                             View
-                                                        </span>
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </button>
+                                    </div>
                                 @empty
                                     <div class="col-span-1 sm:col-span-2 text-center py-10 text-gray-500">
                                         You have not used any coupons yet.
@@ -534,10 +614,16 @@
                                                     x-text="active.title"
                                                 ></h3>
 
-                                                <p
-                                                    class="mt-2 text-xs text-gray-500 text-center leading-5"
-                                                    x-text="active.desc || 'This coupon was already used.'"
-                                                ></p>
+                                                <div class="modal-description-box">
+                                                    <div class="modal-description-label">
+                                                        Description
+                                                    </div>
+
+                                                    <div
+                                                        class="modal-description-text"
+                                                        x-text="active.desc || 'This coupon was already used.'"
+                                                    ></div>
+                                                </div>
 
                                                 
 
@@ -564,12 +650,12 @@
                                                 </div>
 
                                                 <button
-                                                    type="button"
-                                                    @click="close()"
-                                                    class="mt-4 w-full rounded-full bg-gray-900 px-5 py-2.5 text-xs font-bold text-white shadow hover:bg-gray-700"
-                                                >
-                                                    Close
-                                                </button>
+                                                type="button"
+                                                @click="close()"
+                                                class="coupon-close-btn"
+                                            >
+                                                Close
+                                            </button>
                                             </div>
                                         </div>
                                     </div>
