@@ -31,7 +31,6 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Intervention\Image\Colors\Rgb\Channels\Red;
-use Illuminate\Validation\Rule;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class FrontendController extends Controller
@@ -671,11 +670,11 @@ class FrontendController extends Controller
         }
 
         $gc = GiftCertificate::where('sales_header_id',$id)->get();
-        $salesPayments = SalesPayment::where('sales_header_id',$id)->where('status', '!=', 'CANCELLED')->get();
+        $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
         $salesDetails = SalesDetail::with('product.photos')->where('sales_header_id',$id)->get();
-        $totalPayment = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->where('is_discount', 0)->sum('amount');
+        $totalPayment = SalesPayment::where('sales_header_id',$id)->sum('amount');
         $deliveries = DeliveryStatus::where('order_id',$id)->get();
-        $totalNet = $sales->items->sum('net_amount') + $sales->delivery_fee_amount;
+        $totalNet = SalesHeader::where('id',$id)->sum('net_amount');
 
         if($totalNet <= $totalPayment) {
             $status = 'PAID';
@@ -776,19 +775,32 @@ class FrontendController extends Controller
 {
     $page = 'my-used-coupons';
 
-    $request->session()->forget('redirect_after_login');
+$request->session()->forget('redirect_after_login');
 
-    if (!Auth::check()) {
-        return redirect()->route('login', ['redirect' => $request->fullUrl()]);
-    }
+if (!Auth::check()) {
+    return redirect()->route('login', ['redirect' => $request->fullUrl()]);
+}
 
-    $uid = Auth::id();
+$uid = Auth::id();
 
-    $usedCoupons = CouponCart::with('coupon')
-        ->where('customer_id', $uid)
-        ->whereNotNull('sales_header_id')
-        ->latest()
-        ->get();
+$usedCoupons = CouponCart::with('coupon')
+    ->where('customer_id', $uid)
+    ->whereNotNull('sales_header_id')
+
+    // hide fake/empty coupon rows
+    ->where('coupon_id', '>', 0)
+    ->whereNotNull('coupon_code')
+    ->where('coupon_code', '!=', '')
+
+    // only show coupons that were really used
+    ->where('total_usage', '>', 0)
+
+    // make sure coupon record exists
+    ->whereHas('coupon')
+
+    ->latest('created_at')
+    ->get();
+
 
     return view('v2.my-used-coupons', compact('page', 'usedCoupons'));
 }
@@ -822,7 +834,6 @@ class FrontendController extends Controller
 
         $sales = SalesHeader::where('user_id', Auth::id())
                             ->where('is_sub', 0)
-                            ->whereHas('items')
                             ->with([
                                 'couponUsed',
                                 'items.product.photos',
@@ -1042,8 +1053,7 @@ class FrontendController extends Controller
                     'is_active' => 1,
                     'is_org' => $request->input('account_type') === 'organization' ? 1 : 0,
                     'is_subscribe' => $request->is_subscribe ?? 0,
-                    'role_id' => 6,
-                    'user_type' => 'customer',
+                    'role_id' => 6
                 ]);
             } elseif ($request->account_type == 'individual') {
                 $user = User::create([
@@ -1071,8 +1081,7 @@ class FrontendController extends Controller
                     'remember_token' => Str::random(10),
                     'is_active' => 1,
                     'is_subscribe' => $request->is_subscribe ?? 0,
-                    'role_id' => 6,
-                    'user_type' => 'customer',
+                    'role_id' => 6
                 ]);
             }
 
@@ -1121,14 +1130,7 @@ class FrontendController extends Controller
                 'required',
                 'regex:/^(09|\+639)\d{9}$/'
             ],
-            'email' => [
-                'required',
-                'email:rfc,dns',
-                'max:191',
-                Rule::unique('users', 'email')
-                    ->where(fn ($q) => $q->where('registration_type', 'registered'))
-                    ->ignore(Auth::id())
-            ],
+            'email' => 'required|email:rfc,dns|max:191|unique:users,email,' . Auth::id(), 
         ], [
             'contact_mobile.regex' => 'The mobile number must start with 09 or +639 and be followed by 9 digits.',
         ]);
