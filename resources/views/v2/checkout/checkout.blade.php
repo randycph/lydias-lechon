@@ -232,6 +232,12 @@
                                             Available
                                         </span>
                                     </template>
+                                    <template x-if="!coupon.auto_available && coupon.unavailable_reason">
+                                    <span
+                                        class="inline-block text-xs bg-red-100 text-red-700 px-2 py-1 rounded"
+                                        x-text="coupon.unavailable_reason"
+                                    ></span>
+                                </template>
 
                                     
                                 </div>
@@ -737,9 +743,24 @@
                     );
                 },
 
-                couponHasLocationLimit(coupon) {
-                    return this.getCouponLocations(coupon).length > 0;
-                },
+            couponHasLocationLimit(coupon) {
+                const locations = this.getCouponLocations(coupon);
+
+                if (!locations.length) return false;
+
+                const noRestrictionValues = [
+                    'all',
+                    'any',
+                    'none',
+                    'null',
+                    'n/a',
+                    'na',
+                    'undefined',
+                    '-'
+                ];
+
+                return !locations.every(loc => noRestrictionValues.includes(loc));
+            },
 
                 normalizeText(value) {
                     return String(value ?? '')
@@ -749,36 +770,77 @@
                         .toLowerCase();
                 },
 
-                getCouponLocations(coupon) {
-                    const raw = coupon?.location ?? coupon?.locations ?? '';
+   getCouponLocations(coupon) {
+    const raw = coupon?.location ?? coupon?.locations ?? '';
 
-                    if (Array.isArray(raw)) {
-                        return raw.map(v => this.normalizeText(v)).filter(Boolean);
-                    }
+    const cleanLocation = (value) => {
+        const cleaned = this.normalizeText(value);
 
-                    const text = String(raw || '').trim();
-                    if (!text) return [];
+        if (
+            !cleaned ||
+            cleaned === 'null' ||
+            cleaned === 'undefined' ||
+            cleaned === '[]' ||
+            cleaned === '{}'
+        ) {
+            return '';
+        }
 
-                    if (text.startsWith('[') && text.endsWith(']')) {
-                        try {
-                            const parsed = JSON.parse(text);
-                            if (Array.isArray(parsed)) {
-                                return parsed.map(v => this.normalizeText(v)).filter(Boolean);
-                            }
-                        } catch (e) {}
-                    }
+        return cleaned;
+    };
 
-                    return text
-                        .split(/\r?\n|[|,]/)
-                        .map(v => this.normalizeText(v))
-                        .filter(Boolean);
-                },
+    if (Array.isArray(raw)) {
+        return raw.map(cleanLocation).filter(Boolean);
+    }
+
+
+    const text = String(raw || '').trim();
+
+    if (
+        !text ||
+        text === 'null' ||
+        text === 'undefined' ||
+        text === '[]' ||
+        text === '{}'
+    ) {
+        return [];
+    }
+
+    if (text.startsWith('[') && text.endsWith(']')) {
+        try {
+            const parsed = JSON.parse(text);
+
+            if (Array.isArray(parsed)) {
+                return parsed.map(cleanLocation).filter(Boolean);
+            }
+        } catch (e) {}
+    }
+
+    return text
+        .split(/\r?\n|[|,]/)
+        .map(cleanLocation)
+        .filter(Boolean);
+},
 
                 couponMatchesLocation(coupon, city, location) {
                     const allowed = this.getCouponLocations(coupon);
 
                     if (!allowed.length) return true;
-                    if (allowed.includes('all')) return true;
+
+                    const noRestrictionValues = [
+                        'all',
+                        'any',
+                        'none',
+                        'null',
+                        'n/a',
+                        'na',
+                        'undefined',
+                        '-'
+                    ];
+
+                    if (allowed.every(loc => noRestrictionValues.includes(loc))) {
+                        return true;
+                    }
 
                     const normalizedLocation = this.normalizeText(location);
                     const normalizedCity = this.normalizeText(city);
@@ -808,101 +870,106 @@
                 },
 
                 removeInvalidLocationCoupons() {
-                const targets = this.getSelectedCouponTargets();
-                const removedCodes = [];
+                    const targets = this.getSelectedCouponTargets();
+                    const removedCodes = [];
 
-                this.coupons = this.coupons.filter(coupon => {
-                    const normalized = this.normalizeCoupon(coupon);
-                    const allowed = this.getCouponLocations(normalized);
+                    this.coupons = this.coupons.filter(coupon => {
+                        const normalized = this.normalizeCoupon(coupon);
+                        const hasLocationLimit = this.couponHasLocationLimit(normalized);
 
-                    if (!allowed.length) return true;
-                    if (!targets.length) {
-                        removedCodes.push(normalized.code);
-                        return false;
+                        if (!hasLocationLimit) return true;
+
+                        if (!targets.length) {
+                            removedCodes.push(normalized.code);
+                            return false;
+                        }
+
+                        const keep = targets.some(t =>
+                            this.couponMatchesLocation(normalized, t.city, t.location)
+                        );
+
+                        if (!keep) {
+                            removedCodes.push(normalized.code);
+                        }
+
+                        return keep;
+                    });
+
+                    if (removedCodes.length) {
+                        removedCodes.forEach(code => this.removeFreeProductsByCoupon(code));
+
+                        this.autoAppliedCoupons = this.autoAppliedCoupons.filter(c =>
+                            !removedCodes.includes(c.code)
+                        );
+
+                        this.showCouponError('Invalid coupon removed because the selected location changed.');
+                        this.order_amount = this.cartSubtotal();
+                        this.recomputeCouponTotals();
                     }
-
-                    const keep = targets.some(t =>
-                        this.couponMatchesLocation(normalized, t.city, t.location)
-                    );
-
-                    if (!keep) {
-                        removedCodes.push(normalized.code);
-                    }
-
-                    return keep;
-                });
-
-                if (removedCodes.length) {
-                    removedCodes.forEach(code => this.removeFreeProductsByCoupon(code));
-
-                    this.autoAppliedCoupons = this.autoAppliedCoupons.filter(c =>
-                        !removedCodes.includes(c.code)
-                    );
-
-                    this.showCouponError('Invalid coupon removed because the selected location changed.');
-                    this.order_amount = this.cartSubtotal();
-                    this.recomputeCouponTotals();
-                }
-            },
+                },
 
             shouldAutoApplyCoupon(coupon) {
-                const isAuto =
-                    coupon.auto_applied === true ||
-                    String(coupon.activation_type || '').toLowerCase() === 'auto';
+    const normalized = this.normalizeCoupon(coupon);
 
-                if (!isAuto) return false;
-
-                const hasLocationLimit = this.couponHasLocationLimit(coupon);
-
-                // Same rule as free shipping:
-                // if coupon has address/location restriction,
-                // it only applies when delivery address matches.
-                if (hasLocationLimit) {
-                    if (this.method !== 'delivery') return false;
-
-                    const targets = this.getSelectedCouponTargets();
-                    if (!targets.length) return false;
-
-                    return targets.some(t =>
-                        this.couponMatchesLocation(coupon, t.city, t.location)
-                    );
-                }
-
-                return true;
-            },
-
-            getAutoCouponUnavailableReason(coupon) {
     const isAuto =
-        coupon.auto_applied === true ||
-        String(coupon.activation_type || '').toLowerCase() === 'auto';
+        normalized.auto_applied === true ||
+        String(normalized.activation_type || '').toLowerCase() === 'auto';
+
+    if (!isAuto) return false;
+
+    const hasLocationLimit = this.couponHasLocationLimit(normalized);
+
+    if (!hasLocationLimit) {
+        return true;
+    }
+
+    if (this.method !== 'delivery') return false;
+
+    const targets = this.getSelectedCouponTargets();
+    if (!targets.length) return false;
+
+    return targets.some(t =>
+        this.couponMatchesLocation(normalized, t.city, t.location)
+    );
+},
+
+           
+    getAutoCouponUnavailableReason(coupon) {
+    const normalized = this.normalizeCoupon(coupon);
+
+    const isAuto =
+        normalized.auto_applied === true ||
+        String(normalized.activation_type || '').toLowerCase() === 'auto';
 
     if (!isAuto) {
         return 'This is not an auto coupon.';
     }
 
-    const hasLocationLimit = this.couponHasLocationLimit(coupon);
+    const hasLocationLimit = this.couponHasLocationLimit(normalized);
 
-    if (hasLocationLimit) {
-        if (this.method !== 'delivery') {
-            return 'Available for delivery addresses only.';
-        }
-
-        const targets = this.getSelectedCouponTargets();
-
-        if (!targets.length) {
-            return 'Select a delivery location first.';
-        }
-
-        const matched = targets.some(t =>
-            this.couponMatchesLocation(coupon, t.city, t.location)
-        );
-
-        if (!matched) {
-            return 'Not valid for the selected address.';
-        }
+    if (!hasLocationLimit) {
+        return '';
     }
 
-    return 'Not available for the current order.';
+    if (this.method !== 'delivery') {
+        return 'Available for delivery addresses only.';
+    }
+
+    const targets = this.getSelectedCouponTargets();
+
+    if (!targets.length) {
+        return 'Select a delivery location first.';
+    }
+
+    const matched = targets.some(t =>
+        this.couponMatchesLocation(normalized, t.city, t.location)
+    );
+
+    if (!matched) {
+        return 'Not valid for the selected address.';
+    }
+
+    return '';
 },
 
                 getCouponDiscount(coupon) {
