@@ -159,7 +159,7 @@ class CustomerController extends Controller
     {
         $request->validate([
             'email' => [
-                'required',
+                'nullable',
                 'email:rfc,dns',
                 'max:191',
             ],
