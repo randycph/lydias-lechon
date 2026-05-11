@@ -1250,7 +1250,11 @@ class SalesController extends Controller
         // dd($dateneeded);
 
         if($salesheader->delivery_type == 'Door to door delivery'){
-            $locationed = $salesheader->customer_location;
+            if (empty($salesheader->customer_location) || $salesheader->customer_location == null || $salesheader->customer_location == '') {
+                $locationed = 'Other';
+            } else {
+                $locationed = $salesheader->customer_location;
+            }
         }
         if($salesheader->delivery_type == 'Store Pickup'){
             $locationed = $salesheader->outlet;
