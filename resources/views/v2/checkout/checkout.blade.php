@@ -477,6 +477,7 @@
                 autoAppliedCoupons: [],
                 selectedAutoCoupon: null,
                 showAutoCouponChooser: false,
+                autoCouponChooserShownOnce: false,
                 autoCouponChoices: [],
                 selectedAutoCouponId: '',
                 totalDiscountAmount: 0,
@@ -1094,21 +1095,24 @@ applyAutoCoupons() {
     }
 
     if (this.selectedAutoCouponId) {
-        const chosen = availableAutos.find(c =>
-            String(c.id) === String(this.selectedAutoCouponId)
-        );
+    const chosen = availableAutos.find(c =>
+        String(c.id) === String(this.selectedAutoCouponId)
+    );
 
-        if (chosen) {
-            this.applyChosenAutoCoupon(chosen);
-            this.showAutoCouponChooser = false;
-            return;
-        }
+    if (chosen) {
+        this.applyChosenAutoCoupon(chosen);
+        this.showAutoCouponChooser = false;
+        return;
     }
+}
 
+if (!this.autoCouponChooserShownOnce) {
     this.showAutoCouponChooser = true;
+    this.autoCouponChooserShownOnce = true;
+}
 
-    this.order_amount = this.cartSubtotal();
-    this.recomputeCouponTotals();
+this.order_amount = this.cartSubtotal();
+this.recomputeCouponTotals();
 },
             confirmCouponSelection() {
                 if (!this.selectedCoupon) {
