@@ -173,30 +173,63 @@
         </div>
     </template>
 
-    <div class="flex justify-between items-center mb-3">
+    <div class="mb-3">
+    <div class="mb-3">
+    <button
+        type="button"
+        @click="couponModal = true"
+        class="w-full flex items-center justify-between rounded-xl border border-[#0f8f43] bg-green-50 px-4 py-3 text-[#0f8f43] font-bold hover:bg-green-100 transition"
+    >
         <div class="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6 fill-[#ff8545]">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                class="size-6 fill-[#0f8f43]">
                 <path fill-rule="evenodd"
                     d="M1.5 6.375c0-1.036.84-1.875 1.875-1.875h17.25c1.035 0 1.875.84 1.875 1.875v3.026a.75.75 0 0 1-.375.65 2.249 2.249 0 0 0 0 3.898.75.75 0 0 1 .375.65v3.026c0 1.035-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 0 1 1.5 17.625v-3.026a.75.75 0 0 1 .374-.65 2.249 2.249 0 0 0 0-3.898.75.75 0 0 1-.374-.65V6.375Zm15-1.125a.75.75 0 0 1 .75.75v.75a.75.75 0 0 1-1.5 0V6a.75.75 0 0 1 .75-.75Zm.75 4.5a.75.75 0 0 0-1.5 0v.75a.75.75 0 0 0 1.5 0v-.75Zm-.75 3a.75.75 0 0 1 .75.75v.75a.75.75 0 0 1-1.5 0v-.75a.75.75 0 0 1 .75-.75Zm.75 4.5a.75.75 0 0 0-1.5 0V18a.75.75 0 0 0 1.5 0v-.75ZM6 12a.75.75 0 0 1 .75-.75H12a.75.75 0 0 1 0 1.5H6.75A.75.75 0 0 1 6 12Zm.75 2.25a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"
                     clip-rule="evenodd" />
             </svg>
-            <span class="font-medium">Shop Coupon</span>
+
+            <span>View Available Coupons</span>
         </div>
 
-        <div class="cursor-pointer flex items-center justify-between text-[#ff8545] font-bold"
-            @click="couponModal = true">
-            Select Coupon
-        </div>
-    </div>
+        <span class="text-lg leading-none">›</span>
+    </button>
+</div>
+
+    <div class="mt-3 w-full">
+    <label class="block text-xs font-bold text-gray-600 mb-1">
+    Insert Manual Coupon Code here!
+</label>
+
+<div class="flex items-center border border-gray-300 rounded-md overflow-hidden bg-white shadow-sm">
+    <input
+        type="text"
+        x-model="couponCode"
+        @input="couponCode = couponCode.toUpperCase()"
+        @keydown.enter.prevent="applyCouponCode()"
+        placeholder="Enter coupon code"
+        class="w-full p-3 border-none outline-none text-sm bg-white text-gray-900"
+    >
+
+    <button
+        type="button"
+        @click="applyCouponCode()"
+        class="text-white px-5 py-3 text-sm font-bold whitespace-nowrap"
+        style="background:#0f8f43;"
+    >
+        Apply
+    </button>
+</div>
+</div>
+</div>
 
     <template x-if="coupons.length > 0">
         <div class="mt-2 space-y-2">
             <template x-for="(item, i) in coupons" :key="i">
                 <div class="flex justify-between">
                     <div class="flex flex-col">
-                        <template x-if="item.description">
-                            <div class="text-xs text-gray-500 mb-1" x-text="item.description"></div>
-                        </template>
+                      
 
                         <div class="font-medium text-red-700 italic flex items-center flex-wrap">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"
