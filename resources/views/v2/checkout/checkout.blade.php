@@ -520,6 +520,7 @@
             get selectableCoupons() {
     const autoOnlyCoupons = (this.autoCouponChoices || [])
         .map(c => this.normalizeCoupon(c))
+        .filter(c => this.shouldShowCouponInList(c))
         .filter(c => {
             return !this.selectedAutoCoupon ||
                 String(c.id) !== String(this.selectedAutoCoupon.id);
@@ -1004,30 +1005,60 @@
                 },
 
                 shouldShowAutoCouponInList(coupon) {
-                    const normalized = this.normalizeCoupon(coupon);
+                const normalized = this.normalizeCoupon(coupon);
 
-                    const isFreeShipping = this.isFreeShippingCoupon(normalized);
+                const hasLocationRule =
+                    this.couponHasLocationLimit(normalized) ||
+                    this.hasLocationDiscount(normalized) ||
+                    this.isFreeShippingCoupon(normalized);
 
-                    // Only hide FREE SHIPPING auto coupons until location is selected.
-                    if (isFreeShipping) {
-                        if (this.method !== 'delivery') {
-                            return false;
-                        }
-
-                        const targets = this.getSelectedCouponTargets();
-
-                        if (!targets.length) {
-                            return false;
-                        }
-
-                        return targets.some(t =>
-                            this.couponMatchesLocation(normalized, t.city, t.location)
-                        );
+                // If coupon has anything location-based,
+                // hide it until delivery location is selected and matched.
+                if (hasLocationRule) {
+                    if (this.method !== 'delivery') {
+                        return false;
                     }
 
-                    // All other auto coupons should appear.
-                    return true;
-                },
+                    const targets = this.getSelectedCouponTargets();
+
+                    if (!targets.length) {
+                        return false;
+                    }
+
+                    return targets.some(t =>
+                        this.couponMatchesLocation(normalized, t.city, t.location)
+                    );
+                }
+
+                // Coupons with no location restriction can appear normally.
+                return true;
+            },
+            shouldShowCouponInList(coupon) {
+                const normalized = this.normalizeCoupon(coupon);
+
+                const hasLocationRule =
+                    this.couponHasLocationLimit(normalized) ||
+                    this.hasLocationDiscount(normalized) ||
+                    this.isFreeShippingCoupon(normalized);
+
+                if (hasLocationRule) {
+                    if (this.method !== 'delivery') {
+                        return false;
+                    }
+
+                    const targets = this.getSelectedCouponTargets();
+
+                    if (!targets.length) {
+                        return false;
+                    }
+
+                    return targets.some(t =>
+                        this.couponMatchesLocation(normalized, t.city, t.location)
+                    );
+                }
+
+                return true;
+            },
 
                         
                     getAutoCouponUnavailableReason(coupon) {
@@ -1068,57 +1099,57 @@
                     return '';
                 },
 
-                                getCouponDiscount(coupon) {
-                    const subtotal = this.cartSubtotal();
+                getCouponDiscount(coupon) {
+                const subtotal = this.cartSubtotal();
 
-                    if (!coupon) return 0;
+                if (!coupon) return 0;
 
-                    const normalized = this.normalizeCoupon(coupon);
+                const normalized = this.normalizeCoupon(coupon);
 
-                    if (this.isFreeShippingCoupon(normalized)) {
-                        if (this.method !== 'delivery') return 0;
+                if (this.isFreeShippingCoupon(normalized)) {
+                    if (this.method !== 'delivery') return 0;
 
-                        if (this.allowMultiple) {
-                            return (this.deliveries || []).reduce((sum, delivery) => {
-                                if (this.couponMatchesLocation(normalized, delivery.city, delivery.location)) {
-                                    return sum + Number(delivery.delivery_fee || 0);
-                                }
+                    if (this.allowMultiple) {
+                        return (this.deliveries || []).reduce((sum, delivery) => {
+                            if (this.couponMatchesLocation(normalized, delivery.city, delivery.location)) {
+                                return sum + Number(delivery.delivery_fee || 0);
+                            }
 
-                                return sum;
-                            }, 0);
-                        }
-
-                        return this.couponMatchesLocation(normalized, this.city, this.location)
-                            ? Number(this.deliveryFee || 0)
-                            : 0;
+                            return sum;
+                        }, 0);
                     }
 
-                    // Location discount must be checked BEFORE normal discount
-                    if (this.hasLocationDiscount(normalized)) {
-                        if (!this.shouldShowLocationDiscount(normalized)) {
-                            return 0;
-                        }
+                    return this.couponMatchesLocation(normalized, this.city, this.location)
+                        ? Number(this.deliveryFee || 0)
+                        : 0;
+                }
 
-                        if (
-                            normalized.location_discount_type === 'percentage' ||
-                            normalized.location_discount_type === 'percent'
-                        ) {
-                            return subtotal * (Number(normalized.location_discount_amount || 0) / 100);
-                        }
-
-                        return Math.min(Number(normalized.location_discount_amount || 0), subtotal);
+                // Location discount must be checked before normal discount.
+                if (this.hasLocationDiscount(normalized)) {
+                    if (!this.shouldShowLocationDiscount(normalized)) {
+                        return 0;
                     }
 
-                    if (normalized.reward === 'discount-amount-optn' || normalized.discount_type === 'amount') {
-                        return Math.min(Number(normalized.discount || 0), subtotal);
+                    if (
+                        normalized.location_discount_type === 'percentage' ||
+                        normalized.location_discount_type === 'percent'
+                    ) {
+                        return subtotal * (Number(normalized.location_discount_amount || 0) / 100);
                     }
 
-                    if (normalized.reward === 'discount-percentage-optn' || normalized.discount_type === 'percent') {
-                        return subtotal * (Number(normalized.discount || 0) / 100);
-                    }
+                    return Math.min(Number(normalized.location_discount_amount || 0), subtotal);
+                }
 
-                    return 0;
-                },
+                if (normalized.reward === 'discount-amount-optn' || normalized.discount_type === 'amount') {
+                    return Math.min(Number(normalized.discount || 0), subtotal);
+                }
+
+                if (normalized.reward === 'discount-percentage-optn' || normalized.discount_type === 'percent') {
+                    return subtotal * (Number(normalized.discount || 0) / 100);
+                }
+
+                return 0;
+            },
 
                 couponDiscountLabel(coupon) {
                     const amount = this.getCouponDiscount(coupon);
