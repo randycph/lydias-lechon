@@ -885,33 +885,87 @@ class CouponController extends Controller
     public function coupon_list(Request $request)
     {
         $params = [];
-        $qry = "
-            SELECT 
-                h.order_number, 
-                h.net_amount, 
-                h.customer_name, 
-                c.name, 
-                cs.coupon_code, 
-                cs.customer_id 
-            FROM coupon_sales cs
-            LEFT JOIN ecommerce_sales_headers h ON h.id = cs.sales_header_id
-            LEFT JOIN coupons c ON c.id = cs.coupon_id
-            WHERE cs.id > 0
-        ";
 
-        if (!empty($request->coupon_code)) {
-            $qry .= " AND cs.coupon_code = :coupon_code";
-            $params['coupon_code'] = $request->coupon_code;
-        }
+$qry = "
+    SELECT 
+        cs.id,
 
-        if (!empty($request->customer)) {
-            $qry .= " AND cs.customer_id = :customer";
-            $params['customer'] = $request->customer;
-        }
+        CASE
+            WHEN c.reward = 'free-shipping-optn' THEN CONCAT('fs-', cs.coupon_id)
+            WHEN c.reward = 'discount-amount-optn' THEN CONCAT('ad-', cs.coupon_id)
+            WHEN c.reward = 'discount-percentage-optn' THEN CONCAT('pd-', cs.coupon_id)
+            WHEN c.reward = 'free-product-optn' THEN CONCAT('fp-', cs.coupon_id)
+            ELSE CONCAT('cp-', cs.coupon_id)
+        END AS id_label,
 
-        $rs = DB::select($qry, $params);
+        h.order_number, 
 
-        return view('admin.reports.coupon.list', compact('rs'));
+        CASE
+            WHEN h.order_source = 'web' THEN 'Web'
+            ELSE 'JO'
+        END AS order_source_label,
+
+        COALESCE(h.net_amount, 0) AS net_amount,
+        h.customer_name, 
+
+        COALESCE(c.name, cs.coupon_code, 'N/A') AS name,
+
+        CASE
+            WHEN c.reward = 'free-shipping-optn' THEN 'Free Shipping'
+            WHEN c.reward = 'discount-amount-optn' THEN 'Amount Discount'
+            WHEN c.reward = 'discount-percentage-optn' THEN 'Percentage Discount'
+            WHEN c.reward = 'free-product-optn' THEN 'Free Product'
+            ELSE 'Coupon'
+        END AS reward_label,
+
+        c.reward,
+        cs.coupon_code, 
+        cs.customer_id,
+
+        COALESCE(cc.discount_used, 0) AS coupon_amount
+
+    FROM coupon_sales cs
+
+    LEFT JOIN ecommerce_sales_headers h 
+        ON h.id = cs.sales_header_id
+
+    LEFT JOIN coupons c 
+        ON c.id = cs.coupon_id
+
+    LEFT JOIN (
+        SELECT 
+            sales_header_id,
+            coupon_id,
+            coupon_code,
+            SUM(discount_used) AS discount_used
+        FROM coupon_cart
+        GROUP BY sales_header_id, coupon_id, coupon_code
+    ) cc 
+        ON cc.sales_header_id = cs.sales_header_id
+        AND cc.coupon_id = cs.coupon_id
+
+    WHERE cs.id > 0
+    AND cs.coupon_id IS NOT NULL
+";
+
+if (!empty($request->coupon_code)) {
+    $qry .= " AND cs.coupon_code = :coupon_code";
+    $params['coupon_code'] = $request->coupon_code;
+}
+
+if (!empty($request->customer)) {
+    $qry .= " AND cs.customer_id = :customer";
+    $params['customer'] = $request->customer;
+}
+if (!empty($request->coupon_type)) {
+    $qry .= " AND c.reward = :coupon_type";
+    $params['coupon_type'] = $request->coupon_type;
+}
+
+$rs = DB::select($qry, $params);
+
+return view('admin.reports.coupon.list', compact('rs'));
+
     }
 
     public function add_manual_coupon(Request $request)
