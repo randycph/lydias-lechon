@@ -43,24 +43,7 @@
                 <div class="px-6 py-6 space-y-5 max-h-[500px] overflow-y-auto">
 
                     {{-- MANUAL CODE INPUT --}}
-                    <div class="flex items-center border rounded-md overflow-hidden">
-
-                        <input
-                            type="text"
-                            x-model="couponCode"
-                            @input="couponCode = couponCode.toUpperCase()"
-                            placeholder="Enter coupon code"
-                            class="w-full p-3 border-none outline-none"
-                        >
-
-                        <button
-                            type="button"
-                            @click="applyCouponCode()"
-                            class="bg-tertiary text-white px-5 py-3"
-                        >
-                            Apply
-                        </button>
-                    </div>
+                    
 
                     {{-- MESSAGE --}}
                     
