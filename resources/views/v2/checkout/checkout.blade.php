@@ -3892,10 +3892,6 @@ applySelectedAutoCoupon() {
             }
         });
     </script>
-
-
-
-
 @endsection
 
 
