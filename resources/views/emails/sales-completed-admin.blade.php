@@ -27,22 +27,43 @@ Click here to view and manage this order
 
 ---
 
+@php
+    $appliedCoupons = collect($h->applied_coupons ?? []);
+
+    $couponCodes = $appliedCoupons
+        ->pluck('coupon_code')
+        ->filter()
+        ->implode(', ');
+
+    $couponDiscount = $appliedCoupons->sum(function ($coupon) {
+        return (float) ($coupon->discount_used ?? 0);
+    });
+@endphp
+
 @if(count($h->deliveryAddress ?? []) > 0)
 
 ### Order Items
 
 | Code | Product | No of Pax | Qty | Price | Total |
-|------|---------|-----------|-----|--------|--------|
+|------|---------|-----------|-----|-------|-------|
 @foreach($h->items as $details)
 | {{ $details->product->code }} | {!! highlightPaella($details?->product_name) !!} | {{ $details->no_of_pax }} | {{ number_format($details->qty, 0) }} | {{ number_format($details->paella_price + $details->price, 2) }} | {{ number_format($details->gross_amount, 2) }} |
 @endforeach
 
-@if($h->delivery_fee_amount > 0 && $h->delivery_type == 'Door to door delivery')
-| | | | | **Delivery Fee** | {{ number_format($h->delivery_fee_amount, 2) }} |
+@if($h->gross_amount > 0)
+| | | | | Subtotal | {{ number_format($h->gross_amount, 2) }} |
 @endif
 
-@if($h->gross_amount > 0)
-| | | | | **Total** | **{{ number_format($h->gross_amount, 2) }}** |
+@if($appliedCoupons->count() > 0)
+| | | | | <span style="color:#ff6600;">Coupon Code: {{ $couponCodes }}</span> | <span style="color:#ff6600;">₱ {{ number_format($couponDiscount, 2) }}</span> |
+@endif
+
+@if($h->delivery_fee_amount > 0 && $h->delivery_type == 'Door to door delivery')
+| | | | | Delivery Fee | {{ number_format($h->delivery_fee_amount, 2) }} |
+@endif
+
+@if($h->net_amount > 0)
+| | | | | **Total** | **{{ number_format($h->net_amount, 2) }}** |
 @endif
 
 ---
@@ -50,7 +71,7 @@ Click here to view and manage this order
 ### Delivery Addresses
 
 | Contact Person | Contact Number | Delivery Date | Address |
-|----------------|----------------|----------------|----------|
+|----------------|----------------|---------------|---------|
 @foreach($h->deliveryAddress as $address)
 | {{ $address->contact_person }} | {{ $address->contact_tel }} | {{ $address->delivery_date }} | {{ $address->address }} |
 @endforeach
@@ -60,17 +81,25 @@ Click here to view and manage this order
 ### Order Items
 
 | Code | Product | No of Pax | Date Needed | Qty | Price | Total |
-|------|---------|-----------|-------------|-----|--------|--------|{!! highlightPaella($details?->product_name) !!}
+|------|---------|-----------|-------------|-----|-------|-------|
 @foreach($h->items as $details)
 | {{ $details?->product->code }} | {!! highlightPaella($details?->product_name) !!} | {{ $details->no_of_pax }} | {{ date('F d, Y H:i A', strtotime($details->delivery_date)) }} | {{ number_format($details->qty, 0) }} | {{ number_format($details->paella_price + $details->price, 2) }} | {{ number_format($details->gross_amount, 2) }} |
 @endforeach
 
-@if($h->delivery_fee_amount > 0 && $h->delivery_type == 'Door to door delivery')
-| | | | | **Delivery Fee** | {{ number_format($h->delivery_fee_amount, 2) }} |
+@if($h->gross_amount > 0)
+| | | | | | Subtotal | {{ number_format($h->gross_amount, 2) }} |
 @endif
 
-@if($h->gross_amount > 0)
-| | | | | **Total** | **{{ number_format($h->gross_amount, 2) }}** |
+@if($appliedCoupons->count() > 0)
+| | | | | | <span style="color:#ff6600;">Coupon Code: {{ $couponCodes }}</span> | <span style="color:#ff6600;">₱ {{ number_format($couponDiscount, 2) }}</span> |
+@endif
+
+@if($h->delivery_fee_amount > 0 && $h->delivery_type == 'Door to door delivery')
+| | | | | | Delivery Fee | {{ number_format($h->delivery_fee_amount, 2) }} |
+@endif
+
+@if($h->net_amount > 0)
+| | | | | | **Total** | **{{ number_format($h->net_amount, 2) }}** |
 @endif
 
 @endif
