@@ -36,7 +36,6 @@ use App\EcommerceModel\Branch;
 use App\EcommerceModel\JobOrder;
 use App\Mail\DeliveryAssignedMail;
 use App\Mail\DeliveryAssignedMultipleMail;
-use App\Mail\ManualOrderCancelledByAdminMail;
 use App\Models\ActivityLog;
 use App\Models\DeliveriesImage;
 use App\Models\ProductDeliveryAddress;
@@ -52,7 +51,7 @@ class SalesController extends Controller
 
     public function __construct()
     {
-        // Permission::module_init($this, 'sales_transaction');
+        Permission::module_init($this, 'sales_transaction');
     }
 
     public function edit_items(){
@@ -63,14 +62,6 @@ class SalesController extends Controller
 
     public function update_items(Request $request){
         $head = SalesHeader::findOrFail($request->ui_sales_id);
-        
-        if (
-            (!auth()->user()->is_an_admin() && !auth()->user()->is_supervisor()) &&
-            auth()->user()->has_access_to_route('sales-transaction.update') &&
-            $head->isConfirmedAndPastCutoffAndForecasted()) {
-                return redirect()->route('sales-transaction.index')->with('error', 'Confirmed orders past cutoff and forecasted cannot be updated.');
-        }
-        
         $date_needed = '';
         foreach($head->items as $item){
             if(!empty($item->delivery_date)){
@@ -103,6 +94,7 @@ class SalesController extends Controller
                         $e->forceDelete();
                     });
             }
+            
         }
 
         for($x = 1; $x <= $request->ui_total_new; $x++){
@@ -116,12 +108,10 @@ class SalesController extends Controller
                     $gross = ($request->input('uia_qty'.$x) * $request->input('uia_price'.$x)) + ($request->input('uia_qty'.$x) * $request->input('uia_paella'.$x));
                 }
                 $p = Product::whereId($request->input('uia_product'.$x))->first();
-                $product_name = $p->name;
-                $product_name = str_replace(" Boneless with Paella", "", $product_name);
                 $update = SalesDetail::create([
                     'sales_header_id' => $head->id,
                     'product_id' => $request->input('uia_product'.$x),
-                    'product_name' => $paella_qty > 0 ? $product_name . " Boneless with Paella" : $product_name,
+                    'product_name' => $p->name,
                     'product_category' => $p->category_id,
                     'price' => $request->input('uia_price'.$x),
                     'cost' => 0,
@@ -146,23 +136,7 @@ class SalesController extends Controller
             }
         }
         $this->update_header_details($head);
-
-        if(!request()->has('from_update_all')){
-            return back()->with('success','Sales details has been updated!');
-        }
-
         return back()->with('success','Successfully updated sales record');
-    }
-
-    public function update_all(Request $request)
-    {
-        // dd($request->all());
-        $request->merge(['from_update_all' => true]);
-
-        $this->update_dateneeded($request);
-        $this->update_items($request);
-
-        return back()->with('success', 'Sales details and items successfully updated!');
     }
 
     public function update_header_details($sales){
@@ -252,38 +226,9 @@ class SalesController extends Controller
     public function update_dateneeded(Request $request){
         $sales = SalesHeader::findOrFail($request->update_dateneeded_id);
     
-        if (
-            (!auth()->user()->is_an_admin() && !auth()->user()->is_supervisor()) &&
-            auth()->user()->has_access_to_route('sales-transaction.update') &&
-            $sales->isConfirmedAndPastCutoffAndForecasted()) {
-                return redirect()->route('sales-transaction.index')->with('error', 'Confirmed orders past cutoff and forecasted cannot be updated.');
-        }
-
-
-        // if(isset($request->delivery_branch)){
-        //     SalesHeader::whereId($request->update_dateneeded_id)->update(['delivery_branch' => $request->delivery_branch]);
-        // }
-        
-        if ($request->has('open_date') && $request->open_date == 'on') {
-            SalesHeader::whereId($request->update_dateneeded_id)->update([
-                'delivery_status' => 'Open Date'
-            ]);
-
-            SalesDetail::where('sales_header_id',$request->update_dateneeded_id)->update([
-                'delivery_date' => null
-            ]);
-
-        } else {
-            if ($sales->delivery_status == 'Open Date') {
-                SalesHeader::whereId($request->update_dateneeded_id)->update([
-                    'delivery_status' => ''
-                ]);
-            } else {
-                SalesHeader::whereId($request->update_dateneeded_id)->update([
-                    'delivery_status' => $sales->delivery_status // keep existing status if not open date
-                ]);
-            }
-        }
+        SalesHeader::whereId($request->update_dateneeded_id)->update([
+            'delivery_status' => ''
+        ]);
 
         if ($request->has('update_dateneeded_date') && $request->has('update_dateneeded_time')) {
             SalesDetail::where('sales_header_id', $request->update_dateneeded_id)
@@ -296,21 +241,7 @@ class SalesController extends Controller
                 });
         }
 
-        if ($request->has('order_type') && auth()->user()->id == 2) {
-            SalesHeader::whereId($request->update_dateneeded_id)->update([
-                'order_type' => $request->order_type
-            ]);
-
-            $joborder = JobOrder::where('sales_number', $sales->order_number)->first();
-
-            if ($joborder && $joborder->jo_order_type != $request->order_type) {
-                $joborder->update([
-                    'jo_order_type' => $request->order_type
-                ]);
-            }
-        }
-
-        if ($request->shipping_type == 'storepickup' && auth()->user()->has_access_to_route('sales.update_delivery_branch')) {
+        if ($request->shipping_type == 'storepickup') {
             $request->validate([
                 'update_dateneeded_sp' => 'required',
             ], [
@@ -373,7 +304,6 @@ class SalesController extends Controller
             }
         }
 
-
         if($request->shipping_type == 'd2d'){
             $sales->update(['delivery_type' => 'Door to door delivery']);
             $rate_type= 'misc';
@@ -413,10 +343,10 @@ class SalesController extends Controller
                     'customer_delivery_adress' => $request->new_delivery_address,
                     'instruction' => $request->new_instruction,
                     'delivery_fee_amount' => $delivery_amount,
-                    'gross_amount' => $sales->items->sum('gross_amount'),
+                    'gross_amount' => $amt,
                     'net_amount' => $amt,
                     'customer_address' => '',
-                    'delivery_branch' => $request->delivery_branch ?? $sales->delivery_branch
+                    'delivery_branch' => $request->delivery_branch
                 ]);
 
             }else{
@@ -429,7 +359,7 @@ class SalesController extends Controller
                     'gross_amount' => $amt,
                     'net_amount' => $amt,
                     'customer_address' => '',
-                    'delivery_branch' => $request->delivery_branch ?? $sales->delivery_branch
+                    'delivery_branch' => $request->delivery_branch
                 ]);
 
             }
@@ -448,10 +378,6 @@ class SalesController extends Controller
                 'customer_location' => '',
                 'delivery_branch' => null
             ]);
-        }
-
-        if(!request()->has('from_update_all')){
-            return back()->with('success','Sales details has been updated!');
         }
 
         return back()->with('success','Sales details has been updated!');
@@ -488,7 +414,6 @@ class SalesController extends Controller
                                     ]);
                                 });
             if($update_gift_cert){
-                $coupon_amount = 0;
                 $discounts = SalesPayment::where('sales_header_id',$data->sales_header_id)->whereStatus('PAID')->sum('amount');
                 $grand_gross = $data->gross_amount - $discounts;
                 $coupon_amount = $discounts;
@@ -501,12 +426,7 @@ class SalesController extends Controller
                     });
             }
         }
-        
-        $discount = 0;
 
-        if ($data->is_discount == 1) {
-            $discount = $data->amount;
-        }
 
         $ran = microtime();
         $today = getdate();
@@ -516,8 +436,7 @@ class SalesController extends Controller
             'user_id' => Auth::id(),
             'approval_type' => 'Payment',
             'reference_id' => $data->sales_header_id,
-            'remarks' => $request->confirm_payment_remarks,
-            'payment_id' => $orig_payment->id
+            'remarks' => $request->confirm_payment_remarks
         ]);
 
 
@@ -527,12 +446,6 @@ class SalesController extends Controller
 
 
         $sales = SalesHeader::whereId($data->sales_header_id)->first();
-
-        if ($discount > 0) {
-            $sales->discount_amount = floatval($sales->discount_amount + $discount);
-            $sales->net_amount = floatval($sales->net_amount) - floatval($sales->discount_amount + $discount);
-            $sales->save();
-        }
 
         $sms = new Sms();
         $sms->send_sms($sales->customer_contact_number, 'payment_update', $data);
@@ -623,15 +536,19 @@ class SalesController extends Controller
         ]);
 
         $sh = new SalesHeader();
+
         if ($sales->order_source == 'Web') {
             $sh->assign_to_production_branch($sales, 1);
         } else {
             $sh->assign_to_production_branch($sales, $sales->temp_prod_branch);
         }
-            
+
         if ($sales->delivery_status == 'Waiting for Payment' || $sales->delivery_status == '' || is_null($sales->delivery_status)) {
             SalesHeader::whereId($sales->id)->update(['delivery_status' => 'Processing Stock']);
         }
+    
+        //$mobile = SalesHeader::whereId($order_id)->first();
+            
         $sms = new Sms();
         $sms->send_sms($sales->customer_contact_number, 'confirm_order', $sales);
         
@@ -656,10 +573,6 @@ class SalesController extends Controller
 
     public function index()
     {
-        if (!auth()->user()->has_access_to_route('sales-transaction.index')) {
-            return response()->view('components.unauthorize-access');
-        }
-        
         if (auth()->user()->role_id == config('auth.driver_role_id')) {
             return redirect()->route('sales-transaction.driver_sales_transaction');
         } 
@@ -688,7 +601,7 @@ class SalesController extends Controller
                 [
                     'field' => 'status',
                     'operator' => '=',
-                    'value' => request()->has('order_status') && request()->order_status == 'Abandoned' ? '' : 'active',
+                    'value' => 'active',
                     'apply_to_deleted_data' => true
                 ],
             ];
@@ -717,7 +630,7 @@ class SalesController extends Controller
         $isDispatcher = auth()->user()->role_id == 5;
 
         if(auth()->user()->role_id == 1 || $hasProdBranch || auth()->user()->role_id == 3 || $hasBranches || auth()->user()->role_id == 5){
-            
+
             if ($hasProdBranch || $hasBranches) {
                 $productionBranches = $hasProdBranch
                     ? explode(',', auth()->user()->production_branch_id)
@@ -737,11 +650,9 @@ class SalesController extends Controller
                     ->where('d.delivery_date', '>=', $today->startOfDay()->toDateTimeString())
                     ->select('d.sales_header_id');
 
-                $model = SalesHeader::with('items')
-                    // ->paidOnlyForForecasterRole()
-                    ->whereHas('items', function ($q) {
+                $model = SalesHeader::with(['items' => function ($q) {
                         $q->orderBy('delivery_date', 'asc');
-                    })
+                    }])
                     ->where('has_sub', 0)
                     ->when($showDeleted === true,
                         fn ($q) => $q->where('for_deletion', 1),
@@ -751,9 +662,7 @@ class SalesController extends Controller
                         fn ($q) => $q->where('is_new_order', 1)
                     )
                     ->when($isDispatcher == true,
-                        fn ($q) => $q->where('isConfirm', 1)->whereHas('items', function($q) use ($today) {
-                            $q->where('delivery_date', '<=', $today->endOfDay());
-                        })
+                        fn ($q) => $q->where('payment_status', '==', 'PAID')->orWhere('isConfirm', 1)
                     )
                     // apply production / branch filters without plucking IDs
                     ->where(function ($q) use ($hasProdBranch, $eligible, $hasBranches, $locations) {
@@ -771,18 +680,19 @@ class SalesController extends Controller
                         }
                     });
             } elseif (auth()->user()->role_id == 3) {
+
                 $eligible = DB::table('ecommerce_sales_details as d')
                     ->join('job_orders as jo', 'jo.sales_detail_id', '=', 'd.id')
                     ->join('production_orders as po', 'po.joborder_id', '=', 'jo.id')
                     ->where('d.delivery_date', '>=', $today->startOfDay()->toDateTimeString())
                     ->select('d.sales_header_id');
 
-                $model = SalesHeader::with([
-                        'items' => function ($q) {
-                            $q->orderBy('delivery_date', 'asc');
-                        }
-                    ])
+                $model = SalesHeader::with(['items' => function($q) {
+                        $q->orderBy('delivery_date', 'asc');
+                    }])
                     ->whereIn('id', $eligible) 
+                    ->where('has_sub', 0)
+                    ->where('payment_status', '!=', 'PENDING')
                     ->when($showDeleted === true,
                         fn ($q) => $q->where('for_deletion', 1),
                         fn ($q) => $q->where('for_deletion', 0)
@@ -803,10 +713,9 @@ class SalesController extends Controller
                         $q->where('delivery_date', '>=', $today->startOfDay()->toDateTimeString())
                           ->orderBy('delivery_date', 'desc');
                     })
-                    // ->paidOnlyForForecasterRole()
                     ->where('has_sub', 0)
                     ->when($isDispatcher == true,
-                        fn ($q) => $q->where('isConfirm', 1)
+                        fn ($q) => $q->where('payment_status', '==', 'PAID')->orWhere('isConfirm', 1)
                     )
                     ->when($showDeleted === true,
                         fn ($q) => $q->where('for_deletion', 1),
@@ -845,11 +754,6 @@ class SalesController extends Controller
                                 ->when($isDispatcher == true,
                                     fn ($q) => $q->where('payment_status', '==', 'PAID')->orWhere('isConfirm', 1)
                                 )
-                                ->when($isDispatcher == true,
-                                    fn ($q) => $q->whereHas('items', function($q) use ($today) {
-                                        $q->where('delivery_date', '<=', $today->endOfDay());
-                                    })
-                                )
                                 ->where(function ($query) use($locations) {
                                     $query->whereIn('outlet', $locations)
                                         ->orWhereIn('order_source', $locations)
@@ -863,11 +767,6 @@ class SalesController extends Controller
                                 )
                                 ->when($isDispatcher == true,
                                     fn ($q) => $q->where('payment_status', '==', 'PAID')->orWhere('isConfirm', 1)
-                                )
-                                ->when($isDispatcher == true,
-                                    fn ($q) => $q->whereHas('items', function($q) use ($today) {
-                                        $q->where('delivery_date', '<=', $today->endOfDay());
-                                    })
                                 )
                                 ->when($showUnread === true,
                                     fn ($q) => $q->where('is_new_order', 1)
@@ -900,8 +799,6 @@ class SalesController extends Controller
             'net_amount',
             'gross_amount',
             'deleted_at',
-            'lechon_baka_service',
-            'has_baka',
             DB::raw('(SELECT ecommerce_sales_details.delivery_date From ecommerce_sales_details WHERE ecommerce_sales_headers.id=ecommerce_sales_details.sales_header_id GROUP BY ecommerce_sales_details.sales_header_id) as date_needed')
         ];
 
@@ -933,15 +830,9 @@ class SalesController extends Controller
     {
         $ids = explode(',', $request->input('ids'));
     
-        $sales = SalesHeader::whereIn('id', $ids)
+        SalesHeader::whereIn('id', $ids)
             ->where('isConfirm', '!=', 1)
-            ->get();
-
-        foreach ($sales as $sale) {
-            $sale->for_deletion = 1;
-            $sale->status = 'CANCELLED';
-            $sale->save();
-        }
+            ->delete();
     
         return redirect()->back()->with('success', 'Selected sales have been deleted.');
     }
@@ -952,11 +843,7 @@ class SalesController extends Controller
 
         foreach ($records as $record) {
             if ($record['type'] === 'sales') {
-                $sale = SalesHeader::find($record['id']);
-                $sale->for_deletion = 1;
-                $sale->status = 'CANCELLED';
-                $sale->save();
-
+                SalesHeader::find($record['id'])?->delete();
             } elseif ($record['type'] === 'job') {
                 JobOrder::find($record['id'])?->delete();
             }
@@ -995,9 +882,6 @@ class SalesController extends Controller
             elseif ($_GET['order_status'] == 'Cancelled') {
                 $model = $model->where('status','=','Cancelled');        
             }
-            elseif ($_GET['order_status'] == 'Abandoned') {
-                $model = $model->where('status','=','Abandoned');        
-            }
             else{
                 $model = $model->where('isConfirm','=',$_GET['order_status']);        
             }
@@ -1019,18 +903,6 @@ class SalesController extends Controller
 
         if(isset($_GET['delivery_type']) && strlen($_GET['delivery_type']) > 0){
             $model = $model->where('delivery_type','=',$_GET['delivery_type']);        
-        }
-        
-        if (request('filter') === 'unpaid') {
-            $model = $model->unpaid();
-        }
-
-        if (request('filter') === 'partial') {
-            $model = $model->partial();
-        }
-
-        if (request('filter') === 'paid') {
-            $model = $model->paid();
         }
 
         return $model;
@@ -1055,76 +927,22 @@ class SalesController extends Controller
     {
         $sale = SalesHeader::findOrFail($request->id_delete);
 
-        // ActivityLog::create([
-        //     'created_by' => auth()->id(),
-        //     'activity_type' => 'delete',
-        //     'dashboard_activity' => 'delete Sales Transaction',
-        //     'activity_desc' => 'deleted Sales Transaction with Order Number: '.$sale->order_number,
-        //     'activity_date' => date("Y-m-d H:i:s"),
-        //     'db_table' => 'ecommerce_sales_headers',
-        //     'old_value' => '',
-        //     'new_value' => '',
-        //     'reference' => $sale->id
-        // ]);
+        ActivityLog::create([
+            'created_by' => auth()->id(),
+            'activity_type' => 'delete',
+            'dashboard_activity' => 'delete Sales Transaction',
+            'activity_desc' => 'deleted Sales Transaction with Order Number: '.$sale->order_number,
+            'activity_date' => date("Y-m-d H:i:s"),
+            'db_table' => 'ecommerce_sales_headers',
+            'old_value' => '',
+            'new_value' => '',
+            'reference' => $sale->id
+        ]);
 
         $sale->for_deletion = 1;
-        $sale->status = 'CANCELLED';
         $sale->save();
 
         return back()->with('success','Successfully deleted transaction');
-    }
-
-    public function cancel(Request $request, SalesHeader $salesHeader)
-    {
-        $salesHeader = SalesHeader::findOrFail($request->id_cancel);
-
-        if ($salesHeader->status == 'CANCELLED') {
-            return back()->with('error', 'Transaction is already cancelled');
-        }
-
-        if ($salesHeader->status == 'ABANDONED') {
-            return back()->with('error', 'Transaction is already abandoned');
-        }
-        
-        if ($salesHeader?->user?->email) {
-            Mail::to($salesHeader->user->email)
-                ->send(new ManualOrderCancelledByAdminMail($salesHeader));
-        }
-
-        // Cancel current
-        $salesHeader->status = 'CANCELLED';
-        $salesHeader->save();
-
-        if ($salesHeader->is_sub && $salesHeader->parent_sales_header_id) {
-
-            $parent = SalesHeader::find($salesHeader->parent_sales_header_id);
-
-            if ($parent) {
-
-                // Get all children of parent
-                $children = SalesHeader::where('parent_sales_header_id', $parent->id)->get();
-
-                // Check if ALL are cancelled or abandoned
-                $allClosed = $children->every(function ($child) {
-                    return in_array($child->status, ['CANCELLED', 'ABANDONED']);
-                });
-
-                if ($allClosed) {
-
-                    // Decide parent status
-                    // If ALL cancelled - CANCELLED
-                    // Else - ABANDONED
-                    $allCancelled = $children->every(function ($child) {
-                        return $child->status === 'CANCELLED';
-                    });
-
-                    $parent->status = $allCancelled ? 'CANCELLED' : 'ABANDONED';
-                    $parent->save();
-                }
-            }
-        }
-
-        return back()->with('success','Transaction has been cancelled');
     }
 
     public function restore($sales)
@@ -1164,56 +982,81 @@ class SalesController extends Controller
     }
 
     public function show($id)
-    {
-        $sales = SalesHeader::with(['deliveryAddress', 'couponUsed', 'user', 'items'])->where('id',$id)->first();
+{
+    $sales = SalesHeader::with(['deliveryAddress', 'couponUsed', 'user', 'items'])
+        ->where('id', $id)
+        ->first();
 
-        if (!$sales) {
-            return redirect()->route('sales-transaction.index')->with('error', 'Sales record not found.');
-        }
-
-        // if ($sales->is_sub == 1) {
-        //     $subSales = SalesHeader::where('id', $sales->parent_sales_header_id)->first();
-        //     $salesPayments = $subSales->payments ?? collect();
-        //     $totalPayment = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)->sum('amount');
-        // } else {
-        //     $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
-        //     $totalPayment = SalesPayment::where('sales_header_id',$id)->sum('amount');
-        // }
-
-        $salesPayments = SalesPayment::where('sales_header_id',$id)->where('status', '!=', 'CANCELLED')->get();
-        $totalPayment = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->sum('amount');
-
-        if (!$sales) {
-            return redirect()->route('sales-transaction.index')->with('error', 'Sales record not found.');
-        }
-        
-
-        $gc = GiftCertificate::where('sales_header_id',$id)->get();
-        $salesDetails = SalesDetail::where('sales_header_id',$id)->get();
-        $deliveries = DeliveryStatus::where('order_id',$id)->get();
-        $deliveries = DeliveryStatus::where('order_id',$id)->get();
-        $totalNet = ($sales->items->sum('net_amount') + $sales->delivery_fee_amount) - $sales->discount_amount;
-
-        if($totalNet <= $totalPayment){
-            $status = 'PAID';
-        }
-        else {
-            $status = 'UNPAID';
-            if($totalPayment > 0){
-                $status = 'PARTIAL';
-            }
-        }
-
-        if (auth()->user()->role_id == 15) {
-            $sales->has_transited = 0;
-            $sales->save();
-        } else {
-            $sales->is_new_order = 0;
-            $sales->save();
-        }
-
-        return view('admin.sales.view',compact('sales','salesPayments','salesDetails','status','deliveries','gc'));
+    if (!$sales) {
+        return redirect()->route('sales-transaction.index')
+            ->with('error', 'Sales record not found.');
     }
+
+    if ($sales->is_sub == 1) {
+        $subSales = SalesHeader::where('id', $sales->parent_sales_header_id)->first();
+        $salesPayments = $subSales->payments ?? collect();
+
+        $totalPayment = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)
+            ->sum('amount');
+    } else {
+        $salesPayments = SalesPayment::where('sales_header_id', $id)->get();
+
+        $totalPayment = SalesPayment::where('sales_header_id', $id)
+            ->sum('amount');
+    }
+
+    $gc = GiftCertificate::where('sales_header_id', $id)->get();
+
+    $salesDetails = SalesDetail::where('sales_header_id', $id)->get();
+
+    $deliveries = DeliveryStatus::where('order_id', $id)->get();
+
+    $totalNet = SalesHeader::where('id', $id)->sum('net_amount');
+
+    /**
+     * Coupon Codes Used in this Sales Transaction
+     */
+    $couponRows = \DB::table('coupon_cart as cc')
+        ->leftJoin('coupons as c', 'c.id', '=', 'cc.coupon_id')
+        ->where('cc.sales_header_id', $id)
+        ->whereNotNull('cc.coupon_code')
+        ->select(
+            'cc.coupon_id',
+            'cc.coupon_code',
+            'cc.discount_used',
+            'c.name as coupon_name',
+            'c.reward'
+        )
+        ->get();
+
+    if ($totalNet <= $totalPayment) {
+        $status = 'PAID';
+    } else {
+        $status = 'UNPAID';
+
+        if ($totalPayment > 0) {
+            $status = 'PARTIAL';
+        }
+    }
+
+    if (auth()->user()->role_id == 15) {
+        $sales->has_transited = 0;
+        $sales->save();
+    } else {
+        $sales->is_new_order = 0;
+        $sales->save();
+    }
+
+    return view('admin.sales.view', compact(
+        'sales',
+        'salesPayments',
+        'salesDetails',
+        'status',
+        'deliveries',
+        'gc',
+        'couponRows'
+    ));
+}
     
     public function update_sales_details($id)
     {
@@ -1228,14 +1071,6 @@ class SalesController extends Controller
             })
             ->orderBy('name')
             ->get();
-        if (
-            (!auth()->user()->is_an_admin() && !auth()->user()->is_supervisor()) &&
-            auth()->user()->has_access_to_route('sales-transaction.update') &&
-            $salesheader->isConfirmedAndPastCutoffAndForecasted()) {
-                return redirect()->route('sales-transaction.index')->with('error', 'Confirmed orders past cutoff and forecasted cannot be updated.');
-        }
-
-        $products = Product::orderBy('name')->get();
 
         $dateneeded = '';
         $date_only = '';
@@ -1250,11 +1085,7 @@ class SalesController extends Controller
         // dd($dateneeded);
 
         if($salesheader->delivery_type == 'Door to door delivery'){
-            if (empty($salesheader->customer_location) || $salesheader->customer_location == null || $salesheader->customer_location == '') {
-                $locationed = 'Other';
-            } else {
-                $locationed = $salesheader->customer_location;
-            }
+            $locationed = $salesheader->customer_location;
         }
         if($salesheader->delivery_type == 'Store Pickup'){
             $locationed = $salesheader->outlet;
@@ -1300,20 +1131,7 @@ class SalesController extends Controller
 
             // dd($salesheader);
 
-        // return view('admin.sales.update_sales_detail',compact('salesheader','dateneeded','date_only','time_only','locationed','products','branches_store', 'locations', 'provinces', 'cities'));
-
-        return view('admin.sales.update-sales-details', [
-            'salesheader' => $salesheader,
-            'dateneeded' => $dateneeded,
-            'date_only' => $date_only,
-            'time_only' => $time_only,
-            'locationed' => $locationed,
-            'products' => $products,
-            'branches_store' => $branches_store,
-            'locations' => $locations,
-            'provinces' => $provinces,
-            'cities' => $cities
-        ]);
+        return view('admin.sales.update_sales_detail',compact('salesheader','dateneeded','date_only','time_only','locationed','products','branches_store', 'locations', 'provinces', 'cities'));
 
     }
 
@@ -1403,11 +1221,7 @@ class SalesController extends Controller
                     $deliveryAddress->save();
                 }
             } else {
-                $sale = SalesHeader::whereId($request->del_id)->first();
-                $sale->delivery_status = $request->delivery_status;
-                $sale->save();
-
-                JobOrder::where('sales_number', $sale->order_number)->update([
+                SalesHeader::whereId($request->del_id)->update([
                     'delivery_status' => $request->delivery_status
                 ]);
             }
@@ -1578,19 +1392,17 @@ class SalesController extends Controller
             $image_url = $newFile['url'];
         }
         $sales = SalesHeader::whereId($request->sales_header_id)->first();
-        $isDiscount = str_starts_with($request->pamenty_mode, 'Discount');
         $payment = SalesPayment::create([
-            'sales_header_id'       => $request->sales_header_id,
-            'payment_type'          => $request->pamenty_mode,
-            'amount'                => $request->amount,
-            'status'                => 'PENDING',
-            'payment_date'          => $request->payment_dt,
-            'receipt_number'        => $request->ref_no,
-            'file_url'              => $image_url,
-            'remark'                => $request->payment_remark,
-            'order_number'          => $sales->order_number,
-            'created_by'            => Auth::id(),
-            'is_discount'           => $isDiscount ? 1 : 0,
+            'sales_header_id' => $request->sales_header_id,
+            'payment_type' => $request->pamenty_mode,
+            'amount' => $request->amount,
+            'status' => 'PENDING',
+            'payment_date' => $request->payment_dt,
+            'receipt_number' => $request->ref_no,
+            'file_url' => $image_url,
+            'remark' => $request->payment_remark,
+            'order_number' => $sales->order_number,
+            'created_by' => Auth::id()
         ]);
         
 
@@ -1710,14 +1522,12 @@ class SalesController extends Controller
 
         $sale = SalesHeader::where('id', $request->id)->first();
 
-        // if (isset($sale->is_sub) && $sale->is_sub == 1) {
-        //     $parentSale = SalesHeader::where('id', $sale->parent_sales_header_id)->first();
-        //     $payments = SalesPayment::where('sales_header_id', $parentSale->id)->where('status', '!=', 'CANCELLED')->get();
-        // } else {
-        //     $payments = SalesPayment::where('sales_header_id',$request->id)->where('status', '!=', 'CANCELLED')->get();
-        // }
-
-        $payments = SalesPayment::where('sales_header_id',$request->id)->where('status', '!=', 'CANCELLED')->get();
+        if (isset($sale->is_sub) && $sale->is_sub == 1) {
+            $parentSale = SalesHeader::where('id', $sale->parent_sales_header_id)->first();
+            $payments = SalesPayment::where('sales_header_id', $parentSale->id)->get();
+        } else {
+            $payments = SalesPayment::where('sales_header_id',$request->id)->get();
+        }
 
         return view('admin.sales.added-payments-result',compact('payments'));
     }
@@ -1759,9 +1569,9 @@ class SalesController extends Controller
 
         if ($sales->is_sub == 1) {
             $subSales = SalesHeader::where('id', $sales->parent_sales_header_id)->first();
-            $salesPayments = $subSales->payments->where('status', 'PAID') ?? collect();
+            $salesPayments = $subSales->payments ?? collect();
         } else {
-            $salesPayments = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->get();
+            $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
         }
 
         if (!$sales) {
@@ -1786,9 +1596,9 @@ class SalesController extends Controller
 
         if ($sales->is_sub == 1) {
             $subSales = SalesHeader::where('id', $sales->parent_sales_header_id)->first();
-            $salesPayments = $subSales->payments->where('status', 'PAID') ?? collect();
+            $salesPayments = $subSales->payments ?? collect();
         } else {
-            $salesPayments = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->get();
+            $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
         }
 
         if (!$sales) {
@@ -1813,9 +1623,9 @@ class SalesController extends Controller
 
         if ($sales->is_sub == 1) {
             $subSales = SalesHeader::where('id', $sales->parent_sales_header_id)->first();
-            $salesPayments = $subSales->payments->where('status', 'PAID') ?? collect();
+            $salesPayments = $subSales->payments ?? collect();
         } else {
-            $salesPayments = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->get();
+            $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
         }
 
         if (!$sales) {
@@ -1839,10 +1649,7 @@ class SalesController extends Controller
 
     public function payments()
     {
-        $payments = SalesPayment::with('approval.user')
-                                ->where('sales_header_id','>',0)
-                                ->orderBy('id','desc');
-
+        $payments = SalesPayment::where('sales_header_id','>',0)->orderBy('id','desc');
         if(isset($_GET['status']) && $_GET['status']){
             $payments = $payments->where('status',$_GET['status']);
         }
@@ -1861,12 +1668,6 @@ class SalesController extends Controller
 
         $page = new Page();
         $page->name = 'Payments';
-
-        $legacyApprovals = \App\Models\Approvals::whereNull('payment_id')
-            ->where('approval_type','Payment')
-            ->orderBy('created_at')
-            ->get()
-            ->groupBy('reference_id');
 
         return view('admin.sales.payments',compact('payments'));
 
@@ -2044,6 +1845,7 @@ class SalesController extends Controller
 
         // Return paginated to view
         $sales = $paginated;
+        }
 
         // dd($model);
 
@@ -2062,9 +1864,6 @@ class SalesController extends Controller
 
         return view('admin.sales.driver_index',compact('sales','filter','searchType'));
 
-        } else {
-            return redirect()->route('login');
-        }
     }
 
     public function pending_deletion()
@@ -2156,7 +1955,8 @@ class SalesController extends Controller
                     })
                     ->when($isDispatcher == true,
                         fn ($q) => $q->where('payment_status', '==', 'PAID')->orWhere('isConfirm', 1)
-                    );
+                    )
+                    ->orderBy('order_number', 'desc');
 
             } elseif (auth()->user()->role_id == 3) {
 

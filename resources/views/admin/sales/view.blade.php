@@ -12,7 +12,25 @@
         }
         html { overflow: hidden; }
 
+        .coupon-code-label {
+            background: #31d7e6;
+            color: #004b4f;
+            padding: 5px 12px;
+            border-radius: 2px;
+            font-size: 14px;
+            display: inline-block;
+            line-height: 1.2;
+        }
 
+        .coupon-code-text {
+            color: #ff4b00;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .coupon-row td {
+            vertical-align: middle;
+        }
 
     </style>
 @endsection
@@ -256,9 +274,49 @@
                             </tr>
                             @empty
                                 <tr>
-                                    <td class="tx-center " colspan="8">No transaction found.</td>
+                                    <td class="tx-center " colspan="9">No transaction found.</td>
                                 </tr>
                             @endforelse
+
+                            @php
+                                $displayCouponRows = isset($couponRows)
+                                    ? $couponRows
+                                    : ($sales->couponUsed ?? collect());
+                            @endphp
+
+                            @if(isset($displayCouponRows) && count($displayCouponRows) > 0)
+                                @foreach($displayCouponRows as $coupon)
+                                    @php
+                                        $couponCode = $coupon->coupon_code ?? '';
+                                        $couponName = $coupon->coupon_name
+                                            ?? optional($coupon->coupon)->name
+                                            ?? $couponCode;
+                                        $discountUsed = $coupon->discount_used ?? 0;
+                                    @endphp
+                                    <tr class="coupon-row">
+                                        <td class="tx-nowrap">
+                                            <span class="coupon-code-label">Coupon Code</span>
+                                            <br>
+                                            <small class="coupon-code-text">{{ $couponCode }}</small>
+                                        </td>
+                                        <td class="tx-nowrap">{{ $couponName }}</td>
+                                        <td class="tx-center"></td>
+                                        <td class="tx-center"></td>
+                                        <td class="tx-center"></td>
+                                        <td class="tx-center"></td>
+                                        <td class="tx-right"></td>
+                                        <td class="tx-right"></td>
+                                        <td class="tx-right text-danger">
+                                            @if($discountUsed > 0)
+                                                -₱{{ number_format($discountUsed, 2) }}
+                                            @else
+                                                ₱0.00
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            @endif
+
                             @if($sales->delivery_fee_amount > 0)
                                 <tr>
                                     <td class="tx-left " colspan="8">Delivery Fee</td>
@@ -271,41 +329,11 @@
                                     <td class="tx-right">₱{{number_format($salesDetails->sum('gross_amount') + $sales->delivery_fee_amount, 2)}}</td>
                                 </tr>
                             @endif
-                            @if($sales->discount_amount > 0)
-
-                                    @if($sales->couponUsed && count($sales->couponUsed) > 0)
-                                        <tr>
-                                            <td class="tx-left" colspan="6" style="">Discount</td>
-                                        </tr>
-                                        @foreach($sales->couponUsed as $coupon)
-                                        <tr>
-                                                <td class="tx-left" colspan="8" style=" padding-left: 20px;">
-                                                    Coupon (<i>{{ $coupon->coupon_code }}</i>)
-                                                </td>
-                                                @if ($coupon->coupon->free_product_id)
-                                                    <span class="text-green-500">Free Products </span>
-                                                    @php $products = explode('|', $coupon->coupon->free_product_id); @endphp
-                                                    <td class="tx-right" style=" color: red;">
-                                                        @foreach ($products as $productId)
-                                                            @php $product = \App\Models\Product::find($productId); @endphp
-                                                            @if ($product)
-                                                                <li class="text-green-500">
-                                                                    {{ $product->name }}
-                                                                </li>
-                                                            @endif
-                                                        @endforeach
-                                                    </td>
-                                                @else
-                                                    <td class="tx-right" style=" color: red;">-{{ number_format($coupon->discount_used, 2) }}</td>
-                                                @endif
-                                        </tr>
-                                        @endforeach
-                                    @else 
-                                        <tr>
-                                            <td class="tx-left" colspan="8" style="">Discount</td>
-                                            <td class="tx-right text-danger">-{{number_format($sales->discount_amount, 2)}}</td>
-                                        </tr>
-                                    @endif
+                            @if($sales->discount_amount > 0 && (!isset($displayCouponRows) || count($displayCouponRows) == 0))
+                                <tr>
+                                    <td class="tx-left" colspan="8">Discount</td>
+                                    <td class="tx-right text-danger">-₱{{ number_format($sales->discount_amount, 2) }}</td>
+                                </tr>
                             @endif
 
                             @forelse($gc as $g)
@@ -355,7 +383,7 @@
                             <tr>
                                 <td class="tx-left">{{$payment->payment_type}}</td>
                                 <td class="tx-center">{{$payment->receipt_number}}</td>
-                                <td class="tx-center">{{ isValidDate($payment->payment_date) ? \Carbon\Carbon::parse($payment->payment_date)->format('F d, Y') : '' }}</td>
+                               <td class="tx-center">{{ !empty($payment->payment_date) ? \Carbon\Carbon::parse($payment->payment_date)->format('F d, Y') : '' }}</td>
                                 <td class="tx-center">
                                     @if($payment->payment_type == 'Ok Order' || $payment->payment_type == 'COD')
                                         @if($payment->status == 'PAID')
