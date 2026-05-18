@@ -1468,13 +1468,13 @@ class CartController extends Controller
         ->select('coupon_code', 'discount_used')
         ->get();
 
-        $salesHeader->setAttribute('applied_coupons', $appliedCoupons);
-        $salesHeader->setAttribute('email_discount_amount', (float) $salesHeader->discount_amount);
-        $salesHeader->setAttribute('email_gross_amount', (float) $salesHeader->gross_amount);
-        $salesHeader->setAttribute('email_delivery_fee_amount', (float) $salesHeader->delivery_fee_amount);
-        $salesHeader->setAttribute('email_net_amount', (float) $salesHeader->net_amount);
+    $salesHeader->setAttribute('applied_coupons', $appliedCoupons);
+    $salesHeader->setAttribute('email_discount_amount', (float) $salesHeader->discount_amount);
+    $salesHeader->setAttribute('email_gross_amount', (float) $salesHeader->gross_amount);
+    $salesHeader->setAttribute('email_delivery_fee_amount', (float) $salesHeader->delivery_fee_amount);
+    $salesHeader->setAttribute('email_net_amount', (float) $salesHeader->net_amount);
 
-        $sendNotification->process($notificationService, $salesHeader, $user, $request);
+    $sendNotification->process($notificationService, $salesHeader, $user, $request);
 
         // =============================
         // 15. GENERATE PEYMENT SIGNATURE

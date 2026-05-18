@@ -886,9 +886,11 @@ class CouponController extends Controller
     {
         $params = [];
 
+$params = [];
+
 $qry = "
     SELECT 
-        cs.id,
+        MIN(cs.id) AS id,
 
         CASE
             WHEN c.reward = 'free-shipping-optn' THEN CONCAT('fs-', cs.coupon_id)
@@ -898,7 +900,9 @@ $qry = "
             ELSE CONCAT('cp-', cs.coupon_id)
         END AS id_label,
 
-        h.order_number, 
+        h.order_number,
+
+        DATE_FORMAT(h.created_at, '%M %d, %Y') AS order_date,
 
         CASE
             WHEN h.order_source = 'web' THEN 'Web'
@@ -906,7 +910,7 @@ $qry = "
         END AS order_source_label,
 
         COALESCE(h.net_amount, 0) AS net_amount,
-        h.customer_name, 
+        h.customer_name,
 
         COALESCE(c.name, cs.coupon_code, 'N/A') AS name,
 
@@ -919,12 +923,12 @@ $qry = "
         END AS reward_label,
 
         c.reward,
-        cs.coupon_code, 
+        cs.coupon_code,
         cs.customer_id,
 
-        COALESCE(cc.discount_used, 0) AS coupon_amount
+        COALESCE(SUM(cs.discount_used), 0) AS coupon_amount
 
-    FROM coupon_sales cs
+    FROM coupon_cart cs
 
     LEFT JOIN ecommerce_sales_headers h 
         ON h.id = cs.sales_header_id
@@ -932,35 +936,10 @@ $qry = "
     LEFT JOIN coupons c 
         ON c.id = cs.coupon_id
 
-    LEFT JOIN (
-        SELECT 
-            sales_header_id,
-            coupon_id,
-            coupon_code,
-            SUM(discount_used) AS discount_used
-        FROM coupon_cart
-        GROUP BY sales_header_id, coupon_id, coupon_code
-    ) cc 
-        ON cc.sales_header_id = cs.sales_header_id
-        AND cc.coupon_id = cs.coupon_id
-
     WHERE cs.id > 0
     AND cs.coupon_id IS NOT NULL
+    AND cs.sales_header_id IS NOT NULL
 ";
-
-if (!empty($request->coupon_code)) {
-    $qry .= " AND cs.coupon_code = :coupon_code";
-    $params['coupon_code'] = $request->coupon_code;
-}
-
-if (!empty($request->customer)) {
-    $qry .= " AND cs.customer_id = :customer";
-    $params['customer'] = $request->customer;
-}
-if (!empty($request->coupon_type)) {
-    $qry .= " AND c.reward = :coupon_type";
-    $params['coupon_type'] = $request->coupon_type;
-}
 
 $rs = DB::select($qry, $params);
 

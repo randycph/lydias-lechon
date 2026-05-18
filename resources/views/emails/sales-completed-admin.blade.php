@@ -27,6 +27,19 @@ Click here to view and manage this order
 
 ---
 
+@php
+    $appliedCoupons = collect($h->applied_coupons ?? []);
+
+    $couponCodes = $appliedCoupons
+        ->pluck('coupon_code')
+        ->filter()
+        ->implode(', ');
+
+    $couponDiscount = $appliedCoupons->sum(function ($coupon) {
+        return (float) ($coupon->discount_used ?? 0);
+    });
+@endphp
+
 @if(count($h->deliveryAddress ?? []) > 0)
 
 ### Order Items
@@ -38,15 +51,15 @@ Click here to view and manage this order
 @endforeach
 
 @if($h->gross_amount > 0)
-| | | | | **Subtotal** | **{{ number_format($h->gross_amount, 2) }}** |
+| | | | | Subtotal | {{ number_format($h->gross_amount, 2) }} |
+@endif
+
+@if($appliedCoupons->count() > 0)
+| | | | | <span style="color:#ff6600;">Coupon Code: {{ $couponCodes }}</span> | <span style="color:#ff6600;">₱ {{ number_format($couponDiscount, 2) }}</span> |
 @endif
 
 @if($h->delivery_fee_amount > 0 && $h->delivery_type == 'Door to door delivery')
-| | | | | **Delivery Fee** | {{ number_format($h->delivery_fee_amount, 2) }} |
-@endif
-
-@if(($h->discount_amount ?? 0) > 0)
-| | | | | **Discount** | **-{{ number_format($h->discount_amount, 2) }}** |
+| | | | | Delivery Fee | {{ number_format($h->delivery_fee_amount, 2) }} |
 @endif
 
 @if($h->net_amount > 0)
@@ -74,15 +87,15 @@ Click here to view and manage this order
 @endforeach
 
 @if($h->gross_amount > 0)
-| | | | | | **Subtotal** | **{{ number_format($h->gross_amount, 2) }}** |
+| | | | | | Subtotal | {{ number_format($h->gross_amount, 2) }} |
+@endif
+
+@if($appliedCoupons->count() > 0)
+| | | | | | <span style="color:#ff6600;">Coupon Code: {{ $couponCodes }}</span> | <span style="color:#ff6600;">₱ {{ number_format($couponDiscount, 2) }}</span> |
 @endif
 
 @if($h->delivery_fee_amount > 0 && $h->delivery_type == 'Door to door delivery')
-| | | | | | **Delivery Fee** | {{ number_format($h->delivery_fee_amount, 2) }} |
-@endif
-
-@if(($h->discount_amount ?? 0) > 0)
-| | | | | | **Discount** | **-{{ number_format($h->discount_amount, 2) }}** |
+| | | | | | Delivery Fee | {{ number_format($h->delivery_fee_amount, 2) }} |
 @endif
 
 @if($h->net_amount > 0)
