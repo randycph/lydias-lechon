@@ -190,7 +190,7 @@
                                     </h2>
 
                                     <p class="text-sm text-gray-500 mt-1">
-                                        Please choose one available auto coupon to apply. Free shipping coupons will appear after selecting a valid delivery location.
+                                        Please choose one auto coupon to apply. Coupons that do not match your current address will still be shown but cannot be selected.
                                     </p>
                                 </div>
 
@@ -510,34 +510,36 @@
                     return 'Coupon';
                 },
 
-            get selectableCoupons() {
-    const autoOnlyCoupons = (this.autoCouponChoices || [])
-        .map(c => this.normalizeCoupon(c))
-        .filter(c => {
-            return !this.selectedAutoCoupon ||
-                String(c.id) !== String(this.selectedAutoCoupon.id);
-        });
+                get selectableCoupons() {
+                const regularCoupons = (this.eligibleCoupons || [])
+                    .map(c => this.normalizeCoupon(c));
 
-    const unique = [];
+                const nonSelectedAutoCoupons = (this.autoCouponChoices || [])
+                    .map(c => this.normalizeCoupon(c))
+                    .filter(c => {
+                        return !this.selectedAutoCoupon ||
+                            String(c.id) !== String(this.selectedAutoCoupon.id);
+                    });
 
-    autoOnlyCoupons.forEach(coupon => {
-        const code = String(coupon.code || coupon.coupon_code || '')
-            .trim()
-            .toUpperCase();
+                const merged = [
+                    ...regularCoupons,
+                    ...nonSelectedAutoCoupons
+                ];
 
-        const exists = unique.some(item =>
-            String(item.code || item.coupon_code || '')
-                .trim()
-                .toUpperCase() === code
-        );
+                const unique = [];
 
-        if (!exists) {
-            unique.push(coupon);
-        }
-    });
+                merged.forEach(coupon => {
+                    const exists = unique.some(item =>
+                        String(item.code || '').trim().toUpperCase() === String(coupon.code || '').trim().toUpperCase()
+                    );
 
-    return unique;
-},
+                    if (!exists) {
+                        unique.push(coupon);
+                    }
+                });
+
+                return unique;
+            },
 
                 couponWorthLabel(coupon) {
                     if (!coupon) return '';
@@ -572,7 +574,7 @@
                 normalizeCoupon(coupon) {
                     const reward = String(coupon.reward ?? coupon.coupon_type ?? '').trim().toLowerCase();
                     const discountType = String(coupon.discount_type ?? '').trim().toLowerCase();
-                    const activationType = String(coupon.activation_type ??coupon.coupon_activation ??coupon.activation ??'').trim().toLowerCase();
+                    const activationType = String(coupon.activation_type ?? '').trim().toLowerCase();
 
                     return {
                         ...coupon,
@@ -712,11 +714,11 @@
                 this.showCouponPopup(message, 'success');
             },
 
+             
+
                 selectCoupon(coupon) {
                     this.selectedCoupon = this.normalizeCoupon(coupon);
-
-                    // Do not put selected coupon code into manual coupon textbox
-                    this.couponCode = '';
+                    this.couponCode = this.selectedCoupon.code ?? '';
                 },
 
                 clearCouponSelection() {
@@ -903,62 +905,29 @@
                     }
                 },
 
-                shouldAutoApplyCoupon(coupon) {
-                    const normalized = this.normalizeCoupon(coupon);
-
-                    const isAuto =
-                        normalized.auto_applied === true ||
-                        normalized.auto_applied === 1 ||
-                        normalized.auto_applied === '1' ||
-                        String(normalized.activation_type || '').toLowerCase() === 'auto';
-
-                    if (!isAuto) return false;
-
-                    const hasLocationLimit = this.couponHasLocationLimit(normalized);
-
-                    if (!hasLocationLimit) {
-                        return true;
-                    }
-
-                    if (this.method !== 'delivery') {
-                        return false;
-                    }
-
-                    const targets = this.getSelectedCouponTargets();
-
-                    if (!targets.length) {
-                        return false;
-                    }
-
-                    return targets.some(t =>
-                        this.couponMatchesLocation(normalized, t.city, t.location)
-                    );
-                },
-
-shouldShowAutoCouponInList(coupon) {
+            shouldAutoApplyCoupon(coupon) {
     const normalized = this.normalizeCoupon(coupon);
 
-    const isFreeShipping = this.isFreeShippingCoupon(normalized);
+    const isAuto =
+        normalized.auto_applied === true ||
+        String(normalized.activation_type || '').toLowerCase() === 'auto';
 
-    // Only hide FREE SHIPPING auto coupons until location is selected.
-    if (isFreeShipping) {
-        if (this.method !== 'delivery') {
-            return false;
-        }
+    if (!isAuto) return false;
 
-        const targets = this.getSelectedCouponTargets();
+    const hasLocationLimit = this.couponHasLocationLimit(normalized);
 
-        if (!targets.length) {
-            return false;
-        }
-
-        return targets.some(t =>
-            this.couponMatchesLocation(normalized, t.city, t.location)
-        );
+    if (!hasLocationLimit) {
+        return true;
     }
 
-    // All other auto coupons should appear.
-    return true;
+    if (this.method !== 'delivery') return false;
+
+    const targets = this.getSelectedCouponTargets();
+    if (!targets.length) return false;
+
+    return targets.some(t =>
+        this.couponMatchesLocation(normalized, t.city, t.location)
+    );
 },
 
            
@@ -1043,18 +1012,15 @@ shouldShowAutoCouponInList(coupon) {
                     return `- ${this.formatMoney(amount)}`;
                 },
 
-applyAutoCoupons() {
-    const allAutoCoupons = (this.autoCouponsSource || [])
-        .map(c => ({
-            ...this.normalizeCoupon(c),
-            auto_applied: true
-        }));
+           applyAutoCoupons() {
+    const allAutos = (this.autoCouponsSource || [])
+        .map(c => this.normalizeCoupon(c))
+        .filter(c =>
+            c.auto_applied === true ||
+            String(c.activation_type || '').toLowerCase() === 'auto'
+        );
 
-    const visibleAutos = allAutoCoupons.filter(c =>
-        this.shouldShowAutoCouponInList(c)
-    );
-
-    const autoCodes = allAutoCoupons.map(c => c.code);
+    const autoCodes = allAutos.map(c => c.code);
 
     // Remove old auto coupons first
     this.coupons = this.coupons.filter(c => !c.auto_applied);
@@ -1071,7 +1037,10 @@ applyAutoCoupons() {
 
     this.selectedAutoCoupon = null;
 
-    this.autoCouponChoices = visibleAutos.map(coupon => {
+    // Build popup choices from ALL auto coupons
+    // Available ones can be selected.
+    // Not available ones will still display, but disabled.
+    this.autoCouponChoices = allAutos.map(coupon => {
         const available = this.shouldAutoApplyCoupon(coupon);
 
         return {
@@ -1085,6 +1054,7 @@ applyAutoCoupons() {
 
     const availableAutos = this.autoCouponChoices.filter(c => c.auto_available);
 
+    // No auto coupons at all
     if (this.autoCouponChoices.length === 0) {
         this.selectedAutoCouponId = '';
         this.showAutoCouponChooser = false;
@@ -1093,6 +1063,17 @@ applyAutoCoupons() {
         return;
     }
 
+    // No available auto coupon for current condition
+    // Still show the popup so customer can see why coupons are not available.
+    if (availableAutos.length === 0) {
+        this.selectedAutoCouponId = '';
+        this.showAutoCouponChooser = true;
+        this.order_amount = this.cartSubtotal();
+        this.recomputeCouponTotals();
+        return;
+    }
+
+    // If user already selected one before, keep it only if still available
     if (this.selectedAutoCouponId) {
         const chosen = availableAutos.find(c =>
             String(c.id) === String(this.selectedAutoCouponId)
@@ -1105,11 +1086,15 @@ applyAutoCoupons() {
         }
     }
 
+    // IMPORTANT:
+    // Show chooser even if only one coupon is available.
+    // This allows the customer to see the other auto coupons too.
     this.showAutoCouponChooser = true;
 
     this.order_amount = this.cartSubtotal();
     this.recomputeCouponTotals();
 },
+
             confirmCouponSelection() {
                 if (!this.selectedCoupon) {
                     this.showCouponError('Please select a coupon first.');
@@ -1232,45 +1217,16 @@ applyAutoCoupons() {
             this.showCouponSuccess('Coupon applied successfully.');
         },
 
-        removeCoupon(index) {
-            const removed = this.normalizeCoupon(this.coupons[index]);
+                removeCoupon(index) {
+                const removed = this.coupons[index];
+                this.coupons.splice(index, 1);
 
-            this.coupons.splice(index, 1);
+                this.autoAppliedCoupons = this.autoAppliedCoupons.filter(c => c.code !== removed?.code);
+                this.removeFreeProductsByCoupon(removed?.code)
 
-            this.autoAppliedCoupons = this.autoAppliedCoupons.filter(c =>
-                String(c.code || '').trim().toUpperCase() !== String(removed?.code || '').trim().toUpperCase()
-            );
-
-            this.removeFreeProductsByCoupon(removed?.code);
-
-            // IMPORTANT:
-            // If removed coupon is the selected auto coupon,
-            // clear it so it can appear again in the coupon list.
-            if (
-                this.selectedAutoCoupon &&
-                (
-                    String(this.selectedAutoCoupon.id) === String(removed?.id) ||
-                    String(this.selectedAutoCoupon.code || '').trim().toUpperCase() === String(removed?.code || '').trim().toUpperCase()
-                )
-            ) {
-                this.selectedAutoCoupon = null;
-                this.selectedAutoCouponId = '';
-            }
-
-            // Clear selected regular coupon too if same coupon was removed
-            if (
-                this.selectedCoupon &&
-                (
-                    String(this.selectedCoupon.id) === String(removed?.id) ||
-                    String(this.selectedCoupon.code || '').trim().toUpperCase() === String(removed?.code || '').trim().toUpperCase()
-                )
-            ) {
-                this.selectedCoupon = null;
-            }
-
-            this.order_amount = this.cartSubtotal();
-            this.recomputeCouponTotals();
-        },
+                this.order_amount = this.cartSubtotal();
+                this.recomputeCouponTotals();
+            },
 
             applyChosenAutoCoupon(autoCoupon) {
                 if (!autoCoupon) return;
