@@ -265,12 +265,6 @@
                                     <template x-if="coupon.reward === 'free-product-optn'">
                                         <span>Free Product Coupon</span>
                                     </template>
-
-                                    <template x-if="shouldShowLocationDiscount(coupon)">
-                                    <div class="mt-2 text-xs font-bold text-green-700">
-                                        <span x-text="locationDiscountLabel(coupon)"></span>
-                                    </div>
-                                </template>
                                 </div>
                             </div>
                         </div>
@@ -520,7 +514,6 @@
             get selectableCoupons() {
     const autoOnlyCoupons = (this.autoCouponChoices || [])
         .map(c => this.normalizeCoupon(c))
-        .filter(c => this.shouldShowCouponInList(c))
         .filter(c => {
             return !this.selectedAutoCoupon ||
                 String(c.id) !== String(this.selectedAutoCoupon.id);
@@ -578,7 +571,6 @@
                 },
 
                 normalizeCoupon(coupon) {
-                    
                     const reward = String(coupon.reward ?? coupon.coupon_type ?? '').trim().toLowerCase();
                     const discountType = String(coupon.discount_type ?? '').trim().toLowerCase();
                     const activationType = String(coupon.activation_type ??coupon.coupon_activation ??coupon.activation ??'').trim().toLowerCase();
@@ -621,15 +613,11 @@
                             coupon.discount_percentage ??
                             0
                         ),
-                        location_discount_type: String(coupon.location_discount_type ?? '').trim().toLowerCase(),
-                        location_discount_amount: Number(coupon.location_discount_amount ?? 0),
                         free_products: Array.isArray(coupon.free_products)
                             ? coupon.free_products
                             : Object.values(coupon.free_products || {})
                     };
-                    
                 },
-                
                 addFreeProductsFromCoupon(coupon) {
                 if (!Array.isArray(coupon?.free_products) || !coupon.free_products.length) return
 
@@ -858,62 +846,6 @@
 
                     return false;
                 },
-                couponMatchesSelectedLocation(coupon) {
-                    const normalized = this.normalizeCoupon(coupon);
-
-                    if (this.method !== 'delivery') {
-                        return false;
-                    }
-
-                    const targets = this.getSelectedCouponTargets();
-
-                    if (!targets.length) {
-                        return false;
-                    }
-
-                    return targets.some(t =>
-                        this.couponMatchesLocation(normalized, t.city, t.location)
-                    );
-                },
-
-                hasLocationDiscount(coupon) {
-                    const normalized = this.normalizeCoupon(coupon);
-
-                    return Number(normalized.location_discount_amount || 0) > 0 &&
-                        String(normalized.location_discount_type || '').trim() !== '';
-                },
-
-                shouldShowLocationDiscount(coupon) {
-                    const normalized = this.normalizeCoupon(coupon);
-
-                    if (!this.hasLocationDiscount(normalized)) {
-                        return false;
-                    }
-
-                    // Location discount should only appear if coupon has location restriction
-                    if (!this.couponHasLocationLimit(normalized)) {
-                        return false;
-                    }
-
-                    return this.couponMatchesSelectedLocation(normalized);
-                },
-
-                locationDiscountLabel(coupon) {
-                    const normalized = this.normalizeCoupon(coupon);
-
-                    if (!this.shouldShowLocationDiscount(normalized)) {
-                        return '';
-                    }
-
-                    if (
-                        normalized.location_discount_type === 'percentage' ||
-                        normalized.location_discount_type === 'percent'
-                    ) {
-                        return `${Number(normalized.location_discount_amount || 0)}% location discount`;
-                    }
-
-                    return `${this.formatMoney(normalized.location_discount_amount || 0)} location discount`;
-                },
 
                 getSelectedCouponTargets() {
                     if (this.method !== 'delivery') return [];
@@ -1004,152 +936,103 @@
                     );
                 },
 
-                
-            shouldShowAutoCouponInList(coupon) {
-                const normalized = this.normalizeCoupon(coupon);
+shouldShowAutoCouponInList(coupon) {
+    const normalized = this.normalizeCoupon(coupon);
 
-                const hasLocationRule =
-                    this.couponHasLocationLimit(normalized) ||
-                    this.hasLocationDiscount(normalized);
+    const isFreeShipping = this.isFreeShippingCoupon(normalized);
 
-                // Do not treat all free shipping coupons as location-based.
-                // Only hide it if it actually has location restriction or location discount.
-                if (hasLocationRule) {
-                    if (this.method !== 'delivery') {
-                        return false;
-                    }
+    // Only hide FREE SHIPPING auto coupons until location is selected.
+    if (isFreeShipping) {
+        if (this.method !== 'delivery') {
+            return false;
+        }
 
-                    const targets = this.getSelectedCouponTargets();
+        const targets = this.getSelectedCouponTargets();
 
-                    if (!targets.length) {
-                        return false;
-                    }
+        if (!targets.length) {
+            return false;
+        }
 
-                    return targets.some(t =>
-                        this.couponMatchesLocation(normalized, t.city, t.location)
-                    );
-                }
+        return targets.some(t =>
+            this.couponMatchesLocation(normalized, t.city, t.location)
+        );
+    }
 
-                return true;
-            },
-            shouldShowCouponInList(coupon) {
-                const normalized = this.normalizeCoupon(coupon);
+    // All other auto coupons should appear.
+    return true;
+},
 
-                const hasLocationRule =
-                    this.couponHasLocationLimit(normalized) ||
-                    this.hasLocationDiscount(normalized);
+           
+    getAutoCouponUnavailableReason(coupon) {
+    const normalized = this.normalizeCoupon(coupon);
 
-                // Do not treat all free shipping coupons as location-based.
-                // Only location-limited or location-discount coupons should depend on address.
-                if (hasLocationRule) {
-                    if (this.method !== 'delivery') {
-                        return false;
-                    }
+    const isAuto =
+        normalized.auto_applied === true ||
+        String(normalized.activation_type || '').toLowerCase() === 'auto';
 
-                    const targets = this.getSelectedCouponTargets();
+    if (!isAuto) {
+        return 'This is not an auto coupon.';
+    }
 
-                    if (!targets.length) {
-                        return false;
-                    }
+    const hasLocationLimit = this.couponHasLocationLimit(normalized);
 
-                    return targets.some(t =>
-                        this.couponMatchesLocation(normalized, t.city, t.location)
-                    );
-                }
+    if (!hasLocationLimit) {
+        return '';
+    }
 
-                return true;
-            },
+    if (this.method !== 'delivery') {
+        return 'Available for delivery addresses only.';
+    }
 
-                        
-                    getAutoCouponUnavailableReason(coupon) {
-                    const normalized = this.normalizeCoupon(coupon);
+    const targets = this.getSelectedCouponTargets();
 
-                    const isAuto =
-                        normalized.auto_applied === true ||
-                        String(normalized.activation_type || '').toLowerCase() === 'auto';
+    if (!targets.length) {
+        return 'Select a delivery location first.';
+    }
 
-                    if (!isAuto) {
-                        return 'This is not an auto coupon.';
-                    }
+    const matched = targets.some(t =>
+        this.couponMatchesLocation(normalized, t.city, t.location)
+    );
 
-                    const hasLocationLimit = this.couponHasLocationLimit(normalized);
+    if (!matched) {
+        return 'Not valid for the selected address.';
+    }
 
-                    if (!hasLocationLimit) {
-                        return '';
-                    }
-
-                    if (this.method !== 'delivery') {
-                        return 'Available for delivery addresses only.';
-                    }
-
-                    const targets = this.getSelectedCouponTargets();
-
-                    if (!targets.length) {
-                        return 'Select a delivery location first.';
-                    }
-
-                    const matched = targets.some(t =>
-                        this.couponMatchesLocation(normalized, t.city, t.location)
-                    );
-
-                    if (!matched) {
-                        return 'Not valid for the selected address.';
-                    }
-
-                    return '';
-                },
+    return '';
+},
 
                 getCouponDiscount(coupon) {
-                const subtotal = this.cartSubtotal();
+                    const subtotal = this.cartSubtotal();
 
-                if (!coupon) return 0;
+                    if (!coupon) return 0;
 
-                const normalized = this.normalizeCoupon(coupon);
+                    if (this.isFreeShippingCoupon(coupon)) {
+                        if (this.method !== 'delivery') return 0;
 
-                if (this.isFreeShippingCoupon(normalized)) {
-                    if (this.method !== 'delivery') return 0;
+                        if (this.allowMultiple) {
+                            return (this.deliveries || []).reduce((sum, delivery) => {
+                                if (this.couponMatchesLocation(coupon, delivery.city, delivery.location)) {
+                                    return sum + Number(delivery.delivery_fee || 0);
+                                }
+                                return sum;
+                            }, 0);
+                        }
 
-                    if (this.allowMultiple) {
-                        return (this.deliveries || []).reduce((sum, delivery) => {
-                            if (this.couponMatchesLocation(normalized, delivery.city, delivery.location)) {
-                                return sum + Number(delivery.delivery_fee || 0);
-                            }
-
-                            return sum;
-                        }, 0);
+                        return this.couponMatchesLocation(coupon, this.city, this.location)
+                            ? Number(this.deliveryFee || 0)
+                            : 0;
                     }
 
-                    return this.couponMatchesLocation(normalized, this.city, this.location)
-                        ? Number(this.deliveryFee || 0)
-                        : 0;
-                }
-
-                // Location discount must be checked before normal discount.
-                if (this.hasLocationDiscount(normalized)) {
-                    if (!this.shouldShowLocationDiscount(normalized)) {
-                        return 0;
+                    if (coupon.reward === 'discount-amount-optn' || coupon.discount_type === 'amount') {
+                        return Math.min(Number(coupon.discount || 0), subtotal);
                     }
 
-                    if (
-                        normalized.location_discount_type === 'percentage' ||
-                        normalized.location_discount_type === 'percent'
-                    ) {
-                        return subtotal * (Number(normalized.location_discount_amount || 0) / 100);
+                    if (coupon.reward === 'discount-percentage-optn' || coupon.discount_type === 'percent') {
+                        return subtotal * (Number(coupon.discount || 0) / 100);
                     }
 
-                    return Math.min(Number(normalized.location_discount_amount || 0), subtotal);
-                }
-
-                if (normalized.reward === 'discount-amount-optn' || normalized.discount_type === 'amount') {
-                    return Math.min(Number(normalized.discount || 0), subtotal);
-                }
-
-                if (normalized.reward === 'discount-percentage-optn' || normalized.discount_type === 'percent') {
-                    return subtotal * (Number(normalized.discount || 0) / 100);
-                }
-
-                return 0;
-            },
+                    return 0;
+                },
 
                 couponDiscountLabel(coupon) {
                     const amount = this.getCouponDiscount(coupon);
@@ -1161,129 +1044,76 @@
                     return `- ${this.formatMoney(amount)}`;
                 },
 
-        applyAutoCoupons() {
-            const allAutoCoupons = (this.autoCouponsSource || [])
-                .map(c => ({
-                    ...this.normalizeCoupon(c),
-                    auto_applied: true
-                }));
+applyAutoCoupons() {
+    const allAutoCoupons = (this.autoCouponsSource || [])
+        .map(c => ({
+            ...this.normalizeCoupon(c),
+            auto_applied: true
+        }));
 
-            const autoCodes = allAutoCoupons.map(c =>
-                String(c.code || '').trim().toUpperCase()
-            );
+    const visibleAutos = allAutoCoupons.filter(c =>
+        this.shouldShowAutoCouponInList(c)
+    );
 
-            const previousSelectedAutoId = this.selectedAutoCouponId;
-            const previousSelectedAutoCode = this.selectedAutoCoupon
-                ? String(this.selectedAutoCoupon.code || '').trim().toUpperCase()
-                : '';
+    const autoCodes = allAutoCoupons.map(c => c.code);
 
-            this.autoCouponChoices = allAutoCoupons.map(coupon => {
-                const available = this.shouldAutoApplyCoupon(coupon);
+    // Remove old auto coupons first
+    this.coupons = this.coupons.filter(c => !c.auto_applied);
+    this.autoAppliedCoupons = [];
 
-                return {
-                    ...coupon,
-                    auto_available: available,
-                    unavailable_reason: available
-                        ? ''
-                        : this.getAutoCouponUnavailableReason(coupon)
-                };
-            });
+    // Remove old free products from auto coupons
+    this.carts = this.carts.filter(item =>
+        !(item.is_free_product && autoCodes.includes(item.coupon_code))
+    );
 
-            const availableAutos = this.autoCouponChoices.filter(c => c.auto_available);
+    this.orders = this.orders.filter(item =>
+        !(item.is_free_product && autoCodes.includes(item.coupon_code))
+    );
 
-            const selectedStillAvailable = availableAutos.find(c => {
-                const code = String(c.code || '').trim().toUpperCase();
+    this.selectedAutoCoupon = null;
 
-                return (
-                    String(c.id) === String(previousSelectedAutoId) ||
-                    code === previousSelectedAutoCode
-                );
-            });
+    this.autoCouponChoices = visibleAutos.map(coupon => {
+        const available = this.shouldAutoApplyCoupon(coupon);
 
-            // Remove only auto coupons that are no longer valid.
-            this.coupons = this.coupons.filter(coupon => {
-                const code = String(coupon.code || '').trim().toUpperCase();
+        return {
+            ...coupon,
+            auto_available: available,
+            unavailable_reason: available
+                ? ''
+                : this.getAutoCouponUnavailableReason(coupon)
+        };
+    });
 
-                if (!coupon.auto_applied) {
-                    return true;
-                }
+    const availableAutos = this.autoCouponChoices.filter(c => c.auto_available);
 
-                const stillAvailable = availableAutos.some(autoCoupon =>
-                    String(autoCoupon.code || '').trim().toUpperCase() === code
-                );
+    if (this.autoCouponChoices.length === 0) {
+        this.selectedAutoCouponId = '';
+        this.showAutoCouponChooser = false;
+        this.order_amount = this.cartSubtotal();
+        this.recomputeCouponTotals();
+        return;
+    }
 
-                return stillAvailable;
-            });
+    if (this.selectedAutoCouponId) {
+    const chosen = availableAutos.find(c =>
+        String(c.id) === String(this.selectedAutoCouponId)
+    );
 
-            // Remove free products only from invalid auto coupons.
-            this.carts = this.carts.filter(item => {
-                if (!item.is_free_product) return true;
+    if (chosen) {
+        this.applyChosenAutoCoupon(chosen);
+        this.showAutoCouponChooser = false;
+        return;
+    }
+}
 
-                const itemCouponCode = String(item.coupon_code || '').trim().toUpperCase();
+if (!this.autoCouponChooserShownOnce) {
+    this.showAutoCouponChooser = true;
+    this.autoCouponChooserShownOnce = true;
+}
 
-                if (!autoCodes.includes(itemCouponCode)) return true;
-
-                return availableAutos.some(autoCoupon =>
-                    String(autoCoupon.code || '').trim().toUpperCase() === itemCouponCode
-                );
-            });
-
-            this.orders = this.orders.filter(item => {
-                if (!item.is_free_product) return true;
-
-                const itemCouponCode = String(item.coupon_code || '').trim().toUpperCase();
-
-                if (!autoCodes.includes(itemCouponCode)) return true;
-
-                return availableAutos.some(autoCoupon =>
-                    String(autoCoupon.code || '').trim().toUpperCase() === itemCouponCode
-                );
-            });
-
-            this.autoAppliedCoupons = this.coupons.filter(c => c.auto_applied);
-
-            if (selectedStillAvailable) {
-                const alreadyApplied = this.coupons.some(c =>
-                    String(c.code || '').trim().toUpperCase() ===
-                    String(selectedStillAvailable.code || '').trim().toUpperCase()
-                );
-
-                this.selectedAutoCoupon = selectedStillAvailable;
-                this.selectedAutoCouponId = selectedStillAvailable.id;
-
-                if (!alreadyApplied) {
-                    this.applyChosenAutoCoupon(selectedStillAvailable);
-                }
-
-                this.showAutoCouponChooser = false;
-                this.order_amount = this.cartSubtotal();
-                this.recomputeCouponTotals();
-                return;
-            }
-
-            // Clear selected auto only if it is no longer valid.
-            if (previousSelectedAutoId || previousSelectedAutoCode) {
-                this.selectedAutoCoupon = null;
-                this.selectedAutoCouponId = '';
-            }
-
-            if (this.autoCouponChoices.length === 0) {
-                this.showAutoCouponChooser = false;
-                this.order_amount = this.cartSubtotal();
-                this.recomputeCouponTotals();
-                return;
-            }
-
-            if (!this.autoCouponChooserShownOnce) {
-                this.showAutoCouponChooser = true;
-                this.autoCouponChooserShownOnce = true;
-            }
-
-            this.order_amount = this.cartSubtotal();
-            this.recomputeCouponTotals();
-        },
-
-
+this.order_amount = this.cartSubtotal();
+this.recomputeCouponTotals();
+},
             confirmCouponSelection() {
                 if (!this.selectedCoupon) {
                     this.showCouponError('Please select a coupon first.');
@@ -4062,6 +3892,7 @@ applySelectedAutoCoupon() {
             }
         });
     </script>
+
 @endsection
 
 
