@@ -42,11 +42,11 @@
                     
                     @if (count($sales) > 0)
                     @foreach ($sales as $index => $sale)
-                    <div x-data="{ viewMore{{ $index }}: false }" class="rounded-lg border bg-white border-[#DFDFDF] shadow-md mb-5 {{ ($sale->status == 'CANCELLED' || $sale->status == 'ABANDONED') ? 'opacity-50 bg-gray-200' : 'bg-white' }}">
+                    <div x-data="{ viewMore{{ $index }}: false }" class="rounded-lg border bg-white border-[#DFDFDF] shadow-md mb-5 {{ $sale->status == 'CANCELLED' ? 'opacity-50 bg-gray-200' : 'bg-white' }}">
                         <div class="px-6 py-4 border-b border-[#DFDFDF] flex items-center justify-between">
                             <div class="flex items-center gap-2">
-                                <h2 class="font-semibold {{ ($sale->status == 'CANCELLED' || $sale->status == 'ABANDONED') ? 'line-through' : '' }}">Order #{{ $sale->order_number }}</h2> 
-                                <span class="{{ ($sale->status == 'CANCELLED' || $sale->status == 'ABANDONED') ? 'text-red-700 uppercase' : 'hidden' }}">{{ $sale->status }}</span>
+                                <h2 class="font-semibold {{ $sale->status == 'CANCELLED' ? 'line-through' : '' }}">Order #{{ $sale->order_number }}</h2> 
+                                <span class="{{ $sale->status == 'CANCELLED' ? 'text-red-700 uppercase' : 'hidden' }}">{{ $sale->status }}</span>
                             </div>
                             <div class="font-semibold text-tertiary uppercase {{ strtolower($sale->payment_status) == 'unpaid' ? 'text-red-500' : '' }}">
                                 {{ $sale->payment_status }}
@@ -86,13 +86,18 @@
                                 @endif
 
                                 @php
-                                    $amountPaid = ($sale->payments && count($sale->payments) > 0) ? $sale->payments->sum('amount') : 0;
-                                    $amountPaid = $amountPaid < 0 ? 0 : $amountPaid;
-                                    $cartTotal = $total;
-                                    $total += $fee;
-                                    $discount = $sale->discount_amount ? $sale->discount_amount : 0;
-                                    $balance = ($total - $amountPaid) - $discount;
-                                    $balance = $balance < 0 ? 0 : $balance;
+                                    $amountPaid = ($sale->payments && count($sale->payments) > 0)
+                                        ? (float) $sale->payments->sum('amount')
+                                        : 0;
+
+                                    $amountPaid = max($amountPaid, 0);
+
+                                    $cartTotal = (float) $total;
+                                    $discount = (float) ($sale->discount_amount ?? 0);
+                                    $fee = (float) ($sale->delivery_type == 'Door to door delivery' ? $sale->delivery_fee_amount : 0);
+
+                                    $grandTotal = max(($cartTotal + $fee) - $discount, 0);
+                                    $balance = max($grandTotal - $amountPaid, 0);
                                 @endphp
             
                                 <div class="flex items-center justify-between w-full mt-4">
@@ -125,68 +130,56 @@
                                         @if ($sale->discount_amount && $sale->discount_amount > 0)
                                         <div class="flex items-center justify-between w-full">
                                             <div class="text-sm text-black font-bold">Discount</div>
-
-                                            @if ($sale->couponUsed && count($sale->couponUsed) > 0 || $sale->discount_amount > 0)
-                                                @if ($sale->couponUsed && count($sale->couponUsed) > 0)
-                                                <ul class="italic">
-                                                    @foreach ($sale->couponUsed as $coupon)
-                                                        <li class="pl-4 flex items-center text-sm justify-between">
-                                                            <div>{{ $coupon->coupon_code }}</div>
-                                                            <div class="text-right text-red-500 italic">
-                                                            @if ($coupon?->coupon?->free_product_id)
-                                                                <span class="text-green-500">Free Products </span>
-                                                                @php $products = explode('|', $coupon->coupon->free_product_id); @endphp
-                                                                <ul class="mt-2">
-                                                                    @foreach ($products as $productId)
-                                                                        @php $product = \App\Models\Product::find($productId); @endphp
-                                                                        @if ($product)
-                                                                            <li class="text-green-500">
-                                                                                {{ $product->name }}
-                                                                            </li>
-                                                                        @endif
-                                                                    @endforeach
-                                                                </ul>
-                                                            @else
-                                                                <div>-₱{{ number_format($coupon->discount_used ?? 0, 2) }}</div>
-                                                            @endif
-
-                                                        </li>
-                                                    @endforeach
-                                                </ul>
-                                                @else
-                                                    <div class="text-red-600">-₱{{ number_format($sale->discount_amount ?? 0, 2) }}</div>
-                                                @endif
-                                            @endif
-
                                         </div>
                                         @endif
 
-
-                                        @if ($sale->net_amount && $sale->net_amount > 0)
+                                    @if ($sale->couponUsed && count($sale->couponUsed) > 0 && $sale->discount_amount > 0)
+                                        <ul class="italic">
+                                            @foreach ($sale->couponUsed as $coupon)
+                                                <li class="pl-4 flex items-center text-sm justify-between">
+                                                    <div>{{ $coupon->coupon_code }}</div>
+                                                    <div class="text-right text-red-500 italic">
+                                                        @if ($coupon?->coupon?->free_product_id)
+                                                            <span class="text-green-500">Free Products </span>
+                                                            @php $products = explode('|', $coupon->coupon->free_product_id); @endphp
+                                                            <ul class="mt-2">
+                                                                @foreach ($products as $productId)
+                                                                    @php $product = \App\Models\Product::find($productId); @endphp
+                                                                    @if ($product)
+                                                                        <li class="text-green-500">
+                                                                            {{ $product->name }}
+                                                                        </li>
+                                                                    @endif
+                                                                @endforeach
+                                                            </ul>
+                                                        @else
+                                                            <div>-₱{{ number_format($coupon->discount_used ?? 0, 2) }}</div>
+                                                        @endif
+                                                    </div>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+                                        
                                         <div class="flex items-center justify-between w-full">
                                             <div class="text-sm text-black font-bold">Total</div>
-                                            <div class="text-sm font-bold">₱{{number_format($sale->items->sum('net_amount') + $sale->delivery_fee_amount - ($sale->discount_amount ?? 0), 2)}}</div>
+                                            <div class="text-sm font-bold">₱{{ number_format($grandTotal, 2) }}</div>
                                         </div>
-                                        @endif
-                                        @if ($sale->payments && $sale->payments->where('status','PAID')->where('is_discount',0)->sum('amount') > 0)
+
+                                        @if ($amountPaid > 0)
                                         <div class="flex items-center justify-between w-full">
                                             <div class="text-sm text-black font-bold">Amount Paid</div>
-                                            <div class="text-sm text-red-600 font-bold italic">- ₱{{ number_format($sale->payments->where('status','PAID')->where('is_discount',0)->sum('amount'), 2) }}</div>
+                                            <div class="text-sm text-green-600 font-bold">₱{{ number_format($amountPaid, 2) }}</div>
                                         </div>
                                         @endif
 
-                                        @php
-                                            $total_balance = ($sale->items->sum('net_amount') + $sale->delivery_fee_amount) - ($sale->payments->where('status', 'PAID')->sum('amount'));
-                                        @endphp
-
-                                        @if($total_balance > 0 && $sale->payments->where('status','PAID')->sum('amount') > 0)
+                                        @if ($balance > 0)
                                         <div class="flex items-center justify-between w-full">
                                             <div class="text-sm text-black font-bold">Amount to pay</div>
-                                            <div class="text-sm text-black font-bold">
-                                                ₱{{ number_format($total_balance <= 0 ? 0 : $total_balance, 2) }}
-                                            </div>
+                                            <div class="text-sm text-black font-bold">₱{{ number_format($balance, 2) }}</div>
                                         </div>
                                         @endif
+                                        
 
                                         <div class="mt-5">
                                             <div class="text-sm text-slate-500 font-bold mb-3">Order Details</div>
@@ -221,8 +214,8 @@
                                                             @endphp
 
                                                             <li>
-                                                                Date: {{ $sale?->delivery_status <> 'Open Date' ? \Carbon\Carbon::parse($address->delivery_date)->format('F d, Y') : 'Open Date' }}<br>
-                                                                Time: {{ $sale?->delivery_status <> 'Open Date' ? \Carbon\Carbon::parse($address->delivery_time)->format('h:i A') : '--:-- --' }}<br>
+                                                                Date: {{ \Carbon\Carbon::parse($address->delivery_date)->format('F d, Y') }}<br>
+                                                                Time: {{ \Carbon\Carbon::parse($address->delivery_time)->format('h:i A') }}<br>
                                                                 Name: {{ $address->contact_person ?? $sale->customer_name }}<br>
                                                                 Contact #: {{ $address->contact_tel ?? $sale->customer_contact_number }}<br>
                                                                 QTY/Size: {{ $totalQty }}<br>
@@ -237,9 +230,8 @@
                                                                     <ul class="list-disc pl-10">
                                                                         @foreach ($products as $product)
                                                                             @php
-                                                                                $prod = \App\Models\Product::find($product->product_id);
-                                                                                $base   = (float)($prod->price ?? 0);
-                                                                                $addOn  = !empty($product->paella) ? (float)($prod->paella_price ?? 0) : 0;
+                                                                                $base   = (float)($product->product->price ?? 0);
+                                                                                $addOn  = !empty($product->paella) ? (float)($product->product->paella_price ?? 0) : 0;
                                                                                 $price  = $base + $addOn;
                                                                             @endphp
                                                                             <li>
@@ -265,8 +257,8 @@
                                                             $saleDetail = $sale->items ? $sale->items->first() : null;
                                                             $deliveryDate = $saleDetail ? date('F d, Y h:i A', strtotime($saleDetail?->delivery_date)) : 'N/A';
                                                         @endphp
-                                                            Date: {{ $sale?->delivery_status <> 'Open Date' ? \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y') : 'Open Date' }}<br>
-                                                            Time: {{ $sale?->delivery_status <> 'Open Date' ? \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('h:i A') : '--:-- --' }}<br>
+                                                            Date: {{ \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y') }}<br>
+                                                            Time: {{ \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('h:i A') }}<br>
                                                             Name: {{ $saleDetail?->contact_person ?? $sale->customer_name }}<br>
                                                             Contact #: {{ $saleDetail?->contact_tel ?? $sale->customer_contact_number }}<br>
                                                             QTY/Size: {{ count($sale->items) }} <br>
@@ -279,8 +271,8 @@
                                                         $saleDetail = $sale->items ? $sale->items->first() : null;
                                                         $deliveryDate = $saleDetail ? date('F d, Y h:i A', strtotime($saleDetail?->delivery_date)) : 'N/A';
                                                     @endphp
-                                                    Date: {{ $sale?->delivery_status <> 'Open Date' ? \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y') : 'Open Date' }}<br>
-                                                    Time: {{ $sale?->delivery_status <> 'Open Date' ? \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('h:i A') : '--:-- --' }}<br>
+                                                    Date: {{ \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('F d, Y') }}<br>
+                                                    Time: {{ \Carbon\Carbon::parse($saleDetail?->delivery_date)->format('h:i A') }}<br>
                                                     Name: {{ $saleDetail?->contact_person ?? $sale->customer_name }}<br>
                                                     Contact #: {{ $saleDetail?->contact_tel ?? $sale->customer_contact_number }}<br>
                                                     QTY/Size: {{ count($sale->items) }} <br>
@@ -303,7 +295,7 @@
                             <div class="w-full flex flex-col gap-2 px-4 mt-4 lg:flex-row justify-between">
     
                                 {{-- Left side: Cancel Order --}}
-                                <div class="lg:order-1 order-2 w-full lg:w-auto {{ ($sale->status == 'CANCELLED' || $sale->status == 'ABANDONED') ? 'invisible' : '' }}">
+                                <div class="lg:order-1 order-2 w-full lg:w-auto {{ $sale->status == 'CANCELLED' ? 'invisible' : '' }}">
                                     @if (strtolower($sale->payment_status) != 'paid')
                                         <button @click="cancelOrderModal = true; saleId = '{{ $sale->id }}'" type="button"
                                             class="text-white custom-btn btn-tertiary-dark bg-tertiary hover:bg-secondary font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
@@ -364,36 +356,10 @@
                                         View
                                     </a>
                                     @if (strtolower($sale->payment_status) != 'paid')
-                                        <div class="relative group w-full sm:w-auto overflow-visible">
-
-                                            <button 
-                                                {{ $sale->isExpired ? 'disabled' : '' }} 
-                                                @click="openPaymentModal({{$balance}}, '{{ $sale->id }}', {{ $sale->isExpired ? 'true' : 'false' }})" 
-                                                type="button"
-                                                class="{{ $sale->status == 'CANCELLED' ? 'hidden' : '' }} {{ $sale->isExpired ? '' : 'custom-btn' }} 
-                                                    text-white bg-primary  btn-primary-dark font-medium rounded-md 
-                                                    w-full sm:w-auto px-5 py-3.5 text-center 
-                                                    disabled:bg-gray-200 disabled:cursor-not-allowed">
-
-                                                Pay Now
-                                            </button>
-
-                                            @if($sale->isExpired)
-                                                <div class="
-                                                    absolute bottom-full mb-2 z-50 pointer-events-none
-                                                    opacity-0 group-hover:opacity-100 transition-opacity duration-200
-
-                                                    left-1/2 -translate-x-1/2 w-[90vw] max-w-xs px-3 text-center whitespace-normal
-
-                                                    sm:left-auto sm:translate-x-0 sm:right-0 sm:w-auto sm:max-w-none sm:whitespace-nowrap
-
-                                                    bg-gray-800 text-white text-xs py-2 rounded
-                                                ">
-                                                    Payment is no longer allowed for orders with delivery scheduled for tomorrow or in the past.
-                                                </div>
-                                            @endif
-
-                                        </div>
+                                    <button @click="openPaymentModal({{$balance}}, '{{ $sale->order_number }}')" type="button"
+                                        class="{{ $sale->status == 'CANCELLED' ? 'hidden' : '' }} text-white bg-primary custom-btn btn-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
+                                        Pay Now
+                                    </button>
                                     @endif
                                 </div>
                             
@@ -787,43 +753,6 @@
     </div>
 </div>
 
-<div x-show="paymentDisabledModal"
-    x-transition
-    class="relative z-50"
-    aria-labelledby="modal-title"
-    role="dialog"
-    aria-modal="true"
-    style="display: none;">
-    <!-- Backdrop -->
-    <div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
-
-    <!-- Modal content -->
-    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4 text-center sm:items-center sm:p-0">
-            <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg pb-5">
-                <!-- Modal body -->
-                <div class="">
-
-                    <div class="flex justify-between items-center px-3 pt-3">
-                        <div class="flex gap-2 items-center">
-                            <div class="text-2xl font-bold">Payment disabled</div>
-                        </div>
-                        <button @click="paymentDisabledModal = false" class="self-end text-2xl text-gray-800">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-7">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-        
-                    <div class="text-gray-600 font-medium px-4 mt-4">
-                        Payment is no longer allowed for orders with delivery scheduled for tomorrow or in the past.
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <div x-show="editOrderModal"
     x-transition
     class="relative z-50"
@@ -927,11 +856,7 @@
             closeBankDepositProof() {
                 this.bankDepositProof = false;
             },
-            openPaymentModal(amount, sales_header_id, isExpired = false) {
-                if (isExpired) {
-                    this.paymentDisabledModal = true
-                    return;
-                }
+            openPaymentModal(amount, sales_header_id) {
                 this.depositModal = true;
                 this.amount = amount;
                 this.sales_header_id = sales_header_id;
