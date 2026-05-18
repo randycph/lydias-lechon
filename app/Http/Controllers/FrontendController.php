@@ -356,247 +356,301 @@ class FrontendController extends Controller
         $dataPrivacyRender = view('v2.data-privacy', compact('dataPrivacy'))->render();
 
         $now = now()->toDateTimeString();
-        $uid = Auth::id();
+$uid = Auth::id();
 
-        $formatCoupon = function ($coupon, $uid) {
+$formatCoupon = function ($coupon, $uid) {
+    $totalUsed = CouponCart::where('coupon_id', $coupon->id)
+        ->where('status', 1)
+        ->sum('total_usage');
+
+    /*
+    |--------------------------------------------------------------------------
+    | PER TRANSACTION COUPON RULE
+    |--------------------------------------------------------------------------
+    | We no longer count usage by customer here.
+    | Same customer can use the same coupon again on another transaction.
+    */
+    $customerUsed = 0;
+
+    $free_products = collect([]);
+
+    if ($coupon->free_product_id) {
+        $freeProductIds = explode('|', $coupon->free_product_id);
+        $freeProductIds = array_filter($freeProductIds, function ($val) {
+            return !is_null($val) && $val !== '';
+        });
+
+        $free_products = Product::with('photos')
+            ->whereIn('id', $freeProductIds)
+            ->get();
+    }
+
+    return [
+        'id' => $coupon->id,
+        'code' => $coupon->coupon_code,
+        'name' => $coupon->name,
+        'description' => $coupon->description,
+        'terms' => $coupon->terms_and_conditions,
+
+        'type' => $coupon->amount_discount_type == 1 ? 'amount' : 'product',
+
+        'discount_type' => $coupon->reward == 'free-shipping-optn'
+            ? ($coupon->location_discount_type == 'partial' ? 'amount' : 'percent')
+            : ($coupon->percentage > 0 ? 'percent' : 'amount'),
+
+        'discount' => $coupon->percentage > 0 ? $coupon->percentage : $coupon->amount,
+
+        'applies_to' => $coupon->free_product_id
+            ? 'free_product'
+            : ($coupon->purchase_product_id ? 'product' : 'cart'),
+
+        'purchase_product_id' => $coupon->purchase_product_id,
+        'free_products' => $free_products,
+
+        'combination_allowed' => $coupon->combination == 1,
+
+        'total_usage_limit' => $coupon->usage_limit,
+        'total_usage_used' => $totalUsed,
+
+        /*
+        |--------------------------------------------------------------------------
+        | Kept for frontend compatibility only.
+        | This no longer prevents the same customer from using the coupon again.
+        |--------------------------------------------------------------------------
+        */
+        'customer_limit' => $coupon->customer_limit,
+        'customer_usage_used' => $customerUsed,
+
+        'status' => 'valid',
+        'location' => $coupon->location,
+        'reward' => $coupon->reward,
+
+        'free_shipping' => $coupon->reward == 'free-shipping-optn',
+
+        'free_shipping_discount_amount' => $coupon->reward == 'free-shipping-optn'
+            ? ($coupon->location_discount_type == 'partial' ? $coupon->location_discount_amount : 100)
+            : 0,
+
+        'activation_type' => $coupon->activation_type,
+        'shipping_method' => $coupon->shipping_method,
+
+        'purchase_amount' => $coupon->purchase_amount,
+        'purchase_qty' => $coupon->purchase_qty,
+        'purchase_qty_type' => $coupon->purchase_qty_type,
+        'exclude_category_id' => $coupon->exclude_category_id,
+
+        'auto_applied' => $coupon->activation_type === 'auto',
+
+        'start_date' => $coupon->start_date,
+        'start_time' => $coupon->start_time,
+        'end_date' => $coupon->end_date,
+        'end_time' => $coupon->end_time,
+    ];
+};
+
+$eligibleGiftCheques = DB::table('gift_certificate')
+    ->whereNull('deleted_at')
+    ->whereRaw('LOWER(TRIM(status)) = ?', ['unused'])
+    ->get()
+    ->map(function ($gc) {
+        return [
+            'id' => $gc->id,
+            'code' => $gc->code,
+            'amount' => (float) $gc->amount,
+            'gc_type' => $gc->gc_type,
+            'status' => $gc->status,
+        ];
+    })
+    ->values();
+
+/*
+|--------------------------------------------------------------------------
+| REGULAR COUPONS
+|--------------------------------------------------------------------------
+| Coupon availability is no longer blocked by previous customer usage.
+| Same customer can use the same coupon again on another transaction.
+|--------------------------------------------------------------------------
+*/
+$eligibleCoupons = Coupon::query()
+    ->withoutGlobalScope(SoftDeletingScope::class)
+    ->from('coupons as c')
+    ->whereNull('c.deleted_at')
+    ->where('c.activation_type', '<>', 'auto')
+    ->select('c.*')
+    ->selectRaw("
+        CASE
+            WHEN c.status <> 'ACTIVE' THEN 0
+            WHEN COALESCE(
+                    STR_TO_DATE(CONCAT(c.start_date,' ', c.start_time), '%Y-%m-%d %H:%i:%s'),
+                    STR_TO_DATE(CONCAT(c.start_date,' ', c.start_time, ':00'), '%Y-%m-%d %H:%i:%s')
+                ) > NOW() THEN 0
+            WHEN COALESCE(
+                    STR_TO_DATE(CONCAT(c.end_date,' ', c.end_time), '%Y-%m-%d %H:%i:%s'),
+                    STR_TO_DATE(CONCAT(c.end_date,' ', c.end_time, ':00'), '%Y-%m-%d %H:%i:%s')
+                ) < NOW() THEN 0
+            ELSE 1
+        END AS is_currently_valid
+    ")
+    ->get()
+    ->filter(function ($coupon) {
+        if ($coupon->is_currently_valid != 1) {
+            return false;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | IMPORTANT:
+        | Removed coupon_sales customer_id check.
+        | Do not block coupon because customer used it in a previous order.
+        |--------------------------------------------------------------------------
+        */
+
+        return true;
+    })
+    ->values();
+
+$formattedEligibleCoupons = collect(
+    $eligibleCoupons
+        ->map(fn ($coupon) => $formatCoupon($coupon, $uid))
+        ->values()
+        ->all()
+);
+
+$eligibleCoupons = $formattedEligibleCoupons;
+
+/*
+|--------------------------------------------------------------------------
+| AUTO COUPONS
+|--------------------------------------------------------------------------
+| Auto coupons are also no longer blocked by previous customer usage.
+|--------------------------------------------------------------------------
+*/
+$autoCoupons = Coupon::query()
+    ->where('activation_type', 'auto')
+    ->where('status', 'ACTIVE')
+    ->whereRaw("CONCAT(start_date, ' ', start_time) <= ?", [$now])
+    ->whereRaw("CONCAT(end_date, ' ', end_time) >= ?", [$now])
+    ->where(function ($q) use ($uid) {
+        $q->whereNull('customer_scope')
+            ->orWhere('customer_scope', 'all')
+            ->orWhere(function ($x) use ($uid) {
+                $x->where('customer_scope', 'specific')
+                    ->whereRaw(
+                        "FIND_IN_SET(?, REPLACE(REPLACE(scope_customer_id, ' ', ''), '|', ','))",
+                        [$uid]
+                    );
+            });
+    })
+    ->get();
+
+$eligibleAutoCoupons = collect([]);
+
+if ($carts->count() > 0) {
+    $cartQty = $carts->sum('qty');
+
+    $cartTotal = $carts->sum(function ($item) {
+        $price = $item['price'] ?? 0;
+        $qty = $item['qty'] ?? 1;
+        $paellaPrice = ($item['paella_price'] > 0)
+            ? ($item['product']['paella_price'] ?? 0)
+            : 0;
+
+        return (($price + $paellaPrice) * $qty);
+    });
+
+    $cartProductIds = $carts->pluck('product_id')
+        ->map(fn ($id) => (string) $id)
+        ->toArray();
+
+    $cartHasExcludedCategory = $carts->contains(function ($item) {
+        return isset($item['product']['category_id']) && $item['product']['category_id'] == 1;
+    });
+
+    if (!$cartHasExcludedCategory) {
+        foreach ($autoCoupons as $coupon) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | IMPORTANT:
+            | Removed coupon_sales customer_id check.
+            | Same customer can receive/use this auto coupon again
+            | on another transaction if conditions are met.
+            |--------------------------------------------------------------------------
+            */
+
             $totalUsed = CouponCart::where('coupon_id', $coupon->id)
                 ->where('status', 1)
                 ->sum('total_usage');
 
-            $customerUsed = 0;
-            if (Auth::check()) {
-                $customerUsed = CouponCart::where('coupon_id', $coupon->id)
-                    ->where('status', 1)
-                    ->where('customer_id', $uid)
-                    ->sum('total_usage');
+            if ($coupon->usage_limit !== null && $totalUsed >= $coupon->usage_limit) {
+                continue;
             }
 
-            $free_products = collect([]);
-            if ($coupon->free_product_id) {
-                $freeProductIds = explode('|', $coupon->free_product_id);
-                $freeProductIds = array_filter($freeProductIds, fn ($val) => !is_null($val) && $val !== '');
-                $free_products = Product::with('photos')->whereIn('id', $freeProductIds)->get();
-            }
+            /*
+            |--------------------------------------------------------------------------
+            | PER TRANSACTION RULE:
+            | Removed customer_limit checking here.
+            | If you still want a per-customer limit later, keep it separate.
+            |--------------------------------------------------------------------------
+            */
 
-            return [
-                'id' => $coupon->id,
-                'code' => $coupon->coupon_code,
-                'name' => $coupon->name,
-                'description' => $coupon->description,
-                'terms' => $coupon->terms_and_conditions,
-                'type' => $coupon->amount_discount_type == 1 ? 'amount' : 'product',
-                'discount_type' => $coupon->reward == 'free-shipping-optn'
-                    ? ($coupon->location_discount_type == 'partial' ? 'amount' : 'percent')
-                    : ($coupon->percentage > 0 ? 'percent' : 'amount'),
-                'discount' => $coupon->percentage > 0 ? $coupon->percentage : $coupon->amount,
-                'applies_to' => $coupon->free_product_id
-                    ? 'free_product'
-                    : ($coupon->purchase_product_id ? 'product' : 'cart'),
-                'purchase_product_id' => $coupon->purchase_product_id,
-                'free_products' => $free_products,
-                'combination_allowed' => $coupon->combination == 1,
-                'total_usage_limit' => $coupon->usage_limit,
-                'total_usage_used' => $totalUsed,
-                'customer_limit' => $coupon->customer_limit,
-                'customer_usage_used' => $customerUsed,
-                'status' => 'valid',
-                'location' => $coupon->location,
-                'reward' => $coupon->reward,
-                'free_shipping' => $coupon->reward == 'free-shipping-optn',
-                'free_shipping_discount_amount' => $coupon->reward == 'free-shipping-optn'
-                    ? ($coupon->location_discount_type == 'partial' ? $coupon->location_discount_amount : 100)
-                    : 0,
-                'activation_type' => $coupon->activation_type,
-                'shipping_method' => $coupon->shipping_method,
-                'purchase_amount' => $coupon->purchase_amount,
-                'purchase_qty' => $coupon->purchase_qty,
-                'purchase_qty_type' => $coupon->purchase_qty_type,
-                'exclude_category_id' => $coupon->exclude_category_id,
-                'auto_applied' => $coupon->activation_type === 'auto',
-                'start_date' => $coupon->start_date,
-                'start_time' => $coupon->start_time,
-                'end_date' => $coupon->end_date,
-                'end_time' => $coupon->end_time,
-            ];
-        };
+            $shouldSkip = false;
 
-        $eligibleGiftCheques = DB::table('gift_certificate')
-            ->whereNull('deleted_at')
-            ->whereRaw('LOWER(TRIM(status)) = ?', ['unused'])
-            ->get()
-            ->map(function ($gc) {
-                return [
-                    'id' => $gc->id,
-                    'code' => $gc->code,
-                    'amount' => (float) $gc->amount,
-                    'gc_type' => $gc->gc_type,
-                    'status' => $gc->status,
-                ];
-            })
-            ->values();
-            
-        // Regular coupons
-        $eligibleCoupons = Coupon::query()
-            ->withoutGlobalScope(SoftDeletingScope::class)
-            ->from('coupons as c')
-            ->whereNull('c.deleted_at')
-            ->where('c.activation_type', '<>', 'auto')
-            ->select('c.*')
-            ->selectRaw("
-                CASE
-                    WHEN c.status <> 'ACTIVE' THEN 0
-                    WHEN COALESCE(
-                            STR_TO_DATE(CONCAT(c.start_date,' ', c.start_time), '%Y-%m-%d %H:%i:%s'),
-                            STR_TO_DATE(CONCAT(c.start_date,' ', c.start_time, ':00'), '%Y-%m-%d %H:%i:%s')
-                        ) > NOW() THEN 0
-                    WHEN COALESCE(
-                            STR_TO_DATE(CONCAT(c.end_date,' ', c.end_time), '%Y-%m-%d %H:%i:%s'),
-                            STR_TO_DATE(CONCAT(c.end_date,' ', c.end_time, ':00'), '%Y-%m-%d %H:%i:%s')
-                        ) < NOW() THEN 0
-                    ELSE 1
-                END AS is_currently_valid
-            ")
-            ->get()
-            ->filter(function ($coupon) use ($uid) {
-                if ($coupon->is_currently_valid != 1) {
-                    return false;
-                }
+            if ($coupon->purchase_combination) {
+                if ($coupon->purchase_qty && $coupon->purchase_qty > 0) {
+                    if ($coupon->purchase_qty_type === 'min' && $cartQty < $coupon->purchase_qty) {
+                        $shouldSkip = true;
+                    }
 
-                if (Auth::check()) {
-                    $alreadyUsed = DB::table('coupon_sales')
-                        ->where('coupon_id', $coupon->id)
-                        ->where('customer_id', $uid)
-                        ->exists();
-
-                    if ($alreadyUsed) {
-                        return false;
+                    if ($coupon->purchase_qty_type === 'max' && $cartQty > $coupon->purchase_qty) {
+                        $shouldSkip = true;
                     }
                 }
 
-                return true;
-            })
-            ->values();
+                if (!$shouldSkip) {
+                    $combi = explode('|', $coupon->purchase_combination ?? '');
 
-            
-
-        $formattedEligibleCoupons = collect(
-            $eligibleCoupons
-                ->map(fn ($coupon) => $formatCoupon($coupon, $uid))
-                ->values()
-                ->all()
-        );
-
-        $eligibleCoupons = $formattedEligibleCoupons;
-
-        // Auto coupons
-        $autoCoupons = Coupon::query()
-            ->where('activation_type', 'auto')
-            ->where('status', 'ACTIVE')
-            ->whereRaw("CONCAT(start_date, ' ', start_time) <= ?", [$now])
-            ->whereRaw("CONCAT(end_date, ' ', end_time) >= ?", [$now])
-            ->where(function ($q) use ($uid) {
-                $q->whereNull('customer_scope')
-                    ->orWhere('customer_scope', 'all')
-                    ->orWhere(function ($x) use ($uid) {
-                        $x->where('customer_scope', 'specific')
-                            ->whereRaw(
-                                "FIND_IN_SET(?, REPLACE(REPLACE(scope_customer_id, ' ', ''), '|', ','))",
-                                [$uid]
-                            );
-                    });
-            })
-            ->get();
-
-        $eligibleAutoCoupons = collect([]);
-
-        if ($carts->count() > 0) {
-            $cartQty = $carts->sum('qty');
-
-            $cartTotal = $carts->sum(function ($item) {
-                $price = $item['price'] ?? 0;
-                $qty = $item['qty'] ?? 1;
-                $paellaPrice = ($item['paella_price'] > 0) ? ($item['product']['paella_price'] ?? 0) : 0;
-
-                return (($price + $paellaPrice) * $qty);
-            });
-
-            $cartProductIds = $carts->pluck('product_id')->map(fn ($id) => (string) $id)->toArray();
-
-            $cartHasExcludedCategory = $carts->contains(function ($item) {
-                return isset($item['product']['category_id']) && $item['product']['category_id'] == 1;
-            });
-
-            if (!$cartHasExcludedCategory) {
-                foreach ($autoCoupons as $coupon) {
-                    if (Auth::check()) {
-                        $alreadyUsed = DB::table('coupon_sales')
-                            ->where('coupon_id', $coupon->id)
-                            ->where('customer_id', $uid)
-                            ->exists();
-
-                        if ($alreadyUsed) {
-                            continue;
+                    if (
+                        in_array('amount', $combi) &&
+                        $coupon->purchase_amount &&
+                        $coupon->purchase_amount > 0
+                    ) {
+                        if ($cartTotal < $coupon->purchase_amount) {
+                            $shouldSkip = true;
                         }
                     }
 
-                    $totalUsed = CouponCart::where('coupon_id', $coupon->id)->where('status', 1)->sum('total_usage');
+                    if (
+                        !$shouldSkip &&
+                        in_array('product', $combi) &&
+                        $coupon->purchase_product_id
+                    ) {
+                        $requiredIds = explode('|', $coupon->purchase_product_id);
+                        $hasRequiredProduct = false;
 
-                    $customerUsed = 0;
-                    if (Auth::check()) {
-                        $customerUsed = CouponCart::where('coupon_id', $coupon->id)
-                            ->where('status', 1)
-                            ->where('customer_id', $uid)
-                            ->sum('total_usage');
-                    }
-
-                    if ($coupon->usage_limit !== null && $totalUsed >= $coupon->usage_limit) continue;
-                    if ($coupon->customer_limit !== null && $customerUsed >= $coupon->customer_limit) continue;
-
-                    $shouldSkip = false;
-
-                    if ($coupon->purchase_combination) {
-                        if ($coupon->purchase_qty && $coupon->purchase_qty > 0) {
-                            if ($coupon->purchase_qty_type === 'min' && $cartQty < $coupon->purchase_qty) {
-                                $shouldSkip = true;
-                            }
-                            if ($coupon->purchase_qty_type === 'max' && $cartQty > $coupon->purchase_qty) {
-                                $shouldSkip = true;
+                        foreach ($requiredIds as $requiredId) {
+                            if (in_array((string) $requiredId, $cartProductIds)) {
+                                $hasRequiredProduct = true;
+                                break;
                             }
                         }
 
-                        if (!$shouldSkip) {
-                            $combi = explode('|', $coupon->purchase_combination ?? '');
-
-                            if (in_array('amount', $combi) && $coupon->purchase_amount && $coupon->purchase_amount > 0) {
-                                if ($cartTotal < $coupon->purchase_amount) {
-                                    $shouldSkip = true;
-                                }
-                            }
-
-                            if (!$shouldSkip && in_array('product', $combi) && $coupon->purchase_product_id) {
-                                $requiredIds = explode('|', $coupon->purchase_product_id);
-                                $hasRequiredProduct = false;
-
-                                foreach ($requiredIds as $requiredId) {
-                                    if (in_array((string) $requiredId, $cartProductIds)) {
-                                        $hasRequiredProduct = true;
-                                        break;
-                                    }
-                                }
-
-                                if (!$hasRequiredProduct) {
-                                    $shouldSkip = true;
-                                }
-                            }
+                        if (!$hasRequiredProduct) {
+                            $shouldSkip = true;
                         }
                     }
-
-                    if ($shouldSkip) continue;
-
-                    $eligibleAutoCoupons->push($formatCoupon($coupon, $uid));
                 }
             }
+
+            if ($shouldSkip) {
+                continue;
+            }
+
+            $eligibleAutoCoupons->push($formatCoupon($coupon, $uid));
         }
+    }
+}
+
 
 
         $setting = Setting::first();

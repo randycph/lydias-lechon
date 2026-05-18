@@ -965,24 +965,7 @@ class CartController extends Controller
         $decodedDeliveries = json_decode($request->deliveries ?? '[]', true);
         $deliveryCount = is_array($decodedDeliveries) ? count($decodedDeliveries) : 0;
         
-        $couponsList = collect(json_decode($request->coupons ?? '[]', true) ?: [])
-            ->map(function ($coupon) {
-                if (is_array($coupon)) {
-                    return [
-                        'code' => $coupon['code'] ?? null,
-                        'discount_used' => $coupon['discount_used'] ?? 0,
-                    ];
-                }
-
-                return [
-                    'code' => $coupon,
-                    'discount_used' => 0,
-                ];
-            })
-            ->filter(fn ($coupon) => !empty($coupon['code']))
-            ->values()
-            ->all();
-
+        
         $coupon_data = json_decode($request->input('coupon_data'), true);
 
         if (!empty($coupon_data)) {
@@ -1141,21 +1124,24 @@ class CartController extends Controller
 
             $salesHeader = SalesHeader::find(session()->get('edit_sales_header_id'));
 
-            DB::table('gift_certificate')
-                ->where('sales_header_id', $salesHeader->id)
-                ->update([
-                    'status'          => 'Unused',
-                    'customer_id'     => null, 
-                    'sales_header_id' => null,
-                    'updated_at'      => now(),
-                ]);
+                if (!$salesHeader) {
+                    session()->forget('edit_sales_header_id');
 
-            if (!$salesHeader) {
-                session()->forget('edit_sales_header_id');
-                return response()->json([
-                    'error' => 'Sales record not found. Please try again.'
-                ], 404);
-            }
+                    return response()->json([
+                        'error' => 'Sales record not found. Please try again.'
+                    ], 404);
+                }
+
+                DB::table('gift_certificate')
+                    ->where('sales_header_id', $salesHeader->id)
+                    ->update([
+                        'status'          => 'Unused',
+                        'customer_id'     => null,
+                        'sales_header_id' => null,
+                        'updated_at'      => now(),
+                    ]);
+
+            
 
             // DELETE OLD RELATED
             SalesDetail::where('sales_header_id', $salesHeader->id)->delete();
@@ -1252,63 +1238,101 @@ class CartController extends Controller
             $salesHeader->save();
         }
 
-        $couponCode = null;
+        /*
+|--------------------------------------------------------------------------
+| SAVE COUPONS - PER TRANSACTION RULE
+|--------------------------------------------------------------------------
+| Same customer can use the same coupon again on another order.
+| The only duplicate blocked here is the same coupon inside the same transaction.
+|--------------------------------------------------------------------------
+*/
 
-        $couponsList = collect(json_decode($request->coupons ?? '[]', true) ?: [])
-            ->map(function ($coupon) {
-                if (is_array($coupon)) {
-                    return [
-                        'code' => $coupon['code'] ?? null,
-                        'discount_used' => $coupon['discount_used'] ?? 0,
-                    ];
-                }
+$couponsList = collect(json_decode($request->coupons ?? '[]', true) ?: [])
+    ->map(function ($coupon) {
+        if (is_array($coupon)) {
+            return [
+                'code' => strtoupper(trim($coupon['code'] ?? '')),
+                'discount_used' => (float) ($coupon['discount_used'] ?? 0),
+            ];
+        }
 
-                return [
-                    'code' => $coupon,
-                    'discount_used' => 0,
-                ];
-            })
-            ->filter(fn ($coupon) => !empty($coupon['code']))
-            ->values()
-            ->all();
+        return [
+            'code' => strtoupper(trim((string) $coupon)),
+            'discount_used' => 0,
+        ];
+    })
+    ->filter(fn ($coupon) => !empty($coupon['code']))
 
-        if (!empty($couponsList)) {
-            foreach ($couponsList as $coupon) {
-                $couponCode = Coupon::whereRaw('LOWER(coupon_code) = ?', [strtolower($coupon['code'])])
-                    ->where('status', 'ACTIVE')
-                    ->first();
+    // prevent same coupon duplicated in the same checkout request
+    ->unique('code')
+    ->values()
+    ->all();
 
-                if ($couponCode) {
-                        CouponCart::updateOrCreate(
-                            [
-                                'sales_header_id' => $salesHeader->id,
-                                'coupon_code'     => $couponCode->coupon_code,
-                            ],
-                            [
-                                'coupon_id'     => $couponCode->id,
-                                'customer_id'   => $user->id,
-                                'total_usage'   => 1,
-                                'status'        => 1,
-                                'discount_used' => (float) ($coupon['discount_used'] ?? 0),
-                            ]
-                        );
+if (!empty($couponsList)) {
+    foreach ($couponsList as $coupon) {
+        $couponRow = Coupon::whereRaw('UPPER(TRIM(coupon_code)) = ?', [$coupon['code']])
+            ->where('status', 'ACTIVE')
+            ->first();
 
-                        CouponSale::updateOrCreate(
-                            [
-                                'sales_header_id' => $salesHeader->id,
-                                'coupon_id'       => $couponCode->id,
-                                'coupon_code'     => $couponCode->coupon_code,
-                                'product_id'      => null,
-                            ],
-                            [
-                                'customer_id'   => $user->id,
-                                'order_status'  => $salesHeader->status ?? 'active',
-                                'discount_used' => (float) ($coupon['discount_used'] ?? 0),
-                            ]
-                        );
-                    }
+        if (!$couponRow) {
+            continue;
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Check total usage only.
+        | Do NOT check customer_id here because coupon rule is per transaction.
+        |--------------------------------------------------------------------------
+        */
+        if (!is_null($couponRow->usage_limit)) {
+            $totalUsed = CouponCart::where('coupon_id', $couponRow->id)
+                ->where('status', 1)
+                ->where('sales_header_id', '<>', $salesHeader->id)
+                ->sum('total_usage');
+
+            if ($totalUsed >= $couponRow->usage_limit) {
+                continue;
             }
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Duplicate check is only inside this transaction.
+        |--------------------------------------------------------------------------
+        */
+        $alreadyUsedInThisTransaction = CouponCart::where('sales_header_id', $salesHeader->id)
+            ->where(function ($q) use ($couponRow) {
+                $q->where('coupon_id', $couponRow->id)
+                  ->orWhere('coupon_code', $couponRow->coupon_code);
+            })
+            ->exists();
+
+        if ($alreadyUsedInThisTransaction) {
+            continue;
+        }
+
+        CouponCart::create([
+            'sales_header_id' => $salesHeader->id,
+            'coupon_id'      => $couponRow->id,
+            'coupon_code'    => $couponRow->coupon_code,
+            'customer_id'    => $user->id,
+            'product_id'     => null,
+            'total_usage'    => 1,
+            'status'         => 1,
+            'discount_used'  => (float) ($coupon['discount_used'] ?? 0),
+        ]);
+
+        CouponSale::create([
+            'sales_header_id' => $salesHeader->id,
+            'coupon_id'      => $couponRow->id,
+            'coupon_code'    => $couponRow->coupon_code,
+            'customer_id'    => $user->id,
+            'product_id'     => null,
+            'order_status'   => $salesHeader->status ?? 'active',
+            'discount_used'  => (float) ($coupon['discount_used'] ?? 0),
+        ]);
+    }
+}
 
         if ($giftChequeRow && $giftChequeAmount > 0) {
             CouponCart::updateOrCreate(
