@@ -8,7 +8,6 @@
 
 @section('alpine.plugins')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/css/datepicker.min.css">
-        <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/mask@3.x.x/dist/cdn.min.js"></script>
 @endsection
 
 @section('content')
@@ -48,8 +47,6 @@
 
             $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
         }
-            $autoCoupons = isset($autoCoupons) ? $autoCoupons : collect([]);
-             $allCoupons = $eligibleCoupons->merge($autoCoupons);
     @endphp
 
     <div class="bg-cream">
@@ -57,18 +54,6 @@
             <form id="checkoutForm" method="POST" action="{{ route('cart.temp_sales') }}" @submit.prevent="submitForm"
                 class="pb-20 px-4">
                 @csrf
-
-                 <input 
-                    type="hidden" 
-                    name="selected_auto_coupon_id" 
-                    :value="selectedAutoCoupon ? selectedAutoCoupon.id : ''"
-                >
-
-                <input 
-                    type="hidden" 
-                    name="selected_coupon_id" 
-                    :value="selectedCoupon ? selectedCoupon.id : ''"
-                >
                 <div class="pt-20 pb-5 px-4">
                     <h1 class="text-4xl lg:text-7xl font-cubao font-medium text-primary text-center mt-10">Checkout</h1>
                     @if ($carts && count($carts) > 0)
@@ -92,311 +77,71 @@
                             Shopping</a>
                     </div>
                 @else
-    <div class="flex flex-col lg:flex-row gap-4 mt-10">
+                    <div class="flex flex-col lg:flex-row gap-4 mt-10">
+                        {{-- LEFT --}}
+                        <div class="w-full lg:w-3/5 space-y-4 order-2 lg:order-1">
+                            @include('v2.checkout.components.delivery-method')
 
-        {{-- LEFT --}}
-        <div class="w-full lg:w-3/5 space-y-4 order-2 lg:order-1">
-            @include('v2.checkout.components.delivery-method')
+                            <template x-if="method === 'pickup'">
+                                @include('v2.checkout.components.pickup-form')
+                            </template>
 
-            <template x-if="method === 'pickup'">
-                @include('v2.checkout.components.pickup-form')
-            </template>
+                            <template x-if="method === 'delivery' && !allowMultiple">
+                                @include('v2.checkout.components.single-delivery-form')
+                            </template>
 
-            <template x-if="method === 'delivery' && !allowMultiple">
-                @include('v2.checkout.components.single-delivery-form')
-            </template>
+                            <template x-if="method === 'delivery' && allowMultiple">
+                                @include('v2.checkout.components.multi-delivery-form')
+                            </template>
 
-            <template x-if="method === 'delivery' && allowMultiple">
-                @include('v2.checkout.components.multi-delivery-form')
-            </template>
-
-            @include('v2.checkout.components.contact-info')
-            {{-- @include('v2.checkout.components.place-order') --}}
-
-            <button
-                type="submit"
-                :disabled="incompleteProgress || isSubmitting"
-                class="w-full bg-primary text-white font-bold py-3 rounded-lg transition flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                :class="{
-                    'opacity-50 cursor-not-allowed pointer-events-none': incompleteProgress || isSubmitting
-                }"
-            >
-                <template x-if="!isSubmitting">
-                    <span>Place Order</span>
-                </template>
-
-                <template x-if="isSubmitting">
-                    <span class="flex items-center gap-2">
-                        <svg class="animate-spin h-4 w-4 text-white"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24">
-                            <circle class="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    stroke-width="4"></circle>
-                            <path class="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8v8z"></path>
-                        </svg>
-                        Processing...
-                    </span>
-                </template>
-            </button>
-        </div>
-
-        {{-- RIGHT --}}
-        <div class="w-full lg:w-2/5 order-1 lg:order-2">
-            @include('v2.checkout.components.order-summary')
-        </div>
-
-    </div>
-@endif
-            </form>
-                {{-- AUTO COUPON POPUP --}}
-                <div
-                    x-cloak
-                    x-show="showAutoCouponChooser"
-                    x-transition.opacity
-                    class="fixed inset-0 z-50"
-                >
-                    {{-- BACKDROP --}}
-                    <div class="fixed inset-0 bg-black/50"></div>
-
-                    {{-- MODAL CONTAINER --}}
-                    <div class="fixed inset-0 flex items-center justify-center p-4">
-                        <div
-                            x-show="showAutoCouponChooser"
-                            x-transition
-                            class="w-full max-w-xl"
-                        >
-                            <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden">
-
-                                {{-- CLOSE BUTTON --}}
+                            @include('v2.checkout.components.contact-info')
+                            {{-- @include('v2.checkout.components.place-order') --}}
+                            <div>
                                 <button
-                                    type="button"
-                                    @click="showAutoCouponChooser = false"
-                                    class="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+                                    type="submit"
+                                    :disabled="incompleteProgress || isSubmitting"
+                                    class="w-full bg-primary text-white font-bold py-3 rounded-lg transition flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                    :class="{
+                                        'opacity-50 cursor-not-allowed pointer-events-none': incompleteProgress || isSubmitting
+                                    }"
                                 >
-                                    ✕
-                                </button>
+                                    <template x-if="!isSubmitting">
+                                        <span>Place Order</span>
+                                    </template>
 
-                                {{-- HEADER --}}
-                                <div class="px-6 pt-6 pb-4 border-b">
-                                    <h2 class="text-xl font-semibold">
-                                        Choose Your Auto Coupon
-                                    </h2>
-
-                                    <p class="text-sm text-gray-500 mt-1">
-                                        Please choose one auto coupon to apply. Coupons that do not match your current address will still be shown but cannot be selected.
-                                    </p>
-                                </div>
-
-                                {{-- BODY --}}
-                                <div class="px-6 py-6 space-y-4 max-h-[500px] overflow-y-auto">
-
-                                    <template x-for="coupon in autoCouponChoices" :key="coupon.id">
-                    <label
-                        class="block border rounded-2xl p-5 transition"
-                        :class="{
-                            'border-green-600 bg-green-50 cursor-pointer': coupon.auto_available && String(selectedAutoCouponId) === String(coupon.id),
-                            'border-gray-200 bg-white cursor-pointer hover:border-orange-300': coupon.auto_available && String(selectedAutoCouponId) !== String(coupon.id),
-                            'border-gray-200 bg-gray-100 opacity-70 cursor-not-allowed': !coupon.auto_available
-                        }"
-                    >
-                        <div class="flex items-start gap-4">
-                            <input
-                                type="radio"
-                                name="auto_coupon_choice"
-                                :value="coupon.id"
-                                x-model="selectedAutoCouponId"
-                                :disabled="!coupon.auto_available"
-                                class="mt-1"
-                            >
-
-                            <div class="flex-1 min-w-0">
-                                <div
-                                    class="text-lg font-semibold text-gray-900"
-                                    x-text="coupon.name || coupon.code"
-                                ></div>
-
-                                <div class="flex flex-wrap gap-2 mt-2">
-                                    <span class="inline-block text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded">
-                                        Auto Coupon
-                                    </span>
-
-                                    <template x-if="coupon.auto_available">
-                                        <span class="inline-block text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                                            Available
+                                    <template x-if="isSubmitting">
+                                        <span class="flex items-center gap-2">
+                                            <svg class="animate-spin h-4 w-4 text-white"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 24 24">
+                                                <circle class="opacity-25"
+                                                        cx="12"
+                                                        cy="12"
+                                                        r="10"
+                                                        stroke="currentColor"
+                                                        stroke-width="4"></circle>
+                                                <path class="opacity-75"
+                                                    fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8v8z"></path>
+                                            </svg>
+                                            Processing...
                                         </span>
                                     </template>
-                                    <template x-if="!coupon.auto_available && coupon.unavailable_reason">
-                                    <span
-                                        class="inline-block text-xs bg-red-100 text-red-700 px-2 py-1 rounded"
-                                        x-text="coupon.unavailable_reason"
-                                    ></span>
-                                </template>
+                                </button>
 
-                                    
-                                </div>
-
-                                <div
-                                    class="mt-2 text-sm text-gray-600"
-                                    x-text="coupon.description || 'No description available'"
-                                ></div>
-
-                                
-
-                                <div class="mt-3 text-sm text-orange-600 font-medium">
-                                    <template x-if="coupon.reward === 'free-shipping-optn'">
-                                        <span>Free Shipping Coupon</span>
-                                    </template>
-
-                                    <template x-if="coupon.reward === 'discount-amount-optn'">
-                                        <span x-text="'₱' + Number(coupon.discount || 0).toFixed(2) + ' OFF'"></span>
-                                    </template>
-
-                                    <template x-if="coupon.reward === 'discount-percentage-optn'">
-                                        <span x-text="Number(coupon.discount || 0) + '% OFF'"></span>
-                                    </template>
-
-                                    <template x-if="coupon.reward === 'free-product-optn'">
-                                        <span>Free Product Coupon</span>
-                                    </template>
-                                </div>
                             </div>
                         </div>
-                    </label>
-                </template>
 
-                                
-
-                                </div>
-
-                                {{-- FOOTER --}}
-                                <div class="px-6 py-4 border-t flex justify-end gap-3">
-                                    <button
-                                        type="button"
-                                        @click="showAutoCouponChooser = false"
-                                        class="px-4 py-2 text-sm border rounded-md"
-                                    >
-                                        Skip
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        @click="applySelectedAutoCoupon()"
-                                        class="px-6 py-2 text-sm bg-primary text-white rounded-md"
-                                    >
-                                        Apply Selected Coupon
-                                    </button>
-                                </div>
-
-                            </div>
+                        {{-- RIGHT --}}
+                        <div class="w-full lg:w-2/5 order-1 lg:order-2">
+                            @include('v2.checkout.components.order-summary')
                         </div>
                     </div>
-                </div>
-              
+                @endif
+            </form>
+
             @include('v2.checkout.modals.coupon-modal')
-    {{-- COUPON ERROR / SUCCESS POPUP --}}
-<div
-    x-data="{
-        open: false,
-        type: 'error',
-        title: '',
-        message: '',
-
-        show(e) {
-            this.type = e.detail.type || 'error';
-            this.title = this.type === 'success' ? 'Coupon Applied' : 'Coupon Error';
-            this.message = e.detail.message || '';
-            this.open = true;
-        },
-
-        close() {
-            this.open = false;
-        }
-    }"
-    @coupon-popup.window="show($event)"
-    x-cloak
-    x-show="open"
-    x-transition.opacity
-    class="fixed inset-0 flex items-center justify-center p-4"
-    style="z-index: 999999;"
->
-    <div
-        class="absolute inset-0 bg-black/40"
-        @click="close()"
-    ></div>
-
-    <div
-        x-show="open"
-        x-transition
-        class="relative w-full max-w-sm rounded-2xl bg-white shadow-2xl overflow-hidden"
-        style="z-index: 1000000;"
-    >
-        <div
-            class="px-6 py-5"
-            :class="{
-                'bg-red-50': type === 'error',
-                'bg-green-50': type === 'success'
-            }"
-        >
-            <div class="flex items-start gap-4">
-                <div
-                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg font-black"
-                    :class="{
-                        'bg-red-100 text-red-600': type === 'error',
-                        'bg-green-100 text-green-600': type === 'success'
-                    }"
-                >
-                    <span x-text="type === 'success' ? '✓' : '!'"></span>
-                </div>
-
-                <div class="flex-1">
-                    <h3
-                        class="text-lg font-black"
-                        :class="{
-                            'text-red-700': type === 'error',
-                            'text-green-700': type === 'success'
-                        }"
-                        x-text="title"
-                    ></h3>
-
-                    <p
-                        class="mt-1 text-sm leading-5"
-                        :class="{
-                            'text-red-600': type === 'error',
-                            'text-green-600': type === 'success'
-                        }"
-                        x-text="message"
-                    ></p>
-                </div>
-
-                <button
-                    type="button"
-                    @click="close()"
-                    class="text-gray-400 hover:text-gray-700"
-                >
-                    ✕
-                </button>
-            </div>
-        </div>
-
-        <div class="px-6 py-4 bg-white flex justify-end">
-            <button
-                type="button"
-                @click="close()"
-                class="rounded-lg px-6 py-2 text-sm font-bold text-white shadow-md"
-                style="background:#0f8f43; color:#ffffff;"
-            >
-                Okay
-            </button>
-        </div>
-    </div>
-</div>
             @include('v2.checkout.modals.privacy-modal')
             @include('v2.checkout.modals.payment-modal')
             @include('v2.checkout.modals.block-modal')
@@ -411,7 +156,7 @@
 
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.3.4/dist/js/datepicker.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+
     <script>
         window.disabledPickupDates = @json($disabledPickupDates);
         window.disabledDeliveryDates = @json($disabledDeliveryDates);
@@ -431,10 +176,6 @@
         window.minimum_processing_hours_baka = @json($minimum_processing_hours_baka);
         window.initialCarts = @json($carts);
         window.lechonBakaService = @json($lechonBakaService);
-        window.eligibleCoupons = @json($eligibleCoupons);
-        window.eligibleAutoCoupons = @json($eligibleAutoCoupons);
-        window.allCoupons = @json($allCoupons);
-        window.eligibleGiftCheques = @json($eligibleGiftCheques ?? []);
         window.APP_DEBUG = @json(config('app.debug'));
         window.sale = @json($sale ?? null);
     </script>
@@ -453,972 +194,20 @@
                 deliveryFees: [],
                 sale: window.sale,
 
-                couponPopupOpen: false,
-                couponPopupTitle: '',
-                couponPopupMessage: '',
-                couponPopupType: 'error',
-
                 pickup_branch: '',
                 pickup_date: '',
                 pickup_time: '',
                 pickup_note: '',
                 pickupErrors: {},
                 pickupWarning: '',
-                couponModal: false,
-                couponCode: '',
-                couponMessage: '',
-                couponMessageType: '',
-                eligibleCoupons: window.eligibleCoupons || [],
-                availableCoupons: window.eligibleCoupons || [],
-                autoCouponsSource: window.eligibleAutoCoupons || [],
-                giftCheques: window.eligibleGiftCheques || [],
-                allCoupons: window.allCoupons || [],
-                selectedCoupon: null,
-                autoAppliedCoupons: [],
-                selectedAutoCoupon: null,
-                showAutoCouponChooser: false,
-                autoCouponChoices: [],
-                selectedAutoCouponId: '',
-                totalDiscountAmount: 0,
-                shippingDiscountAmount: 0,
-                shippingDiscountLists: [],
-                giftChequeCode: '',
-                giftChequeMessage: '',
-                giftChequeMessageType: '',
-                appliedGiftCheque: null,
-                giftChequeDiscountAmount: 0,
-                
-                couponTypeLabel(coupon) {
-                    if (!coupon) return '';
-
-                    if (coupon.free_shipping || coupon.reward === 'free-shipping-optn') {
-                        return 'Free Shipping';
-                    }
-
-                    if (coupon.reward === 'discount-percentage-optn' || coupon.discount_type === 'percent') {
-                        return 'Percentage Discount';
-                    }
-
-                    if (coupon.reward === 'discount-amount-optn' || coupon.discount_type === 'amount') {
-                        return 'Fixed Amount Discount';
-                    }
-
-                    if (Array.isArray(coupon.free_products) && coupon.free_products.length > 0) {
-                        return 'Free Product';
-                    }
-
-                    return 'Coupon';
-                },
-
-                get selectableCoupons() {
-                const regularCoupons = (this.eligibleCoupons || [])
-                    .map(c => this.normalizeCoupon(c));
-
-                const nonSelectedAutoCoupons = (this.autoCouponChoices || [])
-                    .map(c => this.normalizeCoupon(c))
-                    .filter(c => {
-                        return !this.selectedAutoCoupon ||
-                            String(c.id) !== String(this.selectedAutoCoupon.id);
-                    });
-
-                const merged = [
-                    ...regularCoupons,
-                    ...nonSelectedAutoCoupons
-                ];
-
-                const unique = [];
-
-                merged.forEach(coupon => {
-                    const exists = unique.some(item =>
-                        String(item.code || '').trim().toUpperCase() === String(coupon.code || '').trim().toUpperCase()
-                    );
-
-                    if (!exists) {
-                        unique.push(coupon);
-                    }
-                });
-
-                return unique;
-            },
-
-                couponWorthLabel(coupon) {
-                    if (!coupon) return '';
-
-                    if (coupon.free_shipping || coupon.reward === 'free-shipping-optn') {
-                        return 'Free Shipping';
-                    }
-
-                    if (coupon.reward === 'discount-percentage-optn' || coupon.discount_type === 'percent') {
-                        return `${Number(coupon.discount || 0)}% off`;
-                    }
-
-                    if (coupon.reward === 'discount-amount-optn' || coupon.discount_type === 'amount') {
-                        return this.formatMoney(coupon.discount || 0);
-                    }
-
-                    if (Array.isArray(coupon.free_products) && coupon.free_products.length > 0) {
-                        return `${coupon.free_products.length} free item(s)`;
-                    }
-
-                    return this.formatMoney(coupon.discount || 0);
-                },
-
-                couponExpiryLabel(coupon) {
-                    if (!coupon?.end_date) return 'N/A';
-
-                    return coupon.end_time
-                        ? `${coupon.end_date} ${coupon.end_time}`
-                        : coupon.end_date;
-                },
-
-                normalizeCoupon(coupon) {
-                    const reward = String(coupon.reward ?? coupon.coupon_type ?? '').trim().toLowerCase();
-                    const discountType = String(coupon.discount_type ?? '').trim().toLowerCase();
-                    const activationType = String(coupon.activation_type ?? '').trim().toLowerCase();
-
-                    return {
-                        ...coupon,
-                        id: coupon.id ?? null,
-                        code: String(coupon.code ?? coupon.coupon_code ?? '').trim(),
-                        name: coupon.name ?? coupon.coupon_name ?? coupon.coupon_code ?? 'Coupon',
-                        reward,
-                        activation_type: activationType,
-                        location: coupon.location ?? coupon.locations ?? '',
-                        free_shipping:
-                            !!coupon.free_shipping ||
-                            reward === 'free-shipping-optn' ||
-                            reward === 'free_shipping' ||
-                            reward === 'free-shipping' ||
-                            discountType === 'free_shipping' ||
-                            discountType === 'free-shipping',
-                        end_date: coupon.end_date ?? '',
-                        end_time: coupon.end_time ?? '',
-                        description: coupon.description ?? '',
-                        auto_applied:
-                            coupon.auto_applied === true ||
-                            coupon.auto_applied === 1 ||
-                            coupon.auto_applied === '1' ||
-                            activationType === 'auto',
-                        combination_allowed:
-                            coupon.combination_allowed === true ||
-                            coupon.combination_allowed === 1 ||
-                            coupon.combination_allowed === '1',
-                        discount_type: discountType,
-                        discount: Number(
-                            coupon.discount ??
-                            coupon.amount ??
-                            coupon.discount_amount ??
-                            coupon.discount_value ??
-                            coupon.percentage ??
-                            coupon.discount_percent ??
-                            coupon.discount_percentage ??
-                            0
-                        ),
-                        free_products: Array.isArray(coupon.free_products)
-                            ? coupon.free_products
-                            : Object.values(coupon.free_products || {})
-                    };
-                },
-                addFreeProductsFromCoupon(coupon) {
-                if (!Array.isArray(coupon?.free_products) || !coupon.free_products.length) return
-
-                coupon.free_products.forEach(fp => {
-                    const existsInCart = this.carts.find(item =>
-                        item.is_free_product &&
-                        String(item.product_id) === String(fp.id) &&
-                        item.coupon_code === coupon.code
-                    )
-
-                    if (!existsInCart) {
-                        this.carts.push({
-                            id: `free_${coupon.code}_${fp.id}`,
-                            product_id: fp.id,
-                            qty: 1,
-                            price: 0,
-                            paella_price: 0,
-                            is_free_product: true,
-                            coupon_code: coupon.code,
-                            product: {
-                                id: fp.id,
-                                name: fp.name,
-                                slug: fp.slug ?? '',
-                                category_id: fp.category_id ?? null,
-                                is_misc: fp.is_misc ?? 0,
-                                paella_price: fp.paella_price ?? 0,
-                                photos: fp.photos ?? []
-                            }
-                        })
-                    }
-
-                    const existsInOrders = this.orders.find(o =>
-                        String(o.product_id) === String(fp.id) &&
-                        o.is_free_product &&
-                        o.coupon_code === coupon.code
-                    )
-
-                    if (!existsInOrders) {
-                        this.orders.push({
-                            id: `free_${coupon.code}_${fp.id}`,
-                            product_id: fp.id,
-                            qty: 1,
-                            price: 0,
-                            paella_price: 0,
-                            is_free_product: true,
-                            coupon_code: coupon.code,
-                            product: {
-                                id: fp.id,
-                                name: fp.name,
-                                slug: fp.slug ?? '',
-                                category_id: fp.category_id ?? null,
-                                is_misc: fp.is_misc ?? 0,
-                                paella_price: fp.paella_price ?? 0,
-                                photos: fp.photos ?? []
-                            }
-                        })
-                    }
-                })
-            },
-
-            removeFreeProductsByCoupon(couponCode) {
-                this.carts = this.carts.filter(item =>
-                    !(item.is_free_product && item.coupon_code === couponCode)
-                )
-
-                this.orders = this.orders.filter(item =>
-                    !(item.is_free_product && item.coupon_code === couponCode)
-                )
-            },
-
-
-                closeCouponModal() {
-                    this.couponModal = false;
-                },
-
-            showCouponPopup(message, type = 'error') {
-            this.couponMessage = message;
-            this.couponMessageType = type;
-
-            window.dispatchEvent(new CustomEvent('coupon-popup', {
-                detail: {
-                    message: message,
-                    type: type
-                }
-            }));
-        },
-
-            showCouponError(message) {
-                this.showCouponPopup(message, 'error');
-            },
-
-            showCouponSuccess(message) {
-                this.showCouponPopup(message, 'success');
-            },
-
-             
-
-                selectCoupon(coupon) {
-                    this.selectedCoupon = this.normalizeCoupon(coupon);
-                    this.couponCode = this.selectedCoupon.code ?? '';
-                },
-
-                clearCouponSelection() {
-                    this.selectedCoupon = null;
-                    this.couponCode = '';
-                },
-
-                isFreeShippingCoupon(coupon) {
-                    const reward = String(coupon?.reward ?? '').trim().toLowerCase();
-                    const discountType = String(coupon?.discount_type ?? '').trim().toLowerCase();
-
-                    return !!(
-                        coupon?.free_shipping ||
-                        reward === 'free-shipping-optn' ||
-                        reward === 'free_shipping' ||
-                        reward === 'free-shipping' ||
-                        discountType === 'free_shipping' ||
-                        discountType === 'free-shipping'
-                    );
-                },
-
-            couponHasLocationLimit(coupon) {
-                const locations = this.getCouponLocations(coupon);
-
-                if (!locations.length) return false;
-
-                const noRestrictionValues = [
-                    'all',
-                    'any',
-                    'none',
-                    'null',
-                    'n/a',
-                    'na',
-                    'undefined',
-                    '-'
-                ];
-
-                return !locations.every(loc => noRestrictionValues.includes(loc));
-            },
-
-                normalizeText(value) {
-                    return String(value ?? '')
-                        .replace(/[\[\]"']/g, '')
-                        .replace(/\s+/g, ' ')
-                        .trim()
-                        .toLowerCase();
-                },
-
-   getCouponLocations(coupon) {
-    const raw = coupon?.location ?? coupon?.locations ?? '';
-
-    const cleanLocation = (value) => {
-        const cleaned = this.normalizeText(value);
-
-        if (
-            !cleaned ||
-            cleaned === 'null' ||
-            cleaned === 'undefined' ||
-            cleaned === '[]' ||
-            cleaned === '{}'
-        ) {
-            return '';
-        }
-
-        return cleaned;
-    };
-
-    if (Array.isArray(raw)) {
-        return raw.map(cleanLocation).filter(Boolean);
-    }
-
-
-    const text = String(raw || '').trim();
-
-    if (
-        !text ||
-        text === 'null' ||
-        text === 'undefined' ||
-        text === '[]' ||
-        text === '{}'
-    ) {
-        return [];
-    }
-
-    if (text.startsWith('[') && text.endsWith(']')) {
-        try {
-            const parsed = JSON.parse(text);
-
-            if (Array.isArray(parsed)) {
-                return parsed.map(cleanLocation).filter(Boolean);
-            }
-        } catch (e) {}
-    }
-
-    return text
-        .split(/\r?\n|[|,]/)
-        .map(cleanLocation)
-        .filter(Boolean);
-},
-
-                couponMatchesLocation(coupon, city, location) {
-                    const allowed = this.getCouponLocations(coupon);
-
-                    if (!allowed.length) return true;
-
-                    const noRestrictionValues = [
-                        'all',
-                        'any',
-                        'none',
-                        'null',
-                        'n/a',
-                        'na',
-                        'undefined',
-                        '-'
-                    ];
-
-                    if (allowed.every(loc => noRestrictionValues.includes(loc))) {
-                        return true;
-                    }
-
-                    const normalizedLocation = this.normalizeText(location);
-                    const normalizedCity = this.normalizeText(city);
-
-                    if (normalizedLocation && allowed.includes(normalizedLocation)) return true;
-                    if (normalizedCity && allowed.includes(normalizedCity)) return true;
-
-                    return false;
-                },
-
-                getSelectedCouponTargets() {
-                    if (this.method !== 'delivery') return [];
-
-                    if (this.allowMultiple) {
-                        return (this.deliveries || [])
-                            .map(d => ({
-                                city: d?.city ?? '',
-                                location: d?.location ?? ''
-                            }))
-                            .filter(t => this.normalizeText(t.city) || this.normalizeText(t.location));
-                    }
-
-                    return [{
-                        city: this.city ?? '',
-                        location: this.location ?? ''
-                    }].filter(t => this.normalizeText(t.city) || this.normalizeText(t.location));
-                },
-
-                removeInvalidLocationCoupons() {
-                    const targets = this.getSelectedCouponTargets();
-                    const removedCodes = [];
-
-                    this.coupons = this.coupons.filter(coupon => {
-                        const normalized = this.normalizeCoupon(coupon);
-                        const hasLocationLimit = this.couponHasLocationLimit(normalized);
-
-                        if (!hasLocationLimit) return true;
-
-                        if (!targets.length) {
-                            removedCodes.push(normalized.code);
-                            return false;
-                        }
-
-                        const keep = targets.some(t =>
-                            this.couponMatchesLocation(normalized, t.city, t.location)
-                        );
-
-                        if (!keep) {
-                            removedCodes.push(normalized.code);
-                        }
-
-                        return keep;
-                    });
-
-                    if (removedCodes.length) {
-                        removedCodes.forEach(code => this.removeFreeProductsByCoupon(code));
-
-                        this.autoAppliedCoupons = this.autoAppliedCoupons.filter(c =>
-                            !removedCodes.includes(c.code)
-                        );
-
-                        this.showCouponError('Invalid coupon removed because the selected location changed.');
-                        this.order_amount = this.cartSubtotal();
-                        this.recomputeCouponTotals();
-                    }
-                },
-
-            shouldAutoApplyCoupon(coupon) {
-    const normalized = this.normalizeCoupon(coupon);
-
-    const isAuto =
-        normalized.auto_applied === true ||
-        String(normalized.activation_type || '').toLowerCase() === 'auto';
-
-    if (!isAuto) return false;
-
-    const hasLocationLimit = this.couponHasLocationLimit(normalized);
-
-    if (!hasLocationLimit) {
-        return true;
-    }
-
-    if (this.method !== 'delivery') return false;
-
-    const targets = this.getSelectedCouponTargets();
-    if (!targets.length) return false;
-
-    return targets.some(t =>
-        this.couponMatchesLocation(normalized, t.city, t.location)
-    );
-},
-
-           
-    getAutoCouponUnavailableReason(coupon) {
-    const normalized = this.normalizeCoupon(coupon);
-
-    const isAuto =
-        normalized.auto_applied === true ||
-        String(normalized.activation_type || '').toLowerCase() === 'auto';
-
-    if (!isAuto) {
-        return 'This is not an auto coupon.';
-    }
-
-    const hasLocationLimit = this.couponHasLocationLimit(normalized);
-
-    if (!hasLocationLimit) {
-        return '';
-    }
-
-    if (this.method !== 'delivery') {
-        return 'Available for delivery addresses only.';
-    }
-
-    const targets = this.getSelectedCouponTargets();
-
-    if (!targets.length) {
-        return 'Select a delivery location first.';
-    }
-
-    const matched = targets.some(t =>
-        this.couponMatchesLocation(normalized, t.city, t.location)
-    );
-
-    if (!matched) {
-        return 'Not valid for the selected address.';
-    }
-
-    return '';
-},
-
-                getCouponDiscount(coupon) {
-                    const subtotal = this.cartSubtotal();
-
-                    if (!coupon) return 0;
-
-                    if (this.isFreeShippingCoupon(coupon)) {
-                        if (this.method !== 'delivery') return 0;
-
-                        if (this.allowMultiple) {
-                            return (this.deliveries || []).reduce((sum, delivery) => {
-                                if (this.couponMatchesLocation(coupon, delivery.city, delivery.location)) {
-                                    return sum + Number(delivery.delivery_fee || 0);
-                                }
-                                return sum;
-                            }, 0);
-                        }
-
-                        return this.couponMatchesLocation(coupon, this.city, this.location)
-                            ? Number(this.deliveryFee || 0)
-                            : 0;
-                    }
-
-                    if (coupon.reward === 'discount-amount-optn' || coupon.discount_type === 'amount') {
-                        return Math.min(Number(coupon.discount || 0), subtotal);
-                    }
-
-                    if (coupon.reward === 'discount-percentage-optn' || coupon.discount_type === 'percent') {
-                        return subtotal * (Number(coupon.discount || 0) / 100);
-                    }
-
-                    return 0;
-                },
-
-                couponDiscountLabel(coupon) {
-                    const amount = this.getCouponDiscount(coupon);
-
-                    if (this.isFreeShippingCoupon(coupon)) {
-                        return `- ${this.formatMoney(amount)} (Free Shipping)`;
-                    }
-
-                    return `- ${this.formatMoney(amount)}`;
-                },
-
-           applyAutoCoupons() {
-    const allAutos = (this.autoCouponsSource || [])
-        .map(c => this.normalizeCoupon(c))
-        .filter(c =>
-            c.auto_applied === true ||
-            String(c.activation_type || '').toLowerCase() === 'auto'
-        );
-
-    const autoCodes = allAutos.map(c => c.code);
-
-    // Remove old auto coupons first
-    this.coupons = this.coupons.filter(c => !c.auto_applied);
-    this.autoAppliedCoupons = [];
-
-    // Remove old free products from auto coupons
-    this.carts = this.carts.filter(item =>
-        !(item.is_free_product && autoCodes.includes(item.coupon_code))
-    );
-
-    this.orders = this.orders.filter(item =>
-        !(item.is_free_product && autoCodes.includes(item.coupon_code))
-    );
-
-    this.selectedAutoCoupon = null;
-
-    // Build popup choices from ALL auto coupons
-    // Available ones can be selected.
-    // Not available ones will still display, but disabled.
-    this.autoCouponChoices = allAutos.map(coupon => {
-        const available = this.shouldAutoApplyCoupon(coupon);
-
-        return {
-            ...coupon,
-            auto_available: available,
-            unavailable_reason: available
-                ? ''
-                : this.getAutoCouponUnavailableReason(coupon)
-        };
-    });
-
-    const availableAutos = this.autoCouponChoices.filter(c => c.auto_available);
-
-    // No auto coupons at all
-    if (this.autoCouponChoices.length === 0) {
-        this.selectedAutoCouponId = '';
-        this.showAutoCouponChooser = false;
-        this.order_amount = this.cartSubtotal();
-        this.recomputeCouponTotals();
-        return;
-    }
-
-    // No available auto coupon for current condition
-    // Still show the popup so customer can see why coupons are not available.
-    if (availableAutos.length === 0) {
-        this.selectedAutoCouponId = '';
-        this.showAutoCouponChooser = true;
-        this.order_amount = this.cartSubtotal();
-        this.recomputeCouponTotals();
-        return;
-    }
-
-    // If user already selected one before, keep it only if still available
-    if (this.selectedAutoCouponId) {
-        const chosen = availableAutos.find(c =>
-            String(c.id) === String(this.selectedAutoCouponId)
-        );
-
-        if (chosen) {
-            this.applyChosenAutoCoupon(chosen);
-            this.showAutoCouponChooser = false;
-            return;
-        }
-    }
-
-    // IMPORTANT:
-    // Show chooser even if only one coupon is available.
-    // This allows the customer to see the other auto coupons too.
-    this.showAutoCouponChooser = true;
-
-    this.order_amount = this.cartSubtotal();
-    this.recomputeCouponTotals();
-},
-
-            confirmCouponSelection() {
-                if (!this.selectedCoupon) {
-                    this.showCouponError('Please select a coupon first.');
-                    return;
-                }
-
-                const normalized = this.normalizeCoupon(this.selectedCoupon);
-
-                if (this.couponHasLocationLimit(normalized)) {
-                    const targets = this.getSelectedCouponTargets();
-
-                    if (!targets.length) {
-    this.showCouponError('Please select a delivery location first.');
-    return;
-}
-
-                    const isValidForAnyTarget = targets.some(t =>
-                        this.couponMatchesLocation(normalized, t.city, t.location)
-                    );
-
-                    if (!isValidForAnyTarget) {
-                        this.showCouponError('This coupon is not valid for the selected delivery address.');
-                        return;
-                    }
-                }
-
-                if (this.coupons.find(c => c.code === normalized.code)) {
-                    this.showCouponError('Coupon already applied.');
-                    return;
-                }
-
-                if (!normalized.combination_allowed && this.coupons.length > 0) {
-                    this.showCouponError('This coupon cannot be combined with other coupons.');
-                    return;
-                }
-
-                if (normalized.combination_allowed && this.coupons.some(c => !c.combination_allowed)) {
-                    this.showCouponError('A coupon that does not allow combination has already been applied.');
-                    return;
-                }
-
-                this.coupons.push(normalized);
-                this.addFreeProductsFromCoupon(normalized);
-                this.order_amount = this.cartSubtotal();
-                this.recomputeCouponTotals();
-
-                this.showCouponSuccess('Coupon applied successfully.');
-                this.closeCouponModal();
-            },
-
-           applyCouponCode() {
-            this.couponMessage = '';
-            this.couponMessageType = '';
-
-            const code = String(this.couponCode || '').trim().toUpperCase();
-
-            if (!code) {
-                this.showCouponError('Please enter a coupon code.');
-                return;
-            }
-
-            const found = (this.availableCoupons || []).find(c =>
-                String(c.code ?? c.coupon_code ?? '').trim().toUpperCase() === code
-            );
-
-            if (!found) {
-                this.showCouponError('Invalid coupon code.');
-                return;
-            }
-
-            const normalized = this.normalizeCoupon(found);
-
-            if (this.couponHasLocationLimit(normalized)) {
-                const targets = this.getSelectedCouponTargets();
-
-                if (!targets.length) {
-                    this.showCouponError('Please select a delivery location first.');
-                    return;
-                }
-
-                const isValidForAnyTarget = targets.some(t =>
-                    this.couponMatchesLocation(normalized, t.city, t.location)
-                );
-
-                if (!isValidForAnyTarget) {
-                    this.showCouponError('This coupon is not valid for the selected address.');
-                    return;
-                }
-            }
-
-            const alreadyApplied = this.coupons.find(c =>
-                String(c.code || '').trim().toUpperCase() === code
-            );
-
-            if (alreadyApplied) {
-                if (alreadyApplied.auto_applied) {
-                    this.showCouponError('This coupon is already auto-applied.');
-                } else {
-                    this.showCouponError('Coupon already applied.');
-                }
-                return;
-            }
-
-            if (!normalized.combination_allowed && this.coupons.length > 0) {
-                this.showCouponError('This coupon cannot be combined with other coupons.');
-                return;
-            }
-
-            if (normalized.combination_allowed && this.coupons.some(c => !c.combination_allowed)) {
-                this.showCouponError('A coupon that does not allow combination has already been applied.');
-                return;
-            }
-
-            this.coupons.push(normalized);
-            this.addFreeProductsFromCoupon(normalized);
-            this.couponCode = '';
-            this.order_amount = this.cartSubtotal();
-            this.recomputeCouponTotals();
-
-            this.showCouponSuccess('Coupon applied successfully.');
-        },
-
-                removeCoupon(index) {
-                const removed = this.coupons[index];
-                this.coupons.splice(index, 1);
-
-                this.autoAppliedCoupons = this.autoAppliedCoupons.filter(c => c.code !== removed?.code);
-                this.removeFreeProductsByCoupon(removed?.code)
-
-                this.order_amount = this.cartSubtotal();
-                this.recomputeCouponTotals();
-            },
-
-            applyChosenAutoCoupon(autoCoupon) {
-                if (!autoCoupon) return;
-
-                const alreadyApplied = this.coupons.some(c =>
-                    String(c.code || '').trim().toUpperCase() === String(autoCoupon.code || '').trim().toUpperCase()
-                );
-
-                if (alreadyApplied) return;
-
-                if (!autoCoupon.combination_allowed && this.coupons.length > 0) {
-                    this.showCouponError('This coupon cannot be combined with other coupons.');
-                    return;
-                }
-
-                if (autoCoupon.combination_allowed && this.coupons.some(c => !c.combination_allowed)) {
-                    this.showCouponError('A coupon that does not allow combination has already been applied.');
-                    return;
-                }
-
-                autoCoupon.auto_applied = true;
-
-                this.selectedAutoCoupon = autoCoupon;
-                this.selectedAutoCouponId = autoCoupon.id;
-
-                this.coupons.push(autoCoupon);
-                this.autoAppliedCoupons.push(autoCoupon);
-                this.addFreeProductsFromCoupon(autoCoupon);
-
-                this.order_amount = this.cartSubtotal();
-                this.recomputeCouponTotals();
-            },
-
-applySelectedAutoCoupon() {
-    if (!this.selectedAutoCouponId) {
-        this.showCouponError('Please select an auto coupon first.');
-        return;
-    }
-
-    const chosen = this.autoCouponChoices.find(c =>
-        String(c.id) === String(this.selectedAutoCouponId)
-    );
-
-    if (!chosen) {
-        this.showCouponError('Selected coupon is no longer available.');
-        return;
-    }
-
-    if (!chosen.auto_available) {
-        this.showCouponError(chosen.unavailable_reason || 'This coupon is not available for the current order.');
-        return;
-    }
-
-    const beforeCount = this.coupons.length;
-
-    this.applyChosenAutoCoupon(chosen);
-
-    const wasApplied = this.coupons.length > beforeCount;
-
-    if (!wasApplied) {
-        return;
-    }
-
-    this.showAutoCouponChooser = false;
-    this.showCouponSuccess('Coupon applied successfully.');
-},
-
-                applyGiftCheque() {
-                this.giftChequeMessage = '';
-                this.giftChequeMessageType = '';
-
-                const code = String(this.giftChequeCode || '').trim().toUpperCase();
-
-                if (!code) {
-                    this.giftChequeMessage = 'Please enter a gift cheque code.';
-                    this.giftChequeMessageType = 'error';
-                    return;
-                }
-
-                const found = (this.giftCheques || []).find(gc =>
-                    String(gc.code || '').trim().toUpperCase() === code
-                );
-
-                if (!found) {
-                    this.giftChequeMessage = 'Invalid gift cheque.';
-                    this.giftChequeMessageType = 'error';
-                    return;
-                }
-
-                this.appliedGiftCheque = {
-                    id: found.id,
-                    code: found.code,
-                    amount: Number(found.amount || 0),
-                    gc_type: found.gc_type || ''
-                };
-
-                this.giftChequeDiscountAmount = Number(found.amount || 0);
-                this.giftChequeMessage = 'Gift cheque applied successfully.';
-                this.giftChequeMessageType = 'success';
-
-                this.computeTotal();
-            },
-
-            removeGiftCheque() {
-                this.appliedGiftCheque = null;
-                this.giftChequeDiscountAmount = 0;
-                this.giftChequeCode = '';
-                this.giftChequeMessage = '';
-                this.giftChequeMessageType = '';
-                this.computeTotal();
-            },
-
-                recomputeCouponTotals() {
-                    this.totalDiscountAmount = 0;
-                    this.shippingDiscountAmount = 0;
-                    this.shippingDiscountLists = [];
-
-                    const isMulti = this.method === 'delivery' && this.allowMultiple;
-
-                    if (isMulti) {
-                        this.deliveryFees = this.deliveryFees.map(row => ({
-                            ...row,
-                            discount: 0
-                        }));
-                    }
-
-                    this.coupons.forEach(coupon => {
-                        if (this.isFreeShippingCoupon(coupon) && this.method !== 'pickup') {
-                            if (isMulti) {
-                                (this.deliveries || []).forEach((delivery, idx) => {
-                                    const feeRow = this.deliveryFees[idx] || {
-                                        location: [delivery.city, delivery.province].filter(Boolean).join(', '),
-                                        fee: Number(delivery.delivery_fee || 0),
-                                        discount: 0
-                                    };
-
-                                    if (!this.deliveryFees[idx]) {
-                                        this.deliveryFees[idx] = feeRow;
-                                    }
-
-                                    const fee = parseFloat(feeRow.fee || delivery.delivery_fee || 0);
-                                    if (fee <= 0) return;
-
-                                    if (!this.couponMatchesLocation(coupon, delivery.city, delivery.location)) return;
-
-                                    const existingDiscount = parseFloat(this.deliveryFees[idx].discount || 0);
-                                    const remainingFee = Math.max(fee - existingDiscount, 0);
-
-                                    if (remainingFee <= 0) return;
-
-                                    this.deliveryFees[idx].discount = existingDiscount + remainingFee;
-                                    this.shippingDiscountAmount += remainingFee;
-
-                                    this.shippingDiscountLists.push({
-                                        location: feeRow.location,
-                                        index: idx,
-                                        discount: remainingFee,
-                                        coupon_code: coupon.code
-                                    });
-                                });
-                            } else {
-                                if (this.couponMatchesLocation(coupon, this.city, this.location)) {
-                                    this.shippingDiscountAmount += parseFloat(this.deliveryFee || 0);
-                                }
-                            }
-                        } else {
-                            this.totalDiscountAmount += this.getCouponDiscount(coupon);
-                        }
-                    });
-
-                    this.totalDiscountAmount = Math.min(this.totalDiscountAmount, this.cartSubtotal());
-
-                    if (!isMulti) {
-                        this.shippingDiscountAmount = Math.min(
-                            this.shippingDiscountAmount,
-                            parseFloat(this.deliveryFee || 0)
-                        );
-                    }
-
-                    this.computeTotal();
-                },
 
                 async init() {
                     const cookie = document.cookie.split('; ').find(row => row.startsWith('shipping_method='));
                     await this.changeMethod(cookie ? cookie.split('=')[1] : 'pickup')
 
                     await this.getBlockDates();
+                    
                     await this.loadPhilippineData();
-
-                    this.order_amount = this.cartSubtotal()
-                    this.applyAutoCoupons()
-                    this.recomputeCouponTotals()
 
                     this.$nextTick(() => {
                         if (this.method === 'pickup' && this.$refs.pickupDate) {
@@ -1436,13 +225,13 @@ applySelectedAutoCoupon() {
 
                     this.$nextTick(() => {
                         if (this.sale && this.sale.delivery_type == "Door to door delivery") {
-                            this.province = this.sale?.province ?? ''
+                            this.province = this.sale && this.sale.delivery_type == "Door to door delivery" ? this.sale.province : ''
                             this.onProvinceChange()
-                            this.city = this.sale?.city ?? ''
+                            this.city = this.sale && this.sale.delivery_type == "Door to door delivery" ? this.sale.city : ''
                             this.onCityChange()
-                            this.location = this.sale?.barangay ?? ''
+                            this.location = this.sale && this.sale.delivery_type == "Door to door delivery" ? this.sale.barangay : ''
                             this.onBarangayChange()
-                            this.instruction = this.sale?.instruction ?? ''
+                            this.instruction = this.sale && this.sale.delivery_type == "Door to door delivery" ? this.sale.instruction : ''
 
                             let delivery_date = '{{ $sale && $sale?->delivery_type == "Door to door delivery" ? $sale?->items()->first()->delivery_date : '' }}'
 
@@ -1464,19 +253,13 @@ applySelectedAutoCoupon() {
                                 time = time.slice(0, -3)
                                 this.need_time = this.formatHourValue(time)
                             }
+
                         }
                     })
 
-                    const refreshCouponState = () => {
-                        this.removeInvalidLocationCoupons()
-                        this.applyAutoCoupons()
-                        this.recomputeCouponTotals()
+                    if (!this.allowMultiple && this.hasBaka && this.lechonBakaService > 0) {
+                        console.log('not multiple order and has baka');
                     }
-
-                    this.$watch('province', refreshCouponState)
-                    this.$watch('city', refreshCouponState)
-                    this.$watch('location', refreshCouponState)
-                    this.$watch(() => JSON.stringify(this.deliveries || []), refreshCouponState)
                 },
 
                 formatDate(date) {
@@ -1531,14 +314,7 @@ applySelectedAutoCoupon() {
                         minDate: finalMinDate
                     })
 
-                    const nextValidDate = this.getNextAvailableDate(
-                        finalMinDate,
-                        delivery.blockedDetails || [],
-                        (b) =>
-                            this.blockAppliesToDelivery(b, delivery) &&
-                            (b.block_type === 'both' || b.block_type === 'delivery') &&
-                            this.isBlockedWithCombo(b)
-                    )
+                    const nextValidDate = this.getNextAvailableDate(finalMinDate)
                     const parts = this.formatDateTimeParts(nextValidDate)
 
                     // Only force date if empty or invalid
@@ -1550,11 +326,10 @@ applySelectedAutoCoupon() {
                     let hours = this.generateHours()
 
                     // REMOVE BLOCKED TIME SLOTS (per delivery)
-                    const dateBlocks = (delivery.blockedDetails || []).filter(b =>
+                    const dateBlocks = this.blockedDetails.filter(b =>
                         b.date === delivery.need_date &&
                         this.blockAppliesToDelivery(b, delivery) &&
                         (b.block_type === 'both' || b.block_type === 'delivery') &&
-                        this.isBlockedWithCombo(b) &&
                         b.is_all_day == 0
                     )
 
@@ -1596,6 +371,8 @@ applySelectedAutoCoupon() {
                     })
                 },
 
+                availableDeliveryHours: [],
+
                 formatAMPM(hour) {
                     const suffix = hour >= 12 ? 'PM' : 'AM'
                     const formatted = hour % 12 === 0 ? 12 : hour % 12
@@ -1616,64 +393,62 @@ applySelectedAutoCoupon() {
                 },
 
                 initSingleDeliveryDatepicker(el) {
-                if (el._datepicker) {
-                    el._datepicker.destroy()
-                }
 
-                const earliest = this.getEarliestAllowedDateTime()
-                const nextValidDate = this.getNextAvailableDate(
-                    earliest,
-                    this.blockedDetails,
-                    (b) =>
-                        this.blockAppliesToCart(b) &&
-                        this.blockAppliesToMethod(b) &&
-                        this.isBlockedWithCombo(b)
-                )
-                const parts = this.formatDateTimeParts(nextValidDate)
+                    if (el._datepicker) {
+                        el._datepicker.destroy()
+                    }
 
-                const picker = new Datepicker(el, {
-                    autohide: true,
-                    format: 'yyyy-mm-dd',
-                    minDate: earliest,
-                    placeholder: 'Select date',
-                    beforeShowDay: (date) => {
-                        const formatted = this.formatDate(date)
+                    const earliest = this.getEarliestAllowedDateTime()
+                    const nextValidDate = this.getNextAvailableDate(earliest)
+                    const parts = this.formatDateTimeParts(nextValidDate)
 
-                        const blockedForThisDate = this.blockedDetails.filter(b =>
-                            b.date === formatted &&
-                            this.blockAppliesToCart(b) &&
-                            this.blockAppliesToMethod(b) &&
-                            this.isBlockedWithCombo(b)
-                        )
 
-                        const hasAllDayBlock = blockedForThisDate.some(b => b.is_all_day == 1)
+                    const picker = new Datepicker(el, {
+                        autohide: true,
+                        format: 'yyyy-mm-dd',
+                        minDate: earliest,
+                        placeholder: 'Select date',
+                        beforeShowDay: (date) => {
 
-                        if (hasAllDayBlock) {
-                            return { enabled: false }
+                            const formatted = this.formatDate(date)
+
+                            const blockedForThisDate = this.blockedDetails.filter(b =>
+                                b.date === formatted &&
+                                this.blockAppliesToCart(b) &&
+                                this.blockAppliesToMethod(b) &&
+                                this.isBlockedWithCombo(b)
+                            )
+
+                            // If any full-day block exists - disable entire date
+                            const hasAllDayBlock = blockedForThisDate.some(b => b.is_all_day == 1)
+
+                            if (hasAllDayBlock) {
+                                return { enabled: false }
+                            }
+
+                            return { enabled: true }
                         }
 
-                        return { enabled: true }
+                    })
+
+                    el._datepicker = picker
+
+                    if (this.sale && this.sale.delivery_type == "Door to door delivery") {
+                        
+                    } else {
+                        this.need_date = parts.date
+                        picker.setDate(parts.date)
                     }
-                })
 
-                el._datepicker = picker
+                    this.$nextTick(() => {
+                        this.populateDeliveryTimes(parts.hour)
+                    })
 
-                if (this.sale && this.sale.delivery_type == "Door to door delivery") {
-                    // Keep existing sale date when editing.
-                } else {
-                    this.need_date = parts.date
-                    picker.setDate(parts.date)
-                }
-
-                this.$nextTick(() => {
-                    this.populateDeliveryTimes(parts.hour)
-                })
-
-                el.addEventListener('changeDate', (e) => {
-                    this.need_date = this.formatDate(e.detail.date)
-                    this.populateDeliveryTimes()
-                })
-            },
+                    el.addEventListener('changeDate', (e) => {
+                        this.need_date = this.formatDate(e.detail.date)
+                        this.populateDeliveryTimes()
+                    })
+                },
 
 
 
@@ -1684,14 +459,7 @@ applySelectedAutoCoupon() {
                     }
 
                     const earliest = this.getEarliestAllowedDateTime()
-                    const nextValidDate = this.getNextAvailableDate(
-                        earliest,
-                        this.blockedDetails,
-                        (b) =>
-                            this.blockAppliesToCart(b) &&
-                            this.blockAppliesToMethod(b) &&
-                            this.isBlockedWithCombo(b)
-                    )
+                    const nextValidDate = this.getNextAvailableDate(earliest)
                     const parts = this.formatDateTimeParts(nextValidDate)
 
                     const picker = new Datepicker(el, {
@@ -1700,23 +468,24 @@ applySelectedAutoCoupon() {
                         minDate: earliest,
                         placeholder: 'Select date',
                         beforeShowDay: (date) => {
-                        const formatted = this.formatDate(date)
 
-                        const blockedForThisDate = this.blockedDetails.filter(b =>
-                            b.date === formatted &&
-                            this.blockAppliesToCart(b) &&
-                            this.blockAppliesToMethod(b) &&
-                            this.isBlockedWithCombo(b)
-                        )
+                            const formatted = this.formatDate(date)
 
-                        const hasAllDayBlock = blockedForThisDate.some(b => b.is_all_day == 1)
+                            const blockedForThisDate = this.blockedDetails.filter(b =>
+                                b.date === formatted &&
+                                this.blockAppliesToCart(b) &&
+                                this.blockAppliesToMethod(b)
+                            )
 
-                        if (hasAllDayBlock) {
-                            return { enabled: false }
+                            // If any full-day block exists then we disable entire date
+                            const hasAllDayBlock = blockedForThisDate.some(b => b.is_all_day == 1)
+
+                            if (hasAllDayBlock) {
+                                return { enabled: false }
+                            }
+
+                            return { enabled: true }
                         }
-
-                        return { enabled: true }
-                    }
 
                     })
 
@@ -1737,66 +506,71 @@ applySelectedAutoCoupon() {
                 },
 
                 initMultiDeliveryDatepicker(el, index) {
-                if (el._datepicker) {
-                    el._datepicker.destroy()
-                }
 
-                const picker = new Datepicker(el, {
-                    autohide: true,
-                    format: 'yyyy-mm-dd',
-                    placeholder: 'Select date',
-                    beforeShowDay: (date) => {
-                        const delivery = this.deliveries[index]
-
-                        if (!delivery || !delivery.orders.length) {
-                            return { enabled: false }
-                        }
-
-                        const formatted = this.formatDate(date)
-
-                        const blockedForThisDate = (delivery.blockedDetails || []).filter(b =>
-                            b.date === formatted &&
-                            this.blockAppliesToDelivery(b, delivery) &&
-                            (b.block_type === 'both' || b.block_type === 'delivery') &&
-                            this.isBlockedWithCombo(b)
-                        )
-
-                        const hasAllDayBlock = blockedForThisDate.some(b => b.is_all_day == 1)
-
-                        if (hasAllDayBlock) {
-                            return { enabled: false }
-                        }
-
-                        const nowRounded = this.roundUpToNextHour(new Date())
-                        const earliest = this.getEarliestDateTimeForDelivery(delivery)
-                        const finalMinDate = earliest > nowRounded ? earliest : nowRounded
-
-                        const compareDate = new Date(date)
-                        compareDate.setHours(0, 0, 0, 0)
-
-                        const minCompare = new Date(finalMinDate)
-                        minCompare.setHours(0, 0, 0, 0)
-
-                        if (compareDate < minCompare) {
-                            return { enabled: false }
-                        }
-
-                        return { enabled: true }
+                    if (el._datepicker) {
+                        el._datepicker.destroy()
                     }
-                })
 
-                el._datepicker = picker
-                this.deliveries[index]._datepicker = picker
+                    const picker = new Datepicker(el, {
+                        autohide: true,
+                        format: 'yyyy-mm-dd',
+                        placeholder: 'Select date',
+                        beforeShowDay: (date) => {
 
-                el.addEventListener('changeDate', (e) => {
-                    if (!this.deliveries[index].orders.length) return
+                            const delivery = this.deliveries[index]; 
 
-                    this.deliveries[index].need_date = this.formatDate(e.detail.date)
-                    this.populateMultiDeliveryTimes(index)
-                })
-            },
+                            if (!delivery || !delivery.orders.length) {
+                                return { enabled: false }
+                            }
 
-                        
+                            const formatted = this.formatDate(date)
+
+                            const blockedForThisDate = (delivery.blockedDetails || []).filter(b =>
+                                b.date === formatted &&
+                                this.blockAppliesToCart(b) &&
+                                this.blockAppliesToMethod(b) &&
+                                this.isBlockedWithCombo(b)
+                            )
+
+                            const hasAllDayBlock = blockedForThisDate.some(b => b.is_all_day == 1)
+
+                            if (hasAllDayBlock) {
+                                return { enabled: false }
+                            }
+
+                            // MIN DATE LOGIC
+                            const nowRounded = this.roundUpToNextHour(new Date())
+                            const earliest = this.getEarliestDateTimeForDelivery(delivery)
+                            const finalMinDate = earliest > nowRounded ? earliest : nowRounded
+
+                            const compareDate = new Date(date)
+                            compareDate.setHours(0,0,0,0)
+
+                            const minCompare = new Date(finalMinDate)
+                            minCompare.setHours(0,0,0,0)
+
+                            if (compareDate < minCompare) {
+                                return { enabled: false }
+                            }
+
+                            return { enabled: true }
+                        }
+
+                    })
+
+                    el._datepicker = picker
+                    this.deliveries[index]._datepicker = picker
+
+                    el.addEventListener('changeDate', (e) => {
+
+                        if (!this.deliveries[index].orders.length) return
+
+                        this.deliveries[index].need_date =
+                            this.formatDate(e.detail.date)
+
+                        this.populateMultiDeliveryTimes(index)
+                    })
+                },
 
                 populatePickupTimes(minHour = null) {
 
@@ -1822,14 +596,7 @@ applySelectedAutoCoupon() {
                     })
 
                     const earliest = this.getEarliestForPickupAndSingle()
-                    const nextValidDate = this.getNextAvailableDate(
-                        earliest,
-                        this.blockedDetails,
-                        (b) =>
-                            this.blockAppliesToCart(b) &&
-                            this.blockAppliesToMethod(b) &&
-                            this.isBlockedWithCombo(b)
-                    )
+                    const nextValidDate = this.getNextAvailableDate(earliest)
                     const parts = this.formatDateTimeParts(nextValidDate)
 
                     if (this.need_date === parts.date) {
@@ -1882,14 +649,7 @@ applySelectedAutoCoupon() {
                     })
 
                     const earliest = this.getEarliestForPickupAndSingle()
-                    const nextValidDate = this.getNextAvailableDate(
-                        earliest,
-                        this.blockedDetails,
-                        (b) =>
-                            this.blockAppliesToCart(b) &&
-                            this.blockAppliesToMethod(b) &&
-                            this.isBlockedWithCombo(b)
-                    )
+                    const nextValidDate = this.getNextAvailableDate(earliest)
                     const parts = this.formatDateTimeParts(nextValidDate)
 
                     if (this.need_date === parts.date) {
@@ -1900,6 +660,7 @@ applySelectedAutoCoupon() {
                     this.availableDeliveryHours = hours
 
                     this.$nextTick(() => {
+
                         if (this.sale && this.sale.delivery_type == "Door to door delivery" && this.method == 'delivery') {
                             let delivery_date = '{{ $sale && $sale?->delivery_type == "Door to door delivery" ? $sale?->items()->first()->delivery_date : '' }}'
 
@@ -1954,17 +715,6 @@ applySelectedAutoCoupon() {
                             minimumFractionDigits: 2
                         })
                 },
-                cartSubtotal() {
-                return this.carts.reduce((sum, item) => {
-                    const qty = Number(item?.qty || 1)
-                    const base = item?.is_free_product ? 0 : Number(item?.price || 0)
-                    const paella = Number(item?.paella_price || 0) > 0
-                        ? Number(item?.product?.paella_price || 0)
-                        : 0
-
-                    return sum + ((base + paella) * qty)
-                }, 0)
-                },
 
                 get formattedSubtotal() {
                     const total = this.carts.reduce((sum, item) => {
@@ -1979,14 +729,6 @@ applySelectedAutoCoupon() {
 
                     return this.formatMoney(total)
                 },
-
-            get formattedTotalAmount() {
-                return this.formatMoney(this.total_amount || 0);
-            },
-
-            giftChequeDiscountLabel() {
-                return `- ${this.formatMoney(this.giftChequeDiscountAmount || 0)}`;
-            },
 
                 itemLineTotal(item) {
                     if (item.is_free_product) return '₱0.00'
@@ -2006,44 +748,40 @@ applySelectedAutoCoupon() {
                         '/images/no-image.jpg'
                 },
 
-                
+                couponDiscountLabel(coupon) {
+                    if (coupon.free_shipping) return 'Shipping Discount'
+                    if (coupon.discount_type === 'amount') {
+                        return '- ' + this.formatMoney(coupon.discount)
+                    }
+                    if (coupon.discount_type === 'percent') {
+                        return `- ${coupon.discount}%`
+                    }
+                    return ''
+                },
 
                 /* ==========================
                  * TOTAL
                  * ========================== */
                 computeTotal() {
-                const itemsTotal = this.cartSubtotal();
 
-                let deliveryFeeFinal = 0;
+                    const itemsTotal = this.carts.reduce((sum, item) => {
 
-                if (this.method !== 'pickup') {
-                    if (this.allowMultiple) {
-                        deliveryFeeFinal = this.deliveries.reduce((sum, d) => {
-                            return sum + Number(d.delivery_fee || 0) + Number(d.lechon_baka_service || 0);
-                        }, 0);
-                    } else {
-                        deliveryFeeFinal = Number(this.deliveryFee || 0) + Number(this.lechonBakaService || 0);
-                    }
-                }
+                        const price = parseFloat(item.price || 0)
+                        const paella = parseFloat(item.paella_price || 0)
 
-                deliveryFeeFinal = Math.max(0, deliveryFeeFinal - Number(this.shippingDiscountAmount || 0));
+                        return sum + ((price + paella) * item.qty)
 
-                let total = itemsTotal
-                    + deliveryFeeFinal
-                    - Number(this.totalDiscountAmount || 0)
-                    - Number(this.giftChequeDiscountAmount || 0);
+                    }, 0)
 
-                if (total < 0) total = 0;
+                    const deliveryTotal = this.allowMultiple
+                        ? this.deliveries.reduce((sum, d) => sum + (parseFloat(d.delivery_fee + d.lechon_baka_service) || 0), 0)
+                        : (parseFloat(this.deliveryFee + this.lechonBakaService) || 0)
 
-                this.discount_amount =
-                    Number(this.totalDiscountAmount || 0) +
-                    Number(this.shippingDiscountAmount || 0) +
-                    Number(this.giftChequeDiscountAmount || 0);
+                    this.total_amount = itemsTotal + deliveryTotal;
+                    this.deposit = this.total_amount.toFixed(2);
 
-                this.total_amount = total;
-                this.deposit = total.toFixed(2);
-
-                return this.formatMoney(total);
+                    return '₱' + (itemsTotal + deliveryTotal)
+                        .toLocaleString(undefined, { minimumFractionDigits: 2 })
                 },
 
                 async changeMethod(type) {
@@ -2057,7 +795,6 @@ applySelectedAutoCoupon() {
                         this.deliveryFees = []
                         this.need_time = ''
                         this.pickup_note = ''
-                        this.availableDeliveryHours = []
                     }
 
                     if (type === 'delivery') {
@@ -2077,8 +814,6 @@ applySelectedAutoCoupon() {
                     this.lechonBakaService = this.hasBaka ? window.lechonBakaService : 0;
 
                     this.computeTotal()
-                    this.applyAutoCoupons()
-                this.recomputeCouponTotals()
                 },
 
                 availablePickupHours: [],
@@ -2087,7 +822,9 @@ applySelectedAutoCoupon() {
                 closeHour: 20,
                 availableDeliveryHours: [],
 
-                
+                formatHourValue(hour) {
+                    return (hour < 10 ? '0' + hour : hour) + ':00'
+                },
 
                 async onPickupBranchChange() {
                     this.pickupErrors.branch = ''
@@ -2173,12 +910,11 @@ applySelectedAutoCoupon() {
                     this.validateSingleDeliveryField('province')
 
                     this.rebuildAddress()
-                this.applyAutoCoupons()
-                this.recomputeCouponTotals()
                 },
 
                 onCityChange() {
                     this.location = ''
+                    this.getDeliveryFee?.()
                     this.validateSingleDeliveryField('city')
 
                     this.getBlockDates(true).then(() => {
@@ -2190,15 +926,11 @@ applySelectedAutoCoupon() {
                     })
 
                     this.rebuildAddress()
-                this.getDeliveryFee?.()
-                this.applyAutoCoupons()
-                this.recomputeCouponTotals()
+
                 },
 
                 onBarangayChange() {
                     this.rebuildAddress()
-                this.applyAutoCoupons()
-                this.recomputeCouponTotals()
                 },
 
                 onMultiProvinceChange(index) {
@@ -2209,8 +941,6 @@ applySelectedAutoCoupon() {
                     d.location = ''
 
                     this.rebuildMultiAddress(index)
-                this.applyAutoCoupons()
-                this.recomputeCouponTotals()
                 },
 
                 onMultiCityChange(index) {
@@ -2220,14 +950,10 @@ applySelectedAutoCoupon() {
                     d.location = ''
 
                     this.rebuildMultiAddress(index)
-                this.applyAutoCoupons()
-                this.recomputeCouponTotals()
                 },
 
                 onMultiBarangayChange(index) {
                     this.rebuildMultiAddress(index)
-                this.applyAutoCoupons()
-                this.recomputeCouponTotals()
                 },
 
                 deliveries: [{
@@ -2318,7 +1044,6 @@ applySelectedAutoCoupon() {
                 privacy: {{ auth()->check() ? 'true' : 'false' }},
 
                 isSubmitting: false,
-                formSubmitting: false,
                 hasErrorMessage: false,
                 warningMessage: '',
 
@@ -2366,38 +1091,22 @@ applySelectedAutoCoupon() {
 
                     try {
 
-                        const couponPayload = this.coupons.map(coupon => ({
-                        id: coupon.id,
-                        code: coupon.code,
-                        name: coupon.name,
-                        reward: coupon.reward,
-                        free_shipping: !!coupon.free_shipping,
-                        free_products: coupon.free_products || [],
-                        discount_used: Number(this.getCouponDiscount(coupon) || 0)
-                    }));
-
                         let payload = {
                             name: this.contact.name,
                             mobile: this.contact.mobile,
                             email: this.contact.email,
                             agent: this.contact.agent,
                             shipping_type: this.method,
-
-                            selected_auto_coupon_id: this.selectedAutoCoupon ? this.selectedAutoCoupon.id : null,
-                            selected_coupon_id: this.selectedCoupon ? this.selectedCoupon.id : null,
-
-                            coupons: JSON.stringify(couponPayload),
-                            coupon_data: JSON.stringify(couponPayload),
+                            coupons: JSON.stringify(this.coupons.map(c => c.code)),
+                            coupon_data: JSON.stringify(this.coupons),
                             discount_amount: this.discount_amount || 0,
-                            order_amount: this.cartSubtotal(),
+                            order_amount: this.order_amount,
                             delivery_fee: this.deliveryFee || 0,
                             deposit: this.deposit,
                             total_amount: this.total_amount,
                             isBaka: this.hasBaka ? 1 : 0,
                             lechon_baka_service: this.lechonBakaService,
-                            gift_cheque: this.appliedGiftCheque ? JSON.stringify(this.appliedGiftCheque) : null,
-                            gift_cheque_amount: Number(this.giftChequeDiscountAmount || 0),
-                        };
+                        }
 
                         /* ==========================
                         PICKUP
@@ -2673,7 +1382,7 @@ applySelectedAutoCoupon() {
                     const order = document.createElement('input')
                     order.type = 'hidden'
                     order.name = 'sales_header_id'
-                    order.value = this.paymentDetails.sales_header_id
+                    order.value = this.paymentDetails.order_number
 
                     const amount = document.createElement('input')
                     amount.type = 'hidden'
@@ -2683,12 +1392,62 @@ applySelectedAutoCoupon() {
                     form.appendChild(csrf)
                     form.appendChild(order)
                     form.appendChild(amount)
-                    
+
                     document.body.appendChild(form)
                     form.submit()
-                    
                 },
 
+                couponModal: false,
+                couponCode: '',
+                couponMessage: '',
+                couponMessageType: '',
+                eligibleCoupons: [],
+                selectedCoupon: null,
+                coupons: [],
+
+                closeCouponModal() {
+                    this.couponModal = false
+                },
+
+                selectCoupon(coupon) {
+                    this.selectedCoupon = coupon
+                    this.couponCode = coupon.code ?? ''
+                },
+
+                clearCouponSelection() {
+                    this.selectedCoupon = null
+                    this.couponCode = ''
+                },
+
+                confirmCouponSelection() {
+                    if (!this.selectedCoupon) return
+
+                    this.coupons = [this.selectedCoupon]
+                    this.closeCouponModal()
+                },
+
+                applyCouponCode() {
+
+                    if (!this.couponCode) {
+                        this.couponMessage = 'Please enter a coupon code.'
+                        this.couponMessageType = 'error'
+                        return
+                    }
+
+                    const found = this.eligibleCoupons.find(
+                        c => c.code === this.couponCode
+                    )
+
+                    if (!found) {
+                        this.couponMessage = 'Invalid coupon code.'
+                        this.couponMessageType = 'error'
+                        return
+                    }
+
+                    this.selectedCoupon = found
+                    this.couponMessage = 'Coupon applied successfully.'
+                    this.couponMessageType = 'success'
+                },
 
                 phData: {},
                 provincesList: [],
@@ -2814,8 +1573,7 @@ applySelectedAutoCoupon() {
                     this.$nextTick(() => {
                         this.isBaka = data.is_baka;
                         this.lechonBakaService = data.lechon_baka_service;
-                        this.applyAutoCoupons()
-                        this.recomputeCouponTotals()
+                        // this.location = location;
                     })
                 },
 
@@ -2832,7 +1590,7 @@ applySelectedAutoCoupon() {
                     // include qty in products
                     const products = delivery?.orders?.map(o => ({ product_id: o.product_id, qty: o.qty }));
 
-                    if (!delivery?.orders || !delivery?.orders?.length) {
+                    if (!delivery?.orders && !delivery?.orders?.length) {
                         delivery.city = '';
                         delivery.province = '';
 
@@ -2873,11 +1631,7 @@ applySelectedAutoCoupon() {
                         delivery.isBaka = data.has_baka;
                         delivery.lechon_baka_service = data.lechon_baka_service_total;
 
-                    this.deliveryFee = this.deliveries.reduce((sum, d) =>
-                        sum + parseFloat(d.delivery_fee || 0) + parseFloat(d.lechon_baka_service || 0), 0);
-
-                    this.applyAutoCoupons()
-                    this.recomputeCouponTotals()
+                        this.deliveryFee = this.deliveries.reduce((sum, d) => sum + (parseFloat(d.delivery_fee || 0)) + (parseFloat(d.lechon_baka_service || 0)), 0);
                         
                     } catch (e) {
                         console.error(`Failed to fetch delivery fee for ${city + ', ' + province}`, e);
@@ -2886,7 +1640,11 @@ applySelectedAutoCoupon() {
                         delivery.lechon_baka_service = 0;
                     }
 
-                   
+                    try {
+                        
+                    } catch (error) {
+                        
+                    }
                 },
 
                 onChangeMultipleAddress() {
@@ -2924,6 +1682,9 @@ applySelectedAutoCoupon() {
                             this.availableDeliveryHours = []
                         }
 
+                        this.province = ''
+                        this.delivery_address = ''
+
                         this.isBaka = window.hasBaka;
                         this.lechonBakaService = this.isBaka ? window.lechonBakaService : 0;
                     } else {
@@ -2933,9 +1694,6 @@ applySelectedAutoCoupon() {
                 
                     this.deliveryFees = [];
                     this.deliveryFee = 0;
-
-                    this.applyAutoCoupons()
-                    this.recomputeCouponTotals()
                     
                 },
 
@@ -3223,8 +1981,6 @@ applySelectedAutoCoupon() {
                     return hours
                 },
 
-                
-
                 calculateEarliestBusinessTime(processingHours) {
 
                     const now = new Date()
@@ -3263,8 +2019,17 @@ applySelectedAutoCoupon() {
                 },
 
                 getEarliestAllowedDateTime() {
-                    const hours = this.getRequiredProcessingHours()
-                    return this.calculateEarliestBusinessTime(hours)
+                    return this.calculateEarliestTime(this.getRequiredProcessingHours())
+                },
+
+                getEarliestForPickupAndSingle() {
+                    return this.calculateEarliestTime(this.getCartProcessingHours())
+                },
+
+                getEarliestDateTimeForDelivery(delivery) {
+                    return this.calculateEarliestTime(
+                        this.getProcessingHoursForDelivery(delivery)
+                    )
                 },
 
                 adjustToOpeningHours(dateObj) {
@@ -3273,7 +2038,7 @@ applySelectedAutoCoupon() {
 
                     const hour = adjusted.getHours()
 
-                    // If before opening → move to 9AM
+                    // If before opening - move to 9AM
                     if (hour < this.openHour) {
                         adjusted.setHours(this.openHour, 0, 0, 0)
                     }
@@ -3308,47 +2073,6 @@ applySelectedAutoCoupon() {
                     })
 
                     return hours
-                },
-
-
-                getEarliestDateTimeForDelivery(delivery) {
-
-                    const now = new Date()
-
-                    const processingHours = this.getProcessingHoursForDelivery(delivery)
-
-                    let current = new Date(now)
-
-                    // move to opening if outside hours
-                    if (current.getHours() >= this.closeHour) {
-                        current.setDate(current.getDate() + 1)
-                        current.setHours(this.openHour, 0, 0, 0)
-                    } else if (current.getHours() < this.openHour) {
-                        current.setHours(this.openHour, 0, 0, 0)
-                    }
-
-                    let remainingHours = processingHours
-
-                    while (remainingHours > 0) {
-
-                        const endOfDay = new Date(current)
-                        endOfDay.setHours(this.closeHour, 0, 0, 0)
-
-                        const availableToday =
-                            (endOfDay - current) / (1000 * 60 * 60)
-
-                        if (remainingHours <= availableToday) {
-                            current.setHours(current.getHours() + remainingHours)
-                            remainingHours = 0
-                        } else {
-                            remainingHours -= availableToday
-
-                            current.setDate(current.getDate() + 1)
-                            current.setHours(this.openHour, 0, 0, 0)
-                        }
-                    }
-
-                    return current
                 },
 
                 getProcessingHoursFromSelectedOrders() {
@@ -3398,11 +2122,6 @@ applySelectedAutoCoupon() {
                     })
 
                     return hours
-                },
-
-                getEarliestForPickupAndSingle() {
-                    const hours = this.getCartProcessingHours()
-                    return this.calculateEarliestBusinessTime(hours)
                 },
 
                 getProductName(productId) {
@@ -3730,13 +2449,12 @@ applySelectedAutoCoupon() {
                 },
 
                 getBlockedTimeRangesForDate(date) {
-                return this.blockedDetails.filter(b =>
-                    b.date === date &&
-                    this.blockAppliesToCart(b) &&
-                    this.blockAppliesToMethod(b) &&
-                    this.isBlockedWithCombo(b) &&
-                    b.is_all_day == 0
-                )
+                    return this.blockedDetails.filter(b =>
+                        b.date === date &&
+                        this.blockAppliesToCart(b) &&
+                        this.blockAppliesToMethod(b) &&
+                        b.is_all_day == 0
+                    )
                 },
 
                 normalizeTime(timeStr) {
@@ -3744,27 +2462,85 @@ applySelectedAutoCoupon() {
                     return timeStr.substring(0,5) // from "11:00:00" to "11:00"
                 },
 
-                
-                getNextAvailableDate(startDate, blocks = this.blockedDetails, applies = null) {
-                let date = new Date(startDate)
+                blockAppliesToDelivery(block, delivery) {
 
-                while (true) {
-                    const formatted = this.formatDate(date)
+                    if (!delivery || !delivery.orders?.length) return false
 
-                    const blockedForThisDate = (blocks || []).filter(b => {
-                        if (b.date !== formatted) return false
-                        if (b.is_all_day != 1) return false
+                    const deliveryProductIds = delivery.orders.map(o => o.product_id)
 
-                        return typeof applies === 'function' ? applies(b) : true
-                    })
+                    const deliveryCategoryIds = delivery.orders
+                        .map(o => o.product?.category_id)
+                        .filter(Boolean)
 
-                    if (!blockedForThisDate.length) {
-                        return date
+                    if (block.scope === 'all') {
+                        return true
                     }
 
-                    date.setDate(date.getDate() + 1)
-                }
-            },
+                    if (block.scope === 'product') {
+
+                        if (!block.products?.length) return false
+
+                        const blockProductIds = block.products.map(p => p.id)
+
+                        return deliveryProductIds.some(id => blockProductIds.includes(id))
+                    }
+
+                    if (block.scope === 'category') {
+
+                        if (!block.categories?.length) return false
+
+                        const blockCategoryIds = block.categories.map(c => c.id)
+
+                        return deliveryCategoryIds.some(id => blockCategoryIds.includes(id))
+                    }
+
+                    return false
+                },
+
+                calculateEarliestTime(processingHours) {
+
+                    const debugNow = this.getDebugNowFromUrl()
+
+                    const now = debugNow
+                        ? new Date(debugNow)
+                        : new Date()
+
+                    // add processing normally
+                    let earliest = new Date(
+                        now.getTime() + processingHours * 60 * 60 * 1000
+                    )
+
+                    // round up to next hour
+                    earliest = this.roundUpToNextHour(earliest)
+
+                    //adjust to business hours
+                    earliest = this.adjustToOpeningHours(earliest)
+
+                    return earliest
+                },
+
+                getNextAvailableDate(startDate) {
+                    let date = new Date(startDate)
+
+                    while (true) {
+                        const formatted = this.formatDate(date)
+
+                        const blockedForThisDate = this.blockedDetails.filter(b =>
+                            b.date === formatted &&
+                            this.blockAppliesToCart(b) &&
+                            this.blockAppliesToMethod(b)
+                        )
+
+                        const hasAllDayBlock = blockedForThisDate.some(b => b.is_all_day == 1)
+
+                        if (!hasAllDayBlock) {
+                            return date
+                        }
+
+                        // move to next day
+                        date.setDate(date.getDate() + 1)
+                    }
+                },
 
                 get incompleteProgress() {
                     if (!this.contact.name || !this.contact.mobile || !this.contact.email) {
@@ -3831,6 +2607,11 @@ applySelectedAutoCoupon() {
                     }
 
                     return true
+                },
+
+                getDebugNowFromUrl() {
+                    const params = new URLSearchParams(window.location.search)
+                    return params.get('debug_now')
                 }
 
             }
@@ -3847,4 +2628,6 @@ applySelectedAutoCoupon() {
 
 @endsection
 
-
+@section('alpine.plugins')
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/mask@3.x.x/dist/cdn.min.js"></script>
+@endsection
