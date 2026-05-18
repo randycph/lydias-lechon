@@ -141,6 +141,7 @@
                             <th align="left">Customer</th>
                             <th align="left">Coupon Amount</th>
                             <th align="left">Total Amount</th>
+                            <th align="left">Order Date</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -156,22 +157,22 @@
 
                             if ($r->reward == 'free-shipping-optn') {
                                 $fsCount++;
-                                $displayId = 'fs-' . $fsCount;
+                                $displayId = 'FS-' . $fsCount;
                                 $rewardName = 'Free Shipping';
                             } elseif ($r->reward == 'discount-amount-optn') {
                                 $adCount++;
-                                $displayId = 'ad-' . $adCount;
+                                $displayId = 'AD-' . $adCount;
                                 $rewardName = 'Amount Discount';
                             } elseif ($r->reward == 'discount-percentage-optn') {
                                 $pdCount++;
-                                $displayId = 'pd-' . $pdCount;
+                                $displayId = 'PD-' . $pdCount;
                                 $rewardName = 'Percentage Discount';
                             } elseif ($r->reward == 'free-product-optn') {
                                 $fpCount++;
-                                $displayId = 'fp-' . $fpCount;
+                                $displayId = 'FP-' . $fpCount;
                                 $rewardName = 'Free Product';
                             } else {
-                                $displayId = 'cp-' . ($loop->iteration);
+                                $displayId = 'CP-' . ($loop->iteration);
                                 $rewardName = $r->reward;
                             }
                         @endphp
@@ -186,6 +187,7 @@
                             <td>{{ $r->customer_name }}</td>
                             <td>₱{{ number_format($r->coupon_amount ?? 0, 2) }}</td>
                             <td>₱{{ number_format($r->net_amount ?? 0, 2) }}</td>
+                            <td>{{ $r->order_date}}</td>
                         </tr>
                     @empty
                         <tr>
