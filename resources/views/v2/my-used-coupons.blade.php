@@ -95,6 +95,54 @@
         opacity: .30;
         pointer-events: none;
     }
+    /* =========================
+    EMPTY COUPON STATE
+    ========================= */
+    .coupon-empty-state {
+        grid-column: 1 / -1;
+        min-height: 260px;
+        width: 100%;
+        border: 2px dashed #d1d5db;
+        border-radius: 18px;
+        background:
+            radial-gradient(circle at top, rgba(15, 143, 67, .08), transparent 35%),
+            #ffffff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 34px 20px;
+    }
+
+    .coupon-empty-icon {
+        width: 76px;
+        height: 76px;
+        border-radius: 999px;
+        background: #ecfdf3;
+        color: #0f8f43;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 14px;
+        box-shadow: 0 8px 18px rgba(15, 143, 67, .12);
+    }
+
+    .coupon-empty-state h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 950;
+        color: #111827;
+    }
+
+    .coupon-empty-state p {
+        margin: 8px 0 0;
+        max-width: 380px;
+        font-size: 13px;
+        line-height: 1.5;
+        font-weight: 600;
+        color: #6b7280;
+    }
 
     /* =========================
        COMPACT COUPON PREVIEW
@@ -515,8 +563,18 @@
                                         </div>
                                     </div>
                                 @empty
-                                    <div class="col-span-1 sm:col-span-2 text-center py-10 text-gray-500">
-                                        You have not used any coupons yet.
+                                    <div class="coupon-empty-state">
+                                        <div class="coupon-empty-icon">
+                                            <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none">
+                                                <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v1.25a1.25 1.25 0 0 1-1.25 1.25 2 2 0 1 0 0 4A1.25 1.25 0 0 1 20 15.25v1.25A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-1.25A1.25 1.25 0 0 1 5.25 14a2 2 0 1 0 0-4A1.25 1.25 0 0 1 4 8.75V7.5Z" stroke="currentColor" stroke-width="1.8"/>
+                                                <path d="M9 8.5h.01M9 12h.01M9 15.5h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                                            </svg>
+                                        </div>
+
+                                        <h3>No used coupons yet</h3>
+                                        <p>
+                                            Your used coupons will appear here after you complete an order with a coupon.
+                                        </p>
                                     </div>
                                 @endforelse
                             </div>
