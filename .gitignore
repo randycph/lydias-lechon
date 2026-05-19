@@ -12,3 +12,4 @@ composer.lock
 package-lock.json
 public/hot
 index.php
+resources/views/admin/sales/index_0519.blade.bak.php
