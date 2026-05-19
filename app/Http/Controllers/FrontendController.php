@@ -826,38 +826,45 @@ if ($carts->count() > 0) {
     }
 
     public function my_used_coupons(Request $request)
-{
-    $page = 'my-used-coupons';
+    {
+        $page = 'my-used-coupons';
 
-$request->session()->forget('redirect_after_login');
+    $request->session()->forget('redirect_after_login');
 
-if (!Auth::check()) {
-    return redirect()->route('login', ['redirect' => $request->fullUrl()]);
-}
+    if (!Auth::check()) {
+        return redirect()->route('login', ['redirect' => $request->fullUrl()]);
+    }
 
-$uid = Auth::id();
+    $uid = Auth::id();
 
-$usedCoupons = CouponCart::with('coupon')
-    ->where('customer_id', $uid)
-    ->whereNotNull('sales_header_id')
+    $usedCoupons = CouponCart::with('coupon')
+        ->where('customer_id', $uid)
+        ->whereNotNull('sales_header_id')
 
-    // hide fake/empty coupon rows
-    ->where('coupon_id', '>', 0)
-    ->whereNotNull('coupon_code')
-    ->where('coupon_code', '!=', '')
+        // only show coupons from PAID transactions
+        ->whereExists(function ($q) {
+            $q->select(DB::raw(1))
+                ->from('ecommerce_sales_headers as h')
+                ->whereColumn('h.id', 'coupon_cart.sales_header_id')
+                ->where('h.payment_status', 'PAID');
+        })
 
-    // only show coupons that were really used
-    ->where('total_usage', '>', 0)
+        // hide fake/empty coupon rows
+        ->where('coupon_id', '>', 0)
+        ->whereNotNull('coupon_code')
+        ->where('coupon_code', '!=', '')
 
-    // make sure coupon record exists
-    ->whereHas('coupon')
+        // only show coupons that were really used
+        ->where('total_usage', '>', 0)
 
-    ->latest('created_at')
-    ->get();
+        // make sure coupon record exists
+        ->whereHas('coupon')
 
+        ->latest('created_at')
+        ->get();
 
-    return view('v2.my-used-coupons', compact('page', 'usedCoupons'));
-}
+        return view('v2.my-used-coupons', compact('page', 'usedCoupons'));
+    }
 
     public function my_cart(Request $request)
     {
