@@ -49,10 +49,11 @@ class SalesController extends Controller
 {
     private $searchFields = ['order_number','customer_name'];
 
-    public function __construct()
-    {
-        Permission::module_init($this, 'sales_transaction');
-    }
+    
+    // public function __construct()
+    // {
+    //     Permission::module_init($this, 'sales_transaction');
+    // }
 
     public function edit_items(){
         $items = SalesDetail::where('sales_header_id',$_GET['id'])->get();
