@@ -525,7 +525,7 @@
 										<span class="fa fa-minus"></span>
 									</button>
 								</span>
-								<input type="text" name="coupon_customer_limit_qty" class="form-control input-number border border-top-0 border-bottom-0" value="{{ old('coupon_customer_limit_qty',1) }}" min="1" max="100000">
+								<input type="text" name="coupon_customer_limit_qty" class="form-control input-number border border-top-0 border-bottom-0" value="{{ old('coupon_customer_limit_qty',0) }}" min="0" max="100000">
 								<span class="input-group-btn">
 									<button type="button" class="btn btn-default btn-number" data-type="plus" data-field="coupon_customer_limit_qty">
 										<span class="fa fa-plus"></span>
@@ -1052,5 +1052,56 @@ $(function() {
         isHandlingSelect = false;
     });
 });
+
+function syncCustomerLimitWithSpecificCustomers() {
+    const isSpecific = $('#coupon-scope-specific').is(':checked');
+    const selectedCustomers = $('select[name="customer[]"]').val() || [];
+    const selectedCount = selectedCustomers.length;
+
+    const $limitCheckbox = $('#coupon-customer-limit');
+    const $limitForm = $('#coupon-customer-limit-form');
+    const $limitInput = $('input[name="coupon_customer_limit_qty"]');
+    const $limitButtons = $('.btn-number[data-field="coupon_customer_limit_qty"]');
+
+    if (isSpecific) {
+        $limitCheckbox.prop('checked', true);
+        $limitForm.show();
+
+        $limitInput
+            .val(selectedCount)
+            .prop('readonly', selectedCount > 0);
+
+        $limitButtons.prop('disabled', selectedCount > 0);
+    } else {
+        $limitInput.prop('readonly', false);
+        $limitButtons.prop('disabled', false);
+    }
+}
+
+$('select[name="customer[]"]').on('change select2:select select2:unselect', function () {
+    syncCustomerLimitWithSpecificCustomers();
+});
+
+$('#coupon-scope-specific').on('click change', function () {
+    $('#customer-optn').show();
+    syncCustomerLimitWithSpecificCustomers();
+});
+
+$('#coupon-scope-all').on('click change', function () {
+    $('#customer-optn').hide();
+
+    $('select[name="customer[]"]').val(null).trigger('change');
+
+    $('#coupon-customer-limit').prop('checked', false);
+    $('#coupon-customer-limit-form').hide();
+
+    $('input[name="coupon_customer_limit_qty"]')
+        .val(0)
+        .prop('readonly', false);
+
+    $('.btn-number[data-field="coupon_customer_limit_qty"]').prop('disabled', false);
+});
+
+syncCustomerLimitWithSpecificCustomers();
 </script>
 @endsection
