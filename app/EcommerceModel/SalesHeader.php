@@ -11,9 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use App\Models\Concerns\LogsActivityDiff;
-use App\EcommerceModel\ProductionOrder;
-use App\Helpers\Webfocus\Setting;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class SalesHeader extends Model
@@ -50,7 +47,6 @@ class SalesHeader extends Model
         'net_amount',
         'discount_amount',
         'payment_status',
-        'region',
         'province',
         'city',
         'barangay',
@@ -87,59 +83,9 @@ class SalesHeader extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function getNearestDeliveryDateAttribute()
-    {
-        $today = now()->startOfDay();
-
-        return $this->items
-            ->pluck('delivery_date')
-            ->map(fn ($date) => safe_date($date))
-            ->filter(fn ($date) => $date && $date->gte($today))
-            ->sort()
-            ->first();
-    }
-
-    public function scopeUnpaid($query)
-    {
-        return $query->whereRaw('(
-            SELECT COALESCE(SUM(amount), 0)
-            FROM ecommerce_sales_payments
-            WHERE ecommerce_sales_payments.sales_header_id = ecommerce_sales_headers.id
-            AND ecommerce_sales_payments.status = "PAID"
-        ) < net_amount');
-    }
-
-    public function scopePartial($query)
-    {
-        return $query
-            ->whereHas('payments', fn ($q) => $q->where('status', 'PAID'))
-            ->whereRaw('(
-                SELECT COALESCE(SUM(amount), 0)
-                FROM ecommerce_sales_payments
-                WHERE ecommerce_sales_payments.sales_header_id = ecommerce_sales_headers.id
-                AND ecommerce_sales_payments.status = "PAID"
-            ) < net_amount');
-    }
-
-    public function scopePaid($query)
-    {
-        return $query->whereRaw('(
-            SELECT COALESCE(SUM(amount), 0)
-            FROM ecommerce_sales_payments
-            WHERE ecommerce_sales_payments.sales_header_id = ecommerce_sales_headers.id
-            AND ecommerce_sales_payments.status = "PAID"
-        ) >= net_amount');
-    }
-    
-    public function subSales()
-    {
-        return $this->hasMany(SalesHeader::class, 'parent_sales_header_id');
-    }
-
     public function assign_to_production_branch($sale, $pb){
         //dd($sale);
         $items = $sale->items;
-        $status = !empty($sale?->delivery_status) ? $sale->delivery_status : 'On Processed';
         foreach($items as $salesdetail){
 
             $current_total_order = JobOrder::whereDate('date_needed',date('Y-m-d',strtotime($salesdetail->delivery_date)))->count();
@@ -175,7 +121,7 @@ class SalesHeader extends Model
                 'delivery_tracking_number' => '',
                 'delivery_method' => $sale->delivery_type,
                 'pickup_branch' => $sale->outlet,
-                'delivery_status' => $status,
+                'delivery_status' => 'On Processed',
                 'status' => 'Active',
                 'jo_category' => 'Order',
                 'jo_order_type' => $sale->order_type ?? ' '
@@ -224,7 +170,12 @@ class SalesHeader extends Model
     {
         $sale = SalesHeader::withTrashed()->whereId($this->id)->first();
 
-        $payments = SalesPayment::where('sales_header_id', $sale->id)->get();
+        if (isset($sale->is_sub) && $sale->is_sub == 1) {
+            $parentSale = SalesHeader::withTrashed()->where('id', $sale->parent_sales_header_id)->first();
+            $payments = SalesPayment::where('sales_header_id', $parentSale->id)->get();
+        } else {
+            $payments = SalesPayment::where('sales_header_id', $sale->id)->get();
+        }
 
         $cntr=0;
         foreach($payments as $p){
@@ -241,7 +192,7 @@ class SalesHeader extends Model
 
     public function getPaymentadminstatusAttribute()
     {
-        $amount = floatval($this->items->sum('net_amount')) + floatval($this->delivery_fee_amount ?? 0);
+        $amount = floatval($this->net_amount);
         $sale = SalesHeader::withTrashed()->find($this->id);
 
         if (isset($sale->parent_sales_header_id) && $sale->parent_sales_header_id != null) {
@@ -251,9 +202,6 @@ class SalesHeader extends Model
             $payment = SalesPayment::where('sales_header_id', $sale->id)->where('status', 'PAID')->get();
             $paid = (float) $payment->sum('amount');
         }
-
-        $payment = SalesPayment::where('sales_header_id', $sale->id)->where('status', 'PAID')->get();
-        $paid = (float) $payment->sum('amount');
 
         if (isset($sale->parent_sales_header_id) && $sale->parent_sales_header_id != null) {
             $newSale = SalesHeader::where('id', $sale->parent_sales_header_id)->first();
@@ -285,41 +233,49 @@ class SalesHeader extends Model
         }
     }
 
-    public static function balance($id){
-        $sales = SalesHeader::withTrashed()->whereId($id)->first();
+    public static function balance($id)
+        {
+            $sales = SalesHeader::withTrashed()->whereId($id)->first();
 
-        // if ($sales->is_sub == 1) {
-        //     $sale = SalesHeader::withTrashed()->where('id', $sales->parent_sales_header_id)->first();
-        //     $amount = $sale->net_amount;
-        // } else {
-        //     $sale = SalesHeader::withTrashed()->whereId($id)->first();
-        //     $amount = $sale->net_amount;
-        // }
+            if (!$sales) {
+                return 0;
+            }
 
-        $sale = SalesHeader::withTrashed()->whereId($id)->first();
-        $amount = $sale->items->sum('gross_amount') + $sale->delivery_fee_amount;
+            if ($sales->is_sub == 1) {
+                $sale = SalesHeader::withTrashed()
+                    ->where('id', $sales->parent_sales_header_id)
+                    ->first();
 
-        $amount = $sales->items->sum('net_amount') + $sales->delivery_fee_amount ?? 0;
-        $amount = (float) $amount - $sales->payments->where('status', 'PAID')->where('is_discount', 1)->sum('amount');
+                $saleId = $sales->parent_sales_header_id;
+            } else {
+                $sale = SalesHeader::withTrashed()->whereId($id)->first();
+                $saleId = $id;
+            }
 
-        // if ($sales->is_sub == 1) {
-        //     $payments = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)->where('status', 'PAID')->get();
-        //     $paid = (float) $payments->sum('amount');
-        // } else {
-        //     $payments = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->get();
-        //     $paid = (float) $payments->sum('amount');
-        // }
+            if (!$sale) {
+                return 0;
+            }
 
-        $payments = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->where('is_discount', 0)->get();
-        $paid = (float) $payments->sum('amount');
+        
+            $amount = (float) ($sale->net_amount > 0 ? $sale->net_amount : $sale->gross_amount);
 
-        $total = $amount - $paid;
 
-        if($total <= 0){
-            $total = 0;
+            $paid = (float) SalesPayment::where('sales_header_id', $saleId)
+                ->where('status', 'PAID')
+                ->where(function ($q) {
+                    $q->whereNull('is_discount')
+                    ->orWhere('is_discount', 0);
+                })
+                ->sum('amount');
+
+            $total = $amount - $paid;
+
+            if ($total <= 0) {
+                $total = 0;
+            }
+
+            return $total;
         }
-        return $total;
-    }
 
     public static function paid($id){
         $sales = SalesHeader::withTrashed()->whereId($id)->first();
@@ -329,8 +285,6 @@ class SalesHeader extends Model
         } else {
             $paid = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->sum('amount');
         }
-
-        $paid = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->sum('amount');
 
         logger('$paid: '.$paid);
 
@@ -372,9 +326,50 @@ class SalesHeader extends Model
 
     public function getPaymentStatusAttribute($value)
     {
+        // $sale = SalesHeader::find($this->id);
+
+        // if (isset($sale->parent_sales_header_id) && $sale->parent_sales_header_id != null) {
+        //     $paid = SalesPayment::where('sales_header_id', $sale->parent_sales_header_id)
+        //         ->where('status', 'PAID') 
+        //         ->sum('amount') ?? 0;
+        // } else {
+        //     $paid = SalesPayment::where('sales_header_id', $this->id)
+        //         ->where('status', 'PAID') 
+        //         ->sum('amount') ?? 0;
+        // }
+
+        // // Use the raw/current saved status to avoid recursion
+        // $current = $value ?? $this->getRawOriginal('payment_status');
+
+        // if ($paid >= $this->gross_amount && $current !== 'PAID') {
+        //     static::whereKey($this->id)->update([
+        //         'payment_status' => 'PAID',
+        //         'updated_at'     => $this->created_at,
+        //     ]);
+
+        //     if (
+        //         ($this->delivery_status === 'Waiting for Payment' || $this->delivery_status === '') &&
+        //         $this->delivery_status !== 'Processing Stock'
+        //     ) {
+        //         static::whereKey($this->id)->update([
+        //             'delivery_status' => 'Processing Stock',
+        //             'updated_at'      => $this->created_at,
+        //         ]);
+        //     }
+
+        //     return 'PAID';
+        // }
+
+        // // Normalize legacy 'Completed' to PAID
+        // return in_array($current, ['PAID', 'Completed'], true) ? 'PAID' : 'UNPAID';
+
         $sales = SalesHeader::withTrashed()->whereId($this->id)->first();
 
-        $paid = SalesPayment::where('sales_header_id',$this->id)->where('status', 'PAID')->where('is_discount', 0)->sum('amount');
+        if ($sales->is_sub == 1) {
+            $paid = SalesPayment::where('sales_header_id',$sales->parent_sales_header_id)->where('status', 'PAID')->sum('amount');
+        } else {
+            $paid = SalesPayment::where('sales_header_id',$this->id)->where('status', 'PAID')->sum('amount');
+        }
         
         if ($paid > 0) {
             if ($this->delivery_status == 'Waiting for Payment' || $this->delivery_status == '' || is_null($this->delivery_status)) {
@@ -382,9 +377,7 @@ class SalesHeader extends Model
             }
         }
 
-        $amount = ($this->items->sum('net_amount') + $this->delivery_fee_amount) - $this->payments->where('status', 'PAID')->where('is_discount', 1)->sum('amount');
-
-        if ($paid >= $amount) {
+        if ($paid >= $this->net_amount) {
             SalesHeader::whereId($this->id)->update(['payment_status' => 'PAID']);
 
             return 'PAID';
@@ -393,45 +386,6 @@ class SalesHeader extends Model
         }
     }
     
-    public function getIsExpiredAttribute()
-    {
-        if (!$this->created_at) {
-            return false;
-        }
-
-        $today = now();
-
-        // Debug 
-        $forceDay4     = request()->boolean('force_day_4');
-        $forceTomorrow = request()->boolean('force_tomorrow');
-        $forcePast     = request()->boolean('force_past');
-
-        //Days diff 
-        if ($forceDay4) {
-            $daysDiff = 4;
-        } else {
-            $daysDiff = $this->created_at->diffInDays($today);
-        }
-
-        $item = $this->items->first();
-
-        if ($item && $item->delivery_date) {
-            $deliveryDate = Carbon::parse($item->delivery_date);
-
-            $isTomorrow = $forceTomorrow
-                ? true
-                : $deliveryDate->isSameDay($today->copy()->addDay());
-
-            $isPast = $forcePast
-                ? true
-                : $deliveryDate->isPast();
-
-            return ($daysDiff >= 4 && $isTomorrow) || $isPast;
-        }
-
-        return false;
-    }
-
     public static function media_color($media) {
 
         switch($media){
@@ -573,11 +527,6 @@ class SalesHeader extends Model
         return $this->hasMany(ProductDeliveryAddress::class, 'sales_header_id')->orderBy('id', 'asc');
     }
 
-    public function singleContact()
-    {
-        return $this->hasOne(ProductDeliveryAddress::class, 'sales_header_id')->orderBy('id', 'asc');
-    }
-
     public function deliveryStatuses()
     {
         return $this->hasMany(DeliveryStatus::class, 'order_id', 'id');
@@ -591,114 +540,5 @@ class SalesHeader extends Model
     public function subHeaders()
     {
         return $this->hasMany(self::class, 'parent_sales_header_id', 'id');
-    }
-
-    public function isFullyPaid()
-    {
-        return $this->payment_status === 'PAID';
-    }
-
-    public function isPartiallyPaid()
-    {
-        $payments = $this->payments()->where('status', 'PAID')->sum('amount');
-
-        return $payments > 0 && $payments < $this->net_amount;
-    }
-
-    public function isUnpaid()
-    {
-        $payments = $this->payments()->where('status', 'PAID')->sum('amount');
-
-        return $payments == 0;
-    }
-
-    public function isOverpaid()
-    {
-        $payments = $this->payments()->where('status', 'PAID')->sum('amount');
-
-        return $payments > $this->net_amount;
-    }
-
-    public function isForecasted()
-    {
-        $joborder = JobOrder::where('sales_number', $this->order_number)->where('status', 'Active')->first();
-
-        if (!$joborder) {
-            return false;
-        }
-
-        $productionOrder = ProductionOrder::where('joborder_id', $joborder->id)->whereNotNull('branch_id')->first();
-
-        if (!$productionOrder) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public function isDeliveryDateIsFuture()
-    {
-        $item = $this->items->first();
-        if (!$item) {
-            return false;
-        }
-
-        $deliveryDate = Carbon::parse($item->delivery_date);
-
-        if ($item->delivery_date == null || $item->delivery_date == '0000-00-00 00:00:00') {
-            return true;
-        }
-
-        return $deliveryDate->isFuture();
-    }
-
-    public function isConfirmedAndPastCutoffAndForecasted()
-    {
-        if (auth()->user()->is_an_admin()) {
-            return false;
-        }
-
-        return $this->isConfirm == 1 && $this->pastForecastedTime() && $this->isForecasted();
-    }
-
-    public function pastForecastedTime()
-    {
-        $cutoff = Setting::info()->cutoff;
-
-        $item = $this->items->first();
-        if (!$item) {
-            return false;
-        }
-
-        $deliveryDate = Carbon::parse($item->delivery_date);
-        $now = Carbon::now();
-
-        if ($item->delivery_date == null || $item->delivery_date == '0000-00-00 00:00:00') {
-            return true;
-        }
-
-        return
-            $deliveryDate->isTomorrow() &&
-            $now->format('H:i') > $cutoff;
-    }
-    public function scopePaidOnlyForForecasterRole($query)
-    {
-        return $query->when(
-            auth()->check() && auth()->user()->role_id == 3,
-            function ($q) {
-                $q->where('isConfirm', 1)
-                ->where('has_sub', 0)
-                ->whereHas('payments', fn ($pq) => $pq->where('status', 'PAID'))
-                ->with('payments');
-            }
-        );
-    }
-
-    public function hasPartialPayment()
-    {
-        $payments = $this->payments()->where('status', 'PAID')->get();
-        $paidAmount = $payments->sum('amount');
-
-        return $paidAmount > 0 || $this->isConfirm == 1; 
     }
 }
