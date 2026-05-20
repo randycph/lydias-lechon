@@ -409,12 +409,14 @@
                                                             
                                                                 
                                                                 @if (
-                                                                    (auth()->user()->has_access_to_route('sales-transaction.update') &&
-                                                                    !$sale->isConfirmedAndPastCutoffAndForecasted() && $sale->isDeliveryDateIsFuture()) || (auth()->user()->is_an_admin() || auth()->user()->is_supervisor())
-                                                                ) 
-                                                                <a class="dropdown-item" href="{{ route('sales.update_details',$sale->id) }}" title="Update Sales Details & Items">
-                                                                    Update Sales Details </a> 
-                                                                @endif
+                                                                        auth()->user()->has_access_to_route('sales-transaction.update') ||
+                                                                        auth()->user()->is_an_admin() ||
+                                                                        auth()->user()->is_supervisor()
+                                                                    ) 
+                                                                        <a class="dropdown-item" href="{{ route('sales.update_details',$sale->id) }}" title="Update Sales Details & Items">
+                                                                            Update Sales Details
+                                                                        </a> 
+                                                                    @endif
    
                                                                 @if($sale->isConfirm != 1)
                                                                     @if(auth()->user()->has_access_to_route('sales.confirm.order'))
@@ -529,7 +531,7 @@
                                                             @if (
                                                                     auth()->user()->has_access_to_route('sales-transaction.cancel') && 
                                                                     ($sale->status != 'CANCELLED' && $sale->status != 'ABANDONED') && 
-                                                                    $sale->delivery_status != 'Delivered/Picked Up' && !$sale->hasPartialPayment()
+                                                                   $sale->delivery_status != 'Delivered/Picked Up' && $displayBalance == $displayAmount
                                                                 )
                                                                 <a class="dropdown-item" href="javascript:void(0)" onclick="cancel_sales({{$sale->id}},'{{$sale->order_number}}')" title="Cancel Transaction">Cancel Transaction</a>
                                                             @endif
