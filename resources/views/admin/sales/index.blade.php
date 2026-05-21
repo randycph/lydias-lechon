@@ -432,6 +432,12 @@
                                                     </div>
                                                     @if ($sale->status !== 'CANCELLED')
                                                     @if (true)
+                                                    @if (
+                                                        auth()->user()->has_access_to_route('sales-transaction.view_payment') || 
+                                                        (canAddPayment($sale) && auth()->user()->has_access_to_route('payment.add.store')) ||
+                                                        ($dateneeded > date('Y-m-d H:i:s') && (auth()->user()->role_id == 2 || auth()->user()->role_id == 1 || auth()->user()->role_id == 3)) ||
+                                                        $sale->status == 'UNPAID'
+                                                    )
                                                     <div class="nav-item dropdown">
                                                         <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                             <i data-feather="credit-card"></i>
@@ -472,6 +478,7 @@
 
                                                         </div>
                                                     </div>
+                                                    @endif
                                                     @endif
                                                     <div class="nav-item dropdown">
                                                         <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -1014,6 +1021,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
+                    @if (auth()->user()->has_access_to_route('sales-transaction.view_payment'))
                     <div class="table-responsive">
                         <table class="table table-bordered">
                             <thead>
@@ -1030,6 +1038,9 @@
                             </tbody>
                         </table>
                     </div>
+                    @else
+                        <div class="alert alert-danger">You do not have permission to view this content. Please contact your administrator.</div>
+                    @endif
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>
