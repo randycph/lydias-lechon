@@ -541,4 +541,9 @@ class SalesHeader extends Model
     {
         return $this->hasMany(self::class, 'parent_sales_header_id', 'id');
     }
+
+    public function giftCertificate()
+    {
+        return $this->hasOne(GiftCertificate::class, 'sales_header_id');
+    }
 }

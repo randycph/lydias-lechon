@@ -329,7 +329,7 @@
                                     <td class="tx-right">₱{{number_format($salesDetails->sum('gross_amount') + $sales->delivery_fee_amount, 2)}}</td>
                                 </tr>
                             @endif
-                            @if($sales->discount_amount > 0 && (!isset($displayCouponRows) || count($displayCouponRows) == 0))
+                            @if($sales->discount_amount > 0 && (!isset($displayCouponRows) || count($displayCouponRows) == 0 || $sales->giftCertificate))
                                 <tr>
                                     <td class="tx-left" colspan="8">Discount</td>
                                     <td class="tx-right text-danger">-₱{{ number_format($sales->discount_amount, 2) }}</td>

@@ -112,8 +112,11 @@ class SalesPayment extends Model
 
     public static function get_remaining_unpaid($gross_amount,$id)
     {
-        $paid_amount = SalesPayment::where('sales_header_id',$id)->where('Status','<>','CANCELLED')->sum('amount');
-        $balance = $gross_amount - $paid_amount;
+        $sale = SalesHeader::where('id',$id)->first();
+        $paid_amount = $sale->payments()->where('Status','<>','CANCELLED')->where('is_discount',0)->sum('amount');
+        $discount = $sale->discount_amount ?? 0;
+        $gross = $sale->items->sum('net_amount');
+        $balance = ($gross + $sale->delivery_fee_amount) - ($paid_amount + $discount);
         return $balance;
 
     }

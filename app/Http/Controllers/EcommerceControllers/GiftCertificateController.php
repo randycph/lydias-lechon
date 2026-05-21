@@ -205,34 +205,51 @@ class GiftCertificateController extends Controller
 
     public function change_status(Request $request)
     {
-
-        $pages = explode("|", $request->pages);
-
-        //Validator::make($request->all(), [
-        //    'sales_header_id' => 'exists:order_number,id',
-        //])->validate();
-        $er = 0;
-        foreach ($pages as $page) {
-
-            if (SalesHeader::where('order_number', '=', $request->status)->count() > 0) {
-                $er = 1;
-            }
-            if ($er == 0) {
-
-                return back()->with('error', 'Sales or JO#: ' . $request->status . ' does not exist!');
-            }
-            $publish = GiftCertificate::where('status', '!=', $request->status)
-                ->whereId($page)
-                ->update([
-                    'status'  => (isset($request->status) ? 'Used' : 'Unused'),
-                    'sales_header_id'  => $request->status,
-                    'claimed_at'  => date('Y-m-d H:i:s'),
-                    'user_id' => Auth::user()->id
-                ]);
+        if (empty($request->pages)) {
+            return back()->with('error', 'Please select at least one gift certificate!');
         }
 
-        return back()->with('success',  __('standard.pages.status_success', ['STATUS' => $request->status]));
-        //return $request;
+        if (empty($request->status)) {
+            return back()->with('error', 'Please enter Sales or JO#!');
+        }
+
+        $sale = SalesHeader::where('order_number', $request->status)->first();
+
+        $ids = explode("|", $request->pages);
+
+        if (empty($sale)) {
+            return back()->with('error', 'Sales or JO#: ' . $request->status . ' does not exist!');
+        }
+
+        $gcs = GiftCertificate::where('sales_header_id', $sale->id)->get();
+
+        if (count($gcs) > 0) {
+            return back()->with('error', 'The ' . $request->status . ' has already been used!');
+        }
+
+        $amount = 0;
+
+        if ($ids) {
+
+            foreach ($ids as $id) {
+                GiftCertificate::where('id', $id)->where('status', 'Unused')->update([
+                    'status'  => 'Used',
+                    'sales_header_id'  => $sale->id,
+                    'claimed_at'  => now(),
+                    'user_id' => Auth::user()->id
+                ]);
+            }
+
+            foreach ($ids as $id) {
+                $amount = GiftCertificate::where('id', $id)->first()->amount;
+
+                $sale->discount_amount += $amount;
+            }
+
+            $sale->save();
+        }
+
+        return back()->with('success',  __('standard.pages.status_success', ['STATUS' => 'Used']));
     }
 
     public function destroy($id)

@@ -21,7 +21,7 @@ class GiftCertificate extends Model
 
     public function sales()
 	{
-	    return $this->belongsTo('App\EcommerceModel\SalesHeader','sales_header_id')->withDefault(['order_number' => '', 'customer_name' => '']);
+	    return $this->belongsTo('App\EcommerceModel\SalesHeader','sales_header_id')->withDefault(['order_number' => '', 'customer_name' => '', 'id']);
 	}
 
 

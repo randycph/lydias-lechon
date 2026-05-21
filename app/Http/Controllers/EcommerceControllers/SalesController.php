@@ -800,6 +800,7 @@ class SalesController extends Controller
             'net_amount',
             'gross_amount',
             'deleted_at',
+            'discount_amount',
             DB::raw('(SELECT ecommerce_sales_details.delivery_date From ecommerce_sales_details WHERE ecommerce_sales_headers.id=ecommerce_sales_details.sales_header_id GROUP BY ecommerce_sales_details.sales_header_id) as date_needed')
         ];
 

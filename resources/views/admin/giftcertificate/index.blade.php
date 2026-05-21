@@ -149,8 +149,10 @@
                                     <td>{{ $gc->amount }}</td>
                                     <td>{{ $gc->gc_type }}</td>
                                     <td>{{ $gc->status }}</td>
-                                    <td>{{ $gc->sales_header_id }}
-                                        <!-- @if(isset($gc->claimed_at)) <br><i style="font-size:10px;">Claimed: {{date('Y-m-d h:i A',strtotime($gc->claimed_at))}}</i> @endif -->
+                                    <td>
+                                        @if ($gc->sales_header_id)
+                                        <a title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view', $gc->sales->id) }}">{{ $gc->sales->order_number ?? '' }}</a>
+                                        @endif
                                     </td>
                                     
                                     <td>

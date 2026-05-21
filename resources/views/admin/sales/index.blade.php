@@ -353,8 +353,8 @@
                                    @php
                                         
                                         $displayAmount = (float) ($sale->net_amount > 0 ? $sale->net_amount : $sale->gross_amount);
+                                        $displayAmount = $displayAmount - $sale->discount_amount;
 
-                                        
                                         $paidAmount = (float) $sale->payments
                                             ->where('is_discount', '!=', 1)
                                             ->where('status', 'PAID')
