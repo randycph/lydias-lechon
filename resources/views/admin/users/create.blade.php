@@ -203,75 +203,76 @@ User Management
         </div>
     </div>
 </div>
-</div>
 @endsection
 
 @section('pagejs')
+{{-- jQuery, Bootstrap bundle, and dashforge.js should be loaded once in admin.layouts.app. --}}
 <script src="{{ asset('lib/bselect/dist/js/bootstrap-select.js') }}"></script>
-<script src="{{ asset('lib/jquery/jquery.min.js') }}"></script>
 <script src="{{ asset('lib/select2/js/select2.min.js') }}"></script>
-<script src="{{ asset('js/dashforge.js') }}"></script>
-<script src="{{ asset('lib/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 @endsection
 
 @section('customjs')
 <script>
-    $("#user_form").submit(function(e){
-        const btn = document.getElementById('submitBtn');
-        btn.disabled = true;
-        btn.innerText = 'Saving...';
-    });
-    $(function(){
-            'use strict'
+    $(function () {
+        'use strict';
 
-            $('.select-branch').select2({
-                placeholder: 'Choose Branches',
-                searchInputPlaceholder: 'Search options',
-            });
-
-            $('.select-payment-types').select2({
-                placeholder: 'Choose Payment Types',
-                searchInputPlaceholder: 'Search options',
-            });
-
-            $('.select-production-branch').select2({
-                minimumResultsForSearch: Infinity,
-                placeholder: 'Choose Production Branches'
-            });
+        $('.select-branch').select2({
+            placeholder: 'Choose Branches',
+            searchInputPlaceholder: 'Search options',
+            width: '100%'
         });
 
-        function user_role(){
-            const $roleOpt = $('select[name="role"] option:selected');
-            const has_branches = Number($roleOpt.data('has-branches')) === 1;
-            const has_production_branch = Number($roleOpt.data('has-production-branch')) === 1;
-            const can_approve_payment = Number($roleOpt.data('can-approve-payment')) === 1;
+        $('.select-payment-types').select2({
+            placeholder: 'Choose Payment Types',
+            searchInputPlaceholder: 'Search options',
+            width: '100%'
+        });
 
-            // Branches
-            if (has_branches) {
-                $('#branches_div').removeClass('d-none').addClass('d-block');
-                $('#branches').prop('disabled', false).prop('required', true).trigger('change.select2');
-            } else {
-                $('#branches_div').removeClass('d-block').addClass('d-none');
-                $('#branches').prop('required', false).prop('disabled', true).val(null).trigger('change');
-            }
+        $('.select-production-branch').select2({
+            minimumResultsForSearch: Infinity,
+            placeholder: 'Choose Production Branches',
+            width: '100%'
+        });
 
-            // Production branch
-            if (has_production_branch) {
-                $('#production_branches_div').removeClass('d-none').addClass('d-block');
-                $('#production_branch_id').prop('disabled', false).prop('required', true).trigger('change.select2');
-            } else {
-                $('#production_branches_div').removeClass('d-block').addClass('d-none');
-                $('#production_branch_id').prop('required', false).prop('disabled', true).val('').trigger('change');
-            }
+        $('#user_form').on('submit', function () {
+            const btn = document.getElementById('submitBtn');
 
-            // Payment types (if you have it)
-            if (can_approve_payment == 1){
-                $('#payment_div').removeClass('d-none').addClass('d-block');
-                $('#payment_types').prop('disabled', false).prop('required', false).trigger('change.select2');
-            } else {
-                $('#payment_div').removeClass('d-block').addClass('d-none');
-                $('#payment_types').prop('required', false).prop('disabled', true).val(null).trigger('change');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = 'Saving...';
             }
+        });
+
+        // Safety fallback for Bootstrap 4 dropdowns in the header/user menu.
+        // This will not reload Bootstrap; it only initializes existing dropdown triggers.
+        if ($.fn.dropdown) {
+            $('[data-toggle="dropdown"]').dropdown();
         }
+    });
+
+    function user_role() {
+        const $roleOpt = $('select[name="role"] option:selected');
+        const hasBranches = Number($roleOpt.data('has-branches')) === 1;
+        const hasProductionBranch = Number($roleOpt.data('has-production-branch')) === 1;
+        const canApprovePayment = Number($roleOpt.data('can-approve-payment')) === 1;
+
+        toggleSelectGroup('#branches_div', '#branches', hasBranches, true);
+        toggleSelectGroup('#production_branches_div', '#production_branch_id', hasProductionBranch, true);
+        toggleSelectGroup('#payment_div', '#payment_types', canApprovePayment, false);
+    }
+
+    function toggleSelectGroup(wrapperSelector, selectSelector, shouldShow, isRequired) {
+        const $wrapper = $(wrapperSelector);
+        const $select = $(selectSelector);
+
+        if (shouldShow) {
+            $wrapper.removeClass('d-none').addClass('d-block');
+            $select.prop('disabled', false).prop('required', isRequired).trigger('change.select2');
+            return;
+        }
+
+        $wrapper.removeClass('d-block').addClass('d-none');
+        $select.prop('required', false).prop('disabled', true).val(null).trigger('change');
+    }
 </script>
 @endsection
