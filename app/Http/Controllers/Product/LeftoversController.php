@@ -49,9 +49,7 @@ class LeftoversController extends Controller
     public function create()
     {
         $branches = UserBranch::accessBranch();
-        $products = Product::withTrashed()
-                    ->where('status', 'PUBLISHED')
-                    ->get();
+        $products = Product::get();
         return view('admin.leftover.create',compact('branches','products'));
     }
 
@@ -107,7 +105,6 @@ class LeftoversController extends Controller
     {               
         $branched = Branch::whereId($branch)->first();        
         $los = Leftovers::where('branch_id',$branch)
-                    ->where('status', 'PUBLISHED')
                     ->where('date',$date)->get();
   
         
@@ -118,7 +115,7 @@ class LeftoversController extends Controller
     {               
         $branched = Branch::whereId($branch)->first();        
         $los = Leftovers::where('branch_id',$branch)->where('date',$date)->get();
-        $products = Product::all();
+        $products = Product::get();
         
         return view('admin.leftover.edit',compact('los','branched','date','products'));
     }
