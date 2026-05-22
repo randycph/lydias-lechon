@@ -938,7 +938,9 @@ class CouponController extends Controller
         AND cc.sales_header_id IS NOT NULL
         AND cc.coupon_code IS NOT NULL
         AND cc.coupon_code != ''
-        AND cc.total_usage > 0";
+        AND cc.total_usage > 0
+        AND h.status = 'PAID'
+";
 
     if ($request->filled('coupon_code')) {
         $qry .= " AND cc.coupon_code LIKE ? ";
