@@ -41,86 +41,80 @@
 
     <div class="row row-sm">
         <div class="col-md-12">
-            <form action="{{route('report.coupon.list')}}" method="get">
-                <input type="hidden" name="act" value="go">
-                @csrf
+            <form action="{{ route('report.coupon.list') }}" method="get">
+    <input type="hidden" name="act" value="go">
 
-                <table width="100%" style="font-size:12px;font-family:Arial;">
-                <tr>
-                    <td>Coupon Code</td>
-                    <td>Type of Coupon</td>
-                    <td>Order Source</td>
-                    <td>Order Start date</td>
-                    <td>Order End Date</td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                    <tr>
-                        <td>
-                            <input style="font-size:12px;width: 140px;" type="text" class="form-control input-sm" name="coupon_code" autocomplete="off"
-                            @if(isset($_GET['coupon_code'])) value="{{$_GET['coupon_code']}}" @endif >
-                        </td>
-                        <td>
-                        <select style="font-size:12px;width: 160px;"
-                                name="coupon_type"
-                                class="form-control input-sm">
-                            <option value="">All</option>
+    <div class="row align-items-end" style="font-size:12px;font-family:Arial;">
 
-                            <option value="free-shipping-optn"
-                                @if(isset($_GET['coupon_type']) && $_GET['coupon_type'] == 'free-shipping-optn') selected @endif>
-                                Free Shipping
-                            </option>
+        <div class="col-md-2">
+            <label>Coupon Code</label>
+            <input type="text"
+                   class="form-control input-sm"
+                   name="coupon_code"
+                   autocomplete="off"
+                   value="{{ request('coupon_code') }}">
+        </div>
 
-                            <option value="discount-amount-optn"
-                                @if(isset($_GET['coupon_type']) && $_GET['coupon_type'] == 'discount-amount-optn') selected @endif>
-                                Amount Discount
-                            </option>
+        <div class="col-md-2">
+            <label>Type of Coupon</label>
+            <select name="coupon_type" class="form-control input-sm">
+                <option value="">All</option>
+                <option value="free-shipping-optn" {{ request('coupon_type') == 'free-shipping-optn' ? 'selected' : '' }}>
+                    Free Shipping
+                </option>
+                <option value="discount-amount-optn" {{ request('coupon_type') == 'discount-amount-optn' ? 'selected' : '' }}>
+                    Amount Discount
+                </option>
+                <option value="discount-percentage-optn" {{ request('coupon_type') == 'discount-percentage-optn' ? 'selected' : '' }}>
+                    Percentage Discount
+                </option>
+                <option value="free-product-optn" {{ request('coupon_type') == 'free-product-optn' ? 'selected' : '' }}>
+                    Free Product
+                </option>
+            </select>
+        </div>
 
-                            <option value="discount-percentage-optn"
-                                @if(isset($_GET['coupon_type']) && $_GET['coupon_type'] == 'discount-percentage-optn') selected @endif>
-                                Percentage Discount
-                            </option>
+        <div class="col-md-2">
+            <label>Order Source</label>
+            <select name="order_source" class="form-control input-sm">
+                <option value="">All</option>
+                <option value="web" {{ request('order_source') == 'web' ? 'selected' : '' }}>
+                    Web
+                </option>
+                <option value="jo" {{ request('order_source') == 'jo' ? 'selected' : '' }}>
+                    JO
+                </option>
+            </select>
+        </div>
 
-                            <option value="free-product-optn"
-                                @if(isset($_GET['coupon_type']) && $_GET['coupon_type'] == 'free-product-optn') selected @endif>
-                                Free Product
-                            </option>
-                        </select>
-                    </td>
-                        <td>
-                <select style="font-size:12px;width: 140px;"
-                        name="order_source"
-                        class="form-control input-sm">
-                    <option value="">All</option>
-                    <option value="web" @if(isset($_GET['order_source']) && $_GET['order_source'] == 'web') selected @endif>
-                        Web
-                    </option>
-                    <option value="jo" @if(isset($_GET['order_source']) && $_GET['order_source'] == 'jo') selected @endif>
-                        JO
-                    </option>
-                </select>
-            </td>
+        <div class="col-md-2">
+            <label>Order Start date</label>
+            <input type="date"
+                   class="form-control input-sm"
+                   name="start"
+                   value="{{ request('start') }}">
+        </div>
 
-                        <td>
-                            <input style="font-size:12px;width: 140px;" type="date" class="form-control input-sm" name="start" autocomplete="off"
-                            @if(isset($_GET['start'])) value="{{$_GET['start']}}" @endif >
-                        </td>
+        <div class="col-md-2">
+            <label>Order End Date</label>
+            <input type="date"
+                   class="form-control input-sm"
+                   name="end"
+                   value="{{ request('end') }}">
+        </div>
 
-                        <td>
-                            <input style="font-size:12px;width: 140px;" type="date" class="form-control input-sm" name="end" autocomplete="off"
-                            @if(isset($_GET['end'])) value="{{$_GET['end']}}" @endif >
-                        </td>
-                        
-                        <td>
-                            <button type="submit" class="btn btn-primary btn-sm" style="margin:0px 0px 0px 20px;">Generate</button>
-                        </td>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary btn-sm">
+                Generate
+            </button>
 
-                        <a href="{{ route('report.coupon.list') }}" class="btn btn-success btn-sm" style="margin:0px 0px 0px 20px;">
-                                Reset
-                            </a>
-                    </tr>
-                </table>
-            </form>
+            <a href="{{ route('report.coupon.list') }}" class="btn btn-success btn-sm">
+                Reset
+            </a>
+        </div>
+
+    </div>
+</form>
         </div>
     </div>
 
@@ -191,7 +185,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8">No report result.</td>
+                            <td colspan="10">No report result.</td>
                         </tr>
                     @endforelse
                     </tbody>
