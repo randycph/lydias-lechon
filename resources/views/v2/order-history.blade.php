@@ -295,13 +295,59 @@
                                                                     <ul class="list-disc pl-10">
                                                                         @foreach ($products as $product)
                                                                             @php
-                                                                                $base   = (float)($product->product->price ?? 0);
-                                                                                $addOn  = !empty($product->paella) ? (float)($product->product->paella_price ?? 0) : 0;
-                                                                                $price  = $base + $addOn;
+                                                                                /*
+                                                                                |--------------------------------------------------------------------------
+                                                                                | Multiple delivery product price display
+                                                                                |--------------------------------------------------------------------------
+                                                                                | $product here comes from json_decode($address->products), so it is a stdClass.
+                                                                                | For free items, keep charged price as 0 but show the real product price
+                                                                                | as a label only.
+                                                                                */
+                                                                                $realProduct = \App\Models\Product::find($product->product_id ?? null);
+
+                                                                                $actualPrice = (float) (
+                                                                                    $product->price
+                                                                                    ?? $product->product_price
+                                                                                    ?? $product->unit_price
+                                                                                    ?? 0
+                                                                                );
+
+                                                                                $labelPrice = (float) (
+                                                                                    $product->original_price
+                                                                                    ?? $product->free_item_value
+                                                                                    ?? $realProduct?->price
+                                                                                    ?? $actualPrice
+                                                                                    ?? 0
+                                                                                );
+
+                                                                                $addOn = !empty($product->paella)
+                                                                                    ? (float) (
+                                                                                        $product->paella_price
+                                                                                        ?? $realProduct?->paella_price
+                                                                                        ?? 0
+                                                                                    )
+                                                                                    : 0;
+
+                                                                                $isFreeItem = $actualPrice <= 0;
+                                                                                $displayPrice = ($isFreeItem ? $labelPrice : $actualPrice) + $addOn;
                                                                             @endphp
                                                                             <li>
-                                                                                {!! highlightPaella($product->product_name ?? '') !!} x {{ $product->qty }}
-                                                                                - ₱{{ number_format($price, 2) }}
+                                                                                {!! highlightPaella($product->product_name ?? $realProduct?->name ?? '') !!} x {{ $product->qty ?? 1 }}
+
+                                                                                @if($isFreeItem)
+                                                                                    -
+                                                                                    <span class="line-through text-gray-400">
+                                                                                        ₱{{ number_format($displayPrice, 2) }}
+                                                                                    </span>
+                                                                                    <span class="text-green-600 font-semibold">
+                                                                                        FREE
+                                                                                    </span>
+                                                                                    <span class="text-xs text-gray-500">
+                                                                                        (Free item value label only)
+                                                                                    </span>
+                                                                                @else
+                                                                                    - ₱{{ number_format($displayPrice, 2) }}
+                                                                                @endif
                                                                             </li>
                                                                         @endforeach
                                                                     </ul>

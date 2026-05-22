@@ -518,34 +518,38 @@
                 },
 
             get selectableCoupons() {
-    const autoOnlyCoupons = (this.autoCouponChoices || [])
-        .map(c => this.normalizeCoupon(c))
-        .filter(c => this.shouldShowCouponInList(c))
-        .filter(c => {
-            return !this.selectedAutoCoupon ||
-                String(c.id) !== String(this.selectedAutoCoupon.id);
-        });
+                if (this.hasWholeLechonInCart()) {
+                    return [];
+                }
 
-    const unique = [];
+                const autoOnlyCoupons = (this.autoCouponChoices || [])
+                    .map(c => this.normalizeCoupon(c))
+                    .filter(c => this.shouldShowCouponInList(c))
+                    .filter(c => {
+                        return !this.selectedAutoCoupon ||
+                            String(c.id) !== String(this.selectedAutoCoupon.id);
+                    });
 
-    autoOnlyCoupons.forEach(coupon => {
-        const code = String(coupon.code || coupon.coupon_code || '')
-            .trim()
-            .toUpperCase();
+                const unique = [];
 
-        const exists = unique.some(item =>
-            String(item.code || item.coupon_code || '')
-                .trim()
-                .toUpperCase() === code
-        );
+                autoOnlyCoupons.forEach(coupon => {
+                    const code = String(coupon.code || coupon.coupon_code || '')
+                        .trim()
+                        .toUpperCase();
 
-        if (!exists) {
-            unique.push(coupon);
-        }
-    });
+                    const exists = unique.some(item =>
+                        String(item.code || item.coupon_code || '')
+                            .trim()
+                            .toUpperCase() === code
+                    );
 
-    return unique;
-},
+                    if (!exists) {
+                        unique.push(coupon);
+                    }
+                });
+
+                return unique;
+            },
 
                 couponWorthLabel(coupon) {
                     if (!coupon) return '';
@@ -575,6 +579,46 @@
                     return coupon.end_time
                         ? `${coupon.end_date} ${coupon.end_time}`
                         : coupon.end_date;
+                },
+                hasWholeLechonInCart() {
+                    const items = [
+                        ...(this.carts || []),
+                        ...((this.deliveries || []).flatMap(d => d.orders || []))
+                    ];
+
+                    return items.some(item => {
+                        if (item?.is_free_product) return false;
+
+                        const product = item?.product || {};
+
+                        const name = String(
+                            product.name ||
+                            item.name ||
+                            product.title ||
+                            ''
+                        ).toLowerCase();
+
+                        const slug = String(
+                            product.slug ||
+                            item.slug ||
+                            ''
+                        ).toLowerCase();
+
+                        return (
+                            name.includes('whole lechon') ||
+                            slug.includes('whole-lechon') ||
+                            slug.includes('whole_lechon')
+                        );
+                    });
+                },
+
+                blockCouponIfWholeLechon() {
+                    if (!this.hasWholeLechonInCart()) {
+                        return false;
+                    }
+
+                    this.showCouponError('Coupons are not allowed when there is Whole Lechon in the order list.');
+                    return true;
                 },
 
                 normalizeCoupon(coupon) {
@@ -1160,78 +1204,106 @@
 
                     return `- ${this.formatMoney(amount)}`;
                 },
+                
 
-applyAutoCoupons() {
-    const allAutoCoupons = (this.autoCouponsSource || [])
-        .map(c => ({
-            ...this.normalizeCoupon(c),
-            auto_applied: true
-        }));
+                    applyAutoCoupons() {
+                    if (this.hasWholeLechonInCart()) {
+                        const autoCodes = (this.autoCouponsSource || [])
+                            .map(c => this.normalizeCoupon(c).code);
 
-    const visibleAutos = allAutoCoupons.filter(c =>
-        this.shouldShowAutoCouponInList(c)
-    );
+                        this.coupons = this.coupons.filter(c => !c.auto_applied);
+                        this.autoAppliedCoupons = [];
+                        this.selectedAutoCoupon = null;
+                        this.selectedAutoCouponId = '';
+                        this.autoCouponChoices = [];
+                        this.showAutoCouponChooser = false;
 
-    const autoCodes = allAutoCoupons.map(c => c.code);
+                        this.carts = this.carts.filter(item =>
+                            !(item.is_free_product && autoCodes.includes(item.coupon_code))
+                        );
 
-    // Remove old auto coupons first
-    this.coupons = this.coupons.filter(c => !c.auto_applied);
-    this.autoAppliedCoupons = [];
+                        this.orders = this.orders.filter(item =>
+                            !(item.is_free_product && autoCodes.includes(item.coupon_code))
+                        );
 
-    // Remove old free products from auto coupons
-    this.carts = this.carts.filter(item =>
-        !(item.is_free_product && autoCodes.includes(item.coupon_code))
-    );
+                        this.order_amount = this.cartSubtotal();
+                        this.recomputeCouponTotals();
+                        return;
+                    }
 
-    this.orders = this.orders.filter(item =>
-        !(item.is_free_product && autoCodes.includes(item.coupon_code))
-    );
+                    const allAutoCoupons = (this.autoCouponsSource || [])
+                        .map(c => ({
+                            ...this.normalizeCoupon(c),
+                            auto_applied: true
+                        }));
 
-    this.selectedAutoCoupon = null;
+                    const visibleAutos = allAutoCoupons.filter(c =>
+                        this.shouldShowAutoCouponInList(c)
+                    );
 
-    this.autoCouponChoices = visibleAutos.map(coupon => {
-        const available = this.shouldAutoApplyCoupon(coupon);
+                    const autoCodes = allAutoCoupons.map(c => c.code);
 
-        return {
-            ...coupon,
-            auto_available: available,
-            unavailable_reason: available
-                ? ''
-                : this.getAutoCouponUnavailableReason(coupon)
-        };
-    });
+                    // Remove old auto coupons first
+                    this.coupons = this.coupons.filter(c => !c.auto_applied);
+                    this.autoAppliedCoupons = [];
 
-    const availableAutos = this.autoCouponChoices.filter(c => c.auto_available);
+                    // Remove old free products from auto coupons
+                    this.carts = this.carts.filter(item =>
+                        !(item.is_free_product && autoCodes.includes(item.coupon_code))
+                    );
 
-    if (this.autoCouponChoices.length === 0) {
-        this.selectedAutoCouponId = '';
-        this.showAutoCouponChooser = false;
-        this.order_amount = this.cartSubtotal();
-        this.recomputeCouponTotals();
-        return;
-    }
+                    this.orders = this.orders.filter(item =>
+                        !(item.is_free_product && autoCodes.includes(item.coupon_code))
+                    );
 
-    if (this.selectedAutoCouponId) {
-    const chosen = availableAutos.find(c =>
-        String(c.id) === String(this.selectedAutoCouponId)
-    );
+                    this.selectedAutoCoupon = null;
 
-    if (chosen) {
-        this.applyChosenAutoCoupon(chosen);
-        this.showAutoCouponChooser = false;
-        return;
-    }
-}
+                    this.autoCouponChoices = visibleAutos.map(coupon => {
+                        const available = this.shouldAutoApplyCoupon(coupon);
 
-if (!this.autoCouponChooserShownOnce) {
-    this.showAutoCouponChooser = true;
-    this.autoCouponChooserShownOnce = true;
-}
+                        return {
+                            ...coupon,
+                            auto_available: available,
+                            unavailable_reason: available
+                                ? ''
+                                : this.getAutoCouponUnavailableReason(coupon)
+                        };
+                    });
 
-this.order_amount = this.cartSubtotal();
-this.recomputeCouponTotals();
-},
+                    const availableAutos = this.autoCouponChoices.filter(c => c.auto_available);
+
+                    if (this.autoCouponChoices.length === 0) {
+                        this.selectedAutoCouponId = '';
+                        this.showAutoCouponChooser = false;
+                        this.order_amount = this.cartSubtotal();
+                        this.recomputeCouponTotals();
+                        return;
+                    }
+
+                    if (this.selectedAutoCouponId) {
+                    const chosen = availableAutos.find(c =>
+                        String(c.id) === String(this.selectedAutoCouponId)
+                    );
+
+                    if (chosen) {
+                        this.applyChosenAutoCoupon(chosen);
+                        this.showAutoCouponChooser = false;
+                        return;
+                    }
+                }
+
+                if (!this.autoCouponChooserShownOnce) {
+                    this.showAutoCouponChooser = true;
+                    this.autoCouponChooserShownOnce = true;
+                }
+
+                this.order_amount = this.cartSubtotal();
+                this.recomputeCouponTotals();
+                },
             confirmCouponSelection() {
+                if (this.blockCouponIfWholeLechon()) {
+                    return;
+                }
                 if (!this.selectedCoupon) {
                     this.showCouponError('Please select a coupon first.');
                     return;
@@ -1243,9 +1315,9 @@ this.recomputeCouponTotals();
                     const targets = this.getSelectedCouponTargets();
 
                     if (!targets.length) {
-    this.showCouponError('Please select a delivery location first.');
-    return;
-}
+                        this.showCouponError('Please select a delivery location first.');
+                        return;
+                    }
 
                     const isValidForAnyTarget = targets.some(t =>
                         this.couponMatchesLocation(normalized, t.city, t.location)
@@ -1284,6 +1356,10 @@ this.recomputeCouponTotals();
            applyCouponCode() {
             this.couponMessage = '';
             this.couponMessageType = '';
+            if (this.blockCouponIfWholeLechon()) {
+                this.couponCode = '';
+                return;
+            }
 
             const code = String(this.couponCode || '').trim().toUpperCase();
 
@@ -1394,6 +1470,11 @@ this.recomputeCouponTotals();
         },
 
             applyChosenAutoCoupon(autoCoupon) {
+
+             if (this.blockCouponIfWholeLechon()) {
+                    return;
+                }
+
                 if (!autoCoupon) return;
 
                 const alreadyApplied = this.coupons.some(c =>
@@ -1425,39 +1506,44 @@ this.recomputeCouponTotals();
                 this.recomputeCouponTotals();
             },
 
-applySelectedAutoCoupon() {
-    if (!this.selectedAutoCouponId) {
-        this.showCouponError('Please select an auto coupon first.');
-        return;
-    }
+                applySelectedAutoCoupon() {
+                    if (this.blockCouponIfWholeLechon()) {
+                        this.showAutoCouponChooser = false;
+                        return;
+                    }
 
-    const chosen = this.autoCouponChoices.find(c =>
-        String(c.id) === String(this.selectedAutoCouponId)
-    );
+                    if (!this.selectedAutoCouponId) {
+                        this.showCouponError('Please select an auto coupon first.');
+                        return;
+                    }
 
-    if (!chosen) {
-        this.showCouponError('Selected coupon is no longer available.');
-        return;
-    }
+                    const chosen = this.autoCouponChoices.find(c =>
+                        String(c.id) === String(this.selectedAutoCouponId)
+                    );
 
-    if (!chosen.auto_available) {
-        this.showCouponError(chosen.unavailable_reason || 'This coupon is not available for the current order.');
-        return;
-    }
+                    if (!chosen) {
+                        this.showCouponError('Selected coupon is no longer available.');
+                        return;
+                    }
 
-    const beforeCount = this.coupons.length;
+                    if (!chosen.auto_available) {
+                        this.showCouponError(chosen.unavailable_reason || 'This coupon is not available for the current order.');
+                        return;
+                    }
 
-    this.applyChosenAutoCoupon(chosen);
+                    const beforeCount = this.coupons.length;
 
-    const wasApplied = this.coupons.length > beforeCount;
+                    this.applyChosenAutoCoupon(chosen);
 
-    if (!wasApplied) {
-        return;
-    }
+                    const wasApplied = this.coupons.length > beforeCount;
 
-    this.showAutoCouponChooser = false;
-    this.showCouponSuccess('Coupon applied successfully.');
-},
+                    if (!wasApplied) {
+                        return;
+                    }
+
+                    this.showAutoCouponChooser = false;
+                    this.showCouponSuccess('Coupon applied successfully.');
+                },
 
                 applyGiftCheque() {
                 this.giftChequeMessage = '';
