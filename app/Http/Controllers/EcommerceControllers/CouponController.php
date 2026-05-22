@@ -883,25 +883,22 @@ class CouponController extends Controller
     }
 
     public function coupon_list(Request $request)
-    {
-        $params = [];
+{
+    $params = [];
 
-$params = [];
-
-$qry = "
+    $qry = "
     SELECT 
-        MIN(cs.id) AS id,
+        MIN(cc.id) AS id,
 
         CASE
-            WHEN c.reward = 'free-shipping-optn' THEN CONCAT('fs-', cs.coupon_id)
-            WHEN c.reward = 'discount-amount-optn' THEN CONCAT('ad-', cs.coupon_id)
-            WHEN c.reward = 'discount-percentage-optn' THEN CONCAT('pd-', cs.coupon_id)
-            WHEN c.reward = 'free-product-optn' THEN CONCAT('fp-', cs.coupon_id)
-            ELSE CONCAT('cp-', cs.coupon_id)
+            WHEN c.reward = 'free-shipping-optn' THEN CONCAT('fs-', cc.coupon_id)
+            WHEN c.reward = 'discount-amount-optn' THEN CONCAT('ad-', cc.coupon_id)
+            WHEN c.reward = 'discount-percentage-optn' THEN CONCAT('pd-', cc.coupon_id)
+            WHEN c.reward = 'free-product-optn' THEN CONCAT('fp-', cc.coupon_id)
+            ELSE CONCAT('cp-', cc.coupon_id)
         END AS id_label,
 
         h.order_number,
-
         DATE_FORMAT(h.created_at, '%M %d, %Y') AS order_date,
 
         CASE
@@ -911,8 +908,7 @@ $qry = "
 
         COALESCE(h.net_amount, 0) AS net_amount,
         h.customer_name,
-
-        COALESCE(c.name, cs.coupon_code, 'N/A') AS name,
+        COALESCE(c.name, cc.coupon_code, 'N/A') AS name,
 
         CASE
             WHEN c.reward = 'free-shipping-optn' THEN 'Free Shipping'
@@ -923,29 +919,82 @@ $qry = "
         END AS reward_label,
 
         c.reward,
-        cs.coupon_code,
-        cs.customer_id,
+        cc.coupon_code,
+        cc.customer_id,
 
-        COALESCE(SUM(cs.discount_used), 0) AS coupon_amount
+        COALESCE(SUM(cc.discount_used), 0) AS coupon_amount
 
-    FROM coupon_cart cs
+    FROM coupon_cart cc
 
-    LEFT JOIN ecommerce_sales_headers h 
-        ON h.id = cs.sales_header_id
+    INNER JOIN ecommerce_sales_headers h 
+        ON h.id = cc.sales_header_id
 
     LEFT JOIN coupons c 
-        ON c.id = cs.coupon_id
+        ON c.id = cc.coupon_id
 
-    WHERE cs.id > 0
-    AND cs.coupon_id IS NOT NULL
-    AND cs.sales_header_id IS NOT NULL
+    WHERE cc.id > 0
+        AND cc.coupon_id IS NOT NULL
+        AND cc.coupon_id > 0
+        AND cc.sales_header_id IS NOT NULL
+        AND cc.coupon_code IS NOT NULL
+        AND cc.coupon_code != ''
+        AND cc.total_usage > 0
+        AND h.status = 'PAID'
 ";
 
-$rs = DB::select($qry, $params);
-
-return view('admin.reports.coupon.list', compact('rs'));
-
+    if ($request->filled('coupon_code')) {
+        $qry .= " AND cc.coupon_code LIKE ? ";
+        $params[] = '%' . $request->coupon_code . '%';
     }
+
+    if ($request->filled('coupon_type')) {
+        $qry .= " AND c.reward = ? ";
+        $params[] = $request->coupon_type;
+    }
+
+    if ($request->filled('order_source')) {
+        if ($request->order_source == 'web') {
+            $qry .= " AND h.order_source = ? ";
+            $params[] = 'web';
+        }
+
+        if ($request->order_source == 'jo') {
+            $qry .= " AND (h.order_source IS NULL OR h.order_source != ?) ";
+            $params[] = 'web';
+        }
+    }
+
+    if ($request->filled('start')) {
+        $qry .= " AND DATE(h.created_at) >= ? ";
+        $params[] = $request->start;
+    }
+
+    if ($request->filled('end')) {
+        $qry .= " AND DATE(h.created_at) <= ? ";
+        $params[] = $request->end;
+    }
+
+    $qry .= "
+        GROUP BY 
+            cc.sales_header_id,
+            cc.coupon_id,
+            cc.coupon_code,
+            cc.customer_id,
+            h.order_number,
+            h.created_at,
+            h.order_source,
+            h.net_amount,
+            h.customer_name,
+            c.name,
+            c.reward
+
+        ORDER BY MIN(cc.id) DESC
+    ";
+
+    $rs = DB::select($qry, $params);
+
+    return view('admin.reports.coupon.list', compact('rs'));
+}
 
     public function add_manual_coupon(Request $request)
     {

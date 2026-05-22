@@ -115,9 +115,9 @@
                             <button type="submit" class="btn btn-primary btn-sm" style="margin:0px 0px 0px 20px;">Generate</button>
                         </td>
 
-                        <td>
-                            <a href="{{ route('report.sales.list') }}" class="btn btn-success btn-sm" style="margin:0px 0px 0px 20px;">Reset</a>
-                        </td>
+                        <a href="{{ route('report.coupon.list') }}" class="btn btn-success btn-sm" style="margin:0px 0px 0px 20px;">
+                                Reset
+                            </a>
                     </tr>
                 </table>
             </form>
@@ -219,7 +219,7 @@
         $('#example').DataTable({
             dom: 'Bfrtip',
             pageLength: 20,
-            order: [[0, 'desc']],
+            order: [[9, 'desc']],
             buttons: [
                 {
                     extend: 'print',
