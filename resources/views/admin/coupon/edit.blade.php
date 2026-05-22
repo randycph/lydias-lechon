@@ -201,6 +201,7 @@
 								<option @if(in_array($customer->id, old('customer', $selectedCustomers ?? []))) selected @endif value="{{$customer->id}}">{{ $customer->name }}</option>
 							@endforeach
 						</select>
+						<small id="specific_customer_count" class="text-primary font-weight-bold d-block mt-2"></small>
 						@error('customer')
 							<span class="invalid-feedback" role="alert">
 								<strong>{{ $message }}</strong>
@@ -1181,29 +1182,34 @@ $(function() {
     });
 
     function syncCustomerLimitWithSpecificCustomers() {
-        const isSpecific = $('#coupon-scope-specific').is(':checked');
-        const selectedCustomers = $('select[name="customer[]"]').val() || [];
-        const selectedCount = selectedCustomers.length;
+    const isSpecific = $('#coupon-scope-specific').is(':checked');
+    const selectedCustomers = $('select[name="customer[]"]').val() || [];
+    const selectedCount = selectedCustomers.length;
 
-        const $limitCheckbox = $('#coupon-customer-limit');
-        const $limitForm = $('#coupon-customer-limit-form');
-        const $limitInput = $('input[name="coupon_customer_limit_qty"]');
-        const $limitButtons = $('.btn-number[data-field="coupon_customer_limit_qty"]');
+    const $limitCheckbox = $('#coupon-customer-limit');
+    const $limitForm = $('#coupon-customer-limit-form');
+    const $limitInput = $('input[name="coupon_customer_limit_qty"]');
+    const $limitButtons = $('.btn-number[data-field="coupon_customer_limit_qty"]');
 
-        if (isSpecific) {
-            $limitCheckbox.prop('checked', true);
-            $limitForm.show();
+    if (isSpecific) {
+        $limitCheckbox.prop('checked', true);
+        $limitForm.show();
 
-            $limitInput
-                .val(selectedCount)
-                .prop('readonly', selectedCount > 0);
+        $limitInput
+            .val(selectedCount)
+            .prop('readonly', selectedCount > 0);
 
-            $limitButtons.prop('disabled', selectedCount > 0);
-        } else {
-            $limitInput.prop('readonly', false);
-            $limitButtons.prop('disabled', false);
-        }
+        $limitButtons.prop('disabled', selectedCount > 0);
+
+        $('#specific_customer_count').html(
+            'Selected specific customers: ' + selectedCount
+        );
+    } else {
+        $limitInput.prop('readonly', false);
+        $limitButtons.prop('disabled', false);
+        $('#specific_customer_count').html('');
     }
+}
 
     $('select[name="customer[]"]').on('change select2:select select2:unselect', function () {
         syncCustomerLimitWithSpecificCustomers();

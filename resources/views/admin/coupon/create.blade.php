@@ -187,7 +187,7 @@
 								<option @if(is_array(old('customer')) && in_array($customer->id, old('customer'))) selected @endif value="{{$customer->id}}">{{ $customer->name }}</option>
 							@endforeach
 						</select>
-					
+						<small id="specific_customer_count" class="text-primary font-weight-bold d-block mt-2"></small>
 					</div>
 				</div>
 
@@ -1072,14 +1072,21 @@ function syncCustomerLimitWithSpecificCustomers() {
             .prop('readonly', selectedCount > 0);
 
         $limitButtons.prop('disabled', selectedCount > 0);
+
+        $('#specific_customer_count').html(
+            'Selected specific customers: ' + selectedCount
+        );
     } else {
         $limitInput.prop('readonly', false);
         $limitButtons.prop('disabled', false);
+        $('#specific_customer_count').html('');
     }
 }
 
 $('select[name="customer[]"]').on('change select2:select select2:unselect', function () {
     syncCustomerLimitWithSpecificCustomers();
+
+   
 });
 
 $('#coupon-scope-specific').on('click change', function () {
