@@ -55,9 +55,23 @@ class DeliveryService
 
                 $product = Product::find($order->product_id);
 
-                $gross_amount = ((float)$product->price + ($order->paella ? $product->paella_price : 0)) * $order->qty;
-                $tax_amount   = $gross_amount - ($gross_amount / 1.12);
+                    $savedPrice = data_get($order, 'price');
+                    $hasSavedPrice = !is_null($savedPrice);
 
+                    $isFreeProduct = (bool) data_get($order, 'is_free_product', false)
+                        || !empty(data_get($order, 'coupon_code'))
+                        || ($hasSavedPrice && (float) $savedPrice <= 0);
+
+                    $unitPrice = $isFreeProduct
+                        ? 0
+                        : (float) ($savedPrice ?? $product->price ?? 0);
+
+                    $paellaPrice = $isFreeProduct
+                        ? 0
+                        : (!empty($order->paella) ? (float) ($product->paella_price ?? 0) : 0);
+
+                    $gross_amount = ($unitPrice + $paellaPrice) * (int) ($order->qty ?? 1);
+                    $tax_amount   = $gross_amount > 0 ? $gross_amount - ($gross_amount / 1.12) : 0;
                 $grand_gross += $gross_amount;
                 $grand_tax   += $tax_amount;
 
@@ -171,8 +185,24 @@ class DeliveryService
                 foreach ($delivery->orders as $order) {
 
                     $product = Product::find($order->product_id);
-                    $gross_amount = ((float)$product?->price + ($order->paella ? $product->paella_price : 0)) * $order->qty;
-                    $tax_amount = $gross_amount - ($gross_amount/1.12);
+
+                    $savedPrice = data_get($order, 'price');
+                    $hasSavedPrice = !is_null($savedPrice);
+
+                    $isFreeProduct = (bool) data_get($order, 'is_free_product', false)
+                        || !empty(data_get($order, 'coupon_code'))
+                        || ($hasSavedPrice && (float) $savedPrice <= 0);
+
+                    $unitPrice = $isFreeProduct
+                        ? 0
+                        : (float) ($savedPrice ?? $product->price ?? 0);
+
+                    $paellaPrice = $isFreeProduct
+                        ? 0
+                        : (!empty($order->paella) ? (float) ($product->paella_price ?? 0) : 0);
+
+                    $gross_amount = ($unitPrice + $paellaPrice) * (int) ($order->qty ?? 1);
+                    $tax_amount = $gross_amount > 0 ? $gross_amount - ($gross_amount / 1.12) : 0;
                     $grand_gross += $gross_amount;
                     $grand_tax += $tax_amount;
 
@@ -181,7 +211,7 @@ class DeliveryService
                         'product_id' => $product->id,
                         'product_name' => $product->name . ($order->paella ? ' Boneless with Paella' : ''),
                         'product_category' => $product->category_id,
-                        'price' => $product?->price,
+                        'price' => $unitPrice,
                         'cost' => 0,
                         'tax_amount' => $tax_amount,
                         'promo_id' => 0,
@@ -194,7 +224,7 @@ class DeliveryService
                         'uom' => $product?->uom ?? "",
                         'size' => $product?->size ?? "",
                         'no_of_pax' => $product->no_of_pax ?? "",
-                        'paella_price' => $order->paella ? $product->paella_price : 0,
+                        'paella_price' => $paellaPrice,
                         'other_cost' => 0,
                         'other_cost_description' => '',
                         'created_by' => $user->id,

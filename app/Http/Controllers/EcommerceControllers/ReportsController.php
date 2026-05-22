@@ -50,22 +50,51 @@ class ReportsController extends Controller
         $wra = rtrim($wra,",");
         $wra.=")";
 
-        $qry = "SELECT pb.name as prod_branch,h.delivery_status,jo.jo_number as jnum,h.*,d.*,h.created_at as hcreated,h.id as hid,p.category_id,c.name as catname,d.id as did,p.id as prodid,p.is_misc, h.delivery_branch, time(d.delivery_date) as del_branch
-            FROM `ecommerce_sales_details` d
-            left join ecommerce_sales_headers h on h.id=d.sales_header_id
-            left join products p on p.id=d.product_id
-            left join product_categories c on c.id=p.category_id
-            left join job_orders jo on jo.sales_detail_id = d.id
-            left join production_orders po on po.joborder_id = jo.id
-            left join production_branches pb on pb.id = po.branch_id
-            WHERE   
-                    h.id > 0 
-                AND h.deleted_at is null 
-                AND h.for_deletion = 0 
-                AND jo.deleted_at is null 
-                AND d.deleted_at is null 
-                AND h.has_sub = 0 
-                AND h.status != 'CANCELLED'";
+        $qry = "SELECT 
+            pb.name as prod_branch,
+            h.delivery_status,
+            jo.jo_number as jnum,
+
+            h.*,
+            h.created_at as hcreated,
+            h.id as hid,
+            h.delivery_branch,
+
+            d.id as did,
+            d.sales_header_id,
+            d.product_id,
+            d.product_name,
+            d.product_category,
+            d.price as detail_price,
+            d.paella_price as detail_paella_price,
+            d.qty as detail_qty,
+            d.gross_amount as detail_gross_amount,
+            d.net_amount as detail_net_amount,
+            d.delivery_date,
+            d.created_by,
+
+            p.category_id,
+            p.id as prodid,
+            p.is_misc,
+
+            c.name as catname,
+
+            time(d.delivery_date) as del_branch
+        FROM `ecommerce_sales_details` d
+        left join ecommerce_sales_headers h on h.id=d.sales_header_id
+        left join products p on p.id=d.product_id
+        left join product_categories c on c.id=p.category_id
+        left join job_orders jo on jo.sales_detail_id = d.id
+        left join production_orders po on po.joborder_id = jo.id
+        left join production_branches pb on pb.id = po.branch_id
+        WHERE   
+                h.id > 0 
+            AND h.deleted_at is null 
+            AND h.for_deletion = 0 
+            AND jo.deleted_at is null 
+            AND d.deleted_at is null 
+            AND h.has_sub = 0 
+            AND h.status != 'CANCELLED'";
 
             // conditions
             if(isset($_GET['agent']) && $_GET['agent']<>''){
@@ -120,7 +149,7 @@ class ReportsController extends Controller
         // end conditions
 
         $rs = DB::select($qry);
-       
+
         return view('admin.reports.sales',compact('rs','wra_array'));
 
     }
