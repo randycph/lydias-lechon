@@ -707,40 +707,134 @@ if ($carts->count() > 0) {
 
     public function confirmation($id)
     {
-        $page = 'confirmation';
+    $page = 'confirmation';
 
-        $undecodeId = $id;
-        
-        if (ctype_digit($id)) {
-            $id = $undecodeId;
-        } else {
-            $id = base64_decode($id);
-        }
-        
-        $sales = SalesHeader::where('id',$id)->with('deliveryAddress', 'items', 'couponUsed')->first();
+    $undecodeId = $id;
+    
+    if (ctype_digit($id)) {
+        $id = $undecodeId;
+    } else {
+        $id = base64_decode($id);
+    }
+    
+    $sales = SalesHeader::where('id', $id)
+        ->with('deliveryAddress', 'items', 'couponUsed')
+        ->first();
 
-        if (!$sales) {
-            abort(404);
-        }
+    if (!$sales) {
+        abort(404);
+    }
 
-        $gc = GiftCertificate::where('sales_header_id',$id)->get();
-        $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
-        $salesDetails = SalesDetail::with('product.photos')->where('sales_header_id',$id)->get();
-        $totalPayment = SalesPayment::where('sales_header_id',$id)->sum('amount');
-        $deliveries = DeliveryStatus::where('order_id',$id)->get();
-        $totalNet = SalesHeader::where('id',$id)->sum('net_amount');
+    $gc = GiftCertificate::where('sales_header_id', $id)->get();
 
-        if($totalNet <= $totalPayment) {
-            $status = 'PAID';
-        } else {
-            $status = 'UNPAID';
-            if($totalPayment > 0){
-                $status = 'PARTIAL';
+    $salesPayments = SalesPayment::where('sales_header_id', $id)->get();
+
+    $salesDetails = SalesDetail::with('product.photos')
+        ->where('sales_header_id', $id)
+        ->get();
+
+    $totalPayment = SalesPayment::where('sales_header_id', $id)->sum('amount');
+
+    $deliveries = DeliveryStatus::where('order_id', $id)->get();
+
+    $totalNet = SalesHeader::where('id', $id)->sum('net_amount');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Used Coupons
+    |--------------------------------------------------------------------------
+    | This is needed by the confirmation blade to display:
+    | - coupon name/code
+    | - discount amount
+    | - free item value label
+    */
+    $usedCoupons = CouponCart::with('coupon')
+        ->where('sales_header_id', $id)
+        ->whereNotNull('coupon_id')
+        ->where('coupon_id', '>', 0)
+        ->whereNotNull('coupon_code')
+        ->where('coupon_code', '!=', '')
+        ->get();
+
+    /*
+    |--------------------------------------------------------------------------
+    | Add display price for free product coupons
+    |--------------------------------------------------------------------------
+    | If sales_details.price is 0, we get the real product price
+    | from coupon.free_product_id as label only.
+    */
+    $usedCoupons = $usedCoupons->map(function ($usedCoupon) use ($salesDetails) {
+        $usedCoupon->free_item_value = 0;
+        $usedCoupon->free_item_name = null;
+
+        $reward = $usedCoupon->coupon->reward ?? null;
+
+        if ($reward === 'free-product-optn') {
+            $productIds = [];
+
+            if (!empty($usedCoupon->coupon->free_product_id)) {
+                $productIds = explode('|', $usedCoupon->coupon->free_product_id);
+            }
+
+            $freeProductId = $usedCoupon->product_id ?? ($productIds[0] ?? null);
+
+            if ($freeProductId) {
+                $freeDetail = $salesDetails->firstWhere('product_id', $freeProductId);
+
+                if ($freeDetail) {
+                    $usedCoupon->free_item_name = $freeDetail->product_name ?? $freeDetail->product->name ?? null;
+
+                    $usedCoupon->free_item_value = $freeDetail->price > 0
+                        ? $freeDetail->price
+                        : ($freeDetail->product->price ?? 0);
+                }
+
+                if ($usedCoupon->free_item_value <= 0) {
+                    $product = Product::find($freeProductId);
+
+                    if ($product) {
+                        $usedCoupon->free_item_name = $usedCoupon->free_item_name ?? $product->name;
+                        $usedCoupon->free_item_value = $product->price ?? 0;
+                    }
+                }
+            }
+
+            if ($usedCoupon->free_item_value <= 0) {
+                $usedCoupon->free_item_value = $usedCoupon->discount_used ?? 0;
             }
         }
 
-        return view('v2.confirmation', compact('page', 'sales', 'salesPayments', 'salesDetails', 'status', 'deliveries', 'gc', 'totalPayment', 'totalNet'));
+        return $usedCoupon;
+    });
+
+    $couponDiscountTotal = $usedCoupons->sum(function ($coupon) {
+        return (float) ($coupon->discount_used ?? 0);
+    });
+
+    if ($totalNet <= $totalPayment) {
+        $status = 'PAID';
+    } else {
+        $status = 'UNPAID';
+
+        if ($totalPayment > 0) {
+            $status = 'PARTIAL';
+        }
     }
+
+    return view('v2.confirmation', compact(
+        'page',
+        'sales',
+        'salesPayments',
+        'salesDetails',
+        'status',
+        'deliveries',
+        'gc',
+        'totalPayment',
+        'totalNet',
+        'usedCoupons',
+        'couponDiscountTotal'
+    ));
+}
 
     public function login()
     {

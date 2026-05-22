@@ -74,8 +74,24 @@
                                                 class="w-20 h-20 object-cover">
                                         </div>
                                         <div class="flex flex-col">
+                                            @php
+                                                $cartDisplayPrice = (float) ($cart->price ?? 0);
+                                                $cartOriginalPrice = $cartDisplayPrice > 0
+                                                    ? $cartDisplayPrice
+                                                    : (float) ($cart?->product?->price ?? 0);
+                                            @endphp
                                             <div class="font-bold">{!! highlightPaella($cart?->product_name ?? '') !!} @if ($cart->price == 0)<span class="text-green-600 font-semibold text-sm">(Free)</span>@endif</div>
-                                            <div class="text-sm text-gray-600 font-medium">Price: ₱{{ number_format($cart->price, 2) }} <span class="italic">{{ isset($cart?->paella_price) && $cart?->paella_price > 0 ? '+ ₱' . number_format($cart?->paella_price, 2) : '' }}</span></div>
+                                            <div class="text-sm text-gray-600 font-medium">
+                                                Price:
+                                                @if($cartDisplayPrice <= 0 && $cartOriginalPrice > 0)
+                                                    <span class="line-through text-gray-400">₱{{ number_format($cartOriginalPrice, 2) }}</span>
+                                                    <span class="text-green-600 font-semibold">FREE</span>
+                                                    <span class="text-xs text-gray-500">(Free item value label only)</span>
+                                                @else
+                                                    ₱{{ number_format($cartDisplayPrice, 2) }}
+                                                @endif
+                                                <span class="italic">{{ isset($cart?->paella_price) && $cart?->paella_price > 0 ? '+ ₱' . number_format($cart?->paella_price, 2) : '' }}</span>
+                                            </div>
                                             <div class="text-sm text-gray-600 font-medium">QTY: {{ number_format($cart->qty, 0) }}</div>
                                         </div>
                                         <div class="text-sm text-black font-bold text-right w-full absolute right-0 bottom-0">₱{{ number_format($itemTotal, 2) }}</div>
@@ -133,29 +149,78 @@
                                         </div>
                                         @endif
 
-                                    @if ($sale->couponUsed && count($sale->couponUsed) > 0 && $sale->discount_amount > 0)
-                                        <ul class="italic">
+                                    @if ($sale->couponUsed && count($sale->couponUsed) > 0)
+                                        <ul class="italic w-full">
                                             @foreach ($sale->couponUsed as $coupon)
-                                                <li class="pl-4 flex items-center text-sm justify-between">
-                                                    <div>{{ $coupon->coupon_code }}</div>
-                                                    <div class="text-right text-red-500 italic">
-                                                        @if ($coupon?->coupon?->free_product_id)
-                                                            <span class="text-green-500">Free Products </span>
-                                                            @php $products = explode('|', $coupon->coupon->free_product_id); @endphp
-                                                            <ul class="mt-2">
-                                                                @foreach ($products as $productId)
-                                                                    @php $product = \App\Models\Product::find($productId); @endphp
-                                                                    @if ($product)
-                                                                        <li class="text-green-500">
-                                                                            {{ $product->name }}
-                                                                        </li>
-                                                                    @endif
-                                                                @endforeach
-                                                            </ul>
+                                                @php
+                                                    $isFreeProductCoupon = !empty($coupon?->coupon?->free_product_id);
+                                                    $couponProductIds = $isFreeProductCoupon
+                                                        ? array_values(array_filter(explode('|', $coupon->coupon->free_product_id)))
+                                                        : [];
+                                                @endphp
+
+                                                <li class="pl-4 text-sm border-t border-gray-100 pt-2 mt-2">
+                                                    <div class="flex items-center justify-between gap-4">
+                                                        <div class="font-semibold">
+                                                            Coupon: {{ $coupon->coupon->name ?? $coupon->coupon_code }}
+                                                        </div>
+
+                                                        @if(!$isFreeProductCoupon)
+                                                            <div class="text-right text-red-500 italic">
+                                                                -₱{{ number_format($coupon->discount_used ?? 0, 2) }}
+                                                            </div>
                                                         @else
-                                                            <div>-₱{{ number_format($coupon->discount_used ?? 0, 2) }}</div>
+                                                            <div class="text-right text-green-600 font-semibold">
+                                                                FREE PRODUCT
+                                                            </div>
                                                         @endif
                                                     </div>
+
+                                                    @if ($isFreeProductCoupon)
+                                                        <div class="mt-2 text-xs text-gray-600">
+                                                            @foreach ($couponProductIds as $productId)
+                                                                @php
+                                                                    $freeProduct = \App\Models\Product::find($productId);
+
+                                                                    $freeCartItem = $sale->items->firstWhere('product_id', (int) $productId);
+
+                                                                    $freeItemName = $freeCartItem->product_name
+                                                                        ?? $freeProduct->name
+                                                                        ?? 'Free Product';
+
+                                                                    $freeItemValue = 0;
+
+                                                                    if ($freeCartItem) {
+                                                                        $freeItemValue = (float) ($freeCartItem->price ?? 0);
+
+                                                                        if ($freeItemValue <= 0) {
+                                                                            $freeItemValue = (float) ($freeCartItem?->product?->price ?? 0);
+                                                                        }
+                                                                    }
+
+                                                                    if ($freeItemValue <= 0 && $freeProduct) {
+                                                                        $freeItemValue = (float) ($freeProduct->price ?? 0);
+                                                                    }
+
+                                                                    if ($freeItemValue <= 0) {
+                                                                        $freeItemValue = (float) ($coupon->discount_used ?? 0);
+                                                                    }
+                                                                @endphp
+
+                                                                <div class="flex items-center justify-between gap-4 mt-1">
+                                                                    <div>
+                                                                        <span class="text-green-600 font-semibold">Free Item:</span>
+                                                                        {!! highlightPaella($freeItemName) !!}
+                                                                    </div>
+                                                                    <div class="text-right">
+                                                                        <span class="text-gray-500">Value:</span>
+                                                                        <span class="font-semibold text-green-600">₱{{ number_format($freeItemValue, 2) }}</span>
+                                                                    </div>
+                                                                </div>
+                                                            @endforeach
+                                                            <div class="text-right text-gray-400 mt-1">Free item value is a label only.</div>
+                                                        </div>
+                                                    @endif
                                                 </li>
                                             @endforeach
                                         </ul>

@@ -304,13 +304,102 @@
                         </div>
                     </div>
                     @endif
-                    @if ($sales->discount_amount && $sales->discount_amount > 0)
-                    <div class="flex items-center text-sm justify-between px-4 py-3 border-b border-gray-200">
-                        <div>Discount</div>
-                        <div class="text-right">
-                            <div class="text-red-600">-₱{{ number_format($sales->discount_amount, 2) }}</div>
+                    @if(isset($usedCoupons) && $usedCoupons->count() > 0)
+                        @foreach($usedCoupons as $usedCoupon)
+                            @php
+                                $reward = $usedCoupon->coupon->reward ?? null;
+                                $isFreeProduct = $reward === 'free-product-optn';
+
+                                $displayItemName = $usedCoupon->free_item_name ?? null;
+                                $displayItemValue = (float) ($usedCoupon->free_item_value ?? 0);
+                                $discountedDetail = null;
+                                $itemAfterDiscount = 0;
+
+                                if (!empty($usedCoupon->product_id)) {
+                                    $discountedDetail = $salesDetails->firstWhere('product_id', $usedCoupon->product_id);
+                                }
+
+                                if ($discountedDetail) {
+                                    $paellaPrice = $discountedDetail->paella_price > 0
+                                        ? ($discountedDetail->product->paella_price ?? $discountedDetail->paella_price)
+                                        : 0;
+
+                                    $basePrice = $discountedDetail->price > 0
+                                        ? $discountedDetail->price
+                                        : ($discountedDetail->product->price ?? 0);
+
+                                    $itemOriginalTotal = ($basePrice + $paellaPrice) * $discountedDetail->qty;
+
+                                    if ($displayItemValue <= 0) {
+                                        $displayItemValue = $itemOriginalTotal;
+                                    }
+
+                                    if (empty($displayItemName)) {
+                                        $displayItemName = $discountedDetail->product_name ?? $discountedDetail->product->name ?? null;
+                                    }
+
+                                    $itemAfterDiscount = max($itemOriginalTotal - ($usedCoupon->discount_used ?? 0), 0);
+                                }
+
+                                if ($displayItemValue <= 0) {
+                                    $displayItemValue = (float) ($usedCoupon->discount_used ?? 0);
+                                }
+                            @endphp
+
+                            <div class="px-4 py-3 border-b border-gray-200 text-sm">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        Coupon:
+                                        <span class="font-semibold">
+                                            {{ $usedCoupon->coupon->name ?? $usedCoupon->coupon_code }}
+                                        </span>
+                                    </div>
+
+                                    <div class="text-right text-red-600">
+                                        -₱{{ number_format($usedCoupon->discount_used ?? 0, 2) }}
+                                    </div>
+                                </div>
+
+                                @if($displayItemName || $displayItemValue > 0)
+                                    <div class="mt-2 text-xs text-gray-600">
+                                        @if($displayItemName)
+                                            <div class="flex justify-between gap-4">
+                                                <span>{{ $isFreeProduct ? 'Free Item' : 'Discounted Item' }}</span>
+                                                <span class="font-semibold text-right">
+                                                    {!! highlightPaella($displayItemName) !!}
+                                                </span>
+                                            </div>
+                                        @endif
+
+                                        <div class="flex justify-between gap-4">
+                                            <span>{{ $isFreeProduct ? 'Free Item Value' : 'Item Price' }}</span>
+                                            <span>₱{{ number_format($displayItemValue, 2) }}</span>
+                                        </div>
+
+                                        @if($isFreeProduct)
+                                            <div class="flex justify-between gap-4">
+                                                <span>Status</span>
+                                                <span class="font-semibold text-primary">FREE</span>
+                                            </div>
+                                        @elseif($discountedDetail)
+                                            <div class="flex justify-between gap-4">
+                                                <span>Price After Discount</span>
+                                                <span class="font-semibold text-primary">
+                                                    ₱{{ number_format($itemAfterDiscount, 2) }}
+                                                </span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    @elseif ($sales->discount_amount && $sales->discount_amount > 0)
+                        <div class="flex items-center text-sm justify-between px-4 py-3 border-b border-gray-200">
+                            <div>Discount</div>
+                            <div class="text-right">
+                                <div class="text-red-600">-₱{{ number_format($sales->discount_amount, 2) }}</div>
+                            </div>
                         </div>
-                    </div>
                     @endif
                     <div class="flex items-center text-sm justify-between px-4 py-4 border-b border-gray-200">
                         <div>Total</div>
@@ -396,11 +485,81 @@
                             <td class="px-6 py-4 font-bold">₱{{ number_format($sales->delivery_fee_amount, 2) }}</td>
                         </tr>
                         @endif
-                        @if($sales->discount_amount > 0)
-                        <tr class="bg-white ">
-                            <td colspan="{{ $colspan }}" class="px-6 py-4 font-bold text-right">Discount</td>
-                            <td class="px-6 py-4 font-bold text-red-600 italic">-₱{{ number_format($sales->discount_amount, 2) }}</td>
-                        </tr>
+                        @if(isset($usedCoupons) && $usedCoupons->count() > 0)
+                            @foreach($usedCoupons as $usedCoupon)
+                                @php
+                                    $reward = $usedCoupon->coupon->reward ?? null;
+                                    $isFreeProduct = $reward === 'free-product-optn';
+
+                                    $displayItemName = $usedCoupon->free_item_name ?? null;
+                                    $displayItemValue = (float) ($usedCoupon->free_item_value ?? 0);
+                                    $discountedDetail = null;
+                                    $itemAfterDiscount = 0;
+
+                                    if (!empty($usedCoupon->product_id)) {
+                                        $discountedDetail = $salesDetails->firstWhere('product_id', $usedCoupon->product_id);
+                                    }
+
+                                    if ($discountedDetail) {
+                                        $paellaPrice = $discountedDetail->paella_price > 0
+                                            ? ($discountedDetail->product->paella_price ?? $discountedDetail->paella_price)
+                                            : 0;
+
+                                        $basePrice = $discountedDetail->price > 0
+                                            ? $discountedDetail->price
+                                            : ($discountedDetail->product->price ?? 0);
+
+                                        $itemOriginalTotal = ($basePrice + $paellaPrice) * $discountedDetail->qty;
+
+                                        if ($displayItemValue <= 0) {
+                                            $displayItemValue = $itemOriginalTotal;
+                                        }
+
+                                        if (empty($displayItemName)) {
+                                            $displayItemName = $discountedDetail->product_name ?? $discountedDetail->product->name ?? null;
+                                        }
+
+                                        $itemAfterDiscount = max($itemOriginalTotal - ($usedCoupon->discount_used ?? 0), 0);
+                                    }
+
+                                    if ($displayItemValue <= 0) {
+                                        $displayItemValue = (float) ($usedCoupon->discount_used ?? 0);
+                                    }
+                                @endphp
+
+                                <tr class="bg-white">
+                                    <td colspan="{{ $colspan }}" class="px-6 py-4 font-bold text-right">
+                                        Coupon: {{ $usedCoupon->coupon->name ?? $usedCoupon->coupon_code }}
+
+                                        @if($displayItemName || $displayItemValue > 0)
+                                            <div class="text-xs font-normal text-gray-500 mt-1">
+                                                @if($displayItemName)
+                                                    {{ $isFreeProduct ? 'Free Item' : 'Discounted Item' }}:
+                                                    {!! highlightPaella($displayItemName) !!}
+                                                    <br>
+                                                @endif
+
+                                                {{ $isFreeProduct ? 'Free Item Value' : 'Item Price' }}:
+                                                ₱{{ number_format($displayItemValue, 2) }}
+
+                                                @if($isFreeProduct)
+                                                    <br>Status: FREE
+                                                @elseif($discountedDetail)
+                                                    <br>Price After Discount: ₱{{ number_format($itemAfterDiscount, 2) }}
+                                                @endif
+                                            </div>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 font-bold text-red-600 italic">
+                                        -₱{{ number_format($usedCoupon->discount_used ?? 0, 2) }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @elseif($sales->discount_amount > 0)
+                            <tr class="bg-white">
+                                <td colspan="{{ $colspan }}" class="px-6 py-4 font-bold text-right">Discount</td>
+                                <td class="px-6 py-4 font-bold text-red-600 italic">-₱{{ number_format($sales->discount_amount, 2) }}</td>
+                            </tr>
                         @endif
                         @forelse($gc as $g)
                         <tr class="bg-white ">
