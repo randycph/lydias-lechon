@@ -351,15 +351,9 @@
                                         @endif
                                     </td>
                                    @php
-                                        $itemsTotal = (float) ($sale->details_gross_total ?? 0);
-                                        $deliveryFee = (float) ($sale->delivery_fee_amount ?? 0);
-                                        $discountAmount = (float) ($sale->discount_amount ?? 0);
-
-                                        if ($itemsTotal > 0) {
-                                            $displayAmount = max($itemsTotal + $deliveryFee - $discountAmount, 0);
-                                        } else {
-                                            $displayAmount = (float) ($sale->net_amount > 0 ? $sale->net_amount : $sale->gross_amount);
-                                        }
+                                        
+                                        $displayAmount = (float) ($sale->net_amount > 0 ? $sale->net_amount : $sale->gross_amount);
+                                        $displayAmount = $displayAmount - $sale->discount_amount;
 
                                         $paidAmount = (float) $sale->payments
                                             ->where('is_discount', '!=', 1)
@@ -438,6 +432,12 @@
                                                     </div>
                                                     @if ($sale->status !== 'CANCELLED')
                                                     @if (true)
+                                                    @if (
+                                                        auth()->user()->has_access_to_route('sales-transaction.view_payment') || 
+                                                        (canAddPayment($sale) && auth()->user()->has_access_to_route('payment.add.store')) ||
+                                                        ($dateneeded > date('Y-m-d H:i:s') && (auth()->user()->role_id == 2 || auth()->user()->role_id == 1 || auth()->user()->role_id == 3)) ||
+                                                        $sale->status == 'UNPAID'
+                                                    )
                                                     <div class="nav-item dropdown">
                                                         <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                             <i data-feather="credit-card"></i>
@@ -453,9 +453,9 @@
                                                                 @if(canAddPayment($sale) && auth()->user()->has_access_to_route('payment.add.store'))
                                                                     <a class="dropdown-item" href="javascript:;"
                                                                     onclick="addPayment(
-                                                                                    '{{ $sale->id }}',
-                                                                                    '{{ \App\EcommerceModel\SalesPayment::get_remaining_unpaid($displayAmount, $sale->id) }}'
-                                                                                );"
+                                                                        '{{ $sale->id }}',
+                                                                        '{{ \App\EcommerceModel\SalesPayment::get_remaining_unpaid($sale->gross_amount, $sale->id) }}'
+                                                                    );">
                                                                         Add Payment
                                                                     </a>
                                                                 @endif
@@ -478,6 +478,7 @@
 
                                                         </div>
                                                     </div>
+                                                    @endif
                                                     @endif
                                                     <div class="nav-item dropdown">
                                                         <a class="nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -1020,6 +1021,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
+                    @if (auth()->user()->has_access_to_route('sales-transaction.view_payment'))
                     <div class="table-responsive">
                         <table class="table table-bordered">
                             <thead>
@@ -1036,6 +1038,9 @@
                             </tbody>
                         </table>
                     </div>
+                    @else
+                        <div class="alert alert-danger">You do not have permission to view this content. Please contact your administrator.</div>
+                    @endif
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-sm btn-secondary" data-dismiss="modal">Close</button>

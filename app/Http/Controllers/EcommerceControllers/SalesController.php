@@ -801,12 +801,6 @@ class SalesController extends Controller
             'gross_amount',
             'deleted_at',
             'discount_amount',
-            DB::raw('(
-            SELECT COALESCE(SUM(d.gross_amount), 0)
-            FROM ecommerce_sales_details d
-            WHERE d.sales_header_id = ecommerce_sales_headers.id
-            AND d.deleted_at IS NULL
-        ) as details_gross_total'),
             DB::raw('(SELECT ecommerce_sales_details.delivery_date From ecommerce_sales_details WHERE ecommerce_sales_headers.id=ecommerce_sales_details.sales_header_id GROUP BY ecommerce_sales_details.sales_header_id) as date_needed')
         ];
 
