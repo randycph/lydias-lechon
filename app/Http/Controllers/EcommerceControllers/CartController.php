@@ -1095,48 +1095,9 @@ class CartController extends Controller
         // =============================
         // 8. TOTALS
         // =============================
-
-        $totalPrice = (float) $request->order_amount + (($bakaProduct?->price ?? 0) * ($bakaQty ?? 0));
-
-        $couponDataForDiscount = json_decode($request->input('coupon_data', '[]'), true);
-        $couponsForDiscount = json_decode($request->input('coupons', '[]'), true);
-
-        $computedCouponDiscount = 0;
-
-        if (is_array($couponDataForDiscount)) {
-            foreach ($couponDataForDiscount as $coupon) {
-                $computedCouponDiscount += (float) (
-                $coupon['discount_used']
-                ?? $coupon['discount_amount']
-                ?? $coupon['discount']
-                ?? $coupon['amount']
-                ?? 0
-            );
-            }
-        }
-
-        if ($computedCouponDiscount <= 0 && is_array($couponsForDiscount)) {
-            foreach ($couponsForDiscount as $coupon) {
-                if (is_array($coupon)) {
-                    $computedCouponDiscount += (float) (
-                    $coupon['discount_used']
-                    ?? $coupon['discount_amount']
-                    ?? $coupon['discount']
-                    ?? $coupon['amount']
-                    ?? 0
-                    );
-                }
-            }
-        }
-
-        $requestDiscount = (float) ($request->discount_amount ?? 0);
-
-        $discount = max($requestDiscount, $computedCouponDiscount);
-
-        // safety: discount should not exceed order total + delivery fee
-        $discount = min($discount, $totalPrice + (float) $delivery_fee);
-
-        $netAmount = $totalPrice + (float) $delivery_fee - $discount;
+        $totalPrice = (float)$request->order_amount + ( ($bakaProduct?->price ?? 0) * ($bakaQty ?? 0) );
+        $discount = (float)($request->discount_amount ?? 0);
+        $netAmount = $totalPrice + $delivery_fee - $discount;
 
         // =============================
         // 9. ORDER NUMBER
@@ -1207,7 +1168,7 @@ class CartController extends Controller
                 'gross_amount' => $totalPrice,
                 'net_amount' => $netAmount,
                 'discount_amount' => $discount,
-                'payment_status' => $netAmount <= 0 ? 'PAID' : 'PENDING',
+                'payment_status' => $request->order_amount <= 0 ? 'PAID' : 'PENDING',
                 'delivery_status' => '',
                 'status' => 'active',
                 'currency' => 'PHP',
@@ -1252,7 +1213,7 @@ class CartController extends Controller
                 'order_source' => 'Web',
                 'delivery_branch' => $delivery_type == 'Door to door delivery' ? 'Tandang Sora Delivery' : '',
                 'tax_amount' => 0,
-                'payment_status' => $netAmount <= 0 ? 'PAID' : 'PENDING',
+                'payment_status' => $request->order_amount <= 0 ? 'PAID' : 'PENDING',
                 'delivery_status' => '',
                 'customer_location' => $request->shipping_type == 'pickup' ? '' : ($request->delivery_address),
                 'instruction' => $request->instruction,
@@ -1269,7 +1230,7 @@ class CartController extends Controller
             ]);
         }
 
-        if ($netAmount <= 0) {
+        if ($request->order_amount <= 0) {
             $salesHeader->isConfirm = 1;
             $salesHeader->confirmed_by = 'Customer';
             $salesHeader->confirmed_on = date('Y-m-d H:i:s');
@@ -1286,29 +1247,12 @@ class CartController extends Controller
 |--------------------------------------------------------------------------
 */
 
-$rawCoupons = json_decode($request->coupons ?? '[]', true);
-$rawCouponData = json_decode($request->coupon_data ?? '[]', true);
-
-if (empty($rawCoupons) && !empty($rawCouponData)) {
-    $rawCoupons = $rawCouponData;
-}
-
-$couponsList = collect($rawCoupons ?: [])
+$couponsList = collect(json_decode($request->coupons ?? '[]', true) ?: [])
     ->map(function ($coupon) {
         if (is_array($coupon)) {
             return [
-                'code' => strtoupper(trim(
-                    $coupon['code']
-                    ?? $coupon['coupon_code']
-                    ?? ''
-                )),
-                'discount_used' => (float) (
-                $coupon['discount_used']
-                ?? $coupon['discount_amount']
-                ?? $coupon['discount']
-                ?? $coupon['amount']
-                ?? 0
-            ),
+                'code' => strtoupper(trim($coupon['code'] ?? '')),
+                'discount_used' => (float) ($coupon['discount_used'] ?? 0),
             ];
         }
 
@@ -1318,6 +1262,8 @@ $couponsList = collect($rawCoupons ?: [])
         ];
     })
     ->filter(fn ($coupon) => !empty($coupon['code']))
+
+    // prevent same coupon duplicated in the same checkout request
     ->unique('code')
     ->values()
     ->all();

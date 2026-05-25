@@ -1000,68 +1000,34 @@ class SalesController extends Controller
             ->with('error', 'Sales record not found.');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | Use parent sales ID for multiple address / sub orders
-    |--------------------------------------------------------------------------
-    */
-    $mainSalesId = $sales->is_sub == 1 && !empty($sales->parent_sales_header_id)
-        ? $sales->parent_sales_header_id
-        : $sales->id;
+    if ($sales->is_sub == 1) {
+        $subSales = SalesHeader::where('id', $sales->parent_sales_header_id)->first();
+        $salesPayments = $subSales->payments ?? collect();
 
-    $mainSales = SalesHeader::where('id', $mainSalesId)->first();
+        $totalPayment = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)
+            ->sum('amount');
+    } else {
+        $salesPayments = SalesPayment::where('sales_header_id', $id)->get();
 
-    /*
-    |--------------------------------------------------------------------------
-    | Payments
-    |--------------------------------------------------------------------------
-    */
-    $salesPayments = SalesPayment::where('sales_header_id', $mainSalesId)->get();
+        $totalPayment = SalesPayment::where('sales_header_id', $id)
+            ->sum('amount');
+    }
 
-    $totalPayment = SalesPayment::where('sales_header_id', $mainSalesId)
-        ->sum('amount');
+    $gc = GiftCertificate::where('sales_header_id', $id)->get();
 
-    /*
-    |--------------------------------------------------------------------------
-    | Gift certificates
-    |--------------------------------------------------------------------------
-    */
-    $gc = GiftCertificate::where('sales_header_id', $mainSalesId)->get();
-
-    /*
-    |--------------------------------------------------------------------------
-    | Sales Details
-    | Keep current ID so sub order still shows its own products.
-    |--------------------------------------------------------------------------
-    */
     $salesDetails = SalesDetail::where('sales_header_id', $id)->get();
 
-    /*
-    |--------------------------------------------------------------------------
-    | Deliveries
-    |--------------------------------------------------------------------------
-    */
     $deliveries = DeliveryStatus::where('order_id', $id)->get();
 
-    /*
-    |--------------------------------------------------------------------------
-    | Total Net
-    | Use parent/main order amount for payment status.
-    |--------------------------------------------------------------------------
-    */
-    $totalNet = SalesHeader::where('id', $mainSalesId)->sum('net_amount');
+    $totalNet = SalesHeader::where('id', $id)->sum('net_amount');
 
-    /*
-    |--------------------------------------------------------------------------
-    | Coupon Codes Used in this Sales Transaction
-    | Use parent/main sales ID because coupons are saved to the parent order.
-    |--------------------------------------------------------------------------
-    */
+    /**
+     * Coupon Codes Used in this Sales Transaction
+     */
     $couponRows = \DB::table('coupon_cart as cc')
         ->leftJoin('coupons as c', 'c.id', '=', 'cc.coupon_id')
-        ->where('cc.sales_header_id', $mainSalesId)
+        ->where('cc.sales_header_id', $id)
         ->whereNotNull('cc.coupon_code')
-        ->where('cc.coupon_code', '!=', '')
         ->select(
             'cc.coupon_id',
             'cc.coupon_code',

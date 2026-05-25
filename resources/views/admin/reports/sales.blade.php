@@ -240,7 +240,6 @@
                                 <th>Item Type</th>
                                 <th>Confirmed</th>
                                 <th>Delivery Branch</th>
-                                <th>Date Needed</th>
                                 <th>Encoded By</th>
                             </tr>
                             </thead>
@@ -301,28 +300,17 @@
                                     <th>{{$r->order_source}}</th>
                                     <th>{{$r->jnum}}</th>
                                     <th>{{$r->prod_branch}}</th>
-                                    <td>{{date('Y-m-d',strtotime($r->delivery_date))}}</td>
-                                    <td>{{date('h:i A',strtotime($r->delivery_date))}}</td>
-                                    @php
-                                        $reportPrice = (float) ($r->detail_price ?? 0);
-                                        $reportPaellaPrice = (float) ($r->detail_paella_price ?? 0);
-                                        $reportQty = (float) ($r->detail_qty ?? 0);
-
-                                        $reportTotal = isset($r->detail_gross_amount)
-                                            ? (float) $r->detail_gross_amount
-                                            : (($reportPrice + $reportPaellaPrice) * $reportQty);
-                                    @endphp
-
-                                    <td>{{ number_format($reportPrice, 2) }}</td>
-                                    <td>{{ number_format($reportQty, 2) }}</td>
-                                    <td>{{ number_format($reportTotal, 2) }}</td>
+                                    <td>{{$r->delivery_status == 'Open Date' ? '' : date('Y-m-d',strtotime($r->delivery_date))}}</td>
+                                    <td>{{$r->delivery_status == 'Open Date' ? '' : date('H:i',strtotime($r->delivery_date))}}</td>
+                                    <td>{{number_format($r->price,2)}}</td>
+                                    <td>{{number_format($r->qty,2)}}</td>
+                                    <td>{{number_format((($r->price + $r->paella_price) * $r->qty),2)}}</td>
                                     <td>
                                         {!!$pays!!}
                                     </td>
                                     <td>{{$itemType}}</td>
                                     <td>@if($r->isConfirm==1) Yes @else No @endif</td>
                                     <td>{{ $r->delivery_branch }}</td>  
-                                    <td>{{date('H:i:s',strtotime($r->delivery_date))}}</td>
                                     @php 
                                         $user = \App\Models\User::whereId($r->created_by)->first();
                                     @endphp
@@ -410,7 +398,23 @@
                         columns: ':visible'
                     }
                 },
-                'colvis'
+                {
+                    extend: 'colvis',
+                    text: 'Column visibility',
+                    buttons: [
+                        {
+                            extend: 'colvisGroup',
+                            text: 'Show all columns',
+                            show: ':hidden'
+                        },
+                        {
+                            extend: 'colvisGroup',
+                            text: 'Hide extra columns',
+                            hide: [4,5,6,7,10,11,12,13,20,23]
+                        },
+                        'columnsToggle'
+                    ]
+                }
             ],
             columnDefs: [ {
                 targets: [4,5,6,7,10,11,12,13,20,23],
