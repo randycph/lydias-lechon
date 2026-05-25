@@ -1123,6 +1123,9 @@ class CartController extends Controller
         if (session()->has('edit_sales_header_id') && !empty(session()->get('edit_sales_header_id'))) {
 
             $salesHeader = SalesHeader::find(session()->get('edit_sales_header_id'));
+            if ($salesHeader && !empty($salesHeader->parent_sales_header_id)) {
+                $salesHeader = SalesHeader::find($salesHeader->parent_sales_header_id);
+            }
 
                 if (!$salesHeader) {
                     session()->forget('edit_sales_header_id');
@@ -1141,7 +1144,20 @@ class CartController extends Controller
                         'updated_at'      => now(),
                     ]);
 
-            
+            // DELETE OLD SUB ORDERS FOR MULTIPLE ADDRESS EDIT
+            $oldSubOrderIds = SalesHeader::where('parent_sales_header_id', $salesHeader->id)
+                ->pluck('id')
+                ->toArray();
+
+            if (!empty($oldSubOrderIds)) {
+                SalesDetail::whereIn('sales_header_id', $oldSubOrderIds)->delete();
+                CouponCart::whereIn('sales_header_id', $oldSubOrderIds)->delete();
+                ProductDeliveryAddress::whereIn('sales_header_id', $oldSubOrderIds)->delete();
+                SalesPayment::whereIn('sales_header_id', $oldSubOrderIds)->delete();
+                CouponSale::whereIn('sales_header_id', $oldSubOrderIds)->delete();
+
+                SalesHeader::whereIn('id', $oldSubOrderIds)->delete();
+            }
 
             // DELETE OLD RELATED
             SalesDetail::where('sales_header_id', $salesHeader->id)->delete();

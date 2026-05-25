@@ -48,8 +48,8 @@
 
             $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
         }
-            $autoCoupons = isset($autoCoupons) ? $autoCoupons : collect([]);
-             $allCoupons = $eligibleCoupons->merge($autoCoupons);
+            $eligibleAutoCoupons = isset($eligibleAutoCoupons) ? $eligibleAutoCoupons : collect([]);
+            $allCoupons = isset($allCoupons) ? $allCoupons : $eligibleCoupons->merge($eligibleAutoCoupons);
     @endphp
 
     <div class="bg-cream">
@@ -581,6 +581,10 @@
                         : coupon.end_date;
                 },
                 hasWholeLechonInCart() {
+                    if (window.hasLechon === true || window.hasLechon === 1 || window.hasLechon === '1') {
+                        return true;
+                    }
+
                     const items = [
                         ...(this.carts || []),
                         ...((this.deliveries || []).flatMap(d => d.orders || []))
@@ -590,6 +594,12 @@
                         if (item?.is_free_product) return false;
 
                         const product = item?.product || {};
+
+                        const categoryId = Number(
+                            product.category_id ||
+                            item.category_id ||
+                            0
+                        );
 
                         const name = String(
                             product.name ||
@@ -605,6 +615,7 @@
                         ).toLowerCase();
 
                         return (
+                            categoryId === 1 ||
                             name.includes('whole lechon') ||
                             slug.includes('whole-lechon') ||
                             slug.includes('whole_lechon')

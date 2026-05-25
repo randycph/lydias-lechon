@@ -349,7 +349,11 @@ class FrontendController extends Controller
             return data_get($cart, 'product_id') === 165 || data_get($cart, 'product.id') === 165;
         });
 
-        $lechonBakaService = floatval(Product::whereId(270)->first()->price * ($bakaQty ?? 1));
+        $lechonBakaProduct = Product::find(270);
+
+        $lechonBakaService = $lechonBakaProduct
+            ? floatval($lechonBakaProduct->price * ($bakaQty ?? 1))
+            : 0;
 
         $dataPrivacy = Page::where('slug', 'data-privacy')->first();
 
@@ -359,9 +363,18 @@ class FrontendController extends Controller
 $uid = Auth::id();
 
 $formatCoupon = function ($coupon, $uid) {
-    $totalUsed = CouponCart::where('coupon_id', $coupon->id)
-        ->where('status', 1)
-        ->sum('total_usage');
+    /*
+    |--------------------------------------------------------------------------
+    | Count coupon usage from PAID orders only
+    |--------------------------------------------------------------------------
+    */
+    $totalUsed = CouponCart::from('coupon_cart as cc')
+        ->join('ecommerce_sales_headers as h', 'h.id', '=', 'cc.sales_header_id')
+        ->where('cc.coupon_id', $coupon->id)
+        ->where('cc.status', 1)
+        ->where('cc.total_usage', '>', 0)
+        ->whereRaw('LOWER(h.payment_status) = ?', ['paid'])
+        ->sum('cc.total_usage');
 
     /*
     |--------------------------------------------------------------------------
@@ -499,11 +512,24 @@ $eligibleCoupons = Coupon::query()
 
         /*
         |--------------------------------------------------------------------------
-        | IMPORTANT:
-        | Removed coupon_sales customer_id check.
-        | Do not block coupon because customer used it in a previous order.
+        | Total usage limit check - PAID orders only
         |--------------------------------------------------------------------------
         */
+        $totalUsed = CouponCart::from('coupon_cart as cc')
+            ->join('ecommerce_sales_headers as h', 'h.id', '=', 'cc.sales_header_id')
+            ->where('cc.coupon_id', $coupon->id)
+            ->where('cc.status', 1)
+            ->where('cc.total_usage', '>', 0)
+            ->whereRaw('LOWER(h.payment_status) = ?', ['paid'])
+            ->sum('cc.total_usage');
+
+        if (
+            !is_null($coupon->usage_limit) &&
+            (int) $coupon->usage_limit > 0 &&
+            $totalUsed >= (int) $coupon->usage_limit
+        ) {
+            return false;
+        }
 
         return true;
     })
@@ -516,13 +542,20 @@ $formattedEligibleCoupons = collect(
         ->all()
 );
 
+
+
 $eligibleCoupons = $formattedEligibleCoupons;
+
+if ($haslechon) {
+    $eligibleCoupons = collect([]);
+}
 
 /*
 |--------------------------------------------------------------------------
 | AUTO COUPONS
 |--------------------------------------------------------------------------
 | Auto coupons are also no longer blocked by previous customer usage.
+| Usage limit counts PAID orders only.
 |--------------------------------------------------------------------------
 */
 $autoCoupons = Coupon::query()
@@ -568,21 +601,24 @@ if ($carts->count() > 0) {
 
     if (!$cartHasExcludedCategory) {
         foreach ($autoCoupons as $coupon) {
-
             /*
             |--------------------------------------------------------------------------
-            | IMPORTANT:
-            | Removed coupon_sales customer_id check.
-            | Same customer can receive/use this auto coupon again
-            | on another transaction if conditions are met.
+            | Total usage limit check - PAID orders only
             |--------------------------------------------------------------------------
             */
+            $totalUsed = CouponCart::from('coupon_cart as cc')
+                ->join('ecommerce_sales_headers as h', 'h.id', '=', 'cc.sales_header_id')
+                ->where('cc.coupon_id', $coupon->id)
+                ->where('cc.status', 1)
+                ->where('cc.total_usage', '>', 0)
+                ->whereRaw('LOWER(h.payment_status) = ?', ['paid'])
+                ->sum('cc.total_usage');
 
-            $totalUsed = CouponCart::where('coupon_id', $coupon->id)
-                ->where('status', 1)
-                ->sum('total_usage');
-
-            if ($coupon->usage_limit !== null && $totalUsed >= $coupon->usage_limit) {
+            if (
+                !is_null($coupon->usage_limit) &&
+                (int) $coupon->usage_limit > 0 &&
+                $totalUsed >= (int) $coupon->usage_limit
+            ) {
                 continue;
             }
 
@@ -653,7 +689,6 @@ if ($carts->count() > 0) {
 
 
 
-        $setting = Setting::first();
         $minimum_order_amount_door_to_door = $setting ? $setting->minimum_order : 0;
         $minimum_order_amount_pickup = $setting ? $setting->minimum_order_pickup : 0;
         $minimum_processing_hours = $setting ? $setting->minimum_processing_hours : 24;
@@ -661,16 +696,20 @@ if ($carts->count() > 0) {
         $minimum_processing_hours_baka = $setting ? $setting->minimum_processing_hours_baka : 72;
         $minimum_order_misc = $setting ? $setting->minimum_order_misc : 0;
 
-        $lechonBakaService = floatval(Product::whereId(270)->first()->price * ($bakaQty ?? 1));
+        $lechonBakaProduct = Product::find(270);
+
+        $lechonBakaService = $lechonBakaProduct
+            ? floatval($lechonBakaProduct->price * ($bakaQty ?? 1))
+            : 0;
 
         $sale = null;
 
         if (session()->has('edit_sales_header_id') && !empty(session()->get('edit_sales_header_id'))) {
             $sale = SalesHeader::with(['items', 'items.product'])->find(session()->get('edit_sales_header_id'));
         }
-        $allCoupons = $formattedEligibleCoupons
-            ->merge($eligibleAutoCoupons)
-            ->values();
+        $allCoupons = $eligibleCoupons
+        ->merge($eligibleAutoCoupons)
+        ->values();
 
         return view('v2.checkout.checkout', compact(
             'sale',
