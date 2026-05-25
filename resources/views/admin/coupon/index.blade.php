@@ -146,8 +146,19 @@
 	                                    <td>{{ $coupon->start_date }} {{ $coupon->start_time }}</td>
 	                                    <td>{{ $coupon->end_date }} {{ $coupon->end_time }}</td>
 	                                    <td class="text-center">
-                                            @if( $coupon->couponCarts()->where('status', 1)->sum('total_usage') > 0)
-                                                <a target="_blank" href="{{ route('report.coupon.list') }}?coupon_code={{$coupon->coupon_code}}">{{  $coupon->couponCarts()->where('status', 1)->sum('total_usage') }}</a>
+                                            @php
+                                                $paidUsedCount = $coupon->couponCarts()
+                                                    ->join('ecommerce_sales_headers as h', 'h.id', '=', 'coupon_cart.sales_header_id')
+                                                    ->where('coupon_cart.status', 1)
+                                                    ->where('coupon_cart.total_usage', '>', 0)
+                                                    ->whereRaw('LOWER(h.payment_status) = ?', ['paid'])
+                                                    ->sum('coupon_cart.total_usage');
+                                            @endphp
+
+                                            @if($paidUsedCount > 0)
+                                                <a target="_blank" href="{{ route('report.coupon.list', ['coupon_code' => $coupon->coupon_code]) }}">
+                                                    {{ $paidUsedCount }}
+                                                </a>
                                             @else
                                                 0
                                             @endif

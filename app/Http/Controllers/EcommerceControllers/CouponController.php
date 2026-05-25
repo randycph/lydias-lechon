@@ -36,18 +36,35 @@ class CouponController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
-        $listing = new ListingHelper('desc', 10, 'updated_at');
+   public function index()
+{
+    $listing = new ListingHelper('desc', 10, 'updated_at');
 
-        $coupons = $listing->simple_search(Coupon::class, $this->searchFields);
+    $coupons = $listing->simple_search(Coupon::class, $this->searchFields);
 
-        // Simple search init data
-        $filter = $listing->get_filter($this->searchFields);
-        $searchType = 'simple_search';
+    /*
+     | Count coupon as USED only if related sales header is PAID
+     | Source table: coupon_cart
+     | Related order: ecommerce_sales_headers
+     */
+    $coupons->getCollection()->transform(function ($coupon) {
+        $coupon->paid_used_count = DB::table('coupon_cart as cc')
+            ->join('ecommerce_sales_headers as h', 'h.id', '=', 'cc.sales_header_id')
+            ->where('cc.coupon_id', $coupon->id)
+            ->whereNotNull('cc.sales_header_id')
+            ->where('cc.total_usage', '>', 0)
+            ->whereRaw('LOWER(h.payment_status) = ?', ['paid'])
+            ->sum('cc.total_usage');
 
-        return view('admin.coupon.index',compact('coupons', 'filter', 'searchType'));
-    }
+        return $coupon;
+    });
+
+    // Simple search init data
+    $filter = $listing->get_filter($this->searchFields);
+    $searchType = 'simple_search';
+
+    return view('admin.coupon.index', compact('coupons', 'filter', 'searchType'));
+}
 
     /**
      * Store a newly created resource in storage.
@@ -939,7 +956,7 @@ class CouponController extends Controller
         AND cc.coupon_code IS NOT NULL
         AND cc.coupon_code != ''
         AND cc.total_usage > 0
-        AND h.status = 'PAID'
+        AND LOWER(h.payment_status) = 'paid'
 ";
 
     if ($request->filled('coupon_code')) {
