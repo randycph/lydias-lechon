@@ -48,8 +48,8 @@
                                 <h2 class="font-semibold {{ ($sale->status == 'CANCELLED' || $sale->status == 'ABANDONED') ? 'line-through' : '' }}">Order #{{ $sale->order_number }}</h2> 
                                 <span class="{{ ($sale->status == 'CANCELLED' || $sale->status == 'ABANDONED') ? 'text-red-700 uppercase' : 'hidden' }}">{{ $sale->status }}</span>
                             </div>
-                            <div class="font-semibold text-tertiary uppercase {{ strtolower($sale->payment_status) == 'unpaid' ? 'text-red-500' : '' }}">
-                                {{ $sale->payment_status }}
+                            <div class="font-semibold text-tertiary uppercase {{ strtolower($sale->status) == 'ABANDONED' || strtolower($sale->status) == 'CANCELLED' ? 'text-red-500' : '' }}">
+                                {{ $sale->status }}
                             </div>
                         </div>
                         <div class="flex items-start flex-col gap-2  py-5 border-b border-[#DFDFDF]">
@@ -306,11 +306,11 @@
                                 <div class="lg:order-1 order-2 w-full lg:w-auto {{ ($sale->status == 'CANCELLED' || $sale->status == 'ABANDONED') ? 'invisible' : '' }}">
                                     @if (strtolower($sale->payment_status) != 'paid')
                                         <button @click="cancelOrderModal = true; saleId = '{{ $sale->id }}'" type="button"
-                                            class="text-white custom-btn btn-tertiary-dark bg-tertiary hover:bg-secondary font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
+                                            class="{{ $sale->status == 'CANCELLED' || $sale->status == 'ABANDONED' ? 'hidden' : '' }} text-white custom-btn btn-tertiary-dark bg-tertiary hover:bg-secondary font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
                                             Cancel Order
                                         </button>
                                         <button @click="editOrderModal = true; saleId = '{{ $sale->id }}'" type="button"
-                                            class="text-white custom-btn btn-primary-dark bg-indigo-600 hover:bg-indigo-500 font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
+                                            class="{{ $sale->status == 'CANCELLED' || $sale->status == 'ABANDONED' ? 'hidden' : '' }} text-white custom-btn btn-primary-dark bg-indigo-600 hover:bg-indigo-500 font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
                                             Edit Order
                                         </button>
                                     @endif
@@ -370,7 +370,7 @@
                                                 {{ $sale->isExpired ? 'disabled' : '' }} 
                                                 @click="openPaymentModal({{$balance}}, '{{ $sale->id }}', {{ $sale->isExpired ? 'true' : 'false' }})" 
                                                 type="button"
-                                                class="{{ $sale->status == 'CANCELLED' ? 'hidden' : '' }} {{ $sale->isExpired ? '' : 'custom-btn' }} 
+                                                class="{{ $sale->status == 'CANCELLED' || $sale->status == 'ABANDONED' ? 'hidden' : '' }} {{ $sale->isExpired ? '' : 'custom-btn' }} 
                                                     text-white bg-primary  btn-primary-dark font-medium rounded-md 
                                                     w-full sm:w-auto px-5 py-3.5 text-center 
                                                     disabled:bg-gray-200 disabled:cursor-not-allowed">
