@@ -684,6 +684,31 @@
                     };
                     
                 },
+
+                couponUsageConsumed(coupon) {
+                const usageLimit = Number(
+                    coupon.total_usage_limit ??
+                    coupon.usage_limit ??
+                    coupon.usageLimit ??
+                    coupon.limit ??
+                    0
+                );
+
+                const totalUsed = Number(
+                    coupon.total_usage_used ??
+                    coupon.total_used ??
+                    coupon.used_count ??
+                    coupon.total_usage ??
+                    coupon.usage_count ??
+                    0
+                );
+
+                if (usageLimit <= 0) {
+                    return false;
+                }
+
+                return totalUsed >= usageLimit;
+            },
                 
                 addFreeProductsFromCoupon(coupon) {
                 if (!Array.isArray(coupon?.free_products) || !coupon.free_products.length) return
@@ -1030,6 +1055,10 @@
                 shouldAutoApplyCoupon(coupon) {
                     const normalized = this.normalizeCoupon(coupon);
 
+                    if (this.couponUsageConsumed(coupon)) {
+                        return false;
+                    }
+
                     const isAuto =
                         normalized.auto_applied === true ||
                         normalized.auto_applied === 1 ||
@@ -1118,6 +1147,10 @@
                         
                     getAutoCouponUnavailableReason(coupon) {
                     const normalized = this.normalizeCoupon(coupon);
+
+                    if (this.couponUsageConsumed(coupon)) {
+                        return 'Coupon usage limit has already been consumed.';
+                    }
 
                     const isAuto =
                         normalized.auto_applied === true ||
@@ -1249,6 +1282,7 @@
                         }));
 
                     const visibleAutos = allAutoCoupons.filter(c =>
+                        !this.couponUsageConsumed(c) &&
                         this.shouldShowAutoCouponInList(c)
                     );
 
