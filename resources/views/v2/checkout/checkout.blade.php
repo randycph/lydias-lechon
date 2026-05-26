@@ -525,6 +525,7 @@
                 const autoOnlyCoupons = (this.autoCouponChoices || [])
                     .map(c => this.normalizeCoupon(c))
                     .filter(c => this.shouldShowCouponInList(c))
+                    .filter(c => !this.couponUsageConsumed(c))
                     .filter(c => {
                         return !this.selectedAutoCoupon ||
                             String(c.id) !== String(this.selectedAutoCoupon.id);
@@ -685,7 +686,7 @@
                     
                 },
 
-                couponUsageConsumed(coupon) {
+            couponUsageConsumed(coupon) {
                 const usageLimit = Number(
                     coupon.total_usage_limit ??
                     coupon.usage_limit ??
@@ -703,11 +704,34 @@
                     0
                 );
 
-                if (usageLimit <= 0) {
-                    return false;
+                const customerLimit = Number(
+                    coupon.customer_usage_limit ??
+                    coupon.customer_limit ??
+                    coupon.per_customer_limit ??
+                    coupon.customerUsageLimit ??
+                    coupon.customer_limit_count ??
+                    0
+                );
+
+                const customerUsed = Number(
+                    coupon.customer_usage_used ??
+                    coupon.customer_used ??
+                    coupon.used_by_customer ??
+                    coupon.customer_usage_count ??
+                    coupon.customer_used_count ??
+                    coupon.my_usage_count ??
+                    0
+                );
+
+                if (usageLimit > 0 && totalUsed >= usageLimit) {
+                    return true;
                 }
 
-                return totalUsed >= usageLimit;
+                if (customerLimit > 0 && customerUsed >= customerLimit) {
+                    return true;
+                }
+
+                return false;
             },
                 
                 addFreeProductsFromCoupon(coupon) {
@@ -1387,6 +1411,11 @@
 
                 const normalized = this.normalizeCoupon(this.selectedCoupon);
 
+                if (this.couponUsageConsumed(normalized)) {
+                    this.showCouponError('You have already reached the usage limit for this coupon.');
+                    return;
+                }
+
                 if (this.couponHasLocationLimit(normalized)) {
                     const targets = this.getSelectedCouponTargets();
 
@@ -1429,7 +1458,8 @@
                 this.closeCouponModal();
             },
 
-           applyCouponCode() {
+        applyCouponCode() {
+            
             this.couponMessage = '';
             this.couponMessageType = '';
             if (this.blockCouponIfWholeLechon()) {
@@ -1454,6 +1484,11 @@
             }
 
             const normalized = this.normalizeCoupon(found);
+
+            if (this.couponUsageConsumed(normalized)) {
+                    this.showCouponError('You have already reached the usage limit for this coupon.');
+                    return;
+                }
 
             if (this.couponHasLocationLimit(normalized)) {
                 const targets = this.getSelectedCouponTargets();

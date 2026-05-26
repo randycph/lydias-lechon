@@ -365,25 +365,27 @@ $uid = Auth::id();
 $formatCoupon = function ($coupon, $uid) {
     /*
     |--------------------------------------------------------------------------
-    | Count coupon usage from PAID orders only
+    | COUPON USAGE LIMITS
+    |--------------------------------------------------------------------------
+    | Count usage from PAID orders only.
     |--------------------------------------------------------------------------
     */
     $totalUsed = CouponCart::from('coupon_cart as cc')
         ->join('ecommerce_sales_headers as h', 'h.id', '=', 'cc.sales_header_id')
         ->where('cc.coupon_id', $coupon->id)
-        ->where('cc.status', 1)
+        ->whereNotNull('cc.sales_header_id')
         ->where('cc.total_usage', '>', 0)
-        ->whereRaw('LOWER(h.payment_status) = ?', ['paid'])
+        ->whereRaw('LOWER(TRIM(h.payment_status)) = ?', ['paid'])
         ->sum('cc.total_usage');
 
-    /*
-    |--------------------------------------------------------------------------
-    | PER TRANSACTION COUPON RULE
-    |--------------------------------------------------------------------------
-    | We no longer count usage by customer here.
-    | Same customer can use the same coupon again on another transaction.
-    */
-    $customerUsed = 0;
+    $customerUsed = CouponCart::from('coupon_cart as cc')
+        ->join('ecommerce_sales_headers as h', 'h.id', '=', 'cc.sales_header_id')
+        ->where('cc.coupon_id', $coupon->id)
+        ->where('cc.customer_id', $uid)
+        ->whereNotNull('cc.sales_header_id')
+        ->where('cc.total_usage', '>', 0)
+        ->whereRaw('LOWER(TRIM(h.payment_status)) = ?', ['paid'])
+        ->sum('cc.total_usage');
 
     $free_products = collect([]);
 
@@ -422,17 +424,13 @@ $formatCoupon = function ($coupon, $uid) {
 
         'combination_allowed' => $coupon->combination == 1,
 
-        'total_usage_limit' => $coupon->usage_limit,
-        'total_usage_used' => $totalUsed,
+        'total_usage_limit' => (int) ($coupon->usage_limit ?? 0),
+        'total_usage_used' => (int) $totalUsed,
 
-        /*
-        |--------------------------------------------------------------------------
-        | Kept for frontend compatibility only.
-        | This no longer prevents the same customer from using the coupon again.
-        |--------------------------------------------------------------------------
-        */
-        'customer_limit' => $coupon->customer_limit,
-        'customer_usage_used' => $customerUsed,
+        'customer_usage_limit' => (int) ($coupon->customer_limit ?? 0),
+        'customer_limit' => (int) ($coupon->customer_limit ?? 0),
+        'customer_usage_used' => (int) $customerUsed,
+        'customer_used' => (int) $customerUsed,
 
         'status' => 'valid',
         'location' => $coupon->location,
@@ -480,8 +478,9 @@ $eligibleGiftCheques = DB::table('gift_certificate')
 |--------------------------------------------------------------------------
 | REGULAR COUPONS
 |--------------------------------------------------------------------------
-| Coupon availability is no longer blocked by previous customer usage.
-| Same customer can use the same coupon again on another transaction.
+| Manual coupons are blocked when inactive, expired, outside customer scope,
+| over the total usage limit, or over the customer usage limit.
+| Usage counts PAID orders only.
 |--------------------------------------------------------------------------
 */
 $eligibleCoupons = Coupon::query()
@@ -489,6 +488,17 @@ $eligibleCoupons = Coupon::query()
     ->from('coupons as c')
     ->whereNull('c.deleted_at')
     ->where('c.activation_type', '<>', 'auto')
+    ->where(function ($q) use ($uid) {
+        $q->whereNull('c.customer_scope')
+            ->orWhere('c.customer_scope', 'all')
+            ->orWhere(function ($x) use ($uid) {
+                $x->where('c.customer_scope', 'specific')
+                    ->whereRaw(
+                        "FIND_IN_SET(?, REPLACE(REPLACE(c.scope_customer_id, ' ', ''), '|', ','))",
+                        [$uid]
+                    );
+            });
+    })
     ->select('c.*')
     ->selectRaw("
         CASE
@@ -505,28 +515,40 @@ $eligibleCoupons = Coupon::query()
         END AS is_currently_valid
     ")
     ->get()
-    ->filter(function ($coupon) {
+    ->filter(function ($coupon) use ($uid) {
         if ($coupon->is_currently_valid != 1) {
             return false;
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Total usage limit check - PAID orders only
-        |--------------------------------------------------------------------------
-        */
         $totalUsed = CouponCart::from('coupon_cart as cc')
             ->join('ecommerce_sales_headers as h', 'h.id', '=', 'cc.sales_header_id')
             ->where('cc.coupon_id', $coupon->id)
-            ->where('cc.status', 1)
+            ->whereNotNull('cc.sales_header_id')
             ->where('cc.total_usage', '>', 0)
-            ->whereRaw('LOWER(h.payment_status) = ?', ['paid'])
+            ->whereRaw('LOWER(TRIM(h.payment_status)) = ?', ['paid'])
             ->sum('cc.total_usage');
 
         if (
             !is_null($coupon->usage_limit) &&
             (int) $coupon->usage_limit > 0 &&
             $totalUsed >= (int) $coupon->usage_limit
+        ) {
+            return false;
+        }
+
+        $customerUsed = CouponCart::from('coupon_cart as cc')
+            ->join('ecommerce_sales_headers as h', 'h.id', '=', 'cc.sales_header_id')
+            ->where('cc.coupon_id', $coupon->id)
+            ->where('cc.customer_id', $uid)
+            ->whereNotNull('cc.sales_header_id')
+            ->where('cc.total_usage', '>', 0)
+            ->whereRaw('LOWER(TRIM(h.payment_status)) = ?', ['paid'])
+            ->sum('cc.total_usage');
+
+        if (
+            !is_null($coupon->customer_limit) &&
+            (int) $coupon->customer_limit > 0 &&
+            $customerUsed >= (int) $coupon->customer_limit
         ) {
             return false;
         }
@@ -554,8 +576,8 @@ if ($haslechon) {
 |--------------------------------------------------------------------------
 | AUTO COUPONS
 |--------------------------------------------------------------------------
-| Auto coupons are also no longer blocked by previous customer usage.
-| Usage limit counts PAID orders only.
+| Auto coupons are blocked when outside customer scope, over the total usage
+| limit, or over the customer usage limit. Usage counts PAID orders only.
 |--------------------------------------------------------------------------
 */
 $autoCoupons = Coupon::query()
@@ -609,12 +631,12 @@ if ($carts->count() > 0) {
             $totalUsed = CouponCart::from('coupon_cart as cc')
                 ->join('ecommerce_sales_headers as h', 'h.id', '=', 'cc.sales_header_id')
                 ->where('cc.coupon_id', $coupon->id)
-                ->where('cc.status', 1)
+                ->whereNotNull('cc.sales_header_id')
                 ->where('cc.total_usage', '>', 0)
-                ->whereRaw('LOWER(h.payment_status) = ?', ['paid'])
+                ->whereRaw('LOWER(TRIM(h.payment_status)) = ?', ['paid'])
                 ->sum('cc.total_usage');
 
-            if (
+           if (
                 !is_null($coupon->usage_limit) &&
                 (int) $coupon->usage_limit > 0 &&
                 $totalUsed >= (int) $coupon->usage_limit
@@ -624,11 +646,26 @@ if ($carts->count() > 0) {
 
             /*
             |--------------------------------------------------------------------------
-            | PER TRANSACTION RULE:
-            | Removed customer_limit checking here.
-            | If you still want a per-customer limit later, keep it separate.
+            | Customer usage limit check - PAID orders only
             |--------------------------------------------------------------------------
             */
+            $customerUsed = CouponCart::from('coupon_cart as cc')
+                ->join('ecommerce_sales_headers as h', 'h.id', '=', 'cc.sales_header_id')
+                ->where('cc.coupon_id', $coupon->id)
+                ->where('cc.customer_id', $uid)
+                ->whereNotNull('cc.sales_header_id')
+                ->where('cc.total_usage', '>', 0)
+                ->whereRaw('LOWER(TRIM(h.payment_status)) = ?', ['paid'])
+                ->sum('cc.total_usage');
+
+            if (
+                !is_null($coupon->customer_limit) &&
+                (int) $coupon->customer_limit > 0 &&
+                $customerUsed >= (int) $coupon->customer_limit
+            ) {
+                continue;
+            }
+
 
             $shouldSkip = false;
 
