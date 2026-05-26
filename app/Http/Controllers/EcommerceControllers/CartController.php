@@ -1265,7 +1265,6 @@ class CartController extends Controller
                 'province' => $request->province ?? '',
                 'barangay' => $request->location ?? '',
                 'delivery_tracking_number' => '',
-                'delivery_fee_amount' => $delivery_fee,
                 'order_source' => 'Web',
                 'delivery_branch' => $delivery_type == 'Door to door delivery' ? 'Tandang Sora Delivery' : '',
                 'tax_amount' => 0,
