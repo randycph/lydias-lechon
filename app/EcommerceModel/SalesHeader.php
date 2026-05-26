@@ -701,4 +701,14 @@ class SalesHeader extends Model
 
         return $paidAmount > 0 || $this->isConfirm == 1; 
     }
+
+    public function parent()
+    {
+        return $this->belongsTo(SalesHeader::class, 'parent_sales_header_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(SalesHeader::class, 'parent_sales_header_id');
+    }
 }
