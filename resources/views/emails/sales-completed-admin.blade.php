@@ -61,11 +61,9 @@ Click here to view and manage this order
     ) ? (float) $h->delivery_fee_amount : 0;
 
     // FINAL EMAIL TOTAL
-    $emailTotal = (float) ($h->email_net_amount ?? $h->net_amount ?? 0);
+    $computedEmailTotal = max(0, ($subtotal + $deliveryFee) - $couponDiscount);
 
-    if ($emailTotal <= 0 && (($subtotal + $deliveryFee) > 0)) {
-        $emailTotal = max(0, ($subtotal + $deliveryFee) - $couponDiscount);
-    }
+    $emailTotal = $computedEmailTotal;
 
     $isFreeItem = function ($item) {
         return (float) ($item->gross_amount ?? 0) <= 0;
