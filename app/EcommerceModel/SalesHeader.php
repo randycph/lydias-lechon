@@ -559,6 +559,6 @@ class SalesHeader extends Model
 
     public function subSales()
     {
-        return $this->hasMany(SalesHeader::class, 'parent_id');
+        return $this->hasMany(SalesHeader::class, 'parent_sales_header_id');
     }
 }
