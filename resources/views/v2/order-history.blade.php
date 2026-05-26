@@ -133,28 +133,20 @@
 
                                 <template x-if="viewMore{{ $index }}">
                                     <div class="flex flex-col gap-2 w-full">
-                                        <div class="flex items-center justify-between w-full">
-                                            <div class="text-sm text-black font-bold">Items Sub total</div>
+                                        <div class="flex items-center justify-between w-full ">
+                                            <div class="text-sm text-black font-bold">Sub total</div>
                                             <div class="text-sm text-black font-bold">₱{{ number_format($cartTotal, 2) }}</div>
                                         </div>
                                         @if ($sale->delivery_type == 'Door to door delivery')
-                                        <div class="flex items-center justify-between w-full">
-                                            <div class="text-sm text-black font-bold">Total Delivery Fee</div>
+                                        <div class="flex items-center justify-between w-full ">
+                                            <div class="text-sm text-black font-bold">Total Delivery fee</div>
                                             <div class="text-sm text-black font-bold">₱{{ number_format($fee, 2) }}</div>
                                         </div>
                                         @endif
-
-                                        <div class="flex items-center justify-between w-full">
-                                            <div class="text-sm text-black font-bold">Sub total</div>
-                                            <div class="text-sm text-black font-bold">₱{{ number_format($cartTotal + $fee, 2) }}</div>
-                                        </div>
-
                                         @if ($sale->discount_amount && $sale->discount_amount > 0)
-                                            <div class="mt-4"></div>
-
-                                            <div class="flex items-center justify-between w-full">
-                                                <div class="text-sm text-black font-bold">Discount</div>
-                                            </div>
+                                        <div class="flex items-center justify-between w-full">
+                                            <div class="text-sm text-black font-bold">Discount</div>
+                                        </div>
                                         @endif
 
                                     @if ($sale->couponUsed && count($sale->couponUsed) > 0)
@@ -239,13 +231,19 @@
                                             <div class="text-sm font-bold">₱{{ number_format($grandTotal, 2) }}</div>
                                         </div>
 
-                                   
-
+                                        @if ($amountPaid > 0)
                                         <div class="flex items-center justify-between w-full">
-                                        <div class="text-sm text-black font-bold">Amount to pay</div>
-                                        <div class="text-sm text-black font-bold">₱{{ number_format($balance, 2) }}</div>
-                                    </div>
-                                       
+                                            <div class="text-sm text-black font-bold">Amount Paid</div>
+                                            <div class="text-sm text-green-600 font-bold">₱{{ number_format($amountPaid, 2) }}</div>
+                                        </div>
+                                        @endif
+
+                                        @if ($balance > 0)
+                                        <div class="flex items-center justify-between w-full">
+                                            <div class="text-sm text-black font-bold">Amount to pay</div>
+                                            <div class="text-sm text-black font-bold">₱{{ number_format($balance, 2) }}</div>
+                                        </div>
+                                        @endif
                                         
 
                                         <div class="mt-5">
