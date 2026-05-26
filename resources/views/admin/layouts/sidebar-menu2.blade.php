@@ -256,7 +256,16 @@
             </li>
         @endif
 
-        @if (auth()->user()->has_access_to_module('mailing_list'))
+        @if (
+                auth()->user()->has_access_to_route('mailing-list.subscribers.index') || 
+                auth()->user()->has_access_to_route('mailing-list.subscribers.create') ||
+                auth()->user()->has_access_to_route('mailing-list.groups.index') || 
+                auth()->user()->has_access_to_route('mailing-list.campaigns.index') || 
+                auth()->user()->has_access_to_route('mailing-list.campaigns.create') ||
+                auth()->user()->has_access_to_route('mailing-list.campaigns.sent-campaigns') || 
+                auth()->user()->has_access_to_route('mailing-list.subscribers.unsubscribe') || 
+                auth()->user()->has_access_to_route('mailing-list.groups.create')
+            )
             <li class="nav-item with-sub @if (request()->routeIs('mailing-list*')) active show @endif">
                 <a href="" class="nav-link"><i data-feather="credit-card"></i> <span>Mailing List</span></a>
                 <ul>
