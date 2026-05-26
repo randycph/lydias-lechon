@@ -295,9 +295,13 @@
                                     @endphp
                                     <tr class="coupon-row">
                                         <td class="tx-nowrap">
-                                            <span class="coupon-code-label">Coupon Code</span>
-                                            <br>
-                                            <small class="coupon-code-text">{{ $couponCode }}</small>
+                                           <span class="coupon-code-label">
+                                            {{ !empty($couponCode) ? 'Coupon Code' : 'Discount' }}
+                                        </span>
+                                        <br>
+                                        <small class="coupon-code-text">
+                                            {{ !empty($couponCode) ? $couponCode : $couponName }}
+                                        </small>
                                         </td>
                                         <td class="tx-nowrap">{{ $couponName }}</td>
                                         <td class="tx-center"></td>
@@ -329,12 +333,38 @@
                                     <td class="tx-right">₱{{number_format($salesDetails->sum('gross_amount') + $sales->delivery_fee_amount, 2)}}</td>
                                 </tr>
                             @endif
-                            @if($sales->discount_amount > 0 && (!isset($displayCouponRows) || count($displayCouponRows) == 0 || $sales->giftCertificate))
-                                <tr>
-                                    <td class="tx-left" colspan="8">Discount</td>
-                                    <td class="tx-right text-danger">-₱{{ number_format($sales->discount_amount, 2) }}</td>
-                                </tr>
-                            @endif
+                            @if($sales->discount_amount > 0 && (!isset($displayCouponRows) || count($displayCouponRows) == 0))
+    @php
+        $fallbackDiscountName = 'Discount';
+
+        $discountPayment = $salesPayments
+            ->where('is_discount', 1)
+            ->where('status', 'PAID')
+            ->first();
+
+        if ($discountPayment) {
+            $fallbackDiscountName = $discountPayment->payment_type ?? 'Discount';
+        }
+            @endphp
+
+            <tr class="coupon-row">
+                <td class="tx-nowrap">
+                    <span class="coupon-code-label">Discount</span>
+                    <br>
+                    <small class="coupon-code-text">{{ $fallbackDiscountName }}</small>
+                </td>
+                <td class="tx-nowrap">{{ $fallbackDiscountName }}</td>
+                <td class="tx-center"></td>
+                <td class="tx-center"></td>
+                <td class="tx-center"></td>
+                <td class="tx-center"></td>
+                <td class="tx-right"></td>
+                <td class="tx-right"></td>
+                <td class="tx-right text-danger">
+                    -₱{{ number_format($sales->discount_amount, 2) }}
+                </td>
+            </tr>
+        @endif
 
                             @forelse($gc as $g)
                                 <tr style="font-weight:bold;">
