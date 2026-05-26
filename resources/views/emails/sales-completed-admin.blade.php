@@ -48,6 +48,29 @@ Click here to view and manage this order
 
     // Email display total: subtotal + delivery fee - coupon discount
     $emailTotal = max(0, ($subtotal + $deliveryFee) - $couponDiscount);
+
+    // Detect free item by zero gross amount.
+    $isFreeItem = function ($item) {
+        return (float) ($item->gross_amount ?? 0) <= 0;
+    };
+
+    // Price display for free item should be 0.00
+    $itemPrice = function ($item) use ($isFreeItem) {
+        if ($isFreeItem($item)) {
+            return 0;
+        }
+
+        return (float) ($item->paella_price ?? 0) + (float) ($item->price ?? 0);
+    };
+
+    // Total display for free item should be 0.00
+    $itemTotal = function ($item) use ($isFreeItem) {
+        if ($isFreeItem($item)) {
+            return 0;
+        }
+
+        return (float) ($item->gross_amount ?? 0);
+    };
 @endphp
 
 @if(count($h->deliveryAddress ?? []) > 0)
@@ -57,7 +80,7 @@ Click here to view and manage this order
 | Code | Product | No of Pax | Qty | Price | Total |
 |------|---------|-----------|-----|-------|-------|
 @foreach($h->items as $details)
-| {{ $details->product->code }} | {!! highlightPaella($details?->product_name) !!} | {{ $details->no_of_pax }} | {{ number_format($details->qty, 0) }} | {{ number_format($details->paella_price + $details->price, 2) }} | {{ number_format($details->gross_amount, 2) }} |
+| {{ $details?->product?->code }} | {!! highlightPaella($details?->product_name) !!} | {{ $details->no_of_pax }} | {{ number_format($details->qty, 0) }} | {{ number_format($itemPrice($details), 2) }} | {{ number_format($itemTotal($details), 2) }} |
 @endforeach
 
 @if($subtotal > 0)
@@ -91,7 +114,7 @@ Click here to view and manage this order
 | Code | Product | No of Pax | Date Needed | Qty | Price | Total |
 |------|---------|-----------|-------------|-----|-------|-------|
 @foreach($h->items as $details)
-| {{ $details?->product->code }} | {!! highlightPaella($details?->product_name) !!} | {{ $details->no_of_pax }} | {{ date('F d, Y H:i A', strtotime($details->delivery_date)) }} | {{ number_format($details->qty, 0) }} | {{ number_format($details->paella_price + $details->price, 2) }} | {{ number_format($details->gross_amount, 2) }} |
+| {{ $details?->product?->code }} | {!! highlightPaella($details?->product_name) !!} | {{ $details->no_of_pax }} | {{ date('F d, Y H:i A', strtotime($details->delivery_date)) }} | {{ number_format($details->qty, 0) }} | {{ number_format($itemPrice($details), 2) }} | {{ number_format($itemTotal($details), 2) }} |
 @endforeach
 
 @if($subtotal > 0)
