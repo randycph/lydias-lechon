@@ -49,7 +49,7 @@
                                 <span class="{{ $sale->status == 'CANCELLED' ? 'text-red-700 uppercase' : 'hidden' }}">{{ $sale->status }}</span>
                             </div>
                             <div class="font-semibold text-tertiary uppercase {{ strtolower($sale->status) == 'ABANDONED' || strtolower($sale->status) == 'CANCELLED' ? 'text-red-500' : '' }}">
-                                {{ $sale->status }}
+                                {{ $sale->payment_status }}
                             </div>
                         </div>
                         <div class="flex items-start flex-col gap-2  py-5 border-b border-[#DFDFDF]">
