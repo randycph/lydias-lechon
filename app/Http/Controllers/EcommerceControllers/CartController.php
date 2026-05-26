@@ -1573,6 +1573,26 @@ if (!empty($couponsList)) {
         }
 
         // =============================
+        // RECOMPUTE FINAL TOTAL AFTER SAVING COUPONS
+        // =============================
+        $finalCouponDiscount = (float) CouponCart::where('sales_header_id', $salesHeader->id)
+            ->where('status', 1)
+            ->sum('discount_used');
+
+        $finalGrossAmount = (float) $salesHeader->gross_amount;
+        $finalDeliveryFee = (float) $salesHeader->delivery_fee_amount;
+
+        $finalNetAmount = max(0, ($finalGrossAmount + $finalDeliveryFee) - $finalCouponDiscount);
+
+        $salesHeader->update([
+            'discount_amount' => $finalCouponDiscount,
+            'net_amount' => $finalNetAmount,
+            'payment_status' => $finalNetAmount <= 0 ? 'PAID' : 'PENDING',
+        ]);
+
+        $salesHeader->refresh();
+
+        // =============================
         // 13. CLEAR CART
         // =============================
         if (auth()->check()) {
@@ -1580,6 +1600,8 @@ if (!empty($couponsList)) {
         } else {
             session(['cart' => []]);
         }
+
+        
 
         // =============================
         // 14. NOTIFICATIONS
