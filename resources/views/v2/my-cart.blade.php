@@ -9,6 +9,9 @@
     x-data="{
         cartCount: 0,
         carts: [],
+        urlProductIds: [],
+        cartMismatch: false,
+        missingProducts: [],
         async getCarts() {
             try {
                 {{-- this.carts = []; --}}
@@ -36,10 +39,36 @@
                 console.error('There was a problem with the fetch operation:', error);
             }
         },
-        init() {
-            this.getCarts();
+        async init() {
+            const params = new URLSearchParams(window.location.search);
+
+            this.urlProductIds = params.get('product_ids')
+                ? params.get('product_ids').split(',').map(id => parseInt(id))
+                : [];
+
+            await this.getCarts();
+
+            if (this.carts.length === 0) {
+                window.location.href = '{{ url('/menu') }}';
+                return;
+            }
+
+            this.checkCartProducts();
+
             const cookie = document.cookie.split('; ').find(row => row.startsWith('shipping_method='));
             this.shippingMethod = cookie ? cookie.split('=')[1] : 'pickup';
+        },
+        checkCartProducts() {
+
+            if (this.urlProductIds.length === 0) {
+                return;
+            }
+
+            const cartIds = this.carts.map(cart => parseInt(cart.product.id));
+
+            this.missingProducts = this.urlProductIds.filter(id => !cartIds.includes(id));
+
+            this.cartMismatch = this.missingProducts.length > 0;
         },
         async removeCart(productid) {
             this.loading = true;
@@ -94,6 +123,13 @@
                     <div class="flex items-start font-bold flex-col gap-2  py-5 border-b border-[#DFDFDF]">
                         <template x-if="carts?.length > 0"> 
                             <div class="w-full px-4">
+
+                                <template x-if="cartMismatch">
+                                    <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-md mx-4 mb-4">
+                                        Your cart has been updated since your email reminder was sent. Some items from your previous cart may have been removed or changed.
+                                    </div>
+                                </template>
+                                
                                 <div class="mt-4 flex flex-col gap-4">
                 
                                     <template x-for="(cart, index) in carts" :key="index">

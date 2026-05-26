@@ -828,45 +828,51 @@ Route::get('/test/admin-email', function(){
     }
 });
 
-// Route::get('/test-cart-reminder', function () {
-//     $now = Carbon::now();
+Route::get('/test-cart-reminder', function () {
+    $now = Carbon::now();
 
-//     $carts = Cart::where('user_id', auth()->id())->with('user', 'product')->get();
+    $days = request('days');
 
-//     $cartsByUser = $carts->groupBy('user_id');
+    $carts = Cart::where('user_id', auth()->id())->with('user', 'product')->get();
 
-//     foreach ($cartsByUser as $userId => $userCarts) {
-//         $user = $userCarts->first()->user;
+    if ($days) {
+        $carts->each(function ($cart) use ($days) {
+            $cart->created_at = Carbon::parse($cart->created_at)->subDays($days);
+            $cart->save();
+        });
+    }
 
-//         if (!$user || !$user->email) {
-//             continue;
-//         }
+    $cartsByUser = $carts->groupBy('user_id');
 
-//         // Find the oldest cart item
-//         $oldestCart = $userCarts->sortBy('created_at')->first();
-//         $created = Carbon::parse($oldestCart->created_at);
-//         $diffInMinutes = $created->diffInMinutes($now);
-//         $diffInHours = $created->diffInHours($now);
+    foreach ($cartsByUser as $userId => $userCarts) {
+        $user = $userCarts->first()->user;
 
-//         if ($diffInMinutes >= 1 && $diffInHours < 6) {
-//             // Send reminder email if older than 10 minutes but not yet 6 hours
-//             Mail::to($user->email)->send(new CartReminderMail($userCarts));
-//             logger('Reminder sent to ' . $user->email);
-//         } 
+        if (!$user || !$user->email) {
+            continue;
+        }
 
-//         if ($diffInHours >= 6) {
-//             // Delete all their cart items
-//             foreach ($userCarts as $cart) {
-//                 $cart->delete();
-//             }
-//             logger('Deleted carts for user ID ' . $userId);
-//         }
-//     }
+        // Find the oldest cart item
+        $oldestCart = $userCarts->sortBy('created_at')->first();
+        $created = Carbon::parse($oldestCart->created_at);
+        $diffInDays = $created->diffInDays($now);
 
-//     return response()->json([
-//         'message' => 'Cart reminder check completed!'
-//     ]);
-// });
+        if ($diffInDays >= 2) {
+            // Send reminder email with all their cart items
+            Mail::to($user->email)->send(new CartReminderMail($userCarts));
+        } 
+        
+        if ($diffInDays >= 5) {
+            // Delete all their cart items
+            foreach ($userCarts as $cart) {
+                $cart->delete();
+            }
+        }
+    }
+
+    return response()->json([
+        'message' => 'Cart reminder check completed!'
+    ]);
+});
 
 // Route::get('unpaid-transaction-reminder', function () {
 //     $now = Carbon::now();

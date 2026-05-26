@@ -24,9 +24,13 @@ Here's a quick summary of your cart:
 @endforeach
 @endcomponent
 
+@php
+    $productIds = implode(',', $cartItems->pluck('product_id')->toArray());
+@endphp
+
 ## Grand Total: **{{ format_price($grandTotal) }}**
 
-@component('mail::button', ['url' => route('my-cart')])
+@component('mail::button', ['url' => route('my-cart') . '?product_ids=' . $productIds])
 Return to Shop
 @endcomponent
 
