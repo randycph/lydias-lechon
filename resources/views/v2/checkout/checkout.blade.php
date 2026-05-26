@@ -858,6 +858,24 @@
                         .toLowerCase();
                 },
 
+                couponLocationKey(city, location) {
+                const normalizedCity = this.normalizeText(city);
+                const normalizedLocation = this.normalizeText(location);
+
+                // Use city as the main grouping rule.
+                // If city exists, same city = one coupon discount only.
+                if (normalizedCity) {
+                    return `city:${normalizedCity}`;
+                }
+
+                // fallback if city is empty
+                if (normalizedLocation) {
+                    return `location:${normalizedLocation}`;
+                }
+
+                return '';
+            },
+
    getCouponLocations(coupon) {
     const raw = coupon?.location ?? coupon?.locations ?? '';
 
@@ -1198,14 +1216,27 @@
                     if (this.method !== 'delivery') return 0;
 
                     if (this.allowMultiple) {
-                        return (this.deliveries || []).reduce((sum, delivery) => {
-                            if (this.couponMatchesLocation(normalized, delivery.city, delivery.location)) {
-                                return sum + Number(delivery.delivery_fee || 0);
-                            }
+                    const discountedLocationKeys = new Set();
 
+                    return (this.deliveries || []).reduce((sum, delivery) => {
+                        if (!this.couponMatchesLocation(normalized, delivery.city, delivery.location)) {
                             return sum;
-                        }, 0);
-                    }
+                        }
+
+                        const locationKey = this.couponLocationKey(delivery.city, delivery.location);
+
+                        // Same city/location can only be counted once.
+                        if (locationKey && discountedLocationKeys.has(locationKey)) {
+                            return sum;
+                        }
+
+                        if (locationKey) {
+                            discountedLocationKeys.add(locationKey);
+                        }
+
+                        return sum + Number(delivery.delivery_fee || 0);
+                    }, 0);
+                }
 
                     return this.couponMatchesLocation(normalized, this.city, this.location)
                         ? Number(this.deliveryFee || 0)
@@ -1636,74 +1667,97 @@
             },
 
                 recomputeCouponTotals() {
-                    this.totalDiscountAmount = 0;
-                    this.shippingDiscountAmount = 0;
-                    this.shippingDiscountLists = [];
+                this.totalDiscountAmount = 0;
+                this.shippingDiscountAmount = 0;
+                this.shippingDiscountLists = [];
 
-                    const isMulti = this.method === 'delivery' && this.allowMultiple;
+                const isMulti = this.method === 'delivery' && this.allowMultiple;
 
-                    if (isMulti) {
-                        this.deliveryFees = this.deliveryFees.map(row => ({
-                            ...row,
-                            discount: 0
-                        }));
-                    }
+                if (isMulti) {
+                    this.deliveryFees = this.deliveryFees.map(row => ({
+                        ...row,
+                        discount: 0
+                    }));
+                }
 
-                    this.coupons.forEach(coupon => {
-                        if (this.isFreeShippingCoupon(coupon) && this.method !== 'pickup') {
-                            if (isMulti) {
-                                (this.deliveries || []).forEach((delivery, idx) => {
-                                    const feeRow = this.deliveryFees[idx] || {
-                                        location: [delivery.city, delivery.province].filter(Boolean).join(', '),
-                                        fee: Number(delivery.delivery_fee || 0),
-                                        discount: 0
-                                    };
+                this.coupons.forEach(coupon => {
+                    const normalizedCoupon = this.normalizeCoupon(coupon);
 
-                                    if (!this.deliveryFees[idx]) {
-                                        this.deliveryFees[idx] = feeRow;
-                                    }
+                    if (this.isFreeShippingCoupon(normalizedCoupon) && this.method !== 'pickup') {
+                        if (isMulti) {
+                            const discountedLocationKeys = new Set();
 
-                                    const fee = parseFloat(feeRow.fee || delivery.delivery_fee || 0);
-                                    if (fee <= 0) return;
-
-                                    if (!this.couponMatchesLocation(coupon, delivery.city, delivery.location)) return;
-
-                                    const existingDiscount = parseFloat(this.deliveryFees[idx].discount || 0);
-                                    const remainingFee = Math.max(fee - existingDiscount, 0);
-
-                                    if (remainingFee <= 0) return;
-
-                                    this.deliveryFees[idx].discount = existingDiscount + remainingFee;
-                                    this.shippingDiscountAmount += remainingFee;
-
-                                    this.shippingDiscountLists.push({
-                                        location: feeRow.location,
-                                        index: idx,
-                                        discount: remainingFee,
-                                        coupon_code: coupon.code
-                                    });
-                                });
-                            } else {
-                                if (this.couponMatchesLocation(coupon, this.city, this.location)) {
-                                    this.shippingDiscountAmount += parseFloat(this.deliveryFee || 0);
+                            (this.deliveries || []).forEach((delivery, idx) => {
+                                if (!this.couponMatchesLocation(normalizedCoupon, delivery.city, delivery.location)) {
+                                    return;
                                 }
-                            }
+
+                                const locationKey = this.couponLocationKey(delivery.city, delivery.location);
+
+                                // IMPORTANT:
+                                // Same city/location can only receive this coupon discount once.
+                                if (locationKey && discountedLocationKeys.has(locationKey)) {
+                                    return;
+                                }
+
+                                const feeRow = this.deliveryFees[idx] || {
+                                    location: [delivery.city, delivery.province].filter(Boolean).join(', '),
+                                    fee: Number(delivery.delivery_fee || 0),
+                                    discount: 0
+                                };
+
+                                if (!this.deliveryFees[idx]) {
+                                    this.deliveryFees[idx] = feeRow;
+                                }
+
+                                const fee = parseFloat(feeRow.fee || delivery.delivery_fee || 0);
+
+                                if (fee <= 0) {
+                                    return;
+                                }
+
+                                const existingDiscount = parseFloat(this.deliveryFees[idx].discount || 0);
+                                const remainingFee = Math.max(fee - existingDiscount, 0);
+
+                                if (remainingFee <= 0) {
+                                    return;
+                                }
+
+                                this.deliveryFees[idx].discount = existingDiscount + remainingFee;
+                                this.shippingDiscountAmount += remainingFee;
+
+                                if (locationKey) {
+                                    discountedLocationKeys.add(locationKey);
+                                }
+
+                                this.shippingDiscountLists.push({
+                                    location: feeRow.location,
+                                    index: idx,
+                                    discount: remainingFee,
+                                    coupon_code: normalizedCoupon.code
+                                });
+                            });
                         } else {
-                            this.totalDiscountAmount += this.getCouponDiscount(coupon);
+                            if (this.couponMatchesLocation(normalizedCoupon, this.city, this.location)) {
+                                this.shippingDiscountAmount += parseFloat(this.deliveryFee || 0);
+                            }
                         }
-                    });
-
-                    this.totalDiscountAmount = Math.min(this.totalDiscountAmount, this.cartSubtotal());
-
-                    if (!isMulti) {
-                        this.shippingDiscountAmount = Math.min(
-                            this.shippingDiscountAmount,
-                            parseFloat(this.deliveryFee || 0)
-                        );
+                    } else {
+                        this.totalDiscountAmount += this.getCouponDiscount(normalizedCoupon);
                     }
+                });
 
-                    this.computeTotal();
-                },
+                this.totalDiscountAmount = Math.min(this.totalDiscountAmount, this.cartSubtotal());
+
+                if (!isMulti) {
+                    this.shippingDiscountAmount = Math.min(
+                        this.shippingDiscountAmount,
+                        parseFloat(this.deliveryFee || 0)
+                    );
+                }
+
+                this.computeTotal();
+            },
 
                 async init() {
                     const cookie = document.cookie.split('; ').find(row => row.startsWith('shipping_method='));
