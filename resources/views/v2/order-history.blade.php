@@ -48,8 +48,8 @@
                                 <h2 class="font-semibold {{ $sale->status == 'CANCELLED' ? 'line-through' : '' }}">Order #{{ $sale->order_number }}</h2> 
                                 <span class="{{ $sale->status == 'CANCELLED' ? 'text-red-700 uppercase' : 'hidden' }}">{{ $sale->status }}</span>
                             </div>
-                            <div class="font-semibold text-tertiary uppercase {{ strtolower($sale->payment_status) == 'unpaid' ? 'text-red-500' : '' }}">
-                                {{ $sale->payment_status }}
+                            <div class="font-semibold text-tertiary uppercase {{ strtolower($sale->status) == 'ABANDONED' || strtolower($sale->status) == 'CANCELLED' ? 'text-red-500' : '' }}">
+                                {{ $sale->status }}
                             </div>
                         </div>
                         <div class="flex items-start flex-col gap-2  py-5 border-b border-[#DFDFDF]">
@@ -409,11 +409,11 @@
                                 <div class="lg:order-1 order-2 w-full lg:w-auto {{ $sale->status == 'CANCELLED' ? 'invisible' : '' }}">
                                     @if (strtolower($sale->payment_status) != 'paid')
                                         <button @click="cancelOrderModal = true; saleId = '{{ $sale->id }}'" type="button"
-                                            class="text-white custom-btn btn-tertiary-dark bg-tertiary hover:bg-secondary font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
+                                            class="{{ $sale->status == 'CANCELLED' || $sale->status == 'ABANDONED' ? 'hidden' : '' }} text-white custom-btn btn-tertiary-dark bg-tertiary hover:bg-secondary font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
                                             Cancel Order
                                         </button>
                                         <button @click="editOrderModal = true; saleId = '{{ $sale->id }}'" type="button"
-                                            class="text-white custom-btn btn-primary-dark bg-indigo-600 hover:bg-indigo-500 font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
+                                            class="{{ $sale->status == 'CANCELLED' || $sale->status == 'ABANDONED' ? 'hidden' : '' }} text-white custom-btn btn-primary-dark bg-indigo-600 hover:bg-indigo-500 font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
                                             Edit Order
                                         </button>
                                     @endif
@@ -467,10 +467,36 @@
                                         View
                                     </a>
                                     @if (strtolower($sale->payment_status) != 'paid')
-                                    <button @click="openPaymentModal({{$balance}}, '{{ $sale->order_number }}')" type="button"
-                                        class="{{ $sale->status == 'CANCELLED' ? 'hidden' : '' }} text-white bg-primary custom-btn btn-primary-dark font-medium rounded-md w-full sm:w-auto px-5 py-3.5 text-center">
-                                        Pay Now
-                                    </button>
+                                        <div class="relative group w-full sm:w-auto overflow-visible">
+
+                                            <button 
+                                                {{ $sale->isExpired ? 'disabled' : '' }} 
+                                                @click="openPaymentModal({{$balance}}, '{{ $sale->id }}', {{ $sale->isExpired ? 'true' : 'false' }})" 
+                                                type="button"
+                                                class="{{ $sale->status == 'CANCELLED' || $sale->status == 'ABANDONED' ? 'hidden' : '' }} {{ $sale->isExpired ? '' : 'custom-btn' }} 
+                                                    text-white bg-primary  btn-primary-dark font-medium rounded-md 
+                                                    w-full sm:w-auto px-5 py-3.5 text-center 
+                                                    disabled:bg-gray-200 disabled:cursor-not-allowed">
+
+                                                Pay Now
+                                            </button>
+
+                                            @if($sale->isExpired)
+                                                <div class="
+                                                    absolute bottom-full mb-2 z-50 pointer-events-none
+                                                    opacity-0 group-hover:opacity-100 transition-opacity duration-200
+
+                                                    left-1/2 -translate-x-1/2 w-[90vw] max-w-xs px-3 text-center whitespace-normal
+
+                                                    sm:left-auto sm:translate-x-0 sm:right-0 sm:w-auto sm:max-w-none sm:whitespace-nowrap
+
+                                                    bg-gray-800 text-white text-xs py-2 rounded
+                                                ">
+                                                    Payment is no longer allowed for orders with delivery scheduled for tomorrow or in the past.
+                                                </div>
+                                            @endif
+
+                                        </div>
                                     @endif
                                 </div>
                             
