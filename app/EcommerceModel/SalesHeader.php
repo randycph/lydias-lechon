@@ -546,4 +546,14 @@ class SalesHeader extends Model
     {
         return $this->hasOne(GiftCertificate::class, 'sales_header_id');
     }
+
+    public function parent()
+    {
+        return $this->belongsTo(SalesHeader::class, 'parent_sales_header_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(SalesHeader::class, 'parent_sales_header_id');
+    }
 }

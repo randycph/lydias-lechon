@@ -889,44 +889,154 @@ class ReportsController extends Controller
 
     public function sales_payment(Request $request)
     {
-        $qry = "SELECT h.*,h.created_at as hcreated,h.id as hid,p.*, h.order_number as hnum,p.id as pid,p.created_at as pcreated
-        from ecommerce_sales_payments p
-        left join ecommerce_sales_headers h on h.id=p.sales_header_id
-        where p.id>0 and p.status<>'CANCELLED' and p.amount>0 AND h.has_sub = 0";
+        $qry = "
+            SELECT 
+                h.*,
+                h.created_at as hcreated,
+                h.id as hid,
 
-        if(isset($_GET['status']) && $_GET['status']<>''){
-            $qry.= " and p.status='".$_GET['status']."'";
+                p.*,
+                h.order_number as hnum,
+                p.id as pid,
+                p.created_at as pcreated
+
+            from ecommerce_sales_payments p
+            left join ecommerce_sales_headers h 
+                on h.id = p.sales_header_id
+
+            where 
+                p.id > 0
+                and p.status <> 'CANCELLED'
+                and p.amount > 0
+                AND h.has_sub = 0
+        ";
+
+        if($request->status){
+            $qry .= " and p.status='{$request->status}'";
         }
-        if(isset($_GET['customer']) && $_GET['customer']<>''){
-            $qry.= " and h.customer_name LIKE '%".$_GET['customer']."%'";
+
+        if($request->customer){
+            $qry .= " and h.customer_name LIKE '%{$request->customer}%'";
         }
-        if(isset($_GET['payment_type']) && $_GET['payment_type']<>''){
-            $qry.= " and p.payment_type='".$_GET['payment_type']."'";
+
+        if($request->payment_type){
+            $qry .= " and p.payment_type='{$request->payment_type}'";
         }
+
         if($request->startdate && $request->enddate){
+
             $start = Carbon::parse($request->startdate)->format('Y-m-d');
             $end = Carbon::parse($request->enddate)->format('Y-m-d');
 
-            $qry .= " AND p.payment_date >= '$start' AND p.payment_date <= '$end'";
+            $qry .= "
+                AND p.payment_date >= '$start'
+                AND p.payment_date <= '$end'
+            ";
         }
-        else{
-            $qry.= " and p.payment_date >='2050-01-01 00:00:00.000'";
-        }
-        //return $qry;
-        //dd($qry);
-        // if(isset($_GET['start_date']) && $_GET['start_date']<>''){
-        //     $qry.= " and p.payment_date>='".date('Y-m-d',strtotime($_GET['start_date']))."'";
-        // }
-        // if(isset($_GET['end_date']) && $_GET['end_date']<>''){
-        //     $qry.= " and p.payment_date<='".date('Y-m-d',strtotime($_GET['end_date']))."'";
-        // }
-        $qry.= " order by p.created_at";
-        $rs = DB::select($qry);
-        
 
-        return view('admin.reports.sales_payment',compact('rs'));
+        $qry .= " order by p.payment_date";
 
+        $rs = collect(DB::select($qry));
+
+        // check sub sales
+        $subSales = SalesHeader::query()
+
+            ->whereNotNull('parent_sales_header_id')
+
+            ->whereDoesntHave('payments')
+
+            ->whereHas('parent.payments', function($q) use ($request){
+
+                $q->where('status', '<>', 'CANCELLED')->where('status', '<>', 'ABANDONED')
+                ->where('amount', '>', 0);
+
+                if($request->status){
+                    $q->where('status', $request->status);
+                }
+
+                if($request->payment_type){
+                    $q->where('payment_type', $request->payment_type);
+                }
+
+                if($request->startdate && $request->enddate){
+
+                    $start = Carbon::parse($request->startdate)->format('Y-m-d');
+                    $end = Carbon::parse($request->enddate)->format('Y-m-d');
+
+                    $q->whereBetween('payment_date', [$start, $end]);
+                }
+            })
+
+            ->when($request->customer, function($q) use ($request){
+
+                $q->where(
+                    'customer_name',
+                    'LIKE',
+                    '%'.$request->customer.'%'
+                );
+            })
+
+            ->with([
+                'items',
+                'parent.payments' => function($q){
+
+                    $q->where('status', '<>', 'CANCELLED')
+                    ->where('amount', '>', 0)
+                    ->latest()
+                    ->limit(1);
+                }
+            ])
+
+            ->get();
+
+        $subRows = $subSales->map(function($sale){
+
+            $payment = optional($sale->parent->payments->first());
+
+            if(!$payment){
+                return null;
+            }
+
+            $row = array_merge(
+                $sale->toArray(),
+                $payment->toArray()
+            );
+
+            $row['hcreated'] = $sale->created_at;
+            $row['hid'] = $sale->id;
+
+            $row['hnum'] = $sale->order_number;
+
+            $row['pid'] = $payment->id;
+            $row['pcreated'] = $payment->created_at;
+
+
+    // overide sales_header_id
+            $row['sales_header_id'] = $sale->id;
+
+            // sub sale order total
+            $row['amount'] = ($sale->items->sum('net_amount') + $sale->delivery_fee_amount) - $sale->discount_amount;
+
+            // get status from parent
+            $row['status'] = $payment->status;
+            $row['payment_status'] = $payment->status;
+
+            $row['is_parent_payment'] = 1;
+            $row['parent_payment_id'] = $payment->id;
+
+            return (object)$row;
+        })
+        ->filter();
+
+        // merge the parent and sub sales
+        $rs = $rs
+            ->concat($subRows)
+            ->sortBy('pcreated')
+            ->values();
+
+        return view('admin.reports.sales_payment', compact('rs'));
     }
+
     public function delivery_report_multiple($id, $address)
     {
         if (!is_numeric($id)) {
