@@ -994,17 +994,11 @@ class SalesController extends Controller
             ->with('error', 'Sales record not found.');
     }
 
-    if ($sales->is_sub == 1) {
-        $subSales = SalesHeader::where('id', $sales->parent_sales_header_id)->first();
-        $salesPayments = $subSales->payments ?? collect();
+    $salesPayments = SalesPayment::where('sales_header_id',$id)->where('status', '!=', 'CANCELLED')->get();
+    $totalPayment = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->sum('amount');
 
-        $totalPayment = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)
-            ->sum('amount');
-    } else {
-        $salesPayments = SalesPayment::where('sales_header_id', $id)->get();
-
-        $totalPayment = SalesPayment::where('sales_header_id', $id)
-            ->sum('amount');
+    if (!$sales) {
+        return redirect()->route('sales-transaction.index')->with('error', 'Sales record not found.');
     }
 
     $gc = GiftCertificate::where('sales_header_id', $id)->get();
