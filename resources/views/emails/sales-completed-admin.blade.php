@@ -30,14 +30,28 @@ Click here to view and manage this order
 @php
     $appliedCoupons = collect($h->applied_coupons ?? []);
 
-    $couponCodes = $appliedCoupons
-        ->pluck('coupon_code')
-        ->filter()
-        ->implode(', ');
+    $couponRows = $appliedCoupons->map(function ($coupon) {
+        $reward = $coupon->reward ?? $coupon->coupon?->reward ?? null;
 
-    $couponDiscount = $appliedCoupons->sum(function ($coupon) {
-        return abs((float) ($coupon->discount_used ?? 0));
-    });
+        $rewardLabel = match ($reward) {
+            'free-shipping-optn' => 'Free Shipping',
+            'discount-amount-optn' => 'Amount Discount',
+            'discount-percentage-optn' => 'Percentage Discount',
+            'free-product-optn' => 'Free Product',
+            default => 'Coupon',
+        };
+
+        return (object) [
+            'code' => $coupon->coupon_code ?? $coupon->coupon?->coupon_code ?? null,
+            'name' => $coupon->name ?? $coupon->coupon?->name ?? 'Coupon',
+            'reward_label' => $rewardLabel,
+            'discount_used' => abs((float) ($coupon->discount_used ?? 0)),
+        ];
+    })->filter(function ($coupon) {
+        return $coupon->discount_used > 0;
+    })->values();
+
+    $couponDiscount = $couponRows->sum('discount_used');
 
     $subtotal = (float) ($h->gross_amount ?? 0);
 
@@ -46,15 +60,15 @@ Click here to view and manage this order
         $h->delivery_type == 'Door to door delivery'
     ) ? (float) $h->delivery_fee_amount : 0;
 
-    // Email display total: subtotal + delivery fee - coupon discount
-    $emailTotal = max(0, ($subtotal + $deliveryFee) - $couponDiscount);
+    // FINAL EMAIL TOTAL
+    $computedEmailTotal = max(0, ($subtotal + $deliveryFee) - $couponDiscount);
 
-    // Detect free item by zero gross amount.
+    $emailTotal = $computedEmailTotal;
+
     $isFreeItem = function ($item) {
         return (float) ($item->gross_amount ?? 0) <= 0;
     };
 
-    // Price display for free item should be 0.00
     $itemPrice = function ($item) use ($isFreeItem) {
         if ($isFreeItem($item)) {
             return 0;
@@ -63,7 +77,6 @@ Click here to view and manage this order
         return (float) ($item->paella_price ?? 0) + (float) ($item->price ?? 0);
     };
 
-    // Total display for free item should be 0.00
     $itemTotal = function ($item) use ($isFreeItem) {
         if ($isFreeItem($item)) {
             return 0;
@@ -87,8 +100,10 @@ Click here to view and manage this order
 | | | | | Subtotal | {{ number_format($subtotal, 2) }} |
 @endif
 
-@if($couponDiscount > 0)
-| | | | | Coupon Code: {{ $couponCodes ?: 'Coupon' }} | -{{ number_format($couponDiscount, 2) }} |
+@if($couponRows->count() > 0)
+@foreach($couponRows as $coupon)
+| | | | | {{ $coupon->name }} ({{ $coupon->reward_label }}) | -{{ number_format($coupon->discount_used, 2) }} |
+@endforeach
 @endif
 
 @if($deliveryFee > 0)
@@ -121,10 +136,11 @@ Click here to view and manage this order
 | | | | | | Subtotal | {{ number_format($subtotal, 2) }} |
 @endif
 
-@if($couponDiscount > 0)
-| | | | | | Coupon Code: {{ $couponCodes ?: 'Coupon' }} | -{{ number_format($couponDiscount, 2) }} |
+@if($couponRows->count() > 0)
+@foreach($couponRows as $coupon)
+| | | | | | {{ $coupon->name }} ({{ $coupon->reward_label }}) | -{{ number_format($coupon->discount_used, 2) }} |
+@endforeach
 @endif
-
 @if($deliveryFee > 0)
 | | | | | | Delivery Fee | {{ number_format($deliveryFee, 2) }} |
 @endif

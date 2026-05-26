@@ -288,28 +288,53 @@
                                 @foreach($displayCouponRows as $coupon)
                                     @php
                                         $couponCode = $coupon->coupon_code ?? '';
+
+                                        $couponModel = $coupon->coupon ?? null;
+
                                         $couponName = $coupon->coupon_name
-                                            ?? optional($coupon->coupon)->name
-                                            ?? $couponCode;
-                                        $discountUsed = $coupon->discount_used ?? 0;
+                                            ?? $couponModel?->name
+                                            ?? $couponCode
+                                            ?? 'Discount';
+
+                                        $rewardType = $couponModel?->reward
+                                            ?? $coupon->reward
+                                            ?? '';
+
+                                        $rewardLabel = match ($rewardType) {
+                                            'free-shipping-optn'        => 'Free Shipping',
+                                            'discount-amount-optn'     => 'Discount Amount',
+                                            'discount-percentage-optn' => 'Discount Percentage',
+                                            'free-product-optn'        => 'Free Product',
+                                            default                    => 'Coupon Discount',
+                                        };
+
+                                        $discountUsed = (float) ($coupon->discount_used ?? 0);
                                     @endphp
+
                                     <tr class="coupon-row">
                                         <td class="tx-nowrap">
-                                           <span class="coupon-code-label">
-                                            {{ !empty($couponCode) ? 'Coupon Code' : 'Discount' }}
-                                        </span>
-                                        <br>
-                                        <small class="coupon-code-text">
-                                            {{ !empty($couponCode) ? $couponCode : $couponName }}
-                                        </small>
+                                            <span class="coupon-code-label">
+                                                {{ !empty($couponCode) ? 'Coupon Code' : 'Discount' }}
+                                            </span>
+                                            <br>
+                                            <small class="coupon-code-text">
+                                                {{ !empty($couponCode) ? $couponCode : $couponName }}
+                                            </small>
                                         </td>
-                                        <td class="tx-nowrap">{{ $couponName }}</td>
+
+                                        <td class="tx-nowrap">
+                                            <strong>{{ $couponName }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ $rewardLabel }}</small>
+                                        </td>
+
                                         <td class="tx-center"></td>
                                         <td class="tx-center"></td>
                                         <td class="tx-center"></td>
                                         <td class="tx-center"></td>
                                         <td class="tx-right"></td>
                                         <td class="tx-right"></td>
+
                                         <td class="tx-right text-danger">
                                             @if($discountUsed > 0)
                                                 -₱{{ number_format($discountUsed, 2) }}
@@ -334,169 +359,178 @@
                                 </tr>
                             @endif
                             @if($sales->discount_amount > 0 && (!isset($displayCouponRows) || count($displayCouponRows) == 0))
-    @php
-        $fallbackDiscountName = 'Discount';
-
-        $discountPayment = $salesPayments
-            ->where('is_discount', 1)
-            ->where('status', 'PAID')
-            ->first();
-
-        if ($discountPayment) {
-            $fallbackDiscountName = $discountPayment->payment_type ?? 'Discount';
-        }
-            @endphp
-
-            <tr class="coupon-row">
-                <td class="tx-nowrap">
-                    <span class="coupon-code-label">Discount</span>
-                    <br>
-                    <small class="coupon-code-text">{{ $fallbackDiscountName }}</small>
-                </td>
-                <td class="tx-nowrap">{{ $fallbackDiscountName }}</td>
-                <td class="tx-center"></td>
-                <td class="tx-center"></td>
-                <td class="tx-center"></td>
-                <td class="tx-center"></td>
-                <td class="tx-right"></td>
-                <td class="tx-right"></td>
-                <td class="tx-right text-danger">
-                    -₱{{ number_format($sales->discount_amount, 2) }}
-                </td>
-            </tr>
-        @endif
-
-                            @forelse($gc as $g)
-                                <tr style="font-weight:bold;">
-                                    <td class="tx-left" colspan="8">Gift Certificate: {{$g->code}}</td>
-                                    <td class="tx-right">₱({{number_format($g->amount, 2)}})</td> 
-                                </tr>
-                            @empty
-                            @endforelse
-                            @if($salesDetails->sum('net_amount') > 0)
-                                <tr style="font-weight:bold;">
-                                    <td class="tx-left" colspan="8">Total</td>
-                                    <td class="tx-right">₱{{number_format($salesDetails->sum('net_amount') + $sales->delivery_fee_amount - ($sales->discount_amount ?? 0), 2)}}</td>
-                                </tr>
-                            @endif
-                            </tbody>
-                        </table>
-                    </div>
-                    @endif
-
-                    <div class="table-responsive mg-t-20">
-                        <label class="tx-sans tx-uppercase tx-10 tx-medium tx-spacing-1 tx-color-03">Payments</label>
-                        <table class="table table-invoice bd-b">
-                            
-                            <thead>
-                            <tr>
-                                <th class="tx-left">Payment Type</th>
-                                <th class="tx-center">Receipt No</th>
-                                <th class="tx-center">Date</th>
-                                <th class="tx-center">Status</th>
-                                <th class="tx-right">Amount</th>                                
-                            </tr>
-                            </thead>
-                            <tbody>
-                                @php $paidTotal=0; @endphp
-                            @forelse($salesPayments as $payment)   
-                                
-                                @php 
-                                    if($payment->status == 'PAID'){
-                                        if ($payment->is_discount == 1) {
-                                            $paidTotal-=$payment->amount;
-                                        } else {
-                                            $paidTotal+=$payment->amount;
-                                        }
-                                    }
-                                @endphp 
-                            <tr>
-                                <td class="tx-left">{{$payment->payment_type}}</td>
-                                <td class="tx-center">{{$payment->receipt_number}}</td>
-                               <td class="tx-center">{{ !empty($payment->payment_date) ? \Carbon\Carbon::parse($payment->payment_date)->format('F d, Y') : '' }}</td>
-                                <td class="tx-center">
-                                    @if($payment->payment_type == 'Ok Order' || $payment->payment_type == 'COD')
-                                        @if($payment->status == 'PAID')
-                                            CONFIRMED
-                                        @else
-                                            UNPAID
-                                        @endif
-                                    @else
-                                        {{$payment->status}}
-                                    @endif
-                                </td>
-                                <td class="tx-right {{ $payment->is_discount == 1 ? 'text-danger' : '' }}">{{ $payment->is_discount == 1 ? '-' : '' }}₱{{number_format($payment->amount, 2)}}</td>
-                               
-                            </tr>
-                            @empty
-                                <tr>
-                                    <td class="tx-center " colspan="6">No payment found.</td>
-                                </tr>
-                            @endforelse
-                            
-                            @if($sales->payments->where('status','PAID')->sum('amount') > 0)
-                                <tr style="font-weight:bold;">
-                                    <td class="tx-left" colspan="4">Total</td>
-                                    <td class="tx-right">₱{{number_format($salesPayments->where('status', '!=', 'CANCELLED')->where('is_discount',0)->sum('amount'), 2)}}</td> 
-                                </tr>
-                            @endif
                             @php
-                                $total_balance = ($sales->items->sum('net_amount') + $sales->delivery_fee_amount) - ($sales->payments->where('status', 'PAID')->sum('amount'));
+                                $fallbackDiscountName = 'Order Discount';
+                                $fallbackRewardLabel  = 'Manual Discount';
+
+                                $discountPayment = $salesPayments
+                                    ->where('is_discount', 1)
+                                    ->where('status', 'PAID')
+                                    ->first();
+
+                                if ($discountPayment) {
+                                    $fallbackDiscountName = $discountPayment->payment_type ?? 'Order Discount';
+                                    $fallbackRewardLabel  = 'Payment Discount';
+                                }
                             @endphp
-                            @if($total_balance > 0 && $sales->payments->where('status','PAID')->sum('amount') > 0)
-                                <tr style="font-style:italic;">
-                                    <td class="tx-left" colspan="4"><br>Balance</td>
-                                    <td class="tx-right"><br>{{number_format($total_balance, 2)}}</td> 
-                                </tr>
-                            @endif
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="table-responsive mg-t-20">
-                        <label class="tx-sans tx-uppercase tx-10 tx-medium tx-spacing-1 tx-color-03">Delivery History</label>
-                        <table class="table table-invoice bd-b">
-                            
-                            <thead>
-                            <tr>
-                                <th class="tx-left">Date</th>
-                                <th class="tx-center">Status</th>
-                                <th class="tx-center">Remarks</th>
-                                <th class="tx-center">Delivered By</th>                              
-                            </tr>
-                            </thead>
-                            <tbody>
-                           
-                            @forelse($deliveries as $delivery)                            
-                            <tr>
-                                <td class="tx-left">{{$delivery->created_at}}</td>
-                                <td class="tx-center">{{$delivery->status}}</td>
-                                <td class="tx-center">{{$delivery->remarks}}</td>
-                                <td class="tx-center">{{$delivery->delivered_by}}</td>
-                               
-                            </tr>
-                            @empty
-                                <tr>
-                                    <td class="tx-center " colspan="6">No delivery transaction found.</td>
-                                </tr>
-                            @endforelse
-                           
-                            </tbody>
-                        </table>
-                    </div>
-                    <p>Encoded by: {{$sales->agent ?? ''}}</p>
 
-                   
-                   
-                    <!-- col -->
-                  
+                            <tr class="coupon-row">
+                                <td class="tx-nowrap">
+                                    <span class="coupon-code-label">Discount</span>
+                                    <br>
+                                    <small class="coupon-code-text">{{ $fallbackDiscountName }}</small>
+                                </td>
 
-                </div>
-                <!-- row -->
-            </div>
-            <!-- container -->
-        </div>
-@endsection
+                                <td class="tx-nowrap">
+                                    <strong>{{ $fallbackDiscountName }}</strong>
+                                    <br>
+                                    <small class="text-muted">{{ $fallbackRewardLabel }}</small>
+                                </td>
+
+                                <td class="tx-center"></td>
+                                <td class="tx-center"></td>
+                                <td class="tx-center"></td>
+                                <td class="tx-center"></td>
+                                <td class="tx-right"></td>
+                                <td class="tx-right"></td>
+
+                                <td class="tx-right text-danger">
+                                    -₱{{ number_format($sales->discount_amount, 2) }}
+                                </td>
+                            </tr>
+                        @endif
+
+                                                        @forelse($gc as $g)
+                                                            <tr style="font-weight:bold;">
+                                                                <td class="tx-left" colspan="8">Gift Certificate: {{$g->code}}</td>
+                                                                <td class="tx-right">₱({{number_format($g->amount, 2)}})</td> 
+                                                            </tr>
+                                                        @empty
+                                                        @endforelse
+                                                        @if($salesDetails->sum('net_amount') > 0)
+                                                            <tr style="font-weight:bold;">
+                                                                <td class="tx-left" colspan="8">Total</td>
+                                                                <td class="tx-right">₱{{number_format($salesDetails->sum('net_amount') + $sales->delivery_fee_amount - ($sales->discount_amount ?? 0), 2)}}</td>
+                                                            </tr>
+                                                        @endif
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                @endif
+
+                                                <div class="table-responsive mg-t-20">
+                                                    <label class="tx-sans tx-uppercase tx-10 tx-medium tx-spacing-1 tx-color-03">Payments</label>
+                                                    <table class="table table-invoice bd-b">
+                                                        
+                                                        <thead>
+                                                        <tr>
+                                                            <th class="tx-left">Payment Type</th>
+                                                            <th class="tx-center">Receipt No</th>
+                                                            <th class="tx-center">Date</th>
+                                                            <th class="tx-center">Status</th>
+                                                            <th class="tx-right">Amount</th>                                
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @php $paidTotal=0; @endphp
+                                                        @forelse($salesPayments as $payment)   
+                                                            
+                                                            @php 
+                                                                if($payment->status == 'PAID'){
+                                                                    if ($payment->is_discount == 1) {
+                                                                        $paidTotal-=$payment->amount;
+                                                                    } else {
+                                                                        $paidTotal+=$payment->amount;
+                                                                    }
+                                                                }
+                                                            @endphp 
+                                                        <tr>
+                                                            <td class="tx-left">{{$payment->payment_type}}</td>
+                                                            <td class="tx-center">{{$payment->receipt_number}}</td>
+                                                        <td class="tx-center">{{ !empty($payment->payment_date) ? \Carbon\Carbon::parse($payment->payment_date)->format('F d, Y') : '' }}</td>
+                                                            <td class="tx-center">
+                                                                @if($payment->payment_type == 'Ok Order' || $payment->payment_type == 'COD')
+                                                                    @if($payment->status == 'PAID')
+                                                                        CONFIRMED
+                                                                    @else
+                                                                        UNPAID
+                                                                    @endif
+                                                                @else
+                                                                    {{$payment->status}}
+                                                                @endif
+                                                            </td>
+                                                            <td class="tx-right {{ $payment->is_discount == 1 ? 'text-danger' : '' }}">{{ $payment->is_discount == 1 ? '-' : '' }}₱{{number_format($payment->amount, 2)}}</td>
+                                                        
+                                                        </tr>
+                                                        @empty
+                                                            <tr>
+                                                                <td class="tx-center " colspan="6">No payment found.</td>
+                                                            </tr>
+                                                        @endforelse
+                                                        
+                                                        @if($sales->payments->where('status','PAID')->sum('amount') > 0)
+                                                            <tr style="font-weight:bold;">
+                                                                <td class="tx-left" colspan="4">Total</td>
+                                                                <td class="tx-right">₱{{number_format($salesPayments->where('status', '!=', 'CANCELLED')->where('is_discount',0)->sum('amount'), 2)}}</td> 
+                                                            </tr>
+                                                        @endif
+                                                        @php
+                                                            $total_balance = ($sales->items->sum('net_amount') + $sales->delivery_fee_amount) - ($sales->payments->where('status', 'PAID')->sum('amount'));
+                                                        @endphp
+                                                        @if($total_balance > 0 && $sales->payments->where('status','PAID')->sum('amount') > 0)
+                                                            <tr style="font-style:italic;">
+                                                                <td class="tx-left" colspan="4"><br>Balance</td>
+                                                                <td class="tx-right"><br>{{number_format($total_balance, 2)}}</td> 
+                                                            </tr>
+                                                        @endif
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                
+                                                <div class="table-responsive mg-t-20">
+                                                    <label class="tx-sans tx-uppercase tx-10 tx-medium tx-spacing-1 tx-color-03">Delivery History</label>
+                                                    <table class="table table-invoice bd-b">
+                                                        
+                                                        <thead>
+                                                        <tr>
+                                                            <th class="tx-left">Date</th>
+                                                            <th class="tx-center">Status</th>
+                                                            <th class="tx-center">Remarks</th>
+                                                            <th class="tx-center">Delivered By</th>                              
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                    
+                                                        @forelse($deliveries as $delivery)                            
+                                                        <tr>
+                                                            <td class="tx-left">{{$delivery->created_at}}</td>
+                                                            <td class="tx-center">{{$delivery->status}}</td>
+                                                            <td class="tx-center">{{$delivery->remarks}}</td>
+                                                            <td class="tx-center">{{$delivery->delivered_by}}</td>
+                                                        
+                                                        </tr>
+                                                        @empty
+                                                            <tr>
+                                                                <td class="tx-center " colspan="6">No delivery transaction found.</td>
+                                                            </tr>
+                                                        @endforelse
+                                                    
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                <p>Encoded by: {{$sales->agent ?? ''}}</p>
+
+                                            
+                                            
+                                                <!-- col -->
+                                            
+
+                                            </div>
+                                            <!-- row -->
+                                        </div>
+                                        <!-- container -->
+                                    </div>
+                            @endsection
 
 @section('pagejs')
     <script src="{{ asset('lib/bselect/dist/js/bootstrap-select.js') }}"></script>
