@@ -133,7 +133,6 @@
                             <th align="left">Order Source</th>
                             <th align="left">Order #</th>
                             <th align="left">Customer</th>
-                            <th align="left">Coupon Amount</th>
                             <th align="left">Total Amount</th>
                             <th align="left">Order Date</th>
                         </tr>
@@ -179,7 +178,7 @@
                             <td>{{ $r->order_source_label  }}</td>
                             <td>{{ $r->order_number }}</td>
                             <td>{{ $r->customer_name }}</td>
-                            <td>₱{{ number_format($r->coupon_amount ?? 0, 2) }}</td>
+
                             <td>₱{{ number_format($r->net_amount ?? 0, 2) }}</td>
                             <td>{{ $r->order_date}}</td>
                         </tr>
