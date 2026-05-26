@@ -351,9 +351,15 @@
                                         @endif
                                     </td>
                                    @php
-                                        
-                                        $displayAmount = (float) ($sale->net_amount > 0 ? $sale->net_amount : $sale->gross_amount);
-                                        $displayAmount = $displayAmount - $sale->discount_amount;
+                                        $displayAmount = (float) ($sale->net_amount ?? 0);
+
+                                        if ($displayAmount <= 0) {
+                                            $gross    = (float) ($sale->gross_amount ?? 0);
+                                            $delivery = (float) ($sale->delivery_fee_amount ?? 0);
+                                            $discount = (float) ($sale->discount_amount ?? 0);
+
+                                            $displayAmount = ($gross + $delivery) - $discount;
+                                        }
 
                                         $paidAmount = (float) $sale->payments
                                             ->where('is_discount', '!=', 1)
@@ -452,10 +458,10 @@
 
                                                                 @if(canAddPayment($sale) && auth()->user()->has_access_to_route('payment.add.store'))
                                                                     <a class="dropdown-item" href="javascript:;"
-                                                                    onclick="addPayment(
-                                                                        '{{ $sale->id }}',
-                                                                        '{{ \App\EcommerceModel\SalesPayment::get_remaining_unpaid($sale->gross_amount, $sale->id) }}'
-                                                                    );">
+                                                                   onclick="addPayment(
+                                                                            '{{ $sale->id }}',
+                                                                            '{{ $displayBalance }}'
+                                                                        );"
                                                                         Add Payment
                                                                     </a>
                                                                 @endif
