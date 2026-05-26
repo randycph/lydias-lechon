@@ -461,7 +461,7 @@
                                                                    onclick="addPayment(
                                                                             '{{ $sale->id }}',
                                                                             '{{ $displayBalance }}'
-                                                                        );"
+                                                                        );">
                                                                         Add Payment
                                                                     </a>
                                                                 @endif
