@@ -1095,9 +1095,49 @@ class CartController extends Controller
         // =============================
         // 8. TOTALS
         // =============================
-        $totalPrice = (float)$request->order_amount + ( ($bakaProduct?->price ?? 0) * ($bakaQty ?? 0) );
-        $discount = (float)($request->discount_amount ?? 0);
-        $netAmount = $totalPrice + $delivery_fee - $discount;
+        $totalPrice = (float) $request->order_amount + (($bakaProduct?->price ?? 0) * ($bakaQty ?? 0));
+
+        $computedCouponDiscount = 0;
+
+        $couponDataForDiscount = json_decode($request->input('coupon_data', '[]'), true);
+        $couponsForDiscount = json_decode($request->input('coupons', '[]'), true);
+
+        if (is_array($couponDataForDiscount)) {
+            foreach ($couponDataForDiscount as $coupon) {
+                $computedCouponDiscount += (float) (
+                    $coupon['discount_used']
+                    ?? $coupon['discount_amount']
+                    ?? $coupon['discount']
+                    ?? $coupon['amount']
+                    ?? 0
+                );
+            }
+        }
+
+        if ($computedCouponDiscount <= 0 && is_array($couponsForDiscount)) {
+            foreach ($couponsForDiscount as $coupon) {
+                if (is_array($coupon)) {
+                    $computedCouponDiscount += (float) (
+                        $coupon['discount_used']
+                        ?? $coupon['discount_amount']
+                        ?? $coupon['discount']
+                        ?? $coupon['amount']
+                        ?? 0
+                    );
+                }
+            }
+        }
+
+        $requestDiscount = (float) ($request->discount_amount ?? 0);
+
+        // use the bigger value because sometimes frontend sends discount_amount,
+        // sometimes only coupon_data/coupons has the discount value
+        $discount = max($requestDiscount, $computedCouponDiscount);
+
+        // prevent over-discount
+        $discount = min($discount, $totalPrice + $delivery_fee);
+
+        $netAmount = max(($totalPrice + $delivery_fee) - $discount, 0);
 
         // =============================
         // 9. ORDER NUMBER
@@ -1184,7 +1224,7 @@ class CartController extends Controller
                 'gross_amount' => $totalPrice,
                 'net_amount' => $netAmount,
                 'discount_amount' => $discount,
-                'payment_status' => $request->order_amount <= 0 ? 'PAID' : 'PENDING',
+                'payment_status' => $netAmount <= 0 ? 'PAID' : 'PENDING',
                 'delivery_status' => '',
                 'status' => 'active',
                 'currency' => 'PHP',
@@ -1229,7 +1269,7 @@ class CartController extends Controller
                 'order_source' => 'Web',
                 'delivery_branch' => $delivery_type == 'Door to door delivery' ? 'Tandang Sora Delivery' : '',
                 'tax_amount' => 0,
-                'payment_status' => $request->order_amount <= 0 ? 'PAID' : 'PENDING',
+                'payment_status' => $netAmount <= 0 ? 'PAID' : 'PENDING',
                 'delivery_status' => '',
                 'customer_location' => $request->shipping_type == 'pickup' ? '' : ($request->delivery_address),
                 'instruction' => $request->instruction,
@@ -1246,7 +1286,7 @@ class CartController extends Controller
             ]);
         }
 
-        if ($request->order_amount <= 0) {
+        if ($netAmount <= 0) {
             $salesHeader->isConfirm = 1;
             $salesHeader->confirmed_by = 'Customer';
             $salesHeader->confirmed_on = date('Y-m-d H:i:s');
@@ -1268,7 +1308,13 @@ $couponsList = collect(json_decode($request->coupons ?? '[]', true) ?: [])
         if (is_array($coupon)) {
             return [
                 'code' => strtoupper(trim($coupon['code'] ?? '')),
-                'discount_used' => (float) ($coupon['discount_used'] ?? 0),
+                'discount_used' => (float) (
+                    $coupon['discount_used']
+                    ?? $coupon['discount_amount']
+                    ?? $coupon['discount']
+                    ?? $coupon['amount']
+                    ?? 0
+                ),
             ];
         }
 
@@ -1300,15 +1346,21 @@ if (!empty($couponsList)) {
         | Do NOT check customer_id here because coupon rule is per transaction.
         |--------------------------------------------------------------------------
         */
-        if (!is_null($couponRow->usage_limit)) {
-            $totalUsed = CouponCart::where('coupon_id', $couponRow->id)
-                ->where('status', 1)
-                ->where('sales_header_id', '<>', $salesHeader->id)
-                ->sum('total_usage');
+       $totalUsed = CouponCart::from('coupon_cart as cc')
+            ->join('ecommerce_sales_headers as h', 'h.id', '=', 'cc.sales_header_id')
+            ->where('cc.coupon_id', $couponRow->id)
+            ->where('cc.status', 1)
+            ->where('cc.total_usage', '>', 0)
+            ->whereRaw('LOWER(TRIM(h.payment_status)) = ?', ['paid'])
+            ->where('cc.sales_header_id', '<>', $salesHeader->id)
+            ->sum('cc.total_usage');
 
-            if ($totalUsed >= $couponRow->usage_limit) {
-                continue;
-            }
+        if (
+            !is_null($couponRow->usage_limit) &&
+            (int) $couponRow->usage_limit > 0 &&
+            $totalUsed >= (int) $couponRow->usage_limit
+        ) {
+            continue;
         }
 
         /*
@@ -1549,8 +1601,9 @@ if (!empty($couponsList)) {
         // =============================
         // 15. GENERATE PEYMENT SIGNATURE
         // =============================
+        $paymentAmount = (float) $salesHeader->net_amount;
 
-        $payment = $paymentService->generate($salesHeader, $request->deposit);
+        $payment = $paymentService->generate($salesHeader, $paymentAmount);
 
         // =============================
         // 16. RESPONSE
@@ -1561,7 +1614,7 @@ if (!empty($couponsList)) {
             'order_number' => $salesHeader->order_number,
             'customer_contact_number' => $salesHeader->customer_contact_number,
             'customer_name' => $salesHeader->customer_name,
-            'amount' => $request->deposit,
+            'amount' => number_format($paymentAmount, 2, '.', ''),
             'signature' => $payment['signature'],
             'saved_items' => rtrim($saved_items, ', '),
         ]);
