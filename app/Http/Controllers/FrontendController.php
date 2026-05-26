@@ -766,13 +766,13 @@ if ($carts->count() > 0) {
 
     $gc = GiftCertificate::where('sales_header_id', $id)->get();
 
-    $salesPayments = SalesPayment::where('sales_header_id', $id)->get();
+    $salesPayments = SalesPayment::where('sales_header_id',$id)->where('status', '!=', 'CANCELLED')->get();
 
     $salesDetails = SalesDetail::with('product.photos')
         ->where('sales_header_id', $id)
         ->get();
 
-    $totalPayment = SalesPayment::where('sales_header_id', $id)->sum('amount');
+    $totalPayment = SalesPayment::where('sales_header_id',$id)->where('status', 'PAID')->where('is_discount', 0)->sum('amount');
 
     $deliveries = DeliveryStatus::where('order_id', $id)->get();
 
