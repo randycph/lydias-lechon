@@ -889,6 +889,11 @@ class ReportsController extends Controller
 
     public function sales_payment(Request $request)
     {
+        if(!$request->startdate && !$request->enddate){
+            $rs = [];
+            return view('admin.reports.sales_payment', compact('rs'));
+        }
+
         $qry = "
             SELECT 
                 h.*,
