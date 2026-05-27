@@ -754,19 +754,21 @@ Route::get('/test', function(){
 });
 
 
-// Route::get('/test/test-email-1', function(){
-//     try {
-//         $salesHeader = SalesHeader::first();
+Route::get('/test/test-email-1', function(){
+    try {
+        $saleId = request()->get('sale_id');
+        
+        $salesHeader = SalesHeader::find($saleId);
 
-//         Mail::to('evilryok@gmail.com')->send(new SalesCompleted($salesHeader));
+        Mail::to($salesHeader->email)->send(new SalesCompleted($salesHeader));
 
-//         return response()->json([
-//             'message' => 'Email sent successfully!'
-//         ]);
-//     } catch (\Throwable $th) {
-//         throw $th;
-//     }
-// });
+        return response()->json([
+            'message' => 'Email sent successfully!'
+        ]);
+    } catch (\Throwable $th) {
+        throw $th;
+    }
+});
 
 // Route::get('/test/test-email-2', function(){
 //     try {
