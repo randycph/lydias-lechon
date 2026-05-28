@@ -625,48 +625,95 @@
 
 				<div class="form-row border rounded p-3">
 					<div class="col-12">
+						@php
+							$usageLimitValue = (int) old('usage_limit', $coupon->usage_limit ?? 0);
+							$customerLimitValue = (int) old('customer_limit', $coupon->customer_limit ?? 0);
+
+							$hasUsageLimit = $usageLimitValue > 0;
+							$hasCustomerLimit = $customerLimitValue > 0;
+						@endphp
+
 						<div class="custom-control custom-checkbox">
-							<input type="checkbox" class="custom-control-input" id="coupon-customer-limit" name="customer_limit" onclick="myFunction()" @if($coupon->customer_limit <> 100000) checked @endif>
-							<label class="custom-control-label" for="coupon-customer-limit">Customer Limit &nbsp;&nbsp;<span style="font-style: italic;">Maximum number of customers who can use the coupon.</span></label>
+							<input type="checkbox"
+								class="custom-control-input"
+								id="coupon-usage-limit"
+								name="has_usage_limit"
+								onclick="myFunction()"
+								@if($hasUsageLimit) checked @endif>
+							<label class="custom-control-label" for="coupon-usage-limit">
+								Usage Limit
+								&nbsp;&nbsp;<span style="font-style: italic;">Maximum total paid uses allowed for this coupon across all customers.</span>
+							</label>
 						</div>
 
-						<div class="mt-3" id="coupon-customer-limit-form" style="display:@if($coupon->customer_limit <> 100000) block @else none @endif;">
+						<div class="mt-3" id="coupon-usage-limit-form" style="display:@if($hasUsageLimit) block @else none @endif;">
 							<div class="input-group border rounded">
 								<span class="input-group-btn">
-									<button type="button" class="btn btn-default btn-number" disabled="disabled" data-type="minus" data-field="coupon_customer_limit_qty">
+									<button type="button" class="btn btn-default btn-number" disabled="disabled" data-type="minus" data-field="usage_limit">
 										<span class="fa fa-minus"></span>
 									</button>
 								</span>
-								@php
-									$selectedCustomerCount = count(old('customer', $selectedCustomers ?? []));
-
-									if (old('coupon_scope', $coupon->customer_scope) == 'specific') {
-										$customerLimit = $selectedCustomerCount;
-									} else {
-										if ($coupon->customer_limit == 100000) {
-											$customerLimit = 0;
-										} else {
-											$customerLimit = $coupon->customer_limit;
-										}
-									}
-								@endphp
-
 								<input type="text"
-									name="coupon_customer_limit_qty"
+									name="usage_limit"
+									id="usage_limit"
 									class="form-control input-number border border-top-0 border-bottom-0"
-									value="{{ old('coupon_customer_limit_qty', $customerLimit) }}"
+									value="{{ $usageLimitValue }}"
 									min="0"
 									max="100000">
 								<span class="input-group-btn">
-									<button type="button" class="btn btn-default btn-number" data-type="plus" data-field="coupon_customer_limit_qty">
+									<button type="button" class="btn btn-default btn-number" data-type="plus" data-field="usage_limit">
 										<span class="fa fa-plus"></span>
 									</button>
 								</span>
 							</div>
+							<small class="text-muted d-block mt-2">
+								Set 0 for unlimited total usage. Example: 4 means this coupon can only be used 4 paid times total.
+								<br>
+								If Customer Scope is Specific, this will automatically match the number of selected customers and become readonly.
+							</small>
 							<hr>
 						</div>
 					</div>
 
+					<div class="col-12 mt-3">
+						<div class="custom-control custom-checkbox">
+							<input type="checkbox"
+								class="custom-control-input"
+								id="coupon-customer-limit"
+								name="has_customer_limit"
+								onclick="myFunction()"
+								@if($hasCustomerLimit) checked @endif>
+							<label class="custom-control-label" for="coupon-customer-limit">
+								Customer Limit
+								&nbsp;&nbsp;<span style="font-style: italic;">Maximum paid uses allowed per customer.</span>
+							</label>
+						</div>
+
+						<div class="mt-3" id="coupon-customer-limit-form" style="display:@if($hasCustomerLimit) block @else none @endif;">
+							<div class="input-group border rounded">
+								<span class="input-group-btn">
+									<button type="button" class="btn btn-default btn-number" disabled="disabled" data-type="minus" data-field="customer_limit">
+										<span class="fa fa-minus"></span>
+									</button>
+								</span>
+								<input type="text"
+									name="customer_limit"
+									class="form-control input-number border border-top-0 border-bottom-0"
+									value="{{ $customerLimitValue }}"
+									min="0"
+									max="100000">
+								<span class="input-group-btn">
+									<button type="button" class="btn btn-default btn-number" data-type="plus" data-field="customer_limit">
+										<span class="fa fa-plus"></span>
+									</button>
+								</span>
+							</div>
+							<small class="text-muted d-block mt-2">
+								Set 0 for unlimited per-customer usage. Example: 1 means each customer can only use this coupon once.
+							</small>
+							<hr>
+						</div>
+					</div>
 					<div class="col-12 mt-3">
 						<div class="custom-control custom-checkbox">
 							<input {{ (old("combination") == "ON" || $coupon->combination == 1 ? "checked":"") }} type="checkbox" class="custom-control-input" id="coupon-combination" name="combination">
@@ -728,13 +775,18 @@
 @section('customjs')
 <script>
 	$('#coupon-scope-specific').click(function(){
-		// $('#coupon-customer-limit').prop('checked',false);
-		// // $('#coupon-customer-limit-form').hide();
-		// $('#coupon-customer-limit').attr('disabled',true);
+		$('#customer-optn').show();
+		if (typeof updateSpecificCustomerCount === 'function') {
+			updateSpecificCustomerCount();
+		}
 	});
 
 	$('#coupon-scope-all').click(function(){
-		$('#coupon-customer-limit').attr('disabled',false);
+		$('#customer-optn').hide();
+		$('select[name="customer[]"]').val(null).trigger('change');
+		if (typeof updateSpecificCustomerCount === 'function') {
+			updateSpecificCustomerCount();
+		}
 	});
 
 	function productdiscount(x){
@@ -969,6 +1021,16 @@ refreshRewardOptions();
 				});
 				
 				if(rs == true){
+					if ($('#coupon-scope-specific').is(':checked')) {
+						const selectedCustomers = $('select[name="customer[]"]').val() || [];
+
+						$('input[name="usage_limit"]')
+							.val(selectedCustomers.length)
+							.prop('disabled', false);
+
+						$('#coupon-usage-limit').prop('disabled', false);
+					}
+
 					$('#couponForm').submit();
 				}
             }
@@ -999,39 +1061,65 @@ refreshRewardOptions();
 		minDate: dateToday,
 	});
 
-	$('.select2').each(function () {
-    const $select = $(this);
-
-    $select.select2({
-        placeholder: 'Choose Options',
-        width: '100%',
-        closeOnSelect: !$select.prop('multiple')
-    });
-});
-
 	function myFunction() {
 		var checkCouponTime = document.getElementById("coupon-time");
 		var fieldCouponOption = document.getElementById("coupon-time-option");
-		if (checkCouponTime.checked == true){
-			fieldCouponOption.style.display = "flex";
-		} else {
-			fieldCouponOption.style.display = "none";
+		if (checkCouponTime && fieldCouponOption) {
+			if (checkCouponTime.checked == true){
+				fieldCouponOption.style.display = "flex";
+			} else {
+				fieldCouponOption.style.display = "none";
+			}
 		};
 
 		var couponPurchase = document.getElementById("coupon-purchase");
 		var fieldCouponOption = document.getElementById("coupon-purchase-option");
-		if (couponPurchase.checked == true){
-			fieldCouponOption.style.display = "flex";
-		} else {
-			fieldCouponOption.style.display = "none";
+		if (couponPurchase && fieldCouponOption) {
+			if (couponPurchase.checked == true){
+				fieldCouponOption.style.display = "flex";
+			} else {
+				fieldCouponOption.style.display = "none";
+			}
+		};
+
+		var couponUsageLimit = document.getElementById("coupon-usage-limit");
+		var fieldUsageLimitOption = document.getElementById("coupon-usage-limit-form");
+		var scopeSpecific = document.getElementById("coupon-scope-specific");
+
+		if (scopeSpecific && scopeSpecific.checked) {
+			if (couponUsageLimit) {
+				couponUsageLimit.checked = true;
+				couponUsageLimit.disabled = true;
+			}
+
+			if (fieldUsageLimitOption) {
+				fieldUsageLimitOption.style.display = "block";
+			}
+
+			const selectedCustomers = $('select[name="customer[]"]').val() || [];
+
+			$('input[name="usage_limit"]')
+				.val(selectedCustomers.length)
+				.prop('readonly', true)
+				.prop('disabled', true);
+
+			$('.btn-number[data-field="usage_limit"]').prop('disabled', true);
+		} else if (couponUsageLimit && couponUsageLimit.checked == true){
+			fieldUsageLimitOption.style.display = "block";
+		} else if (fieldUsageLimitOption) {
+			fieldUsageLimitOption.style.display = "none";
+			$('input[name="usage_limit"]').val(0).prop('readonly', false).prop('disabled', false);
+			$('.btn-number[data-field="usage_limit"]').prop('disabled', false);
 		};
 
 		var couponCustomerLimit = document.getElementById("coupon-customer-limit");
 		var fieldCustomerLimitOption = document.getElementById("coupon-customer-limit-form");
-		if (couponCustomerLimit.checked == true){
+		if (couponCustomerLimit && couponCustomerLimit.checked == true){
 			fieldCustomerLimitOption.style.display = "block";
-		} else {
+		} else if (fieldCustomerLimitOption) {
 			fieldCustomerLimitOption.style.display = "none";
+			$('input[name="customer_limit"]').val(0).prop('readonly', false).prop('disabled', false);
+			$('.btn-number[data-field="customer_limit"]').prop('disabled', false);
 		};
 	};
 
@@ -1139,9 +1227,15 @@ $(function() {
     $('.selectpicker').selectpicker();
 
     $('.select2').each(function () {
-        const isMultiple = $(this).prop('multiple');
+        const $select = $(this);
 
-        $(this).select2({
+        if ($select.hasClass('select2-hidden-accessible')) {
+            $select.select2('destroy');
+        }
+
+        const isMultiple = $select.prop('multiple');
+
+        $select.select2({
             placeholder: 'Type to search...',
             width: '100%',
             closeOnSelect: !isMultiple,
@@ -1172,70 +1266,101 @@ $(function() {
         let selected = $select.val() || [];
 
         if (selectedId === 'all') {
-            $select.val(['all']).trigger('change.select2');
+            $select.val(['all']).trigger('change');
         } else {
             selected = selected.filter(value => value !== 'all');
-            $select.val(selected).trigger('change.select2');
+            $select.val(selected).trigger('change');
         }
 
         isHandlingSelect = false;
     });
 
-    function syncCustomerLimitWithSpecificCustomers() {
-    const isSpecific = $('#coupon-scope-specific').is(':checked');
-    const selectedCustomers = $('select[name="customer[]"]').val() || [];
-    const selectedCount = selectedCustomers.length;
+    function updateSpecificCustomerCount() {
+        const isSpecific = $('#coupon-scope-specific').is(':checked');
+        const selectedCustomers = $('select[name="customer[]"]').val() || [];
+        const selectedCount = selectedCustomers.length;
 
-    const $limitCheckbox = $('#coupon-customer-limit');
-    const $limitForm = $('#coupon-customer-limit-form');
-    const $limitInput = $('input[name="coupon_customer_limit_qty"]');
-    const $limitButtons = $('.btn-number[data-field="coupon_customer_limit_qty"]');
+        const $usageLimitCheckbox = $('#coupon-usage-limit');
+        const $usageLimitForm = $('#coupon-usage-limit-form');
+        const $usageLimitInput = $('input[name="usage_limit"]');
+        const $usageLimitButtons = $('.btn-number[data-field="usage_limit"]');
 
-    if (isSpecific) {
-        $limitCheckbox.prop('checked', true);
-        $limitForm.show();
+        const $customerLimitCheckbox = $('#coupon-customer-limit');
+        const $customerLimitInput = $('input[name="customer_limit"]');
+        const $customerLimitButtons = $('.btn-number[data-field="customer_limit"]');
 
-        $limitInput
-            .val(selectedCount)
-            .prop('readonly', selectedCount > 0);
+        if (isSpecific) {
+            $('#customer-optn').show();
 
-        $limitButtons.prop('disabled', selectedCount > 0);
+            $('#specific_customer_count').html(
+                'Selected specific customers: ' + selectedCount
+            );
 
-        $('#specific_customer_count').html(
-            'Selected specific customers: ' + selectedCount
-        );
-    } else {
-        $limitInput.prop('readonly', false);
-        $limitButtons.prop('disabled', false);
-        $('#specific_customer_count').html('');
+            // Specific users control the total available recipients.
+            // Auto enable Usage Limit, set it to selected count, and disable editing.
+            $usageLimitCheckbox
+                .prop('checked', true)
+                .prop('disabled', true);
+
+            $usageLimitForm.show();
+
+            $usageLimitInput
+                .val(selectedCount)
+                .prop('readonly', true)
+                .prop('disabled', true);
+
+            $usageLimitButtons.prop('disabled', true);
+
+            // Customer Limit must remain enabled/editable.
+            $customerLimitCheckbox.prop('disabled', false);
+            $customerLimitInput
+                .prop('readonly', false)
+                .prop('disabled', false);
+
+            $customerLimitButtons.prop('disabled', false);
+        } else {
+            $('#customer-optn').hide();
+            $('#specific_customer_count').html('');
+
+            // For "All", Usage Limit is editable again.
+            $usageLimitCheckbox.prop('disabled', false);
+            $usageLimitInput
+                .prop('readonly', false)
+                .prop('disabled', false);
+
+            $usageLimitButtons.prop('disabled', false);
+
+            // Customer Limit remains editable for all customers.
+            $customerLimitCheckbox.prop('disabled', false);
+            $customerLimitInput
+                .prop('readonly', false)
+                .prop('disabled', false);
+
+            $customerLimitButtons.prop('disabled', false);
+        }
     }
-}
+
+    window.updateSpecificCustomerCount = updateSpecificCustomerCount;
 
     $('select[name="customer[]"]').on('change select2:select select2:unselect', function () {
-        syncCustomerLimitWithSpecificCustomers();
+        updateSpecificCustomerCount();
     });
 
     $('#coupon-scope-specific').on('click change', function () {
-        $('#customer-optn').show();
-        syncCustomerLimitWithSpecificCustomers();
+        updateSpecificCustomerCount();
     });
 
     $('#coupon-scope-all').on('click change', function () {
-        $('#customer-optn').hide();
-
         $('select[name="customer[]"]').val(null).trigger('change');
 
-        $('#coupon-customer-limit').prop('checked', false);
-        $('#coupon-customer-limit-form').hide();
+        $('input[name="usage_limit"]').prop('readonly', false);
+        $('.btn-number[data-field="usage_limit"]').prop('disabled', false);
 
-        $('input[name="coupon_customer_limit_qty"]')
-            .val(0)
-            .prop('readonly', false);
-
-        $('.btn-number[data-field="coupon_customer_limit_qty"]').prop('disabled', false);
+        updateSpecificCustomerCount();
     });
 
-    syncCustomerLimitWithSpecificCustomers();
+    updateSpecificCustomerCount();
 });
+
 </script>
 @endsection

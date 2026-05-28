@@ -681,60 +681,87 @@
                         location_discount_amount: Number(coupon.location_discount_amount ?? 0),
                         free_products: Array.isArray(coupon.free_products)
                             ? coupon.free_products
-                            : Object.values(coupon.free_products || {})
+                            : Object.values(coupon.free_products || {}),
+
+                        total_usage_limit: Number(coupon.total_usage_limit ?? coupon.usage_limit ?? 0),
+                        total_usage_used: Number(coupon.total_usage_used ?? coupon.total_used ?? 0),
+
+                        customer_usage_limit: Number(coupon.customer_usage_limit ?? coupon.customer_limit ?? 0),
+                        customer_usage_used: Number(coupon.customer_usage_used ?? coupon.customer_used ?? 0)
                     };
                     
                 },
 
-            couponUsageConsumed(coupon) {
-                const usageLimit = Number(
-                    coupon.total_usage_limit ??
-                    coupon.usage_limit ??
-                    coupon.usageLimit ??
-                    coupon.limit ??
+            couponUsageStatus(coupon) {
+                const normalized = this.normalizeCoupon(coupon);
+
+                /*
+                |--------------------------------------------------------------------------
+                | Coupon usage rules
+                |--------------------------------------------------------------------------
+                | usage_limit    = total paid uses allowed across all customers
+                | customer_limit = paid uses allowed per customer
+                |--------------------------------------------------------------------------
+                */
+
+                const totalLimit = Number(
+                    normalized.total_usage_limit ??
+                    normalized.usage_limit ??
+                    normalized.usageLimit ??
                     0
                 );
 
                 const totalUsed = Number(
-                    coupon.total_usage_used ??
-                    coupon.total_used ??
-                    coupon.used_count ??
-                    coupon.total_usage ??
-                    coupon.usage_count ??
+                    normalized.total_usage_used ??
+                    normalized.total_used ??
+                    normalized.used_count ??
+                    normalized.total_usage ??
+                    normalized.usage_count ??
                     0
                 );
 
+                if (totalLimit > 0 && totalUsed >= totalLimit) {
+                    return {
+                        consumed: true,
+                        type: 'total',
+                        message: 'This coupon has reached its total usage limit.'
+                    };
+                }
+
                 const customerLimit = Number(
-                    coupon.customer_usage_limit ??
-                    coupon.customer_limit ??
-                    coupon.per_customer_limit ??
-                    coupon.customerUsageLimit ??
-                    coupon.customer_limit_count ??
+                    normalized.customer_usage_limit ??
+                    normalized.customer_limit ??
+                    normalized.per_customer_limit ??
                     0
                 );
 
                 const customerUsed = Number(
-                    coupon.customer_usage_used ??
-                    coupon.customer_used ??
-                    coupon.used_by_customer ??
-                    coupon.customer_usage_count ??
-                    coupon.customer_used_count ??
-                    coupon.my_usage_count ??
+                    normalized.customer_usage_used ??
+                    normalized.customer_used ??
+                    normalized.used_by_customer ??
+                    normalized.my_usage_count ??
                     0
                 );
 
-                if (usageLimit > 0 && totalUsed >= usageLimit) {
-                    return true;
-                }
-
                 if (customerLimit > 0 && customerUsed >= customerLimit) {
-                    return true;
+                    return {
+                        consumed: true,
+                        type: 'customer',
+                        message: 'You have already used this coupon.'
+                    };
                 }
 
-                return false;
+                return {
+                    consumed: false,
+                    type: '',
+                    message: ''
+                };
             },
-                
-                addFreeProductsFromCoupon(coupon) {
+
+            couponUsageConsumed(coupon) {
+                return this.couponUsageStatus(coupon).consumed;
+            },
+addFreeProductsFromCoupon(coupon) {
                 if (!Array.isArray(coupon?.free_products) || !coupon.free_products.length) return
 
                 coupon.free_products.forEach(fp => {
@@ -1190,8 +1217,10 @@
                     getAutoCouponUnavailableReason(coupon) {
                     const normalized = this.normalizeCoupon(coupon);
 
-                    if (this.couponUsageConsumed(coupon)) {
-                        return 'Coupon usage limit has already been consumed.';
+                    const couponUsage = this.couponUsageStatus(coupon);
+
+                    if (couponUsage.consumed) {
+                        return couponUsage.message;
                     }
 
                     const isAuto =
@@ -1411,8 +1440,10 @@
 
                 const normalized = this.normalizeCoupon(this.selectedCoupon);
 
-                if (this.couponUsageConsumed(normalized)) {
-                    this.showCouponError('You have already reached the usage limit for this coupon.');
+                const couponUsage = this.couponUsageStatus(normalized);
+
+                if (couponUsage.consumed) {
+                    this.showCouponError(couponUsage.message);
                     return;
                 }
 
@@ -1485,10 +1516,13 @@
 
             const normalized = this.normalizeCoupon(found);
 
-            if (this.couponUsageConsumed(normalized)) {
-                    this.showCouponError('You have already reached the usage limit for this coupon.');
-                    return;
-                }
+            const couponUsage = this.couponUsageStatus(normalized);
+
+            if (couponUsage.consumed) {
+                this.showCouponError(couponUsage.message);
+                this.couponCode = '';
+                return;
+            }
 
             if (this.couponHasLocationLimit(normalized)) {
                 const targets = this.getSelectedCouponTargets();

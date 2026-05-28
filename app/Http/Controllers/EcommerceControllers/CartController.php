@@ -1295,10 +1295,13 @@ class CartController extends Controller
 
         /*
 |--------------------------------------------------------------------------
-| SAVE COUPONS - PER TRANSACTION RULE
+| SAVE COUPONS - USAGE LIMIT RULES
 |--------------------------------------------------------------------------
-| Same customer can use the same coupon again on another order.
-| The only duplicate blocked here is the same coupon inside the same transaction.
+| usage_limit    = total paid uses allowed across all customers
+| customer_limit = paid uses allowed per customer
+|
+| Counts PAID orders only. If this order is still PENDING, the usage is saved
+| but will only count after the order becomes PAID.
 |--------------------------------------------------------------------------
 */
 
@@ -1341,11 +1344,12 @@ if (!empty($couponsList)) {
 
         /*
         |--------------------------------------------------------------------------
-        | Check total usage only.
-        | Do NOT check customer_id here because coupon rule is per transaction.
+        | Total usage limit check - PAID orders only
         |--------------------------------------------------------------------------
         */
-       $totalUsed = CouponCart::from('coupon_cart as cc')
+        $totalUsageLimit = (int) ($couponRow->usage_limit ?? 0);
+
+        $totalUsed = CouponCart::from('coupon_cart as cc')
             ->join('ecommerce_sales_headers as h', 'h.id', '=', 'cc.sales_header_id')
             ->where('cc.coupon_id', $couponRow->id)
             ->where('cc.status', 1)
@@ -1354,12 +1358,45 @@ if (!empty($couponsList)) {
             ->where('cc.sales_header_id', '<>', $salesHeader->id)
             ->sum('cc.total_usage');
 
-        if (
-            !is_null($couponRow->usage_limit) &&
-            (int) $couponRow->usage_limit > 0 &&
-            $totalUsed >= (int) $couponRow->usage_limit
-        ) {
-            continue;
+        if ($totalUsageLimit > 0 && $totalUsed >= $totalUsageLimit) {
+            $couponRow->update([
+                'status' => 'INACTIVE',
+            ]);
+
+            return response()->json([
+                'errors' => [
+                    'coupon' => [
+                        "Coupon {$couponRow->coupon_code} has reached its total usage limit."
+                    ]
+                ]
+            ], 422);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Customer usage limit check - PAID orders only
+        |--------------------------------------------------------------------------
+        */
+        $customerUsageLimit = (int) ($couponRow->customer_limit ?? 0);
+
+        $customerUsed = CouponCart::from('coupon_cart as cc')
+            ->join('ecommerce_sales_headers as h', 'h.id', '=', 'cc.sales_header_id')
+            ->where('cc.coupon_id', $couponRow->id)
+            ->where('cc.customer_id', $user->id)
+            ->where('cc.status', 1)
+            ->where('cc.total_usage', '>', 0)
+            ->whereRaw('LOWER(TRIM(h.payment_status)) = ?', ['paid'])
+            ->where('cc.sales_header_id', '<>', $salesHeader->id)
+            ->sum('cc.total_usage');
+
+        if ($customerUsageLimit > 0 && $customerUsed >= $customerUsageLimit) {
+            return response()->json([
+                'errors' => [
+                    'coupon' => [
+                        "You have already used coupon {$couponRow->coupon_code}."
+                    ]
+                ]
+            ], 422);
         }
 
         /*
@@ -1398,6 +1435,25 @@ if (!empty($couponsList)) {
             'order_status'   => $salesHeader->status ?? 'active',
             'discount_used'  => (float) ($coupon['discount_used'] ?? 0),
         ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Deactivate coupon after this save if PAID usage reaches total limit.
+        |--------------------------------------------------------------------------
+        */
+        $totalUsedAfterSave = CouponCart::from('coupon_cart as cc')
+            ->join('ecommerce_sales_headers as h', 'h.id', '=', 'cc.sales_header_id')
+            ->where('cc.coupon_id', $couponRow->id)
+            ->where('cc.status', 1)
+            ->where('cc.total_usage', '>', 0)
+            ->whereRaw('LOWER(TRIM(h.payment_status)) = ?', ['paid'])
+            ->sum('cc.total_usage');
+
+        if ($totalUsageLimit > 0 && $totalUsedAfterSave >= $totalUsageLimit) {
+            $couponRow->update([
+                'status' => 'INACTIVE',
+            ]);
+        }
     }
 }
 

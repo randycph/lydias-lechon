@@ -116,6 +116,12 @@ class CouponController extends Controller
             : 'nullable|array',
 
         'free_product_id.*' => 'nullable|exists:products,id',
+
+        // usage_limit = total paid usage limit across all customers
+        'usage_limit' => 'nullable|integer|min:0',
+
+        // customer_limit = paid usage limit per customer
+        'customer_limit' => 'nullable|integer|min:0',
     ])->validate();
 
     $isManual = $request->coupon_activation === 'manual';
@@ -168,6 +174,25 @@ class CouponController extends Controller
         ? $request->input('discount_productid')
         : null;
 
+    /*
+     |------------------------------------------------------------
+     | Coupon Limits
+     |------------------------------------------------------------
+     | usage_limit    = total paid uses allowed across all customers
+     | customer_limit = paid uses allowed per customer
+     |
+     | If customer scope is specific and usage_limit is empty/0,
+     | auto-set usage_limit to the number of selected specific customers.
+     | Example: 4 selected customers = 4 total paid uses.
+     |------------------------------------------------------------
+     */
+    $usageLimit = (int) $request->input('usage_limit', 0);
+    $customerLimit = (int) $request->input('customer_limit', 0);
+
+    if ($isSpecificCustomer && $usageLimit <= 0) {
+        $usageLimit = count($request->input('customer', []));
+    }
+
     DB::transaction(function () use (
         $request,
         $isManual,
@@ -181,7 +206,9 @@ class CouponController extends Controller
         $locationDiscountAmount,
         $amountDiscountType,
         $productDiscount,
-        $discountProductId
+        $discountProductId,
+        $usageLimit,
+        $customerLimit
     ) {
         $coupon = Coupon::create([
             'coupon_code' => $isManual ? $request->input('code') : $request->input('name'),
@@ -191,6 +218,9 @@ class CouponController extends Controller
             'activation_type' => $request->input('coupon_activation'),
             'customer_scope' => $request->input('coupon_scope'),
             'scope_customer_id' => $isSpecificCustomer ? $scopeCustomerId : null,
+
+            'usage_limit' => $usageLimit,
+            'customer_limit' => $customerLimit,
 
             'location' => $location,
             'location_discount_type' => $locationDiscountType,
@@ -496,7 +526,7 @@ class CouponController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, Coupon $coupon)
-    {
+{
     Validator::make($request->all(), [
         'name' => 'required|max:150|unique:coupons,name,' . $coupon->id,
         'description' => 'required',
@@ -516,7 +546,7 @@ class CouponController extends Controller
             ? 'required|max:150|unique:coupons,coupon_code,' . $coupon->id
             : 'nullable',
 
-        // Location is now required for Free Shipping AND Free Product
+        // Location is required for Free Shipping and Free Product
         'location' => in_array($request->reward, ['free-shipping-optn', 'free-product-optn'])
             ? 'required|array|min:1'
             : 'nullable|array',
@@ -547,6 +577,12 @@ class CouponController extends Controller
             : 'nullable|array',
 
         'free_product_id.*' => 'nullable|exists:products,id',
+
+        // usage_limit = total paid uses across all customers
+        'usage_limit' => 'nullable|integer|min:0',
+
+        // customer_limit = paid uses allowed per customer
+        'customer_limit' => 'nullable|integer|min:0',
     ])->validate();
 
     $isFreeShipping = $request->reward == 'free-shipping-optn';
@@ -595,9 +631,32 @@ class CouponController extends Controller
      | Customer scope
      |------------------------------------------------------------
      */
-    $customernames = $request->coupon_scope == 'specific'
-        ? $savePipeValues($request->customer)
+    $isSpecificCustomer = $request->coupon_scope == 'specific';
+
+    $selectedCustomers = $request->input('customer', []);
+
+    $customernames = $isSpecificCustomer
+        ? $savePipeValues($selectedCustomers)
         : null;
+
+    /*
+     |------------------------------------------------------------
+     | Coupon limits
+     |------------------------------------------------------------
+     | usage_limit    = total paid uses allowed across all customers
+     | customer_limit = paid uses allowed per customer
+     |
+     | If customer scope is Specific, usage_limit must match the
+     | number of selected specific customers.
+     | Example: 4 selected customers = 4 total paid uses.
+     |------------------------------------------------------------
+     */
+    $usageLimit = (int) $request->input('usage_limit', 0);
+    $customerLimit = (int) $request->input('customer_limit', 0);
+
+    if ($isSpecificCustomer) {
+        $usageLimit = count($selectedCustomers);
+    }
 
     /*
      |------------------------------------------------------------
@@ -637,6 +696,9 @@ class CouponController extends Controller
         'customer_scope' => $request->coupon_scope,
         'scope_customer_id' => $customernames,
 
+        'usage_limit' => $usageLimit,
+        'customer_limit' => $customerLimit,
+
         'location' => $loc,
         'location_discount_type' => $loc_discount_type,
         'location_discount_amount' => $loc_discount_amount,
@@ -670,6 +732,7 @@ class CouponController extends Controller
 
     return back()->with('success', 'Coupon details has been updated.');
 }
+
 
     public function update_coupon_time_settings($couponID,$request)
     {
