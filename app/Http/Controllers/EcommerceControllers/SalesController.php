@@ -663,7 +663,10 @@ class SalesController extends Controller
                         fn ($q) => $q->where('is_new_order', 1)
                     )
                     ->when($isDispatcher == true,
-                        fn ($q) => $q->where('payment_status', '==', 'PAID')->orWhere('isConfirm', 1)
+                        fn ($q) => $q->where(function ($q2) {
+                            $q2->where('payment_status', '=', 'PAID')
+                               ->orWhere('isConfirm', 1);
+                        })
                     )
                     // apply production / branch filters without plucking IDs
                     ->where(function ($q) use ($hasProdBranch, $eligible, $hasBranches, $locations) {
@@ -716,7 +719,10 @@ class SalesController extends Controller
                     })
                     ->where('has_sub', 0)
                     ->when($isDispatcher == true,
-                        fn ($q) => $q->where('payment_status', '==', 'PAID')->orWhere('isConfirm', 1)
+                        fn ($q) => $q->where(function ($q2) {
+                            $q2->where('payment_status', '=', 'PAID')
+                               ->orWhere('isConfirm', 1);
+                        })
                     )
                     ->when($showDeleted === true,
                         fn ($q) => $q->where('for_deletion', 1),
@@ -753,7 +759,10 @@ class SalesController extends Controller
                                     fn ($q) => $q->where('is_new_order', 1)
                                 )
                                 ->when($isDispatcher == true,
-                                    fn ($q) => $q->where('payment_status', '==', 'PAID')->orWhere('isConfirm', 1)
+                                    fn ($q) => $q->where(function ($q2) {
+                            $q2->where('payment_status', '=', 'PAID')
+                               ->orWhere('isConfirm', 1);
+                        })
                                 )
                                 ->where(function ($query) use($locations) {
                                     $query->whereIn('outlet', $locations)
@@ -767,13 +776,36 @@ class SalesController extends Controller
                                     fn ($q) => $q->where('for_deletion', 0)
                                 )
                                 ->when($isDispatcher == true,
-                                    fn ($q) => $q->where('payment_status', '==', 'PAID')->orWhere('isConfirm', 1)
+                                    fn ($q) => $q->where(function ($q2) {
+                            $q2->where('payment_status', '=', 'PAID')
+                               ->orWhere('isConfirm', 1);
+                        })
                                 )
                                 ->when($showUnread === true,
                                     fn ($q) => $q->where('is_new_order', 1)
                                 );
             }
         }
+
+        $originalSearch = request()->input('search');
+
+        $multiOrderNumbers = collect(preg_split('/[\s,]+/', (string) $originalSearch))
+            ->map(fn ($item) => trim($item))
+            ->filter()
+            ->unique()
+            ->values();
+
+        $isMultiOrderNumberSearch = $multiOrderNumbers->count() > 1;
+
+        if ($isMultiOrderNumberSearch) {
+            $model->whereIn('order_number', $multiOrderNumbers->all());
+
+            // Prevent ListingHelper from searching the whole comma string as one keyword
+            request()->merge([
+                'search' => ''
+            ]);
+        }
+
         $model = $this->additional_filters($model);
       
         $selectFields = [
@@ -817,14 +849,30 @@ class SalesController extends Controller
         } else {
             $listing = new ListingHelper('desc',20,'order_number', $customConditions);
         }
-        $sales = $listing->filter_fields($filterFields)->simple_search_using_collection($model, $this->searchFields,  [],  [], [], $selectFields, $filterFields);
+        $sales = $listing
+            ->filter_fields($filterFields)
+            ->simple_search_using_collection(
+                $model,
+                $this->searchFields,
+                [],
+                [],
+                [],
+                $selectFields,
+                $filterFields
+            );
+
+        if ($isMultiOrderNumberSearch) {
+            request()->merge([
+                'search' => $originalSearch
+            ]);
+        }
 
         $filter = $listing->get_filter($this->searchFields);
         $searchType = 'simple_search_using_collection';
         //dd($sales);
 
 
-        return view('admin.sales.index',compact('sales','filter','searchType'));
+        return view('admin.sales.index', compact('sales', 'filter', 'searchType'));
 
     }
 
