@@ -149,95 +149,233 @@
                                             <div class="text-sm text-black font-bold">₱{{ number_format($cartTotal + $fee, 2) }}</div>
                                         </div>
 
-                                        @if ($sale->discount_amount && $sale->discount_amount > 0)
+                                        @php
+                                            /*
+                                            |--------------------------------------------------------------------------
+                                            | Discount / Payment Applied
+                                            |--------------------------------------------------------------------------
+                                            | STRICT RULE:
+                                            | - Show couponUsed rows only when they are REAL coupons.
+                                            | - Show gift certificates only in the Gift Certificate section.
+                                            | - Hide fake GC rows saved as couponUsed, especially:
+                                            |   Coupon: Coupon / Code: N/A / Type: Coupon.
+                                            */
+
+                                            $giftCertificates = \App\EcommerceModel\GiftCertificate::where('sales_header_id', $sale->id)->get();
+
+                                            $giftCertificatePayments = $sale->payments
+                                                ? $sale->payments->filter(function ($payment) {
+                                                    $paymentType = strtolower(trim((string) ($payment->payment_type ?? '')));
+
+                                                    return in_array($paymentType, [
+                                                        'gift cert',
+                                                        'gift certificate',
+                                                        'gift cheque',
+                                                        'gc',
+                                                    ], true);
+                                                })
+                                                : collect();
+
+                                            $validCouponRewards = [
+                                                'free-shipping-optn',
+                                                'discount-amount-optn',
+                                                'discount-percentage-optn',
+                                                'free-product-optn',
+                                            ];
+
+                                            $rawCoupons = $sale->couponUsed ? collect($sale->couponUsed) : collect();
+
+                                            $displayCoupons = $rawCoupons->filter(function ($coupon) use ($validCouponRewards) {
+                                                $couponName = strtolower(trim((string) ($coupon?->coupon?->name ?? $coupon->coupon_name ?? $coupon->name ?? '')));
+                                                $couponCode = strtolower(trim((string) ($coupon->coupon_code ?? $coupon?->coupon?->coupon_code ?? '')));
+                                                $couponReward = strtolower(trim((string) ($coupon?->coupon?->reward ?? $coupon->reward ?? '')));
+
+                                                /*
+                                                |--------------------------------------------------------------------------
+                                                | This is the main fix.
+                                                |--------------------------------------------------------------------------
+                                                | If the coupon row has no valid coupon reward, do not display it as coupon.
+                                                | This removes the duplicate fake row:
+                                                | Coupon: Coupon / Code: N/A / Type: Coupon.
+                                                */
+                                                if (!in_array($couponReward, $validCouponRewards, true)) {
+                                                    return false;
+                                                }
+
+                                                if ($couponName === '' || in_array($couponName, ['coupon', 'gift certificate', 'gift cert', 'gc'], true)) {
+                                                    return false;
+                                                }
+
+                                                if ($couponCode === '' || in_array($couponCode, ['n/a', 'na', 'null'], true)) {
+                                                    return false;
+                                                }
+
+                                                return true;
+                                            })->values();
+
+                                            $hasCoupons = $displayCoupons->count() > 0;
+                                            $hasGiftCertificates = $giftCertificates->count() > 0 || $giftCertificatePayments->count() > 0;
+                                        @endphp
+
+                                        @if ($hasCoupons || $hasGiftCertificates)
                                             <div class="mt-4"></div>
 
                                             <div class="flex items-center justify-between w-full">
-                                                <div class="text-sm text-black font-bold">Discount</div>
+                                                <div class="text-sm text-black font-bold">Discount / Payment Applied</div>
                                             </div>
-                                        @endif
 
-                                    @if ($sale->couponUsed && count($sale->couponUsed) > 0)
-                                        <ul class="italic w-full">
-                                            @foreach ($sale->couponUsed as $coupon)
-                                                @php
-                                                    $isFreeProductCoupon = !empty($coupon?->coupon?->free_product_id);
-                                                    $couponProductIds = $isFreeProductCoupon
-                                                        ? array_values(array_filter(explode('|', $coupon->coupon->free_product_id)))
-                                                        : [];
-                                                @endphp
+                                            <ul class="italic w-full">
+                                                {{-- REAL COUPONS ONLY --}}
+                                                @foreach ($displayCoupons as $coupon)
+                                                    @php
+                                                        $isFreeProductCoupon = !empty($coupon?->coupon?->free_product_id);
+                                                        $couponProductIds = $isFreeProductCoupon
+                                                            ? array_values(array_filter(explode('|', $coupon->coupon->free_product_id)))
+                                                            : [];
 
-                                                <li class="pl-4 text-sm border-t border-gray-100 pt-2 mt-2">
-                                                    <div class="flex items-center justify-between gap-4">
-                                                        <div class="font-semibold">
-                                                            Coupon: {{ $coupon->coupon->name ?? $coupon->coupon_code }}
+                                                        $couponName = $coupon->coupon->name ?? $coupon->coupon_name ?? $coupon->coupon_code ?? 'Coupon';
+                                                        $couponCode = $coupon->coupon_code ?? $coupon->coupon->coupon_code ?? 'N/A';
+                                                        $couponReward = $coupon->coupon->reward ?? $coupon->reward ?? '';
+
+                                                        $rewardLabel = match ($couponReward) {
+                                                            'free-shipping-optn' => 'Free Shipping Coupon',
+                                                            'discount-amount-optn' => 'Amount Discount Coupon',
+                                                            'discount-percentage-optn' => 'Percentage Discount Coupon',
+                                                            'free-product-optn' => 'Free Product Coupon',
+                                                            default => 'Coupon',
+                                                        };
+                                                    @endphp
+
+                                                    <li class="pl-4 text-sm border-t border-gray-100 pt-2 mt-2">
+                                                        <div class="flex items-center justify-between gap-4">
+                                                            <div class="font-semibold">
+                                                                <span class="text-blue-600 not-italic">Coupon:</span>
+                                                                {{ $couponName }}
+
+                                                                <div class="text-xs text-gray-500 not-italic">
+                                                                    Code: {{ $couponCode }} |
+                                                                    Type: {{ $rewardLabel }}
+                                                                </div>
+                                                            </div>
+
+                                                            @if(!$isFreeProductCoupon)
+                                                                <div class="text-right text-red-500 italic">
+                                                                    -₱{{ number_format((float) ($coupon->discount_used ?? 0), 2) }}
+                                                                </div>
+                                                            @else
+                                                                <div class="text-right text-green-600 font-semibold not-italic">
+                                                                    FREE PRODUCT
+                                                                </div>
+                                                            @endif
                                                         </div>
 
-                                                        @if(!$isFreeProductCoupon)
-                                                            <div class="text-right text-red-500 italic">
-                                                                -₱{{ number_format($coupon->discount_used ?? 0, 2) }}
-                                                            </div>
-                                                        @else
-                                                            <div class="text-right text-green-600 font-semibold">
-                                                                FREE PRODUCT
-                                                            </div>
-                                                        @endif
-                                                    </div>
+                                                        @if ($isFreeProductCoupon)
+                                                            <div class="mt-2 text-xs text-gray-600">
+                                                                @foreach ($couponProductIds as $productId)
+                                                                    @php
+                                                                        $freeProduct = \App\Models\Product::find($productId);
+                                                                        $freeCartItem = $sale->items->firstWhere('product_id', (int) $productId);
 
-                                                    @if ($isFreeProductCoupon)
-                                                        <div class="mt-2 text-xs text-gray-600">
-                                                            @foreach ($couponProductIds as $productId)
-                                                                @php
-                                                                    $freeProduct = \App\Models\Product::find($productId);
+                                                                        $freeItemName = $freeCartItem->product_name
+                                                                            ?? $freeProduct->name
+                                                                            ?? 'Free Product';
 
-                                                                    $freeCartItem = $sale->items->firstWhere('product_id', (int) $productId);
+                                                                        $freeItemValue = 0;
 
-                                                                    $freeItemName = $freeCartItem->product_name
-                                                                        ?? $freeProduct->name
-                                                                        ?? 'Free Product';
+                                                                        if ($freeCartItem) {
+                                                                            $freeItemValue = (float) ($freeCartItem->price ?? 0);
 
-                                                                    $freeItemValue = 0;
+                                                                            if ($freeItemValue <= 0) {
+                                                                                $freeItemValue = (float) ($freeCartItem?->product?->price ?? 0);
+                                                                            }
+                                                                        }
 
-                                                                    if ($freeCartItem) {
-                                                                        $freeItemValue = (float) ($freeCartItem->price ?? 0);
+                                                                        if ($freeItemValue <= 0 && $freeProduct) {
+                                                                            $freeItemValue = (float) ($freeProduct->price ?? 0);
+                                                                        }
 
                                                                         if ($freeItemValue <= 0) {
-                                                                            $freeItemValue = (float) ($freeCartItem?->product?->price ?? 0);
+                                                                            $freeItemValue = (float) ($coupon->discount_used ?? 0);
                                                                         }
-                                                                    }
+                                                                    @endphp
 
-                                                                    if ($freeItemValue <= 0 && $freeProduct) {
-                                                                        $freeItemValue = (float) ($freeProduct->price ?? 0);
-                                                                    }
-
-                                                                    if ($freeItemValue <= 0) {
-                                                                        $freeItemValue = (float) ($coupon->discount_used ?? 0);
-                                                                    }
-                                                                @endphp
-
-                                                                <div class="flex items-center justify-between gap-4 mt-1">
-                                                                    <div>
-                                                                        <span class="text-green-600 font-semibold">Free Item:</span>
-                                                                        {!! highlightPaella($freeItemName) !!}
+                                                                    <div class="flex items-center justify-between gap-4 mt-1">
+                                                                        <div>
+                                                                            <span class="text-green-600 font-semibold">Free Item:</span>
+                                                                            {!! highlightPaella($freeItemName) !!}
+                                                                        </div>
+                                                                        <div class="text-right">
+                                                                            <span class="text-gray-500">Value:</span>
+                                                                            <span class="font-semibold text-green-600">₱{{ number_format($freeItemValue, 2) }}</span>
+                                                                        </div>
                                                                     </div>
-                                                                    <div class="text-right">
-                                                                        <span class="text-gray-500">Value:</span>
-                                                                        <span class="font-semibold text-green-600">₱{{ number_format($freeItemValue, 2) }}</span>
+                                                                @endforeach
+                                                                <div class="text-right text-gray-400 mt-1">Free item value is a label only.</div>
+                                                            </div>
+                                                        @endif
+                                                    </li>
+                                                @endforeach
+
+                                                {{-- GIFT CERTIFICATES --}}
+                                                @foreach ($giftCertificates as $gc)
+                                                    @php
+                                                        $gcCode = $gc->code ?? $gc->serial_number ?? 'N/A';
+                                                        $gcType = $gc->gc_type ?? 'Gift Certificate';
+                                                    @endphp
+
+                                                    <li class="pl-4 text-sm border-t border-gray-100 pt-2 mt-2">
+                                                        <div class="flex items-center justify-between gap-4">
+                                                            <div class="font-semibold">
+                                                                <span class="text-purple-600 not-italic">Gift Certificate:</span>
+                                                                {{ $gcCode }}
+
+                                                                <div class="text-xs text-gray-500 not-italic">
+                                                                    Code: {{ $gcCode }} |
+                                                                    Type: {{ $gcType }}
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="text-right text-red-500 italic">
+                                                                -₱{{ number_format((float) ($gc->amount ?? 0), 2) }}
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                @endforeach
+
+                                                {{-- FALLBACK: Gift Certificate from sales_payments only if no gift_certificate row exists --}}
+                                                @if ($giftCertificates->count() <= 0)
+                                                    @foreach ($giftCertificatePayments as $payment)
+                                                        @php
+                                                            $gcPaymentCode = $payment->receipt_number ?? $payment->ref_no ?? 'N/A';
+                                                            $gcPaymentType = $payment->payment_type ?? 'Gift Certificate';
+                                                        @endphp
+
+                                                        <li class="pl-4 text-sm border-t border-gray-100 pt-2 mt-2">
+                                                            <div class="flex items-center justify-between gap-4">
+                                                                <div class="font-semibold">
+                                                                    <span class="text-purple-600 not-italic">Gift Certificate:</span>
+                                                                    {{ $gcPaymentCode }}
+
+                                                                    <div class="text-xs text-gray-500 not-italic">
+                                                                        Code: {{ $gcPaymentCode }} |
+                                                                        Type: {{ $gcPaymentType }}
                                                                     </div>
                                                                 </div>
-                                                            @endforeach
-                                                            <div class="text-right text-gray-400 mt-1">Free item value is a label only.</div>
-                                                        </div>
-                                                    @endif
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    @endif
-                                        
-                                        <div class="flex items-center justify-between w-full">
-                                            <div class="text-sm text-black font-bold">Total</div>
-                                            <div class="text-sm font-bold">₱{{ number_format($grandTotal, 2) }}</div>
-                                        </div>
+
+                                                                <div class="text-right text-red-500 italic">
+                                                                    -₱{{ number_format((float) ($payment->amount ?? 0), 2) }}
+                                                                </div>
+                                                            </div>
+                                                        </li>
+                                                    @endforeach
+                                                @endif
+                                            </ul>
+                                        @endif
+
+                                    <div class="flex items-center justify-between w-full">
+                                        <div class="text-sm text-black font-bold">Total</div>
+                                        <div class="text-sm font-bold">₱{{ number_format($grandTotal, 2) }}</div>
+                                    </div>
 
                                    
 
