@@ -244,7 +244,7 @@
                                                 <a href="{{route('joborders.edit-pantaga-or-display',$jo->id)}}" class="btn btn-success btn-xs">Edit</a>
                                             @endif
 
-                                            @if (auth()->user()->has_access_to_route('joborders.destroy') || auth()->user()->has_access_to_route('jo.delete'))
+                                            @if (!$jo->trashed() && (auth()->user()->has_access_to_route('joborders.destroy') || auth()->user()->has_access_to_route('jo.delete')))
                                                 <a href="javascript:;" data-toggle="modal" data-id="{{$jo->id}}" data-target="#prompt-delete-joborder" class="btn btn-danger btn-xs delete-joborder">Delete</a>
                                             @endif
                                         </div>

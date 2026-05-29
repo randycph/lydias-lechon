@@ -209,7 +209,7 @@ class SalesHeader extends Model
             $newSale = SalesHeader::where('id', $sale->id)->first();
         }
 
-        if ($newSale->payment_status == 'PAID') {
+        if ($newSale?->payment_status == 'PAID') {
             return 'PAID';
         }
         $balance = $amount - $paid;
