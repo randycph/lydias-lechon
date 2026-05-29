@@ -31,12 +31,30 @@ Click here to view and manage this order
         }
     }
 
-    $subtotal = (float) ($h->items ? $h->items->sum('gross_amount') : 0);
+    $subtotal = (float) (
+        $h->email_gross_amount ??
+        $h->gross_amount ??
+        ($h->items ? $h->items->sum('gross_amount') : 0)
+    );
 
     $deliveryFee = (
-        (float) ($h->delivery_fee_amount ?? 0) > 0 &&
+        (float) ($h->email_delivery_fee_amount ?? $h->delivery_fee_amount ?? 0) > 0 &&
         $h->delivery_type === 'Door to door delivery'
-    ) ? (float) $h->delivery_fee_amount : 0;
+    ) ? (float) ($h->email_delivery_fee_amount ?? $h->delivery_fee_amount) : 0;
+
+    $couponRows = collect();
+
+    if (!empty($h->applied_coupons) && count($h->applied_coupons) > 0) {
+        $couponRows = collect($h->applied_coupons);
+    } elseif (!empty($h->couponUsed) && count($h->couponUsed) > 0) {
+        $couponRows = collect($h->couponUsed);
+    } else {
+        $couponRows = \App\EcommerceModel\CouponCart::where('sales_header_id', $h->id)
+            ->where('status', 1)
+            ->where('discount_used', '>', 0)
+            ->select('coupon_id', 'coupon_code', 'discount_used')
+            ->get();
+    }
 
     $discountAmount = (float) (
         $h->email_discount_amount ??
@@ -44,13 +62,15 @@ Click here to view and manage this order
         0
     );
 
+    if ($discountAmount <= 0 && $couponRows->count() > 0) {
+        $discountAmount = (float) $couponRows->sum('discount_used');
+    }
+
     $grandTotal = (float) (
         $h->email_net_amount ??
         $h->net_amount ??
         max(0, ($subtotal + $deliveryFee) - $discountAmount)
     );
-
-    $appliedCoupons = $h->applied_coupons ?? collect();
 @endphp
 
 @component('mail::panel')
@@ -143,22 +163,18 @@ Click here to view and manage this order
 @if($deliveryFee > 0)
 | **Delivery Fee** |  |  |  | **{{ number_format($deliveryFee, 2) }}** |
 @endif
-@if($discountAmount > 0)
-| **Discount / GC** |  |  |  | **-{{ number_format($discountAmount, 2) }}** |
+@if($couponRows && count($couponRows) > 0)
+@foreach($couponRows as $coupon)
+@php
+    $isGiftCertificate = empty($coupon->coupon_id);
+    $discountLabel = $isGiftCertificate ? 'Gift Certificate' : 'Coupon Discount';
+@endphp
+| **{{ $discountLabel }}**<br><small>{{ $coupon->coupon_code ?? 'N/A' }}</small> |  |  |  | **-{{ number_format((float) ($coupon->discount_used ?? 0), 2) }}** |
+@endforeach
+@elseif($discountAmount > 0)
+| **Discount** |  |  |  | **-{{ number_format($discountAmount, 2) }}** |
 @endif
 | **Grand Total** |  |  |  | **{{ number_format($grandTotal, 2) }}** |
-
-@if($appliedCoupons && count($appliedCoupons) > 0)
-
-### Applied Discounts
-
-| Code | Amount |
-|:-----|------:|
-@foreach($appliedCoupons as $coupon)
-| {{ $coupon->coupon_code ?? 'N/A' }} | -{{ number_format((float) ($coupon->discount_used ?? 0), 2) }} |
-@endforeach
-
-@endif
 
 <br><br>
 Thanks,  
