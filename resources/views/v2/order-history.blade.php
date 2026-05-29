@@ -380,9 +380,69 @@
                                    
 
                                         <div class="flex items-center justify-between w-full">
-                                        <div class="text-sm text-black font-bold">Amount to pay</div>
-                                        <div class="text-sm text-black font-bold">₱{{ number_format($balance, 2) }}</div>
-                                    </div>
+                                            <div class="text-sm text-black font-bold">Amount to pay</div>
+                                            <div class="text-sm text-black font-bold">₱{{ number_format($balance, 2) }}</div>
+                                        </div>
+
+                                        @php
+                                            /*
+                                            |--------------------------------------------------------------------------
+                                            | Payment Details
+                                            |--------------------------------------------------------------------------
+                                            | Show payment details only when the order payment status is PAID.
+                                            */
+
+                                            $orderPaymentStatus = strtolower(trim((string) ($sale->payment_status ?? $sale->PaymentStatus ?? '')));
+
+                                            $paidPayments = $sale->payments
+                                                ? $sale->payments->filter(function ($payment) {
+                                                    $paymentStatus = strtolower(trim((string) ($payment->status ?? '')));
+                                                    $paymentAmount = (float) ($payment->amount ?? 0);
+
+                                                    return $paymentStatus === 'paid' && $paymentAmount > 0;
+                                                })->values()
+                                                : collect();
+                                        @endphp
+
+                                        @if ($orderPaymentStatus === 'paid' && $paidPayments->count() > 0)
+                                            <div class="mt-4"></div>
+
+                                            <div class="flex items-center justify-between w-full">
+                                                <div class="text-sm text-black font-bold">Payment Details</div>
+                                            </div>
+
+                                            <ul class="w-full">
+                                                @foreach ($paidPayments as $payment)
+                                                    @php
+                                                        $paymentType = $payment->payment_type ?? 'Payment';
+                                                        $receiptNo = $payment->receipt_number ?? $payment->ref_no ?? 'N/A';
+                                                        $paymentDate = $payment->payment_date ?? $payment->created_at ?? null;
+                                                        $paymentStatus = $payment->status ?? 'PAID';
+                                                        $paymentAmount = (float) ($payment->amount ?? 0);
+                                                    @endphp
+
+                                                    <li class="pl-4 text-sm border-t border-gray-100 pt-2 mt-2">
+                                                        <div class="flex items-center justify-between gap-4">
+                                                            <div class="font-semibold">
+                                                                {{ $paymentType }}
+
+                                                                <div class="text-xs text-gray-500 font-normal">
+                                                                    Receipt No: {{ $receiptNo }} |
+                                                                    Status: {{ $paymentStatus }}
+                                                                    @if ($paymentDate)
+                                                                        | Date: {{ \Carbon\Carbon::parse($paymentDate)->format('m/d/Y h:i A') }}
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="text-right font-bold text-primary">
+                                                                ₱{{ number_format($paymentAmount, 2) }}
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
                                        
                                         
 
