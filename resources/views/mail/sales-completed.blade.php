@@ -694,53 +694,89 @@ Media Item
                                                                                           <td colspan="5"></td>
                                                                                     </tr>
 
+                                                                                    @php
+                                                                                        $subtotal = (float) (
+                                                                                              $h->email_gross_amount ??
+                                                                                              $h->gross_amount ??
+                                                                                              ($h->items ? $h->items->sum('gross_amount') : 0)
+                                                                                        );
+
+                                                                                        $deliveryFee = (
+                                                                                              (float) ($h->email_delivery_fee_amount ?? $h->delivery_fee_amount ?? 0) > 0 &&
+                                                                                              $h->delivery_type == 'Door to door delivery'
+                                                                                        ) ? (float) ($h->email_delivery_fee_amount ?? $h->delivery_fee_amount) : 0;
+
+                                                                                        $discountAmount = (float) (
+                                                                                              $h->email_discount_amount ??
+                                                                                              $h->discount_amount ??
+                                                                                              0
+                                                                                        );
+
+                                                                                        $grandTotal = (float) (
+                                                                                              $h->email_net_amount ??
+                                                                                              $h->net_amount ??
+                                                                                              max(0, ($subtotal + $deliveryFee) - $discountAmount)
+                                                                                        );
+
+                                                                                        $couponRows = $h->applied_coupons ?? $h->couponUsed ?? collect();
+                                                                                    @endphp
+
                                                                                     @forelse($h->items as $details)                      
                                                                                     <tr>
-                                                                                          <td align="left" style="font-size:11px;padding: 3px;">{{$details->product->code}}</td>    
+                                                                                          <td align="left" style="font-size:11px;padding: 3px;">{{ $details->product->code ?? '' }}</td>    
                                                                                           <td align="left" style="font-size:11px;padding: 3px;">{!! highlightPaella($details?->product_name) !!}</td> 
-                                                                                          <td align="left" style="font-size:11px;padding: 3px;">{{$details->no_of_pax}}</td>                         
-                                                                                          <td align="left" style="font-size:11px;padding: 3px;">{{date('F d, Y H:i A',strtotime($details->delivery_date))}}</td>
-                                                                                          <td align="left" style="font-size:11px;padding: 3px;">{{number_format($details->qty, 0)}}</td>
-                                                                                          <td align="left" style="font-size:11px;padding: 3px;">{{number_format(($details->paella_price + $details->price),2)}}</td>
-                                                                                          <td align="left"adding: 15px; style="font-size:11px;padding: 3px;">{{number_format($details->gross_amount, 2)}}</td>                               
+                                                                                          <td align="left" style="font-size:11px;padding: 3px;">{{ $details->no_of_pax }}</td>                         
+                                                                                          <td align="left" style="font-size:11px;padding: 3px;">{{ date('F d, Y H:i A', strtotime($details->delivery_date)) }}</td>
+                                                                                          <td align="left" style="font-size:11px;padding: 3px;">{{ number_format($details->qty, 0) }}</td>
+                                                                                          <td align="left" style="font-size:11px;padding: 3px;">{{ number_format(((float) $details->paella_price + (float) $details->price), 2) }}</td>
+                                                                                          <td align="left" style="font-size:11px;padding: 3px;">{{ number_format((float) $details->gross_amount, 2) }}</td>                               
                                                                                     </tr>
                                                                                     @empty
+                                                                                    <tr>
+                                                                                          <td colspan="7" style="font-size:11px;padding: 3px;">No items found</td>
+                                                                                    </tr>
                                                                                     @endforelse
-                                                                                    @if($h->gross_amount > 0)
-                                                                                    <tr>
-                                                                                          <td class="tx-left " colspan="6" style="font-size:11px;">Subtotal</td>
-                                                                                          <td class="tx-right " style="font-size:11px;">{{number_format($h->gross_amount, 2)}}</td>
-                                                                                    </tr>
-                                                                                    @endif
-                                                                                    @if($h->delivery_fee_amount > 0 && $h->delivery_type == 'Door to door delivery')
-                                                                                    <tr>
-                                                                                          <td class="tx-left " colspan="6" style="font-size:11px;">Delivery Fee</td>
-                                                                                          <td class="tx-right " style="font-size:11px;">{{number_format($h->delivery_fee_amount, 2)}}</td>
-                                                                                    </tr>
-                                                                                    @endif
-                                                                                    @if($h->discount_amount > 0)
-                                                                                          <tr>
-                                                                                                <td class="tx-left" colspan="6" style="font-size:11px;">Discount</td>
-                                                                                          </tr>
 
-                                                                                          @if($h->couponUsed && count($h->couponUsed) > 0)
-                                                                                                @foreach($h->couponUsed as $coupon)
+                                                                                    @if($subtotal > 0)
+                                                                                    <tr>
+                                                                                          <td class="tx-left" colspan="6" style="font-size:11px;">Subtotal</td>
+                                                                                          <td class="tx-right" style="font-size:11px;">{{ number_format($subtotal, 2) }}</td>
+                                                                                    </tr>
+                                                                                    @endif
+
+                                                                                    @if($deliveryFee > 0)
+                                                                                    <tr>
+                                                                                          <td class="tx-left" colspan="6" style="font-size:11px;">Delivery Fee</td>
+                                                                                          <td class="tx-right" style="font-size:11px;">{{ number_format($deliveryFee, 2) }}</td>
+                                                                                    </tr>
+                                                                                    @endif
+
+                                                                                    @if($discountAmount > 0)
+                                                                                    <tr>
+                                                                                          <td class="tx-left" colspan="6" style="font-size:11px;">Discount / GC</td>
+                                                                                          <td class="tx-right" style="font-size:11px; color:red;">-{{ number_format($discountAmount, 2) }}</td>
+                                                                                    </tr>
+
+                                                                                          @if($couponRows && count($couponRows) > 0)
+                                                                                                @foreach($couponRows as $coupon)
                                                                                                 <tr>
                                                                                                       <td class="tx-left" colspan="6" style="font-size:11px; padding-left: 20px;">
-                                                                                                            Coupon (<i>{{ $coupon->coupon_code }}</i>)
+                                                                                                            {{ empty($coupon->coupon_id) ? 'Gift Certificate' : 'Coupon' }}
+                                                                                                            (<i>{{ $coupon->coupon_code ?? 'N/A' }}</i>)
                                                                                                       </td>
-                                                                                                      <td class="tx-right" style="font-size:11px; color: red;">-{{ number_format($coupon->discount_used, 2) }}</td>
+                                                                                                      <td class="tx-right" style="font-size:11px; color:red;">
+                                                                                                            -{{ number_format((float) ($coupon->discount_used ?? 0), 2) }}
+                                                                                                      </td>
                                                                                                 </tr>
                                                                                                 @endforeach
                                                                                           @endif
                                                                                     @endif
-                                                                                    @if($h->gross_amount > 0)
+
                                                                                     <tr><td colspan="7"><hr></td></tr>
                                                                                     <tr style="font-weight:bold;">
-                                                                                          <td class="tx-left" colspan="6" style="font-size:11px;">Total</td>
-                                                                                          <td class="tx-right" style="font-size:11px;">{{number_format($h->items->sum('gross_amount') + $h?->delivery_fee_amount, 2)}}</td> 
-                                                                                    </tr>
-                                                                                    @endif      
+                                                                                          <td class="tx-left" colspan="6" style="font-size:11px;">Grand Total</td>
+                                                                                          <td class="tx-right" style="font-size:11px;">{{ number_format($grandTotal, 2) }}</td> 
+                                                                                    </tr>      
                                                                               </table>
                                                                         </td>
                                                                         <td class="expander">
