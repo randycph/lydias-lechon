@@ -5,10 +5,11 @@ namespace App\Mail\MailingList;
 use App\MailingListModel\Campaign;
 use App\Setting;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class CampaignMail extends Mailable
+class CampaignMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 

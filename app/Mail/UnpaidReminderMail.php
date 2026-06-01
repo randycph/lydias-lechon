@@ -6,8 +6,9 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use App\EcommerceModel\SalesHeader;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-class UnpaidReminderMail extends Mailable
+class UnpaidReminderMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 

@@ -19,6 +19,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('sitemap:generate')->dailyAt('03:00');
         // $schedule->command('update:deliverable-cities-schedules')->everyFiveMinutes();
+        $schedule->command('queue:work --stop-when-empty')->everyMinute();
     }
 
     /**
