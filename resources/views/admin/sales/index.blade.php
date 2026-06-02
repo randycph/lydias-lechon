@@ -287,10 +287,23 @@
                                             <a title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale->id) }}">{{$sale->order_number }}</a><br>
                                         </div>
                                     </th>
-                                    <td class="{{ isUnreadTransaction($sale->id) ? 'font-weight-bold' : '' }}">
-                                        {{ $sale?->singleContact?->contact_person ?? $sale->customer_name ?? $sale->contact_person }}
-                                    </td>
-                                    <td>{{ $sale->customer_name }}</td>
+                                   <td class="{{ isUnreadTransaction($sale->id) ? 'font-weight-bold' : '' }}">
+                                    @php
+                                        $contactPersons = collect($sale->deliveryAddress ?? [])
+                                            ->pluck('contact_person')
+                                            ->filter()
+                                            ->unique()
+                                            ->values();
+                                    @endphp
+
+                                    @if ($contactPersons->isNotEmpty())
+                                        {!! $contactPersons->map(fn($name) => e($name))->implode('<br>') !!}
+                                    @else
+                                        {{ $sale->contact_person ?: $sale->customer_name }}
+                                    @endif
+                                </td>
+
+                                <td>{{ $sale->customer_name }}</td>
                                     <td>{{ $sale->order_source }}</td>
                                     <td>{{ $sale->delivery_type == 'Store Pickup' ? $sale->outlet : $sale->delivery_branch }}</td>
                                     <td>{{ \Carbon\Carbon::parse($sale->created_at)->format('Y-m-d g:i A') }}</td>
