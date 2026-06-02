@@ -909,19 +909,53 @@ addFreeProductsFromCoupon(coupon) {
                         .toLowerCase();
                 },
 
-                couponLocationKey(city, location) {
-                const normalizedCity = this.normalizeText(city);
-                const normalizedLocation = this.normalizeText(location);
+                couponLocationKey(city, location, delivery = null) {
+                const normalizedCity = this.normalizeText(
+                    city ||
+                    delivery?.city ||
+                    delivery?.customer_city ||
+                    delivery?.delivery_city ||
+                    ''
+                );
 
-                // Use city as the main grouping rule.
-                // If city exists, same city = one coupon discount only.
+                const normalizedBarangay = this.normalizeText(
+                    location ||
+                    delivery?.location ||
+                    delivery?.barangay ||
+                    delivery?.customer_barangay ||
+                    delivery?.delivery_barangay ||
+                    ''
+                );
+
+                const normalizedProvince = this.normalizeText(
+                    delivery?.province ||
+                    delivery?.customer_province ||
+                    delivery?.delivery_province ||
+                    ''
+                );
+
+                const normalizedAddress = this.normalizeText(
+                    delivery?.address ||
+                    delivery?.customer_delivery_address ||
+                    delivery?.customer_delivery_adress ||
+                    delivery?.delivery_address ||
+                    ''
+                );
+
+                // Main rule: same city = one free shipping discount only.
                 if (normalizedCity) {
                     return `city:${normalizedCity}`;
                 }
 
-                // fallback if city is empty
-                if (normalizedLocation) {
-                    return `location:${normalizedLocation}`;
+                // Fallback: same province/barangay/address = one discount only.
+                const fallbackKey = [
+                    normalizedProvince,
+                    normalizedBarangay,
+                    normalizedAddress
+                ].filter(Boolean).join('|');
+
+                if (fallbackKey) {
+                    return `address:${fallbackKey}`;
                 }
 
                 return '';
@@ -1276,7 +1310,7 @@ addFreeProductsFromCoupon(coupon) {
                             return sum;
                         }
 
-                        const locationKey = this.couponLocationKey(delivery.city, delivery.location);
+                        const locationKey = this.couponLocationKey(delivery.city, delivery.location, delivery);
 
                         // Same city/location can only be counted once.
                         if (locationKey && discountedLocationKeys.has(locationKey)) {
@@ -1761,7 +1795,7 @@ addFreeProductsFromCoupon(coupon) {
                                     return;
                                 }
 
-                                const locationKey = this.couponLocationKey(delivery.city, delivery.location);
+                                const locationKey = this.couponLocationKey(delivery.city, delivery.location, delivery);
 
                                 // IMPORTANT:
                                 // Same city/location can only receive this coupon discount once.

@@ -243,20 +243,7 @@
                         </div>
                     </div>
 
-                    <span class="font-medium italic text-red-700">
-                        <template x-if="item.free_shipping || item.reward === 'free-shipping-optn'">
-                            <span>
-                                - ₱<span x-text="Number(deliveryFee || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })"></span>
-                                (Free Shipping)
-                            </span>
-                        </template>
-
-                        <template x-if="!(item.free_shipping || item.reward === 'free-shipping-optn')">
-                            <span>
-                                - ₱<span x-text="getCouponDiscount(item).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })"></span>
-                            </span>
-                        </template>
-                    </span>
+                    <span class="font-medium italic text-red-700" x-text="couponDiscountLabel(item)"></span>
                 </div>
             </template>
         </div>
