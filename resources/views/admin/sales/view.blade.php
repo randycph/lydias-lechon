@@ -279,9 +279,34 @@
                             @endforelse
 
                             @php
-                                $displayCouponRows = isset($couponRows)
+                                /*
+                                 * Multiple-address discount display rule:
+                                 * Show the coupon/discount only on the -A transaction.
+                                 * This keeps the coupon design but prevents the same discount
+                                 * from appearing on every child sales transaction.
+                                 */
+                                $orderNumberForDiscountDisplay = (string) ($sales->order_number ?? '');
+                                $showDiscountOnThisTransaction = \Illuminate\Support\Str::endsWith($orderNumberForDiscountDisplay, '-A');
+
+                                /*
+                                 * If this is not a multiple-address child order, keep showing the discount
+                                 * for normal/single-address transactions.
+                                 */
+                                if (!str_contains($orderNumberForDiscountDisplay, '-')) {
+                                    $showDiscountOnThisTransaction = true;
+                                }
+
+                                $rawCouponRows = isset($couponRows)
                                     ? $couponRows
                                     : ($sales->couponUsed ?? collect());
+
+                                $displayCouponRows = $showDiscountOnThisTransaction
+                                    ? $rawCouponRows
+                                    : collect();
+
+                                $displayOrderDiscount = $showDiscountOnThisTransaction
+                                    ? (float) ($sales->discount_amount ?? 0)
+                                    : 0;
                             @endphp
 
                             @if(isset($displayCouponRows) && count($displayCouponRows) > 0)
@@ -358,7 +383,7 @@
                                     <td class="tx-right">₱{{number_format($salesDetails->sum('gross_amount') + $sales->delivery_fee_amount, 2)}}</td>
                                 </tr>
                             @endif
-                            @if($sales->discount_amount > 0 && (!isset($displayCouponRows) || count($displayCouponRows) == 0))
+                            @if($displayOrderDiscount > 0 && (!isset($displayCouponRows) || count($displayCouponRows) == 0))
                             @php
                                 $fallbackDiscountName = 'Order Discount';
                                 $fallbackRewardLabel  = 'Manual Discount';
@@ -395,7 +420,7 @@
                                 <td class="tx-right"></td>
 
                                 <td class="tx-right text-danger">
-                                    -₱{{ number_format($sales->discount_amount, 2) }}
+                                    -₱{{ number_format($displayOrderDiscount, 2) }}
                                 </td>
                             </tr>
                         @endif
@@ -410,7 +435,7 @@
                                                         @if($salesDetails->sum('net_amount') > 0)
                                                             <tr style="font-weight:bold;">
                                                                 <td class="tx-left" colspan="8">Total</td>
-                                                                <td class="tx-right">₱{{number_format($salesDetails->sum('net_amount') + $sales->delivery_fee_amount - ($sales->discount_amount ?? 0), 2)}}</td>
+                                                                <td class="tx-right">₱{{number_format($salesDetails->sum('net_amount') + $sales->delivery_fee_amount - $displayOrderDiscount, 2)}}</td>
                                                             </tr>
                                                         @endif
                                                         </tbody>
