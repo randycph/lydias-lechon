@@ -21,7 +21,10 @@
             class="w-full max-w-xl"
         >
 
-            <div class="relative bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <div
+                class="relative bg-white rounded-2xl shadow-2xl overflow-hidden"
+                @click.stop
+            >
 
                 {{-- CLOSE BUTTON --}}
                 <button

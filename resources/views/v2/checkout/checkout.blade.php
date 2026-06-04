@@ -1099,22 +1099,22 @@ addFreeProductsFromCoupon(coupon) {
                 },
 
                 getSelectedCouponTargets() {
-                    if (this.method !== 'delivery') return [];
+                if (this.method !== 'delivery') return [];
 
-                    if (this.allowMultiple) {
-                        return (this.deliveries || [])
-                            .map(d => ({
-                                city: d?.city ?? '',
-                                location: d?.location ?? ''
-                            }))
-                            .filter(t => this.normalizeText(t.city) || this.normalizeText(t.location));
-                    }
+                if (this.allowMultiple) {
+                    return (this.deliveries || [])
+                        .map(d => ({
+                            city: d?.city ?? '',
+                            location: ''
+                        }))
+                        .filter(t => this.normalizeText(t.city));
+                }
 
-                    return [{
-                        city: this.city ?? '',
-                        location: this.location ?? ''
-                    }].filter(t => this.normalizeText(t.city) || this.normalizeText(t.location));
-                },
+                return [{
+                    city: this.city ?? '',
+                    location: ''
+                }].filter(t => this.normalizeText(t.city));
+            },
 
                 removeInvalidLocationCoupons() {
                     const targets = this.getSelectedCouponTargets();
@@ -1126,9 +1126,16 @@ addFreeProductsFromCoupon(coupon) {
 
                         if (!hasLocationLimit) return true;
 
-                        if (!targets.length) {
-                            removedCodes.push(normalized.code);
-                            return false;
+                        /**
+                         * Do not remove yet while delivery location is incomplete.
+                         * This prevents coupon from disappearing while customer is still selecting barangay.
+                         */
+                        const hasIncompleteTarget = targets.some(t => {
+                            return this.normalizeText(t.city) && !this.normalizeText(t.location);
+                        });
+
+                        if (!targets.length || hasIncompleteTarget) {
+                            return true;
                         }
 
                         const keep = targets.some(t =>
@@ -1306,9 +1313,9 @@ addFreeProductsFromCoupon(coupon) {
                     const discountedLocationKeys = new Set();
 
                     return (this.deliveries || []).reduce((sum, delivery) => {
-                        if (!this.couponMatchesLocation(normalized, delivery.city, delivery.location)) {
-                            return sum;
-                        }
+                        if (!this.couponMatchesLocation(normalized, delivery.city, '')) {
+                                return sum;
+                            }
 
                         const locationKey = this.couponLocationKey(delivery.city, delivery.location, delivery);
 
@@ -1325,7 +1332,7 @@ addFreeProductsFromCoupon(coupon) {
                     }, 0);
                 }
 
-                    return this.couponMatchesLocation(normalized, this.city, this.location)
+                    return this.couponMatchesLocation(normalized, this.city, '')
                         ? Number(this.deliveryFee || 0)
                         : 0;
                 }
@@ -1368,49 +1375,18 @@ addFreeProductsFromCoupon(coupon) {
                 },
                 
 
-                    applyAutoCoupons() {
-                    if (this.hasWholeLechonInCart()) {
-                        const autoCodes = (this.autoCouponsSource || [])
-                            .map(c => this.normalizeCoupon(c).code);
+                applyAutoCoupons() {
+                if (this.hasWholeLechonInCart()) {
+                    const autoCodes = (this.autoCouponsSource || [])
+                        .map(c => this.normalizeCoupon(c).code);
 
-                        this.coupons = this.coupons.filter(c => !c.auto_applied);
-                        this.autoAppliedCoupons = [];
-                        this.selectedAutoCoupon = null;
-                        this.selectedAutoCouponId = '';
-                        this.autoCouponChoices = [];
-                        this.showAutoCouponChooser = false;
-
-                        this.carts = this.carts.filter(item =>
-                            !(item.is_free_product && autoCodes.includes(item.coupon_code))
-                        );
-
-                        this.orders = this.orders.filter(item =>
-                            !(item.is_free_product && autoCodes.includes(item.coupon_code))
-                        );
-
-                        this.order_amount = this.cartSubtotal();
-                        this.recomputeCouponTotals();
-                        return;
-                    }
-
-                    const allAutoCoupons = (this.autoCouponsSource || [])
-                        .map(c => ({
-                            ...this.normalizeCoupon(c),
-                            auto_applied: true
-                        }));
-
-                    const visibleAutos = allAutoCoupons.filter(c =>
-                        !this.couponUsageConsumed(c) &&
-                        this.shouldShowAutoCouponInList(c)
-                    );
-
-                    const autoCodes = allAutoCoupons.map(c => c.code);
-
-                    // Remove old auto coupons first
                     this.coupons = this.coupons.filter(c => !c.auto_applied);
                     this.autoAppliedCoupons = [];
+                    this.selectedAutoCoupon = null;
+                    this.selectedAutoCouponId = '';
+                    this.autoCouponChoices = [];
+                    this.showAutoCouponChooser = false;
 
-                    // Remove old free products from auto coupons
                     this.carts = this.carts.filter(item =>
                         !(item.is_free_product && autoCodes.includes(item.coupon_code))
                     );
@@ -1419,33 +1395,62 @@ addFreeProductsFromCoupon(coupon) {
                         !(item.is_free_product && autoCodes.includes(item.coupon_code))
                     );
 
-                    this.selectedAutoCoupon = null;
+                    this.order_amount = this.cartSubtotal();
+                    this.recomputeCouponTotals();
+                    return;
+                }
 
-                    this.autoCouponChoices = visibleAutos.map(coupon => {
-                        const available = this.shouldAutoApplyCoupon(coupon);
+                const previousSelectedAutoCouponId = this.selectedAutoCouponId;
+                const previousSelectedAutoCoupon = this.selectedAutoCoupon;
 
-                        return {
-                            ...coupon,
-                            auto_available: available,
-                            unavailable_reason: available
-                                ? ''
-                                : this.getAutoCouponUnavailableReason(coupon)
-                        };
-                    });
+                const allAutoCoupons = (this.autoCouponsSource || [])
+                    .map(c => ({
+                        ...this.normalizeCoupon(c),
+                        auto_applied: true
+                    }));
 
-                    const availableAutos = this.autoCouponChoices.filter(c => c.auto_available);
+                const visibleAutos = allAutoCoupons.filter(c =>
+                    !this.couponUsageConsumed(c) &&
+                    this.shouldShowAutoCouponInList(c)
+                );
 
-                    if (this.autoCouponChoices.length === 0) {
-                        this.selectedAutoCouponId = '';
-                        this.showAutoCouponChooser = false;
-                        this.order_amount = this.cartSubtotal();
-                        this.recomputeCouponTotals();
-                        return;
-                    }
+                const autoCodes = allAutoCoupons.map(c => c.code);
 
-                    if (this.selectedAutoCouponId) {
+                this.coupons = this.coupons.filter(c => !c.auto_applied);
+                this.autoAppliedCoupons = [];
+
+                this.carts = this.carts.filter(item =>
+                    !(item.is_free_product && autoCodes.includes(item.coupon_code))
+                );
+
+                this.orders = this.orders.filter(item =>
+                    !(item.is_free_product && autoCodes.includes(item.coupon_code))
+                );
+
+                this.selectedAutoCoupon = null;
+
+                this.autoCouponChoices = visibleAutos.map(coupon => {
+                    const available = this.shouldAutoApplyCoupon(coupon);
+
+                    return {
+                        ...coupon,
+                        auto_available: available,
+                        unavailable_reason: available
+                            ? ''
+                            : this.getAutoCouponUnavailableReason(coupon)
+                    };
+                });
+
+                const availableAutos = this.autoCouponChoices.filter(c => c.auto_available);
+
+                /**
+                 * IMPORTANT:
+                 * Do not clear selectedAutoCouponId just because barangay/city is still changing.
+                 * This prevents the customer from needing to reselect/reinsert the coupon.
+                 */
+                if (previousSelectedAutoCouponId) {
                     const chosen = availableAutos.find(c =>
-                        String(c.id) === String(this.selectedAutoCouponId)
+                        String(c.id) === String(previousSelectedAutoCouponId)
                     );
 
                     if (chosen) {
@@ -1453,6 +1458,16 @@ addFreeProductsFromCoupon(coupon) {
                         this.showAutoCouponChooser = false;
                         return;
                     }
+
+                    this.selectedAutoCouponId = previousSelectedAutoCouponId;
+                    this.selectedAutoCoupon = previousSelectedAutoCoupon;
+                }
+
+                if (this.autoCouponChoices.length === 0) {
+                    this.showAutoCouponChooser = false;
+                    this.order_amount = this.cartSubtotal();
+                    this.recomputeCouponTotals();
+                    return;
                 }
 
                 if (!this.autoCouponChooserShownOnce) {
@@ -1462,66 +1477,72 @@ addFreeProductsFromCoupon(coupon) {
 
                 this.order_amount = this.cartSubtotal();
                 this.recomputeCouponTotals();
-                },
-            confirmCouponSelection() {
-                if (this.blockCouponIfWholeLechon()) {
-                    return;
-                }
-                if (!this.selectedCoupon) {
-                    this.showCouponError('Please select a coupon first.');
-                    return;
-                }
-
-                const normalized = this.normalizeCoupon(this.selectedCoupon);
-
-                const couponUsage = this.couponUsageStatus(normalized);
-
-                if (couponUsage.consumed) {
-                    this.showCouponError(couponUsage.message);
-                    return;
-                }
-
-                if (this.couponHasLocationLimit(normalized)) {
-                    const targets = this.getSelectedCouponTargets();
-
-                    if (!targets.length) {
-                        this.showCouponError('Please select a delivery location first.');
-                        return;
-                    }
-
-                    const isValidForAnyTarget = targets.some(t =>
-                        this.couponMatchesLocation(normalized, t.city, t.location)
-                    );
-
-                    if (!isValidForAnyTarget) {
-                        this.showCouponError('This coupon is not valid for the selected delivery address.');
-                        return;
-                    }
-                }
-
-                if (this.coupons.find(c => c.code === normalized.code)) {
-                    this.showCouponError('Coupon already applied.');
-                    return;
-                }
-
-                if (!normalized.combination_allowed && this.coupons.length > 0) {
-                    this.showCouponError('This coupon cannot be combined with other coupons.');
-                    return;
-                }
-
-                if (normalized.combination_allowed && this.coupons.some(c => !c.combination_allowed)) {
-                    this.showCouponError('A coupon that does not allow combination has already been applied.');
-                    return;
-                }
-
-                this.coupons.push(normalized);
-                this.addFreeProductsFromCoupon(normalized);
-                this.order_amount = this.cartSubtotal();
-                this.recomputeCouponTotals();
-
-                this.showCouponSuccess('Coupon applied successfully.');
-                this.closeCouponModal();
             },
+
+            confirmCouponSelection() {
+    if (this.blockCouponIfWholeLechon()) {
+        return;
+    }
+
+    if (!this.selectedCoupon) {
+        this.showCouponError('Please select a coupon first.');
+        return;
+    }
+
+    const normalized = this.normalizeCoupon(this.selectedCoupon);
+    const couponUsage = this.couponUsageStatus(normalized);
+
+    if (couponUsage.consumed) {
+        this.showCouponError(couponUsage.message);
+        return;
+    }
+
+    if (this.couponHasLocationLimit(normalized)) {
+        const targets = this.getSelectedCouponTargets();
+
+        if (!targets.length) {
+            this.showCouponError('Please select a delivery location first.');
+            return;
+        }
+
+        const isValidForAnyTarget = targets.some(t =>
+            this.couponMatchesLocation(normalized, t.city, t.location)
+        );
+
+        if (!isValidForAnyTarget) {
+            this.showCouponError('This coupon is not valid for the selected delivery address.');
+            return;
+        }
+    }
+
+    const alreadyApplied = this.coupons.find(c =>
+        String(c.code || '').trim().toUpperCase() === String(normalized.code || '').trim().toUpperCase()
+    );
+
+    if (alreadyApplied) {
+        this.showCouponError('Coupon already applied.');
+        return;
+    }
+
+    if (!normalized.combination_allowed && this.coupons.length > 0) {
+        this.showCouponError('This coupon cannot be combined with other coupons.');
+        return;
+    }
+
+    if (normalized.combination_allowed && this.coupons.some(c => !c.combination_allowed)) {
+        this.showCouponError('A coupon that does not allow combination has already been applied.');
+        return;
+    }
+
+    this.coupons.push(normalized);
+    this.addFreeProductsFromCoupon(normalized);
+    this.couponCode = '';
+    this.order_amount = this.cartSubtotal();
+    this.recomputeCouponTotals();
+
+    this.showCouponSuccess('Coupon applied successfully.');
+    this.closeCouponModal();
+},
 
         applyCouponCode() {
             
@@ -1710,15 +1731,20 @@ addFreeProductsFromCoupon(coupon) {
                         return;
                     }
 
-                    const beforeCount = this.coupons.length;
+                    const alreadyApplied = this.coupons.some(c =>
+                        String(c.code || '').trim().toUpperCase() === String(chosen.code || '').trim().toUpperCase()
+                    );
 
-                    this.applyChosenAutoCoupon(chosen);
-
-                    const wasApplied = this.coupons.length > beforeCount;
-
-                    if (!wasApplied) {
+                    if (alreadyApplied) {
+                        this.selectedAutoCoupon = chosen;
+                        this.selectedAutoCouponId = chosen.id;
+                        this.showAutoCouponChooser = false;
+                        this.recomputeCouponTotals();
+                        this.showCouponSuccess('Coupon applied successfully.');
                         return;
                     }
+
+                    this.applyChosenAutoCoupon(chosen);
 
                     this.showAutoCouponChooser = false;
                     this.showCouponSuccess('Coupon applied successfully.');
@@ -1791,7 +1817,7 @@ addFreeProductsFromCoupon(coupon) {
                             const discountedLocationKeys = new Set();
 
                             (this.deliveries || []).forEach((delivery, idx) => {
-                                if (!this.couponMatchesLocation(normalizedCoupon, delivery.city, delivery.location)) {
+                                if (!this.couponMatchesLocation(normalizedCoupon, delivery.city, '')) {
                                     return;
                                 }
 
@@ -1841,9 +1867,9 @@ addFreeProductsFromCoupon(coupon) {
                                 });
                             });
                         } else {
-                            if (this.couponMatchesLocation(normalizedCoupon, this.city, this.location)) {
-                                this.shippingDiscountAmount += parseFloat(this.deliveryFee || 0);
-                            }
+                            if (this.couponMatchesLocation(normalizedCoupon, this.city, '')) {
+                                    this.shippingDiscountAmount += parseFloat(this.deliveryFee || 0);
+                                }
                         }
                     } else {
                         this.totalDiscountAmount += this.getCouponDiscount(normalizedCoupon);
@@ -1920,16 +1946,29 @@ addFreeProductsFromCoupon(coupon) {
                         }
                     })
 
-                    const refreshCouponState = () => {
-                        this.removeInvalidLocationCoupons()
-                        this.applyAutoCoupons()
+                const refreshCouponStateAfterCityChange = () => {
+                    this.removeInvalidLocationCoupons()
+                    this.applyAutoCoupons()
+                    this.recomputeCouponTotals()
+                }
+
+                const refreshCouponStateAfterBarangayChange = () => {
                         this.recomputeCouponTotals()
                     }
 
-                    this.$watch('province', refreshCouponState)
-                    this.$watch('city', refreshCouponState)
-                    this.$watch('location', refreshCouponState)
-                    this.$watch(() => JSON.stringify(this.deliveries || []), refreshCouponState)
+                this.$watch('province', refreshCouponStateAfterCityChange)
+                this.$watch('city', refreshCouponStateAfterCityChange)
+                this.$watch('location', () => {
+                    // Barangay change: keep applied coupon; only recompute totals.
+                    this.$nextTick(() => {
+                        this.recomputeCouponTotals();
+                    });
+                });
+
+                this.$watch(() => JSON.stringify(this.deliveries || []), () => {
+                    this.applyAutoCoupons()
+                    this.recomputeCouponTotals()
+                })
                 },
 
                 formatDate(date) {
@@ -2649,9 +2688,13 @@ addFreeProductsFromCoupon(coupon) {
                 },
 
                 onBarangayChange() {
-                    this.rebuildAddress()
-                this.applyAutoCoupons()
-                this.recomputeCouponTotals()
+                    this.rebuildAddress();
+
+                    // Barangay change should NOT refresh coupons.
+                    // Delivery fee is based on province + city only, so just recompute totals.
+                    this.$nextTick(() => {
+                        this.recomputeCouponTotals();
+                    });
                 },
 
                 onMultiProvinceChange(index) {
@@ -2678,9 +2721,13 @@ addFreeProductsFromCoupon(coupon) {
                 },
 
                 onMultiBarangayChange(index) {
-                    this.rebuildMultiAddress(index)
-                this.applyAutoCoupons()
-                this.recomputeCouponTotals()
+                    this.rebuildMultiAddress(index);
+
+                    this.getDeliveryFeeForMulti?.(index);
+
+                    this.$nextTick(() => {
+                        this.recomputeCouponTotals();
+                    });
                 },
 
                 deliveries: [{
@@ -3242,7 +3289,7 @@ addFreeProductsFromCoupon(coupon) {
                     return barangays.sort()
                 },
 
-                async getDeliveryFee() {
+                async getDeliveryFee(refreshCoupons = true) {
 
                     if (!this.province || !this.city) return
 
@@ -3267,8 +3314,12 @@ addFreeProductsFromCoupon(coupon) {
                     this.$nextTick(() => {
                         this.isBaka = data.is_baka;
                         this.lechonBakaService = data.lechon_baka_service;
-                        this.applyAutoCoupons()
-                        this.recomputeCouponTotals()
+
+                        if (refreshCoupons) {
+                            this.applyAutoCoupons();
+                        }
+
+                        this.recomputeCouponTotals();
                     })
                 },
 
