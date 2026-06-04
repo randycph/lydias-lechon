@@ -287,23 +287,10 @@
                                             <a title="View Sales Summary" target="_blank" href="{{ route('sales-transaction.view',$sale->id) }}">{{$sale->order_number }}</a><br>
                                         </div>
                                     </th>
-                                   <td class="{{ isUnreadTransaction($sale->id) ? 'font-weight-bold' : '' }}">
-                                    @php
-                                        $contactPersons = collect($sale->deliveryAddress ?? [])
-                                            ->pluck('contact_person')
-                                            ->filter()
-                                            ->unique()
-                                            ->values();
-                                    @endphp
-
-                                    @if ($contactPersons->isNotEmpty())
-                                        {!! $contactPersons->map(fn($name) => e($name))->implode('<br>') !!}
-                                    @else
-                                        {{ $sale->contact_person ?: $sale->customer_name }}
-                                    @endif
-                                </td>
-
-                                <td>{{ $sale->customer_name }}</td>
+                                    <td class="{{ isUnreadTransaction($sale->id) ? 'font-weight-bold' : '' }}">
+                                        {{ $sale?->singleContact?->contact_person ?? $sale->customer_name ?? $sale->contact_person }}
+                                    </td>
+                                    <td>{{ $sale->customer_name }}</td>
                                     <td>{{ $sale->order_source }}</td>
                                     <td>{{ $sale->delivery_type == 'Store Pickup' ? $sale->outlet : $sale->delivery_branch }}</td>
                                     <td>{{ \Carbon\Carbon::parse($sale->created_at)->format('Y-m-d g:i A') }}</td>
@@ -314,46 +301,65 @@
                                     </td>
                                     <td>{{ $sale->delivery_type }}</td>
                                     <td style="font-size:11px;">
-                                        @php
-                                            $addresses      = collect($sale->deliveryAddress ?? []);
-                                            $firstAddressId = data_get($sale, 'deliveryAddress.0.id');
+                                                @php
+                                                    $addresses      = collect($sale->deliveryAddress ?? []);
+                                                    $firstAddressId = data_get($sale, 'deliveryAddress.0.id');
 
-                                            $addrStatusLinks = $addresses
-                                                ->map(function ($addr) use ($sale) {
-                                                    $addressId = $addr->id ?? null;
-                                                    if (!$addressId) return null;
+                                                    $transactionStatus = strtoupper(trim((string) ($sale->status ?? '')));
+                                                    $selectedOrderStatus = strtoupper(trim((string) request('order_status')));
 
-                                                    $status = trim((string)($addr->delivery_status ?? $sale->delivery_status ?? ''));
-                                                    $label  = $status !== '' ? $status : 'No status';
+                                                    $isCancelled = in_array($transactionStatus, ['CANCELLED', 'CANCELED'])
+                                                        || in_array($selectedOrderStatus, ['CANCELLED', 'CANCELED']);
 
-                                                    $href = url("admin/report/delivery_report/{$sale->id}/multiple/{$addressId}");
-                                                    return '<a href="'.$href.'" class="text-blue-600 hover:underline">'.e($label).'</a>';
-                                                })
-                                                ->filter();
-                                        @endphp
+                                                    $isAbandoned = $transactionStatus === 'ABANDONED'
+                                                        || $selectedOrderStatus === 'ABANDONED';
 
-                                        @if ($sale->status === 'CANCELLED')
-                                            CANCELLED
-                                        @elseif ($sale->status === 'ABANDONED')
-                                            ABANDONED
-                                        @else
-                                            @if ($addrStatusLinks->isNotEmpty())
-                                                {!! $addrStatusLinks->implode(',<br> ') !!}
-                                            @else
-                                                @if (!empty($sale->delivery_status) && $firstAddressId)
-                                                    <a target="_blank" href="{{ url("admin/report/delivery_report/{$sale->id}/multiple/{$firstAddressId}") }}"
-                                                    class="text-blue-600 hover:underline">
-                                                        {{ $sale->delivery_status }}
-                                                    </a>
+                                                    $addrStatusLinks = $addresses
+                                                        ->map(function ($addr) use ($sale) {
+                                                            $addressId = $addr->id ?? null;
+                                                            if (!$addressId) return null;
+
+                                                            $status = trim((string)($addr->delivery_status ?? $sale->delivery_status ?? ''));
+                                                            $label  = $status !== '' ? $status : 'No status';
+
+                                                            $href = url("admin/report/delivery_report/{$sale->id}/multiple/{$addressId}");
+
+                                                            return '<a target="_blank" href="'.$href.'" class="text-blue-600 hover:underline">'.e($label).'</a>';
+                                                        })
+                                                        ->filter();
+                                                @endphp
+
+                                                @if ($isCancelled)
+                                                    CANCELLED
+
+                                                @elseif ($isAbandoned)
+                                                    ABANDONED
+
                                                 @else
-                                                    <a target="_blank" href="{{ route('admin.report.delivery_report', ['id' => $sale->id]) }}"
-                                                    class="text-blue-600 hover:underline">
-                                                        {{ $sale->delivery_status ?? 'No status' }}
-                                                    </a>
+                                                    @if ($addrStatusLinks->isNotEmpty())
+                                                        {!! $addrStatusLinks->implode(',<br> ') !!}
+                                                    @else
+                                                        @php
+                                                            $displayStatus = trim((string) ($sale->delivery_status ?? ''));
+                                                            $displayStatus = $displayStatus !== '' ? $displayStatus : 'No status';
+                                                        @endphp
+
+                                                        @if (!empty($sale->delivery_status) && $firstAddressId)
+                                                            <a target="_blank"
+                                                            href="{{ url("admin/report/delivery_report/{$sale->id}/multiple/{$firstAddressId}") }}"
+                                                            class="text-blue-600 hover:underline">
+                                                                {{ $displayStatus }}
+                                                            </a>
+                                                        @else
+                                                            <a target="_blank"
+                                                            href="{{ route('admin.report.delivery_report', ['id' => $sale->id]) }}"
+                                                            class="text-blue-600 hover:underline">
+                                                                {{ $displayStatus }}
+                                                            </a>
+                                                        @endif
+                                                    @endif
                                                 @endif
-                                            @endif
-                                        @endif
-                                    </td>
+                                            </td>
                                     <td style="display:none;">{{ rtrim($payment_types,",") }}</td>
                                     <td>
                                         {{ $sale->Paymentadminstatus }} <a href="#" title="Pending payments" onclick="show_added_payments('{{$sale->id}}');"><span class="badge badge-info">{{$sale->Paymentspendingtotal}}</span></a>
@@ -364,25 +370,53 @@
                                         @endif
                                     </td>
                                    @php
-                                        $displayAmount = (float) ($sale->net_amount ?? 0);
+                                    /*
+                                        Multiple transaction rule:
+                                        - Discount should only be deducted/displayed on the -A order.
+                                        - -B, -C, -D, etc. should show their own gross + delivery only.
+                                        - Single/non-suffixed orders can still use their discount normally.
+                                    */
 
-                                        if ($displayAmount <= 0) {
-                                            $gross    = (float) ($sale->gross_amount ?? 0);
-                                            $delivery = (float) ($sale->delivery_fee_amount ?? 0);
-                                            $discount = (float) ($sale->discount_amount ?? 0);
+                                    $orderNumber = strtoupper(trim((string) ($sale->order_number ?? '')));
 
-                                            $displayAmount = ($gross + $delivery) - $discount;
+                                    preg_match('/-([A-Z])$/', $orderNumber, $suffixMatch);
+                                    $orderSuffix = $suffixMatch[1] ?? null;
+
+                                    $isMultipleChild = !empty($orderSuffix);
+                                    $isDiscountAllowedOnThisRow = !$isMultipleChild || $orderSuffix === 'A';
+
+                                    $gross    = (float) ($sale->gross_amount ?? 0);
+                                    $delivery = (float) ($sale->delivery_fee_amount ?? 0);
+                                    $discount = $isDiscountAllowedOnThisRow
+                                        ? (float) ($sale->discount_amount ?? 0)
+                                        : 0;
+
+                                    /*
+                                        Force display amount from gross + delivery - discount,
+                                        because net_amount may already contain discount on B/C rows.
+                                    */
+                                    $displayAmount = max(($gross + $delivery) - $discount, 0);
+
+                                    /*
+                                        Fallback only if gross/delivery are both empty.
+                                    */
+                                    if ($displayAmount <= 0 && (float) ($sale->net_amount ?? 0) > 0) {
+                                        $displayAmount = (float) $sale->net_amount;
+
+                                        if (!$isDiscountAllowedOnThisRow) {
+                                            $displayAmount += (float) ($sale->discount_amount ?? 0);
                                         }
+                                    }
 
-                                        $paidAmount = (float) $sale->payments
-                                            ->where('is_discount', '!=', 1)
-                                            ->where('status', 'PAID')
-                                            ->sum('amount');
+                                    $paidAmount = (float) $sale->payments
+                                        ->where('is_discount', '!=', 1)
+                                        ->where('status', 'PAID')
+                                        ->sum('amount');
 
-                                        $displayBalance = strtoupper($sale->Paymentadminstatus ?? '') === 'PAID'
-                                            ? 0
-                                            : max($displayAmount - $paidAmount, 0);
-                                    @endphp
+                                    $displayBalance = strtoupper($sale->Paymentadminstatus ?? '') === 'PAID'
+                                        ? 0
+                                        : max($displayAmount - $paidAmount, 0);
+                                @endphp
 
                                     <td>
                                         @if(\App\EcommerceModel\SalesPayment::check_if_has_added_payments($sale->id) == 1)
