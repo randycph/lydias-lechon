@@ -1054,32 +1054,34 @@ if ($carts->count() > 0) {
     public function order_history(Request $request)
     {
         if (!Auth::check()) {
-            return redirect()->route('login', ['redirect' => $request->fullUrl()]);
+    return redirect()->route('login', ['redirect' => $request->fullUrl()]);
+}
+
+if (Auth::check() && Auth()->user()->role_id != 6) {
+    return redirect()->route('my-account')
+        ->with('error', 'You are not allowed to access this page. Please contact support for assistance.');
+}
+
+$page = 'order-history';
+
+$sales = SalesHeader::where('user_id', Auth::id())
+    ->where('is_sub', 0)
+    ->with([
+        'couponUsed',
+        'items.product.photos',
+        'payments' => function ($query) {
+            $query->where('status', 'PAID');
+        },
+        'deliveryStatus' => function ($query) {
+            $query->orderBy('created_at', 'asc');
+        },
+        'subHeaders' => function ($query) {
+            $query->with(['deliveryStatus']);
         }
-
-        if (Auth::check() && Auth()->user()->role_id != 6) {
-            return redirect()->route('my-account')->with('error', 'You are not allowed to access this page. Please contact support for assistance.');
-        }
-
-        $page = 'order-history';
-
-        $sales = SalesHeader::where('user_id', Auth::id())
-                            ->where('is_sub', 0)
-                            ->with([
-                                'couponUsed',
-                                'items.product.photos',
-                                'payments' => function ($query) {
-                                    $query->where('status', 'PAID');
-                                },
-                                'deliveryStatus' => function ($query) {
-                                    $query->orderBy('created_at', 'asc');
-                                },
-                                'subHeaders' => function ($query) {
-                                    $query->with(['deliveryStatus']);
-                                }
-                            ])
-                            ->orderBy('created_at', 'desc')
-                            ->get();
+    ])
+    ->orderBy('created_at', 'desc')
+    ->paginate(10)
+    ->withQueryString();
 
         return view('v2.order-history', compact('page', 'sales'));
     }

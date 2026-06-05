@@ -711,6 +711,12 @@
                         </div>
                     </div>
                     @endforeach
+
+                    @if(method_exists($sales, 'links'))
+                        <div class="mt-6">
+                            {{ $sales->onEachSide(1)->links() }}
+                        </div>
+                    @endif
                     @else
                         <div class="w-full flex justify-center mb-10">
                             <div class="mt-6 px-6 flex items-center justify-center flex-col h-full">
