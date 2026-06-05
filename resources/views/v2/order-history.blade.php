@@ -712,9 +712,51 @@
                     </div>
                     @endforeach
 
-                    @if(method_exists($sales, 'links'))
-                        <div class="mt-6">
-                            {{ $sales->onEachSide(1)->links() }}
+                    @if ($sales instanceof \Illuminate\Pagination\LengthAwarePaginator && $sales->hasPages())
+                        <div class="mt-8 flex flex-col items-center justify-center gap-3">
+                            <div class="text-xs text-gray-500 font-semibold">
+                                Showing {{ $sales->firstItem() }} to {{ $sales->lastItem() }} of {{ $sales->total() }} transactions
+                            </div>
+
+                            <nav class="flex flex-row flex-wrap items-center justify-center gap-2" aria-label="Order history pagination">
+                                {{-- Previous Button --}}
+                                @if ($sales->onFirstPage())
+                                    <span class="px-3 py-2 text-sm font-semibold text-gray-400 bg-gray-100 border border-gray-200 rounded-md cursor-not-allowed">
+                                        Previous
+                                    </span>
+                                @else
+                                    <a href="{{ $sales->previousPageUrl() }}"
+                                       class="px-3 py-2 text-sm font-semibold text-primary bg-white border border-primary rounded-md hover:bg-primary hover:text-white transition">
+                                        Previous
+                                    </a>
+                                @endif
+
+                                {{-- Page Numbers --}}
+                                @foreach ($sales->getUrlRange(1, $sales->lastPage()) as $pageNumber => $url)
+                                    @if ($pageNumber == $sales->currentPage())
+                                        <span class="px-3 py-2 text-sm font-bold text-white bg-primary border border-primary rounded-md">
+                                            {{ $pageNumber }}
+                                        </span>
+                                    @else
+                                        <a href="{{ $url }}"
+                                           class="px-3 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-primary hover:text-white hover:border-primary transition">
+                                            {{ $pageNumber }}
+                                        </a>
+                                    @endif
+                                @endforeach
+
+                                {{-- Next Button --}}
+                                @if ($sales->hasMorePages())
+                                    <a href="{{ $sales->nextPageUrl() }}"
+                                       class="px-3 py-2 text-sm font-semibold text-primary bg-white border border-primary rounded-md hover:bg-primary hover:text-white transition">
+                                        Next
+                                    </a>
+                                @else
+                                    <span class="px-3 py-2 text-sm font-semibold text-gray-400 bg-gray-100 border border-gray-200 rounded-md cursor-not-allowed">
+                                        Next
+                                    </span>
+                                @endif
+                            </nav>
                         </div>
                     @endif
                     @else
@@ -1100,8 +1142,6 @@
         </div>
     </div>
 </div>
-
-
 
 <div x-show="editOrderModal"
     x-transition
