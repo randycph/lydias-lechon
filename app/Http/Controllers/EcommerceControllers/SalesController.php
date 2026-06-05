@@ -1208,10 +1208,10 @@ class SalesController extends Controller
     if ($sales->is_sub == 1) {
         $subSales = SalesHeader::where('id', $sales->parent_sales_header_id)->first();
         $salesPayments = $subSales->payments ?? collect();
-        $totalPayment = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)->sum('amount');
+        $totalPayment = SalesPayment::where('sales_header_id', $sales->parent_sales_header_id)->where('status', '!=', 'CANCELLED')->sum('amount');
     } else {
-        $salesPayments = SalesPayment::where('sales_header_id',$id)->get();
-        $totalPayment = SalesPayment::where('sales_header_id',$id)->sum('amount');
+        $salesPayments = SalesPayment::where('sales_header_id',$id)->where('status', '!=', 'CANCELLED')->get();
+        $totalPayment = SalesPayment::where('sales_header_id',$id)->where('status', '!=', 'CANCELLED')->sum('amount');
     }
 
     // $salesPayments = SalesPayment::where('sales_header_id',$id)->where('status', '!=', 'CANCELLED')->get();
