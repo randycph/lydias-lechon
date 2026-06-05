@@ -114,19 +114,39 @@ Click here to view and manage this order
 @php
     $prod = \App\Models\Product::find($product->product_id ?? null);
 
-    $productName = $product->product->name
-        ?? $prod->name
-        ?? 'Unknown Product';
+    /*
+     * Keep the Address Orders item label the same as the Order Details table.
+     * Order Details uses $details->product_name, while this section was only
+     * using the base product name, so "Boneless with Paella" was missing here.
+     */
+    $productName = $product->product_name
+        ?? $product->name
+        ?? ($product->product->name ?? null)
+        ?? ($prod->name ?? 'Unknown Product');
+
+    $hasPaella = !empty($product->paella)
+        || !empty($product->paella_price)
+        || stripos($productName, 'paella') !== false;
+
+    if ($hasPaella && stripos($productName, 'paella') === false) {
+        $productName .= ' Boneless with Paella';
+    }
 
     $qty = (float) ($product->qty ?? 0);
 
-    $price = (float) ($prod->price ?? $product->price ?? 0);
+    /*
+     * Prefer the saved checkout price first. Only fall back to product master
+     * price when the address product payload has no price.
+     */
+    $price = (float) ($product->price ?? $prod->price ?? 0);
 
-    if (!empty($product->paella)) {
-        $price += (float) ($prod->paella_price ?? $product->paella_price ?? 0);
+    if ($hasPaella && !empty($product->paella_price)) {
+        $price += (float) $product->paella_price;
+    } elseif ($hasPaella && !empty($prod->paella_price) && (float) ($product->price ?? 0) <= (float) ($prod->price ?? 0)) {
+        $price += (float) $prod->paella_price;
     }
 
-    $lineTotal = $price * $qty;
+    $lineTotal = (float) ($product->gross_amount ?? $product->total ?? ($price * $qty));
 @endphp
 
 - {{ $productName }} x {{ number_format($qty, 0) }} - ₱{{ number_format($lineTotal, 2) }}

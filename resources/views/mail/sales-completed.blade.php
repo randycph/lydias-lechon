@@ -752,23 +752,27 @@ Media Item
                                                                                     @endif
 
                                                                                     @if($discountAmount > 0)
-                                                                                    <tr>
-                                                                                          <td class="tx-left" colspan="6" style="font-size:11px;">Discount / GC</td>
-                                                                                          <td class="tx-right" style="font-size:11px; color:red;">-{{ number_format($discountAmount, 2) }}</td>
-                                                                                    </tr>
-
                                                                                           @if($couponRows && count($couponRows) > 0)
                                                                                                 @foreach($couponRows as $coupon)
-                                                                                                <tr>
-                                                                                                      <td class="tx-left" colspan="6" style="font-size:11px; padding-left: 20px;">
-                                                                                                            {{ empty($coupon->coupon_id) ? 'Gift Certificate' : 'Coupon' }}
-                                                                                                            (<i>{{ $coupon->coupon_code ?? 'N/A' }}</i>)
-                                                                                                      </td>
-                                                                                                      <td class="tx-right" style="font-size:11px; color:red;">
-                                                                                                            -{{ number_format((float) ($coupon->discount_used ?? 0), 2) }}
-                                                                                                      </td>
-                                                                                                </tr>
+                                                                                                      @php
+                                                                                                            $couponIdValue = data_get($coupon, 'coupon_id', '__missing__');
+                                                                                                            $isGiftCertificate = $couponIdValue !== '__missing__' && empty($couponIdValue);
+                                                                                                            $discountLabel = $isGiftCertificate ? 'Gift Certificate' : 'Coupon Discount';
+                                                                                                      @endphp
+                                                                                                      <tr>
+                                                                                                            <td class="tx-left" colspan="6" style="font-size:11px;">
+                                                                                                                  {{ $discountLabel }} (<i>{{ $coupon->coupon_code ?? 'N/A' }}</i>)
+                                                                                                            </td>
+                                                                                                            <td class="tx-right" style="font-size:11px; color:red;">
+                                                                                                                  -{{ number_format((float) ($coupon->discount_used ?? 0), 2) }}
+                                                                                                            </td>
+                                                                                                      </tr>
                                                                                                 @endforeach
+                                                                                          @else
+                                                                                                <tr>
+                                                                                                      <td class="tx-left" colspan="6" style="font-size:11px;">Discount</td>
+                                                                                                      <td class="tx-right" style="font-size:11px; color:red;">-{{ number_format($discountAmount, 2) }}</td>
+                                                                                                </tr>
                                                                                           @endif
                                                                                     @endif
 
