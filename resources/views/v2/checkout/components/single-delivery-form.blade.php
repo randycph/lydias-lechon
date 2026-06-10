@@ -94,7 +94,7 @@
         {{-- BARANGAY --}}
         <div>
             <label class="block font-bold mb-2">
-                Barangay
+                Barangay <span class="text-red-600">*</span>
             </label>
 
             <select
