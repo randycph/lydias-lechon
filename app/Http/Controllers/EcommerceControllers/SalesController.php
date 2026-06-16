@@ -664,9 +664,34 @@ class SalesController extends Controller
 
         $showUnread = request()->boolean('unread') && request()->has('unread') && request()->unread == 'on';
 
+        /*
+        |--------------------------------------------------------------------------
+        | Order Number Search Override
+        |--------------------------------------------------------------------------
+        | If the search keyword is an exact order number, do not force status = active.
+        | This allows Abandoned/Cancelled/Inactive orders to appear when searched directly.
+        */
+        $originalSearch = trim((string) request()->input('search'));
+
+        $orderNumberTokens = collect(preg_split('/[\s,]+/', $originalSearch))
+            ->map(fn ($item) => trim($item))
+            ->filter()
+            ->unique()
+            ->values();
+
+        $matchedOrderNumbers = collect();
+
+        if ($orderNumberTokens->isNotEmpty()) {
+            $matchedOrderNumbers = SalesHeader::query()
+                ->whereIn('order_number', $orderNumberTokens->all())
+                ->pluck('order_number');
+        }
+
+        $isOrderNumberSearch = $matchedOrderNumbers->isNotEmpty();
+
         $selectedOrderStatus = strtoupper(trim((string) request('order_status')));
 
-            $shouldForceActiveStatus = !in_array($selectedOrderStatus, [
+            $shouldForceActiveStatus = !$isOrderNumberSearch && !in_array($selectedOrderStatus, [
                 'ABANDONED',
                 'CANCELLED',
                 'CANCELED',
@@ -871,20 +896,10 @@ class SalesController extends Controller
             }
         }
 
-        $originalSearch = request()->input('search');
+        if ($isOrderNumberSearch) {
+            $model->whereIn('order_number', $matchedOrderNumbers->all());
 
-        $multiOrderNumbers = collect(preg_split('/[\s,]+/', (string) $originalSearch))
-            ->map(fn ($item) => trim($item))
-            ->filter()
-            ->unique()
-            ->values();
-
-        $isMultiOrderNumberSearch = $multiOrderNumbers->count() > 1;
-
-        if ($isMultiOrderNumberSearch) {
-            $model->whereIn('order_number', $multiOrderNumbers->all());
-
-            // Prevent ListingHelper from searching the whole comma string as one keyword
+            // Prevent ListingHelper from searching the order number keyword again
             request()->merge([
                 'search' => ''
             ]);
@@ -945,7 +960,7 @@ class SalesController extends Controller
                 $filterFields
             );
 
-        if ($isMultiOrderNumberSearch) {
+        if ($isOrderNumberSearch) {
             request()->merge([
                 'search' => $originalSearch
             ]);
