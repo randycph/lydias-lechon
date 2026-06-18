@@ -664,40 +664,43 @@ class SalesController extends Controller
 
         $showUnread = request()->boolean('unread') && request()->has('unread') && request()->unread == 'on';
 
+        $customConditions = [];
+
         /*
         |--------------------------------------------------------------------------
-        | Order Number Search Override
+        | Exact Order Number Search Override
         |--------------------------------------------------------------------------
-        | If the search keyword is an exact order number, do not force status = active.
-        | This allows Abandoned/Cancelled/Inactive orders to appear when searched directly.
+        | When the user searches an exact order number, do not force status = active.
+        | This allows abandoned/cancelled/inactive orders to appear by order number.
         */
-        $originalSearch = trim((string) request()->input('search'));
 
-        $orderNumberTokens = collect(preg_split('/[\s,]+/', $originalSearch))
-            ->map(fn ($item) => trim($item))
-            ->filter()
-            ->unique()
-            ->values();
+        if (request()->has('search')) {
+            $originalSearch = trim((string) request()->input('search'));
 
-        $matchedOrderNumbers = collect();
+            $orderNumberTokens = collect(preg_split('/[\s,]+/', $originalSearch))
+                ->map(fn ($item) => trim($item))
+                ->filter()
+                ->unique()
+                ->values();
 
-        if ($orderNumberTokens->isNotEmpty()) {
-            $matchedOrderNumbers = SalesHeader::query()
-                ->whereIn('order_number', $orderNumberTokens->all())
-                ->pluck('order_number');
-        }
+            $matchedOrderNumbers = collect();
 
-        $isOrderNumberSearch = $matchedOrderNumbers->isNotEmpty();
+            if ($orderNumberTokens->isNotEmpty()) {
+                $matchedOrderNumbers = SalesHeader::query()
+                    ->whereIn('order_number', $orderNumberTokens->all())
+                    ->orWhere('customer_name', 'like', '%' . $originalSearch . '%')
+                    ->pluck('order_number');
+            }
 
-        $selectedOrderStatus = strtoupper(trim((string) request('order_status')));
+            $isOrderNumberSearch = $matchedOrderNumbers->isNotEmpty();
+
+            $selectedOrderStatus = strtoupper(trim((string) request('order_status')));
 
             $shouldForceActiveStatus = !$isOrderNumberSearch && !in_array($selectedOrderStatus, [
                 'ABANDONED',
                 'CANCELLED',
                 'CANCELED',
             ]);
-
-            $customConditions = [];
 
             if ($shouldForceActiveStatus) {
                 $customConditions[] = [
@@ -707,15 +710,25 @@ class SalesController extends Controller
                     'apply_to_deleted_data' => true
                 ];
             }
+        }
 
-            if (auth()->user()->role_id == 4) {
-                $customConditions[] = [
+        if(auth()->user()->role_id == 4) {
+            $customConditions = [
+                [
+                    'field' => 'status',
+                    'operator' => '=',
+                    'value' => 'active',
+                    'apply_to_deleted_data' => true
+                ],
+                [
                     'field' => 'order_source',
                     'operator' => '=',
                     'value' => session('branch'),
                     'apply_to_deleted_data' => true
-                ];
-            }
+                ]
+            ];
+        }
+
         $today = now();
 
         $roleId        = auth()->user()->role_id;
