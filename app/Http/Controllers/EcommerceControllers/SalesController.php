@@ -909,14 +909,14 @@ class SalesController extends Controller
             }
         }
 
-        if ($isOrderNumberSearch) {
-            $model->whereIn('order_number', $matchedOrderNumbers->all());
+        // if ($isOrderNumberSearch) {
+        //     $model->whereIn('order_number', $matchedOrderNumbers->all());
 
-            // Prevent ListingHelper from searching the order number keyword again
-            request()->merge([
-                'search' => ''
-            ]);
-        }
+        //     // Prevent ListingHelper from searching the order number keyword again
+        //     request()->merge([
+        //         'search' => ''
+        //     ]);
+        // }
 
         $model = $this->additional_filters($model);
       
@@ -973,11 +973,11 @@ class SalesController extends Controller
                 $filterFields
             );
 
-        if ($isOrderNumberSearch) {
-            request()->merge([
-                'search' => $originalSearch
-            ]);
-        }
+        // if ($isOrderNumberSearch) {
+        //     request()->merge([
+        //         'search' => $originalSearch
+        //     ]);
+        // }
 
         $filter = $listing->get_filter($this->searchFields);
         $searchType = 'simple_search_using_collection';
