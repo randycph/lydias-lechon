@@ -668,7 +668,55 @@ class SalesController extends Controller
 
         $showUnread = request()->boolean('unread') && request()->has('unread') && request()->unread == 'on';
 
-        if(auth()->user()->role_id == 4) // branch manager user
+        $customConditions = [];
+
+        /*
+        |--------------------------------------------------------------------------
+        | Exact Order Number Search Override
+        |--------------------------------------------------------------------------
+        | When the user searches an exact order number, do not force status = active.
+        | This allows abandoned/cancelled/inactive orders to appear by order number.
+        */
+
+        if (request()->has('search')) {
+            $originalSearch = trim((string) request()->input('search'));
+
+            $orderNumberTokens = collect(preg_split('/[\s,]+/', $originalSearch))
+                ->map(fn ($item) => trim($item))
+                ->filter()
+                ->unique()
+                ->values();
+
+            $matchedOrderNumbers = collect();
+
+            if ($orderNumberTokens->isNotEmpty()) {
+                $matchedOrderNumbers = SalesHeader::query()
+                    ->whereIn('order_number', $orderNumberTokens->all())
+                    ->orWhere('customer_name', 'like', '%' . $originalSearch . '%')
+                    ->pluck('order_number');
+            }
+
+            $isOrderNumberSearch = $matchedOrderNumbers->isNotEmpty();
+
+            $selectedOrderStatus = strtoupper(trim((string) request('order_status')));
+
+            $shouldForceActiveStatus = !$isOrderNumberSearch && !in_array($selectedOrderStatus, [
+                'ABANDONED',
+                'CANCELLED',
+                'CANCELED',
+            ]);
+
+            if ($shouldForceActiveStatus) {
+                $customConditions[] = [
+                    'field' => 'status',
+                    'operator' => '=',
+                    'value' => 'active',
+                    'apply_to_deleted_data' => true
+                ];
+            }
+        }
+
+        if(auth()->user()->role_id == 4) {
             $customConditions = [
                 [
                     'field' => 'status',
@@ -683,16 +731,8 @@ class SalesController extends Controller
                     'apply_to_deleted_data' => true
                 ]
             ];
-        else {
-            $customConditions = [
-                [
-                    'field' => 'status',
-                    'operator' => '=',
-                    'value' => request()->has('order_status') && request()->order_status == 'Abandoned' ? '' : 'active',
-                    'apply_to_deleted_data' => true
-                ],
-            ];
         }
+
         $today = now();
 
         $roleId        = auth()->user()->role_id;
