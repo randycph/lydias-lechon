@@ -559,7 +559,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <th colspan="10" style="text-align: center;"> <p class="text-danger">No Sales Transaction found.</p></th>
+                                    <th colspan="15" style="text-align: center;"> <p class="text-danger">No Sales Transaction found.</p></th>
                                 </tr>
                             @endforelse
                             </tbody>
