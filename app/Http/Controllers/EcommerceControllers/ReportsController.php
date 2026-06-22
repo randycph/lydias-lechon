@@ -1937,6 +1937,7 @@ class ReportsController extends Controller
 
     public function audit_trail_per_sales(Request $request){
         $pb = SalesHeader::where('order_number', 'LIKE', "%{$request->input('pb')}%")->first();
+        $pb = $pb->id;
 
         if (!$pb) {
             $pb = $request->input('pb');
