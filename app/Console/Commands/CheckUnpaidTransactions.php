@@ -118,6 +118,7 @@ class CheckUnpaidTransactions extends Command
                     'created_by'        => 1,
                     'email'             => 'wsiprod.demo@gmail.com',
                     'role'              => 'Super Admin',
+                    'activity_type'      => 'update',
                     'dashboard_activity' => "abandoned order",
                     'activity_desc'      => "updated the ecommerce_sales_headers status of {$order->id} from {$order->status} to 'ABANDONED",
                     'activity_date'      => now()->format('Y-m-d H:i:s'),

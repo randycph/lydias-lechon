@@ -395,13 +395,9 @@ table.dataTable thead .sorting::before, table.dataTable thead .sorting::after {
                                     <label class="tx-13">Order Type</label>
                                     <select name="order_type" id="order_type" class="form-control">
                                         <option value="">- Select Item Type -</option>
-                                        <option value="Buhat">Buhat</option>
-                                        <option value="Additional">Additional</option>                                                                           
-                                        <option value="Reserve">Reserve</option>                                                                                    
-                                        <option value="Miscellaneous">Miscellaneous</option>                                                                            
-                                        @isset($_GET['order_type'])
-                                            <option value="{{$_GET['order_type']}}" selected="selected">{{ $_GET['order_type'] }}</option>
-                                        @endisset
+                                        <option value="Buhat" {{ isset($_GET['order_type']) && $_GET['order_type'] == 'Buhat' ? 'selected' : '' }}>Buhat</option>
+                                        <option value="Additional" {{ isset($_GET['order_type']) && $_GET['order_type'] == 'Additional' ? 'selected' : '' }}>Additional</option>                                                                           
+                                        <option value="Reserve" {{ isset($_GET['order_type']) && $_GET['order_type'] == 'Reserve' ? 'selected' : '' }}>Reserve</option>                                                                                    
                                     </select>
                                 </div>
                             </div>
