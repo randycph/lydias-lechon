@@ -196,10 +196,10 @@
 					<label class="d-block">Reward *</label>
 					<select class="custom-select @error('reward') is-invalid @enderror" id="reward-optn" name="reward">
 						<option value="" class="text-secondary">Select Reward</option>
-						<option @if(old('reward') == 'free-shipping-optn') selected @endif value="free-shipping-optn">Free Shipping</option>
-						<option @if(old('reward') == 'discount-amount-optn') selected @endif value="discount-amount-optn">Discount Amount</option>
-						<option @if(old('reward') == 'discount-percentage-optn') selected @endif value="discount-percentage-optn">Discount Percentage</option>
-						<option @if(old('reward') == 'free-product-optn') selected @endif value="free-product-optn">Free Product/Gift</option>
+						<option @if(old('reward') == 'free-shipping-optn') selected @endif value="free-shipping-optn">Free Shipping (FS</option>
+						<option @if(old('reward') == 'discount-amount-optn') selected @endif value="discount-amount-optn">Discount Amount (DA)</option>
+						<option @if(old('reward') == 'discount-percentage-optn') selected @endif value="discount-percentage-optn">Discount Percentage (DP)</option>
+						<option @if(old('reward') == 'free-product-optn') selected @endif value="free-product-optn">Free Product/Gift (FP)</option>
 					</select>
 				
 				</div>

@@ -127,9 +127,9 @@
                     <thead>
                         <tr>
                             <th align="left">ID</th>
+                            <th align="left">Reward</th>
                             <th align="left">Code</th>
                             <th align="left">Name</th>
-                            <th align="left">Reward</th>
                             <th align="left">Order Source</th>
                             <th align="left">Order #</th>
                             <th align="left">Customer</th>
@@ -172,9 +172,9 @@
 
                         <tr>
                             <td>{{ $displayId }}</td>
+                            <td>{{ $rewardName }}</td>
                             <td>{{ $r->coupon_code }}</td>
                             <td>{{ $r->name }}</td>
-                            <td>{{ $rewardName }}</td>
                             <td>{{ $r->order_source_label  }}</td>
                             <td>{{ $r->order_number }}</td>
                             <td>{{ $r->customer_name }}</td>
