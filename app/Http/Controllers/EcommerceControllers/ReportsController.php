@@ -2051,7 +2051,11 @@ class ReportsController extends Controller
     }
 
     public function audit_trail_per_sales(Request $request){
-        $pb = $request->input('pb') ?? null;
+        $pb = SalesHeader::where('order_number', 'LIKE', "%{$request->input('pb')}%")->first();
+
+        if (!$pb) {
+            $pb = $request->input('pb');
+        }
 
         $rs = ActivityLog::with('user')->whereIn('db_table', [
             'ecommerce_sales_headers',
