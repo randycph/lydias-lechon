@@ -619,7 +619,8 @@ table.dataTable thead .sorting::before, table.dataTable thead .sorting::after {
                                 <th>Encoded Date</th>  
                                 <th>Encoded Time</th>   
                                 <th>Delivery Status</th>
-                                <th>Size</th>                     
+                                <th>Size</th>      
+                                <th>Receiver Branch</th>                            
                             </tr>
                             </thead>
                                 <tbody>
@@ -945,6 +946,11 @@ table.dataTable thead .sorting::before, table.dataTable thead .sorting::after {
         <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $size }}">
             {{ $isSales ? ($isMerged ? '' : e($size)) : e($size ?? '') }}
         </td>
+
+        {{-- Receiver Branch (duplicate of status; merged for sales; JO per-row) --}}
+        <td class="bord {{ $isSales && $isMerged ? 'merge-same' :  ($isSales  ? 'merge-first' : '') }} }}" data-value="{{ $r->trantype == 'jo' ? $r->receiver : ($r->receiver_branch ?? '') }}">
+            {{ $isSales ? ($isMerged ? '' : e($r->trantype == 'jo' ? $r->receiver : ($r->receiver_branch ?? ''))) : e($r->trantype == 'jo' ? $r->receiver : ($r->receiver_branch ?? '')) }}
+        </td>
     </tr>
 
     @php
@@ -1252,14 +1258,14 @@ table.dataTable thead .sorting::before, table.dataTable thead .sorting::after {
                     {
                         extend: 'colvisGroup',
                         text: 'Hide extra columns',
-                        hide: [2,4,7,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35]
+                        hide: [2,4,7,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36]
                     },
                     'columnsToggle'
                 ]
             }
         ],
         columnDefs: [
-            { targets: [2,4,7,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35], visible: false }
+            { targets: [2,4,7,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36], visible: false }
         ]
     });
 
