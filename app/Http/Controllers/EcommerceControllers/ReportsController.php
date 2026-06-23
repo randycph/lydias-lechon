@@ -1921,12 +1921,12 @@ class ReportsController extends Controller
                             Carbon::parse($end)->endOfDay()
                         ]);
                     })
-                    // remove records if reference contains from exlude list
-                    ->where(function ($query) use ($exclude) {
-                        foreach ($exclude as $item) {
-                            $query->where('reference', 'not like', "%{$item}%");
-                        }
-                    })
+                    // // remove records if reference contains from exlude list
+                    // ->where(function ($query) use ($exclude) {
+                    //     foreach ($exclude as $item) {
+                    //         $query->where('reference', 'not like', "%{$item}%");
+                    //     }
+                    // })
                     ->when($pb, function ($query) use ($pb) {
                         $query->where('created_by', $pb);
                     })
