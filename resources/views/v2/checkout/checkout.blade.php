@@ -523,7 +523,52 @@
                 },
 
             get selectableCoupons() {
-                return this.getDeliveryQualifiedCouponChoices();
+                if (this.hasWholeLechonInCart()) {
+                    return [];
+                }
+
+                const sources = [
+                    ...(this.availableCoupons || []),
+                    ...(this.eligibleCoupons || []),
+                    ...(this.allCoupons || []),
+                    ...(this.autoCouponsSource || []),
+                    ...(this.autoCouponChoices || [])
+                ];
+
+                const unique = [];
+
+                sources
+                    .map(coupon => this.normalizeCoupon(coupon))
+                    .filter(coupon => {
+                        const code = this.couponCodeKey(coupon);
+                        return code !== '';
+                    })
+                    .filter(coupon => !this.couponUsageConsumed(coupon))
+                    .filter(coupon => !this.couponAlreadyApplied(coupon))
+                    .filter(coupon => {
+                        if (typeof this.couponProductRequirementStatus !== 'function') {
+                            return true;
+                        }
+
+                        return this.couponProductRequirementStatus(coupon).valid;
+                    })
+                    .forEach(coupon => {
+                        const code = this.couponCodeKey(coupon);
+
+                        const exists = unique.some(item =>
+                            this.couponCodeKey(item) === code
+                        );
+
+                        if (!exists) {
+                            unique.push({
+                                ...coupon,
+                                auto_applied: false,
+                                activation_type: coupon.activation_type || 'manual'
+                            });
+                        }
+                    });
+
+                return unique;
             },
 
             couponCodeKey(coupon) {
