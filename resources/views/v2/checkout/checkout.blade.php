@@ -992,39 +992,157 @@
             },
 
             couponRequiredProductQuantity(coupon) {
-                const directQty = Number(
-                    coupon?.required_product_quantity ??
-                    coupon?.minimum_product_quantity ??
-                    coupon?.min_product_quantity ??
-                    coupon?.product_quantity_required ??
-                    coupon?.required_product_count ??
-                    coupon?.minimum_product_count ??
-                    coupon?.min_product_count ??
-                    coupon?.product_count ??
-                    coupon?.required_qty ??
-                    coupon?.minimum_qty ??
-                    coupon?.min_qty ??
-                    coupon?.product_qty ??
-                    coupon?.qty_required ??
-                    coupon?.buy_quantity ??
-                    coupon?.buy_qty ??
-                    0
-                );
+                const qtyKeys = [
+                    // Admin Purchase Conditions: Total Quantity + Minimum
+                    'total_quantity',
+                    'total_qty',
+                    'minimum_total_quantity',
+                    'min_total_quantity',
+                    'purchase_total_quantity',
+                    'purchase_total_qty',
+                    'purchase_condition_total_quantity',
+                    'purchase_condition_total_qty',
+                    'condition_total_quantity',
+                    'condition_total_qty',
+                    'minimum_purchase_total_quantity',
+                    'minimum_purchase_total_qty',
+                    'minimum_purchase_quantity',
+                    'minimum_purchase_qty',
+                    'min_purchase_quantity',
+                    'min_purchase_qty',
+                    'purchase_minimum_quantity',
+                    'purchase_minimum_qty',
 
-                if (directQty > 0) return directQty;
+                    // Product quantity aliases
+                    'total_product_quantity',
+                    'total_products_quantity',
+                    'total_product_qty',
+                    'total_products_qty',
+                    'product_total_quantity',
+                    'product_total_qty',
+                    'coupon_product_quantity',
+                    'coupon_product_qty',
+                    'coupon_total_product_quantity',
+                    'coupon_total_product_qty',
+                    'required_product_quantity',
+                    'minimum_product_quantity',
+                    'min_product_quantity',
+                    'product_quantity_required',
+                    'required_product_count',
+                    'minimum_product_count',
+                    'min_product_count',
+                    'product_count',
+                    'total_count',
+                    'minimum_count',
+                    'min_count',
+                    'required_count',
+                    'purchase_count',
+                    'purchase_qty',
 
-                // Fallback for descriptions like: "Less P200 every 2 orders of Bopis"
+                    // Generic quantity aliases
+                    'required_quantity',
+                    'minimum_quantity',
+                    'min_quantity',
+                    'required_qty',
+                    'minimum_qty',
+                    'min_qty',
+                    'quantity',
+                    'qty',
+                    'product_qty',
+                    'qty_required',
+                    'buy_quantity',
+                    'buy_qty'
+                ];
+
+                const parseMaybeJson = (value) => {
+                    if (!value) return [];
+                    if (Array.isArray(value)) return value;
+
+                    if (typeof value === 'object') {
+                        return [value];
+                    }
+
+                    const text = String(value || '').trim();
+
+                    if (!text || text === 'null' || text === 'undefined' || text === '[]' || text === '{}') {
+                        return [];
+                    }
+
+                    if (text.startsWith('[') || text.startsWith('{')) {
+                        try {
+                            const parsed = JSON.parse(text);
+                            return Array.isArray(parsed) ? parsed : [parsed];
+                        } catch (e) {}
+                    }
+
+                    return [];
+                };
+
+                const sources = [];
+                const addSource = (source) => {
+                    parseMaybeJson(source).forEach(item => {
+                        if (!item || typeof item !== 'object') return;
+
+                        sources.push(item);
+
+                        [
+                            item.purchase_condition,
+                            item.purchase_conditions,
+                            item.minimum_purchase,
+                            item.minimum_purchase_condition,
+                            item.minimum_purchase_conditions,
+                            item.purchase_rule,
+                            item.purchase_rules,
+                            item.coupon_condition,
+                            item.coupon_conditions,
+                            item.requirement,
+                            item.requirements,
+                            item.minimum_requirement,
+                            item.minimum_requirements,
+                            item.condition,
+                            item.conditions,
+                            item.product_condition,
+                            item.product_conditions,
+                            item.product_rule,
+                            item.product_rules,
+                            item.rule,
+                            item.rules,
+                            item.pivot
+                        ].forEach(addSource);
+                    });
+                };
+
+                addSource(coupon);
+
+                for (const source of sources) {
+                    for (const key of qtyKeys) {
+                        const qty = Number(source?.[key] ?? 0);
+
+                        if (qty > 0) {
+                            return qty;
+                        }
+                    }
+                }
+
+                // Fallback for descriptions like:
+                // "Minimum 2 Bopis", "Total Quantity 2",
+                // "Buy 2 Bopis Get 1 Fresh Lumpia", and the common typo "But 2 Bopis Get 1...".
                 const text = this.normalizeCouponProductText([
                     coupon?.description,
                     coupon?.details,
                     coupon?.name,
-                    coupon?.coupon_name
+                    coupon?.coupon_name,
+                    coupon?.code,
+                    coupon?.coupon_code
                 ].filter(Boolean).join(' '));
 
                 const patterns = [
-                    /every\s+(\d+)\s+(?:orders?|items?|products?|pcs?|pieces?|qty|quantity)\s+of\s+[a-z0-9 ]+/,
-                    /buy\s+(\d+)\s+[a-z0-9 ]+/,
-                    /(?:minimum|min|required|requires)\s+(\d+)\s+(?:orders?|items?|products?|pcs?|pieces?|qty|quantity)?/
+                    /(?:total\s+quantity|total\s+product\s+quantity)\s*(?:is|:)?\s*(\d+)/,
+                    /(?:minimum|min|required|requires)\s+(\d+)\s+(?:orders?|items?|products?|pcs?|pieces?|qty|quantity)?/,
+                    /\b(?:buy|but)\s+(\d+)\s+[a-z0-9 ]+(?:\s+get\s+\d+|\s+receive\s+\d+|\s+free\s+\d+|$)/,
+                    /\b(\d+)\s+[a-z0-9 ]+\s+(?:get|receive|free)\s+\d+/,
+                    /(?:for\s+)?every\s+(\d+)\s+(?:orders?|items?|products?|pcs?|pieces?|qty|quantity)\s+of\s+[a-z0-9 ]+/,
+                    /buy\s+(\d+)\s+[a-z0-9 ]+/
                 ];
 
                 for (const pattern of patterns) {
@@ -1045,30 +1163,206 @@
                     coupon?.coupon_name
                 ].filter(Boolean).join(' '));
 
-                // Example: "Less P200 every 2 orders of Bopis" => "bopis"
-                const match = text.match(/(?:orders?|items?|products?|pcs?|pieces?|qty|quantity)\s+of\s+([a-z0-9 ]+)/);
+                const patterns = [
+                    // Example: "Less P200 every 2 orders of Bopis" => "bopis"
+                    /(?:orders?|items?|products?|pcs?|pieces?|qty|quantity)\s+of\s+([a-z0-9 ]+)/,
+                    // Example: "Buy 2 Bopis Get 1 Fresh Lumpia" => "bopis"
+                    /\b(?:buy|but)\s+\d+\s+([a-z0-9 ]+?)(?:\s+get\s+\d+|\s+receive\s+\d+|\s+free\s+\d+|$)/,
+                    // Example: "2 Bopis Get 1 Fresh Lumpia" => "bopis"
+                    /\b\d+\s+([a-z0-9 ]+?)\s+(?:get|receive|free)\s+\d+/,
+                    // Example: "Minimum 2 Bopis" => "bopis"
+                    /(?:minimum|min|required|requires)\s+\d+\s+([a-z0-9 ]+)/
+                ];
 
-                if (!match) return '';
+                for (const pattern of patterns) {
+                    const match = text.match(pattern);
 
-                return this.normalizeCouponProductText(
-                    match[1]
-                        .replace(/\b(?:only|and|or|with|for|per|each|every)\b.*$/i, '')
-                );
+                    if (match && match[1]) {
+                        return this.normalizeCouponProductText(
+                            match[1].replace(/\b(?:get|receive|free|only|and|or|with|for|per|each|every)\b.*$/i, '')
+                        );
+                    }
+                }
+
+                return '';
             },
 
             getCouponProductRules(coupon) {
                 const defaultRequiredQty = this.couponRequiredProductQuantity(coupon);
+                const rawRules = [];
 
-                const rawRules = [
-                    ...this.parseCouponArray(coupon?.required_products),
-                    ...this.parseCouponArray(coupon?.coupon_products),
-                    ...this.parseCouponArray(coupon?.products),
-                    ...this.parseCouponArray(coupon?.applicable_products),
-                    ...this.parseCouponArray(coupon?.eligible_products),
-                    ...this.parseCouponArray(coupon?.selected_products),
-                    ...this.parseCouponArray(coupon?.buy_products),
-                    ...this.parseCouponArray(coupon?.product_ids)
-                ];
+                const pushRules = (value) => {
+                    this.parseCouponArray(value).forEach(rule => {
+                        if (rule !== null && rule !== undefined && rule !== '') {
+                            rawRules.push(rule);
+                        }
+                    });
+                };
+
+                const pushDirectProductRule = (source) => {
+                    if (!source || typeof source !== 'object') return;
+
+                    const product = source.product || {};
+                    const pivot = source.pivot || {};
+
+                    const productId =
+                        source.product_id ??
+                        source.productId ??
+                        source.required_product_id ??
+                        source.buy_product_id ??
+                        source.selected_product_id ??
+                        product.id ??
+                        pivot.product_id ??
+                        '';
+
+                    const directName =
+                        source.product_name ??
+                        source.required_product_name ??
+                        source.buy_product_name ??
+                        source.selected_product_name ??
+                        source.name ??
+                        source.title ??
+                        product.name ??
+                        product.title ??
+                        '';
+
+                    const directSlug =
+                        source.slug ??
+                        source.product_slug ??
+                        product.slug ??
+                        '';
+
+                    if (productId || directName || directSlug) {
+                        rawRules.push({
+                            product_id: productId,
+                            name: directName,
+                            slug: directSlug,
+                            required_qty:
+                                source.required_qty ??
+                                source.required_quantity ??
+                                source.minimum_qty ??
+                                source.min_qty ??
+                                source.minimum_quantity ??
+                                source.min_quantity ??
+                                source.minimum_purchase_quantity ??
+                                source.minimum_purchase_qty ??
+                                source.total_quantity ??
+                                source.total_qty ??
+                                source.total_product_quantity ??
+                                source.product_total_quantity ??
+                                source.quantity ??
+                                source.qty ??
+                                pivot.required_qty ??
+                                pivot.minimum_qty ??
+                                pivot.min_qty ??
+                                pivot.minimum_quantity ??
+                                pivot.min_quantity ??
+                                pivot.minimum_purchase_quantity ??
+                                pivot.minimum_purchase_qty ??
+                                pivot.total_quantity ??
+                                pivot.total_qty ??
+                                pivot.quantity ??
+                                pivot.qty ??
+                                defaultRequiredQty
+                        });
+                    }
+                };
+
+                const parseConditionSources = (value) => {
+                    if (!value) return [];
+                    if (Array.isArray(value)) return value;
+                    if (typeof value === 'object') return [value];
+
+                    const text = String(value || '').trim();
+
+                    if (!text || text === 'null' || text === 'undefined' || text === '[]' || text === '{}') {
+                        return [];
+                    }
+
+                    if (text.startsWith('[') || text.startsWith('{')) {
+                        try {
+                            const parsed = JSON.parse(text);
+                            return Array.isArray(parsed) ? parsed : [parsed];
+                        } catch (e) {}
+                    }
+
+                    return [];
+                };
+
+                const collectConditionProducts = (source) => {
+                    parseConditionSources(source).forEach(condition => {
+                        if (!condition || typeof condition !== 'object') return;
+
+                        pushDirectProductRule(condition);
+                        pushRules(condition.products);
+                        pushRules(condition.product);
+                        pushRules(condition.required_products);
+                        pushRules(condition.coupon_products);
+                        pushRules(condition.applicable_products);
+                        pushRules(condition.eligible_products);
+                        pushRules(condition.selected_products);
+                        pushRules(condition.buy_products);
+                        pushRules(condition.product_ids);
+                        pushRules(condition.product_id);
+
+                        [
+                            condition.purchase_condition,
+                            condition.purchase_conditions,
+                            condition.coupon_condition,
+                            condition.coupon_conditions,
+                            condition.requirement,
+                            condition.requirements,
+                            condition.minimum_requirement,
+                            condition.minimum_requirements,
+                            condition.minimum_purchase,
+                            condition.minimum_purchase_condition,
+                            condition.minimum_purchase_conditions,
+                            condition.product_condition,
+                            condition.product_conditions,
+                            condition.condition,
+                            condition.conditions,
+                            condition.rule,
+                            condition.rules
+                        ].forEach(collectConditionProducts);
+                    });
+                };
+
+                pushRules(coupon?.required_products);
+                pushRules(coupon?.coupon_products);
+                pushRules(coupon?.products);
+                pushRules(coupon?.applicable_products);
+                pushRules(coupon?.eligible_products);
+                pushRules(coupon?.selected_products);
+                pushRules(coupon?.buy_products);
+                pushRules(coupon?.product_ids);
+
+                pushRules(coupon?.purchase_products);
+                pushRules(coupon?.purchase_product);
+                pushRules(coupon?.purchase_product_ids);
+                pushRules(coupon?.minimum_purchase_products);
+                pushRules(coupon?.minimum_purchase_product_ids);
+                pushRules(coupon?.condition_products);
+                pushRules(coupon?.condition_product_ids);
+                pushRules(coupon?.total_quantity_products);
+                pushRules(coupon?.total_quantity_product_ids);
+
+                collectConditionProducts(coupon?.purchase_condition);
+                collectConditionProducts(coupon?.purchase_conditions);
+                collectConditionProducts(coupon?.coupon_condition);
+                collectConditionProducts(coupon?.coupon_conditions);
+                collectConditionProducts(coupon?.requirement);
+                collectConditionProducts(coupon?.requirements);
+                collectConditionProducts(coupon?.minimum_requirement);
+                collectConditionProducts(coupon?.minimum_requirements);
+                collectConditionProducts(coupon?.minimum_purchase);
+                collectConditionProducts(coupon?.minimum_purchase_condition);
+                collectConditionProducts(coupon?.minimum_purchase_conditions);
+                collectConditionProducts(coupon?.product_condition);
+                collectConditionProducts(coupon?.product_conditions);
+                collectConditionProducts(coupon?.condition);
+                collectConditionProducts(coupon?.conditions);
+                collectConditionProducts(coupon?.rule);
+                collectConditionProducts(coupon?.rules);
 
                 const directProductId = coupon?.product_id ?? coupon?.required_product_id ?? coupon?.buy_product_id ?? null;
 
@@ -1117,13 +1411,22 @@
                     const productId =
                         rule.product_id ??
                         rule.productId ??
+                        rule.required_product_id ??
+                        rule.buy_product_id ??
                         product.id ??
                         pivot.product_id ??
                         '';
 
-                    const slug = this.normalizeCouponProductText(rule.slug ?? product.slug ?? '');
+                    const slug = this.normalizeCouponProductText(rule.slug ?? rule.product_slug ?? product.slug ?? '');
                     const name = this.normalizeCouponProductText(
-                        rule.name ?? rule.product_name ?? rule.title ?? product.name ?? product.title ?? ''
+                        rule.name ??
+                        rule.product_name ??
+                        rule.required_product_name ??
+                        rule.buy_product_name ??
+                        rule.title ??
+                        product.name ??
+                        product.title ??
+                        ''
                     );
 
                     const requiredQty = Number(
@@ -1131,12 +1434,31 @@
                         rule.required_quantity ??
                         rule.minimum_qty ??
                         rule.min_qty ??
+                        rule.minimum_quantity ??
+                        rule.min_quantity ??
+                        rule.minimum_purchase_quantity ??
+                        rule.minimum_purchase_qty ??
                         rule.qty_required ??
+                        rule.total_quantity ??
+                        rule.total_qty ??
+                        rule.total_product_quantity ??
+                        rule.product_total_quantity ??
                         rule.qty ??
                         rule.quantity ??
                         rule.product_count ??
                         rule.count ??
                         pivot.required_qty ??
+                        pivot.required_quantity ??
+                        pivot.minimum_qty ??
+                        pivot.min_qty ??
+                        pivot.minimum_quantity ??
+                        pivot.min_quantity ??
+                        pivot.minimum_purchase_quantity ??
+                        pivot.minimum_purchase_qty ??
+                        pivot.total_quantity ??
+                        pivot.total_qty ??
+                        pivot.total_product_quantity ??
+                        pivot.product_total_quantity ??
                         pivot.qty ??
                         pivot.quantity ??
                         defaultRequiredQty ??
@@ -3520,6 +3842,26 @@ addFreeProductsFromCoupon(coupon) {
                     }
 
                     try {
+
+                        // Re-check product count minimum purchase rules before submitting.
+                        // Example: Product = Bopis, Total Quantity = 2, Minimum.
+                        const invalidProductCoupon = (this.coupons || [])
+                            .map(coupon => {
+                                const normalized = this.normalizeCoupon(coupon);
+
+                                return {
+                                    coupon: normalized,
+                                    status: this.couponProductRequirementStatus(normalized)
+                                };
+                            })
+                            .find(row => !row.status.valid);
+
+                        if (invalidProductCoupon) {
+                            this.showCouponError(invalidProductCoupon.status.message);
+                            this.isSubmitting = false;
+                            this.formSubmitting = false;
+                            return;
+                        }
 
                         const couponPayload = this.coupons.map(coupon => {
                         const normalized = this.normalizeCoupon(coupon);
