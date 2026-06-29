@@ -1079,9 +1079,15 @@
                 };
 
                 const sources = [];
+                const visited = new Set();
+
                 const addSource = (source) => {
                     parseMaybeJson(source).forEach(item => {
                         if (!item || typeof item !== 'object') return;
+
+                        const visitKey = JSON.stringify(item);
+                        if (visited.has(visitKey)) return;
+                        visited.add(visitKey);
 
                         sources.push(item);
 
@@ -1124,366 +1130,202 @@
                     }
                 }
 
-                // Fallback for descriptions like:
-                // "Minimum 2 Bopis", "Total Quantity 2",
-                // "Buy 2 Bopis Get 1 Fresh Lumpia", and the common typo "But 2 Bopis Get 1...".
-                const text = this.normalizeCouponProductText([
-                    coupon?.description,
-                    coupon?.details,
-                    coupon?.name,
-                    coupon?.coupon_name,
-                    coupon?.code,
-                    coupon?.coupon_code
-                ].filter(Boolean).join(' '));
-
-                const patterns = [
-                    /(?:total\s+quantity|total\s+product\s+quantity)\s*(?:is|:)?\s*(\d+)/,
-                    /(?:minimum|min|required|requires)\s+(\d+)\s+(?:orders?|items?|products?|pcs?|pieces?|qty|quantity)?/,
-                    /\b(?:buy|but)\s+(\d+)\s+[a-z0-9 ]+(?:\s+get\s+\d+|\s+receive\s+\d+|\s+free\s+\d+|$)/,
-                    /\b(\d+)\s+[a-z0-9 ]+\s+(?:get|receive|free)\s+\d+/,
-                    /(?:for\s+)?every\s+(\d+)\s+(?:orders?|items?|products?|pcs?|pieces?|qty|quantity)\s+of\s+[a-z0-9 ]+/,
-                    /buy\s+(\d+)\s+[a-z0-9 ]+/
-                ];
-
-                for (const pattern of patterns) {
-                    const match = text.match(pattern);
-                    if (match && Number(match[1]) > 0) {
-                        return Number(match[1]);
-                    }
-                }
-
+                // Do not read quantity from coupon name/description/code.
+                // Minimum count must come from the saved purchase-condition fields only.
                 return 0;
             },
 
-            couponDescriptionProductName(coupon) {
-                const text = this.normalizeCouponProductText([
-                    coupon?.description,
-                    coupon?.details,
-                    coupon?.name,
-                    coupon?.coupon_name
-                ].filter(Boolean).join(' '));
+            normalizeCouponProductId(value) {
+                if (value === null || value === undefined) return '';
 
-                const patterns = [
-                    // Example: "Less P200 every 2 orders of Bopis" => "bopis"
-                    /(?:orders?|items?|products?|pcs?|pieces?|qty|quantity)\s+of\s+([a-z0-9 ]+)/,
-                    // Example: "Buy 2 Bopis Get 1 Fresh Lumpia" => "bopis"
-                    /\b(?:buy|but)\s+\d+\s+([a-z0-9 ]+?)(?:\s+get\s+\d+|\s+receive\s+\d+|\s+free\s+\d+|$)/,
-                    // Example: "2 Bopis Get 1 Fresh Lumpia" => "bopis"
-                    /\b\d+\s+([a-z0-9 ]+?)\s+(?:get|receive|free)\s+\d+/,
-                    // Example: "Minimum 2 Bopis" => "bopis"
-                    /(?:minimum|min|required|requires)\s+\d+\s+([a-z0-9 ]+)/
-                ];
-
-                for (const pattern of patterns) {
-                    const match = text.match(pattern);
-
-                    if (match && match[1]) {
-                        return this.normalizeCouponProductText(
-                            match[1].replace(/\b(?:get|receive|free|only|and|or|with|for|per|each|every)\b.*$/i, '')
-                        );
-                    }
+                if (typeof value === 'object') {
+                    return this.normalizeCouponProductId(
+                        value.product_id ??
+                        value.productId ??
+                        value.required_product_id ??
+                        value.buy_product_id ??
+                        value.selected_product_id ??
+                        value.id ??
+                        value.value ??
+                        value.product?.id ??
+                        value.pivot?.product_id ??
+                        ''
+                    );
                 }
 
-                return '';
+                const text = String(value).trim();
+
+                if (!text || text === 'null' || text === 'undefined') return '';
+
+                // Keep this strict. Product requirements must match by ID, not by product name.
+                return /^\d+$/.test(text) ? text : '';
             },
 
-            getCouponProductRules(coupon) {
-                const defaultRequiredQty = this.couponRequiredProductQuantity(coupon);
-                const rawRules = [];
+            parseCouponProductIds(value) {
+                if (value === null || value === undefined || value === '') return [];
 
-                const pushRules = (value) => {
-                    this.parseCouponArray(value).forEach(rule => {
-                        if (rule !== null && rule !== undefined && rule !== '') {
-                            rawRules.push(rule);
-                        }
-                    });
-                };
-
-                const pushDirectProductRule = (source) => {
-                    if (!source || typeof source !== 'object') return;
-
-                    const product = source.product || {};
-                    const pivot = source.pivot || {};
-
-                    const productId =
-                        source.product_id ??
-                        source.productId ??
-                        source.required_product_id ??
-                        source.buy_product_id ??
-                        source.selected_product_id ??
-                        product.id ??
-                        pivot.product_id ??
-                        '';
-
-                    const directName =
-                        source.product_name ??
-                        source.required_product_name ??
-                        source.buy_product_name ??
-                        source.selected_product_name ??
-                        source.name ??
-                        source.title ??
-                        product.name ??
-                        product.title ??
-                        '';
-
-                    const directSlug =
-                        source.slug ??
-                        source.product_slug ??
-                        product.slug ??
-                        '';
-
-                    if (productId || directName || directSlug) {
-                        rawRules.push({
-                            product_id: productId,
-                            name: directName,
-                            slug: directSlug,
-                            required_qty:
-                                source.required_qty ??
-                                source.required_quantity ??
-                                source.minimum_qty ??
-                                source.min_qty ??
-                                source.minimum_quantity ??
-                                source.min_quantity ??
-                                source.minimum_purchase_quantity ??
-                                source.minimum_purchase_qty ??
-                                source.total_quantity ??
-                                source.total_qty ??
-                                source.total_product_quantity ??
-                                source.product_total_quantity ??
-                                source.quantity ??
-                                source.qty ??
-                                pivot.required_qty ??
-                                pivot.minimum_qty ??
-                                pivot.min_qty ??
-                                pivot.minimum_quantity ??
-                                pivot.min_quantity ??
-                                pivot.minimum_purchase_quantity ??
-                                pivot.minimum_purchase_qty ??
-                                pivot.total_quantity ??
-                                pivot.total_qty ??
-                                pivot.quantity ??
-                                pivot.qty ??
-                                defaultRequiredQty
-                        });
+                const ids = [];
+                const pushId = (id) => {
+                    const normalizedId = this.normalizeCouponProductId(id);
+                    if (normalizedId && !ids.includes(normalizedId)) {
+                        ids.push(normalizedId);
                     }
                 };
 
-                const parseConditionSources = (value) => {
-                    if (!value) return [];
-                    if (Array.isArray(value)) return value;
-                    if (typeof value === 'object') return [value];
+                const parseValue = (input) => {
+                    if (input === null || input === undefined || input === '') return;
 
-                    const text = String(value || '').trim();
+                    if (Array.isArray(input)) {
+                        input.forEach(parseValue);
+                        return;
+                    }
+
+                    if (typeof input === 'object') {
+                        pushId(input);
+                        return;
+                    }
+
+                    const text = String(input || '').trim();
 
                     if (!text || text === 'null' || text === 'undefined' || text === '[]' || text === '{}') {
-                        return [];
+                        return;
                     }
 
                     if (text.startsWith('[') || text.startsWith('{')) {
                         try {
                             const parsed = JSON.parse(text);
-                            return Array.isArray(parsed) ? parsed : [parsed];
+                            parseValue(parsed);
+                            return;
                         } catch (e) {}
                     }
 
-                    return [];
+                    // Accept only numeric IDs from comma/pipe separated values.
+                    // Product names like "Bopis" or "Lumpia" are intentionally ignored.
+                    text.split(/[|,]/).map(v => v.trim()).forEach(pushId);
                 };
 
-                const collectConditionProducts = (source) => {
-                    parseConditionSources(source).forEach(condition => {
-                        if (!condition || typeof condition !== 'object') return;
+                parseValue(value);
 
-                        pushDirectProductRule(condition);
-                        pushRules(condition.products);
-                        pushRules(condition.product);
-                        pushRules(condition.required_products);
-                        pushRules(condition.coupon_products);
-                        pushRules(condition.applicable_products);
-                        pushRules(condition.eligible_products);
-                        pushRules(condition.selected_products);
-                        pushRules(condition.buy_products);
-                        pushRules(condition.product_ids);
-                        pushRules(condition.product_id);
+                return ids;
+            },
 
-                        [
-                            condition.purchase_condition,
-                            condition.purchase_conditions,
-                            condition.coupon_condition,
-                            condition.coupon_conditions,
-                            condition.requirement,
-                            condition.requirements,
-                            condition.minimum_requirement,
-                            condition.minimum_requirements,
-                            condition.minimum_purchase,
-                            condition.minimum_purchase_condition,
-                            condition.minimum_purchase_conditions,
-                            condition.product_condition,
-                            condition.product_conditions,
-                            condition.condition,
-                            condition.conditions,
-                            condition.rule,
-                            condition.rules
-                        ].forEach(collectConditionProducts);
+            getCouponSelectedProductIds(coupon) {
+                const normalized = this.normalizeCoupon(coupon);
+                const ids = [];
+                const visited = new Set();
+
+                const addIds = (value) => {
+                    this.parseCouponProductIds(value).forEach(id => {
+                        if (!ids.includes(id)) ids.push(id);
                     });
                 };
 
-                pushRules(coupon?.required_products);
-                pushRules(coupon?.coupon_products);
-                pushRules(coupon?.products);
-                pushRules(coupon?.applicable_products);
-                pushRules(coupon?.eligible_products);
-                pushRules(coupon?.selected_products);
-                pushRules(coupon?.buy_products);
-                pushRules(coupon?.product_ids);
+                const scanSource = (source) => {
+                    if (!source) return;
 
-                pushRules(coupon?.purchase_products);
-                pushRules(coupon?.purchase_product);
-                pushRules(coupon?.purchase_product_ids);
-                pushRules(coupon?.minimum_purchase_products);
-                pushRules(coupon?.minimum_purchase_product_ids);
-                pushRules(coupon?.condition_products);
-                pushRules(coupon?.condition_product_ids);
-                pushRules(coupon?.total_quantity_products);
-                pushRules(coupon?.total_quantity_product_ids);
-
-                collectConditionProducts(coupon?.purchase_condition);
-                collectConditionProducts(coupon?.purchase_conditions);
-                collectConditionProducts(coupon?.coupon_condition);
-                collectConditionProducts(coupon?.coupon_conditions);
-                collectConditionProducts(coupon?.requirement);
-                collectConditionProducts(coupon?.requirements);
-                collectConditionProducts(coupon?.minimum_requirement);
-                collectConditionProducts(coupon?.minimum_requirements);
-                collectConditionProducts(coupon?.minimum_purchase);
-                collectConditionProducts(coupon?.minimum_purchase_condition);
-                collectConditionProducts(coupon?.minimum_purchase_conditions);
-                collectConditionProducts(coupon?.product_condition);
-                collectConditionProducts(coupon?.product_conditions);
-                collectConditionProducts(coupon?.condition);
-                collectConditionProducts(coupon?.conditions);
-                collectConditionProducts(coupon?.rule);
-                collectConditionProducts(coupon?.rules);
-
-                const directProductId = coupon?.product_id ?? coupon?.required_product_id ?? coupon?.buy_product_id ?? null;
-
-                if (directProductId) {
-                    rawRules.push({
-                        product_id: directProductId,
-                        required_qty: defaultRequiredQty
-                    });
-                }
-
-                const directName = coupon?.product_name ?? coupon?.required_product_name ?? coupon?.buy_product_name ?? '';
-
-                if (directName) {
-                    rawRules.push({
-                        name: directName,
-                        required_qty: defaultRequiredQty
-                    });
-                }
-
-                const descriptionProductName = this.couponDescriptionProductName(coupon);
-
-                if (descriptionProductName && defaultRequiredQty > 0) {
-                    rawRules.push({
-                        name: descriptionProductName,
-                        required_qty: defaultRequiredQty
-                    });
-                }
-
-                const seen = new Set();
-
-                return rawRules.map(rule => {
-                    if (rule === null || rule === undefined || rule === '') return null;
-
-                    if (typeof rule !== 'object') {
-                        return {
-                            product_id: /^\d+$/.test(String(rule).trim()) ? String(rule).trim() : '',
-                            slug: '',
-                            name: /^\d+$/.test(String(rule).trim()) ? '' : this.normalizeCouponProductText(rule),
-                            required_qty: defaultRequiredQty
-                        };
+                    if (Array.isArray(source)) {
+                        source.forEach(scanSource);
+                        return;
                     }
 
-                    const product = rule.product || {};
-                    const pivot = rule.pivot || {};
+                    if (typeof source === 'string') {
+                        const text = source.trim();
 
-                    const productId =
-                        rule.product_id ??
-                        rule.productId ??
-                        rule.required_product_id ??
-                        rule.buy_product_id ??
-                        product.id ??
-                        pivot.product_id ??
-                        '';
+                        if (!text || text === 'null' || text === 'undefined' || text === '[]' || text === '{}') {
+                            return;
+                        }
 
-                    const slug = this.normalizeCouponProductText(rule.slug ?? rule.product_slug ?? product.slug ?? '');
-                    const name = this.normalizeCouponProductText(
-                        rule.name ??
-                        rule.product_name ??
-                        rule.required_product_name ??
-                        rule.buy_product_name ??
-                        rule.title ??
-                        product.name ??
-                        product.title ??
-                        ''
-                    );
+                        if (text.startsWith('[') || text.startsWith('{')) {
+                            try {
+                                scanSource(JSON.parse(text));
+                            } catch (e) {}
+                            return;
+                        }
 
-                    const requiredQty = Number(
-                        rule.required_qty ??
-                        rule.required_quantity ??
-                        rule.minimum_qty ??
-                        rule.min_qty ??
-                        rule.minimum_quantity ??
-                        rule.min_quantity ??
-                        rule.minimum_purchase_quantity ??
-                        rule.minimum_purchase_qty ??
-                        rule.qty_required ??
-                        rule.total_quantity ??
-                        rule.total_qty ??
-                        rule.total_product_quantity ??
-                        rule.product_total_quantity ??
-                        rule.qty ??
-                        rule.quantity ??
-                        rule.product_count ??
-                        rule.count ??
-                        pivot.required_qty ??
-                        pivot.required_quantity ??
-                        pivot.minimum_qty ??
-                        pivot.min_qty ??
-                        pivot.minimum_quantity ??
-                        pivot.min_quantity ??
-                        pivot.minimum_purchase_quantity ??
-                        pivot.minimum_purchase_qty ??
-                        pivot.total_quantity ??
-                        pivot.total_qty ??
-                        pivot.total_product_quantity ??
-                        pivot.product_total_quantity ??
-                        pivot.qty ??
-                        pivot.quantity ??
-                        defaultRequiredQty ??
-                        0
-                    );
+                        addIds(text);
+                        return;
+                    }
 
-                    return {
-                        product_id: productId !== '' && productId !== null && productId !== undefined
-                            ? String(productId)
-                            : '',
-                        slug,
-                        name,
-                        required_qty: requiredQty
-                    };
-                }).filter(rule => {
-                    if (!rule) return false;
+                    if (typeof source !== 'object') {
+                        addIds(source);
+                        return;
+                    }
 
-                    const key = [rule.product_id, rule.slug, rule.name].filter(Boolean).join('|');
+                    const visitKey = JSON.stringify(source);
+                    if (visited.has(visitKey)) return;
+                    visited.add(visitKey);
 
-                    if (!key) return false;
-                    if (seen.has(key)) return false;
+                    addIds(source.product_id);
+                    addIds(source.productId);
+                    addIds(source.required_product_id);
+                    addIds(source.required_product_ids);
+                    addIds(source.buy_product_id);
+                    addIds(source.buy_product_ids);
+                    addIds(source.selected_product_id);
+                    addIds(source.selected_product_ids);
+                    addIds(source.product_ids);
+                    addIds(source.purchase_product_id);
+                    addIds(source.purchase_product_ids);
+                    addIds(source.minimum_purchase_product_id);
+                    addIds(source.minimum_purchase_product_ids);
+                    addIds(source.condition_product_id);
+                    addIds(source.condition_product_ids);
+                    addIds(source.total_quantity_product_id);
+                    addIds(source.total_quantity_product_ids);
+                    addIds(source.product);
 
-                    seen.add(key);
-                    return true;
-                });
+                    [
+                        source.required_products,
+                        source.coupon_products,
+                        source.products,
+                        source.applicable_products,
+                        source.eligible_products,
+                        source.selected_products,
+                        source.buy_products,
+                        source.purchase_products,
+                        source.purchase_product,
+                        source.minimum_purchase_products,
+                        source.condition_products,
+                        source.total_quantity_products,
+                        source.purchase_condition,
+                        source.purchase_conditions,
+                        source.coupon_condition,
+                        source.coupon_conditions,
+                        source.requirement,
+                        source.requirements,
+                        source.minimum_requirement,
+                        source.minimum_requirements,
+                        source.minimum_purchase,
+                        source.minimum_purchase_condition,
+                        source.minimum_purchase_conditions,
+                        source.product_condition,
+                        source.product_conditions,
+                        source.condition,
+                        source.conditions,
+                        source.rule,
+                        source.rules,
+                        source.pivot
+                    ].forEach(scanSource);
+                };
+
+                scanSource(normalized);
+
+                return ids;
+            },
+
+            getCouponProductRules(coupon) {
+                const normalized = this.normalizeCoupon(coupon);
+                const defaultRequiredQty = Number(this.couponRequiredProductQuantity(normalized) || 0);
+                const productIds = this.getCouponSelectedProductIds(normalized);
+
+                // Product purchase condition must be based on selected product IDs only.
+                // Do not create rules from product name, slug, coupon name, or description.
+                return productIds.map(productId => ({
+                    product_id: String(productId),
+                    required_qty: defaultRequiredQty,
+                    name: '',
+                    slug: ''
+                }));
             },
 
             cartItemsForCouponQualification() {
@@ -1513,21 +1355,47 @@
 
             couponRuleMatchesCartItem(rule, item) {
                 const product = item?.product || {};
+                const cartProductId = this.normalizeCouponProductId(item?.product_id ?? product?.id ?? '');
+                const ruleProductId = this.normalizeCouponProductId(rule?.product_id ?? '');
 
-                const productId = String(item?.product_id ?? product?.id ?? '');
-                const slug = this.normalizeCouponProductText(item?.slug ?? product?.slug ?? '');
-                const name = this.normalizeCouponProductText(
-                    item?.name ?? item?.product_name ?? product?.name ?? product?.title ?? ''
-                );
+                // Strict ID matching only. Never match by product name or slug.
+                return !!(ruleProductId && cartProductId && cartProductId === ruleProductId);
+            },
 
-                const ruleName = this.normalizeCouponProductText(rule?.name ?? '');
-                const ruleSlug = this.normalizeCouponProductText(rule?.slug ?? '');
+            couponHasSelectedProductCondition(coupon) {
+                const normalized = this.normalizeCoupon(coupon);
 
-                return !!(
-                    (rule?.product_id && productId === String(rule.product_id)) ||
-                    (ruleSlug && (slug === ruleSlug || slug.includes(ruleSlug) || ruleSlug.includes(slug))) ||
-                    (ruleName && (name === ruleName || name.includes(ruleName) || ruleName.includes(name)))
-                );
+                if (this.getCouponSelectedProductIds(normalized).length > 0) {
+                    return true;
+                }
+
+                const directFlags = [
+                    normalized.product_condition_enabled,
+                    normalized.product_required,
+                    normalized.requires_product,
+                    normalized.has_product_condition,
+                    normalized.is_product_condition,
+                    normalized.purchase_product_enabled,
+                    normalized.product_optn,
+                    normalized.product_option
+                ];
+
+                if (directFlags.some(value => this.toBoolean(value))) {
+                    return true;
+                }
+
+                const textValues = [
+                    normalized.condition_type,
+                    normalized.purchase_condition_type,
+                    normalized.minimum_purchase_type,
+                    normalized.purchase_requirement_type,
+                    normalized.requirement_type
+                ];
+
+                return textValues.some(value => {
+                    const text = this.normalizeText(value);
+                    return text === 'product' || text.includes('product-optn') || text.includes('product option');
+                });
             },
 
             couponHasProductRequirement(coupon) {
@@ -1535,12 +1403,12 @@
                 const requiredQty = this.couponRequiredProductQuantity(normalized);
                 const rules = this.getCouponProductRules(normalized);
 
-                return requiredQty > 0 || rules.length > 0;
+                return requiredQty > 0 || rules.length > 0 || this.couponHasSelectedProductCondition(normalized);
             },
 
             couponEffectiveRequiredProductQty(coupon) {
                 const normalized = this.normalizeCoupon(coupon);
-                const directRequiredQty = this.couponRequiredProductQuantity(normalized);
+                const directRequiredQty = Number(this.couponRequiredProductQuantity(normalized) || 0);
                 const rules = this.getCouponProductRules(normalized);
                 const ruleRequiredQty = rules.reduce((max, rule) => {
                     return Math.max(max, Number(rule?.required_qty || 0));
@@ -1555,20 +1423,25 @@
                 const rules = this.getCouponProductRules(normalized);
                 const items = this.cartItemsForCouponQualification();
 
-                // If the coupon only has a product count rule and no specific product,
-                // count all paid cart items.
-                if (!rules.length && requiredQty > 0) {
-                    return items.reduce((sum, item) => sum + Number(item?.qty || 1), 0);
+                if (rules.length) {
+                    return items.reduce((sum, item) => {
+                        const matchesAnyRule = rules.some(rule => this.couponRuleMatchesCartItem(rule, item));
+                        return matchesAnyRule ? sum + Number(item?.qty || 1) : sum;
+                    }, 0);
                 }
 
-                if (!rules.length) {
+                // If Product is enabled but selected product IDs are missing,
+                // do not count all cart items. This prevents false qualification.
+                if (this.couponHasSelectedProductCondition(normalized)) {
                     return 0;
                 }
 
-                return items.reduce((sum, item) => {
-                    const matchesAnyRule = rules.some(rule => this.couponRuleMatchesCartItem(rule, item));
-                    return matchesAnyRule ? sum + Number(item?.qty || 1) : sum;
-                }, 0);
+                // Quantity-only condition without Product selected: count all paid cart items.
+                if (requiredQty > 0) {
+                    return items.reduce((sum, item) => sum + Number(item?.qty || 1), 0);
+                }
+
+                return 0;
             },
 
             couponDiscountMultiplier(coupon) {
@@ -1576,8 +1449,6 @@
 
                 // Product count is only a qualification rule.
                 // Do not multiply the discount by QTY.
-                // Example: Less P200 every 2 Bopis
-                // QTY 1 = not qualified, QTY 2+ = one fixed P200 discount only.
                 const productRequirement = this.couponProductRequirementStatus(normalized);
 
                 return productRequirement.valid ? 1 : 0;
@@ -1591,19 +1462,26 @@
                 }
 
                 const requiredQty = Math.max(Number(this.couponEffectiveRequiredProductQty(normalized) || 0), 1);
+                const rules = this.getCouponProductRules(normalized);
+
+                if (this.couponHasSelectedProductCondition(normalized) && !rules.length) {
+                    return {
+                        valid: false,
+                        message: 'This coupon has a Product condition, but no selected product ID was found. Please pass the selected product ID from the coupon setup.'
+                    };
+                }
+
                 const matchedQty = Number(this.couponMatchedProductQty(normalized) || 0);
 
                 if (matchedQty >= requiredQty) {
                     return { valid: true, message: '' };
                 }
 
-                const rules = this.getCouponProductRules(normalized);
-                const firstRule = rules[0] || {};
-                const readableProduct = firstRule.name || firstRule.slug || 'matching product(s)';
+                const selectedProductIds = rules.map(rule => rule.product_id).filter(Boolean).join(', ');
 
                 return {
                     valid: false,
-                    message: `This coupon requires at least ${requiredQty} count of ${readableProduct}. Current cart count is ${matchedQty}.`
+                    message: `This coupon requires at least ${requiredQty} count of selected product ID(s): ${selectedProductIds || 'missing'}. Current selected product count is ${matchedQty}.`
                 };
             },
 addFreeProductsFromCoupon(coupon) {
