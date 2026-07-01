@@ -544,6 +544,7 @@
                         return code !== '';
                     })
                     .filter(coupon => this.couponIsActive(coupon))
+                    .filter(coupon => this.shouldShowCouponInList(coupon))
                     .filter(coupon => !this.couponUsageConsumed(coupon))
                     .filter(coupon => !this.couponAlreadyApplied(coupon))
                     .filter(coupon => {
@@ -1889,6 +1890,47 @@
                 }, 0);
             },
 
+            couponRuleRequirementLabel(rule) {
+                const productId = this.normalizeCouponProductId(rule?.product_id ?? '');
+                const categoryId = this.normalizeCouponCategoryId(rule?.category_id ?? '');
+
+                if (productId && categoryId) {
+                    return `product ID ${productId} under category ID ${categoryId}`;
+                }
+
+                if (productId) {
+                    return `product ID ${productId}`;
+                }
+
+                if (categoryId) {
+                    return `category ID ${categoryId}`;
+                }
+
+                return 'selected product/category';
+            },
+
+            couponRuleRequirementStatuses(coupon) {
+                const normalized = this.normalizeCoupon(coupon);
+                const rules = this.getCouponProductRules(normalized);
+                const defaultRequiredQty = Math.max(
+                    Number(this.couponEffectiveRequiredProductQty(normalized) || 0),
+                    1
+                );
+
+                return rules.map(rule => {
+                    const requiredQty = Math.max(Number(rule?.required_qty || defaultRequiredQty || 0), 1);
+                    const matchedQty = Number(this.cartQtyForCouponRule(rule) || 0);
+
+                    return {
+                        ...rule,
+                        required_qty: requiredQty,
+                        matched_qty: matchedQty,
+                        valid: matchedQty >= requiredQty,
+                        label: this.couponRuleRequirementLabel(rule)
+                    };
+                });
+            },
+
             couponRuleMatchesCartItem(rule, item) {
                 const product = item?.product || {};
                 const cartProductId = this.normalizeCouponProductId(item?.product_id ?? product?.id ?? '');
@@ -2074,6 +2116,28 @@
                     return {
                         valid: false,
                         message: 'This coupon has a Product/Category condition, but no selected product ID or category ID was found. Please pass the selected product/category ID from the coupon setup.'
+                    };
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Multiple selected products/categories + Total Quantity
+                |--------------------------------------------------------------------------
+                | Example: selected products = Pork BBQ + Pork Dinuguan, Total Quantity = 2.
+                | This must mean minimum 2 EACH, not total combined quantity of 2.
+                |--------------------------------------------------------------------------
+                */
+                if (rules.length) {
+                    const ruleStatuses = this.couponRuleRequirementStatuses(normalized);
+                    const failedRules = ruleStatuses.filter(rule => !rule.valid);
+
+                    if (!failedRules.length) {
+                        return { valid: true, message: '' };
+                    }
+
+                    return {
+                        valid: false,
+                        message: `This coupon requires at least ${requiredQty} each for every selected product/category. ${failedRules.map(rule => `${rule.label}: needs ${rule.required_qty}, current ${rule.matched_qty}`).join('; ')}.`
                     };
                 }
 
@@ -2523,49 +2587,18 @@ normalizeFreeProductFromCoupon(fp) {
             },
 
                 removeInvalidLocationCoupons() {
-                    const targets = this.getSelectedCouponTargets();
-                    const removedCodes = [];
-
-                    this.coupons = this.coupons.filter(coupon => {
-                        const normalized = this.normalizeCoupon(coupon);
-                        const hasLocationLimit = this.couponHasLocationLimit(normalized);
-
-                        if (!hasLocationLimit) return true;
-
-                        /**
-                         * Do not remove yet while delivery location is incomplete.
-                         * This prevents coupon from disappearing while customer is still selecting barangay.
-                         */
-                        const hasIncompleteTarget = targets.some(t => {
-                            return this.normalizeText(t.city) && !this.normalizeText(t.location);
-                        });
-
-                        if (!targets.length || hasIncompleteTarget) {
-                            return true;
-                        }
-
-                        const keep = targets.some(t =>
-                            this.couponMatchesLocation(normalized, t.city, t.location)
-                        );
-
-                        if (!keep) {
-                            removedCodes.push(normalized.code);
-                        }
-
-                        return keep;
-                    });
-
-                    if (removedCodes.length) {
-                        removedCodes.forEach(code => this.removeFreeProductsByCoupon(code));
-
-                        this.autoAppliedCoupons = this.autoAppliedCoupons.filter(c =>
-                            !removedCodes.includes(c.code)
-                        );
-
-                        this.showCouponError('Invalid coupon removed because the selected location changed.');
-                        this.order_amount = this.cartSubtotal();
-                        this.recomputeCouponTotals();
-                    }
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Multiple-address safe behavior
+                    |--------------------------------------------------------------------------
+                    | Do not remove an already-applied coupon when the customer switches to
+                    | multiple address or changes city/barangay. Location is only an eligibility
+                    | check for the discount amount. If the selected address does not match yet,
+                    | getCouponDiscount() returns 0, but the coupon remains visible/applied.
+                    |--------------------------------------------------------------------------
+                    */
+                    this.order_amount = this.cartSubtotal();
+                    this.recomputeCouponTotals();
                 },
 
                 shouldAutoApplyCoupon(coupon) {
@@ -2614,21 +2647,27 @@ normalizeFreeProductFromCoupon(fp) {
                     );
                 },
 
-                shouldShowAutoCouponInList(coupon) {
-                const normalized = this.normalizeCoupon(coupon);
+                couponHasDeliveryLocationRule(coupon) {
+                    const normalized = this.normalizeCoupon(coupon);
+                    const shippingMethod = this.normalizeText(normalized.shipping_method ?? normalized.delivery_method ?? '');
 
-                if (!this.couponIsActive(normalized)) {
-                    return false;
-                }
+                    return this.couponHasLocationLimit(normalized) ||
+                        this.hasLocationDiscount(normalized) ||
+                        this.isFreeShippingCoupon(normalized) ||
+                        shippingMethod.includes('delivery') ||
+                        shippingMethod.includes('door') ||
+                        shippingMethod.includes('location');
+                },
 
-                const hasLocationRule =
-                    this.couponHasLocationLimit(normalized) ||
-                    this.hasLocationDiscount(normalized) ||
-                    this.isFreeShippingCoupon(normalized);
+                couponSelectedLocationIsHit(coupon) {
+                    const normalized = this.normalizeCoupon(coupon);
 
-                // If coupon has anything location-based,
-                // hide it until delivery location is selected and matched.
-                if (hasLocationRule) {
+                    if (!this.couponHasDeliveryLocationRule(normalized)) {
+                        return true;
+                    }
+
+                    // Location-only coupons must not appear on pickup, in the popup,
+                    // or in coupon selection until the selected delivery location matches.
                     if (this.method !== 'delivery') {
                         return false;
                     }
@@ -2639,13 +2678,27 @@ normalizeFreeProductFromCoupon(fp) {
                         return false;
                     }
 
-                    return targets.some(t =>
-                        this.couponMatchesLocation(normalized, t.city, t.location)
-                    );
+                    // If a coupon has a saved location list, the selected city/barangay
+                    // must hit that list. Do not show it just because delivery was chosen.
+                    if (this.couponHasLocationLimit(normalized)) {
+                        return targets.some(t =>
+                            this.couponMatchesLocation(normalized, t.city, t.location)
+                        );
+                    }
+
+                    // Delivery-only/free-shipping coupons without a location list can show
+                    // once a delivery target exists.
+                    return true;
+                },
+
+                shouldShowAutoCouponInList(coupon) {
+                const normalized = this.normalizeCoupon(coupon);
+
+                if (!this.couponIsActive(normalized)) {
+                    return false;
                 }
 
-                // Coupons with no location restriction can appear normally.
-                return true;
+                return this.couponSelectedLocationIsHit(normalized);
             },
             shouldShowCouponInList(coupon) {
                 const normalized = this.normalizeCoupon(coupon);
@@ -2654,28 +2707,7 @@ normalizeFreeProductFromCoupon(fp) {
                     return false;
                 }
 
-                const hasLocationRule =
-                    this.couponHasLocationLimit(normalized) ||
-                    this.hasLocationDiscount(normalized) ||
-                    this.isFreeShippingCoupon(normalized);
-
-                if (hasLocationRule) {
-                    if (this.method !== 'delivery') {
-                        return false;
-                    }
-
-                    const targets = this.getSelectedCouponTargets();
-
-                    if (!targets.length) {
-                        return false;
-                    }
-
-                    return targets.some(t =>
-                        this.couponMatchesLocation(normalized, t.city, t.location)
-                    );
-                }
-
-                return true;
+                return this.couponSelectedLocationIsHit(normalized);
             },
 
                         
@@ -2870,22 +2902,28 @@ normalizeFreeProductFromCoupon(fp) {
                 applyAutoCoupons() {
                 if (this.hasWholeLechonInCart()) {
                     const autoCodes = (this.autoCouponsSource || [])
-                        .map(c => this.normalizeCoupon(c).code);
+                        .map(c => this.couponCodeKey(this.normalizeCoupon(c)))
+                        .filter(Boolean);
 
-                    this.coupons = this.coupons.filter(c => !c.auto_applied);
+                    this.coupons = (this.coupons || [])
+                        .map(c => this.normalizeCoupon(c))
+                        .filter(c => !c.auto_applied);
+
                     this.autoAppliedCoupons = [];
                     this.selectedAutoCoupon = null;
                     this.selectedAutoCouponId = '';
                     this.autoCouponChoices = [];
                     this.showAutoCouponChooser = false;
 
-                    this.carts = this.carts.filter(item =>
-                        !(item.is_free_product && autoCodes.includes(item.coupon_code))
-                    );
+                    this.carts = (this.carts || []).filter(item => {
+                        const itemCouponCode = this.couponCodeKey(item);
+                        return !(item.is_free_product && autoCodes.includes(itemCouponCode));
+                    });
 
-                    this.orders = this.orders.filter(item =>
-                        !(item.is_free_product && autoCodes.includes(item.coupon_code))
-                    );
+                    this.orders = (this.orders || []).filter(item => {
+                        const itemCouponCode = this.couponCodeKey(item);
+                        return !(item.is_free_product && autoCodes.includes(itemCouponCode));
+                    });
 
                     this.order_amount = this.cartSubtotal();
                     this.recomputeCouponTotals();
@@ -2893,7 +2931,9 @@ normalizeFreeProductFromCoupon(fp) {
                 }
 
                 const previousSelectedAutoCouponId = this.selectedAutoCouponId;
-                const previousSelectedAutoCoupon = this.selectedAutoCoupon;
+                const previousSelectedAutoCoupon = this.selectedAutoCoupon
+                    ? this.normalizeCoupon(this.selectedAutoCoupon)
+                    : null;
 
                 const allAutoCoupons = (this.autoCouponsSource || [])
                     .map(c => ({
@@ -2901,15 +2941,20 @@ normalizeFreeProductFromCoupon(fp) {
                         auto_applied: true
                     }));
 
-                const visibleAutos = allAutoCoupons.filter(c =>
-                    this.couponIsActive(c) &&
-                    !this.couponUsageConsumed(c) &&
-                    this.shouldShowAutoCouponInList(c)
-                );
+                const autoCodes = allAutoCoupons
+                    .map(c => this.couponCodeKey(c))
+                    .filter(Boolean);
 
-                const autoCodes = allAutoCoupons.map(c => this.couponCodeKey(c)).filter(Boolean);
-                const manuallySelectedAutoCodes = (this.coupons || [])
+                const currentCoupons = (this.coupons || [])
                     .map(c => this.normalizeCoupon(c))
+                    .filter(c => this.couponIsActive(c));
+
+                const appliedAutoCouponsToKeep = currentCoupons.filter(c => c.auto_applied);
+                const appliedAutoCodesToKeep = appliedAutoCouponsToKeep
+                    .map(c => this.couponCodeKey(c))
+                    .filter(Boolean);
+
+                const manuallySelectedAutoCodes = currentCoupons
                     .filter(c => autoCodes.includes(this.couponCodeKey(c)) && !c.auto_applied)
                     .map(c => this.couponCodeKey(c));
 
@@ -2918,18 +2963,34 @@ normalizeFreeProductFromCoupon(fp) {
 
                     const itemCouponCode = this.couponCodeKey(item);
 
+                    // Do not remove free products from already-applied auto coupons while
+                    // multiple-address selection is being edited.
                     return autoCodes.includes(itemCouponCode) &&
-                        !manuallySelectedAutoCodes.includes(itemCouponCode);
+                        !manuallySelectedAutoCodes.includes(itemCouponCode) &&
+                        !appliedAutoCodesToKeep.includes(itemCouponCode);
                 };
 
-                this.coupons = this.coupons.filter(c => !this.normalizeCoupon(c).auto_applied);
-                this.autoAppliedCoupons = [];
+                // Keep already-applied coupons. Do not clear them just because address
+                // mode/location changed. Invalid location will only make discount 0.
+                this.coupons = currentCoupons;
+                this.autoAppliedCoupons = appliedAutoCouponsToKeep;
 
-                this.carts = this.carts.filter(item => !shouldRemoveAutoFreeProduct(item));
+                this.carts = (this.carts || []).filter(item => !shouldRemoveAutoFreeProduct(item));
+                this.orders = (this.orders || []).filter(item => !shouldRemoveAutoFreeProduct(item));
 
-                this.orders = this.orders.filter(item => !shouldRemoveAutoFreeProduct(item));
+                if (previousSelectedAutoCoupon) {
+                    this.selectedAutoCoupon = previousSelectedAutoCoupon;
+                    this.selectedAutoCouponId = previousSelectedAutoCoupon.id || previousSelectedAutoCouponId || '';
+                } else if (this.autoAppliedCoupons.length) {
+                    this.selectedAutoCoupon = this.autoAppliedCoupons[0];
+                    this.selectedAutoCouponId = this.autoAppliedCoupons[0].id || '';
+                }
 
-                this.selectedAutoCoupon = null;
+                const visibleAutos = allAutoCoupons.filter(c =>
+                    this.couponIsActive(c) &&
+                    !this.couponUsageConsumed(c) &&
+                    this.shouldShowAutoCouponInList(c)
+                );
 
                 const mappedAutoChoices = visibleAutos.map(coupon => {
                     const available = this.shouldAutoApplyCoupon(coupon);
@@ -2943,14 +3004,27 @@ normalizeFreeProductFromCoupon(fp) {
                     };
                 });
 
-                // IMPORTANT:
-                // Hide auto coupons that are not qualified yet.
-                // Example: "every 2 orders of Bopis" should not appear when Bopis QTY is only 1.
-                this.autoCouponChoices = mappedAutoChoices.filter(c => c.auto_available);
+                // Hide coupons that are not qualified yet and do not show already-applied
+                // coupons again in the chooser.
+                this.autoCouponChoices = mappedAutoChoices.filter(c =>
+                    c.auto_available && !this.couponAlreadyApplied(c)
+                );
 
                 const availableAutos = this.autoCouponChoices;
 
                 if (previousSelectedAutoCouponId) {
+                    const alreadyAppliedSelected = this.coupons.some(c =>
+                        String(c.id) === String(previousSelectedAutoCouponId) ||
+                        this.couponCodeKey(c) === this.couponCodeKey(previousSelectedAutoCoupon)
+                    );
+
+                    if (alreadyAppliedSelected) {
+                        this.showAutoCouponChooser = false;
+                        this.order_amount = this.cartSubtotal();
+                        this.recomputeCouponTotals();
+                        return;
+                    }
+
                     const chosen = availableAutos.find(c =>
                         String(c.id) === String(previousSelectedAutoCouponId)
                     );
@@ -2961,10 +3035,14 @@ normalizeFreeProductFromCoupon(fp) {
                         return;
                     }
 
-                    // The previously selected auto coupon is no longer qualified,
-                    // so clear it instead of keeping it hidden/selected.
-                    this.selectedAutoCouponId = '';
-                    this.selectedAutoCoupon = null;
+                    // Do not clear previousSelectedAutoCouponId here. A location coupon can
+                    // become qualified again after one of the multiple addresses matches.
+                    if (previousSelectedAutoCoupon) {
+                        this.showAutoCouponChooser = false;
+                        this.order_amount = this.cartSubtotal();
+                        this.recomputeCouponTotals();
+                        return;
+                    }
                 }
 
                 if (this.autoCouponChoices.length === 0) {
@@ -3554,8 +3632,10 @@ normalizeFreeProductFromCoupon(fp) {
                 this.$watch('province', refreshCouponStateAfterCityChange)
                 this.$watch('city', refreshCouponStateAfterCityChange)
                 this.$watch('location', () => {
-                    // Barangay change: keep applied coupon; only recompute totals.
+                    // Barangay/location change: refresh auto coupon choices too,
+                    // so location-only coupons stay hidden until the selected location is hit.
                     this.$nextTick(() => {
+                        this.applyAutoCoupons();
                         refreshCouponStateAfterBarangayChange();
                     });
                 });
