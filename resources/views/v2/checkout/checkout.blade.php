@@ -495,6 +495,7 @@
                 appliedGiftCheque: null,
                 giftChequeDiscountAmount: 0,
                 deliveryCouponPopupShownCodes: [],
+                deliveryCouponPopupLocationKey: '',
                 
                 couponTypeLabel(coupon) {
                     if (!coupon) return '';
@@ -677,6 +678,59 @@
                 return unique;
             },
 
+            deliveryCouponPopupLocationSignature() {
+                if (this.method !== 'delivery') {
+                    return 'method:pickup';
+                }
+
+                const normalizeTarget = (target) => [
+                    this.normalizeText(target?.province || ''),
+                    this.normalizeText(target?.city || ''),
+                    this.normalizeText(target?.location || target?.barangay || '')
+                ].join('|');
+
+                if (this.allowMultiple) {
+                    return (this.deliveries || [])
+                        .filter(delivery => (delivery?.orders || []).length > 0)
+                        .map(delivery => normalizeTarget(delivery))
+                        .sort()
+                        .join('||');
+                }
+
+                return normalizeTarget({
+                    province: this.province,
+                    city: this.city,
+                    location: this.location
+                });
+            },
+
+            resetDeliveryCouponPopupForLocationChange(force = false) {
+                const currentSignature = this.deliveryCouponPopupLocationSignature();
+
+                if (!force && currentSignature === this.deliveryCouponPopupLocationKey) {
+                    return;
+                }
+
+                this.deliveryCouponPopupLocationKey = currentSignature;
+
+                /*
+                |--------------------------------------------------------------------------
+                | Re-show location coupon popup when location becomes valid again
+                |--------------------------------------------------------------------------
+                | Example flow:
+                | 1. Customer selects a valid city and coupon popup appears.
+                | 2. Customer changes to an invalid city, so the coupon is removed/hidden.
+                | 3. Customer selects the valid city again.
+                |
+                | Clear the shown-code memory so the same coupon can pop up again.
+                | Already-applied coupons still will not appear because couponAlreadyApplied()
+                | filters them in getDeliveryQualifiedCouponChoices().
+                |--------------------------------------------------------------------------
+                */
+                this.deliveryCouponPopupShownCodes = [];
+                this.autoCouponChooserShownOnce = false;
+            },
+
             checkDeliveryCouponPopup() {
                 const qualifiedCoupons = this.getDeliveryQualifiedCouponChoices();
                 const currentSelectedCoupon = this.selectedCoupon
@@ -727,8 +781,9 @@
                 this.couponModal = true;
             },
 
-            refreshDeliveryCouponPopup() {
+            refreshDeliveryCouponPopup(forceReshow = false) {
                 this.$nextTick(() => {
+                    this.resetDeliveryCouponPopupForLocationChange(forceReshow);
                     this.checkDeliveryCouponPopup();
                 });
             },
@@ -2311,12 +2366,8 @@ normalizeFreeProductFromCoupon(fp) {
                     );
                 },
 
-            couponHasLocationLimit(coupon) {
-                const locations = this.getCouponLocations(coupon);
-
-                if (!locations.length) return false;
-
-                const noRestrictionValues = [
+            couponNoLocationValues() {
+                return [
                     'all',
                     'any',
                     'none',
@@ -2324,10 +2375,147 @@ normalizeFreeProductFromCoupon(fp) {
                     'n/a',
                     'na',
                     'undefined',
-                    '-'
+                    '-',
+                    '[]',
+                    '{}'
+                ];
+            },
+
+            couponHasLocationLimit(coupon) {
+                const locations = this.getCouponLocations(coupon);
+                const noRestrictionValues = this.couponNoLocationValues();
+
+                if (locations.length) {
+                    return !locations.every(loc => noRestrictionValues.includes(loc));
+                }
+
+                // Some coupon payloads do not expose the actual location list, but still
+                // expose a location/city/barangay flag/mechanic. Treat that as location-
+                // restricted and hide it until the backend sends a matching location value.
+                return this.couponHasLocationConditionSource(coupon);
+            },
+
+            couponHasLocationConditionSource(coupon) {
+                if (!coupon) return false;
+
+                const locationKeys = [
+                    'location',
+                    'locations',
+                    'location_id',
+                    'location_ids',
+                    'coupon_location',
+                    'coupon_locations',
+                    'coupon_location_id',
+                    'coupon_location_ids',
+                    'delivery_location',
+                    'delivery_locations',
+                    'delivery_location_id',
+                    'delivery_location_ids',
+                    'valid_location',
+                    'valid_locations',
+                    'valid_location_id',
+                    'valid_location_ids',
+                    'allowed_location',
+                    'allowed_locations',
+                    'allowed_location_id',
+                    'allowed_location_ids',
+                    'applicable_location',
+                    'applicable_locations',
+                    'applicable_location_id',
+                    'applicable_location_ids',
+                    'selected_location',
+                    'selected_locations',
+                    'selected_location_id',
+                    'selected_location_ids',
+                    'delivery_area',
+                    'delivery_areas',
+                    'covered_area',
+                    'covered_areas',
+                    'area',
+                    'areas',
+                    'city',
+                    'cities',
+                    'city_id',
+                    'city_ids',
+                    'province',
+                    'provinces',
+                    'province_id',
+                    'province_ids',
+                    'barangay',
+                    'barangays',
+                    'barangay_id',
+                    'barangay_ids'
                 ];
 
-                return !locations.every(loc => noRestrictionValues.includes(loc));
+                const hasMeaningfulLocationField = locationKeys.some(key =>
+                    this.couponValueHasMeaningfulData(coupon?.[key])
+                );
+
+                if (hasMeaningfulLocationField || this.getCouponLocations(coupon).length > 0) {
+                    return true;
+                }
+
+                const locationFlagKeys = [
+                    'has_location_condition',
+                    'location_condition_enabled',
+                    'location_required',
+                    'requires_location',
+                    'is_location_condition',
+                    'delivery_location_required',
+                    'delivery_location_enabled',
+                    'city_required',
+                    'requires_city',
+                    'has_city_condition',
+                    'barangay_required',
+                    'requires_barangay',
+                    'has_barangay_condition',
+                    'province_required',
+                    'requires_province',
+                    'has_province_condition'
+                ];
+
+                if (locationFlagKeys.some(key => this.toBoolean(coupon?.[key]))) {
+                    return true;
+                }
+
+                const mechanicValues = [
+                    coupon?.coupon_mechanics,
+                    coupon?.mechanics,
+                    coupon?.mechanic,
+                    coupon?.conditions,
+                    coupon?.condition,
+                    coupon?.rules,
+                    coupon?.rule,
+                    coupon?.purchase_combination,
+                    coupon?.purchase_conditions,
+                    coupon?.condition_combination,
+                    coupon?.delivery_condition,
+                    coupon?.delivery_conditions,
+                    coupon?.availability_condition,
+                    coupon?.availability_conditions,
+                    coupon?.applies_to,
+                    coupon?.applicable_to
+                ];
+
+                return mechanicValues
+                    .flatMap(value => this.parseCouponArray(value))
+                    .map(value => this.normalizeText(value))
+                    .some(value =>
+                        value === 'location' ||
+                        value === 'locations' ||
+                        value === 'city' ||
+                        value === 'cities' ||
+                        value === 'province' ||
+                        value === 'provinces' ||
+                        value === 'barangay' ||
+                        value === 'barangays' ||
+                        value.includes('delivery location') ||
+                        value.includes('delivery address') ||
+                        value.includes('location only') ||
+                        value.includes('city only') ||
+                        value.includes('barangay only') ||
+                        value.includes('province only')
+                    );
             },
 
                 normalizeText(value) {
@@ -2390,85 +2578,313 @@ normalizeFreeProductFromCoupon(fp) {
                 return '';
             },
 
-   getCouponLocations(coupon) {
-    const raw = coupon?.location ?? coupon?.locations ?? '';
+                normalizeLocationText(value) {
+                    return this.normalizeText(value)
+                        .replace(/\bcity of\b/g, '')
+                        .replace(/\bmunicipality of\b/g, '')
+                        .replace(/\bprovince of\b/g, '')
+                        .replace(/\s+/g, ' ')
+                        .trim();
+                },
 
-    const cleanLocation = (value) => {
-        const cleaned = this.normalizeText(value);
+                locationAliasValues(value) {
+                    const normalized = this.normalizeText(value);
+                    const simplified = this.normalizeLocationText(value);
 
-        if (
-            !cleaned ||
-            cleaned === 'null' ||
-            cleaned === 'undefined' ||
-            cleaned === '[]' ||
-            cleaned === '{}'
-        ) {
-            return '';
-        }
+                    return [normalized, simplified]
+                        .filter(Boolean)
+                        .filter((item, index, arr) => arr.indexOf(item) === index);
+                },
 
-        return cleaned;
-    };
+                getCouponLocations(coupon) {
+                    const normalized = coupon || {};
+                    const values = [];
+                    const visited = new Set();
+                    const locationLikeKeys = [
+                        'location',
+                        'locations',
+                        'location_id',
+                        'location_ids',
+                        'coupon_location',
+                        'coupon_locations',
+                        'coupon_location_id',
+                        'coupon_location_ids',
+                        'delivery_location',
+                        'delivery_locations',
+                        'delivery_location_id',
+                        'delivery_location_ids',
+                        'valid_location',
+                        'valid_locations',
+                        'valid_location_id',
+                        'valid_location_ids',
+                        'allowed_location',
+                        'allowed_locations',
+                        'allowed_location_id',
+                        'allowed_location_ids',
+                        'applicable_location',
+                        'applicable_locations',
+                        'applicable_location_id',
+                        'applicable_location_ids',
+                        'selected_location',
+                        'selected_locations',
+                        'selected_location_id',
+                        'selected_location_ids',
+                        'delivery_area',
+                        'delivery_areas',
+                        'covered_area',
+                        'covered_areas',
+                        'area',
+                        'areas',
+                        'city',
+                        'cities',
+                        'city_id',
+                        'city_ids',
+                        'province',
+                        'provinces',
+                        'province_id',
+                        'province_ids',
+                        'barangay',
+                        'barangays',
+                        'barangay_id',
+                        'barangay_ids'
+                    ];
 
-    if (Array.isArray(raw)) {
-        return raw.map(cleanLocation).filter(Boolean);
-    }
+                    const isLocationKey = (key) => {
+                        const normalizedKey = String(key || '')
+                            .replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
+                            .replace(/[^a-z0-9]+/g, '_')
+                            .replace(/^_+|_+$/g, '')
+                            .toLowerCase();
 
+                        return locationLikeKeys.includes(normalizedKey) ||
+                            normalizedKey.includes('location') ||
+                            normalizedKey.includes('barangay') ||
+                            normalizedKey === 'city' ||
+                            normalizedKey === 'cities' ||
+                            normalizedKey === 'province' ||
+                            normalizedKey === 'provinces' ||
+                            normalizedKey === 'area' ||
+                            normalizedKey === 'areas';
+                    };
 
-    const text = String(raw || '').trim();
+                    const pushValue = (value) => {
+                        const cleaned = this.normalizeText(value);
 
-    if (
-        !text ||
-        text === 'null' ||
-        text === 'undefined' ||
-        text === '[]' ||
-        text === '{}'
-    ) {
-        return [];
-    }
+                        if (!cleaned || this.couponNoLocationValues().includes(cleaned)) {
+                            return;
+                        }
 
-    if (text.startsWith('[') && text.endsWith(']')) {
-        try {
-            const parsed = JSON.parse(text);
+                        if (!values.includes(cleaned)) {
+                            values.push(cleaned);
+                        }
+                    };
 
-            if (Array.isArray(parsed)) {
-                return parsed.map(cleanLocation).filter(Boolean);
-            }
-        } catch (e) {}
-    }
+                    const scan = (source, forceAsLocation = false, depth = 0) => {
+                        if (source === null || source === undefined || depth > 8) return;
 
-    return text
-        .split(/\r?\n|[|,]/)
-        .map(cleanLocation)
-        .filter(Boolean);
-},
+                        if (typeof source === 'string') {
+                            const text = source.trim();
 
-                couponMatchesLocation(coupon, city, location) {
+                            if (!text || text === 'null' || text === 'undefined' || text === '[]' || text === '{}') {
+                                return;
+                            }
+
+                            if ((text.startsWith('[') && text.endsWith(']')) || (text.startsWith('{') && text.endsWith('}'))) {
+                                try {
+                                    scan(JSON.parse(text), forceAsLocation, depth + 1);
+                                    return;
+                                } catch (e) {}
+                            }
+
+                            if (forceAsLocation) {
+                                text
+                                    .split(/\r?\n|[|,;]/)
+                                    .map(item => item.trim())
+                                    .filter(Boolean)
+                                    .forEach(pushValue);
+                            }
+
+                            return;
+                        }
+
+                        if (typeof source !== 'object') {
+                            if (forceAsLocation) pushValue(source);
+                            return;
+                        }
+
+                        const visitKey = JSON.stringify(source);
+                        if (visited.has(visitKey)) return;
+                        visited.add(visitKey);
+
+                        if (Array.isArray(source)) {
+                            source.forEach(item => scan(item, forceAsLocation, depth + 1));
+                            return;
+                        }
+
+                        const objectMarksLocation = Object.entries(source).some(([key, value]) => {
+                            const markerKey = String(key || '')
+                                .replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
+                                .replace(/[^a-z0-9]+/g, '_')
+                                .replace(/^_+|_+$/g, '')
+                                .toLowerCase();
+                            const markerValue = this.normalizeText(value);
+
+                            return [
+                                'type',
+                                'condition_type',
+                                'field',
+                                'field_name',
+                                'key',
+                                'name',
+                                'mechanic',
+                                'mechanics'
+                            ].includes(markerKey) &&
+                                (
+                                    markerValue === 'location' ||
+                                    markerValue === 'locations' ||
+                                    markerValue === 'city' ||
+                                    markerValue === 'cities' ||
+                                    markerValue === 'province' ||
+                                    markerValue === 'provinces' ||
+                                    markerValue === 'barangay' ||
+                                    markerValue === 'barangays' ||
+                                    markerValue.includes('delivery location') ||
+                                    markerValue.includes('delivery address')
+                                );
+                        });
+
+                        if (objectMarksLocation && !forceAsLocation) {
+                            Object.entries(source).forEach(([key, value]) => {
+                                const markerKey = String(key || '')
+                                    .replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
+                                    .replace(/[^a-z0-9]+/g, '_')
+                                    .replace(/^_+|_+$/g, '')
+                                    .toLowerCase();
+
+                                if (![
+                                    'type',
+                                    'condition_type',
+                                    'field',
+                                    'field_name',
+                                    'key',
+                                    'name',
+                                    'mechanic',
+                                    'mechanics'
+                                ].includes(markerKey)) {
+                                    scan(value, true, depth + 1);
+                                }
+                            });
+                        }
+
+                        if (forceAsLocation) {
+                            [
+                                source.name,
+                                source.location,
+                                source.location_name,
+                                source.locationName,
+                                source.city,
+                                source.city_name,
+                                source.cityName,
+                                source.province,
+                                source.province_name,
+                                source.provinceName,
+                                source.barangay,
+                                source.barangay_name,
+                                source.barangayName,
+                                source.area,
+                                source.area_name,
+                                source.areaName,
+                                source.label,
+                                source.value,
+                                source.text
+                            ].forEach(pushValue);
+                        }
+
+                        Object.entries(source).forEach(([key, value]) => {
+                            const keyIsLocation = isLocationKey(key);
+                            if (keyIsLocation || forceAsLocation) {
+                                scan(value, true, depth + 1);
+                            }
+                        });
+                    };
+
+                    locationLikeKeys.forEach(key => scan(normalized?.[key], true));
+
+                    // Scan nested coupon payloads where the backend may store mechanics.
+                    [
+                        normalized?.coupon_mechanics,
+                        normalized?.mechanics,
+                        normalized?.mechanic,
+                        normalized?.conditions,
+                        normalized?.condition,
+                        normalized?.rules,
+                        normalized?.rule,
+                        normalized?.delivery_condition,
+                        normalized?.delivery_conditions,
+                        normalized?.availability_condition,
+                        normalized?.availability_conditions,
+                        normalized?.applicable_to,
+                        normalized?.applies_to,
+                        normalized?.pivot
+                    ].forEach(source => scan(source, false));
+
+                    return values;
+                },
+
+                couponMatchesLocation(coupon, city, location, delivery = null) {
                     const allowed = this.getCouponLocations(coupon);
 
-                    if (!allowed.length) return true;
+                    if (!allowed.length) return false;
 
-                    const noRestrictionValues = [
-                        'all',
-                        'any',
-                        'none',
-                        'null',
-                        'n/a',
-                        'na',
-                        'undefined',
-                        '-'
-                    ];
+                    const noRestrictionValues = this.couponNoLocationValues();
 
                     if (allowed.every(loc => noRestrictionValues.includes(loc))) {
                         return true;
                     }
 
-                    const normalizedLocation = this.normalizeText(location);
-                    const normalizedCity = this.normalizeText(city);
+                    const target = delivery || {};
+                    const targetValues = [
+                        city,
+                        location,
+                        target.city,
+                        target.location,
+                        target.barangay,
+                        target.province,
+                        target.address,
+                        target.delivery_address,
+                        target.customer_delivery_address,
+                        [city || target.city, target.province].filter(Boolean).join(' '),
+                        [location || target.location || target.barangay, city || target.city].filter(Boolean).join(' '),
+                        [location || target.location || target.barangay, city || target.city, target.province].filter(Boolean).join(' ')
+                    ]
+                        .flatMap(value => this.locationAliasValues(value))
+                        .filter(Boolean)
+                        .filter((item, index, arr) => arr.indexOf(item) === index);
 
-                    if (normalizedLocation && allowed.includes(normalizedLocation)) return true;
-                    if (normalizedCity && allowed.includes(normalizedCity)) return true;
+                    if (!targetValues.length) return false;
 
-                    return false;
+                    return allowed.some(allowedLocation => {
+                        const allowedAliases = this.locationAliasValues(allowedLocation);
+
+                        return allowedAliases.some(allowedAlias => {
+                            if (!allowedAlias || noRestrictionValues.includes(allowedAlias)) {
+                                return noRestrictionValues.includes(allowedAlias);
+                            }
+
+                            return targetValues.some(targetValue => {
+                                if (!targetValue) return false;
+
+                                if (allowedAlias === targetValue) return true;
+
+                                // Match values like "CITY OF PASIG, NCR - SECOND DISTRICT"
+                                // against selected city "CITY OF PASIG", without matching tiny fragments.
+                                if (targetValue.length >= 4 && allowedAlias.includes(targetValue)) return true;
+                                if (allowedAlias.length >= 4 && targetValue.includes(allowedAlias)) return true;
+
+                                return false;
+                            });
+                        });
+                    });
                 },
                 couponMatchesSelectedLocation(coupon) {
                     return this.couponLocationApplies(coupon);
@@ -2485,6 +2901,14 @@ normalizeFreeProductFromCoupon(fp) {
                         return false;
                     }
 
+                    const allowed = this.getCouponLocations(normalized);
+
+                    // If the coupon has a location mechanic but the backend did not pass
+                    // its allowed city/barangay list, do not show/apply it as a global coupon.
+                    if (!allowed.length) {
+                        return false;
+                    }
+
                     const targets = this.getSelectedCouponTargets();
 
                     if (!targets.length) {
@@ -2492,14 +2916,14 @@ normalizeFreeProductFromCoupon(fp) {
                     }
 
                     return targets.some(t =>
-                        this.couponMatchesLocation(normalized, t.city, t.location)
+                        this.couponMatchesLocation(normalized, t.city, t.location, t)
                     );
                 },
 
                 couponLocationRequirementStatus(coupon) {
                     const normalized = this.normalizeCoupon(coupon);
 
-                    if (!this.couponHasLocationLimit(normalized)) {
+                    if (!this.couponHasDeliveryLocationRule(normalized)) {
                         return { valid: true, message: '' };
                     }
 
@@ -2519,7 +2943,7 @@ normalizeFreeProductFromCoupon(fp) {
                         };
                     }
 
-                    if (!this.couponLocationApplies(normalized)) {
+                    if (this.couponHasLocationLimit(normalized) && !this.couponLocationApplies(normalized)) {
                         return {
                             valid: false,
                             message: 'This coupon is not valid for the selected delivery address.'
@@ -2569,36 +2993,174 @@ normalizeFreeProductFromCoupon(fp) {
                 },
 
                 getSelectedCouponTargets() {
-                if (this.method !== 'delivery') return [];
+                    if (this.method !== 'delivery') return [];
 
-                if (this.allowMultiple) {
-                    return (this.deliveries || [])
-                        .map(d => ({
-                            city: d?.city ?? '',
-                            location: d?.location ?? d?.barangay ?? ''
-                        }))
-                        .filter(t => this.normalizeText(t.city) || this.normalizeText(t.location));
-                }
+                    if (this.allowMultiple) {
+                        return (this.deliveries || [])
+                            .filter(d => (d?.orders || []).length > 0 || this.normalizeText(d?.city) || this.normalizeText(d?.location))
+                            .map(d => ({
+                                province: d?.province ?? '',
+                                city: d?.city ?? '',
+                                location: d?.location ?? d?.barangay ?? '',
+                                barangay: d?.barangay ?? d?.location ?? '',
+                                address: d?.address ?? d?.delivery_address ?? ''
+                            }))
+                            .filter(t =>
+                                this.normalizeText(t.province) ||
+                                this.normalizeText(t.city) ||
+                                this.normalizeText(t.location) ||
+                                this.normalizeText(t.address)
+                            );
+                    }
 
-                return [{
-                    city: this.city ?? '',
-                    location: this.location ?? this.barangay ?? ''
-                }].filter(t => this.normalizeText(t.city) || this.normalizeText(t.location));
-            },
+                    return [{
+                        province: this.province ?? '',
+                        city: this.city ?? '',
+                        location: this.location ?? this.barangay ?? '',
+                        barangay: this.barangay ?? this.location ?? '',
+                        address: this.delivery_address ?? this.delivery_address_street ?? ''
+                    }].filter(t =>
+                        this.normalizeText(t.province) ||
+                        this.normalizeText(t.city) ||
+                        this.normalizeText(t.location) ||
+                        this.normalizeText(t.address)
+                    );
+                },
 
-                removeInvalidLocationCoupons() {
+                couponLocationValidationIsPending(coupon) {
+                    const normalized = this.normalizeCoupon(coupon);
+
+                    if (!this.couponHasDeliveryLocationRule(normalized)) {
+                        return false;
+                    }
+
+                    if (this.method !== 'delivery') {
+                        return false;
+                    }
+
                     /*
                     |--------------------------------------------------------------------------
-                    | Multiple-address safe behavior
+                    | Preserve coupon while customer is still switching to/editing multiple address
                     |--------------------------------------------------------------------------
-                    | Do not remove an already-applied coupon when the customer switches to
-                    | multiple address or changes city/barangay. Location is only an eligibility
-                    | check for the discount amount. If the selected address does not match yet,
-                    | getCouponDiscount() returns 0, but the coupon remains visible/applied.
+                    | When a coupon was already applied in single delivery and the customer ticks
+                    | Multiple Address, the multi delivery rows can be empty/incomplete for a moment.
+                    | Do not remove the coupon in that pending state. Remove it only after the
+                    | delivery address mechanics are already available and the coupon still fails.
                     |--------------------------------------------------------------------------
                     */
+                    if (this.allowMultiple) {
+                        const deliveries = this.deliveries || [];
+                        const activeDeliveries = deliveries.filter(delivery =>
+                            (delivery?.orders || []).length > 0
+                        );
+
+                        const hasAnyAddressInput = deliveries.some(delivery =>
+                            this.normalizeText(delivery?.province) ||
+                            this.normalizeText(delivery?.city) ||
+                            this.normalizeText(delivery?.location) ||
+                            this.normalizeText(delivery?.barangay) ||
+                            this.normalizeText(delivery?.address)
+                        );
+
+                        if (!activeDeliveries.length && !hasAnyAddressInput) {
+                            return true;
+                        }
+
+                        const hasIncompleteActiveDelivery = activeDeliveries.some(delivery =>
+                            !this.normalizeText(delivery?.province) ||
+                            !this.normalizeText(delivery?.city)
+                        );
+
+                        if (hasIncompleteActiveDelivery) {
+                            return true;
+                        }
+                    }
+
+                    return !this.getSelectedCouponTargets().length;
+                },
+
+                couponShouldRemoveWhenMechanicsNotMet(coupon) {
+                    const normalized = this.normalizeCoupon(coupon);
+
+                    if (!this.couponIsActive(normalized)) {
+                        return true;
+                    }
+
+                    const productRequirement = this.couponProductRequirementStatus(normalized);
+
+                    if (!productRequirement.valid) {
+                        return true;
+                    }
+
+                    const locationRequirement = this.couponLocationRequirementStatus(normalized);
+
+                    if (!locationRequirement.valid) {
+                        return !this.couponLocationValidationIsPending(normalized);
+                    }
+
+                    return false;
+                },
+
+                couponShouldStayAppliedWhileEditingAddress(coupon) {
+                    const normalized = this.normalizeCoupon(coupon);
+
+                    if (!this.couponIsActive(normalized)) {
+                        return false;
+                    }
+
+                    const productRequirement = this.couponProductRequirementStatus(normalized);
+
+                    if (!productRequirement.valid) {
+                        return false;
+                    }
+
+                    return this.couponLocationValidationIsPending(normalized);
+                },
+
+                removeInvalidLocationCoupons(recompute = true) {
+                    const removedCodes = [];
+
+                    this.coupons = (this.coupons || [])
+                        .map(coupon => this.normalizeCoupon(coupon))
+                        .filter(coupon => {
+                            const code = this.couponCodeKey(coupon);
+
+                            if (this.couponShouldRemoveWhenMechanicsNotMet(coupon)) {
+                                if (code) removedCodes.push(code);
+                                return false;
+                            }
+
+                            return true;
+                        });
+
+                    removedCodes.forEach(code => this.removeFreeProductsByCoupon(code));
+
+                    if (removedCodes.length) {
+                        this.autoAppliedCoupons = (this.autoAppliedCoupons || []).filter(coupon =>
+                            !removedCodes.includes(this.couponCodeKey(coupon))
+                        );
+
+                        this.deliveryCouponPopupShownCodes = (this.deliveryCouponPopupShownCodes || []).filter(code =>
+                            !removedCodes.includes(String(code || '').trim().toUpperCase())
+                        );
+
+                        this.autoCouponChooserShownOnce = false;
+
+                        if (this.selectedCoupon && removedCodes.includes(this.couponCodeKey(this.selectedCoupon))) {
+                            this.selectedCoupon = null;
+                        }
+
+                        if (this.selectedAutoCoupon && removedCodes.includes(this.couponCodeKey(this.selectedAutoCoupon))) {
+                            this.selectedAutoCoupon = null;
+                            this.selectedAutoCouponId = '';
+                        }
+                    }
+
                     this.order_amount = this.cartSubtotal();
-                    this.recomputeCouponTotals();
+
+                    if (recompute) {
+                        this.recomputeCouponTotals();
+                    }
                 },
 
                 shouldAutoApplyCoupon(coupon) {
@@ -2626,25 +3188,19 @@ normalizeFreeProductFromCoupon(fp) {
                         return false;
                     }
 
+                    const locationRequirement = this.couponLocationRequirementStatus(normalized);
+
+                    if (!locationRequirement.valid) {
+                        return false;
+                    }
+
                     const hasLocationLimit = this.couponHasLocationLimit(normalized);
 
                     if (!hasLocationLimit) {
                         return true;
                     }
 
-                    if (this.method !== 'delivery') {
-                        return false;
-                    }
-
-                    const targets = this.getSelectedCouponTargets();
-
-                    if (!targets.length) {
-                        return false;
-                    }
-
-                    return targets.some(t =>
-                        this.couponMatchesLocation(normalized, t.city, t.location)
-                    );
+                    return this.couponLocationApplies(normalized);
                 },
 
                 couponHasDeliveryLocationRule(coupon) {
@@ -2652,6 +3208,7 @@ normalizeFreeProductFromCoupon(fp) {
                     const shippingMethod = this.normalizeText(normalized.shipping_method ?? normalized.delivery_method ?? '');
 
                     return this.couponHasLocationLimit(normalized) ||
+                        this.couponHasLocationConditionSource(normalized) ||
                         this.hasLocationDiscount(normalized) ||
                         this.isFreeShippingCoupon(normalized) ||
                         shippingMethod.includes('delivery') ||
@@ -2678,12 +3235,10 @@ normalizeFreeProductFromCoupon(fp) {
                         return false;
                     }
 
-                    // If a coupon has a saved location list, the selected city/barangay
+                    // If a coupon has saved location mechanics, the selected city/barangay
                     // must hit that list. Do not show it just because delivery was chosen.
                     if (this.couponHasLocationLimit(normalized)) {
-                        return targets.some(t =>
-                            this.couponMatchesLocation(normalized, t.city, t.location)
-                        );
+                        return this.couponLocationApplies(normalized);
                     }
 
                     // Delivery-only/free-shipping coupons without a location list can show
@@ -2738,28 +3293,10 @@ normalizeFreeProductFromCoupon(fp) {
                         return productRequirement.message;
                     }
 
-                    const hasLocationLimit = this.couponHasLocationLimit(normalized);
+                    const locationRequirement = this.couponLocationRequirementStatus(normalized);
 
-                    if (!hasLocationLimit) {
-                        return '';
-                    }
-
-                    if (this.method !== 'delivery') {
-                        return 'Available for delivery addresses only.';
-                    }
-
-                    const targets = this.getSelectedCouponTargets();
-
-                    if (!targets.length) {
-                        return 'Select a delivery location first.';
-                    }
-
-                    const matched = targets.some(t =>
-                        this.couponMatchesLocation(normalized, t.city, t.location)
-                    );
-
-                    if (!matched) {
-                        return 'Not valid for the selected address.';
+                    if (!locationRequirement.valid) {
+                        return locationRequirement.message;
                     }
 
                     return '';
@@ -2826,7 +3363,7 @@ normalizeFreeProductFromCoupon(fp) {
                     const discountedLocationKeys = new Set();
 
                     return (this.deliveries || []).reduce((sum, delivery) => {
-                        if (!this.couponMatchesLocation(normalized, delivery.city, delivery.location)) {
+                        if (!this.couponMatchesLocation(normalized, delivery.city, delivery.location, delivery)) {
                                 return sum;
                             }
 
@@ -2848,7 +3385,7 @@ normalizeFreeProductFromCoupon(fp) {
                     }, 0);
                 }
 
-                    return this.couponMatchesLocation(normalized, this.city, this.location)
+                    return this.couponMatchesLocation(normalized, this.city, this.location, { province: this.province, city: this.city, location: this.location, address: this.delivery_address })
                         ? this.getShippingDiscountAmountFromCoupon(normalized, Number(this.deliveryFee || 0))
                         : 0;
                 }
@@ -2945,11 +3482,24 @@ normalizeFreeProductFromCoupon(fp) {
                     .map(c => this.couponCodeKey(c))
                     .filter(Boolean);
 
-                const currentCoupons = (this.coupons || [])
-                    .map(c => this.normalizeCoupon(c))
-                    .filter(c => this.couponIsActive(c));
+                const normalizedCurrentCoupons = (this.coupons || [])
+                    .map(c => this.normalizeCoupon(c));
 
-                const appliedAutoCouponsToKeep = currentCoupons.filter(c => c.auto_applied);
+                const removedMechanicCodes = normalizedCurrentCoupons
+                    .filter(c => this.couponShouldRemoveWhenMechanicsNotMet(c))
+                    .map(c => this.couponCodeKey(c))
+                    .filter(Boolean);
+
+                const currentCoupons = normalizedCurrentCoupons
+                    .filter(c => !this.couponShouldRemoveWhenMechanicsNotMet(c));
+
+                const appliedAutoCouponsToKeep = currentCoupons.filter(c =>
+                    c.auto_applied &&
+                    (
+                        this.shouldAutoApplyCoupon(c) ||
+                        this.couponShouldStayAppliedWhileEditingAddress(c)
+                    )
+                );
                 const appliedAutoCodesToKeep = appliedAutoCouponsToKeep
                     .map(c => this.couponCodeKey(c))
                     .filter(Boolean);
@@ -2963,27 +3513,40 @@ normalizeFreeProductFromCoupon(fp) {
 
                     const itemCouponCode = this.couponCodeKey(item);
 
-                    // Do not remove free products from already-applied auto coupons while
-                    // multiple-address selection is being edited.
-                    return autoCodes.includes(itemCouponCode) &&
-                        !manuallySelectedAutoCodes.includes(itemCouponCode) &&
-                        !appliedAutoCodesToKeep.includes(itemCouponCode);
+                    // Do not remove free products from already-applied coupons while
+                    // multiple-address selection is still being edited. Remove only when
+                    // product/location mechanics are actually not met.
+                    return removedMechanicCodes.includes(itemCouponCode) ||
+                        (
+                            autoCodes.includes(itemCouponCode) &&
+                            !manuallySelectedAutoCodes.includes(itemCouponCode) &&
+                            !appliedAutoCodesToKeep.includes(itemCouponCode)
+                        );
                 };
 
-                // Keep already-applied coupons. Do not clear them just because address
-                // mode/location changed. Invalid location will only make discount 0.
+                // Keep already-applied coupons when switching to Multiple Address.
+                // Remove them only when the saved coupon mechanics are actually not met.
                 this.coupons = currentCoupons;
                 this.autoAppliedCoupons = appliedAutoCouponsToKeep;
 
                 this.carts = (this.carts || []).filter(item => !shouldRemoveAutoFreeProduct(item));
                 this.orders = (this.orders || []).filter(item => !shouldRemoveAutoFreeProduct(item));
 
-                if (previousSelectedAutoCoupon) {
+                if (
+                    previousSelectedAutoCoupon &&
+                    (
+                        this.shouldAutoApplyCoupon(previousSelectedAutoCoupon) ||
+                        this.couponShouldStayAppliedWhileEditingAddress(previousSelectedAutoCoupon)
+                    )
+                ) {
                     this.selectedAutoCoupon = previousSelectedAutoCoupon;
                     this.selectedAutoCouponId = previousSelectedAutoCoupon.id || previousSelectedAutoCouponId || '';
                 } else if (this.autoAppliedCoupons.length) {
                     this.selectedAutoCoupon = this.autoAppliedCoupons[0];
                     this.selectedAutoCouponId = this.autoAppliedCoupons[0].id || '';
+                } else {
+                    this.selectedAutoCoupon = null;
+                    this.selectedAutoCouponId = '';
                 }
 
                 const visibleAutos = allAutoCoupons.filter(c =>
@@ -3035,14 +3598,8 @@ normalizeFreeProductFromCoupon(fp) {
                         return;
                     }
 
-                    // Do not clear previousSelectedAutoCouponId here. A location coupon can
-                    // become qualified again after one of the multiple addresses matches.
-                    if (previousSelectedAutoCoupon) {
-                        this.showAutoCouponChooser = false;
-                        this.order_amount = this.cartSubtotal();
-                        this.recomputeCouponTotals();
-                        return;
-                    }
+                    this.selectedAutoCoupon = null;
+                    this.selectedAutoCouponId = '';
                 }
 
                 if (this.autoCouponChoices.length === 0) {
@@ -3093,22 +3650,11 @@ normalizeFreeProductFromCoupon(fp) {
         return;
     }
 
-    if (this.couponHasLocationLimit(normalized)) {
-        const targets = this.getSelectedCouponTargets();
+    const locationRequirement = this.couponLocationRequirementStatus(normalized);
 
-        if (!targets.length) {
-            this.showCouponError('Please select a delivery location first.');
-            return;
-        }
-
-        const isValidForAnyTarget = targets.some(t =>
-            this.couponMatchesLocation(normalized, t.city, t.location)
-        );
-
-        if (!isValidForAnyTarget) {
-            this.showCouponError('This coupon is not valid for the selected delivery address.');
-            return;
-        }
+    if (!locationRequirement.valid) {
+        this.showCouponError(locationRequirement.message);
+        return;
     }
 
     const alreadyApplied = this.coupons.find(c =>
@@ -3190,22 +3736,12 @@ normalizeFreeProductFromCoupon(fp) {
                 return;
             }
 
-            if (this.couponHasLocationLimit(normalized)) {
-                const targets = this.getSelectedCouponTargets();
+            const locationRequirement = this.couponLocationRequirementStatus(normalized);
 
-                if (!targets.length) {
-                    this.showCouponError('Please select a delivery location first.');
-                    return;
-                }
-
-                const isValidForAnyTarget = targets.some(t =>
-                    this.couponMatchesLocation(normalized, t.city, t.location)
-                );
-
-                if (!isValidForAnyTarget) {
-                    this.showCouponError('This coupon is not valid for the selected address.');
-                    return;
-                }
+            if (!locationRequirement.valid) {
+                this.showCouponError(locationRequirement.message);
+                this.couponCode = '';
+                return;
             }
 
             const alreadyApplied = this.coupons.find(c =>
@@ -3297,6 +3833,18 @@ normalizeFreeProductFromCoupon(fp) {
 
                 if (!productRequirement.valid) {
                     this.showCouponError(productRequirement.message);
+                    return;
+                }
+
+                const locationRequirement = this.couponLocationRequirementStatus(normalizedAutoCoupon);
+
+                if (!locationRequirement.valid) {
+                    this.showCouponError(locationRequirement.message);
+                    return;
+                }
+
+                if (!this.shouldAutoApplyCoupon(normalizedAutoCoupon)) {
+                    this.showCouponError(this.getAutoCouponUnavailableReason(normalizedAutoCoupon) || 'This coupon is not available for the current delivery location.');
                     return;
                 }
 
@@ -3463,7 +4011,7 @@ normalizeFreeProductFromCoupon(fp) {
                             const discountedLocationKeys = new Set();
 
                             (this.deliveries || []).forEach((delivery, idx) => {
-                                if (!this.couponMatchesLocation(normalizedCoupon, delivery.city, delivery.location)) {
+                                if (!this.couponMatchesLocation(normalizedCoupon, delivery.city, delivery.location, delivery)) {
                                     return;
                                 }
 
@@ -3522,7 +4070,7 @@ normalizeFreeProductFromCoupon(fp) {
                                 });
                             });
                         } else {
-                            if (this.couponMatchesLocation(normalizedCoupon, this.city, this.location)) {
+                            if (this.couponMatchesLocation(normalizedCoupon, this.city, this.location, { province: this.province, city: this.city, location: this.location, address: this.delivery_address })) {
                                 const fee = parseFloat(this.deliveryFee || 0);
                                 const remainingFee = Math.max(fee - this.shippingDiscountAmount, 0);
 
@@ -3625,6 +4173,8 @@ normalizeFreeProductFromCoupon(fp) {
                 }
 
                 const refreshCouponStateAfterBarangayChange = () => {
+                    this.removeInvalidLocationCoupons()
+                    this.applyAutoCoupons()
                     this.recomputeCouponTotals()
                     this.refreshDeliveryCouponPopup()
                 }
@@ -3647,6 +4197,7 @@ normalizeFreeProductFromCoupon(fp) {
                 })
 
                 this.$watch(() => JSON.stringify(this.deliveries || []), () => {
+                    this.removeInvalidLocationCoupons()
                     this.applyAutoCoupons()
                     this.recomputeCouponTotals()
                     this.refreshDeliveryCouponPopup()
@@ -4256,6 +4807,7 @@ normalizeFreeProductFromCoupon(fp) {
                     this.deliveryFee = 0;
                     this.lechonBakaService = this.hasBaka ? window.lechonBakaService : 0;
 
+                    this.resetDeliveryCouponPopupForLocationChange(true)
                     this.computeTotal()
                     this.applyAutoCoupons()
                 this.recomputeCouponTotals()
@@ -4353,9 +4905,11 @@ normalizeFreeProductFromCoupon(fp) {
                     this.validateSingleDeliveryField('province')
 
                     this.rebuildAddress()
-                this.applyAutoCoupons()
-                this.recomputeCouponTotals()
-                this.refreshDeliveryCouponPopup()
+                    this.resetDeliveryCouponPopupForLocationChange(true)
+                    this.removeInvalidLocationCoupons()
+                    this.applyAutoCoupons()
+                    this.recomputeCouponTotals()
+                    this.refreshDeliveryCouponPopup()
                 },
 
                 onCityChange() {
@@ -4371,18 +4925,21 @@ normalizeFreeProductFromCoupon(fp) {
                     })
 
                     this.rebuildAddress()
-                this.getDeliveryFee?.()
-                this.applyAutoCoupons()
-                this.recomputeCouponTotals()
-                this.refreshDeliveryCouponPopup()
+                    this.getDeliveryFee?.()
+                    this.resetDeliveryCouponPopupForLocationChange(true)
+                    this.removeInvalidLocationCoupons()
+                    this.applyAutoCoupons()
+                    this.recomputeCouponTotals()
+                    this.refreshDeliveryCouponPopup()
                 },
 
                 onBarangayChange() {
                     this.rebuildAddress();
 
-                    // Barangay change should NOT refresh coupons.
-                    // Delivery fee is based on province + city only, so just recompute totals.
                     this.$nextTick(() => {
+                        this.resetDeliveryCouponPopupForLocationChange(true);
+                        this.removeInvalidLocationCoupons();
+                        this.applyAutoCoupons();
                         this.recomputeCouponTotals();
                         this.refreshDeliveryCouponPopup();
                     });
@@ -4396,9 +4953,11 @@ normalizeFreeProductFromCoupon(fp) {
                     d.location = ''
 
                     this.rebuildMultiAddress(index)
-                this.applyAutoCoupons()
-                this.recomputeCouponTotals()
-                this.refreshDeliveryCouponPopup()
+                    this.resetDeliveryCouponPopupForLocationChange(true)
+                    this.removeInvalidLocationCoupons()
+                    this.applyAutoCoupons()
+                    this.recomputeCouponTotals()
+                    this.refreshDeliveryCouponPopup()
                 },
 
                 onMultiCityChange(index) {
@@ -4408,9 +4967,11 @@ normalizeFreeProductFromCoupon(fp) {
                     d.location = ''
 
                     this.rebuildMultiAddress(index)
-                this.applyAutoCoupons()
-                this.recomputeCouponTotals()
-                this.refreshDeliveryCouponPopup()
+                    this.resetDeliveryCouponPopupForLocationChange(true)
+                    this.removeInvalidLocationCoupons()
+                    this.applyAutoCoupons()
+                    this.recomputeCouponTotals()
+                    this.refreshDeliveryCouponPopup()
                 },
 
                 onMultiBarangayChange(index) {
@@ -4419,6 +4980,9 @@ normalizeFreeProductFromCoupon(fp) {
                     this.getDeliveryFeeForMulti?.(index);
 
                     this.$nextTick(() => {
+                        this.resetDeliveryCouponPopupForLocationChange(true);
+                        this.removeInvalidLocationCoupons();
+                        this.applyAutoCoupons();
                         this.recomputeCouponTotals();
                         this.refreshDeliveryCouponPopup();
                     });
@@ -4593,6 +5157,29 @@ normalizeFreeProductFromCoupon(fp) {
                             this.showCouponError(invalidProductCoupon.status.message);
                             this.isSubmitting = false;
                             this.formSubmitting = false;
+                            return;
+                        }
+
+                        const invalidLocationCoupon = (this.coupons || [])
+                            .map(coupon => {
+                                const normalized = this.normalizeCoupon(coupon);
+
+                                return {
+                                    coupon: normalized,
+                                    status: this.couponLocationRequirementStatus(normalized)
+                                };
+                            })
+                            .find(row => !row.status.valid);
+
+                        if (invalidLocationCoupon) {
+                            this.showCouponError(invalidLocationCoupon.status.message);
+                            this.removeFreeProductsByCoupon(invalidLocationCoupon.coupon.code);
+                            this.coupons = (this.coupons || []).filter(coupon =>
+                                this.couponCodeKey(coupon) !== this.couponCodeKey(invalidLocationCoupon.coupon)
+                            );
+                            this.isSubmitting = false;
+                            this.formSubmitting = false;
+                            this.recomputeCouponTotals();
                             return;
                         }
 
