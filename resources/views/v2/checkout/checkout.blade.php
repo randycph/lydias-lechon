@@ -2908,14 +2908,38 @@ normalizeFreeProductFromCoupon(fp) {
                 const locations = this.getCouponLocations(coupon);
                 const noRestrictionValues = this.couponNoLocationValues();
 
-                if (locations.length) {
-                    return !locations.every(loc => noRestrictionValues.includes(loc));
+                /*
+                |--------------------------------------------------------------------------
+                | Affected Location only
+                |--------------------------------------------------------------------------
+                | Do not treat a coupon as location-restricted just because it has a
+                | delivery/free-shipping mechanic or because an old payload has a generic
+                | location flag. It must have an actual affected location value. This keeps
+                | already applied coupons when the customer checks Multiple Address, unless
+                | the coupon really has a location mechanic that no longer matches.
+                |--------------------------------------------------------------------------
+                */
+                if (!locations.length) {
+                    return false;
                 }
 
-                // Some coupon payloads do not expose the actual location list, but still
-                // expose a location/city/barangay flag/mechanic. Treat that as location-
-                // restricted and hide it until the backend sends a matching location value.
-                return this.couponHasLocationConditionSource(coupon);
+                return !locations.every(loc => noRestrictionValues.includes(loc));
+            },
+
+            couponRequiresDeliveryMethod(coupon) {
+                const normalized = this.normalizeCoupon(coupon);
+                const shippingMethod = this.normalizeText(
+                    normalized.shipping_method ??
+                    normalized.delivery_method ??
+                    normalized.method ??
+                    ''
+                );
+
+                return this.isFreeShippingCoupon(normalized) ||
+                    this.hasLocationDiscount(normalized) ||
+                    shippingMethod.includes('delivery') ||
+                    shippingMethod.includes('door') ||
+                    shippingMethod.includes('location');
             },
 
             couponHasLocationConditionSource(coupon) {
@@ -3389,9 +3413,12 @@ normalizeFreeProductFromCoupon(fp) {
                 },
 
                 couponMatchesLocation(coupon, city, location, delivery = null) {
+                    // Coupons without affected locations are global for delivery addresses.
+                    if (!this.couponHasLocationLimit(coupon)) return true;
+
                     const allowed = this.getCouponLocations(coupon);
 
-                    if (!allowed.length) return false;
+                    if (!allowed.length) return true;
 
                     const noRestrictionValues = this.couponNoLocationValues();
 
@@ -3450,19 +3477,13 @@ normalizeFreeProductFromCoupon(fp) {
                 couponLocationApplies(coupon) {
                     const normalized = this.normalizeCoupon(coupon);
 
+                    // No affected location means the coupon is not tied to a city/barangay.
+                    // Keep it applied when switching to Multiple Address.
                     if (!this.couponHasLocationLimit(normalized)) {
                         return true;
                     }
 
                     if (this.method !== 'delivery') {
-                        return false;
-                    }
-
-                    const allowed = this.getCouponLocations(normalized);
-
-                    // If the coupon has a location mechanic but the backend did not pass
-                    // its allowed city/barangay list, do not show/apply it as a global coupon.
-                    if (!allowed.length) {
                         return false;
                     }
 
@@ -3479,18 +3500,19 @@ normalizeFreeProductFromCoupon(fp) {
 
                 couponLocationRequirementStatus(coupon) {
                     const normalized = this.normalizeCoupon(coupon);
+                    const hasAffectedLocation = this.couponHasLocationLimit(normalized);
 
-                    // Location = All Area is not a delivery restriction.
-                    // It must work for pickup and delivery.
-                    if (!this.couponHasLocationLimit(normalized) && !this.isFreeShippingCoupon(normalized) && !this.hasLocationDiscount(normalized)) {
-                        const shippingMethod = this.normalizeText(normalized.shipping_method ?? normalized.delivery_method ?? '');
-
-                        if (!shippingMethod.includes('delivery') && !shippingMethod.includes('door')) {
-                            return { valid: true, message: '' };
+                    // Coupon has no affected location, so switching to Multiple Address
+                    // should not remove it. Only delivery-only rewards still require the
+                    // checkout method to be Delivery.
+                    if (!hasAffectedLocation) {
+                        if (this.couponRequiresDeliveryMethod(normalized) && this.method !== 'delivery') {
+                            return {
+                                valid: false,
+                                message: 'This coupon is available for delivery orders only.'
+                            };
                         }
-                    }
 
-                    if (!this.couponHasDeliveryLocationRule(normalized)) {
                         return { valid: true, message: '' };
                     }
 
@@ -3510,7 +3532,7 @@ normalizeFreeProductFromCoupon(fp) {
                         };
                     }
 
-                    if (this.couponHasLocationLimit(normalized) && !this.couponLocationApplies(normalized)) {
+                    if (!this.couponLocationApplies(normalized)) {
                         return {
                             valid: false,
                             message: 'This coupon is not valid for the selected delivery address.'
@@ -3772,15 +3794,12 @@ normalizeFreeProductFromCoupon(fp) {
 
                 couponHasDeliveryLocationRule(coupon) {
                     const normalized = this.normalizeCoupon(coupon);
-                    const shippingMethod = this.normalizeText(normalized.shipping_method ?? normalized.delivery_method ?? '');
 
+                    // A real location rule exists only when there are affected locations.
+                    // Delivery/free-shipping coupons without affected locations are delivery
+                    // method rules, not city/barangay rules.
                     return this.couponHasLocationLimit(normalized) ||
-                        this.couponHasLocationConditionSource(normalized) ||
-                        this.hasLocationDiscount(normalized) ||
-                        this.isFreeShippingCoupon(normalized) ||
-                        shippingMethod.includes('delivery') ||
-                        shippingMethod.includes('door') ||
-                        shippingMethod.includes('location');
+                        this.couponRequiresDeliveryMethod(normalized);
                 },
 
                 couponSelectedLocationIsHit(coupon) {
@@ -3788,6 +3807,13 @@ normalizeFreeProductFromCoupon(fp) {
 
                     if (!this.couponHasDeliveryLocationRule(normalized)) {
                         return true;
+                    }
+
+                    // Delivery-only/free-shipping coupons without affected locations should
+                    // not be removed when Multiple Address is checked. They only need the
+                    // checkout method to be Delivery.
+                    if (!this.couponHasLocationLimit(normalized)) {
+                        return !this.couponRequiresDeliveryMethod(normalized) || this.method === 'delivery';
                     }
 
                     // Location-only coupons must not appear on pickup, in the popup,
@@ -3802,15 +3828,7 @@ normalizeFreeProductFromCoupon(fp) {
                         return false;
                     }
 
-                    // If a coupon has saved location mechanics, the selected city/barangay
-                    // must hit that list. Do not show it just because delivery was chosen.
-                    if (this.couponHasLocationLimit(normalized)) {
-                        return this.couponLocationApplies(normalized);
-                    }
-
-                    // Delivery-only/free-shipping coupons without a location list can show
-                    // once a delivery target exists.
-                    return true;
+                    return this.couponLocationApplies(normalized);
                 },
 
                 shouldShowAutoCouponInList(coupon) {
