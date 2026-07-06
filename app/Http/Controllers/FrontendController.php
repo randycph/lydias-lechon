@@ -534,7 +534,198 @@ $extractCouponCategoryData = function ($coupon) {
     ];
 };
 
-$formatCoupon = function ($coupon, $uid) use ($extractCouponCategoryData) {
+
+$extractCouponProductData = function ($coupon) {
+    $rawValues = [
+        $coupon->purchase_product_id ?? null,
+        $coupon->purchase_product_ids ?? null,
+        $coupon->purchase_product ?? null,
+        $coupon->purchase_products ?? null,
+        $coupon->selected_product_id ?? null,
+        $coupon->selected_product_ids ?? null,
+        $coupon->selected_products ?? null,
+        $coupon->condition_product_id ?? null,
+        $coupon->condition_product_ids ?? null,
+        $coupon->condition_product ?? null,
+        $coupon->condition_products ?? null,
+        $coupon->total_quantity_product_id ?? null,
+        $coupon->total_quantity_product_ids ?? null,
+        $coupon->total_quantity_product ?? null,
+        $coupon->total_quantity_products ?? null,
+    ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Optional legacy fallback
+    |--------------------------------------------------------------------------
+    | Some older coupon records used product_id/product_ids for the purchase
+    | condition. Do not use free_product_id here because that is the reward item.
+    | If product_id matches a free reward product, ignore it to avoid validating
+    | against Fresh Lumpia instead of the required purchase product like Bopis.
+    |--------------------------------------------------------------------------
+    */
+    $freeRewardIds = collect(preg_split('/[|,]/', (string) ($coupon->free_product_id ?? '')))
+        ->map(fn ($id) => trim((string) $id))
+        ->filter(fn ($id) => $id !== '' && ctype_digit($id))
+        ->values();
+
+    foreach (['product_id', 'product_ids'] as $fieldName) {
+        if (!isset($coupon->{$fieldName}) || trim((string) $coupon->{$fieldName}) === '') {
+            continue;
+        }
+
+        $legacyIds = collect(preg_split('/[|,]/', (string) $coupon->{$fieldName}))
+            ->map(fn ($id) => trim((string) $id))
+            ->filter(fn ($id) => $id !== '' && ctype_digit($id))
+            ->values();
+
+        if ($legacyIds->isNotEmpty() && $legacyIds->diff($freeRewardIds)->isEmpty()) {
+            continue;
+        }
+
+        $rawValues[] = $coupon->{$fieldName};
+    }
+
+    $ids = collect([]);
+    $names = collect([]);
+
+    $collectValue = function ($value) use (&$collectValue, &$ids, &$names) {
+        if (is_null($value)) {
+            return;
+        }
+
+        if ($value instanceof \Illuminate\Support\Collection) {
+            $value = $value->all();
+        }
+
+        if (is_array($value)) {
+            foreach ($value as $item) {
+                $collectValue($item);
+            }
+            return;
+        }
+
+        if (is_object($value)) {
+            foreach ([
+                'product_id',
+                'productId',
+                'required_product_id',
+                'requiredProductId',
+                'purchase_product_id',
+                'purchaseProductId',
+                'selected_product_id',
+                'selectedProductId',
+                'condition_product_id',
+                'conditionProductId',
+                'total_quantity_product_id',
+                'totalQuantityProductId',
+                'id',
+                'value',
+            ] as $key) {
+                if (isset($value->{$key}) && trim((string) $value->{$key}) !== '') {
+                    $collectValue($value->{$key});
+                }
+            }
+
+            foreach (['name', 'product_name', 'label', 'text', 'title'] as $key) {
+                if (isset($value->{$key}) && trim((string) $value->{$key}) !== '') {
+                    $names->push(trim((string) $value->{$key}));
+                }
+            }
+
+            if (isset($value->product)) {
+                $collectValue($value->product);
+            }
+
+            if (isset($value->pivot)) {
+                $collectValue($value->pivot);
+            }
+
+            return;
+        }
+
+        $text = trim((string) $value);
+
+        if ($text === '' || in_array(strtolower($text), ['null', 'undefined', '[]', '{}'], true)) {
+            return;
+        }
+
+        if (((substr($text, 0, 1) === '[') && (substr($text, -1) === ']')) || ((substr($text, 0, 1) === '{') && (substr($text, -1) === '}'))) {
+            $decoded = json_decode($text);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $collectValue($decoded);
+                return;
+            }
+        }
+
+        foreach (preg_split('/[|,]/', $text) as $part) {
+            $part = trim((string) $part);
+
+            if ($part === '') {
+                continue;
+            }
+
+            if (ctype_digit($part)) {
+                $ids->push($part);
+            } elseif (!in_array(strtolower($part), ['all', 'any', 'none', 'n/a', 'na', '-'], true)) {
+                $names->push($part);
+            }
+        }
+    };
+
+    foreach ($rawValues as $rawValue) {
+        $collectValue($rawValue);
+    }
+
+    $ids = $ids
+        ->map(fn ($id) => trim((string) $id))
+        ->filter(fn ($id) => $id !== '' && ctype_digit($id))
+        ->reject(fn ($id) => $freeRewardIds->contains($id))
+        ->unique()
+        ->values();
+
+    $names = $names
+        ->map(fn ($name) => trim((string) $name))
+        ->filter(fn ($name) => $name !== '')
+        ->unique()
+        ->values();
+
+    /*
+    |--------------------------------------------------------------------------
+    | Safety fallback for old coupon records
+    |--------------------------------------------------------------------------
+    | The checkout frontend matches product requirements by ID. If the coupon
+    | saved only the product name, such as "Bopis", resolve that product name
+    | to its real Product ID here before sending the coupon to the checkout view.
+    |--------------------------------------------------------------------------
+    */
+    if ($names->isNotEmpty()) {
+        try {
+            $matchedIds = Product::query()
+                ->whereIn(DB::raw('LOWER(TRIM(name))'), $names->map(fn ($name) => strtolower(trim($name)))->all())
+                ->pluck('id')
+                ->map(fn ($id) => trim((string) $id))
+                ->filter(fn ($id) => $id !== '' && ctype_digit($id))
+                ->reject(fn ($id) => $freeRewardIds->contains($id));
+
+            if ($matchedIds->isNotEmpty()) {
+                $ids = $ids->merge($matchedIds)->unique()->values();
+            }
+        } catch (\Throwable $e) {
+            // If Product lookup fails, keep the original IDs only.
+        }
+    }
+
+    $hasProductCondition = $ids->isNotEmpty() || $names->isNotEmpty();
+
+    return [
+        'ids' => $ids->values()->all(),
+        'names' => $names->values()->all(),
+        'has_condition' => $hasProductCondition,
+    ];
+};
+
+$formatCoupon = function ($coupon, $uid) use ($extractCouponCategoryData, $extractCouponProductData) {
     /*
     |--------------------------------------------------------------------------
     | COUPON USAGE LIMITS
@@ -572,8 +763,14 @@ $formatCoupon = function ($coupon, $uid) use ($extractCouponCategoryData) {
             ->get();
     }
 
-    // Category purchase conditions must be sent by ID, not by category name.
-    // If old data saved only the name, $extractCouponCategoryData tries to resolve it to an ID.
+    // Product/category purchase conditions must be sent by ID, not by display name.
+    // If old data saved only the name, these extractors try to resolve it to an ID.
+    $productData = $extractCouponProductData($coupon);
+    $purchaseProductIds = $productData['ids'];
+    $purchaseProductNames = $productData['names'];
+    $hasProductCondition = $productData['has_condition'];
+    $purchaseProductValue = implode('|', $purchaseProductIds);
+
     $categoryData = $extractCouponCategoryData($coupon);
     $purchaseCategoryIds = $categoryData['ids'];
     $purchaseCategoryNames = $categoryData['names'];
@@ -597,9 +794,15 @@ $formatCoupon = function ($coupon, $uid) use ($extractCouponCategoryData) {
 
         'applies_to' => $coupon->free_product_id
             ? 'free_product'
-            : ($coupon->purchase_product_id ? 'product' : (!empty($purchaseCategoryIds) ? 'category' : 'cart')),
+            : (!empty($purchaseProductIds) ? 'product' : (!empty($purchaseCategoryIds) ? 'category' : 'cart')),
 
-        'purchase_product_id' => $coupon->purchase_product_id,
+        'purchase_product_id' => $purchaseProductValue,
+        'purchase_product_ids' => $purchaseProductIds,
+        'purchase_product_names' => $purchaseProductNames,
+        'product_id' => $purchaseProductValue,
+        'product_ids' => $purchaseProductIds,
+        'product_names' => $purchaseProductNames,
+        'has_product_condition' => $hasProductCondition,
         'purchase_product_cat_id' => $purchaseCategoryValue,
         'purchase_product_cat_ids' => $purchaseCategoryIds,
         'purchase_category_id' => $purchaseCategoryValue,
@@ -934,37 +1137,62 @@ if ($carts->count() > 0) {
 
                     $hasCategoryCondition = $categoryData['has_condition'];
 
-                    $requiredProductIds = collect(preg_split('/[|,]/', (string) ($coupon->purchase_product_id ?? '')))
+                    $productData = $extractCouponProductData($coupon);
+                    $requiredProductIds = collect($productData['ids'])
                         ->map(fn ($id) => trim((string) $id))
                         ->filter(fn ($id) => $id !== '' && ctype_digit($id))
                         ->values();
 
+                    $hasProductCondition = $productData['has_condition'];
                     $hasProductOrCategoryCondition = $requiredProductIds->isNotEmpty() || $requiredCategoryIds->isNotEmpty();
 
-                    // If Category was selected in coupon setup but no category ID can be resolved,
-                    // do not allow the coupon to qualify by total cart quantity.
+                    // If Product/Category was selected in coupon setup but no ID can be resolved,
+                    // do not allow the coupon to qualify by total cart quantity alone.
+                    if (!$shouldSkip && $hasProductCondition && $requiredProductIds->isEmpty()) {
+                        $shouldSkip = true;
+                    }
+
                     if (!$shouldSkip && $hasCategoryCondition && $requiredCategoryIds->isEmpty()) {
                         $shouldSkip = true;
                     }
 
-                    if (!$shouldSkip && $hasProductOrCategoryCondition) {
-                        $matchingPurchaseQty = $carts->sum(function ($item) use ($requiredProductIds, $requiredCategoryIds) {
-                            $productId = (string) data_get($item, 'product_id', data_get($item, 'product.id', ''));
-                            $categoryId = (string) data_get($item, 'product.category_id', data_get($item, 'category_id', ''));
+                    if (!$shouldSkip && $hasProductOrCategoryCondition && $coupon->purchase_qty && $coupon->purchase_qty > 0) {
+                        $requiredQty = (int) $coupon->purchase_qty;
+                        $qtyType = strtolower(trim((string) $coupon->purchase_qty_type));
 
-                            $matchesProduct = $requiredProductIds->isNotEmpty() && $requiredProductIds->contains($productId);
-                            $matchesCategory = $requiredCategoryIds->isNotEmpty() && $requiredCategoryIds->contains($categoryId);
+                        foreach ($requiredProductIds as $requiredProductId) {
+                            $matchingPurchaseQty = $carts->sum(function ($item) use ($requiredProductId) {
+                                $productId = (string) data_get($item, 'product_id', data_get($item, 'product.id', ''));
+                                return $productId === (string) $requiredProductId ? (int) data_get($item, 'qty', 1) : 0;
+                            });
 
-                            return ($matchesProduct || $matchesCategory) ? (int) data_get($item, 'qty', 1) : 0;
-                        });
-
-                        if ($coupon->purchase_qty && $coupon->purchase_qty > 0) {
-                            if ($coupon->purchase_qty_type === 'min' && $matchingPurchaseQty < $coupon->purchase_qty) {
+                            if ($qtyType === 'min' && $matchingPurchaseQty < $requiredQty) {
                                 $shouldSkip = true;
+                                break;
                             }
 
-                            if ($coupon->purchase_qty_type === 'max' && $matchingPurchaseQty > $coupon->purchase_qty) {
+                            if ($qtyType === 'max' && $matchingPurchaseQty > $requiredQty) {
                                 $shouldSkip = true;
+                                break;
+                            }
+                        }
+
+                        if (!$shouldSkip) {
+                            foreach ($requiredCategoryIds as $requiredCategoryId) {
+                                $matchingPurchaseQty = $carts->sum(function ($item) use ($requiredCategoryId) {
+                                    $categoryId = (string) data_get($item, 'product.category_id', data_get($item, 'category_id', ''));
+                                    return $categoryId === (string) $requiredCategoryId ? (int) data_get($item, 'qty', 1) : 0;
+                                });
+
+                                if ($qtyType === 'min' && $matchingPurchaseQty < $requiredQty) {
+                                    $shouldSkip = true;
+                                    break;
+                                }
+
+                                if ($qtyType === 'max' && $matchingPurchaseQty > $requiredQty) {
+                                    $shouldSkip = true;
+                                    break;
+                                }
                             }
                         }
                     }

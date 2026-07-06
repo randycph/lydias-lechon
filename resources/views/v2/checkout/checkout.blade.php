@@ -1123,12 +1123,90 @@
                         activation_type: activationType,
                         location: coupon.location ?? coupon.locations ?? '',
                         purchase_combination: coupon.purchase_combination ?? coupon.purchase_conditions ?? coupon.condition_combination ?? '',
-                        purchase_product_id: coupon.purchase_product_id ?? coupon.purchase_product_ids ?? coupon.product_id ?? coupon.product_ids ?? '',
-                        purchase_product_ids: coupon.purchase_product_ids ?? coupon.purchase_product_id ?? coupon.product_ids ?? coupon.product_id ?? '',
-                        purchase_category_id: coupon.purchase_product_cat_id ?? coupon.purchase_product_cat_ids ?? coupon.purchase_category_id ?? coupon.purchase_category_ids ?? coupon.category_id ?? coupon.category_ids ?? coupon.condition_category_id ?? coupon.condition_category_ids ?? '',
-                        purchase_product_cat_id: coupon.purchase_product_cat_id ?? coupon.purchase_product_cat_ids ?? coupon.purchase_category_id ?? coupon.purchase_category_ids ?? '',
-                        purchase_category_ids: coupon.purchase_product_cat_ids ?? coupon.purchase_product_cat_id ?? coupon.purchase_category_ids ?? coupon.purchase_category_id ?? coupon.category_ids ?? coupon.category_id ?? coupon.condition_category_ids ?? coupon.condition_category_id ?? '',
-                        purchase_product_cat_ids: coupon.purchase_product_cat_ids ?? coupon.purchase_product_cat_id ?? coupon.purchase_category_ids ?? coupon.purchase_category_id ?? '',
+                        // Important: do NOT fall back to coupon.product_id / coupon.product_ids here.
+                        // In a Free Product coupon, generic product_id can be the reward item
+                        // (example: Fresh Lumpia), not the purchase-condition item (example: Bopis).
+                        // Purchase conditions must come only from purchase/condition/selected fields.
+                        purchase_product_id:
+                            coupon.purchase_product_id ??
+                            coupon.purchase_product_ids ??
+                            coupon.selected_product_id ??
+                            coupon.selected_product_ids ??
+                            coupon.condition_product_id ??
+                            coupon.condition_product_ids ??
+                            coupon.minimum_purchase_product_id ??
+                            coupon.minimum_purchase_product_ids ??
+                            coupon.total_quantity_product_id ??
+                            coupon.total_quantity_product_ids ??
+                            coupon.required_product_id ??
+                            coupon.required_product_ids ??
+                            '',
+                        purchase_product_ids:
+                            coupon.purchase_product_ids ??
+                            coupon.purchase_product_id ??
+                            coupon.selected_product_ids ??
+                            coupon.selected_product_id ??
+                            coupon.condition_product_ids ??
+                            coupon.condition_product_id ??
+                            coupon.minimum_purchase_product_ids ??
+                            coupon.minimum_purchase_product_id ??
+                            coupon.total_quantity_product_ids ??
+                            coupon.total_quantity_product_id ??
+                            coupon.required_product_ids ??
+                            coupon.required_product_id ??
+                            '',
+                        purchase_category_id:
+                            coupon.purchase_product_cat_id ??
+                            coupon.purchase_product_cat_ids ??
+                            coupon.purchase_category_id ??
+                            coupon.purchase_category_ids ??
+                            coupon.selected_category_id ??
+                            coupon.selected_category_ids ??
+                            coupon.condition_category_id ??
+                            coupon.condition_category_ids ??
+                            coupon.minimum_purchase_category_id ??
+                            coupon.minimum_purchase_category_ids ??
+                            coupon.total_quantity_category_id ??
+                            coupon.total_quantity_category_ids ??
+                            coupon.required_category_id ??
+                            coupon.required_category_ids ??
+                            '',
+                        purchase_product_cat_id:
+                            coupon.purchase_product_cat_id ??
+                            coupon.purchase_product_cat_ids ??
+                            coupon.purchase_category_id ??
+                            coupon.purchase_category_ids ??
+                            coupon.selected_category_id ??
+                            coupon.selected_category_ids ??
+                            coupon.condition_category_id ??
+                            coupon.condition_category_ids ??
+                            '',
+                        purchase_category_ids:
+                            coupon.purchase_product_cat_ids ??
+                            coupon.purchase_product_cat_id ??
+                            coupon.purchase_category_ids ??
+                            coupon.purchase_category_id ??
+                            coupon.selected_category_ids ??
+                            coupon.selected_category_id ??
+                            coupon.condition_category_ids ??
+                            coupon.condition_category_id ??
+                            coupon.minimum_purchase_category_ids ??
+                            coupon.minimum_purchase_category_id ??
+                            coupon.total_quantity_category_ids ??
+                            coupon.total_quantity_category_id ??
+                            coupon.required_category_ids ??
+                            coupon.required_category_id ??
+                            '',
+                        purchase_product_cat_ids:
+                            coupon.purchase_product_cat_ids ??
+                            coupon.purchase_product_cat_id ??
+                            coupon.purchase_category_ids ??
+                            coupon.purchase_category_id ??
+                            coupon.selected_category_ids ??
+                            coupon.selected_category_id ??
+                            coupon.condition_category_ids ??
+                            coupon.condition_category_id ??
+                            '',
                         purchase_category: coupon.purchase_category ?? coupon.condition_category ?? coupon.total_quantity_category ?? coupon.category ?? '',
                         purchase_categories: coupon.purchase_categories ?? coupon.selected_categories ?? coupon.applicable_categories ?? coupon.categories ?? [],
                         category_id: coupon.purchase_product_cat_id ?? coupon.category_id ?? coupon.purchase_category_id ?? coupon.condition_category_id ?? '',
@@ -1609,7 +1687,19 @@
                     '[]',
                     '{}',
                     'all',
+                    'all area',
+                    'all areas',
+                    'all_area',
+                    'all_areas',
+                    'all location',
+                    'all locations',
+                    'all city',
+                    'all cities',
+                    'all barangay',
+                    'all barangays',
                     'any',
+                    'any area',
+                    'any areas',
                     'none',
                     'n/a',
                     'na',
@@ -1718,10 +1808,24 @@
                     if (visited.has(visitKey)) return;
                     visited.add(visitKey);
 
+                    const isRootCoupon = source === normalized;
+
+                    // Some controllers send the purchase category as plain
+                    // category_id/category_ids. Keep this fallback for old payloads.
                     addIds(source.category_id);
                     addIds(source.categoryId);
                     addIds(source.category_ids);
                     addIds(source.categoryIds);
+                    addIds(source.category);
+
+                    // Nested category objects may only have {id, name}.
+                    if (!isRootCoupon) {
+                        addIds(source.id);
+                        addIds(source.value);
+                        addIds(source.pivot?.category_id);
+                        addIds(source.pivot?.categoryId);
+                    }
+
                     addIds(source.required_category_id);
                     addIds(source.required_category_ids);
                     addIds(source.purchase_product_cat_id);
@@ -1740,7 +1844,6 @@
                     addIds(source.total_quantity_category_ids);
                     addIds(source.coupon_category_id);
                     addIds(source.coupon_category_ids);
-                    addIds(source.category);
 
                     [
                         source.required_categories,
@@ -1783,14 +1886,119 @@
                 return ids;
             },
 
+
+            couponFreeProductIds(coupon) {
+                const ids = [];
+                const visited = new Set();
+
+                const pushId = (value) => {
+                    const normalizedId = this.normalizeCouponProductId(value);
+                    if (normalizedId && !ids.includes(normalizedId)) {
+                        ids.push(normalizedId);
+                    }
+                };
+
+                const scan = (value) => {
+                    if (value === null || value === undefined || value === '') return;
+
+                    if (Array.isArray(value)) {
+                        value.forEach(scan);
+                        return;
+                    }
+
+                    if (typeof value === 'string') {
+                        const text = value.trim();
+
+                        if (!text || text === 'null' || text === 'undefined' || text === '[]' || text === '{}') {
+                            return;
+                        }
+
+                        if (text.startsWith('[') || text.startsWith('{')) {
+                            try {
+                                scan(JSON.parse(text));
+                                return;
+                            } catch (e) {}
+                        }
+
+                        // Plain numeric string means free product ID.
+                        pushId(text);
+                        return;
+                    }
+
+                    if (typeof value !== 'object') {
+                        pushId(value);
+                        return;
+                    }
+
+                    const visitKey = JSON.stringify(value);
+                    if (visited.has(visitKey)) return;
+                    visited.add(visitKey);
+
+                    // Free product reward payloads may come as {id}, {product_id},
+                    // {free_product_id}, or nested {product: {id}} depending on the controller.
+                    pushId(value.free_product_id);
+                    pushId(value.freeProductId);
+                    pushId(value.reward_product_id);
+                    pushId(value.rewardProductId);
+                    pushId(value.gift_product_id);
+                    pushId(value.giftProductId);
+                    pushId(value.product_id);
+                    pushId(value.productId);
+                    pushId(value.product?.id);
+                    pushId(value.id);
+
+                    [
+                        value.product,
+                        value.free_product,
+                        value.freeProduct,
+                        value.reward_product,
+                        value.rewardProduct,
+                        value.gift_product,
+                        value.giftProduct,
+                        value.free_products,
+                        value.reward_products,
+                        value.gift_products
+                    ].forEach(scan);
+                };
+
+                const normalized = coupon || {};
+
+                [
+                    normalized.free_products,
+                    normalized.free_product,
+                    normalized.freeProduct,
+                    normalized.free_product_id,
+                    normalized.free_product_ids,
+                    normalized.freeProductId,
+                    normalized.freeProductIds,
+                    normalized.reward_product,
+                    normalized.reward_products,
+                    normalized.reward_product_id,
+                    normalized.reward_product_ids,
+                    normalized.gift_product,
+                    normalized.gift_products,
+                    normalized.gift_product_id,
+                    normalized.gift_product_ids
+                ].forEach(scan);
+
+                return ids;
+            },
+
             getCouponSelectedProductIds(coupon) {
                 const normalized = this.normalizeCoupon(coupon);
                 const ids = [];
                 const visited = new Set();
+                const freeProductIds = this.couponFreeProductIds(normalized);
 
-                const addIds = (value) => {
+                const addIds = (value, options = {}) => {
                     this.parseCouponProductIds(value).forEach(id => {
-                        if (!ids.includes(id)) ids.push(id);
+                        // Generic root product_id/product_ids can be the Free Product reward.
+                        // Use it as a purchase condition only when it is not the free reward item.
+                        if (options.excludeFreeProductIds && freeProductIds.includes(id)) {
+                            return;
+                        }
+
+                        if (id && !ids.includes(id)) ids.push(id);
                     });
                 };
 
@@ -1829,15 +2037,37 @@
                     if (visited.has(visitKey)) return;
                     visited.add(visitKey);
 
-                    addIds(source.product_id);
-                    addIds(source.productId);
+                    const isRootCoupon = source === normalized;
+
+                    if (isRootCoupon) {
+                        // Some controllers still send the selected Product Name field as
+                        // product_id/product_ids. Allow it, but never let the Free Product
+                        // reward item (Fresh Lumpia) become the required purchase item.
+                        addIds(source.product_id, { excludeFreeProductIds: true });
+                        addIds(source.productId, { excludeFreeProductIds: true });
+                        addIds(source.product_ids, { excludeFreeProductIds: true });
+                        addIds(source.productIds, { excludeFreeProductIds: true });
+                        addIds(source.product, { excludeFreeProductIds: true });
+                    } else {
+                        // Nested product objects usually come from coupon.products or
+                        // purchase_products and may only have {id, name}. Include id/value.
+                        addIds(source.product_id);
+                        addIds(source.productId);
+                        addIds(source.product_ids);
+                        addIds(source.productIds);
+                        addIds(source.product);
+                        addIds(source.id);
+                        addIds(source.value);
+                        addIds(source.pivot?.product_id);
+                        addIds(source.pivot?.productId);
+                    }
+
                     addIds(source.required_product_id);
                     addIds(source.required_product_ids);
                     addIds(source.buy_product_id);
                     addIds(source.buy_product_ids);
                     addIds(source.selected_product_id);
                     addIds(source.selected_product_ids);
-                    addIds(source.product_ids);
                     addIds(source.purchase_product_id);
                     addIds(source.purchase_product_ids);
                     addIds(source.minimum_purchase_product_id);
@@ -1846,7 +2076,6 @@
                     addIds(source.condition_product_ids);
                     addIds(source.total_quantity_product_id);
                     addIds(source.total_quantity_product_ids);
-                    addIds(source.product);
 
                     [
                         source.required_products,
@@ -1887,23 +2116,297 @@
                 return ids;
             },
 
+            selectedProductNameCandidates(coupon) {
+                const normalized = coupon || {};
+                const names = [];
+
+                const pushName = (value) => {
+                    if (value === null || value === undefined) return;
+
+                    if (Array.isArray(value)) {
+                        value.forEach(pushName);
+                        return;
+                    }
+
+                    if (typeof value === 'object') {
+                        pushName(value.product_name);
+                        pushName(value.productName);
+                        pushName(value.purchase_product_name);
+                        pushName(value.selected_product_name);
+                        pushName(value.required_product_name);
+                        pushName(value.text);
+                        pushName(value.label);
+                        pushName(value.title);
+                        pushName(value.name);
+                        pushName(value.product?.name);
+                        return;
+                    }
+
+                    const text = String(value || '').trim();
+                    if (!text || text === 'null' || text === 'undefined' || text === '[]' || text === '{}') return;
+
+                    if (text.startsWith('[') || text.startsWith('{')) {
+                        try {
+                            pushName(JSON.parse(text));
+                            return;
+                        } catch (e) {}
+                    }
+
+                    // Numeric values are IDs, not names.
+                    if (/^\d+$/.test(text)) return;
+
+                    const normalizedName = this.normalizeCouponProductText(text);
+                    if (normalizedName && !names.includes(normalizedName)) {
+                        names.push(normalizedName);
+                    }
+                };
+
+                [
+                    normalized.purchase_product_name,
+                    normalized.purchase_product_names,
+                    normalized.selected_product_name,
+                    normalized.selected_product_names,
+                    normalized.required_product_name,
+                    normalized.required_product_names,
+                    normalized.condition_product_name,
+                    normalized.condition_product_names,
+                    normalized.minimum_purchase_product_name,
+                    normalized.minimum_purchase_product_names,
+                    normalized.total_quantity_product_name,
+                    normalized.total_quantity_product_names,
+                    // Compatibility only: some old payloads put the selected purchase
+                    // product name inside purchase_product_id. Exact-name resolution is
+                    // used only to recover the cart product ID; matching still uses ID.
+                    normalized.purchase_product_id,
+                    normalized.purchase_product_ids,
+                    normalized.purchase_product,
+                    normalized.purchase_products,
+                    normalized.selected_product,
+                    normalized.selected_products,
+                    normalized.required_products,
+                    normalized.condition_products,
+                    normalized.minimum_purchase_products,
+                    normalized.total_quantity_products,
+                    normalized.purchase_condition,
+                    normalized.purchase_conditions,
+                    normalized.minimum_purchase,
+                    normalized.minimum_purchase_condition,
+                    normalized.minimum_purchase_conditions
+                ].forEach(pushName);
+
+                return names;
+            },
+
+            selectedCategoryNameCandidates(coupon) {
+                const normalized = coupon || {};
+                const names = [];
+
+                const pushName = (value) => {
+                    if (value === null || value === undefined) return;
+
+                    if (Array.isArray(value)) {
+                        value.forEach(pushName);
+                        return;
+                    }
+
+                    if (typeof value === 'object') {
+                        pushName(value.category_name);
+                        pushName(value.categoryName);
+                        pushName(value.purchase_category_name);
+                        pushName(value.purchase_product_cat_name);
+                        pushName(value.selected_category_name);
+                        pushName(value.required_category_name);
+                        pushName(value.text);
+                        pushName(value.label);
+                        pushName(value.title);
+                        pushName(value.name);
+                        pushName(value.category?.name);
+                        return;
+                    }
+
+                    const text = String(value || '').trim();
+                    if (!text || text === 'null' || text === 'undefined' || text === '[]' || text === '{}') return;
+
+                    if (text.startsWith('[') || text.startsWith('{')) {
+                        try {
+                            pushName(JSON.parse(text));
+                            return;
+                        } catch (e) {}
+                    }
+
+                    if (/^\d+$/.test(text)) return;
+
+                    const normalizedName = this.normalizeCouponProductText(text);
+                    if (normalizedName && !names.includes(normalizedName)) {
+                        names.push(normalizedName);
+                    }
+                };
+
+                [
+                    normalized.purchase_category_name,
+                    normalized.purchase_category_names,
+                    normalized.purchase_product_cat_name,
+                    normalized.purchase_product_cat_names,
+                    normalized.selected_category_name,
+                    normalized.selected_category_names,
+                    normalized.required_category_name,
+                    normalized.required_category_names,
+                    normalized.condition_category_name,
+                    normalized.condition_category_names,
+                    normalized.minimum_purchase_category_name,
+                    normalized.minimum_purchase_category_names,
+                    normalized.total_quantity_category_name,
+                    normalized.total_quantity_category_names,
+                    normalized.purchase_product_cat_id,
+                    normalized.purchase_product_cat_ids,
+                    normalized.purchase_category_id,
+                    normalized.purchase_category_ids,
+                    normalized.purchase_category,
+                    normalized.purchase_categories,
+                    normalized.selected_category,
+                    normalized.selected_categories,
+                    normalized.required_categories,
+                    normalized.condition_categories,
+                    normalized.minimum_purchase_categories,
+                    normalized.total_quantity_categories,
+                    normalized.purchase_condition,
+                    normalized.purchase_conditions,
+                    normalized.minimum_purchase,
+                    normalized.minimum_purchase_condition,
+                    normalized.minimum_purchase_conditions
+                ].forEach(pushName);
+
+                return names;
+            },
+
+            resolveCouponProductIdsFromSelectedNames(coupon) {
+                const selectedNames = this.selectedProductNameCandidates(coupon);
+                if (!selectedNames.length) return [];
+
+                const ids = [];
+
+                (this.cartItemsForCouponQualification() || []).forEach(item => {
+                    const product = item?.product || {};
+                    const cartProductId = this.normalizeCouponProductId(item?.product_id ?? product?.id ?? '');
+
+                    if (!cartProductId) return;
+
+                    const cartNames = [
+                        item?.product_name,
+                        item?.name,
+                        item?.title,
+                        product?.name,
+                        product?.title,
+                        product?.slug,
+                        item?.slug
+                    ].map(value => this.normalizeCouponProductText(value)).filter(Boolean);
+
+                    if (cartNames.some(name => selectedNames.includes(name)) && !ids.includes(cartProductId)) {
+                        ids.push(cartProductId);
+                    }
+                });
+
+                return ids;
+            },
+
+            resolveCouponCategoryIdsFromSelectedNames(coupon) {
+                const selectedNames = this.selectedCategoryNameCandidates(coupon);
+                if (!selectedNames.length) return [];
+
+                const ids = [];
+
+                (this.cartItemsForCouponQualification() || []).forEach(item => {
+                    const product = item?.product || {};
+                    const category = product?.category || item?.category || {};
+                    const cartCategoryId = this.normalizeCouponCategoryId(
+                        item?.category_id ??
+                        item?.product_category_id ??
+                        product?.category_id ??
+                        category?.id ??
+                        ''
+                    );
+
+                    if (!cartCategoryId) return;
+
+                    const cartNames = [
+                        item?.category_name,
+                        item?.product_category_name,
+                        product?.category_name,
+                        category?.name,
+                        category?.title,
+                        category?.slug
+                    ].map(value => this.normalizeCouponProductText(value)).filter(Boolean);
+
+                    if (cartNames.some(name => selectedNames.includes(name)) && !ids.includes(cartCategoryId)) {
+                        ids.push(cartCategoryId);
+                    }
+                });
+
+                return ids;
+            },
+
+            couponHasProductConditionSource(coupon) {
+                const normalized = coupon || {};
+
+                if (this.getCouponSelectedProductIds(normalized).length > 0) {
+                    return true;
+                }
+
+                if (this.selectedProductNameCandidates(normalized).length > 0) {
+                    return true;
+                }
+
+                const rawProductValues = [
+                    normalized.purchase_product_id,
+                    normalized.purchase_product_ids,
+                    normalized.purchase_product,
+                    normalized.purchase_products,
+                    normalized.selected_product_id,
+                    normalized.selected_product_ids,
+                    normalized.selected_product,
+                    normalized.selected_products,
+                    normalized.condition_product_id,
+                    normalized.condition_product_ids,
+                    normalized.condition_product,
+                    normalized.condition_products,
+                    normalized.minimum_purchase_product_id,
+                    normalized.minimum_purchase_product_ids,
+                    normalized.minimum_purchase_products,
+                    normalized.total_quantity_product_id,
+                    normalized.total_quantity_product_ids,
+                    normalized.total_quantity_products
+                ];
+
+                if (rawProductValues.some(value => this.couponValueHasMeaningfulData(value))) {
+                    return true;
+                }
+
+                return this.parseCouponArray(normalized.purchase_combination)
+                    .map(value => this.normalizeText(value))
+                    .some(value => value === 'product' || value.includes('product'));
+            },
+
             getCouponProductRules(coupon) {
                 const normalized = this.normalizeCoupon(coupon);
                 const defaultRequiredQty = Number(this.couponRequiredProductQuantity(normalized) || 0);
-                const productIds = this.getCouponSelectedProductIds(normalized);
-                const categoryIds = this.getCouponSelectedCategoryIds(normalized);
+                const productIds = [
+                    ...this.getCouponSelectedProductIds(normalized),
+                    ...this.resolveCouponProductIdsFromSelectedNames(normalized)
+                ].filter((id, index, list) => id && list.indexOf(id) === index);
+                const categoryIds = [
+                    ...this.getCouponSelectedCategoryIds(normalized),
+                    ...this.resolveCouponCategoryIdsFromSelectedNames(normalized)
+                ].filter((id, index, list) => id && list.indexOf(id) === index);
                 const rules = [];
 
-                // Purchase condition must be based on selected product/category IDs only.
-                // Do not create rules from product name, slug, coupon name, description,
-                // or category name like "Party Trays".
                 productIds.forEach(productId => {
                     rules.push({
                         product_id: String(productId),
                         category_id: '',
                         required_qty: defaultRequiredQty,
                         name: '',
-                        slug: ''
+                        slug: '',
+                        source_type: 'product'
                     });
                 });
 
@@ -1913,7 +2416,8 @@
                         category_id: String(categoryId),
                         required_qty: defaultRequiredQty,
                         name: '',
-                        slug: ''
+                        slug: '',
+                        source_type: 'category'
                     });
                 });
 
@@ -1959,6 +2463,10 @@
 
                 if (categoryId) {
                     return `category ID ${categoryId}`;
+                }
+
+                if (rule?.source_name) {
+                    return `selected ${rule.source_type || 'product/category'} ${rule.source_name}`;
                 }
 
                 return 'selected product/category';
@@ -2020,7 +2528,10 @@
 
                 if (
                     this.getCouponSelectedProductIds(normalized).length > 0 ||
+                    this.resolveCouponProductIdsFromSelectedNames(normalized).length > 0 ||
                     this.getCouponSelectedCategoryIds(normalized).length > 0 ||
+                    this.resolveCouponCategoryIdsFromSelectedNames(normalized).length > 0 ||
+                    this.couponHasProductConditionSource(normalized) ||
                     this.couponHasCategoryConditionSource(normalized)
                 ) {
                     return true;
@@ -2170,7 +2681,7 @@
                 if (this.couponHasSelectedProductCondition(normalized) && !rules.length) {
                     return {
                         valid: false,
-                        message: 'This coupon has a Product/Category condition, but no selected product ID or category ID was found. Please pass the selected product/category ID from the coupon setup.'
+                        message: 'This coupon has a Product/Category condition, but no selected purchase product/category ID was found. Please pass the selected purchase condition ID from the coupon setup. Do not pass the free reward product ID as the purchase condition.'
                     };
                 }
 
@@ -2369,7 +2880,19 @@ normalizeFreeProductFromCoupon(fp) {
             couponNoLocationValues() {
                 return [
                     'all',
+                    'all area',
+                    'all areas',
+                    'all_area',
+                    'all_areas',
+                    'all location',
+                    'all locations',
+                    'all city',
+                    'all cities',
+                    'all barangay',
+                    'all barangays',
                     'any',
+                    'any area',
+                    'any areas',
                     'none',
                     'null',
                     'n/a',
@@ -2447,8 +2970,42 @@ normalizeFreeProductFromCoupon(fp) {
                     'barangay_ids'
                 ];
 
-                const hasMeaningfulLocationField = locationKeys.some(key =>
-                    this.couponValueHasMeaningfulData(coupon?.[key])
+                const locationValuesAreOnlyNoRestriction = (value) => {
+                    if (value === null || value === undefined) return true;
+
+                    if (Array.isArray(value)) {
+                        return value.every(item => locationValuesAreOnlyNoRestriction(item));
+                    }
+
+                    if (typeof value === 'object') {
+                        return Object.values(value).every(item => locationValuesAreOnlyNoRestriction(item));
+                    }
+
+                    const text = String(value || '').trim();
+
+                    if (!text || ['null', 'undefined', '[]', '{}'].includes(text.toLowerCase())) {
+                        return true;
+                    }
+
+                    if ((text.startsWith('[') && text.endsWith(']')) || (text.startsWith('{') && text.endsWith('}'))) {
+                        try {
+                            return locationValuesAreOnlyNoRestriction(JSON.parse(text));
+                        } catch (e) {}
+                    }
+
+                    return text
+                        .split(/\r?\n|[|,;]/)
+                        .map(item => this.normalizeText(item))
+                        .filter(Boolean)
+                        .every(item => this.couponNoLocationValues().includes(item));
+                };
+
+                const rawLocationValues = locationKeys
+                    .map(key => coupon?.[key])
+                    .filter(value => value !== null && value !== undefined && String(value).trim() !== '');
+
+                const hasMeaningfulLocationField = rawLocationValues.some(value =>
+                    this.couponValueHasMeaningfulData(value) && !locationValuesAreOnlyNoRestriction(value)
                 );
 
                 if (hasMeaningfulLocationField || this.getCouponLocations(coupon).length > 0) {
@@ -2923,6 +3480,16 @@ normalizeFreeProductFromCoupon(fp) {
                 couponLocationRequirementStatus(coupon) {
                     const normalized = this.normalizeCoupon(coupon);
 
+                    // Location = All Area is not a delivery restriction.
+                    // It must work for pickup and delivery.
+                    if (!this.couponHasLocationLimit(normalized) && !this.isFreeShippingCoupon(normalized) && !this.hasLocationDiscount(normalized)) {
+                        const shippingMethod = this.normalizeText(normalized.shipping_method ?? normalized.delivery_method ?? '');
+
+                        if (!shippingMethod.includes('delivery') && !shippingMethod.includes('door')) {
+                            return { valid: true, message: '' };
+                        }
+                    }
+
                     if (!this.couponHasDeliveryLocationRule(normalized)) {
                         return { valid: true, message: '' };
                     }
@@ -3302,6 +3869,29 @@ normalizeFreeProductFromCoupon(fp) {
                     return '';
                 },
 
+                debugCouponQualificationRows() {
+                    return (this.autoCouponChoices || []).map(coupon => {
+                        const normalized = this.normalizeCoupon(coupon);
+                        const productStatus = this.couponProductRequirementStatus(normalized);
+                        const locationStatus = this.couponLocationRequirementStatus(normalized);
+
+                        return {
+                            code: this.couponCodeKey(normalized),
+                            auto_available: coupon.auto_available,
+                            reason: coupon.unavailable_reason || '',
+                            product_valid: productStatus.valid,
+                            product_message: productStatus.message || '',
+                            location_valid: locationStatus.valid,
+                            location_message: locationStatus.message || '',
+                            required_qty: Number(this.couponEffectiveRequiredProductQty(normalized) || 0),
+                            matched_qty: Number(this.couponMatchedProductQty(normalized) || 0),
+                            purchase_product_ids: this.getCouponSelectedProductIds(normalized).join(','),
+                            free_product_ids: this.couponFreeProductIds(normalized).join(','),
+                            purchase_category_ids: this.getCouponSelectedCategoryIds(normalized).join(',')
+                        };
+                    });
+                },
+
                 getShippingDiscountAmountFromCoupon(coupon, deliveryFee) {
                     const normalized = this.normalizeCoupon(coupon);
                     const fee = Number(deliveryFee || 0);
@@ -3572,6 +4162,10 @@ normalizeFreeProductFromCoupon(fp) {
                 this.autoCouponChoices = mappedAutoChoices.filter(c =>
                     c.auto_available && !this.couponAlreadyApplied(c)
                 );
+
+                if (window.APP_DEBUG && typeof console !== 'undefined') {
+                    console.table(this.debugCouponQualificationRows());
+                }
 
                 const availableAutos = this.autoCouponChoices;
 
