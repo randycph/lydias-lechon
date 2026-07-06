@@ -2424,6 +2424,33 @@
                 return rules;
             },
 
+            isMultipleDeliveryAssignmentPending() {
+                if (this.method !== 'delivery' || !this.allowMultiple) {
+                    return false;
+                }
+
+                const deliveries = Array.isArray(this.deliveries) ? this.deliveries : [];
+
+                // While the customer is still checking/assigning items in Multiple Address,
+                // do not remove an already-applied coupon. The order is not final yet.
+                if (typeof this.hasRemainingOrders === 'function' && this.hasRemainingOrders()) {
+                    return true;
+                }
+
+                const activeDeliveries = deliveries.filter(delivery =>
+                    (delivery?.orders || []).length > 0
+                );
+
+                if (!activeDeliveries.length) {
+                    return true;
+                }
+
+                return activeDeliveries.some(delivery =>
+                    !this.normalizeText(delivery?.province) ||
+                    !this.normalizeText(delivery?.city)
+                );
+            },
+
             cartItemsForCouponQualification() {
                 const cartItems = (this.carts || []).filter(item => !item?.is_free_product);
 
@@ -2433,7 +2460,9 @@
 
                     // In multiple-address checkout, delivery.orders are assigned from the same cart items.
                     // Do not add carts + delivery.orders together, or QTY 1 can be counted as QTY 2.
-                    if (deliveryItems.length) {
+                    // But while the customer is still checking items, do not use the partial delivery list,
+                    // because a partially assigned order can make the coupon mechanics fail and remove it.
+                    if (deliveryItems.length && !this.isMultipleDeliveryAssignmentPending()) {
                         return deliveryItems;
                     }
                 }
@@ -3678,6 +3707,14 @@ normalizeFreeProductFromCoupon(fp) {
                     const productRequirement = this.couponProductRequirementStatus(normalized);
 
                     if (!productRequirement.valid) {
+                        // When the user is still checking/assigning products in Multiple Address,
+                        // keep the coupon until the assignment is complete. Otherwise a valid
+                        // coupon can disappear after the first checkbox because delivery.orders
+                        // is still only a partial copy of the cart.
+                        if (this.isMultipleDeliveryAssignmentPending()) {
+                            return false;
+                        }
+
                         return true;
                     }
 

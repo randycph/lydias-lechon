@@ -1009,6 +1009,102 @@ class CartController extends Controller
             }
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | FREE PRODUCT NORMALIZATION FOR MULTIPLE DELIVERY
+        |--------------------------------------------------------------------------
+        | Free products were already added to $carts with price 0, but in multiple
+        | address checkout the DeliveryService reads from the submitted deliveries
+        | payload. If the free product order inside deliveries is not marked free,
+        | the sub-order SalesDetail can still save the normal product price.
+        |
+        | Normalize the deliveries payload here so the DeliveryService receives:
+        | - is_free_product = true
+        | - price / total / gross / net = 0
+        | - coupon_code from the coupon that granted the free product
+        |--------------------------------------------------------------------------
+        */
+        $freeProductMap = [];
+
+        if (is_array($coupon_data)) {
+            foreach ($coupon_data as $coupon) {
+                foreach (($coupon['free_products'] ?? []) as $freeProduct) {
+                    $freeProductId = (int) (
+                        data_get($freeProduct, 'id')
+                        ?? data_get($freeProduct, 'product_id')
+                        ?? data_get($freeProduct, 'product.id')
+                        ?? 0
+                    );
+
+                    if ($freeProductId <= 0) {
+                        continue;
+                    }
+
+                    $freeProductMap[$freeProductId] = [
+                        'id'          => $freeProductId,
+                        'coupon_code' => $coupon['code'] ?? $coupon['coupon_code'] ?? null,
+                        'name'        => data_get($freeProduct, 'name') ?? data_get($freeProduct, 'product.name'),
+                    ];
+                }
+            }
+        }
+
+        $markDeliveryOrderAsFree = function (&$order) use ($freeProductMap) {
+            if (!is_array($order) || empty($freeProductMap)) {
+                return;
+            }
+
+            $productId = (int) (
+                data_get($order, 'product_id')
+                ?? data_get($order, 'id')
+                ?? data_get($order, 'product.id')
+                ?? 0
+            );
+
+            if ($productId <= 0 || !array_key_exists($productId, $freeProductMap)) {
+                return;
+            }
+
+            $order['is_free_product'] = true;
+            $order['coupon_code'] = $order['coupon_code'] ?? $freeProductMap[$productId]['coupon_code'];
+            $order['price'] = 0;
+            $order['amount'] = 0;
+            $order['subtotal'] = 0;
+            $order['total'] = 0;
+            $order['gross_amount'] = 0;
+            $order['net_amount'] = 0;
+            $order['discount_amount'] = 0;
+            $order['paella_price'] = 0;
+
+            if (isset($order['product']) && is_array($order['product'])) {
+                $order['product']['price'] = 0;
+                $order['product']['amount'] = 0;
+                $order['product']['paella_price'] = 0;
+            }
+        };
+
+        if (!empty($freeProductMap) && is_array($decodedDeliveries) && count($decodedDeliveries) > 0) {
+            foreach ($decodedDeliveries as &$delivery) {
+                if (!is_array($delivery)) {
+                    continue;
+                }
+
+                foreach (($delivery['orders'] ?? []) as &$order) {
+                    $markDeliveryOrderAsFree($order);
+                }
+                unset($order);
+            }
+            unset($delivery);
+
+            // Keep request + local decoded object in sync for validation and DeliveryService.
+            $request->merge([
+                'deliveries' => json_encode($decodedDeliveries),
+            ]);
+
+            $deliveries = json_decode($request->deliveries ?? '[]');
+        }
+
         // =============================
         // 4. VALIDATION
         // =============================
@@ -1540,6 +1636,80 @@ if (!empty($couponsList)) {
                     $bakaProduct,
                     $bakaQty
                 );
+
+
+                /*
+                |------------------------------------------------------------------
+                | SAFETY PATCH FOR MULTIPLE ADDRESS SALES SUMMARY
+                |------------------------------------------------------------------
+                | Some DeliveryService implementations rebuild SalesDetail from the
+                | Product model and ignore the submitted order price. This makes the
+                | sales summary show the normal price for free products. After the
+                | sub-orders are created, force only the free products assigned per
+                | delivery address to zero.
+                |------------------------------------------------------------------
+                */
+                if (!empty($freeProductMap) && is_array($decodedDeliveries)) {
+                    $subSalesHeaders = SalesHeader::where('parent_sales_header_id', $salesHeader->id)
+                        ->orderBy('id')
+                        ->get()
+                        ->values();
+
+                    foreach ($decodedDeliveries as $deliveryIndex => $deliveryData) {
+                        if (!is_array($deliveryData)) {
+                            continue;
+                        }
+
+                        $freeProductIdsForDelivery = collect($deliveryData['orders'] ?? [])
+                            ->filter(function ($order) {
+                                return (bool) data_get($order, 'is_free_product', false) === true;
+                            })
+                            ->map(function ($order) {
+                                return (int) (
+                                    data_get($order, 'product_id')
+                                    ?? data_get($order, 'id')
+                                    ?? data_get($order, 'product.id')
+                                    ?? 0
+                                );
+                            })
+                            ->filter(fn ($productId) => $productId > 0)
+                            ->unique()
+                            ->values()
+                            ->all();
+
+                        if (empty($freeProductIdsForDelivery)) {
+                            continue;
+                        }
+
+                        $subSalesHeader = $subSalesHeaders->get($deliveryIndex);
+
+                        if (!$subSalesHeader) {
+                            continue;
+                        }
+
+                        SalesDetail::where('sales_header_id', $subSalesHeader->id)
+                            ->whereIn('product_id', $freeProductIdsForDelivery)
+                            ->update([
+                                'price'           => 0,
+                                'paella_price'    => 0,
+                                'tax_amount'      => 0,
+                                'discount_amount' => 0,
+                                'gross_amount'    => 0,
+                                'net_amount'      => 0,
+                            ]);
+
+                        $subGrossAmount = (float) SalesDetail::where('sales_header_id', $subSalesHeader->id)
+                            ->sum('gross_amount');
+
+                        $subDeliveryFee = (float) ($subSalesHeader->delivery_fee_amount ?? 0);
+                        $subDiscount = (float) ($subSalesHeader->discount_amount ?? 0);
+
+                        $subSalesHeader->update([
+                            'gross_amount' => $subGrossAmount,
+                            'net_amount'   => max(0, ($subGrossAmount + $subDeliveryFee) - $subDiscount),
+                        ]);
+                    }
+                }
             }
         }
 

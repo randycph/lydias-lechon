@@ -50,6 +50,178 @@
                     
                 </div>
 
+                @php
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Free product display support
+                    |--------------------------------------------------------------------------
+                    | In multiple-address orders, the free product can be stored in the
+                    | delivery-address JSON while the original Product model still has its
+                    | normal price. Use coupon data + line flags to display it as FREE.
+                    */
+                    $couponRowsForFreeProducts = isset($couponRows) ? collect($couponRows) : collect();
+
+                    $extractFreeProductIds = function ($value) use (&$extractFreeProductIds) {
+                        $ids = collect();
+
+                        if ($value === null || $value === '' || $value === []) {
+                            return $ids;
+                        }
+
+                        if ($value instanceof \Illuminate\Support\Collection) {
+                            $value = $value->toArray();
+                        }
+
+                        if ($value instanceof \Illuminate\Database\Eloquent\Collection) {
+                            $value = $value->toArray();
+                        }
+
+                        if (is_object($value)) {
+                            $value = (array) $value;
+                        }
+
+                        if (is_string($value)) {
+                            $text = trim($value);
+
+                            if ($text === '' || in_array(strtolower($text), ['null', 'undefined', '[]', '{}'])) {
+                                return $ids;
+                            }
+
+                            $decoded = json_decode($text, true);
+
+                            if (json_last_error() === JSON_ERROR_NONE) {
+                                return $extractFreeProductIds($decoded);
+                            }
+
+                            foreach (preg_split('/[,|]/', $text) as $part) {
+                                $part = trim($part);
+
+                                if (is_numeric($part)) {
+                                    $ids->push((int) $part);
+                                }
+                            }
+
+                            return $ids->unique()->values();
+                        }
+
+                        if (is_numeric($value)) {
+                            return collect([(int) $value]);
+                        }
+
+                        if (is_array($value)) {
+                            foreach ([
+                                'id',
+                                'product_id',
+                                'productId',
+                                'free_product_id',
+                                'freeProductId',
+                                'reward_product_id',
+                                'rewardProductId',
+                                'gift_product_id',
+                                'giftProductId',
+                            ] as $key) {
+                                if (!empty($value[$key]) && is_numeric($value[$key])) {
+                                    $ids->push((int) $value[$key]);
+                                }
+                            }
+
+                            foreach ([
+                                'product',
+                                'free_product',
+                                'freeProduct',
+                                'reward_product',
+                                'rewardProduct',
+                                'gift_product',
+                                'giftProduct',
+                                'free_products',
+                                'reward_products',
+                                'gift_products',
+                            ] as $key) {
+                                if (!empty($value[$key])) {
+                                    $ids = $ids->merge($extractFreeProductIds($value[$key]));
+                                }
+                            }
+
+                            foreach ($value as $item) {
+                                $ids = $ids->merge($extractFreeProductIds($item));
+                            }
+                        }
+
+                        return $ids->unique()->values();
+                    };
+
+                    $freeProductIds = collect();
+                    $couponIds = $couponRowsForFreeProducts
+                        ->pluck('coupon_id')
+                        ->filter()
+                        ->unique()
+                        ->values();
+
+                    if ($couponIds->isNotEmpty()) {
+                        $couponModelsForFreeProducts = \App\Models\Coupon::whereIn('id', $couponIds)->get();
+
+                        foreach ($couponModelsForFreeProducts as $couponModelForFreeProduct) {
+                            $reward = strtolower(trim($couponModelForFreeProduct->reward ?? ''));
+                            $isFreeProductCoupon = str_contains($reward, 'free-product') || str_contains($reward, 'free_product');
+
+                            if (!$isFreeProductCoupon) {
+                                continue;
+                            }
+
+                            foreach ([
+                                $couponModelForFreeProduct->free_products ?? null,
+                                $couponModelForFreeProduct->free_product ?? null,
+                                $couponModelForFreeProduct->free_product_id ?? null,
+                                $couponModelForFreeProduct->free_product_ids ?? null,
+                                $couponModelForFreeProduct->reward_product ?? null,
+                                $couponModelForFreeProduct->reward_products ?? null,
+                                $couponModelForFreeProduct->reward_product_id ?? null,
+                                $couponModelForFreeProduct->reward_product_ids ?? null,
+                                $couponModelForFreeProduct->gift_product_id ?? null,
+                                $couponModelForFreeProduct->gift_product_ids ?? null,
+
+                                // fallback for older setups where the free reward item was saved here
+                                $couponModelForFreeProduct->product_id ?? null,
+                                $couponModelForFreeProduct->product_ids ?? null,
+                            ] as $candidate) {
+                                $freeProductIds = $freeProductIds->merge($extractFreeProductIds($candidate));
+                            }
+                        }
+                    }
+
+                    $freeProductIds = $freeProductIds->unique()->values();
+
+                    $isFreeProductLine = function ($line) use ($freeProductIds) {
+                        $productId = (int) (data_get($line, 'product_id') ?: data_get($line, 'product.id') ?: 0);
+
+                        if ((bool) data_get($line, 'is_free_product', false) === true) {
+                            return true;
+                        }
+
+                        if ((bool) data_get($line, 'is_free', false) === true) {
+                            return true;
+                        }
+
+                        if ((bool) data_get($line, 'free_product', false) === true) {
+                            return true;
+                        }
+
+                        if (!empty(data_get($line, 'coupon_code')) && (float) (data_get($line, 'price') ?? data_get($line, 'product.price') ?? 0) <= 0) {
+                            return true;
+                        }
+
+                        return $productId > 0 && $freeProductIds->contains($productId);
+                    };
+
+                    $displaySalesDetailsGross = collect($salesDetails ?? [])->sum(function ($detail) use ($isFreeProductLine) {
+                        return $isFreeProductLine($detail) ? 0 : (float) ($detail->gross_amount ?? 0);
+                    });
+
+                    $displaySalesDetailsNet = collect($salesDetails ?? [])->sum(function ($detail) use ($isFreeProductLine) {
+                        return $isFreeProductLine($detail) ? 0 : (float) ($detail->net_amount ?? 0);
+                    });
+                @endphp
+
                 <div class="row row-sm align-items-start">
                     <div class="col-sm-6 col-lg-8">
                         <label class="tx-sans tx-uppercase tx-10 tx-medium tx-spacing-1 tx-color-03">Customer Details</label>
@@ -102,26 +274,45 @@
                                                         @forelse($products as $product)
                                                             @php
                                                                 $prod = \App\Models\Product::find($product->product_id);
-                                                                $lineTotal = ($prod->price * ($product->qty ?? 1))
-                                                                        + (!empty($product->paella) ? ($prod->paella_price ?? 0) * ($product->qty ?? 1) : 0);
+                                                                $qty = (int) ($product->qty ?? 1);
+                                                                $isFreeProduct = $isFreeProductLine($product);
 
+                                                                $regularPrice = (float) ($prod->price ?? data_get($product, 'product.price', 0));
+                                                                $displayPrice = $isFreeProduct ? 0 : $regularPrice;
+
+                                                                $regularPaellaPrice = !empty($product->paella)
+                                                                    ? (float) (($prod->paella_price ?? null) ?? data_get($product, 'product.paella_price', 0))
+                                                                    : 0;
+                                                                $displayPaellaPrice = $isFreeProduct ? 0 : $regularPaellaPrice;
+
+                                                                $lineTotal = ($displayPrice * $qty) + ($displayPaellaPrice * $qty);
                                                                 $grandTotal += $lineTotal;
                                                             @endphp
                                                             <tr>
                                                                 <td class="tx-nowrap">
                                                                     {!! highlightPaella($product?->product_name ?? $product?->product?->name ?? '') !!}
+                                                                    @if($isFreeProduct)
+                                                                        <br><small class="tx-success tx-semibold">FREE</small>
+                                                                    @endif
                                                                 </td>
-                                                                <th class="tx-center">{{ $prod->no_of_pax }}</th>                                
+                                                                <th class="tx-center">{{ $prod->no_of_pax ?? '' }}</th>                                
                                                                 <td class="tx-nowrap">
                                                                     {{ \Carbon\Carbon::parse(($address->delivery_date . ' ' . $address->delivery_time))->format('F d, Y g:i A') }}
                                                                 </td>
                                                                 <td></td>
-                                                                <td class="tx-center">{{ number_format((int) ($product->qty ?? 0), 0) }}</td>
+                                                                <td class="tx-center">{{ number_format($qty, 0) }}</td>
                                                                 <td class="tx-right">
-                                                                    ₱{{ number_format(!empty($product->paella) ? ($product->product->paella_price ?? 0) : 0, 2) }}
+                                                                    ₱{{ number_format($displayPaellaPrice, 2) }}
                                                                 </td>
                                                                 <td class="tx-right">
-                                                                    ₱{{ number_format($prod->price ?? 0, 2) }}
+                                                                    @if($isFreeProduct)
+                                                                        <span class="tx-success tx-semibold">FREE</span>
+                                                                        @if($regularPrice > 0)
+                                                                            <br><small class="text-muted"><s>₱{{ number_format($regularPrice, 2) }}</s></small>
+                                                                        @endif
+                                                                    @else
+                                                                        ₱{{ number_format($displayPrice, 2) }}
+                                                                    @endif
                                                                 </td>
                                                                 <td class="tx-right">
                                                                     ₱{{ number_format($lineTotal, 2) }}
@@ -240,9 +431,20 @@
                             <tbody>
 
                             @forelse($salesDetails as $details)
+                            @php
+                                $isFreeDetail = $isFreeProductLine($details);
+                                $displayDetailPrice = $isFreeDetail ? 0 : (float) ($details?->price ?? 0);
+                                $displayDetailPaellaPrice = $isFreeDetail ? 0 : (float) ($details?->paella_price ?? 0);
+                                $displayDetailGross = $isFreeDetail ? 0 : (float) ($details?->gross_amount ?? 0);
+                            @endphp
                             <tr>
                                 <td class="tx-nowrap">{{$details->product->code}}</td>
-                                <td class="tx-nowrap">{!! highlightPaella($details?->product_name) !!}</td>
+                                <td class="tx-nowrap">
+                                    {!! highlightPaella($details?->product_name) !!}
+                                    @if($isFreeDetail)
+                                        <br><small class="tx-success tx-semibold">FREE</small>
+                                    @endif
+                                </td>
                                 <th class="tx-center">{{$details->no_of_pax}}</th>                                
                                 <td class="tx-nowrap">
                                     @if ($sales->delivery_status == 'Open Date')
@@ -268,9 +470,18 @@
                                     @endforelse
                                 </td>
                                 <td class="tx-center">{{number_format($details?->qty, 0)}}</td>
-                                <td class="tx-right">₱{{number_format(($details?->paella_price),2)}}</td>
-                                <td class="tx-right">₱{{number_format($details?->price, 2)}}</td>
-                                <td class="tx-right">₱{{number_format($details?->gross_amount, 2)}}</td>                               
+                                <td class="tx-right">₱{{number_format($displayDetailPaellaPrice, 2)}}</td>
+                                <td class="tx-right">
+                                    @if($isFreeDetail)
+                                        <span class="tx-success tx-semibold">FREE</span>
+                                        @if((float) ($details?->price ?? 0) > 0)
+                                            <br><small class="text-muted"><s>₱{{ number_format($details?->price, 2) }}</s></small>
+                                        @endif
+                                    @else
+                                        ₱{{number_format($displayDetailPrice, 2)}}
+                                    @endif
+                                </td>
+                                <td class="tx-right">₱{{number_format($displayDetailGross, 2)}}</td>                               
                             </tr>
                             @empty
                                 <tr>
@@ -377,10 +588,10 @@
                                     <td class="tx-right ">₱{{number_format($sales->delivery_fee_amount, 2)}}</td>
                                 </tr>
                             @endif
-                            @if($salesDetails->sum('gross_amount') > 0)
+                            @if($displaySalesDetailsGross > 0 || $sales->delivery_fee_amount > 0)
                                 <tr>
                                     <td class="tx-left" colspan="8">Subtotal</td>
-                                    <td class="tx-right">₱{{number_format($salesDetails->sum('gross_amount') + $sales->delivery_fee_amount, 2)}}</td>
+                                    <td class="tx-right">₱{{number_format($displaySalesDetailsGross + $sales->delivery_fee_amount, 2)}}</td>
                                 </tr>
                             @endif
                             @if($displayOrderDiscount > 0 && (!isset($displayCouponRows) || count($displayCouponRows) == 0))
@@ -432,10 +643,10 @@
                                                             </tr>
                                                         @empty
                                                         @endforelse
-                                                        @if($salesDetails->sum('net_amount') > 0)
+                                                        @if($displaySalesDetailsNet > 0 || $sales->delivery_fee_amount > 0)
                                                             <tr style="font-weight:bold;">
                                                                 <td class="tx-left" colspan="8">Total</td>
-                                                                <td class="tx-right">₱{{number_format($salesDetails->sum('net_amount') + $sales->delivery_fee_amount - $displayOrderDiscount, 2)}}</td>
+                                                                <td class="tx-right">₱{{number_format($displaySalesDetailsNet + $sales->delivery_fee_amount - $displayOrderDiscount, 2)}}</td>
                                                             </tr>
                                                         @endif
                                                         </tbody>
@@ -500,7 +711,7 @@
                                                             </tr>
                                                         @endif
                                                         @php
-                                                            $total_balance = ($sales->items->sum('net_amount') + $sales->delivery_fee_amount) - ($sales->payments->where('status', 'PAID')->sum('amount'));
+                                                            $total_balance = ($displaySalesDetailsNet + $sales->delivery_fee_amount) - ($sales->payments->where('status', 'PAID')->sum('amount'));
                                                         @endphp
                                                         @if($total_balance > 0 && $sales->payments->where('status','PAID')->sum('amount') > 0)
                                                             <tr style="font-style:italic;">
