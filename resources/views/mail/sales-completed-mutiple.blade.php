@@ -42,28 +42,61 @@ Click here to view and manage this order
         $h->delivery_type === 'Door to door delivery'
     ) ? (float) ($h->email_delivery_fee_amount ?? $h->delivery_fee_amount) : 0;
 
-    $couponRows = collect();
-
-    if (!empty($h->applied_coupons) && count($h->applied_coupons) > 0) {
-        $couponRows = collect($h->applied_coupons);
-    } elseif (!empty($h->couponUsed) && count($h->couponUsed) > 0) {
-        $couponRows = collect($h->couponUsed);
-    } else {
-        $couponRows = \App\EcommerceModel\CouponCart::where('sales_header_id', $h->id)
-            ->where('status', 1)
-            ->where('discount_used', '>', 0)
-            ->select('coupon_id', 'coupon_code', 'discount_used')
-            ->get();
-    }
-
     $discountAmount = (float) (
         $h->email_discount_amount ??
         $h->discount_amount ??
         0
     );
 
+    /*
+     * Coupon display fix:
+     * Do not filter by discount_used > 0 because valid coupons can have 0.00 discount,
+     * such as free product, free shipping, or coupon indicator rows.
+     * Also include child sales headers for multiple-address orders.
+     */
+    $couponRows = collect();
+
+    if (!empty($h->applied_coupons)) {
+        $couponRows = $h->applied_coupons instanceof \Illuminate\Support\Collection
+            ? $h->applied_coupons
+            : collect($h->applied_coupons);
+    } elseif (!empty($h->couponUsed)) {
+        $couponRows = $h->couponUsed instanceof \Illuminate\Support\Collection
+            ? $h->couponUsed
+            : collect($h->couponUsed);
+    } else {
+        $salesHeaderIds = collect([$h->id]);
+
+        if (!empty($salesHeaders) && $salesHeaders->count() > 0) {
+            $salesHeaderIds = $salesHeaderIds->merge($salesHeaders->pluck('id'));
+        }
+
+        $couponRows = \App\EcommerceModel\CouponCart::whereIn('sales_header_id', $salesHeaderIds->unique()->values())
+            ->where('status', 1)
+            ->select('coupon_id', 'coupon_code', 'discount_used')
+            ->get();
+    }
+
+    // Fallback if only coupon code was saved directly on the sales header.
+    if ($couponRows->isEmpty() && !empty($h->coupon_code)) {
+        $couponRows = collect([
+            (object) [
+                'coupon_id'     => $h->coupon_id ?? null,
+                'coupon_code'   => $h->coupon_code,
+                'discount_used' => $discountAmount,
+            ]
+        ]);
+    }
+
     if ($discountAmount <= 0 && $couponRows->count() > 0) {
-        $discountAmount = (float) $couponRows->sum('discount_used');
+        $discountAmount = (float) $couponRows->sum(function ($coupon) {
+            return (float) (
+                data_get($coupon, 'discount_used') ??
+                data_get($coupon, 'discount_amount') ??
+                data_get($coupon, 'amount') ??
+                0
+            );
+        });
     }
 
     $grandTotal = (float) (
@@ -186,10 +219,24 @@ Click here to view and manage this order
 @if($couponRows && count($couponRows) > 0)
 @foreach($couponRows as $coupon)
 @php
-    $isGiftCertificate = empty($coupon->coupon_id);
+    $couponIdValue = data_get($coupon, 'coupon_id', '__missing__');
+    $isGiftCertificate = $couponIdValue !== '__missing__' && empty($couponIdValue);
     $discountLabel = $isGiftCertificate ? 'Gift Certificate' : 'Coupon Discount';
+
+    $couponCode = data_get($coupon, 'coupon_code')
+        ?? data_get($coupon, 'code')
+        ?? data_get($coupon, 'coupon.code')
+        ?? data_get($coupon, 'coupon.coupon_code')
+        ?? 'N/A';
+
+    $couponDiscount = (float) (
+        data_get($coupon, 'discount_used') ??
+        data_get($coupon, 'discount_amount') ??
+        data_get($coupon, 'amount') ??
+        0
+    );
 @endphp
-| **{{ $discountLabel }}**<br><small>{{ $coupon->coupon_code ?? 'N/A' }}</small> |  |  |  | **-{{ number_format((float) ($coupon->discount_used ?? 0), 2) }}** |
+| **{{ $discountLabel }}**<br><small>{{ $couponCode }}</small> |  |  |  | @if($couponDiscount > 0) **-{{ number_format($couponDiscount, 2) }}** @else **Applied** @endif |
 @endforeach
 @elseif($discountAmount > 0)
 | **Discount** |  |  |  | **-{{ number_format($discountAmount, 2) }}** |

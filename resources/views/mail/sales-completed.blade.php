@@ -718,7 +718,34 @@ Media Item
                                                                                               max(0, ($subtotal + $deliveryFee) - $discountAmount)
                                                                                         );
 
-                                                                                        $couponRows = $h->applied_coupons ?? $h->couponUsed ?? collect();
+                                                                                        /*
+                                                                                         * Coupon display fix:
+                                                                                         * The old template only showed coupon rows when discountAmount > 0.
+                                                                                         * That hides valid coupons with 0.00 discount_used, like free product / free shipping coupons,
+                                                                                         * or when the header discount amount was not saved but couponUsed exists.
+                                                                                         */
+                                                                                        $rawCouponRows = $h->applied_coupons ?? $h->couponUsed ?? [];
+
+                                                                                        if ($rawCouponRows instanceof \Illuminate\Support\Collection) {
+                                                                                              $couponRows = $rawCouponRows;
+                                                                                        } elseif (is_array($rawCouponRows)) {
+                                                                                              $couponRows = collect($rawCouponRows);
+                                                                                        } elseif (!empty($rawCouponRows)) {
+                                                                                              $couponRows = collect([$rawCouponRows]);
+                                                                                        } else {
+                                                                                              $couponRows = collect();
+                                                                                        }
+
+                                                                                        // Fallback if only the coupon code/discount was saved directly on the sales header.
+                                                                                        if ($couponRows->isEmpty() && !empty($h->coupon_code)) {
+                                                                                              $couponRows = collect([
+                                                                                                    (object) [
+                                                                                                          'coupon_id'     => $h->coupon_id ?? null,
+                                                                                                          'coupon_code'   => $h->coupon_code,
+                                                                                                          'discount_used' => $discountAmount,
+                                                                                                    ]
+                                                                                              ]);
+                                                                                        }
                                                                                     @endphp
 
                                                                                     @forelse($h->items as $details)                      
@@ -751,29 +778,45 @@ Media Item
                                                                                     </tr>
                                                                                     @endif
 
-                                                                                    @if($discountAmount > 0)
-                                                                                          @if($couponRows && count($couponRows) > 0)
-                                                                                                @foreach($couponRows as $coupon)
-                                                                                                      @php
-                                                                                                            $couponIdValue = data_get($coupon, 'coupon_id', '__missing__');
-                                                                                                            $isGiftCertificate = $couponIdValue !== '__missing__' && empty($couponIdValue);
-                                                                                                            $discountLabel = $isGiftCertificate ? 'Gift Certificate' : 'Coupon Discount';
-                                                                                                      @endphp
-                                                                                                      <tr>
-                                                                                                            <td class="tx-left" colspan="6" style="font-size:11px;">
-                                                                                                                  {{ $discountLabel }} (<i>{{ $coupon->coupon_code ?? 'N/A' }}</i>)
-                                                                                                            </td>
-                                                                                                            <td class="tx-right" style="font-size:11px; color:red;">
-                                                                                                                  -{{ number_format((float) ($coupon->discount_used ?? 0), 2) }}
-                                                                                                            </td>
-                                                                                                      </tr>
-                                                                                                @endforeach
-                                                                                          @else
+                                                                                    {{-- Show coupon/gift certificate whenever it exists, even if discount_used is 0.00 --}}
+                                                                                    @if($couponRows->count() > 0)
+                                                                                          @foreach($couponRows as $coupon)
+                                                                                                @php
+                                                                                                      $couponIdValue = data_get($coupon, 'coupon_id', '__missing__');
+                                                                                                      $isGiftCertificate = $couponIdValue !== '__missing__' && empty($couponIdValue);
+                                                                                                      $discountLabel = $isGiftCertificate ? 'Gift Certificate' : 'Coupon Discount';
+
+                                                                                                      $couponCode = data_get($coupon, 'coupon_code')
+                                                                                                            ?? data_get($coupon, 'code')
+                                                                                                            ?? data_get($coupon, 'coupon.code')
+                                                                                                            ?? data_get($coupon, 'coupon.coupon_code')
+                                                                                                            ?? 'N/A';
+
+                                                                                                      $couponDiscount = (float) (
+                                                                                                            data_get($coupon, 'discount_used')
+                                                                                                            ?? data_get($coupon, 'discount_amount')
+                                                                                                            ?? data_get($coupon, 'amount')
+                                                                                                            ?? 0
+                                                                                                      );
+                                                                                                @endphp
                                                                                                 <tr>
-                                                                                                      <td class="tx-left" colspan="6" style="font-size:11px;">Discount</td>
-                                                                                                      <td class="tx-right" style="font-size:11px; color:red;">-{{ number_format($discountAmount, 2) }}</td>
+                                                                                                      <td class="tx-left" colspan="6" style="font-size:11px;">
+                                                                                                            {{ $discountLabel }} (<i>{{ $couponCode }}</i>)
+                                                                                                      </td>
+                                                                                                      <td class="tx-right" style="font-size:11px; color:red;">
+                                                                                                            @if($couponDiscount > 0)
+                                                                                                                  -{{ number_format($couponDiscount, 2) }}
+                                                                                                            @else
+                                                                                                                  Applied
+                                                                                                            @endif
+                                                                                                      </td>
                                                                                                 </tr>
-                                                                                          @endif
+                                                                                          @endforeach
+                                                                                    @elseif($discountAmount > 0)
+                                                                                          <tr>
+                                                                                                <td class="tx-left" colspan="6" style="font-size:11px;">Discount</td>
+                                                                                                <td class="tx-right" style="font-size:11px; color:red;">-{{ number_format($discountAmount, 2) }}</td>
+                                                                                          </tr>
                                                                                     @endif
 
                                                                                     <tr><td colspan="7"><hr></td></tr>
