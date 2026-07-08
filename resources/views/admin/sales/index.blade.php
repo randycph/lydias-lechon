@@ -371,40 +371,45 @@
                                     </td>
                                    @php
                                     /*
-                                        Multiple transaction rule:
-                                        - Discount should only be deducted/displayed on the -A order.
-                                        - -B, -C, -D, etc. should show their own gross + delivery only.
-                                        - Single/non-suffixed orders can still use their discount normally.
+                                        Amount display rule:
+                                        - net_amount is already the final order amount saved by the order summary.
+                                        - It already includes delivery fee and applied discounts.
+                                        - Do NOT add delivery_fee_amount again here, otherwise orders like:
+                                          items 4,700 + delivery 300 = 5,000 will display as 5,300.
                                     */
-
-                                    $orderNumber = strtoupper(trim((string) ($sale->order_number ?? '')));
-
-                                    preg_match('/-([A-Z])$/', $orderNumber, $suffixMatch);
-                                    $orderSuffix = $suffixMatch[1] ?? null;
-
-                                    $isMultipleChild = !empty($orderSuffix);
-                                    $isDiscountAllowedOnThisRow = !$isMultipleChild || $orderSuffix === 'A';
 
                                     $gross    = (float) ($sale->gross_amount ?? 0);
                                     $delivery = (float) ($sale->delivery_fee_amount ?? 0);
-                                    $discount = $isDiscountAllowedOnThisRow
-                                        ? (float) ($sale->discount_amount ?? 0)
-                                        : 0;
+                                    $net      = (float) ($sale->net_amount ?? 0);
 
                                     /*
-                                        Force display amount from gross + delivery - discount,
-                                        because net_amount may already contain discount on B/C rows.
+                                        Use saved final amount first.
+                                        Fallback is only for old records where net_amount is empty.
                                     */
-                                    $displayAmount = max(($gross + $delivery) - $discount, 0);
+                                    if ($net > 0) {
+                                        $displayAmount = $net;
+                                    } else {
+                                        $orderNumber = strtoupper(trim((string) ($sale->order_number ?? '')));
 
-                                    /*
-                                        Fallback only if gross/delivery are both empty.
-                                    */
-                                    if ($displayAmount <= 0 && (float) ($sale->net_amount ?? 0) > 0) {
-                                        $displayAmount = (float) $sale->net_amount;
+                                        preg_match('/-([A-Z])$/', $orderNumber, $suffixMatch);
+                                        $orderSuffix = $suffixMatch[1] ?? null;
 
-                                        if (!$isDiscountAllowedOnThisRow) {
-                                            $displayAmount += (float) ($sale->discount_amount ?? 0);
+                                        $isMultipleChild = !empty($orderSuffix);
+                                        $isDiscountAllowedOnThisRow = !$isMultipleChild || $orderSuffix === 'A';
+
+                                        $discount = $isDiscountAllowedOnThisRow
+                                            ? (float) ($sale->discount_amount ?? 0)
+                                            : 0;
+
+                                        /*
+                                            Old-record fallback:
+                                            If gross is already populated, prefer gross minus discount.
+                                            Only add delivery when gross is empty but delivery exists.
+                                        */
+                                        if ($gross > 0) {
+                                            $displayAmount = max($gross - $discount, 0);
+                                        } else {
+                                            $displayAmount = max($delivery - $discount, 0);
                                         }
                                     }
 
@@ -632,7 +637,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <th colspan="15" style="text-align: center;"> <p class="text-danger">No Sales Transaction found.</p></th>
+                                    <th colspan="10" style="text-align: center;"> <p class="text-danger">No Sales Transaction found.</p></th>
                                 </tr>
                             @endforelse
                             </tbody>
