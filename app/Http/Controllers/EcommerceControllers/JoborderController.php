@@ -659,33 +659,37 @@ class JoborderController extends Controller
             return redirect()->route('sales-transaction.index')->with('success', __('standard.joborders.create_success'));
     }
 
-    public function upload_file_to_storage($folder, $file, $key = '') {
+    public function upload_file_to_storage($folder, $file, $key = '')
+    {
+        $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $extension = $file->getClientOriginalExtension();
 
-        $fileName = $file->getClientOriginalName();
-        if (Storage::disk('public')->exists($folder.'/'.$fileName)) {
-            $fileNames = explode(".", $fileName);
+        $filename = preg_replace('/[^A-Za-z0-9 _.-]/', '', $filename);
+
+        $filename = preg_replace('/\s+/', '_', trim($filename));
+
+        if (empty($filename)) {
+            $filename = 'file';
+        }
+
+        $fileName = $filename . '.' . $extension;
+
+        if (Storage::disk('public')->exists($folder . '/' . $fileName)) {
             $count = 2;
-            $newFilename = $fileNames[0].' ('.$count.').'.$fileNames[1];
-            while(Storage::disk('public')->exists($folder.'/'.$newFilename)) {
-                $count += 1;
-                $newFilename = $fileNames[0].' ('.$count.').'.$fileNames[1];
-            }
-
-            $fileName = $newFilename;
+            do {
+                $fileName = $filename . ' (' . $count . ').' . $extension;
+                $count++;
+            } while (Storage::disk('public')->exists($folder . '/' . $fileName));
         }
 
         $path = Storage::disk('public')->putFileAs($folder, $file, $fileName);
-        $url = Storage::disk('public')->url($path);
+
         $returnArr = [
             'name' => $fileName,
-            'url' => $url
+            'url'  => Storage::disk('public')->url($path),
         ];
 
-        if ($key == '') {
-            return $returnArr;
-        } else {
-            return $returnArr[$key];
-        }
+        return $key === '' ? $returnArr : $returnArr[$key];
     }
 
     public function staff_edit_payment($id)

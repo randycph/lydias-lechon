@@ -1716,33 +1716,31 @@ class SalesController extends Controller
         return redirect('/order?success=order_submitted');
     }
 
-    public function upload_file_to_storage($folder, $file, $key = '') {
+    public function upload_file_to_storage($folder, $file, $key = '')
+    {
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $extension = $file->getClientOriginalExtension();
 
-        $fileName = $file->getClientOriginalName();
-        if (Storage::disk('public')->exists($folder.'/'.$fileName)) {
-            $fileNames = explode(".", $fileName);
-            $count = 2;
-            $newFilename = $fileNames[0].' ('.$count.').'.$fileNames[1];
-            while(Storage::disk('public')->exists($folder.'/'.$newFilename)) {
-                $count += 1;
-                $newFilename = $fileNames[0].' ('.$count.').'.$fileNames[1];
-            }
+        $safeName = preg_replace('/[^A-Za-z0-9 _.-]/', '', $originalName);
 
-            $fileName = $newFilename;
+        $safeName = Str::of($safeName)->replace(' ', '_');
+
+        $fileName = $safeName . '.' . $extension;
+
+        $count = 2;
+        while (Storage::disk('public')->exists($folder.'/'.$fileName)) {
+            $fileName = $safeName . " ({$count})." . $extension;
+            $count++;
         }
 
         $path = Storage::disk('public')->putFileAs($folder, $file, $fileName);
-        $url = Storage::disk('public')->url($path);
+
         $returnArr = [
             'name' => $fileName,
-            'url' => $url
+            'url' => Storage::disk('public')->url($path),
         ];
 
-        if ($key == '') {
-            return $returnArr;
-        } else {
-            return $returnArr[$key];
-        }
+        return $key === '' ? $returnArr : $returnArr[$key];
     }
 
     public function display_payments(Request $request){
