@@ -157,8 +157,27 @@
                         ->unique()
                         ->values();
 
-                    if ($couponIds->isNotEmpty()) {
-                        $couponModelsForFreeProducts = \App\Models\Coupon::whereIn('id', $couponIds)->get();
+                    /*
+                     * Resolve the correct Coupon model namespace.
+                     * Some Lydia's ecommerce projects use App\EcommerceModel\Coupon,
+                     * while newer Laravel projects may use App\Models\Coupon.
+                     * This prevents the page from crashing on tickets with coupon rows.
+                     */
+                    $couponModelClass = null;
+
+                    foreach ([
+                        \App\EcommerceModel\Coupon::class,
+                        \App\Models\Coupon::class,
+                        \App\Coupon::class,
+                    ] as $possibleCouponModelClass) {
+                        if (class_exists($possibleCouponModelClass)) {
+                            $couponModelClass = $possibleCouponModelClass;
+                            break;
+                        }
+                    }
+
+                    if ($couponIds->isNotEmpty() && $couponModelClass) {
+                        $couponModelsForFreeProducts = $couponModelClass::whereIn('id', $couponIds)->get();
 
                         foreach ($couponModelsForFreeProducts as $couponModelForFreeProduct) {
                             $reward = strtolower(trim($couponModelForFreeProduct->reward ?? ''));
