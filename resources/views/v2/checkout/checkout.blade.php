@@ -715,20 +715,14 @@
 
                 /*
                 |--------------------------------------------------------------------------
-                | Re-show location coupon popup when location becomes valid again
+                | Re-show manual/location coupon popup when location becomes valid again
                 |--------------------------------------------------------------------------
-                | Example flow:
-                | 1. Customer selects a valid city and coupon popup appears.
-                | 2. Customer changes to an invalid city, so the coupon is removed/hidden.
-                | 3. Customer selects the valid city again.
-                |
-                | Clear the shown-code memory so the same coupon can pop up again.
-                | Already-applied coupons still will not appear because couponAlreadyApplied()
-                | filters them in getDeliveryQualifiedCouponChoices().
+                | Keep this reset only for the manual/location coupon popup.
+                | Do NOT reset autoCouponChooserShownOnce here, because the automatic
+                | coupon chooser must popup only once after its conditions are first hit.
                 |--------------------------------------------------------------------------
                 */
                 this.deliveryCouponPopupShownCodes = [];
-                this.autoCouponChooserShownOnce = false;
             },
 
             checkDeliveryCouponPopup() {
@@ -3770,7 +3764,8 @@ normalizeFreeProductFromCoupon(fp) {
                             !removedCodes.includes(String(code || '').trim().toUpperCase())
                         );
 
-                        this.autoCouponChooserShownOnce = false;
+                        // Do NOT reset autoCouponChooserShownOnce here.
+                        // The automatic coupon popup must show only once per checkout page load.
 
                         if (this.selectedCoupon && removedCodes.includes(this.couponCodeKey(this.selectedCoupon))) {
                             this.selectedCoupon = null;
