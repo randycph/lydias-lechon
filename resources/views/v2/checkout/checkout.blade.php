@@ -496,7 +496,34 @@
                 giftChequeDiscountAmount: 0,
                 deliveryCouponPopupShownCodes: [],
                 deliveryCouponPopupLocationKey: '',
+                suppressDeliveryCouponPopup: false,
+                deliveryCouponPopupSuppressTimer: null,
                 
+                temporarilySuppressDeliveryCouponPopup(duration = 700) {
+                    this.suppressDeliveryCouponPopup = true;
+                    this.couponModal = false;
+                    this.selectedCoupon = null;
+
+                    if (this.deliveryCouponPopupSuppressTimer) {
+                        clearTimeout(this.deliveryCouponPopupSuppressTimer);
+                    }
+
+                    this.deliveryCouponPopupSuppressTimer = setTimeout(() => {
+                        this.suppressDeliveryCouponPopup = false;
+                        this.deliveryCouponPopupSuppressTimer = null;
+                    }, duration);
+                },
+
+
+                releaseDeliveryCouponPopupSuppression() {
+                    if (this.deliveryCouponPopupSuppressTimer) {
+                        clearTimeout(this.deliveryCouponPopupSuppressTimer);
+                        this.deliveryCouponPopupSuppressTimer = null;
+                    }
+
+                    this.suppressDeliveryCouponPopup = false;
+                },
+
                 couponTypeLabel(coupon) {
                     if (!coupon) return '';
 
@@ -546,6 +573,7 @@
                     })
                     .filter(coupon => this.couponIsActive(coupon))
                     .filter(coupon => this.shouldShowCouponInList(coupon))
+                    .filter(coupon => this.couponLocationRequirementStatus(coupon).valid)
                     .filter(coupon => !this.couponUsageConsumed(coupon))
                     .filter(coupon => !this.couponAlreadyApplied(coupon))
                     .filter(coupon => {
@@ -620,14 +648,24 @@
                 }
 
                 if (this.allowMultiple) {
-                    const activeDeliveries = (this.deliveries || [])
-                        .filter(delivery => (delivery?.orders || []).length > 0);
+                    const deliveryTargets = (this.deliveries || [])
+                        .filter(delivery =>
+                            (delivery?.orders || []).length > 0 ||
+                            this.normalizeText(delivery?.province) ||
+                            this.normalizeText(delivery?.city) ||
+                            this.normalizeText(delivery?.location) ||
+                            this.normalizeText(delivery?.barangay)
+                        );
 
-                    if (!activeDeliveries.length) {
+                    if (!deliveryTargets.length) {
                         return false;
                     }
 
-                    return activeDeliveries.every(delivery =>
+                    // For Multiple Address, open the coupon chooser once at least one
+                    // delivery row has a selected Province and City. Do not require
+                    // orders first, because product qualification can still use the cart
+                    // while the customer is assigning items.
+                    return deliveryTargets.some(delivery =>
                         this.normalizeText(delivery?.province) &&
                         this.normalizeText(delivery?.city)
                     );
@@ -654,6 +692,7 @@
                     .map(coupon => this.normalizeCoupon(coupon))
                     .filter(coupon => this.couponIsActive(coupon))
                     .filter(coupon => this.shouldShowCouponInList(coupon))
+                    .filter(coupon => this.couponLocationRequirementStatus(coupon).valid)
                     .filter(coupon => !this.couponUsageConsumed(coupon))
                     .filter(coupon => !this.couponAlreadyApplied(coupon))
                     .filter(coupon => this.couponProductRequirementStatus(coupon).valid)
@@ -691,7 +730,13 @@
 
                 if (this.allowMultiple) {
                     return (this.deliveries || [])
-                        .filter(delivery => (delivery?.orders || []).length > 0)
+                        .filter(delivery =>
+                            (delivery?.orders || []).length > 0 ||
+                            this.normalizeText(delivery?.province) ||
+                            this.normalizeText(delivery?.city) ||
+                            this.normalizeText(delivery?.location) ||
+                            this.normalizeText(delivery?.barangay)
+                        )
                         .map(delivery => normalizeTarget(delivery))
                         .sort()
                         .join('||');
@@ -726,6 +771,12 @@
             },
 
             checkDeliveryCouponPopup() {
+                if (this.suppressDeliveryCouponPopup) {
+                    this.couponModal = false;
+                    this.selectedCoupon = null;
+                    return;
+                }
+
                 const qualifiedCoupons = this.getDeliveryQualifiedCouponChoices();
                 const currentSelectedCoupon = this.selectedCoupon
                     ? this.normalizeCoupon(this.selectedCoupon)
@@ -777,6 +828,12 @@
 
             refreshDeliveryCouponPopup(forceReshow = false) {
                 this.$nextTick(() => {
+                    if (this.suppressDeliveryCouponPopup) {
+                        this.couponModal = false;
+                        this.selectedCoupon = null;
+                        return;
+                    }
+
                     this.resetDeliveryCouponPopupForLocationChange(forceReshow);
                     this.checkDeliveryCouponPopup();
                 });
@@ -3439,6 +3496,15 @@ normalizeFreeProductFromCoupon(fp) {
                     // Coupons without affected locations are global for delivery addresses.
                     if (!this.couponHasLocationLimit(coupon)) return true;
 
+                    const target = delivery || {};
+                    const selectedCity = this.normalizeText(city || target.city || '');
+
+                    // A coupon with a designated city/location must not match only from
+                    // typed address text. The actual City field must be selected.
+                    if (!selectedCity) {
+                        return false;
+                    }
+
                     const allowed = this.getCouponLocations(coupon);
 
                     if (!allowed.length) return true;
@@ -3449,7 +3515,6 @@ normalizeFreeProductFromCoupon(fp) {
                         return true;
                     }
 
-                    const target = delivery || {};
                     const targetValues = [
                         city,
                         location,
@@ -3510,7 +3575,8 @@ normalizeFreeProductFromCoupon(fp) {
                         return false;
                     }
 
-                    const targets = this.getSelectedCouponTargets();
+                    const targets = this.getSelectedCouponTargets()
+                        .filter(t => this.normalizeText(t.city));
 
                     if (!targets.length) {
                         return false;
@@ -3548,10 +3614,10 @@ normalizeFreeProductFromCoupon(fp) {
 
                     const targets = this.getSelectedCouponTargets();
 
-                    if (!targets.length) {
+                    if (!targets.length || !targets.some(t => this.normalizeText(t.city))) {
                         return {
                             valid: false,
-                            message: 'Please select a delivery location first.'
+                            message: 'Please select a delivery city first.'
                         };
                     }
 
@@ -3652,43 +3718,30 @@ normalizeFreeProductFromCoupon(fp) {
 
                     /*
                     |--------------------------------------------------------------------------
-                    | Preserve coupon while customer is still switching to/editing multiple address
+                    | Location-restricted coupon rule
                     |--------------------------------------------------------------------------
-                    | When a coupon was already applied in single delivery and the customer ticks
-                    | Multiple Address, the multi delivery rows can be empty/incomplete for a moment.
-                    | Do not remove the coupon in that pending state. Remove it only after the
-                    | delivery address mechanics are already available and the coupon still fails.
+                    | If the coupon has a designated/affected location, do NOT keep it while
+                    | the city/address is blank. Example: customer selected a valid city, the
+                    | coupon was applied, then the city was cleared. The coupon must be removed.
+                    |
+                    | All-location/global coupons are not affected here because
+                    | couponHasLocationLimit() is false for empty/all/any location values.
                     |--------------------------------------------------------------------------
                     */
-                    if (this.allowMultiple) {
-                        const deliveries = this.deliveries || [];
-                        const activeDeliveries = deliveries.filter(delivery =>
-                            (delivery?.orders || []).length > 0
-                        );
-
-                        const hasAnyAddressInput = deliveries.some(delivery =>
-                            this.normalizeText(delivery?.province) ||
-                            this.normalizeText(delivery?.city) ||
-                            this.normalizeText(delivery?.location) ||
-                            this.normalizeText(delivery?.barangay) ||
-                            this.normalizeText(delivery?.address)
-                        );
-
-                        if (!activeDeliveries.length && !hasAnyAddressInput) {
-                            return true;
-                        }
-
-                        const hasIncompleteActiveDelivery = activeDeliveries.some(delivery =>
-                            !this.normalizeText(delivery?.province) ||
-                            !this.normalizeText(delivery?.city)
-                        );
-
-                        if (hasIncompleteActiveDelivery) {
-                            return true;
-                        }
+                    if (this.couponHasLocationLimit(normalized)) {
+                        return false;
                     }
 
-                    return !this.getSelectedCouponTargets().length;
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Global delivery coupon rule
+                    |--------------------------------------------------------------------------
+                    | Coupons without affected locations are not tied to a city/barangay, so
+                    | clearing the city must not remove them. They only need the order method
+                    | to remain Delivery, which is already handled by couponLocationRequirementStatus().
+                    |--------------------------------------------------------------------------
+                    */
+                    return false;
                 },
 
                 couponShouldRemoveWhenMechanicsNotMet(coupon) {
@@ -4834,6 +4887,19 @@ normalizeFreeProductFromCoupon(fp) {
                     });
                 });
 
+                this.$watch('allowMultiple', () => {
+                    // Do not open the coupon chooser when Multiple Address is toggled.
+                    // The toggle temporarily clears/rebuilds delivery targets, so the
+                    // previous popup logic can treat coupons as newly available again.
+                    this.temporarilySuppressDeliveryCouponPopup();
+
+                    this.$nextTick(() => {
+                        this.removeInvalidLocationCoupons();
+                        this.applyAutoCoupons();
+                        this.recomputeCouponTotals();
+                    });
+                });
+
                 this.$watch(() => JSON.stringify(this.carts || []), () => {
                     this.applyAutoCoupons()
                     this.recomputeCouponTotals()
@@ -5560,6 +5626,10 @@ normalizeFreeProductFromCoupon(fp) {
                     this.location = ''
                     this.validateSingleDeliveryField('city')
 
+                    if (this.normalizeText(this.city)) {
+                        this.releaseDeliveryCouponPopupSuppression();
+                    }
+
                     this.getBlockDates(true).then(() => {
                         this.$nextTick(() => {
                             if (this.$refs.deliveryDate) {
@@ -5610,6 +5680,10 @@ normalizeFreeProductFromCoupon(fp) {
 
                     d.location = ''
 
+                    if (this.normalizeText(d?.city)) {
+                        this.releaseDeliveryCouponPopupSuppression();
+                    }
+
                     this.rebuildMultiAddress(index)
                     this.resetDeliveryCouponPopupForLocationChange(true)
                     this.removeInvalidLocationCoupons()
@@ -5619,6 +5693,12 @@ normalizeFreeProductFromCoupon(fp) {
                 },
 
                 onMultiBarangayChange(index) {
+                    const d = this.deliveries[index];
+
+                    if (this.normalizeText(d?.city)) {
+                        this.releaseDeliveryCouponPopupSuppression();
+                    }
+
                     this.rebuildMultiAddress(index);
 
                     this.getDeliveryFeeForMulti?.(index);
@@ -6378,6 +6458,8 @@ normalizeFreeProductFromCoupon(fp) {
                 },
 
                 onChangeMultipleAddress() {
+                    this.temporarilySuppressDeliveryCouponPopup();
+                    this.showAutoCouponChooser = false;
 
                     if (!this.allowMultiple) {
                         // Reset to single delivery structure
@@ -6422,8 +6504,11 @@ normalizeFreeProductFromCoupon(fp) {
                     this.deliveryFees = [];
                     this.deliveryFee = 0;
 
+                    this.removeInvalidLocationCoupons()
                     this.applyAutoCoupons()
                     this.recomputeCouponTotals()
+                    // Do not call refreshDeliveryCouponPopup() here.
+                    // Ticking/unticking Multiple Address must not open the coupon modal.
                     
                 },
 
