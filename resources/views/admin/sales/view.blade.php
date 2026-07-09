@@ -730,12 +730,31 @@
                                                             </tr>
                                                         @endif
                                                         @php
-                                                            $total_balance = ($displaySalesDetailsNet + $sales->delivery_fee_amount) - ($sales->payments->where('status', 'PAID')->sum('amount'));
+                                                            /*
+                                                             * Balance should follow the same amount shown in the Order Details total.
+                                                             * The discount must be deducted before comparing against paid payments,
+                                                             * otherwise a fully-paid discounted order shows the discount amount as balance.
+                                                             */
+                                                            $orderTotalForBalance = max(
+                                                                ((float) $displaySalesDetailsNet + (float) ($sales->delivery_fee_amount ?? 0)) - (float) $displayOrderDiscount,
+                                                                0
+                                                            );
+
+                                                            $paidAmountForBalance = (float) $salesPayments
+                                                                ->where('status', 'PAID')
+                                                                ->where('is_discount', '!=', 1)
+                                                                ->sum('amount');
+
+                                                            $total_balance = max($orderTotalForBalance - $paidAmountForBalance, 0);
+
+                                                            if (strtoupper((string) ($sales->PaymentStatus ?? $sales->payment_status ?? '')) === 'PAID') {
+                                                                $total_balance = 0;
+                                                            }
                                                         @endphp
-                                                        @if($total_balance > 0 && $sales->payments->where('status','PAID')->sum('amount') > 0)
+                                                        @if($total_balance > 0 && $paidAmountForBalance > 0)
                                                             <tr style="font-style:italic;">
                                                                 <td class="tx-left" colspan="4"><br>Balance</td>
-                                                                <td class="tx-right"><br>{{number_format($total_balance, 2)}}</td> 
+                                                                <td class="tx-right"><br>{{ number_format($total_balance, 2) }}</td> 
                                                             </tr>
                                                         @endif
                                                         </tbody>
