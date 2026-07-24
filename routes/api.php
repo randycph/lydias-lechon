@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DeployController;
-
+use App\Http\Controllers\SalesPaymentFileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,3 +22,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::post('/deploy/beta', [DeployController::class, 'beta']);
 Route::post('/deploy/deployment', [DeployController::class, 'deployment']);
+Route::get('/sales-payments/special-chars', [SalesPaymentFileController::class, 'index']);
+Route::post('/sales-payments/special-chars/fix', [SalesPaymentFileController::class, 'fix']);
