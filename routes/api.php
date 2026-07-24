@@ -23,4 +23,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::post('/deploy/beta', [DeployController::class, 'beta']);
 Route::post('/deploy/deployment', [DeployController::class, 'deployment']);
 Route::get('/sales-payments/special-chars', [SalesPaymentFileController::class, 'index']);
-Route::post('/sales-payments/special-chars/fix', [SalesPaymentFileController::class, 'fix']);
+Route::get('/sales-payments/special-chars/fix', [SalesPaymentFileController::class, 'fix']);
