@@ -11,18 +11,27 @@ use Illuminate\Support\Facades\DB;
 
 class SalesPaymentFileController extends Controller
 {
-    protected const UNSAFE_CHARS_REGEX = '[#%&,?]';
+    protected const UNSAFE_CHARS_REGEX = '[#%&?]';
 
     protected const DISK = 'public';
     protected const DEFAULT_FOLDER = 'payments';
     
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
+        $start_date = $request->query('start_date');
+        $end_date = $request->query('end_date');
+
+        if (!$start_date || !$end_date) {
+            return response()->json([
+                'error' => 'Both start_date and end_date query parameters are required in YYYY-MM-DD format.',
+            ], 400);
+        }
+
         $records = SalesPayment::query()
             ->whereNotNull('file_url')
             ->where('file_url', '!=', '')
             ->whereRaw("file_url REGEXP '" . self::UNSAFE_CHARS_REGEX . "'")
-            ->whereBetween('payment_date', ['2026-06-01', '2026-06-26'])
+            ->whereBetween('payment_date', [$start_date, $end_date])
             ->orderBy('id')
             ->get(['id', 'sales_header_id', 'file_url','payment_date']);
 
