@@ -16,7 +16,7 @@ class SalesPaymentFileController extends Controller
     protected const DISK = 'public';
     protected const DEFAULT_FOLDER = 'payments';
     
-    public function index(Request $request): JsonResponse
+    public function index(Request $request)
     {
         $start_date = $request->query('start_date');
         $end_date = $request->query('end_date');
@@ -61,7 +61,7 @@ class SalesPaymentFileController extends Controller
         ]);
     }
 
-    public function fix(Request $request): JsonResponse
+    public function fix(Request $request)
     {
         $validated = $request->validate([
             'ids' => ['sometimes', 'array'],
