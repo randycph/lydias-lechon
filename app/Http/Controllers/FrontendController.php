@@ -680,7 +680,6 @@ $extractCouponProductData = function ($coupon) {
     $ids = $ids
         ->map(fn ($id) => trim((string) $id))
         ->filter(fn ($id) => $id !== '' && ctype_digit($id))
-        ->reject(fn ($id) => $freeRewardIds->contains($id))
         ->unique()
         ->values();
 
@@ -705,8 +704,7 @@ $extractCouponProductData = function ($coupon) {
                 ->whereIn(DB::raw('LOWER(TRIM(name))'), $names->map(fn ($name) => strtolower(trim($name)))->all())
                 ->pluck('id')
                 ->map(fn ($id) => trim((string) $id))
-                ->filter(fn ($id) => $id !== '' && ctype_digit($id))
-                ->reject(fn ($id) => $freeRewardIds->contains($id));
+                ->filter(fn ($id) => $id !== '' && ctype_digit($id));
 
             if ($matchedIds->isNotEmpty()) {
                 $ids = $ids->merge($matchedIds)->unique()->values();
@@ -1055,6 +1053,20 @@ if ($carts->count() > 0) {
         return isset($item['product']['category_id']) && $item['product']['category_id'] == 1;
     });
 
+    $quantityRuleFails = static function ($actualQty, $requiredQty, $quantityType) {
+        $actualQty = (int) $actualQty;
+        $requiredQty = (int) $requiredQty;
+        $quantityType = strtolower(trim((string) $quantityType));
+
+        if (in_array($quantityType, ['max', 'maximum'], true)) {
+            return $actualQty > $requiredQty;
+        }
+
+        // Treat an empty/unknown type as a minimum rule. Purchase quantity
+        // conditions in the coupon form are minimum rules by default.
+        return $actualQty < $requiredQty;
+    };
+
     if (!$cartHasExcludedCategory) {
         foreach ($autoCoupons as $coupon) {
             /*
@@ -1104,125 +1116,119 @@ if ($carts->count() > 0) {
             $shouldSkip = false;
 
             if ($coupon->purchase_combination) {
-                if ($coupon->purchase_qty && $coupon->purchase_qty > 0) {
-                    if ($coupon->purchase_qty_type === 'min' && $cartQty < $coupon->purchase_qty) {
-                        $shouldSkip = true;
-                    }
+                $combi = collect(preg_split('/[|,]/', (string) $coupon->purchase_combination))
+                    ->map(fn ($condition) => strtolower(trim((string) $condition)))
+                    ->filter()
+                    ->values();
 
-                    if ($coupon->purchase_qty_type === 'max' && $cartQty > $coupon->purchase_qty) {
-                        $shouldSkip = true;
-                    }
+                /*
+                |----------------------------------------------------------------------
+                | Product quantity must be checked against the purchase product
+                |----------------------------------------------------------------------
+                | Use the numeric purchase_product_id saved by the coupon form. Never
+                | let the total quantity of unrelated cart products satisfy this rule.
+                | The purchase and free product may legitimately be the same product.
+                |----------------------------------------------------------------------
+                */
+                $requiredProductIds = collect(
+                    preg_split('/[|,]/', (string) ($coupon->purchase_product_id ?? ''))
+                )
+                    ->map(fn ($id) => trim((string) $id))
+                    ->filter(fn ($id) => $id !== '' && ctype_digit($id))
+                    ->unique()
+                    ->values();
+
+                $categoryData = $extractCouponCategoryData($coupon);
+                $requiredCategoryIds = collect($categoryData['ids'])
+                    ->map(fn ($id) => trim((string) $id))
+                    ->filter(fn ($id) => $id !== '' && ctype_digit($id))
+                    ->unique()
+                    ->values();
+
+                $hasProductCondition = $combi->contains('product');
+                $hasCategoryCondition = $combi->contains('category');
+
+                // Fail closed when the coupon says Product/Category is required but
+                // its corresponding numeric ID was not saved.
+                if ($hasProductCondition && $requiredProductIds->isEmpty()) {
+                    $shouldSkip = true;
                 }
 
-                if (!$shouldSkip) {
-                    $combi = explode('|', $coupon->purchase_combination ?? '');
+                if (!$shouldSkip && $hasCategoryCondition && $requiredCategoryIds->isEmpty()) {
+                    $shouldSkip = true;
+                }
 
-                    if (
-                        in_array('amount', $combi) &&
-                        $coupon->purchase_amount &&
-                        $coupon->purchase_amount > 0
-                    ) {
-                        if ($cartTotal < $coupon->purchase_amount) {
-                            $shouldSkip = true;
-                        }
-                    }
+                if (
+                    !$shouldSkip &&
+                    $combi->contains('amount') &&
+                    $coupon->purchase_amount &&
+                    $coupon->purchase_amount > 0 &&
+                    $cartTotal < $coupon->purchase_amount
+                ) {
+                    $shouldSkip = true;
+                }
 
-                    $combi = array_map('strtolower', array_map('trim', $combi));
+                $requiredQty = (int) ($coupon->purchase_qty ?? 0);
 
-                    $categoryData = $extractCouponCategoryData($coupon);
-                    $requiredCategoryIds = collect($categoryData['ids'])
-                        ->map(fn ($id) => trim((string) $id))
-                        ->filter(fn ($id) => $id !== '' && ctype_digit($id))
-                        ->values();
-
-                    $hasCategoryCondition = $categoryData['has_condition'];
-
-                    $productData = $extractCouponProductData($coupon);
-                    $requiredProductIds = collect($productData['ids'])
-                        ->map(fn ($id) => trim((string) $id))
-                        ->filter(fn ($id) => $id !== '' && ctype_digit($id))
-                        ->values();
-
-                    $hasProductCondition = $productData['has_condition'];
-                    $hasProductOrCategoryCondition = $requiredProductIds->isNotEmpty() || $requiredCategoryIds->isNotEmpty();
-
-                    // If Product/Category was selected in coupon setup but no ID can be resolved,
-                    // do not allow the coupon to qualify by total cart quantity alone.
-                    if (!$shouldSkip && $hasProductCondition && $requiredProductIds->isEmpty()) {
-                        $shouldSkip = true;
-                    }
-
-                    if (!$shouldSkip && $hasCategoryCondition && $requiredCategoryIds->isEmpty()) {
-                        $shouldSkip = true;
-                    }
-
-                    if (!$shouldSkip && $hasProductOrCategoryCondition && $coupon->purchase_qty && $coupon->purchase_qty > 0) {
-                        $requiredQty = (int) $coupon->purchase_qty;
-                        $qtyType = strtolower(trim((string) $coupon->purchase_qty_type));
-
+                if (!$shouldSkip && $requiredQty > 0) {
+                    if ($hasProductCondition) {
                         foreach ($requiredProductIds as $requiredProductId) {
                             $matchingPurchaseQty = $carts->sum(function ($item) use ($requiredProductId) {
-                                $productId = (string) data_get($item, 'product_id', data_get($item, 'product.id', ''));
-                                return $productId === (string) $requiredProductId ? (int) data_get($item, 'qty', 1) : 0;
+                                $cartProductId = trim((string) data_get(
+                                    $item,
+                                    'product_id',
+                                    data_get($item, 'product.id', '')
+                                ));
+
+                                return $cartProductId === (string) $requiredProductId
+                                    ? (int) data_get($item, 'qty', 1)
+                                    : 0;
                             });
 
-                            if ($qtyType === 'min' && $matchingPurchaseQty < $requiredQty) {
+                            if ($quantityRuleFails(
+                                $matchingPurchaseQty,
+                                $requiredQty,
+                                $coupon->purchase_qty_type
+                            )) {
                                 $shouldSkip = true;
                                 break;
-                            }
-
-                            if ($qtyType === 'max' && $matchingPurchaseQty > $requiredQty) {
-                                $shouldSkip = true;
-                                break;
-                            }
-                        }
-
-                        if (!$shouldSkip) {
-                            foreach ($requiredCategoryIds as $requiredCategoryId) {
-                                $matchingPurchaseQty = $carts->sum(function ($item) use ($requiredCategoryId) {
-                                    $categoryId = (string) data_get($item, 'product.category_id', data_get($item, 'category_id', ''));
-                                    return $categoryId === (string) $requiredCategoryId ? (int) data_get($item, 'qty', 1) : 0;
-                                });
-
-                                if ($qtyType === 'min' && $matchingPurchaseQty < $requiredQty) {
-                                    $shouldSkip = true;
-                                    break;
-                                }
-
-                                if ($qtyType === 'max' && $matchingPurchaseQty > $requiredQty) {
-                                    $shouldSkip = true;
-                                    break;
-                                }
                             }
                         }
                     }
 
-                    if (
-                        !$shouldSkip &&
-                        (in_array('product', $combi) || in_array('category', $combi) || $hasProductOrCategoryCondition) &&
-                        $hasProductOrCategoryCondition
-                    ) {
-                        $hasRequiredProductOrCategory = false;
+                    if (!$shouldSkip && $hasCategoryCondition) {
+                        foreach ($requiredCategoryIds as $requiredCategoryId) {
+                            $matchingPurchaseQty = $carts->sum(function ($item) use ($requiredCategoryId) {
+                                $cartCategoryId = trim((string) data_get(
+                                    $item,
+                                    'product.category_id',
+                                    data_get($item, 'category_id', '')
+                                ));
 
-                        foreach ($requiredProductIds as $requiredId) {
-                            if (in_array((string) $requiredId, $cartProductIds)) {
-                                $hasRequiredProductOrCategory = true;
+                                return $cartCategoryId === (string) $requiredCategoryId
+                                    ? (int) data_get($item, 'qty', 1)
+                                    : 0;
+                            });
+
+                            if ($quantityRuleFails(
+                                $matchingPurchaseQty,
+                                $requiredQty,
+                                $coupon->purchase_qty_type
+                            )) {
+                                $shouldSkip = true;
                                 break;
                             }
                         }
+                    }
 
-                        if (!$hasRequiredProductOrCategory) {
-                            foreach ($requiredCategoryIds as $requiredCategoryId) {
-                                if (in_array((string) $requiredCategoryId, $cartCategoryIds)) {
-                                    $hasRequiredProductOrCategory = true;
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (!$hasRequiredProductOrCategory) {
-                            $shouldSkip = true;
-                        }
+                    // A coupon with only Total Quantity selected still uses the cart
+                    // total. Product/Category coupons never use this fallback.
+                    if (
+                        !$hasProductCondition &&
+                        !$hasCategoryCondition &&
+                        $quantityRuleFails($cartQty, $requiredQty, $coupon->purchase_qty_type)
+                    ) {
+                        $shouldSkip = true;
                     }
                 }
             }
@@ -1300,6 +1306,7 @@ if ($carts->count() > 0) {
             )
         );
     }
+
 
     public function confirmation($id)
     {
