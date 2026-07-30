@@ -1,3 +1,4 @@
+{{-- UPDATED: PRODUCT-ID QUANTITY GATE — BUILD product-id-qty-20260730-v4 --}}
 @extends('layouts.guest', ['page' => $page])
 
 @section('title', 'Checkout')
@@ -588,7 +589,7 @@
         window.eligibleGiftCheques = @json($eligibleGiftCheques ?? []);
         window.APP_DEBUG = @json(config('app.debug'));
         window.sale = @json($sale ?? null);
-        window.checkoutCouponBuild = 'product-id-qty-20260730-v3';
+        window.checkoutCouponBuild = 'product-id-qty-20260730-v4';
     </script>
 
     <script>
@@ -4117,6 +4118,112 @@ normalizeFreeProductFromCoupon(fp) {
                     }
                 },
 
+                autoCouponPurchaseProductQuantityStatus(coupon) {
+                    /*
+                     * Direct pre-popup gate for Product + Total Quantity.
+                     *
+                     * Use only numeric purchase_product_id values from the
+                     * coupon payload and compare them with numeric cart
+                     * product_id values. Never infer the product from the
+                     * coupon name or description.
+                     */
+                    const requiredProductIds = this.parseCouponProductIds(
+                        coupon?.purchase_product_id ??
+                        coupon?.purchase_product_ids ??
+                        coupon?.selected_product_id ??
+                        coupon?.selected_product_ids ??
+                        coupon?.required_product_id ??
+                        coupon?.required_product_ids ??
+                        ''
+                    );
+
+                    const requiredQty = Number(
+                        coupon?.purchase_qty ??
+                        coupon?.purchase_quantity ??
+                        coupon?.total_quantity ??
+                        coupon?.total_qty ??
+                        coupon?.minimum_quantity ??
+                        coupon?.minimum_qty ??
+                        coupon?.required_quantity ??
+                        coupon?.required_qty ??
+                        0
+                    );
+
+                    if (!requiredProductIds.length || requiredQty <= 0) {
+                        return {
+                            valid: true,
+                            required_product_ids: requiredProductIds,
+                            required_qty: requiredQty,
+                            matched_qty_by_product: {},
+                            message: ''
+                        };
+                    }
+
+                    const matchedQtyByProduct = {};
+
+                    requiredProductIds.forEach(productId => {
+                        matchedQtyByProduct[String(productId)] = 0;
+                    });
+
+                    (this.carts || [])
+                        .filter(item => !item?.is_free_product)
+                        .forEach(item => {
+                            const cartProductId = this.normalizeCouponProductId(
+                                item?.product_id ??
+                                item?.product?.id ??
+                                ''
+                            );
+
+                            if (!cartProductId || !requiredProductIds.includes(cartProductId)) {
+                                return;
+                            }
+
+                            matchedQtyByProduct[cartProductId] =
+                                Number(matchedQtyByProduct[cartProductId] || 0) +
+                                Number(item?.qty || 1);
+                        });
+
+                    const qtyType = String(
+                        coupon?.purchase_qty_type ??
+                        coupon?.quantity_type ??
+                        coupon?.total_quantity_type ??
+                        'min'
+                    ).trim().toLowerCase();
+
+                    const failedProductIds = requiredProductIds.filter(productId => {
+                        const matchedQty = Number(matchedQtyByProduct[productId] || 0);
+
+                        if (qtyType === 'max' || qtyType === 'maximum') {
+                            return matchedQty > requiredQty;
+                        }
+
+                        return matchedQty < requiredQty;
+                    });
+
+                    if (!failedProductIds.length) {
+                        return {
+                            valid: true,
+                            required_product_ids: requiredProductIds,
+                            required_qty: requiredQty,
+                            matched_qty_by_product: matchedQtyByProduct,
+                            message: ''
+                        };
+                    }
+
+                    return {
+                        valid: false,
+                        required_product_ids: requiredProductIds,
+                        required_qty: requiredQty,
+                        matched_qty_by_product: matchedQtyByProduct,
+                        message: failedProductIds
+                            .map(productId => {
+                                const matchedQty = Number(matchedQtyByProduct[productId] || 0);
+                                return `Product ID ${productId} requires ${requiredQty}; current quantity is ${matchedQty}`;
+                            })
+                            .join('; ')
+                    };
+                },
+
                 shouldAutoApplyCoupon(coupon) {
                     const normalized = this.normalizeCoupon(coupon);
 
@@ -4135,6 +4242,13 @@ normalizeFreeProductFromCoupon(fp) {
                         String(normalized.activation_type || '').toLowerCase() === 'auto';
 
                     if (!isAuto) return false;
+
+                    const directProductQuantity =
+                        this.autoCouponPurchaseProductQuantityStatus(normalized);
+
+                    if (!directProductQuantity.valid) {
+                        return false;
+                    }
 
                     const productRequirement = this.couponProductRequirementStatus(normalized);
 
@@ -4235,6 +4349,13 @@ normalizeFreeProductFromCoupon(fp) {
 
                     if (!isAuto) {
                         return 'This is not an auto coupon.';
+                    }
+
+                    const directProductQuantity =
+                        this.autoCouponPurchaseProductQuantityStatus(normalized);
+
+                    if (!directProductQuantity.valid) {
+                        return directProductQuantity.message;
                     }
 
                     const productRequirement = this.couponProductRequirementStatus(normalized);
@@ -4445,7 +4566,17 @@ normalizeFreeProductFromCoupon(fp) {
                     ? this.normalizeCoupon(this.selectedAutoCoupon)
                     : null;
 
-                const allAutoCoupons = (this.autoCouponsSource || [])
+                /*
+                 * Check Product + Total Quantity before building the chooser.
+                 * Unqualified coupons never enter autoCouponChoices, so the
+                 * modal cannot display them as Available.
+                 */
+                const quantityQualifiedAutoCoupons = (this.autoCouponsSource || [])
+                    .filter(coupon =>
+                        this.autoCouponPurchaseProductQuantityStatus(coupon).valid
+                    );
+
+                const allAutoCoupons = quantityQualifiedAutoCoupons
                     .map(c => ({
                         ...this.normalizeCoupon(c),
                         auto_applied: true
