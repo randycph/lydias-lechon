@@ -48,8 +48,153 @@
 
             $total += ($paella_price * $qty) + ($isFree ? 0 : ($price * $qty));
         }
-            $eligibleAutoCoupons = isset($eligibleAutoCoupons) ? $eligibleAutoCoupons : collect([]);
-            $allCoupons = isset($allCoupons) ? $allCoupons : $eligibleCoupons->merge($eligibleAutoCoupons);
+        $eligibleCoupons = collect($eligibleCoupons ?? []);
+        $eligibleAutoCoupons = collect($eligibleAutoCoupons ?? []);
+
+        /*
+         * Product-specific auto-coupon guard.
+         *
+         * Do not allow an unrelated cart product to satisfy purchase_qty.
+         * Example: Lechon Belly QTY 1 + Bopis QTY 1 must NOT satisfy
+         * purchase_product_id = Bopis and purchase_qty = 2.
+         */
+        $paidCartProductQty = collect($carts ?? [])
+            ->reject(fn ($item) => (bool) data_get($item, 'is_free_product', false))
+            ->reduce(function (array $quantities, $item): array {
+                $productId = trim((string) (
+                    data_get($item, 'product_id') ??
+                    data_get($item, 'product.id') ??
+                    ''
+                ));
+
+                if ($productId !== '') {
+                    $quantities[$productId] =
+                        ($quantities[$productId] ?? 0) +
+                        (float) data_get($item, 'qty', 1);
+                }
+
+                return $quantities;
+            }, []);
+
+        $paidCartQty = array_sum($paidCartProductQty);
+
+        $couponValue = static function ($coupon, array $keys, $default = null) {
+            foreach ($keys as $key) {
+                $value = data_get($coupon, $key);
+
+                if ($value !== null && $value !== '') {
+                    return $value;
+                }
+            }
+
+            return $default;
+        };
+
+        $eligibleAutoCoupons = $eligibleAutoCoupons
+            ->filter(function ($coupon) use ($paidCartProductQty, $paidCartQty, $couponValue) {
+                $rawProductIds = $couponValue($coupon, [
+                    'purchase_product_id',
+                    'purchase_product_ids',
+                    'selected_product_id',
+                    'selected_product_ids',
+                    'required_product_id',
+                    'required_product_ids',
+                ], '');
+
+                if (is_array($rawProductIds) || $rawProductIds instanceof \Traversable) {
+                    $requiredProductIds = collect($rawProductIds)
+                        ->map(fn ($item) => data_get($item, 'product_id', data_get($item, 'id', $item)));
+                } else {
+                    $requiredProductIds = collect(
+                        preg_split('/[|,]/', (string) $rawProductIds, -1, PREG_SPLIT_NO_EMPTY)
+                    );
+                }
+
+                $requiredProductIds = $requiredProductIds
+                    ->map(fn ($id) => trim((string) $id))
+                    ->filter(fn ($id) => $id !== '' && ctype_digit($id))
+                    ->unique()
+                    ->values();
+
+                $requiredQty = (float) $couponValue($coupon, [
+                    'purchase_qty',
+                    'purchase_quantity',
+                    'total_quantity',
+                    'total_qty',
+                    'minimum_quantity',
+                    'minimum_qty',
+                    'required_quantity',
+                    'required_qty',
+                    'product_count',
+                    'minimum_product_count',
+                ], 0);
+
+                $qtyType = strtolower((string) $couponValue($coupon, [
+                    'purchase_qty_type',
+                    'quantity_type',
+                    'total_quantity_type',
+                ], 'min'));
+
+                $purchaseCombination = $couponValue($coupon, [
+                    'purchase_combination',
+                    'purchase_conditions',
+                    'condition_combination',
+                ], '');
+
+                $purchaseCombination = strtolower(
+                    is_array($purchaseCombination)
+                        ? implode('|', $purchaseCombination)
+                        : (string) $purchaseCombination
+                );
+
+                $hasProductCondition =
+                    $requiredProductIds->isNotEmpty() ||
+                    preg_match('/(^|[|,\s])product($|[|,\s])/', $purchaseCombination) === 1;
+
+                if ($hasProductCondition && $requiredProductIds->isEmpty()) {
+                    // Product condition is enabled but its numeric product ID
+                    // was not sent. Fail closed instead of making it unrestricted.
+                    return false;
+                }
+
+                if ($requiredProductIds->isNotEmpty()) {
+                    return $requiredProductIds->every(function ($productId) use (
+                        $paidCartProductQty,
+                        $requiredQty,
+                        $qtyType
+                    ) {
+                        $matchedQty = (float) ($paidCartProductQty[$productId] ?? 0);
+
+                        if ($requiredQty <= 0) {
+                            return $matchedQty > 0;
+                        }
+
+                        if (in_array($qtyType, ['max', 'maximum'], true)) {
+                            return $matchedQty <= $requiredQty;
+                        }
+
+                        return $matchedQty >= $requiredQty;
+                    });
+                }
+
+                // A quantity-only coupon still uses the total paid cart quantity.
+                if ($requiredQty > 0) {
+                    if (in_array($qtyType, ['max', 'maximum'], true)) {
+                        return $paidCartQty <= $requiredQty;
+                    }
+
+                    return $paidCartQty >= $requiredQty;
+                }
+
+                return true;
+            })
+            ->values();
+
+        // Rebuild after validation so an invalid auto coupon cannot re-enter
+        // the chooser through window.allCoupons.
+        $allCoupons = $eligibleCoupons
+            ->merge($eligibleAutoCoupons)
+            ->values();
     @endphp
 
     <div class="bg-cream">
@@ -443,6 +588,7 @@
         window.eligibleGiftCheques = @json($eligibleGiftCheques ?? []);
         window.APP_DEBUG = @json(config('app.debug'));
         window.sale = @json($sale ?? null);
+        window.checkoutCouponBuild = 'product-id-qty-20260730-v3';
     </script>
 
     <script>
@@ -7549,8 +7695,6 @@ normalizeFreeProductFromCoupon(fp) {
             if (event.persisted || performance.getEntriesByType('navigation')[0].type === 'back_forward') {
                 location.reload();
             }
-
-            
         });
     </script>
 @endsection
