@@ -76,7 +76,7 @@
 
 
         {{-- AGENT CODE --}}
-        <div>
+        {{-- <div>
             <label class="block mb-2 text-sm font-bold">
                 Agent Code
             </label>
@@ -87,7 +87,7 @@
                 x-model="contact.agent"
                 class="bg-gray-50 border border-gray-300 text-sm rounded-md block w-full p-2.5"
             >
-        </div>
+        </div> --}}
 
 
         {{-- SINGLE DELIVERY DATE + TIME (ONLY IF NOT MULTIPLE) --}}
