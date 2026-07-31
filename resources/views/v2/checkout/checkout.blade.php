@@ -631,7 +631,7 @@
                 selectedAutoCoupon: null,
                 showAutoCouponChooser: false,
                 autoCouponChooserShownOnce: false,
-                automaticCouponPopupShownOnce: false,
+                autoCouponPopupShownCodes: [],
                 autoCouponChoices: [],
                 selectedAutoCouponId: '',
                 totalDiscountAmount: 0,
@@ -779,6 +779,10 @@
                 if (!this.deliveryCouponPopupShownCodes.includes(code)) {
                     this.deliveryCouponPopupShownCodes.push(code);
                 }
+
+                if (!this.autoCouponPopupShownCodes.includes(code)) {
+                    this.autoCouponPopupShownCodes.push(code);
+                }
             },
 
             couponChoiceSources() {
@@ -843,6 +847,7 @@
                     .filter(coupon => this.couponLocationRequirementStatus(coupon).valid)
                     .filter(coupon => !this.couponUsageConsumed(coupon))
                     .filter(coupon => !this.couponAlreadyApplied(coupon))
+                    .filter(coupon => this.couponCombinationStatus(coupon).valid)
                     .filter(coupon => this.couponProductRequirementStatus(coupon).valid)
                     .forEach(coupon => {
                         const code = this.couponCodeKey(coupon);
@@ -908,11 +913,12 @@
 
                 /*
                 |--------------------------------------------------------------------------
-                | Keep automatic coupon popups one-time only
+                | Keep automatic coupon popups one-time per coupon
                 |--------------------------------------------------------------------------
                 | Address/cart actions may revalidate, remove, or restore coupon
-                | eligibility, but they must not clear popup history. Customers can
-                | still open the complete list using "View Available Coupons".
+                | eligibility, but they must not clear a coupon's popup history.
+                | A different newly-qualified coupon may still open once. Customers
+                | can always open the complete list using "View Available Coupons".
                 |--------------------------------------------------------------------------
                 */
             },
@@ -921,10 +927,6 @@
                 if (this.suppressDeliveryCouponPopup) {
                     this.couponModal = false;
                     this.selectedCoupon = null;
-                    return;
-                }
-
-                if (this.automaticCouponPopupShownOnce) {
                     return;
                 }
 
@@ -957,9 +959,13 @@
                     return;
                 }
 
-                const newCoupons = qualifiedCoupons.filter(coupon =>
-                    !this.deliveryCouponPopupShownCodes.includes(this.couponCodeKey(coupon))
-                );
+                const newCoupons = qualifiedCoupons.filter(coupon => {
+                    const code = this.couponCodeKey(coupon);
+
+                    return code &&
+                        !this.deliveryCouponPopupShownCodes.includes(code) &&
+                        !this.autoCouponPopupShownCodes.includes(code);
+                });
 
                 if (!newCoupons.length) {
                     return;
@@ -971,10 +977,13 @@
                     if (code && !this.deliveryCouponPopupShownCodes.includes(code)) {
                         this.deliveryCouponPopupShownCodes.push(code);
                     }
+
+                    if (code && !this.autoCouponPopupShownCodes.includes(code)) {
+                        this.autoCouponPopupShownCodes.push(code);
+                    }
                 });
 
                 this.selectedCoupon = this.normalizeCoupon(newCoupons[0]);
-                this.automaticCouponPopupShownOnce = true;
                 this.couponModal = true;
             },
 
@@ -4692,24 +4701,21 @@ normalizeFreeProductFromCoupon(fp) {
                     );
 
                     if (alreadyAppliedSelected) {
-                        this.showAutoCouponChooser = false;
-                        this.order_amount = this.cartSubtotal();
-                        this.recomputeCouponTotals();
-                        return;
+                        // Keep the applied coupon stable, but continue below so a
+                        // different newly-qualified combinable coupon can appear.
+                    } else {
+                        const chosen = availableAutos.find(c =>
+                            String(c.id) === String(previousSelectedAutoCouponId)
+                        );
+
+                        if (chosen) {
+                            this.applyChosenAutoCoupon(chosen);
+                            this.showAutoCouponChooser = false;
+                        } else {
+                            this.selectedAutoCoupon = null;
+                            this.selectedAutoCouponId = '';
+                        }
                     }
-
-                    const chosen = availableAutos.find(c =>
-                        String(c.id) === String(previousSelectedAutoCouponId)
-                    );
-
-                    if (chosen) {
-                        this.applyChosenAutoCoupon(chosen);
-                        this.showAutoCouponChooser = false;
-                        return;
-                    }
-
-                    this.selectedAutoCoupon = null;
-                    this.selectedAutoCouponId = '';
                 }
 
                 if (this.autoCouponChoices.length === 0) {
@@ -4719,13 +4725,43 @@ normalizeFreeProductFromCoupon(fp) {
                     return;
                 }
 
-                if (
-                    !this.autoCouponChooserShownOnce &&
-                    !this.automaticCouponPopupShownOnce
-                ) {
+                const unseenAutoCouponChoices = this.autoCouponChoices.filter(coupon => {
+                    const code = this.couponCodeKey(coupon);
+
+                    if (
+                        !code ||
+                        this.couponAlreadyApplied(coupon) ||
+                        !this.couponCombinationStatus(coupon).valid
+                    ) {
+                        return false;
+                    }
+
+                    return !this.autoCouponPopupShownCodes.includes(code) &&
+                        !this.deliveryCouponPopupShownCodes.includes(code);
+                });
+
+                /*
+                 * Open again only for a DIFFERENT newly-qualified coupon.
+                 * Revalidation actions cannot reopen a coupon whose code was
+                 * already shown during this checkout page load.
+                 */
+                if (!this.showAutoCouponChooser && unseenAutoCouponChoices.length) {
+                    this.autoCouponChoices = unseenAutoCouponChoices;
+
+                    unseenAutoCouponChoices.forEach(coupon => {
+                        const code = this.couponCodeKey(coupon);
+
+                        if (!this.autoCouponPopupShownCodes.includes(code)) {
+                            this.autoCouponPopupShownCodes.push(code);
+                        }
+
+                        if (!this.deliveryCouponPopupShownCodes.includes(code)) {
+                            this.deliveryCouponPopupShownCodes.push(code);
+                        }
+                    });
+
                     this.showAutoCouponChooser = true;
                     this.autoCouponChooserShownOnce = true;
-                    this.automaticCouponPopupShownOnce = true;
                 }
 
                 this.order_amount = this.cartSubtotal();
