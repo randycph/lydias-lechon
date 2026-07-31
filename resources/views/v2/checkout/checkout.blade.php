@@ -1,4 +1,4 @@
-{{-- UPDATED: PRODUCT-ID QUANTITY GATE — BUILD product-id-qty-20260730-v4 --}}
+
 @extends('layouts.guest', ['page' => $page])
 
 @section('title', 'Checkout')
@@ -631,6 +631,7 @@
                 selectedAutoCoupon: null,
                 showAutoCouponChooser: false,
                 autoCouponChooserShownOnce: false,
+                automaticCouponPopupShownOnce: false,
                 autoCouponChoices: [],
                 selectedAutoCouponId: '',
                 totalDiscountAmount: 0,
@@ -907,20 +908,23 @@
 
                 /*
                 |--------------------------------------------------------------------------
-                | Re-show manual/location coupon popup when location becomes valid again
+                | Keep automatic coupon popups one-time only
                 |--------------------------------------------------------------------------
-                | Keep this reset only for the manual/location coupon popup.
-                | Do NOT reset autoCouponChooserShownOnce here, because the automatic
-                | coupon chooser must popup only once after its conditions are first hit.
+                | Address/cart actions may revalidate, remove, or restore coupon
+                | eligibility, but they must not clear popup history. Customers can
+                | still open the complete list using "View Available Coupons".
                 |--------------------------------------------------------------------------
                 */
-                this.deliveryCouponPopupShownCodes = [];
             },
 
             checkDeliveryCouponPopup() {
                 if (this.suppressDeliveryCouponPopup) {
                     this.couponModal = false;
                     this.selectedCoupon = null;
+                    return;
+                }
+
+                if (this.automaticCouponPopupShownOnce) {
                     return;
                 }
 
@@ -970,6 +974,7 @@
                 });
 
                 this.selectedCoupon = this.normalizeCoupon(newCoupons[0]);
+                this.automaticCouponPopupShownOnce = true;
                 this.couponModal = true;
             },
 
@@ -4094,12 +4099,9 @@ normalizeFreeProductFromCoupon(fp) {
                             !removedCodes.includes(this.couponCodeKey(coupon))
                         );
 
-                        this.deliveryCouponPopupShownCodes = (this.deliveryCouponPopupShownCodes || []).filter(code =>
-                            !removedCodes.includes(String(code || '').trim().toUpperCase())
-                        );
-
-                        // Do NOT reset autoCouponChooserShownOnce here.
-                        // The automatic coupon popup must show only once per checkout page load.
+                        // Preserve popup history when a coupon becomes temporarily invalid.
+                        // A later cart/address action may make it valid again, but it must
+                        // not automatically reopen during the same checkout page load.
 
                         if (this.selectedCoupon && removedCodes.includes(this.couponCodeKey(this.selectedCoupon))) {
                             this.selectedCoupon = null;
@@ -4717,9 +4719,13 @@ normalizeFreeProductFromCoupon(fp) {
                     return;
                 }
 
-                if (!this.autoCouponChooserShownOnce) {
+                if (
+                    !this.autoCouponChooserShownOnce &&
+                    !this.automaticCouponPopupShownOnce
+                ) {
                     this.showAutoCouponChooser = true;
                     this.autoCouponChooserShownOnce = true;
+                    this.automaticCouponPopupShownOnce = true;
                 }
 
                 this.order_amount = this.cartSubtotal();
