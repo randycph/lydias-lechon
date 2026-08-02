@@ -104,8 +104,18 @@ class CheckUnpaidTransactions extends Command
 
         foreach ($cancel as $order) {
             try {
-                if ($order?->payments?->where('status', 'PAID')->sum('amount') > 0 || $order->isConfirm == 1) {
-                    continue; // Skip if any payment is marked as PAID or if the order is confirmed
+                $order->refresh();
+
+                if ($order->payment_status === 'PAID' || $order->isConfirm == 1) {
+                    continue;
+                }
+
+                $hasPaidPayment = $order->payments()
+                    ->whereRaw('UPPER(status) = ?', ['PAID'])
+                    ->sum('amount') > 0;
+
+                if ($hasPaidPayment) {
+                    continue;
                 }
                 
                 $order->update(['status' => 'ABANDONED']);
