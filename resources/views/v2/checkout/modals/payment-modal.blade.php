@@ -87,12 +87,12 @@
                             </p>
 
                             <div class="flex flex-wrap items-center gap-3">
-                                <img src="{{ asset('images/payments/maya.webp') }}" alt="Maya" class="h-12">
-                                <img src="{{ asset('images/payments/qrph.png') }}" alt="Gcash" class="h-4">
-                                <img src="{{ asset('images/payments/gcash.webp') }}" alt="QR Ph" class="h-12">
-                                <img src="{{ asset('images/payments/mastercard.svg') }}" alt="Mastercard" class="h-8">
-                                <img src="{{ asset('images/payments/visa.svg') }}" alt="Visa" class="h-8">
-                                <img src="{{ asset('images/payments/jcb.svg') }}" alt="JCB" class="h-8">
+                                <img src="{{ asset('payments/maya.webp') }}" alt="Maya" class="h-12">
+                                <img src="{{ asset('payments/qrph.png') }}" alt="Gcash" class="h-4">
+                                <img src="{{ asset('payments/gcash.webp') }}" alt="QR Ph" class="h-12">
+                                <img src="{{ asset('payments/mastercard.svg') }}" alt="Mastercard" class="h-8">
+                                <img src="{{ asset('payments/visa.svg') }}" alt="Visa" class="h-8">
+                                <img src="{{ asset('payments/jcb.svg') }}" alt="JCB" class="h-8">
                             </div>
                         </div>
                     </div>
