@@ -75,16 +75,26 @@
                     {{-- PAYMENT METHOD --}}
                     <div>
                         <label class="block text-sm font-semibold mb-2">
-                            Select Payment Method
+                            Available Payment Options
                         </label>
 
-                        <select
-                            x-model="paymentMode"
-                            class="bg-gray-50 border border-gray-300 rounded-md w-full p-2.5"
-                        >
-                            <option value="PayMaya">PayMaya</option>
-                            {{-- Future methods here --}}
-                        </select>
+                        {{-- Hidden field keeps paymentMode = PayMaya for submitPayment() --}}
+                        <input type="hidden" x-model="paymentMode" value="PayMaya">
+
+                        <div class="bg-gray-50 border border-gray-300 rounded-md p-3">
+                            <p class="text-xs text-gray-500 mb-2">
+                                You'll be redirected to PayMaya, where you can pay using any of the options below — a Maya account is not required.
+                            </p>
+
+                            <div class="flex flex-wrap items-center gap-3">
+                                <img src="{{ asset('images/payments/maya.webp') }}" alt="Maya" class="h-12">
+                                <img src="{{ asset('images/payments/qrph.png') }}" alt="Gcash" class="h-4">
+                                <img src="{{ asset('images/payments/gcash.webp') }}" alt="QR Ph" class="h-12">
+                                <img src="{{ asset('images/payments/mastercard.svg') }}" alt="Mastercard" class="h-8">
+                                <img src="{{ asset('images/payments/visa.svg') }}" alt="Visa" class="h-8">
+                                <img src="{{ asset('images/payments/jcb.svg') }}" alt="JCB" class="h-8">
+                            </div>
+                        </div>
                     </div>
 
                 </div>
