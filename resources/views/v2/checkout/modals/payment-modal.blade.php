@@ -86,7 +86,7 @@
                                 You'll be redirected to PayMaya, where you can pay using any of the options below — a Maya account is not required.
                             </p>
 
-                            <div class="flex flex-wrap items-center gap-3">
+                            <div class="flex flex-wrap items-center gap-3 justify-center">
                                 <img src="{{ asset('payments/maya.webp') }}" alt="Maya" class="h-12">
                                 <img src="{{ asset('payments/qrph.png') }}" alt="Gcash" class="h-4">
                                 <img src="{{ asset('payments/gcash.webp') }}" alt="QR Ph" class="h-12">
