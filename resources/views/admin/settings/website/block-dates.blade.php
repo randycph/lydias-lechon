@@ -1210,8 +1210,6 @@
                 }
 
                 if (val === 'location') {
-                    groupCategory.disabled = false;
-                    groupProduct.disabled  = false;
                     groupLocation.disabled = false;
                     groupCity.disabled    = false;
                 }
