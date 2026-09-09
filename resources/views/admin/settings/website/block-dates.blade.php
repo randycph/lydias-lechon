@@ -584,8 +584,6 @@
                 }
 
                 if (value === 'location') {
-                    categorySelect.disabled = false;
-                    productSelect.disabled  = false;
                     locationSelect.disabled = false;
                     citySelect.disabled    = false;
                 }
