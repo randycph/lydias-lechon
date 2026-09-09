@@ -161,21 +161,15 @@ class BlockSlotController extends Controller
 
             if ($scope === 'category') {
                 $productIds = [];
-                $locationIds = [];
-                $cityIds = [];
             }
 
             if ($scope === 'product') {
                 $categoryIds = [];
-                $locationIds = [];
-                $cityIds = [];
             }
 
             if ($scope === 'all') {
                 $productIds = [];
                 $categoryIds = [];
-                $locationIds = [];
-                $cityIds = [];
             }
             
             $newData = [
@@ -324,21 +318,15 @@ class BlockSlotController extends Controller
 
         if ($scope === 'category') {
             $productIds = [];
-            $locationIds = [];
-            $cityIds = [];
         }
 
         if ($scope === 'product') {
             $categoryIds = [];
-            $locationIds = [];
-            $cityIds = [];
         }
 
         if ($scope === 'all') {
             $productIds = [];
             $categoryIds = [];
-            $locationIds = [];
-            $cityIds = [];
         }
 
         // UPDATE BLOCK
@@ -802,21 +790,15 @@ class BlockSlotController extends Controller
 
             if ($scope === 'category') {
                 $productIds = [];
-                $locationIds = [];
-                $cityIds = [];
             }
 
             if ($scope === 'product') {
                 $categoryIds = [];
-                $locationIds = [];
-                $cityIds = [];
             }
 
             if ($scope === 'all') {
                 $productIds = [];
                 $categoryIds = [];
-                $locationIds = [];
-                $cityIds = [];
             }
 
             $oldData = [
