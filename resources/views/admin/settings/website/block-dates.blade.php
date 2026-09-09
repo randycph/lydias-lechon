@@ -572,8 +572,7 @@
                 $('#city').val(null).trigger('change');
 
                 if (value === 'all') {
-                    // everything stays disabled
-                    return;
+                    // Category and product fields stay disabled.
                 }
 
                 if (value === 'category') {
@@ -590,6 +589,11 @@
                     locationSelect.disabled = false;
                     citySelect.disabled    = false;
                 }
+
+                // Location and city availability is determined by the selected
+                // block type, not by the product scope.
+                document.querySelector('input[name="block_type"]:checked')
+                    ?.dispatchEvent(new Event('change'));
             });
         });
 
