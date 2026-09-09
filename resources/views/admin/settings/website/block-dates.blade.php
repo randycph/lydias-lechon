@@ -549,6 +549,11 @@
             });
         });
 
+        // Apply the default block type on page load as well. The "both" option is
+        // checked in the markup, but no change event fires for that initial state.
+        document.querySelector('input[name="block_type"]:checked')
+            ?.dispatchEvent(new Event('change'));
+
         scopeRadios.forEach(radio => {
             radio.addEventListener('change', () => {
 
