@@ -628,7 +628,10 @@
             $('#addPayment').on('click', addPaymentRow);
 
             $('#paymentsTable').on('change', '.payment-method', handlePaymentMethodChange);
-            $('#paymentsTable').on('input', '.payment-amount', recalculatePayments);
+            $('#paymentsTable').on('input', '.payment-amount', function () {
+                // Pass the field being edited so only that (latest) payment is capped.
+                recalculatePayments(this);
+            });
             $('#paymentsTable').on('click', '.remove-payment', removePaymentRow);
 
             reindexPayments();
@@ -691,7 +694,7 @@
         CALCULATIONS
         ========================= */
 
-        function recalculatePayments() {
+        function recalculatePayments(changedAmount) {
 
             let paymentTotal = 0;
             let discountTotals = {
@@ -718,7 +721,20 @@
 
             console.log(gross, paymentTotal)
 
-            if (paymentTotal > gross) {
+            const $changedAmount = changedAmount ? $(changedAmount) : $();
+            const changedMethod = $changedAmount.closest('.payment-row').find('.payment-method').val();
+            const isDiscount = Object.prototype.hasOwnProperty.call(DISCOUNT_TYPES, changedMethod);
+
+            // Keep the payment total within the gross amount.  When there are
+            // multiple methods, only the amount most recently entered is changed
+            // to the balance left after the other payment methods.
+            if (paymentTotal > gross && $changedAmount.length && !isDiscount) {
+                const enteredAmount = parseFloat($changedAmount.val()) || 0;
+                const remaining = Math.max(0, gross - (paymentTotal - enteredAmount));
+
+                $changedAmount.val(remaining.toFixed(2));
+                paymentTotal = Math.max(0, gross);
+
                 alert('You are exceeding the gross amount. Please check your payments. Continue anyway.');
             }
             
