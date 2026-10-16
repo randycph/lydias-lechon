@@ -1686,6 +1686,12 @@ class SalesController extends Controller
             $this->confirm_order($sales->id, 'Auto confirm after payment completion', Auth::user()->name);
         }
 
+        if ($sales->status == 'ABANDONED') {
+            $sales->update([
+                'status' => 'active',
+            ]);
+        }
+
         ActivityLog::create([
             'created_by' => auth()->id(),
             'activity_type' => 'insert',
