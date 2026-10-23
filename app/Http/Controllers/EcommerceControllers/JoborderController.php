@@ -27,6 +27,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rule;
 
 
 class JoborderController extends Controller
@@ -48,14 +49,24 @@ class JoborderController extends Controller
         $rem = 0;
         $err = '';
 
-        $x = explode(" - ", $request->dateneeded);
+        $dateNeeded = $request->input('dateneeded');
+        $hasExpectedFormat = is_string($dateNeeded)
+            && preg_match('/\A\d{4}-\d{2}-\d{2} - \d{2}:\d{2}\z/', $dateNeeded) === 1;
+        $selectedDate = $hasExpectedFormat
+            ? DateTime::createFromFormat('!Y-m-d - H:i', $dateNeeded)
+            : false;
 
-        $tym24 = isset($x[1])
-            ? date("H:i", strtotime($x[1]))
-            : null;
+        if ($selectedDate === false || $selectedDate->format('Y-m-d - H:i') !== $dateNeeded) {
+            return response()->json([
+                'err' => '<li>Please select a valid delivery date and time.</li>',
+                'remark' => 1,
+            ]);
+        }
+
+        $x = explode(' - ', $dateNeeded);
+        $tym24 = $selectedDate->format('H:i');
 
         //check if time is between the operation time
-        $current_time = $x[1];
         $open = "04:59";
         $close = "21:01";
         $date1 = new DateTime($tym24);
@@ -69,8 +80,7 @@ class JoborderController extends Controller
             $err .= "<li>The time you've selected (".$x[1].") is beyond our operation time which is between 5AM - 9PM.</li>";
         }
 
-        //check if time is more than 48 hrs
-        $date = strtotime($x[0]." ".$x[1]);
+        $date = $selectedDate->getTimestamp();
 
 
         //logger($request);
@@ -281,6 +291,22 @@ class JoborderController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'customer_type' => ['required', 'in:cs-new,cs-exist'],
+            'customer_id' => [
+                'exclude_unless:customer_type,cs-exist',
+                'required',
+                'integer',
+                Rule::exists('users', 'id')->whereNull('deleted_at'),
+            ],
+        ], [
+            'customer_type.required' => 'Please select New Customer or Existing Customer.',
+            'customer_type.in' => 'Please select New Customer or Existing Customer.',
+            'customer_id.required' => 'Please select an existing customer and wait for their details to load.',
+            'customer_id.integer' => 'Please select a valid customer from the customer search.',
+            'customer_id.exists' => 'The selected customer is no longer available. Please select another customer.',
+        ]);
+
         $rdata = $request->all();
         if($request->totalcoupon > 0){
             $couponCode = $rdata['couponcode'];
@@ -858,7 +884,7 @@ class JoborderController extends Controller
         $input = $request->all();
         
         //$details = SalesHeader::where('customer_name',$request->name)->orderBy('id','desc')->first();
-        $details = User::find($request->id);
+        $details = User::findOrFail($request->id);
 
         return view('admin.joborder.display-customer-details',compact('details'));
 

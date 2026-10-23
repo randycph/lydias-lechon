@@ -42,9 +42,11 @@
                                         <option value="">Select Branch</option>
                                         @forelse($branches as $b)
                                             @php 
-                                                $name = \App\EcommerceModel\Branch::whereId($b->branch_id)->first();
+                                                $branch = \App\EcommerceModel\Branch::withTrashed()->find($b->branch_id);
                                             @endphp
-                                            <option value="{{$b->branch_id}}">{{$name->name}}</option>
+                                            <option value="{{ $b->branch_id }}">
+                                                {{ $branch?->name ?? 'Unavailable branch (#'.$b->branch_id.')' }}
+                                            </option>
                                         @empty
                                         @endforelse
                                     </select>
@@ -79,7 +81,7 @@
                             @forelse($dates as $date)
                                 <tr>
                                     
-                                    <td> {{$date->branch->name }}</td>
+                                    <td>{{ $date->branch?->name ?? 'Unavailable branch (#'.$date->branch_id.')' }}</td>
                                     <td>{{ $date->date }}</td>                                    
                                     <td>
                                         <nav class="nav table-options">                                           

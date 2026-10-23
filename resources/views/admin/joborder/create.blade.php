@@ -90,10 +90,17 @@
                 </div>
 
                 <!-- Existing Customer -->
+                @error('customer_type')
+                    <span class="text-danger">{{ $message }}</span>
+                @enderror
+
                 <div class="cs-exist box">
                     <div class="form-group">
                         <label class="d-block">Search Customer *</label>
                         <input id="input2" name="customer" type="text" onchange="view_customer_details($(this).val());" class="form-control" value="{{ old('customer') }}">
+                        @error('customer_id')
+                            <span class="text-danger">{{ $message }}</span>
+                        @enderror
                     </div>
                     <div class="form-group">
                         <div id="customer_details"></div>
@@ -1089,6 +1096,13 @@
         });
 
         function check_time(time){
+            var deliveryDate = $('#date1').val();
+            var deliveryTime = $('#delivery_time').val();
+
+            if (!deliveryDate || !deliveryTime || $('#open-date').is(':checked')) {
+                return;
+            }
+
             var arr_time = [ '23:00','01:00','02:00','03:00','04:00','05:00'];
 
             if(time == '23:00'){
@@ -1104,7 +1118,7 @@
             //     $("#delivery_time").val('').trigger('change');
             // } 
 
-            var v = $('#date1').val()+' - '+$('#delivery_time').val();  
+            var v = deliveryDate + ' - ' + deliveryTime;
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -1632,12 +1646,18 @@
 
         function view_customer_details(id)
         {
+            $('#customer_details').empty().hide();
+
             if(id > 0){
                 $.ajax({
                     type: "GET",
                     url: "{{ route('display-customer-details') }}",
                     data: { id : id },
                     success: function(response) {
+                        if (String($('#input2').val()) !== String(id)) {
+                            return;
+                        }
+
                         $('#customer_details').show();
                         $('#customer_details').html(response); 
                         $('#add_ress').val($('#customer_address').val());

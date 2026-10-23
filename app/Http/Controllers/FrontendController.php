@@ -11,6 +11,7 @@ use App\EcommerceModel\GiftCertificate;
 use App\EcommerceModel\SalesDetail;
 use App\EcommerceModel\SalesHeader;
 use App\EcommerceModel\SalesPayment;
+use App\Http\Requests\ArticlePaginationRequest;
 use App\Mail\WelcomeEmail;
 use App\Models\Album;
 use App\Models\Article;
@@ -2028,10 +2029,10 @@ $sales = SalesHeader::where('user_id', Auth::id())
         return response()->json(['success' => true]);
     }
 
-    public function articleLoadMore(Request $request)
+    public function articleLoadMore(ArticlePaginationRequest $request)
     {
-        $page = $request->input('page', 1);
-        $limit = $request->input('limit', 4);
+        $page = (int) $request->input('page', 1);
+        $limit = (int) $request->input('limit', 4);
 
         $articles = Article::with('category')
             ->where('is_blog', 1)
@@ -2048,12 +2049,15 @@ $sales = SalesHeader::where('user_id', Auth::id())
         ]);
     }
 
-    public function articleCategoryLoadMore(Request $request)
+    public function articleCategoryLoadMore(ArticlePaginationRequest $request)
     {
-        $page = $request->input('page', 1);
-        $limit = $request->input('limit', 4);
-        $category = $request->input('category');
-        $category = ArticleCategory::where('slug', $category)->first();
+        $validated = $request->validate([
+            'category' => ['required', 'string'],
+        ]);
+
+        $page = (int) $request->input('page', 1);
+        $limit = (int) $request->input('limit', 4);
+        $category = ArticleCategory::where('slug', $validated['category'])->firstOrFail();
 
         $articles = Article::with('category')
             ->where('category_id', $category->id)
