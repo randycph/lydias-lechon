@@ -28,14 +28,18 @@ class CheckUnpaidTransactions extends Command
             ->get();
 
         foreach ($remind as $order) {
-            if (!$order->user || !$order->user->email) {
-                continue; // Skip if no user or email
+            $email = $order->user?->email;
+
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                logger()->warning("Skipping unpaid reminder for order {$order->id}: invalid customer email.");
+                continue;
             }
+
             if ($order?->payments?->where('status', 'PAID')->sum('amount') > 0 || $order->isConfirm == 1) {
                 continue; // Skip if any payment is marked as PAID or if the order is confirmed
             }
 
-            Mail::to($order->user->email)->send(new \App\Mail\UnpaidReminderMail($order));
+            Mail::to($email)->send(new \App\Mail\UnpaidReminderMail($order));
         }
 
         // Transactions unpaid for 5+ days — cancel them
@@ -120,8 +124,12 @@ class CheckUnpaidTransactions extends Command
                 
                 $order->update(['status' => 'ABANDONED']);
 
-                if ($order->user && $order->user->email) {
-                    Mail::to($order->user->email)->send(new \App\Mail\OrderCancelledMail($order));
+                $email = $order->user?->email;
+
+                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    Mail::to($email)->send(new \App\Mail\OrderCancelledMail($order));
+                } elseif ($email) {
+                    logger()->warning("Skipping cancellation email for order {$order->id}: invalid customer email.");
                 }
 
                 ActivityLog::create([
