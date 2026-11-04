@@ -34,6 +34,8 @@
     <link rel="stylesheet" href="https://unpkg.com/perfect-scrollbar/css/perfect-scrollbar.css" />
     <script src="{{ asset('js/perfect-scrollbar.min.js') }}"></script>
     
+    <script defer src="https://t.contentsquare.net/uxa/ab7f543ddc5ac.js"></script>
+
     <style>
         @font-face {
             font-family: 'Feelings';
