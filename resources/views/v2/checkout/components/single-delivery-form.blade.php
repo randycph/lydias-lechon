@@ -143,6 +143,7 @@
                         x-ref="deliveryDate"
                         type="text"
                         x-model="need_date"
+                        :disabled="blockDatesLoading"
                         readonly
                         x-init="initSingleDeliveryDatepicker($el)"
                         @change="validateSingleDeliveryField('date')"

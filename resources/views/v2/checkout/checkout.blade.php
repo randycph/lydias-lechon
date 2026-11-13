@@ -5563,10 +5563,15 @@ normalizeFreeProductFromCoupon(fp) {
                     this.populateDeliveryTimes(parts.hour)
                 })
 
-                el.addEventListener('changeDate', (e) => {
+                if (el._checkoutDateChangeHandler) {
+                    el.removeEventListener('changeDate', el._checkoutDateChangeHandler)
+                }
+
+                el._checkoutDateChangeHandler = (e) => {
                     this.need_date = this.formatDate(e.detail.date)
                     this.populateDeliveryTimes()
-                })
+                }
+                el.addEventListener('changeDate', el._checkoutDateChangeHandler)
             },
 
 
@@ -5624,10 +5629,15 @@ normalizeFreeProductFromCoupon(fp) {
                         this.populatePickupTimes(parts.hour)
                     })
 
-                    el.addEventListener('changeDate', (e) => {
+                    if (el._checkoutDateChangeHandler) {
+                        el.removeEventListener('changeDate', el._checkoutDateChangeHandler)
+                    }
+
+                    el._checkoutDateChangeHandler = (e) => {
                         this.need_date = this.formatDate(e.detail.date)
                         this.populatePickupTimes()
-                    })
+                    }
+                    el.addEventListener('changeDate', el._checkoutDateChangeHandler)
                 },
 
                 initMultiDeliveryDatepicker(el, index) {
@@ -5943,6 +5953,7 @@ normalizeFreeProductFromCoupon(fp) {
                 async changeMethod(type) {
                     if (type == this.method) return
 
+                    this.blockDatesLoading = true
                     this.method = type
 
                     if (type === 'pickup') {
@@ -5966,6 +5977,7 @@ normalizeFreeProductFromCoupon(fp) {
                     this.city = ''
                     this.pickup_branch = ''
                     this.blockedDetails = []
+                    this.need_date = ''
 
                     this.deliveryFee = 0;
                     this.lechonBakaService = this.hasBaka ? window.lechonBakaService : 0;
@@ -5973,7 +5985,22 @@ normalizeFreeProductFromCoupon(fp) {
                     this.resetDeliveryCouponPopupForLocationChange(true)
                     this.computeTotal()
                     this.applyAutoCoupons()
-                this.recomputeCouponTotals()
+                    this.recomputeCouponTotals()
+
+                    const loaded = await this.getBlockDates()
+
+                    if (!loaded || this.method !== type) return
+
+                    this.$nextTick(() => {
+                        if (this.method === 'pickup' && this.$refs.pickupDate) {
+                            this.initPickupDatepicker(this.$refs.pickupDate)
+                        }
+
+                        if (this.method === 'delivery' && this.$refs.deliveryDate) {
+                            this.initSingleDeliveryDatepicker(this.$refs.deliveryDate)
+                        }
+
+                    })
                 },
 
                 availablePickupHours: [],
@@ -7632,6 +7659,8 @@ normalizeFreeProductFromCoupon(fp) {
                         }
                     }
 
+                    const requestId = ++this.blockDatesRequestId;
+
                     const response = await fetch('{{ route('checkout.blocks') }}', {
                         method: 'POST',
                         headers: {
@@ -7647,6 +7676,8 @@ normalizeFreeProductFromCoupon(fp) {
 
                     const blocks = await response.json();
 
+                    if (requestId !== this.blockDatesRequestId) return;
+
                     this.blockedDetails = Array.isArray(blocks) ? blocks : [];
 
                     // FORCE DATEPICKER REFRESH
@@ -7660,10 +7691,15 @@ normalizeFreeProductFromCoupon(fp) {
                             this.$refs.deliveryDate._datepicker.update();
                         }
 
+                        this.blockDatesLoading = false;
                     });
+
+                    return true;
                 },
 
                 blockedDetails: [],
+                blockDatesRequestId: 0,
+                blockDatesLoading: false,
                 blockModal: false,
 
                 closeBlockModal() {
