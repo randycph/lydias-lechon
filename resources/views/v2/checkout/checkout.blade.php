@@ -5509,7 +5509,28 @@ normalizeFreeProductFromCoupon(fp) {
                     return dateStr === today
                 },
 
+                isAvailableCheckoutDate(date, earliest) {
+                    if (!date || date < this.formatDate(earliest)) {
+                        return false
+                    }
+
+                    return !this.blockedDetails.some(b =>
+                        b.date === date &&
+                        b.is_all_day == 1 &&
+                        this.blockAppliesToCart(b) &&
+                        this.blockAppliesToMethod(b) &&
+                        this.isBlockedWithCombo(b)
+                    )
+                },
+
                 initSingleDeliveryDatepicker(el) {
+                const selectedDate = this.need_date
+                const selectedTime = this.need_time
+
+                if (el._checkoutDateChangeHandler) {
+                    el.removeEventListener('changeDate', el._checkoutDateChangeHandler)
+                }
+
                 if (el._datepicker) {
                     el._datepicker.destroy()
                 }
@@ -5524,6 +5545,9 @@ normalizeFreeProductFromCoupon(fp) {
                         this.isBlockedWithCombo(b)
                 )
                 const parts = this.formatDateTimeParts(nextValidDate)
+                const dateToSelect = this.isAvailableCheckoutDate(selectedDate, earliest)
+                    ? selectedDate
+                    : parts.date
 
                 const picker = new Datepicker(el, {
                     autohide: true,
@@ -5555,17 +5579,13 @@ normalizeFreeProductFromCoupon(fp) {
                 if (this.sale && this.sale.delivery_type == "Door to door delivery") {
                     // Keep existing sale date when editing.
                 } else {
-                    this.need_date = parts.date
-                    picker.setDate(parts.date)
+                    this.need_date = dateToSelect
+                    picker.setDate(dateToSelect)
                 }
 
                 this.$nextTick(() => {
-                    this.populateDeliveryTimes(parts.hour)
+                    this.populateDeliveryTimes(parts.hour, selectedTime)
                 })
-
-                if (el._checkoutDateChangeHandler) {
-                    el.removeEventListener('changeDate', el._checkoutDateChangeHandler)
-                }
 
                 el._checkoutDateChangeHandler = (e) => {
                     this.need_date = this.formatDate(e.detail.date)
@@ -5577,6 +5597,12 @@ normalizeFreeProductFromCoupon(fp) {
 
 
                 initPickupDatepicker(el) {
+                    const selectedDate = this.need_date
+                    const selectedTime = this.need_time
+
+                    if (el._checkoutDateChangeHandler) {
+                        el.removeEventListener('changeDate', el._checkoutDateChangeHandler)
+                    }
 
                     if (el._datepicker) {
                         el._datepicker.destroy()
@@ -5592,6 +5618,9 @@ normalizeFreeProductFromCoupon(fp) {
                             this.isBlockedWithCombo(b)
                     )
                     const parts = this.formatDateTimeParts(nextValidDate)
+                    const dateToSelect = this.isAvailableCheckoutDate(selectedDate, earliest)
+                        ? selectedDate
+                        : parts.date
 
                     const picker = new Datepicker(el, {
                         autohide: true,
@@ -5621,17 +5650,13 @@ normalizeFreeProductFromCoupon(fp) {
 
                     el._datepicker = picker
 
-                    this.need_date = parts.date
-                    picker.setDate(parts.date)
+                    this.need_date = dateToSelect
+                    picker.setDate(dateToSelect)
 
                     // auto populate time correctly
                     this.$nextTick(() => {
-                        this.populatePickupTimes(parts.hour)
+                        this.populatePickupTimes(parts.hour, selectedTime)
                     })
-
-                    if (el._checkoutDateChangeHandler) {
-                        el.removeEventListener('changeDate', el._checkoutDateChangeHandler)
-                    }
 
                     el._checkoutDateChangeHandler = (e) => {
                         this.need_date = this.formatDate(e.detail.date)
@@ -5702,7 +5727,7 @@ normalizeFreeProductFromCoupon(fp) {
 
                         
 
-                populatePickupTimes(minHour = null) {
+                populatePickupTimes(minHour = null, selectedTime = null) {
 
                     if (!this.need_date) return
 
@@ -5755,14 +5780,15 @@ normalizeFreeProductFromCoupon(fp) {
                                 }, 300)
                             }
                         } else {
-                            this.need_time = hours.length
-                                ? this.formatHourValue(hours[0])
-                                : ''
+                            const availableTimes = hours.map(hour => this.formatHourValue(hour))
+                            this.need_time = availableTimes.includes(selectedTime)
+                                ? selectedTime
+                                : (availableTimes[0] || '')
                         }
                     })
                 },
 
-                populateDeliveryTimes(minHour = null) {
+                populateDeliveryTimes(minHour = null, selectedTime = null) {
 
                     if (!this.need_date) return
 
@@ -5815,9 +5841,10 @@ normalizeFreeProductFromCoupon(fp) {
                                 }, 300)
                             }
                         } else {
-                            this.need_time = hours.length
-                                ? this.formatHourValue(hours[0])
-                                : ''
+                            const availableTimes = hours.map(hour => this.formatHourValue(hour))
+                            this.need_time = availableTimes.includes(selectedTime)
+                                ? selectedTime
+                                : (availableTimes[0] || '')
                         }
                     })
                 },
@@ -6013,7 +6040,9 @@ normalizeFreeProductFromCoupon(fp) {
 
                 async onPickupBranchChange() {
                     this.pickupErrors.branch = ''
-                    this.getBlockDates().then(() => {
+                    this.getBlockDates().then((loaded) => {
+                        if (!loaded || this.method !== 'pickup') return
+
                         this.$nextTick(() => {
                             if (this.$refs.pickupDate) {
                                 this.initPickupDatepicker(this.$refs.pickupDate)
@@ -6110,7 +6139,9 @@ normalizeFreeProductFromCoupon(fp) {
                         this.releaseDeliveryCouponPopupSuppression();
                     }
 
-                    this.getBlockDates(true).then(() => {
+                    this.getBlockDates(true).then((loaded) => {
+                        if (!loaded || this.method !== 'delivery') return
+
                         this.$nextTick(() => {
                             if (this.$refs.deliveryDate) {
                                 this.initSingleDeliveryDatepicker(this.$refs.deliveryDate)
