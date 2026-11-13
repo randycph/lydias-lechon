@@ -62,6 +62,7 @@
                         x-ref="pickupDate"
                         type="text"
                         x-model="need_date"
+                        :disabled="blockDatesLoading"
                         @change="validatePickupDateTime"
                         readonly
                         x-init="initPickupDatepicker($el)"
