@@ -56,7 +56,7 @@
                                 <input type="email" class="form-control" id="email" name="email" required>
                             </div>
                             <button type="submit" class="btn btn-success reg-btn">Submit</button>
-                          <a href="{{ route('customer-front.login') }}" class="cancel-btn btn" style="margin-right:5px;">Go Back</a>
+                          <a href="{{ route('login') }}" class="cancel-btn btn" style="margin-right:5px;">Go Back</a>
                         </form>
                     </div>
                 </div>

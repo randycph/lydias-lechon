@@ -99,7 +99,7 @@ class CustomerFrontController extends Controller
 
         //Auth::login($user);
 
-        return redirect(route('customer-front.login'))->with('success_registration','Your registration has been successfull');
+        return redirect(route('login'))->with('success_registration','Your registration has been successfull');
     }
 
     public function get_random_code($length = 6)

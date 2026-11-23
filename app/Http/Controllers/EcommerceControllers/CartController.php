@@ -845,7 +845,7 @@ class CartController extends Controller
             if($request->customer_type == 1){
                 return redirect()->route('cart.front.checkout-as-guest');
             } else {
-                return redirect()->route('customer-front.login');
+                return redirect()->route('login');
             }
         }
     }
