@@ -128,7 +128,7 @@
 				</div>
 
 				<div class="form-group">
-					<label class="d-block">Start to show in seconds*</label>
+					<label class="d-block">Start to show in seconds</label>
 					<input type="text" name="start_to_show" class="form-control @error('start_to_show') is-invalid @enderror" value="{{ old('start_to_show', $popup_message->start_to_show) }}">
 					<p class="tx-11 mg-t-4">Enter the number of seconds after which the popup will be shown. Default is 0 seconds.</p>
 				</div>
