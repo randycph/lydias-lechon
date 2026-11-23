@@ -239,6 +239,23 @@
                     $displaySalesDetailsNet = collect($salesDetails ?? [])->sum(function ($detail) use ($isFreeProductLine) {
                         return $isFreeProductLine($detail) ? 0 : (float) ($detail->net_amount ?? 0);
                     });
+
+                    // Multiple-address discounts are displayed only on the -A transaction.
+                    $orderNumberForDiscountDisplay = (string) ($sales->order_number ?? '');
+                    $showDiscountOnThisTransaction = !str_contains($orderNumberForDiscountDisplay, '-')
+                        || \Illuminate\Support\Str::endsWith($orderNumberForDiscountDisplay, '-A');
+
+                    $rawCouponRows = isset($couponRows)
+                        ? $couponRows
+                        : ($sales->couponUsed ?? collect());
+
+                    $displayCouponRows = $showDiscountOnThisTransaction
+                        ? $rawCouponRows
+                        : collect();
+
+                    $displayOrderDiscount = $showDiscountOnThisTransaction
+                        ? (float) ($sales->discount_amount ?? 0)
+                        : 0;
                 @endphp
 
                 <div class="row row-sm align-items-start">
@@ -507,37 +524,6 @@
                                     <td class="tx-center " colspan="9">No transaction found.</td>
                                 </tr>
                             @endforelse
-
-                            @php
-                                /*
-                                 * Multiple-address discount display rule:
-                                 * Show the coupon/discount only on the -A transaction.
-                                 * This keeps the coupon design but prevents the same discount
-                                 * from appearing on every child sales transaction.
-                                 */
-                                $orderNumberForDiscountDisplay = (string) ($sales->order_number ?? '');
-                                $showDiscountOnThisTransaction = \Illuminate\Support\Str::endsWith($orderNumberForDiscountDisplay, '-A');
-
-                                /*
-                                 * If this is not a multiple-address child order, keep showing the discount
-                                 * for normal/single-address transactions.
-                                 */
-                                if (!str_contains($orderNumberForDiscountDisplay, '-')) {
-                                    $showDiscountOnThisTransaction = true;
-                                }
-
-                                $rawCouponRows = isset($couponRows)
-                                    ? $couponRows
-                                    : ($sales->couponUsed ?? collect());
-
-                                $displayCouponRows = $showDiscountOnThisTransaction
-                                    ? $rawCouponRows
-                                    : collect();
-
-                                $displayOrderDiscount = $showDiscountOnThisTransaction
-                                    ? (float) ($sales->discount_amount ?? 0)
-                                    : 0;
-                            @endphp
 
                             @if(isset($displayCouponRows) && count($displayCouponRows) > 0)
                                 @foreach($displayCouponRows as $coupon)
