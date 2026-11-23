@@ -27,7 +27,7 @@ class AuthenticatedMiddleware
 //            } else if (strpos($currentUrl, 'member') !== false) {
 //                return redirect(route('member.login'));
 //            } else {
-//                return redirect(route('customer-front.login'));
+//                return redirect(route('login'));
 //            }
         }
     }

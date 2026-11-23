@@ -989,10 +989,10 @@
                 type: "post",
                 url: "{{route('joborder.check_coupon')}}",            
                 success: function(returnData) {   
-                    $('#totalcoupon').val(1); 
                     x++;
                     
                     if(returnData['success'] == 1) {
+                        $('#totalcoupon').val(1);
                         arr_selected_coupons.push(parseInt(returnData['code']));
                     
                         $('#tbod').append('<tr id="on_screen_cpn'+x+'">'+
@@ -1022,8 +1022,13 @@
         
         $(document).on('click', '.cremove', function(){
             var id = $(this).attr("id");
+            var code = $('#on_screen_cpn' + id).find('input[name="couponcode[]"]').val();
+            arr_selected_coupons = arr_selected_coupons.filter(function (selectedCoupon) {
+                return selectedCoupon !== parseInt(code);
+            });
             $('#cpn'+id).remove();
             $('#on_screen_cpn'+id).remove();
+            $('#totalcoupon').val($('#coupons_tbl .cremove').length > 0 ? 1 : 0);
             
             calculate_grand_total();
         });
