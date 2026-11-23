@@ -29,6 +29,7 @@ class JobOrderCustomerValidationTest extends TestCase
         try {
             $cases = [
                 ['customer_type' => 'cs-new'],
+                ['customer_type' => 'cs-new', 'totalcoupon' => 1],
                 ['customer_type' => 'cs-new', 'customer_id' => 'stale-input'],
                 ['customer_type' => 'cs-exist', 'customer_id' => '123'],
             ];
@@ -53,6 +54,34 @@ class JobOrderCustomerValidationTest extends TestCase
                 $this->assertTrue($session->get('errors')->has('payments'));
                 $this->assertFalse($session->get('errors')->has('customer_id'));
             }
+        } finally {
+            Container::setInstance($previousContainer);
+        }
+    }
+
+    public function test_incomplete_coupon_fields_are_rejected_before_saving(): void
+    {
+        $previousContainer = Container::getInstance();
+        $container = new Container();
+        Container::setInstance($container);
+
+        try {
+            $session = new Store('test', new ArraySessionHandler(120));
+            $redirector = new Redirector(new UrlGenerator(new RouteCollection(), Request::create('/')));
+            $redirector->setSession($session);
+            $container->instance('redirect', $redirector);
+
+            $factory = new Factory(new Translator(new ArrayLoader(), 'en'));
+            $request = $this->validationRequest([
+                'customer_type' => 'cs-new',
+                'couponcode' => ['TEST'],
+            ], $factory);
+            $controller = (new ReflectionClass(JoborderController::class))->newInstanceWithoutConstructor();
+
+            $response = $controller->store($request);
+
+            $this->assertSame(302, $response->getStatusCode());
+            $this->assertTrue($session->get('errors')->has('couponcode'));
         } finally {
             Container::setInstance($previousContainer);
         }
