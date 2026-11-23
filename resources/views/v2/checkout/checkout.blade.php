@@ -260,9 +260,14 @@
             @include('v2.checkout.components.contact-info')
             {{-- @include('v2.checkout.components.place-order') --}}
 
+            <div x-show="minimumOrderMessage || errors.minimum_order" class="border border-red-500 text-red-700 rounded-lg p-4" role="alert">
+                <span x-text="minimumOrderMessage || errors.minimum_order"></span>
+                <a href="{{ url('/menu') }}" class="underline font-bold">Browse Menu</a>
+            </div>
+
             <button
                 type="submit"
-                :disabled="incompleteProgress || isSubmitting"
+                :disabled="incompleteProgress || isSubmitting || !!minimumOrderMessage"
                 class="w-full bg-primary text-white font-bold py-3 rounded-lg transition flex items-center justify-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 :class="{
                     'opacity-50 cursor-not-allowed pointer-events-none': incompleteProgress || isSubmitting
@@ -5897,6 +5902,27 @@ normalizeFreeProductFromCoupon(fp) {
                 }, 0)
                 },
 
+                get minimumOrderMessage() {
+                    const subtotal = this.cartSubtotal();
+                    const minimum = Number(this.method === 'delivery'
+                        ? window.minimum_order_amount_door_to_door
+                        : window.minimum_order_amount_pickup) || 0;
+                    const label = this.method === 'delivery' ? 'door-to-door delivery' : 'pickup';
+
+                    if (subtotal < minimum) {
+                        return `The minimum order amount for ${label} is ${this.formatMoney(minimum)}.`;
+                    }
+
+                    const miscMinimum = Number(window.minimum_order_misc) || 0;
+                    const miscOnly = this.carts.length > 0 && this.carts.every(item => Number(item.product?.is_misc) === 1);
+
+                    if (miscOnly && subtotal < miscMinimum) {
+                        return `The minimum order amount for miscellaneous items is ${this.formatMoney(miscMinimum)}.`;
+                    }
+
+                    return '';
+                },
+
                 get formattedSubtotal() {
                     const total = this.carts.reduce((sum, item) => {
                         const qty = Number(item.qty) || 1
@@ -5980,6 +6006,7 @@ normalizeFreeProductFromCoupon(fp) {
                 async changeMethod(type) {
                     if (type == this.method) return
 
+                    delete this.errors.minimum_order
                     this.blockDatesLoading = true
                     this.method = type
 
@@ -6340,6 +6367,10 @@ normalizeFreeProductFromCoupon(fp) {
                 async submitForm() {
 
                     if (this.isSubmitting) return
+
+                    if (this.minimumOrderMessage) {
+                        return
+                    }
 
                     this.isSubmitting = true
 
