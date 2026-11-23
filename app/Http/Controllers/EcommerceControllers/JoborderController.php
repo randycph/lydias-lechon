@@ -299,6 +299,10 @@ class JoborderController extends Controller
                 'integer',
                 Rule::exists('users', 'id')->whereNull('deleted_at'),
             ],
+            'couponcode' => ['nullable', 'array'],
+            'couponcode.*' => ['required', 'string'],
+            'coupondiscount' => ['nullable', 'array'],
+            'coupondiscount.*' => ['required', 'numeric', 'min:0'],
         ], [
             'customer_type.required' => 'Please select New Customer or Existing Customer.',
             'customer_type.in' => 'Please select New Customer or Existing Customer.',
@@ -307,14 +311,18 @@ class JoborderController extends Controller
             'customer_id.exists' => 'The selected customer is no longer available. Please select another customer.',
         ]);
 
-        $rdata = $request->all();
-        if($request->totalcoupon > 0){
-            $couponCode = $rdata['couponcode'];
-            foreach($couponCode as $key => $coupon){
-                $verify_coupon = $this->verify_coupon($coupon);
-                if($verify_coupon == 0){
-                    return back()->with('error','Coupon Code: '.$coupon.' has been used already');
-                }
+        $couponCodes = $request->input('couponcode', []) ?? [];
+        $couponDiscounts = $request->input('coupondiscount', []) ?? [];
+
+        if (array_keys($couponCodes) !== array_keys($couponDiscounts)) {
+            return back()->withErrors([
+                'couponcode' => 'The applied gift certificates are incomplete. Please remove and apply them again.',
+            ])->withInput();
+        }
+
+        foreach ($couponCodes as $coupon) {
+            if ($this->verify_coupon($coupon) == 0) {
+                return back()->with('error', 'Coupon Code: '.$coupon.' has been used already')->withInput();
             }
         }
 
@@ -479,9 +487,8 @@ class JoborderController extends Controller
         $discount_amount = 0;
         $totalCouponDiscount = 0;
 
-        if($request->totalcoupon > 0){
-            $coupons = $rdata['coupondiscount'];
-            foreach($coupons as $key => $discount){
+        if (!empty($couponCodes)) {
+            foreach ($couponDiscounts as $discount) {
                 $totalCouponDiscount += $discount;
             }
 
@@ -641,17 +648,13 @@ class JoborderController extends Controller
                 ]);
             }
 
-            //if(strlen($request->couponcode)>=1){
-            if($request->totalcoupon > 0){
-                $couponDiscount = $rdata['coupondiscount'];
-                $couponCode = $rdata['couponcode'];
-
-                foreach($couponCode as $key => $coupon){
+            if (!empty($couponCodes)) {
+                foreach ($couponCodes as $key => $coupon) {
                     $use_coupon = $this->use_coupon($coupon,$salesHeader->id);
                     $payment_coupon = SalesPayment::create([
                         'sales_header_id' => $salesHeader->id,
                         'payment_type' => 'Gift Cert',
-                        'amount' => $couponDiscount[$key],
+                        'amount' => $couponDiscounts[$key],
                         'status' => 'PAID',
                         'payment_date' => date('Y-m-d'),
                         'receipt_number' => $coupon,
