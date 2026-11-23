@@ -47,7 +47,7 @@ class PopupMessageController extends Controller
             'title' => 'required',
             'message' => 'required',
             'button_text' => 'required',
-            'start_to_show' => 'nullable',
+            'start_to_show' => 'nullable|integer|min:0',
             'button_text_url' => 'nullable',
             'close_button_text' => 'required',
             'url' => 'nullable',
@@ -57,6 +57,7 @@ class PopupMessageController extends Controller
         ])->validate();
 
         $data = $request->all();
+        $data['start_to_show'] = $request->filled('start_to_show') ? $request->input('start_to_show') : 0;
 
         if ($request->has('is_active')) {
             $data['is_active'] = 1;
@@ -111,7 +112,7 @@ class PopupMessageController extends Controller
             'title' => 'required',
             'message' => 'required',
             'button_text' => 'required',
-            'start_to_show' => 'nullable',
+            'start_to_show' => 'nullable|integer|min:0',
             'button_text_url' => 'nullable',
             'close_button_text' => 'required',
             'url' => 'nullable',
@@ -131,6 +132,7 @@ class PopupMessageController extends Controller
             'start_at',
             'expire_at',
         ]);
+        $data['start_to_show'] = $request->filled('start_to_show') ? $request->input('start_to_show') : 0;
 
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('popup_images', 'public');
