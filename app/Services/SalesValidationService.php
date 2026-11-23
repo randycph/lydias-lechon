@@ -9,6 +9,47 @@ use Illuminate\Support\Facades\Validator;
 
 class SalesValidationService
 {
+    public function minimumOrderMessage(Collection $carts, $setting, $shippingType)
+    {
+        if (!in_array($shippingType, ['pickup', 'delivery'], true)) {
+            return 'Please select a valid shipping method.';
+        }
+
+        $items = $carts->reject(function ($item) {
+            return (int) data_get($item, 'product_id') === 270;
+        });
+
+        $subtotal = $items->sum(function ($item) {
+            $quantity = (float) data_get($item, 'qty', 1);
+            $price = data_get($item, 'is_free_product') ? 0 : (float) data_get($item, 'product.price', 0);
+            $paella = (float) data_get($item, 'paella_price', 0) > 0
+                ? (float) data_get($item, 'product.paella_price', 0)
+                : 0;
+
+            return ($price + $paella) * $quantity;
+        });
+
+        $minimum = (float) ($shippingType === 'delivery'
+            ? data_get($setting, 'minimum_order', 0)
+            : data_get($setting, 'minimum_order_pickup', 0));
+        $label = $shippingType === 'delivery' ? 'door-to-door delivery' : 'pickup';
+
+        if ($subtotal < $minimum) {
+            return 'The minimum order amount for ' . $label . ' is ₱' . number_format($minimum, 2) . '.';
+        }
+
+        $miscMinimum = (float) data_get($setting, 'minimum_order_misc', 0);
+        $miscOnly = $items->isNotEmpty() && $items->every(function ($item) {
+            return (int) data_get($item, 'product.is_misc', 0) === 1;
+        });
+
+        if ($miscOnly && $subtotal < $miscMinimum) {
+            return 'The minimum order amount for miscellaneous items is ₱' . number_format($miscMinimum, 2) . '.';
+        }
+
+        return null;
+    }
+
     public function common($request)
     {
         $validator = Validator::make($request->all(), [

@@ -903,6 +903,15 @@ class CartController extends Controller
         // 2. CART
         // =============================
         $carts = $cartService->getCart($user);
+        $setting = \App\Models\Setting::first();
+        $minimumOrderMessage = $salesValidationService->minimumOrderMessage($carts, $setting, $request->shipping_type);
+
+        if ($minimumOrderMessage) {
+            return response()->json([
+                'errors' => ['minimum_order' => [$minimumOrderMessage]],
+            ], 422);
+        }
+
         $carts = $cartService->attachBakaService($carts, $user);
         $couponData = json_decode($request->input('coupon_data'), true);
         // $carts = $couponService->applyFreeProducts($carts, $couponData);
@@ -910,7 +919,6 @@ class CartController extends Controller
         // =============================
         // 3. SETTINGS
         // =============================
-        $setting = \App\Models\Setting::first();
         $bakaProduct = Product::find(270);
         $minHours = $processingService->resolveMinHours($carts, $setting);
         $minimum_processing_hours = $setting ? $setting->minimum_processing_hours : 24;

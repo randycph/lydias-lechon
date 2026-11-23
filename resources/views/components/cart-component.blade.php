@@ -26,7 +26,7 @@
 
             this.cartCount = this.carts?.length ?? 0;
             
-            this.shippingMessage = '';
+            this.validateMinimumOrder();
 
         } catch (error) {
             console.error('There was a problem with the fetch operation:', error);
@@ -79,9 +79,10 @@
     chooseShippingMethod(method) {
         this.shippingMethod = method;
         document.cookie = 'shipping_method=' + method + '; path=/; max-age=31536000';
+        this.validateMinimumOrder();
     },
     canCheckout: false,
-    handleCheckout(auth) {
+    validateMinimumOrder() {
         this.subtotal = this.carts.reduce(
             (total, cart) => 
                 total +
@@ -89,6 +90,13 @@
                 ((cart?.is_free_product ? 0 : (Number(cart?.product?.price) || 0) * (Number(cart?.qty) || 1))),
             0
         );
+
+        if (this.carts.length === 0) {
+            this.canCheckout = false;
+            this.shippingMessage = '';
+            return;
+        }
+
         if (this.shippingMethod === 'delivery' && this.subtotal < this.minimumOrderAmountDoorToDoor) {
             this.canCheckout = false;
             this.shippingMessage = 'Minimum order amount for Door to Door delivery is ₱' + this.minimumOrderAmountDoorToDoor.toLocaleString(undefined, { minimumFractionDigits: 2 });
@@ -102,6 +110,9 @@
             this.canCheckout = true;
             this.shippingMessage = '';
         }
+    },
+    handleCheckout(auth) {
+        this.validateMinimumOrder();
 
         if (!this.canCheckout) {
             return;
